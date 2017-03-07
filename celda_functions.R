@@ -13,3 +13,17 @@ cosineDist <- function(x){
 }
 
 second.best = function(v) sort(v, decreasing=TRUE)[2]
+
+stability = function(ll.probs) {
+  require(entropy)
+  nStates = ncol(ll.probs)
+  nData = nrow(ll.probs)
+  
+  ## Normalize probabilties 
+  ll.probs = exp(sweep(probs, 1, apply(ll.probs, 1, max), "-"))
+  probs = sweep(ll.probs, 1, rowSums(ll.probs), "/")
+  
+  stability = sum(1-apply(probs, 1, entropy) / log(nStates)) / nData
+  return(stability)
+}
+  

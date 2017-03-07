@@ -1,4 +1,4 @@
-calcLL = function(counts, s, z, y, K, L, a1, a2, a3, a4) {
+cCG.calcLL = function(counts, s, z, y, K, L, a1, a2, a3, a4) {
   
   ## Calculate for "Theta" component
   m = table(z, s)
@@ -51,7 +51,7 @@ calcLL = function(counts, s, z, y, K, L, a1, a2, a3, a4) {
   return(final)
 }
 
-calcLLliteZ = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
+cCG.calcLLliteZ = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
   
   z = factor(z, levels=1:K)
   y = factor(y, levels=1:L)
@@ -72,7 +72,7 @@ calcLLliteZ = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
   return(final)
 }
 
-calcLLliteY = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
+cCG.calcLLliteY = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
   
   z = factor(z, levels=1:K)
   y = factor(y, levels=1:L)
@@ -108,31 +108,29 @@ calcLLliteY = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
   return(final)
 }
 
-
-calcGibbsProbZ = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
+cCG.calcGibbsProbZ = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
   
   final = rep(NA, K)
   for(j in 1:K) {
     z[ix] = j
-    final[j] = calcLLliteZ(ix, counts=counts, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+    final[j] = cCG.calcLLliteZ(ix, counts=counts, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
   }  
   
   return(final)
 }
 
-calcGibbsProbY = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
+cCG.calcGibbsProbY = function(ix, counts, s, z, y, K, L, a1, a2, a3, a4) {
   
   final = rep(NA, L)
   for(j in 1:L) {
     y[ix] = j
-    final[j] = calcLLliteY(ix, counts=counts, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+    final[j] = cCG.calcLLliteY(ix, counts=counts, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
   }  
   
   return(final)
 }
 
-
-generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, a1=1, a2=1, a3=1, a4=1, seed=12345) {
+cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, a1=1, a2=1, a3=1, a4=1, seed=12345) {
   require(gtools)
   
   set.seed(seed)
@@ -188,10 +186,9 @@ generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K
 }
 
 
-
 celda_CG = function(counts, sample, K, L, a1=1, a2=1, a3=1, a4=1, max.iter=25, min.cell=5, seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
   set.seed(seed)
-  require(entropy)
+  
   cat(date(), "... Starting Gibbs sampling\n")
   
   co = counts
@@ -199,11 +196,13 @@ celda_CG = function(counts, sample, K, L, a1=1, a2=1, a3=1, a4=1, max.iter=25, m
   
   ## Randomly select z and y
   z = sample(1:K, ncol(co), replace=TRUE)
-  z.all = z
   y = sample(1:L, nrow(co), replace=TRUE)
+  z.all = z
   y.all = y
+  z.stability = c(0)
+  y.stability = c(0)
   
-  ll = calcLL(counts=co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+  ll = cCG.calcLL(counts=co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
   
   z.probs = matrix(NA, nrow=ncol(co), ncol=K)
   y.probs = matrix(NA, nrow=nrow(co), ncol=L)
@@ -220,15 +219,15 @@ celda_CG = function(counts, sample, K, L, a1=1, a2=1, a3=1, a4=1, max.iter=25, m
       
       for(j in all.k.to.kick) { 
         all.k.to.test = which(z.ta > 2*min.cell)
-        z = kick.z(co, s=s, z=z, y=y, K=K, L=L, k.to.kick=j, k.to.test=all.k.to.test, min.cell=min.cell, a1, a2, a3, a4)
-        z.ta = table(factor(z, levels=1:k))
+        z = cCG.kick.z(co, s=s, z=z, y=y, K=K, L=L, k.to.kick=j, k.to.test=all.k.to.test, min.cell=min.cell, a1, a2, a3, a4)
+        z.ta = table(factor(z, levels=1:K))
       }
     }
     
     ## Begin process of Gibbs sampling for each cell
     ix = sample(1:ncol(co))
     for(i in ix) {
-      probs = calcGibbsProbZ(i, co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+      probs = cCG.calcGibbsProbZ(i, co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
       
       z[i] = sample.ll(probs)
       z.probs[i,] = probs
@@ -237,19 +236,18 @@ celda_CG = function(counts, sample, K, L, a1=1, a2=1, a3=1, a4=1, max.iter=25, m
     ix = sample(1:nrow(co))
     for(i in ix) {
       if(sum(y == y[i]) > 1) {
-        probs = calcGibbsProbY(i, co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+        probs = cCG.calcGibbsProbY(i, co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
         y[i] = sample.ll(probs)
         y.probs[i,] = probs
       }  
     }
-    
     
     ## Save Z history
     z.all = cbind(z.all, z)
     y.all = cbind(y.all, y)
     
     ## Calculate complete likelihood
-    temp.ll = calcLL(counts=co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+    temp.ll = cCG.calcLL(counts=co, s=s, z=z, y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
     ll = c(ll, temp.ll)
     
     cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
@@ -260,23 +258,16 @@ celda_CG = function(counts, sample, K, L, a1=1, a2=1, a3=1, a4=1, max.iter=25, m
     y.probs = exp(sweep(y.probs, 1, apply(y.probs, 1, max), "-"))
     y.probs = sweep(y.probs, 1, rowSums(y.probs), "/")
     
-    f = function(v) sort(v, decreasing=TRUE)[2]
-    z.probs.second = max(apply(z.probs, 1, f))
-    y.probs.second = max(apply(y.probs, 1, f))
-    z.ta = table(z)
-    y.ta = table(y)
-    
-    z.check = z.probs.second < converge & (min(z.ta) >= min.cell | kick==FALSE)
-    y.check = y.probs.second < converge & (min(y.ta) >= min.cell | kick==FALSE)
-    if(z.check & y.check) {
-      continue = FALSE
-      cat("Maximum probability of a cell changing its state is ", z.probs.second, ". Exiting at iteration ", iter, ".", sep="")
-    }
+    ## Calculate stability
+    z.stab = sum(1-apply(z.probs, 1, entropy) / log(K)) / ncol(co)
+    z.stability = c(z.stability, stability(z.probs))
+    y.stab = sum(1-apply(y.probs, 1, entropy) / log(L)) / nrow(co)
+    y.stability = c(y.stability, stability(y.probs))
     
     iter = iter + 1    
   }
   
-  
+  ## Identify which model is the best overall in terms of maximum likelihood
   if(best == TRUE) {
     ix = which.max(ll)
     z.final = z.all[,ix]
@@ -288,20 +279,11 @@ celda_CG = function(counts, sample, K, L, a1=1, a2=1, a3=1, a4=1, max.iter=25, m
     ll.final = tail(ll, n=1)
   }
   
-  return(list(z=z.final, y=y.final, complete.z=z.all, complete.y=y.all, completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs, y.prob=y.probs))
+  return(list(z=z.final, y=y.final, complete.z=z.all, complete.y=y.all, z.stability=z.stability, y.stability=y.stability, completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs, y.prob=y.probs))
 }
 
 
-
-
-cosineDist <- function(x){
-  x = t(x)
-  y = as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2))))) 
-  return(y)
-}
-
-
-kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, a1, a2, a3, a4) {
+cCG.kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, a1, a2, a3, a4) {
   require(cluster)
   cat(date(), "... Cluster", k.to.kick, "has fewer than", min.cell, "cells. Performing kick by ")
   
@@ -343,7 +325,7 @@ kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, a1, a
       z.kick[ix,i] = k.pam.final
       
     }
-    k.kick.ll[i] = calcLL(counts=counts, s=s, z=z.kick[,i], y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
+    k.kick.ll[i] = cCG.calcLL(counts=counts, s=s, z=z.kick[,i], y=y, K=K, L=L, a1=a1, a2=a2, a3=a3, a4=a4)
   }
   
   k.to.test.select = sample.ll(k.kick.ll)
@@ -352,11 +334,4 @@ kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, a1, a
   return(z.kick[,k.to.test.select])
 }
 
-
-sample.ll = function(ll.probs) {
-  probs.sub = exp(ll.probs - max(ll.probs))
-  probs.norm = probs.sub / sum(probs.sub)
-  probs.select = sample(1:length(ll.probs), size=1, prob=probs.norm)
-  return(probs.select)
-}
 
