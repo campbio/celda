@@ -1,19 +1,19 @@
-cCG.calcLL = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
+cCG.calcLL = function(counts, s, m.theta, n.phi, n.psi, z, y, K, L, alpha, beta, gamma, delta) {
   
   ## Calculate for "Theta" component
-  m = table(z, s)
-  ns = ncol(m)
+  #m = table(z, s)
+  ns = ncol(m.theta)
   
   a = ns*lgamma(K*alpha)
-  b = sum(lgamma(m+alpha))
+  b = sum(lgamma(m.theta+alpha))
   c = -ns*K*lgamma(alpha)
-  d = -sum(lgamma(apply(m + alpha, 2, sum)))
+  d = -sum(lgamma(apply(m.theta + alpha, 2, sum)))
   
   theta.ll = a + b + c + d
   
   
   ## Calculate for "Phi" component
-  n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
+  #n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
   
   a = K*lgamma(L*beta)
   b = sum(lgamma(n.phi+beta))
@@ -23,7 +23,7 @@ cCG.calcLL = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
   phi.ll = a + b + c + d
   
   ## Calculate for "Psi" component
-  n.psi = rowSums(counts)
+  #n.psi = rowSums(counts)
   n.psi.sum = as.numeric(rowsum(n.psi, y))
   
   ny = table(y)
@@ -51,17 +51,17 @@ cCG.calcLL = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
   return(final)
 }
 
-cCG.calcLLliteZ = function(ix, counts, s, z, y, K, L, alpha, beta, gamma, delta) {
+cCG.calcGibbsProbZ = function(m.theta, n.phi, alpha, beta) {
   
-  z = factor(z, levels=1:K)
-  y = factor(y, levels=1:L)
+#  z = factor(z, levels=1:K)
+#  y = factor(y, levels=1:L)
   
   ## Calculate for "Theta" component
-  m = table(z[-ix], s[-ix])
-  theta.ll = log(m[z[ix],s[ix]] + alpha)
+#  m = table(z[-ix], s[-ix])
+  theta.ll = log(m.theta + alpha)
   
   ## Calculate for "Phi" component
-  n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
+#  n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
   
   b = sum(lgamma(n.phi+beta))
   d = -sum(lgamma(apply(n.phi + beta, 1, sum)))
@@ -72,63 +72,33 @@ cCG.calcLLliteZ = function(ix, counts, s, z, y, K, L, alpha, beta, gamma, delta)
   return(final)
 }
 
-cCG.calcLLliteY = function(ix, counts, s, z, y, K, L, alpha, beta, gamma, delta) {
-  
-  z = factor(z, levels=1:K)
-  y = factor(y, levels=1:L)
+cCG.calcGibbsProbY = function(y, n.phi, n.psi, q.eta, beta, gamma, delta) {
   
   ## Calculate for "Phi" component
-  n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
-  
   b = sum(lgamma(n.phi+beta))
   d = -sum(lgamma(apply(n.phi + beta, 1, sum)))
   
   phi.ll = b + d
   
   ## Calculate for "Psi" component
-  n.psi = rowSums(counts)
-  n.psi.sum = as.numeric(rowsum(n.psi, y))
+  n.psi.y = as.numeric(rowsum(n.psi, y))
   
   ny = table(y)
   ny.sum = sum(ny)
   ng = length(n.psi)
-  nk = length(n.psi.sum)
   
   a = sum(lgamma(ny * delta))
-  d = -sum(lgamma(n.psi.sum + (ny*delta)))
+  d = -sum(lgamma(n.psi.y + (ny*delta)))
   
   psi.ll = a + d
   
-  
   ## Calculate for "Eta" side
-  ng.y.minus = table(y[-ix])
-  eta.ll = log(ng.y.minus[y[ix]] + gamma)
+  eta.ll = log(q.eta + gamma)
   
   final = phi.ll + psi.ll + eta.ll
   return(final)
 }
 
-cCG.calcGibbsProbZ = function(ix, counts, s, z, y, K, L, alpha, beta, gamma, delta) {
-  
-  final = rep(NA, K)
-  for(j in 1:K) {
-    z[ix] = j
-    final[j] = cCG.calcLLliteZ(ix, counts=counts, s=s, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
-  }  
-  
-  return(final)
-}
-
-cCG.calcGibbsProbY = function(ix, counts, s, z, y, K, L, alpha, beta, gamma, delta) {
-  
-  final = rep(NA, L)
-  for(j in 1:L) {
-    y[ix] = j
-    final[j] = cCG.calcLLliteY(ix, counts=counts, s=s, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
-  }  
-  
-  return(final)
-}
 
 cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
   require(gtools)
@@ -196,7 +166,14 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
   z.stability = c(NA)
   y.stability = c(NA)
   
-  ll = cCG.calcLL(counts=co, s=s, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+  ## Calculate counts one time up front
+  m.theta = table(factor(z, levels=1:K), s)
+  n.phi.y = rowsum(co, group=y, reorder=TRUE)
+  n.phi.y.z = rowsum(t(n.phi.y), group=z, reorder=TRUE)
+  n.psi = rowSums(co)
+  q.eta = table(y)
+  
+  ll = cCG.calcLL(counts=co, s=s, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
   
   z.probs = matrix(NA, nrow=ncol(co), ncol=K)
   y.probs = matrix(NA, nrow=nrow(co), ncol=L)
@@ -219,23 +196,58 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
     }
     
     ## Begin process of Gibbs sampling for each cell
+    n.phi.y = rowsum(co, group=y, reorder=TRUE)
     ix = sample(1:ncol(co))
     for(i in ix) {
+      # If more than one cell belongs to the current state, then sampling will proceed, otherwise this cell will be skipped
       if(sum(z == z[i]) > 1) {
-        probs = cCG.calcGibbsProbZ(i, co, s=s, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+        
+        ## Subtract current cell counts from matrices
+        m.theta[z[i],s[i]] = m.theta[z[i],s[i]] - 1
+        n.phi.y.z[z[i],] = n.phi.y.z[z[i],] - n.phi.y[,i]
+        
+        ## Calculate probabilities for each state
+        probs = rep(NA, K)
+        for(j in 1:K) {
+          temp.n.phi.y.z = n.phi.y.z
+          temp.n.phi.y.z[j,] = temp.n.phi.y.z[j,] + n.phi.y[,i]
+          probs[j] = cCG.calcGibbsProbZ(m.theta=m.theta[j,s[i]], n.phi=temp.n.phi.y.z, alpha=alpha, beta=beta)
+        }  
+        
+        ## Identify next state and add back counts
         z[i] = sample.ll(probs)
+        m.theta[z[i],s[i]] = m.theta[z[i],s[i]] + 1
+        n.phi.y.z[z[i],] = n.phi.y.z[z[i],] + n.phi.y[,i]
+        
       } else {
         probs = rep(0, K)
         probs[z[i]] = 1
       }
       z.probs[i,] = probs
     }
+    
     ## Begin process of Gibbs sampling for each gene
+    n.phi.z = rowsum(t(co), group=z, reorder=TRUE)
     ix = sample(1:nrow(co))
     for(i in ix) {
       if(sum(y == y[i]) > 1) {
-        probs = cCG.calcGibbsProbY(i, co, s=s, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+        
+        probs = rep(NA, L)
+        q.eta[y[i]] = q.eta[y[i]] - 1
+        n.phi.y.z[,y[i]] = n.phi.y.z[,y[i]] - n.phi.z[,i]
+        
+        for(j in 1:L) {
+          temp.y = y
+          temp.y[i] = j
+          temp.n.phi.y.z = n.phi.y.z
+          temp.n.phi.y.z[,j] = temp.n.phi.y.z[,j] + n.phi.z[,i]
+          probs[j] = cCG.calcGibbsProbY(y=temp.y, n.phi=temp.n.phi.y.z, n.psi=n.psi, q.eta=q.eta[j], beta=beta, gamma=gamma, delta=delta)
+        }  
+        
         y[i] = sample.ll(probs)
+        q.eta[y[i]] = q.eta[y[i]] + 1
+        n.phi.y.z[,y[i]] = n.phi.y.z[,y[i]] + n.phi.z[,i]
+        
       } else {
         probs = rep(0, L)
         probs[y[i]] = 1
@@ -254,11 +266,10 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
     y.stability = c(y.stability, stability(y.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(counts=co, s=s, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
-    if(best == TRUE & all(temp.ll > ll)) {
+    temp.ll = cCG.calcLL(counts=co, s=s, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
-      if(sum(is.na(y.probs)) > 0) { return(y.probs)}
     }
     ll = c(ll, temp.ll)
     
