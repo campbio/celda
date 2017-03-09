@@ -1,29 +1,29 @@
-cCG.calcLL = function(counts, s, m.theta, n.phi, n.psi, z, y, K, L, alpha, beta, gamma, delta) {
+cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
   
   ## Calculate for "Theta" component
-  #m = table(z, s)
-  ns = ncol(m.theta)
+  m = table(z, s)
+  ns = ncol(m)
   
   a = ns*lgamma(K*alpha)
-  b = sum(lgamma(m.theta+alpha))
+  b = sum(lgamma(m+alpha))
   c = -ns*K*lgamma(alpha)
-  d = -sum(lgamma(apply(m.theta + alpha, 2, sum)))
+  d = -sum(lgamma(colSums(m + alpha)))
   
   theta.ll = a + b + c + d
   
   
   ## Calculate for "Phi" component
-  #n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
+  n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
   
   a = K*lgamma(L*beta)
   b = sum(lgamma(n.phi+beta))
   c = -K*L*lgamma(beta)
-  d = -sum(lgamma(apply(n.phi + beta, 1, sum)))
+  d = -sum(lgamma(rowSums(n.phi + beta)))
   
   phi.ll = a + b + c + d
   
   ## Calculate for "Psi" component
-  #n.psi = rowSums(counts)
+  n.psi = rowSums(counts)
   n.psi.sum = as.numeric(rowsum(n.psi, y))
   
   ny = table(y)
@@ -44,6 +44,57 @@ cCG.calcLL = function(counts, s, m.theta, n.phi, n.psi, z, y, K, L, alpha, beta,
   b = sum(lgamma(ny+gamma))
   c = -L*lgamma(gamma)
   d = -lgamma(sum(ny + gamma))
+  
+  eta.ll = a + b + c + d
+  
+  final = theta.ll + phi.ll + psi.ll + eta.ll
+  return(final)
+}
+
+cCG.calcLL = function(K, L, m.theta, n.phi, n.psi, n.psi.y, q.eta, alpha, beta, gamma, delta) {
+  
+  ## Calculate for "Theta" component
+  #m = table(z, s)
+  ns = ncol(m.theta)
+  
+  a = ns*lgamma(K*alpha)
+  b = sum(lgamma(m.theta+alpha))
+  c = -ns*K*lgamma(alpha)
+  d = -sum(lgamma(colSums(m.theta + alpha)))
+  
+  theta.ll = a + b + c + d
+  
+  
+  ## Calculate for "Phi" component
+  #n.phi = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
+  
+  a = K*lgamma(L*beta)
+  b = sum(lgamma(n.phi+beta))
+  c = -K*L*lgamma(beta)
+  d = -sum(lgamma(rowSums(n.phi + beta)))
+  
+  phi.ll = a + b + c + d
+  
+  ## Calculate for "Psi" component
+  #n.psi = rowSums(counts)
+  #n.psi.sum = as.numeric(rowsum(n.psi, y))
+  
+  #ny = table(y)
+  ny.sum = sum(q.eta)
+
+  a = sum(lgamma(q.eta * delta))
+  b = sum(lgamma(n.psi + delta))
+  c = -ny.sum * lgamma(delta)
+  d = -sum(lgamma(n.psi.y + (q.eta * delta)))
+  
+  psi.ll = a + b + c + d
+  
+  
+  ## Calculate for "Eta" side
+  a = lgamma(L*gamma)
+  b = sum(lgamma(q.eta + gamma))
+  c = -L*lgamma(gamma)
+  d = -lgamma(sum(q.eta + gamma))
   
   eta.ll = a + b + c + d
   
@@ -162,6 +213,9 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
   y.all = y
   z.stability = c(NA)
   y.stability = c(NA)
+  z.probs = matrix(NA, nrow=ncol(co), ncol=K)
+  y.probs = matrix(NA, nrow=nrow(co), ncol=L)
+  
   
   ## Calculate counts one time up front
   m.theta = table(factor(z, levels=1:K), s)
@@ -169,13 +223,10 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
   n.phi.y.z = rowsum(t(n.phi.y), group=z, reorder=TRUE)
   n.psi = rowSums(co)
   n.psi.y = as.numeric(rowsum(n.psi, y))
-  y.ta = table(y)  
   q.eta = table(y)
+  y.ta = table(y)
   
-  ll = cCG.calcLL(counts=co, s=s, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
-  
-  z.probs = matrix(NA, nrow=ncol(co), ncol=K)
-  y.probs = matrix(NA, nrow=nrow(co), ncol=L)
+  ll = cCG.calcLL(K=K, L=L, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, n.psi.y=n.psi.y, q.eta=q.eta, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
   
   iter = 1
   continue = TRUE
@@ -271,7 +322,7 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
     y.stability = c(y.stability, stability(y.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(counts=co, s=s, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+    temp.ll = cCG.calcLL(K=K, L=L, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, n.psi.y=n.psi.y, q.eta=q.eta, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
