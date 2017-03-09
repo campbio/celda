@@ -72,7 +72,7 @@ cCG.calcGibbsProbZ = function(m.theta, n.phi, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(y, n.phi, n.psi, q.eta, beta, gamma, delta) {
+cCG.calcGibbsProbY = function(n.phi, n.psi, n.psi.y, ny, ny.sum, q.eta, beta, gamma, delta) {
   
   ## Calculate for "Phi" component
   b = sum(lgamma(n.phi+beta))
@@ -81,11 +81,8 @@ cCG.calcGibbsProbY = function(y, n.phi, n.psi, q.eta, beta, gamma, delta) {
   phi.ll = b + d
   
   ## Calculate for "Psi" component
-  n.psi.y = as.numeric(rowsum(n.psi, y))
-  
-  ny = table(y)
-  ny.sum = sum(ny)
-  ng = length(n.psi)
+  #n.psi.y = as.numeric(rowsum(n.psi, y))
+  #ny.sum = sum(ny)
   
   a = sum(lgamma(ny * delta))
   d = -sum(lgamma(n.psi.y + (ny*delta)))
@@ -171,6 +168,8 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
   n.phi.y = rowsum(co, group=y, reorder=TRUE)
   n.phi.y.z = rowsum(t(n.phi.y), group=z, reorder=TRUE)
   n.psi = rowSums(co)
+  n.psi.y = as.numeric(rowsum(n.psi, y))
+  y.ta = table(y)  
   q.eta = table(y)
   
   ll = cCG.calcLL(counts=co, s=s, m.theta=m.theta, n.phi=n.phi.y.z, n.psi=n.psi, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
@@ -235,18 +234,24 @@ celda_CG = function(counts, sample, K, L, alpha=1, beta=1, gamma=1, delta=1, max
         probs = rep(NA, L)
         q.eta[y[i]] = q.eta[y[i]] - 1
         n.phi.y.z[,y[i]] = n.phi.y.z[,y[i]] - n.phi.z[,i]
+        n.psi.y[y[i]] = n.psi.y[y[i]] - n.psi[i]
+        y.ta[y[i]] = y.ta[y[i]] - 1
         
         for(j in 1:L) {
-          temp.y = y
-          temp.y[i] = j
           temp.n.phi.y.z = n.phi.y.z
           temp.n.phi.y.z[,j] = temp.n.phi.y.z[,j] + n.phi.z[,i]
-          probs[j] = cCG.calcGibbsProbY(y=temp.y, n.phi=temp.n.phi.y.z, n.psi=n.psi, q.eta=q.eta[j], beta=beta, gamma=gamma, delta=delta)
+          temp.n.psi.y = n.psi.y
+          temp.n.psi.y[j] = n.psi.y[j] + n.psi[i]
+          temp.y.ta = y.ta
+          temp.y.ta[j] = temp.y.ta[j] + 1
+          probs[j] = cCG.calcGibbsProbY(n.phi=temp.n.phi.y.z, n.psi=n.psi, n.psi.y=temp.n.psi.y, ny=temp.y.ta, q.eta=q.eta[j], beta=beta, gamma=gamma, delta=delta)
         }  
         
         y[i] = sample.ll(probs)
         q.eta[y[i]] = q.eta[y[i]] + 1
         n.phi.y.z[,y[i]] = n.phi.y.z[,y[i]] + n.phi.z[,i]
+        n.psi.y[y[i]] = n.psi.y[y[i]] + n.psi[i]
+        y.ta[y[i]] = y.ta[y[i]] + 1
         
       } else {
         probs = rep(0, L)
