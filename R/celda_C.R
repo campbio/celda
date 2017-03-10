@@ -1,46 +1,47 @@
 calcGibbsProb = function(ix, r, s, z, k, a, b) {
-  
-  phi = c()
+  phi <- c()
   for(j in 1:k) {
-    z[ix] = j
-    n = t(rowsum(t(r), group=z, reorder=TRUE))
-    phi = c(phi, ll.phi.gibbs(n, b))    
+  z[ix] <- j
+  n <- t(rowsum(t(r), group=z, reorder=TRUE))
+  phi <- c(phi, ll.phi.gibbs(n, b))    
   }  
- 
-  z = factor(z, levels=1:k)
-  m = table(z[-ix], s[-ix])  
-  s.ix = colnames(m) == s[ix]
   
-  final = log(m[,s.ix] + a) + phi
+  z <- factor(z, levels=1:k)
+  m <- table(z[-ix], s[-ix])  
+  s.ix <- colnames(m) == s[ix]
+  
+  final <- log(m[,s.ix] + a) + phi
   return(final)
 }
 
 
-generateCells = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000), G=5000, k=5, a=1, b=0.1) {
-  require(gtools)
-
-  phi = rdirichlet(k, rep(b, G))
-  theta = rdirichlet(S, rep(a, k))
+generateCells = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
+                         G=5000, k=5, a=1, b=0.1) {
+  
+  phi <- gtools::rdirichlet(k, rep(b, G))
+  theta <- gtools::rdirichlet(S, rep(a, k))
   
   ## Select the number of cells per sample
-  nC = sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)  
-  cell.sample = rep(1:S, nC)
-   
+  nC <- sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)  
+  cell.sample <- rep(1:S, nC)
+  
   ## Select state of the cells  
-  cell.state = unlist(lapply(1:S, function(i) sample(1:k, size=nC[i], prob=theta[i,], replace=TRUE)))
+  cell.state <- unlist(lapply(1:S, function(i) sample(1:k, size=nC[i], prob=theta[i,], replace=TRUE)))
   
   ## Select number of transcripts per cell
-  nN = sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
+  nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
   
   ## Select transcript distribution for each cell
-  cell.counts = sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
+  cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
   return(list(z=cell.state, counts=cell.counts, sample=cell.sample, k=k, a=a, b=b))
 }
 
 
 
-celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
+celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, 
+                   seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
+  
   set.seed(seed)
   require(entropy)
   cat(date(), "... Starting Gibbs sampling\n")
@@ -58,7 +59,8 @@ celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, seed=
   continue = TRUE
   while(iter <= max.iter & continue == TRUE) {
     
-    ## Determine if any clusters are below the minimum threshold and if a kick needs to be performed
+    ## Determine if any clusters are below the minimum threshold 
+    ## and if a kick needs to be performed
     z.ta = table(factor(z, levels=1:k))
     if(min(z.ta) < min.cell & kick==TRUE) {
 
@@ -66,10 +68,10 @@ celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, seed=
       
       for(j in all.k.to.kick) { 
         all.k.to.test = which(z.ta > 2*min.cell)
-        z = kick.z(co, s=s, z=z, k=k, k.to.kick=j, k.to.test=all.k.to.test, min.cell=min.cell, a=a, b=b)
+        z = kick.z(co, s=s, z=z, k=k, k.to.kick=j, k.to.test=all.k.to.test, 
+                   min.cell=min.cell, a=a, b=b)
         z.ta = table(factor(z, levels=1:k))
       }
-      
       
     }
     
@@ -97,7 +99,7 @@ celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, seed=
     f = function(v) sort(v, decreasing=TRUE)[2]
     z.probs.second = max(apply(z.probs, 1, f))
     z.ta = table(z)
-    if(z.probs.second < converge & (min(z.ta) >= min.cell | kick==FALSE)) {
+    if (z.probs.second < converge & (min(z.ta) >= min.cell | kick==FALSE)) {
       continue = FALSE
       cat("Maximum probability of a cell changing its state is ", z.probs.second, ". Exiting at iteration ", iter, ".", sep="")
     }
@@ -106,7 +108,7 @@ celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, seed=
   }
   
   
-  if(best == TRUE) {
+  if (best == TRUE) {
     ix = which.max(ll)
     z.final = z.all[,ix]
     ll.final = ll[ix]
@@ -115,7 +117,8 @@ celda_C = function(counts, sample, k, a=1, b=0.1, max.iter=25, min.cell=5, seed=
     ll.final = tail(ll, n=1)
   }
   
-  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, finalLogLik=ll.final, z.probability=z.probs))
+  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
+              finalLogLik=ll.final, z.probability=z.probs))
 }
 
 
