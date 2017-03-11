@@ -254,9 +254,13 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
   while(iter <= max.iter & continue == TRUE) {
     
     ## Determine if any clusters are below the minimum threshold and if a kick needs to be performed
+    ## Probably needs work
+    ## Alternative approach to try:
+        ## Every ith iteration, determine if splitting up each cluster and assigning 1/2 of samples
+        ## to each other cluster will result in a better log likelihood
     z.ta = table(factor(z, levels=1:K))
     if(min(z.ta) < min.cell & kick==TRUE) {
-      print(z.ta)
+      
       all.k.to.kick = which(z.ta < min.cell)
       
       for(j in all.k.to.kick) { 
@@ -288,7 +292,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
           probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, alpha=alpha, beta=beta)
         }  
         
-        ## Identify next state and add back counts
+        ## Sample next state and add back counts
         z[i] = sample.ll(probs)
         m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
         n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
@@ -306,13 +310,14 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     for(i in ix) {
       if(sum(y == y[i]) > 1) {
         
-        probs = rep(NA, L)
-
+        ## Subtract current gene counts from matrices
         nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
         n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
         n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
         
+        probs = rep(NA, L)
         for(j in 1:L) {
+          ## Add in counts to each state and determine probability
           temp.n.CP.by.TS = n.CP.by.TS
           temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
           temp.n.by.TS = n.by.TS
@@ -320,10 +325,10 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
           temp.nG.by.TS = nG.by.TS
           temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
           
-          #cCG.calcGibbsProbY = function(n.CP.by.TS,                 n.by.G, n.by.TS, ny, ny.sum,                      nG.in.Y,            beta, gamma, delta) {
           probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, ny=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, gamma=gamma, delta=delta)
         }  
         
+        ## Sample next state and add back counts
         y[i] = sample.ll(probs)
         nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
         n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
