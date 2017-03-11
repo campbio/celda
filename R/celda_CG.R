@@ -265,7 +265,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
       
       for(j in all.k.to.kick) { 
         all.k.to.test = which(z.ta > 2*min.cell)
-        z = cCG.kick.z(counts, s=s, z=z, y=y, K=K, L=L, k.to.kick=j, k.to.test=all.k.to.test, min.cell=min.cell, a, beta, gamma, delta)
+        z = cCG.kick.z(counts, s=s, z=z, y=y, K=K, L=L, k.to.kick=j, k.to.test=all.k.to.test, min.cell=min.cell, alpha, beta, gamma, delta)
         z.ta = table(factor(z, levels=1:K))
       }
       m.CP.by.S = table(factor(z, levels=1:K), s)
