@@ -1,0 +1,32 @@
+---
+title: "The Legend of celda"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.width=8,fig.height=7 ,
+			out.width="0.7\\linewidth", fig.align = "center")
+oldpar <- par()
+par(mar=c(3,3,2,1), mgp=c(2,.7,0), tck=-.01)
+
+library(RColorBrewer)
+library(ggplot2)
+```
+
+# to be written
+
+```{r}
+
+```
+
+
+
+```{r cleaning_up,echo=FALSE}
+par(oldpar)
+sessionInfo()
+```
