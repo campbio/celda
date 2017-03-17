@@ -31,6 +31,7 @@
 # nG.by.TS = Number of genes in each Transcriptional State
 
 
+#' @export
 cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
   
   ## Calculate for "Theta" component
@@ -165,6 +166,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, ny, nG.in.Y, beta, gamma, del
 }
 
 
+#' @export
 cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
   require(gtools)
   
@@ -215,6 +217,7 @@ cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=100
 }
 
 
+#' @export
 celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=1, max.iter=25, min.cell=5, seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
   set.seed(seed)
   

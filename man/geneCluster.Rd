@@ -32,7 +32,8 @@ geneCluster(counts, k, a = 1, b = 1, g = 1, max.iter = 25,
 \item{converge}{Threshold at which to consider the Markov chain converged}
 }
 \description{
-geneCluster leverages a
+geneCluster provides cluster assignments for all genes in a provided single-cell 
+sequencing count matrix, using the celda Bayesian hierarchical model.
 }
 \examples{
 TODO
