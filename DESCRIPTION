@@ -9,7 +9,9 @@ Depends:
     R (>= 3.2.2)
 Imports:
     gtools,
-    entropy
+    entropy,
+    foreach,
+    doParallel
 Suggests:
 	testthat,
 	knitr,
