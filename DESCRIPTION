@@ -13,12 +13,13 @@ Imports:
 Suggests:
 	testthat,
 	knitr,
-	roxygen2
-VignetteBuilder: 
+	roxygen2,
+    rmarkdown
+VignetteBuilder:
 	knitr
 License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
-BugReports: 
+BugReports:
 	https://github.com/definitelysean/celda/issues

@@ -1,32 +1,58 @@
 ---
 title: "The Legend of celda"
 author: "Vignette Author"
-date: "`r Sys.Date()`"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+
+## Overview
+
+The purpose of this vignette is to briefly introduce package `celda`. `celda` is the abbreviation of "CELlular Latent Dirichlet Allocation."
+
+It means that we implement Bayesian Hierarchical Modeling for Clustering Single-Cell RNA-Seq Data
+
+To install `celda`:  
+
+```{r,eval=FALSE}
+library(devtools)
+install_github("definitelysean/celda")
+```
+  
+## Single-Cell RNA-Seq Data
+
+
+## Latent Dirichlet allocation
+
+In natural language processing, latent Dirichlet allocation (LDA) is a generative statistical model that allows sets of observations to be explained by unobserved groups that explain why some parts of the data are similar.  
+
+For example, if observations are words collected into documents, it posits that each document is a mixture of a small number of topics and that each word's creation is attributable to one of the document's topics.  
+
+LDA is an example of a topic model and was first presented as a graphical model for topic discovery by David Blei, Andrew Ng, and Michael I. Jordan in 2003. Essentially the same model was also proposed independently by J. K. Pritchard, M. Stephens, and P. Donnelly in the study of population genetics in 2000. Both papers have been highly influential, with 16488 and 18170 citations respectively by December 2016.([via](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation))
+
+
+
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,fig.width=8,fig.height=7 ,
 			out.width="0.7\\linewidth", fig.align = "center")
-oldpar <- par()
-par(mar=c(3,3,2,1), mgp=c(2,.7,0), tck=-.01)
+#oldpar <- par()
+#par(mar=c(3,3,2,1), mgp=c(2,.7,0), tck=-.01)
 
 library(RColorBrewer)
 library(ggplot2)
 ```
 
-# to be written
 
-```{r}
 
-```
 
 
 
 ```{r cleaning_up,echo=FALSE}
-par(oldpar)
-sessionInfo()
+#par(oldpar)
+#sessionInfo()
 ```
