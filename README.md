@@ -6,8 +6,10 @@ Description
 
 ## Examples and vignettes
 
-Vignettes are available in the package. \n
+Vignettes are available in the package. 
+
 See Introduction of the package via vignette('celda-intro').
+
 See a analysis example using celda with RNASeq via vignette('celda-analysis')
 
 ## New Features and announcements
