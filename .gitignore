@@ -25,3 +25,5 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 inst/doc
+celda.Rproj
+.DS_Store
