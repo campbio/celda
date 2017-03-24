@@ -8,9 +8,9 @@ Description
 
 Vignettes are available in the package. 
 
-See Introduction of the package via vignette('celda-intro').
+An Introduction of the package via vignette('celda-intro').
 
-See a analysis example using celda with RNASeq via vignette('celda-analysis')
+An analysis example using celda with RNASeq via vignette('celda-analysis')
 
 ## New Features and announcements
 
