@@ -1,6 +1,6 @@
 ---
 title: "The Legend of celda"
-author: "Vignette Author"
+author: "Josh D. Campbell, Sean Corbett, Masanao Yajima, Zichun Liu, Shiyi Yang, Tianwen Huan, Anahita Bahri"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -24,6 +24,7 @@ install_github("definitelysean/celda")
   
 ## Single-Cell RNA-Seq Data
 
+Single Cell RNA-Seq Data
 
 ## Latent Dirichlet allocation
 
@@ -46,11 +47,6 @@ knitr::opts_chunk$set(echo = TRUE,fig.width=8,fig.height=7 ,
 library(RColorBrewer)
 library(ggplot2)
 ```
-
-
-
-
-
 
 ```{r cleaning_up,echo=FALSE}
 #par(oldpar)
