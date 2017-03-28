@@ -21,4 +21,3 @@ TODO
 \keyword{likelihood}
 \keyword{log}
 \keyword{sample}
-

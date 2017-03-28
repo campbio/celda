@@ -28,4 +28,3 @@ given the cluster assignment for all other cells.
 \examples{
 TODO 
 }
-

@@ -9,7 +9,9 @@ Depends:
     R (>= 3.2.2)
 Imports:
     gtools,
-    entropy
+    entropy,
+    RColorBrewer,
+    pheatmap
 Suggests:
 	testthat,
 	knitr,
@@ -20,6 +22,6 @@ VignetteBuilder:
 License: MIT
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 BugReports:
 	https://github.com/definitelysean/celda/issues
