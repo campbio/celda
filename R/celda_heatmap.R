@@ -1,42 +1,58 @@
-##ToDo:  Need to (1)scale the row height accordingly; (2) pick more contradictory color;
-##       (3)Aanotation need to change and; (4)  what else need to do?
- #' plot the heatmap of the counts data
- #' @param counts the counts matrix 
- #' @param K The number of clusters being considered  (Question1)or: Total number of cell populations??
- #' @param z A numeric vector of cluster assignments
- #' @param L Total number of transcriptional states
- #' @param col vector of colors used in heatmap
- #' @param cluster_gene boolean values determining if genes should be clustered
- #' @param cluster_cell boolean values determining if cells should be clustered
- #' @param annotation_gene data frame that specifies the annotations for genes 
- #' @param annotation_cell data frame that specifies the annotations for cells 
- #' @example TODO
- #' @export 
-  celda_heatmap <- function(counts, K, z, L, col="YlOrBr", cluster_gene = TRUE, cluster_cell = FALSE, 
-                            annotation_gene, annotation_cell) {
-    ## Set row name to counts matrix 
-    if(is.null(rownames(counts))){
-      rownames(counts) <- 1:nrow(counts)
-    } 
-    else if(is.null(colnames(counts))) {
-      colnames(counts) <- 1:ncol(counts)
-    }
-    ##-- Set cell annotation    # need to do 
-    #annotaion_cell <- data.frame(pseudoanno = sample(c("Tcell","BCell"), nrow(counts), replace = T))   # ToDo: need to change 
-    ##-- Set gene annotation
-    #annotation_gene <- data.frame(pseudo=sample(1:6,nrow(counts),replace=T))
-    
-    ## Set color 
-    col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 9, name =col))(100)  # ToDo: need to be more flexible or fixed to a better color list
-    pheatmap::pheatmap(counts, 
-                       color = col.pal,
-                       cluster_rows = cluster_gene,
-                       cluster_cols = cluster_cell,
-                       annotation_row = annotation_gene,
-                       annotation_col = annotation_cell,
-                       cutree_rows = L,   # Question1: not sure about this
-                       cutree_cols = L,   # Question2: not sure about this either 
-                       fontsize = 6.5,
-                       fontsize_col = 5
-                       )
+##ToDo:  Need to (1)  cluster by group(row/col label)
+##       (2) within each group(row/col label) --> hierarchical clustering 
+#' plot the heatmap of the counts data
+#' @param counts the counts matrix 
+#' @param K The number of clusters being considered  (Question1)or: Total number of cell populations??
+#' @param z A numeric vector of cluster assignments for cell 
+#' @param L Total number of transcriptional states
+#' @param y A numeric vector of cluster assignments for gene
+#' @param col vector of colors used in heatmap
+#' @param cluster_gene ##  has to set to be FALSE in pheatmap --> need to improve this ourself 
+#' @param cluster_cell ##  has to set to be FALSE in pheatmap --> need to improve this ourself 
+#' @example TODO
+#' @export 
+celda_heatmap <- function(counts, K, z, L, y,  col="YlOrBr") {
+  ## Set row and column name to counts matrix 
+  if(is.null(rownames(counts))){
+    rownames(counts) <- 1:nrow(counts)
+  } 
+  if(is.null(colnames(counts))) {
+    colnames(counts) <- 1:ncol(counts)
   }
+  
+  
+  ## order(cluster) count matrix   
+  counts.orderCell_gene <- counts[order(y),order(z) ] 
+  
+  
+  lLenth.cell = table(z)   # cell : label length 
+  lLenth.gene = table(y)   # gene : label length 
+  
+  pos.lcell = cumsum(lLenth.cell)  # cell : position of the label gap
+  pos.lgene = cumsum(lLenth.gene)  # gene : position of the label gap
+  
+  
+  
+  #  Set cell annotation    
+  annotation_cell <- data.frame(cell_lable = as.factor(z[order(z)])  ) 
+  rownames(annotation_cell) <- colnames(counts.orderCell_gene)  # rowname should correspond to counts matrix's col(cell) name
+  #  Set gene annotation
+  annotation_gene <- data.frame(gene_label = as.factor(y[order(y)])  )
+  rownames(annotation_gene) <- rownames(counts.orderCell_gene)  # rowname should correspond to counts matrix's row(gene) name
+  
+  
+  ## Set color 
+  col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 9, name = col))(100)  # ToDo: need to be more flexible or fixed to a better color list
+  
+  pheatmap::pheatmap(counts.orderCell_gene, 
+                     color = col.pal,
+                     gaps_row = pos.lgene[-L],
+                     gaps_col = pos.lcell[-K],
+                     annotation_row = annotation_gene,
+                     annotation_col = annotation_cell,
+                     cluster_rows = FALSE,   # has to set to be FALSE
+                     cluster_cols = FALSE,   # has to set to be FALSE 
+                     fontsize = 6.5,
+                     fontsize_col = 5
+  )
+}
