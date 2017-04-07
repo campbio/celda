@@ -559,7 +559,7 @@ cluster_mat <- function(mat, labels, distance, method){
   cum.hclust <- list()
   
   if(nGroup==1){  # matrix has only 1 group 
-    if(class.label==1){
+    if(length(class.label)==1){
       stop("only one row/column for the matrix")
     }
     group.hclust <-  hclust(dis(mat = mat, distance = distance), method = method) 
@@ -609,20 +609,26 @@ cluster_mat <- function(mat, labels, distance, method){
         hclust.com$order <- c(hclust1$order, hclust2$order+row.1+1)
         class(hclust.com) <- "hclust"
       }else{  # one group has only 1 row, the other group has >1 rows
-        if(hclust2$merge[1,1]==0){   # make sure the hclust1 has 1 row , hclust2 has >1 rows 
-          swap <- hclust2 
-          hclust2 <- hclust1
-          hclust1 <- swap
-        } 
-        row.2 <- dim(hclust2$merge)[1]  #   #nodes in the hclust2 group 
-        hclust.com <- as.list(1:7)
-        names(hclust.com) <- c("merge","height", "order", "labels","method","call","dist.method")
-        class(hclust.com) <- "hclust"
-        mer <- hclust2$merge
-        hclust.com$merge <- (mer>0) * (mer) + (mer<0) * (mer-1)
-        hclust.com$merge <- rbind(hclust.com$merge, c(-1, row.2))
-        hclust.com$height <- c(hclust2$height, max(hclust2$height)+1)  # check for different matrix whether 1 should be good 
-        hclust.com$order <- c(1, hclust2$order+1)
+        if(hclust1$merge[1,1]==0){   #  hclust1 has 1 row , hclust2 has >1 rows 
+          row.2 <- dim(hclust2$merge)[1]  #   #nodes in the hclust2 group 
+          hclust.com <- as.list(1:7)
+          names(hclust.com) <- c("merge","height", "order", "labels","method","call","dist.method")
+          class(hclust.com) <- "hclust"
+          mer <- hclust2$merge
+          hclust.com$merge <- (mer>0) * (mer) + (mer<0) * (mer-1)
+          hclust.com$merge <- rbind(hclust.com$merge, c(-1, row.2))
+          hclust.com$height <- c(hclust2$height, max(hclust2$height)+1)  # check for different matrix whether 1 should be good 
+          hclust.com$order <- c(1, hclust2$order+1)
+        }else if(hclust2$merge[1,1]==0){   # the hclust1 has >1 rows , and hclust2 has 1 row
+          row.1 <- dim(hclust1$merge)[1]  #   #nodes in the hclust1 group 
+          hclust.com <- as.list(1:7)
+          names(hclust.com) <- c("merge","height", "order", "labels","method","call","dist.method")
+          class(hclust.com) <- "hclust"
+          hclust.com$merge <- hclust1$merge
+          hclust.com$merge <- rbind(hclust.com$merge, c(row.1, -(row.1+2)))
+          hclust.com$height <- c(hclust1$height, max(hclust1$height)+1)
+          hclust.com$order <- c(hclust1$order, max(hclust1$order)+1)
+        }
         
       }
       
