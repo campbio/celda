@@ -42,8 +42,9 @@ celda_heatmap <- function(counts, K, z, L, y,  col="YlOrBr") {
   
   
   ## Set color 
-  col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 9, name = col))(100)  # ToDo: need to be more flexible or fixed to a better color list
-  
+  #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 2, name = col))(100)  # ToDo: need to be more flexible or fixed to a better color list
+  col.pal <- gplots::bluered(100)
+
   pheatmap::pheatmap(counts.orderCell_gene, 
                      color = col.pal,
                      gaps_row = pos.lgene[-L],

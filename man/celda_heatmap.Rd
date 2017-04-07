@@ -4,27 +4,24 @@
 \alias{celda_heatmap}
 \title{plot the heatmap of the counts data}
 \usage{
-celda_heatmap(counts, K, z, L, col = "YlOrBr", cluster_gene = TRUE,
-  cluster_cell = FALSE, annotation_gene, annotation_cell)
+celda_heatmap(counts, K, z, L, y, col = "YlOrBr")
 }
 \arguments{
 \item{counts}{the counts matrix}
 
 \item{K}{The number of clusters being considered  (Question1)or: Total number of cell populations??}
 
-\item{z}{A numeric vector of cluster assignments}
+\item{z}{A numeric vector of cluster assignments for cell}
 
 \item{L}{Total number of transcriptional states}
 
+\item{y}{A numeric vector of cluster assignments for gene}
+
 \item{col}{vector of colors used in heatmap}
 
-\item{cluster_gene}{boolean values determining if genes should be clustered}
+\item{cluster_gene}{##  has to set to be FALSE in pheatmap --> need to improve this ourself}
 
-\item{cluster_cell}{boolean values determining if cells should be clustered}
-
-\item{annotation_gene}{data frame that specifies the annotations for genes}
-
-\item{annotation_cell}{data frame that specifies the annotations for cells}
+\item{cluster_cell}{##  has to set to be FALSE in pheatmap --> need to improve this ourself}
 }
 \description{
 plot the heatmap of the counts data
