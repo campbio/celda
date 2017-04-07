@@ -17,26 +17,33 @@ Starting from a matrix of counts of transcripts (cells by transcripts). we will 
 
 We will apply these methods to a data set of __________, measured on _________. 
 
-```{r,eval=FALSE}
+```{r,eval=T}
 library(devtools)
-install_github("definitelysean/celda")
+library(celda)
+library(Matrix)
+library(gtools)
+library(ggplot2)
 ```
+
+
+We use the built-in data generating function `cCG.generateCells`
+
 
 ## Loading and transforming data
 
-```{}
-
-
-
-
-
+```{r}
+sim_counts = cCG.generateCells()
+str(sim_counts)
 ```
+
+
+Sean/Josh: Can you add some description on `cCG.generateCells`?
 
 Some illustrations.
 
-```{}
-
-
+```{r}
+plot(1:10)
+qplot(1:10,1:10)
 
 
 
