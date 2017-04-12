@@ -85,32 +85,38 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
     ix = sample(1:ncol(counts))
     for(i in ix) {
       
-      if(sum(z == z[i]) > 1) {
+      ## Subtract current cell counts from matrices
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
+      n.CP.by.G[z[i],] = n.CP.by.G[z[i],] - counts[,i]
         
-        ## Subtract current cell counts from matrices
-        m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
-        n.CP.by.G[z[i],] = n.CP.by.G[z[i],] - counts[,i]
-        
-        ## Calculate probabilities for each state
-        ## Calculate probabilities for each state
-        probs = rep(NA, K)
-        for(j in 1:K) {
-          temp.n.CP.by.G = n.CP.by.G
-          temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
-          probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, alpha=alpha, beta=beta)
-        }  
+      ## Calculate probabilities for each state
+      probs = rep(NA, K)
+      for(j in 1:K) {
+        temp.n.CP.by.G = n.CP.by.G
+        temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
+        probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, alpha=alpha, beta=beta)
+      }  
 
-        ## Sample next state and add back counts
-        z[i] = sample.ll(probs)
-        m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
-        n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
+      ## Sample next state and add back counts
+      previous.z = z
+      z[i] = sample.ll(probs)
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
+      n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
       
-      } else {
-        probs = rep(0, K)
-        probs[z[i]] = 1
+      ## Perform check for empty clusters; Do not allow on last iteration
+      if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
+        
+        ## Split another cluster into two
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
+        
+        ## Re-calculate variables
+        m.CP.by.S = table(factor(z, levels=1:K), s)
+        n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
       }
+       
+      z.probs[i,] = probs
     }  
-    #z.probs[i,] = probs
+    
 
     ## Save history
     z.all = cbind(z.all, z)
