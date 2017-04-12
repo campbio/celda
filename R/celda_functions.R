@@ -8,12 +8,9 @@ sample.ll = function(ll.probs) {
 
 cosineDist = function(x){
   x <- t(x)
-  y <- as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2))))) 
-  return(y)
+  y <- (1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2))))/2)
+  return(as.dist(y))
 }
-
-
-second.best = function(v) sort(v, decreasing=TRUE)[2]
 
 
 stability = function(probs) {
@@ -23,10 +20,16 @@ stability = function(probs) {
   return(stability)
 }
 
+second.best = function(v) sort(v, decreasing=TRUE)[2]
 
 normalizeLogProbs = function(ll.probs) {
   ll.probs <- exp(sweep(ll.probs, 1, apply(ll.probs, 1, max), "-"))
   probs <- sweep(ll.probs, 1, rowSums(ll.probs), "/")
   return(probs)
+}
+
+normalizeCounts = function(counts, scale.factor=1e6) {
+  counts.norm = sweep(counts, 2, colSums(counts) * scale.factor, "/")
+  return(counts.norm)
 }
   
