@@ -3,6 +3,7 @@
 export(cC.calcLLFromVariables)
 export(cCG.calcLLFromVariables)
 export(cCG.generateCells)
+export(calculate_marginal_likelihood)
 export(celda)
 export(celda_C)
 export(celda_CG)

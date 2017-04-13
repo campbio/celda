@@ -7,7 +7,7 @@
 #' @return The estimated marginal likelihood
 #' @export
 calculate_marginal_likelihood = function(completeLogLik) {
-  mpfr_log_lik = mpfr(completeLogLik, 512)
+  mpfr_log_lik = Rmpfr::mpfr(completeLogLik, 512)
   complete_likelihood = exp(mpfr_log_lik)
   marginal_likelihood = mean(complete_likelihood)
   return(marginal_likelihood)
