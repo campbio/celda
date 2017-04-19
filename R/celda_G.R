@@ -225,10 +225,23 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
       }  
 
       ## Sample next state and add back counts
+      previous.y = y
       y[i] <- sample.ll(probs)
       nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
       n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
       n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+
+      ## Perform check for empty clusters; Do not allow on last iteration
+      if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
+        
+        ## Split another cluster into two
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cG.calcLLFromVariables", beta=beta, delta=delta, gamma=gamma)
+        
+        ## Re-calculate variables
+        n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+        n.by.TS = as.numeric(rowsum(n.by.G, y))
+        nG.by.TS = table(y)
+      }
       
       y.probs[i,] <- probs
     }
