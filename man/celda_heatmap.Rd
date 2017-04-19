@@ -4,7 +4,7 @@
 \alias{celda_heatmap}
 \title{plot the heatmap of the counts data}
 \usage{
-celda_heatmap(counts, K, z, L, y, scale_type = "log")
+celda_heatmap(counts, K, z, L, y, scale_type = "row")
 }
 \arguments{
 \item{counts}{the counts matrix}
@@ -18,10 +18,6 @@ celda_heatmap(counts, K, z, L, y, scale_type = "log")
 \item{y}{A numeric vector of cluster assignments for gene}
 
 \item{scale_type}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
-
-\item{cluster_gene}{##  has to set to be FALSE in pheatmap --> need to improve this ourself}
-
-\item{cluster_cell}{##  has to set to be FALSE in pheatmap --> need to improve this ourself}
 }
 \description{
 plot the heatmap of the counts data
