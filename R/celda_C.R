@@ -147,7 +147,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
   }
   
   return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs))
+              finalLogLik=ll.final, z.probability=z.probs, seed=seed))
 }
 
 

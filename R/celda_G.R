@@ -191,7 +191,8 @@ geneCluster = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5,
   }
   
   return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs))
+              finalLogLik=ll.final, z.probability=z.probs,
+              seed=seed))
 }
 
 
