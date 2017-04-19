@@ -39,47 +39,87 @@
 #' @param counts A numeric count matrix
 #' @param y A numeric vector of gene cluster assignments
 #' @param L The number of clusters being considered
-#' @param beta The Dirichlet distribution parameter for Phi; a pseudocount of each state in each cell
-#' @param gamma The Dirichlet distribution parameter for Psi; a pseudocount of transcripts in each state
-#' @param delta The Dirichlet distribution parameter for Eta; a pseudocount of the number of genes in each state
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @keywords log likelihood
 #' @examples TODO
-cG.calcLLFromVariables = function(counts, y, K, beta, gamma, delta) {
-  n.phi <- rowsum(counts, group=z, reorder=TRUE)
-  nk <- nrow(n.phi)
-  nc <- ncol(n.phi)
+#' @export
+cG.calcLLFromVariables = function(counts, y, L, beta, gamma, delta) {
+  n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
-  a <- nc*lgamma(nk*alpha)
-  b <- sum(lgamma(n.phi+alpha))
-  c <- -nc*nk*lgamma(alpha)
-  d <- -sum(lgamma(apply(n.phi + alpha, 2, sum)))
+  nM <- ncol(n.TS.by.C)
+  
+  a <- nM * lgamma(L * beta)
+  b <- sum(lgamma(n.TS.by.C + beta))
+  c <- -nM * L * lgamma(beta)
+  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
   
   phi.ll <- a + b + c + d
 
-  n.psi <- rowSums(counts)
-  n.psi.sum <- as.numeric(rowsum(n.psi, z))
+  n.by.G <- rowSums(counts)
+  n.by.TS <- as.numeric(rowsum(n.by.G, y))
   
-  ng.z <- table(z)
-  ng <- length(n.psi)
-  nk <- length(n.psi.sum)
-  
-  a <- sum(lgamma(ng.z * beta))
-  b <- sum(lgamma(n.psi + beta))
-  c <- -ng * lgamma(beta)
-  d <- -sum(lgamma(n.psi.sum + (ng.z*beta)))
+  nG.by.TS <- table(y)
+  nG <- nrow(counts)
+
+  a <- sum(lgamma(nG.by.TS * delta))
+  b <- sum(lgamma(n.by.G + delta))
+  c <- -nG * lgamma(delta)
+  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll <- a + b + c + d
-  
-  a <- lgamma(nk*gamma)
-  b <- sum(lgamma(ng.z+gamma))
-  c <- -nk*lgamma(gamma)
-  d <- -sum(lgamma(sum(ng.z + gamma)))
+
+  a <- lgamma(L * gamma)
+  b <- sum(lgamma(nG.by.TS + gamma))
+  c <- -L * lgamma(gamma)
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
   
   eta.ll <- a + b + c + d
 
   final <- phi.ll + psi.ll + eta.ll
   return(final)
 }
+
+
+cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamma, delta) {
+  #n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
+  
+  ## Calculate for "Phi" component
+  a <- nM * lgamma(L * beta)
+  b <- sum(lgamma(n.TS.by.C + beta))
+  c <- -nM * L * lgamma(beta)
+  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
+  
+  phi.ll <- a + b + c + d
+  
+  #n.by.G <- rowSums(counts)
+  #n.by.TS <- as.numeric(rowsum(n.by.G, y))
+  
+  #nG.by.TS <- table(y)
+#  nG <- length(n.by.G)
+  
+  ## Calculate for "Psi" component
+  a <- sum(lgamma(nG.by.TS * delta))
+  b <- sum(lgamma(n.by.G + delta))
+  c <- -nG * lgamma(delta)
+  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
+  
+  psi.ll <- a + b + c + d
+  
+  ## Calculate for "Eta" component
+  a <- lgamma(L * gamma)
+  b <- sum(lgamma(nG.by.TS + gamma))
+  c <- -L * lgamma(gamma)
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+  
+  eta.ll <- a + b + c + d
+  
+  final <- phi.ll + psi.ll + eta.ll
+  return(final)
+}
+
+
 
 
 #' Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)
@@ -96,51 +136,25 @@ cG.calcLLFromVariables = function(counts, y, K, beta, gamma, delta) {
 #' @param gamma The number of cell states ("topics")
 #' @keywords log likelihood
 #' @examples TODO
-calcLLlite_gene_clustering = function(ix, counts, z, k, alpha, beta, gamma) {
+cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, delta, gamma) {
   
-  ng.z.minus <- table(z[-ix])
-  eta.ll <- log(ng.z.minus[z[ix]] + gamma)
+  ## Calculate for "Eta" component
+  eta.ll <- log(nG.in.Y + gamma)
   
-  n.phi <- rowsum(counts, group=z, reorder=TRUE)
-  b <- sum(lgamma(n.phi+alpha))
-  d <- -sum(lgamma(apply(n.phi + alpha, 2, sum)))
+  ## Calculate for "Phi" component
+  b <- sum(lgamma(n.TS.by.C + beta))
+  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
   phi.ll <- b + d
   
-  n.psi <- rowSums(counts)
-  n.psi.sum <- as.numeric(rowsum(n.psi, z))
-  ng.z <- table(z)
-  ng <- length(n.psi)
-  a <- sum(lgamma(ng.z*beta))
-  d <- -sum(lgamma(n.psi.sum + (ng.z*beta)))
+  ## Calculate for "Psi" component
+  a <- sum(lgamma(nG.by.TS * delta))
+  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   psi.ll <- a + d
   
   final <- eta.ll + phi.ll + psi.ll
   return(final)
 }
 
-
-#' Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)
-#'
-#' This function calculates the log-likelihood of a cell's membership to each possible clusters,
-#' given the cluster assignment for all other cells.
-#' 
-#' @param ix The index in z corresponding to the cell currently being considered during Gibbs sampling
-#' @param r A numeric count matrix
-#' @param z A numeric vector of cluster assignments
-#' @param k The number of clusters being considered
-#' @param a Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution
-#' @param b Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
-#' @param g The number of cell states ("topics")
-#' @examples TODO 
-calcGibbsProb = function(ix, r, z, k, a, b, g) {
-  final <- rep(NA, k)
-  for(j in 1:k) {
-    z[ix] <- j
-    final[j] <- calcLLlite_gene_clustering(ix, counts=r, z=z, k=k, 
-                                           alpha=a, beta=b, gamma=g)
-  }  
-  return(final)
-}
 
 
 #' Cluster Genes from Single Cell Sequencing Data
@@ -162,69 +176,90 @@ calcGibbsProb = function(ix, r, z, k, a, b, g) {
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
-celda_G = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5, 
-                       seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
+celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
+                       seed=12345, best=TRUE, kick=TRUE) {
   
   set.seed(seed)
   cat(date(), "... Starting Gibbs sampling\n")
-  
-  co <- counts
 
-  z <- sample(1:k, nrow(co), replace=TRUE)
-  z.all <- z
-  ll <- calcLL_gene_clustering(counts=co, z=z, k=k, alpha=a, beta=b, gamma=g)
+  y <- sample(1:L, nrow(counts), replace=TRUE)
+  y.all <- y
+
+  ## Calculate counts one time up front
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  nG.by.TS = table(y)
+  nM = ncol(counts)
+  nG = nrow(counts)
   
-  z.probs <- matrix(NA, nrow=nrow(co), ncol=k)
+  ## Calculate initial log likelihood
+  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
+  y.probs <- matrix(NA, nrow=nrow(counts), ncol=L)
   iter <- 1
-  continue <- TRUE
+  continue = TRUE
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
-    ix <- sample(1:nrow(co))
+    ix <- sample(1:nrow(counts))
     for(i in ix) {
-      probs <- calcGibbsProb(i, r=co, z=z, k=k, a=a, b=b, g=g)
-      z[i] <- sample.ll(probs)
-      z.probs[i,] <- probs
+      
+      ## Subtract current gene counts from matrices
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+      n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+      n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+
+      ## Calculate probabilities for each state
+      probs = rep(NA, L)
+      for(j in 1:L) {
+        temp.nG.by.TS = nG.by.TS
+        temp.n.by.TS = n.by.TS
+        temp.n.TS.by.C = n.TS.by.C
+        
+        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+        temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+        temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
+        
+        probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], beta=beta, delta=delta, gamma=gamma)
+      }  
+
+      ## Sample next state and add back counts
+      y[i] <- sample.ll(probs)
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+      n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+      
+      y.probs[i,] <- probs
     }
     
-    ## Save Z history
-    z.all <- cbind(z.all, z)
+    ## Save history
+    y.all <- cbind(y.all, y)
     
     ## Calculate complete likelihood
-    temp.ll <- calcLL_gene_clustering(counts=co, z=z, k=k, alpha=a, beta=b, gamma=g)
+    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
+      y.probs.final = y.probs
+    }
     ll <- c(ll, temp.ll)
     
     cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
-    
-    ## Normalize Z probabilties and test for convergence
-    z.probs <- exp(sweep(z.probs, 1, apply(z.probs, 1, max), "-"))
-    z.probs <- sweep(z.probs, 1, rowSums(z.probs), "/")
-    f <- function(v) sort(v, decreasing=TRUE)[2]
-    z.probs.second <- max(apply(z.probs, 1, f))
-    z.ta <- table(z)
-#    if(z.probs.second < converge & (min(z.ta) >= min.cell | kick==FALSE)) {
-    if(z.probs.second < converge) {    
-      continue <- FALSE
-      cat("Maximum probability of a cell changing its state is ",  z.probs.second, 
-          ". Exiting at iteration ", iter, ".", sep="")
-    }
-    
+
     iter <- iter + 1    
   }
   
   
   if(best == TRUE) {
     ix <- which.max(ll)
-    z.final <- z.all[,ix]
+    y.final <- y.all[,ix]
     ll.final <- ll[ix]
   } else {
-    z.final <- z
+    y.final <- y
     ll.final <- tail(ll, n=1)
   }
   
-  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs))
+  return(list(y=y.final, complete.y=y.all, completeLogLik=ll, 
+              finalLogLik=ll.final, y.probability=y.probs))
 }
 
 
@@ -234,11 +269,12 @@ celda_G = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5,
 #' parameters can be provided by the user.
 #' 
 #' @param C The number of cells
+#' @param L The number of transcriptional states
 #' @param N.Range The range of counts each gene should have
 #' @param G The number of genes for which to simulate counts
-##' @param a Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution
-#' @param b Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
-#' @param g The number of cell states ("topics")' @param k The number of gene clusters to simulate from
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param seed Parameter to set.seed() for random number generation
 #' @examples TODO
 #' @export
@@ -273,21 +309,5 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   }
 
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
-}
-
-
-#' Sample log-likelihood probabilities
-#'
-#' Given a set of log-likelihoods for cluster membership, return a single cluster assignment.
-#' 
-#' @param counts A numeric count matrix
-#' @keywords log likelihood sample
-#' @return A single integer in 1:k corresponding to a cluster assignment
-#' @examples TODO
-sample.ll = function(ll.probs) {
-  probs.sub <- exp(ll.probs - max(ll.probs))
-  probs.norm <- probs.sub / sum(probs.sub)
-  probs.select <- sample(1:length(ll.probs), size=1, prob=probs.norm)
-  return(probs.select)
 }
 
