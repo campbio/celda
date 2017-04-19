@@ -1,17 +1,50 @@
+# -----------------------------------
+# Variable description
+# -----------------------------------
+# C = Cell
+# S or s = Sample
+# G = Gene
+# TS = Transcriptional State
+# CP = Cell population
+# n = counts of transcripts
+# m = counts of cells
+# K = Total number of cell populations
+# L = Total number of transcriptional states
+# nM = Number of cells
+# nG = Number of genes
+# nS = Number of samples
+
+# -----------------------------------
+# Count matrices descriptions
+# -----------------------------------
+
+# All n.* variables contain counts of transcripts
+# n.CP.by.TS = Number of counts in each Cellular Population per Transcriptional State
+# n.TS.by.C = Number of counts in each Transcriptional State per Cell 
+# n.CP.by.G = Number of counts in each Cellular Population per Gene
+# n.by.G = Number of counts per gene (i.e. rowSums)
+# n.by.TS = Number of counts per Transcriptional State
+
+## All m.* variables contain counts of cells
+# m.CP.by.S = Number of cells in each Cellular Population per Sample
+
+# nG.by.TS = Number of genes in each Transcriptional State
+
+
 #' Calculate Log Likelihood For A Set of Gene Clusterings (Gene Clustering)
 #'
 #' This function calculates the log likelihood of each clustering of genes generated
 #' over multiple iterations of Gibbs sampling.
 #' 
 #' @param counts A numeric count matrix
-#' @param z A numeric vector of cluster assignments
-#' @param k The number of clusters being considered
-#' @param alpha Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution
-#' @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
-#' @param gamma The number of cell states ("topics")
+#' @param y A numeric vector of gene cluster assignments
+#' @param L The number of clusters being considered
+#' @param beta The Dirichlet distribution parameter for Phi; a pseudocount of each state in each cell
+#' @param gamma The Dirichlet distribution parameter for Psi; a pseudocount of transcripts in each state
+#' @param delta The Dirichlet distribution parameter for Eta; a pseudocount of the number of genes in each state
 #' @keywords log likelihood
 #' @examples TODO
-calcLL_gene_clustering = function(counts, z, k, alpha, beta, gamma) {
+cG.calcLLFromVariables = function(counts, y, K, beta, gamma, delta) {
   n.phi <- rowsum(counts, group=z, reorder=TRUE)
   nk <- nrow(n.phi)
   nc <- ncol(n.phi)
@@ -129,7 +162,7 @@ calcGibbsProb = function(ix, r, z, k, a, b, g) {
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
-geneCluster = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5, 
+celda_G = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5, 
                        seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
   
   set.seed(seed)
@@ -209,23 +242,23 @@ geneCluster = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5,
 #' @param seed Parameter to set.seed() for random number generation
 #' @examples TODO
 #' @export
-generateCells_gene_clustering = function(C=100, N.Range=c(500,5000),  G=1000, 
-                                         k=5, a=1, b=1, g=1, seed=12345) {
+simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000, 
+                                         L=5, beta=1, gamma=1, delta=1, seed=12345) {
   set.seed(seed)
-  eta = gtools::rdirichlet(1, rep(g, k))
+  eta = gtools::rdirichlet(1, rep(gamma, L))
   
-  z = sample(1:k, size=G, prob=eta, replace=TRUE)
-  if(length(table(z)) < k) {
+  y = sample(1:L, size=G, prob=eta, replace=TRUE)
+  if(length(table(y)) < L) {
     stop("Some states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
   }
   
-  phi = matrix(0, nrow=G, ncol=k)
-  for(i in 1:k) {
-    ind = z == i
-    phi[ind,i] = gtools::rdirichlet(1, rep(b, sum(ind)))
+  psi = matrix(0, nrow=G, ncol=L)
+  for(i in 1:L) {
+    ind = y == i
+    psi[ind,i] = gtools::rdirichlet(1, rep(delta, sum(ind)))
   }
   
-  theta = gtools::rdirichlet(C, rep(a, k))
+  phi = gtools::rdirichlet(C, rep(beta, L))
   
   ## Select number of transcripts per cell
   nN = sample(N.Range[1]:N.Range[2], size=C, replace=TRUE)
@@ -233,17 +266,13 @@ generateCells_gene_clustering = function(C=100, N.Range=c(500,5000),  G=1000,
   ## Select transcript distribution for each cell
   cell.counts = matrix(0, nrow=G, ncol=C)
   for(i in 1:C) {
-    cell.dist = rmultinom(1, size=nN[i], prob=theta[i,])
-    for(j in 1:k) {
-      cell.counts[,i] = cell.counts[,i] + rmultinom(1, size=cell.dist[j], prob=phi[,j])
+    cell.dist = rmultinom(1, size=nN[i], prob=phi[i,])
+    for(j in 1:L) {
+      cell.counts[,i] = cell.counts[,i] + rmultinom(1, size=cell.dist[j], prob=psi[,j])
     }
   }
 
-  cc.rowsum0 = rowSums(cell.counts) > 0
-  cell.counts = cell.counts[cc.rowsum0,]
-  z = z[cc.rowsum0]
-  
-  return(list(z=z, counts=cell.counts, k=k, a=a, b=b, g=g, theta=theta, phi=phi, eta=eta, seed=seed))
+  return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
