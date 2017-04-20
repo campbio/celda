@@ -12,6 +12,11 @@ cosineDist = function(x){
   return(as.dist(y))
 }
 
+spearmanDist = function(x){
+  y = (1 - cor(x, method="spearman"))/2
+  return(as.dist(y))
+}
+
 
 stability = function(probs) {
   nStates <- ncol(probs)
