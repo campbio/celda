@@ -144,7 +144,7 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, ny, nG.in.Y, beta, gamma, delta) {
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, gamma, delta) {
   
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
@@ -153,8 +153,8 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, ny, nG.in.Y, beta, gamma, del
   phi.ll = b + d
   
   ## Calculate for "Psi" component
-  a = sum(lgamma(ny * delta))
-  d = -sum(lgamma(n.by.TS + (ny*delta)))
+  a = sum(lgamma(nG.by.TS * delta))
+  d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll = a + d
   
@@ -167,8 +167,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, ny, nG.in.Y, beta, gamma, del
 
 
 #' @export
-cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
-  require(gtools)
+simulateCells.celdaCG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
   
   set.seed(seed)
 
@@ -181,16 +180,16 @@ cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=100
   nN = sample(N.Range[1]:N.Range[2], size=length(cell.sample.label), replace=TRUE)
   
   ## Generate cell population distribution for each sample
-  theta = t(rdirichlet(S, rep(alpha, K)))
+  theta = t(gtools::rdirichlet(S, rep(alpha, K)))
 
   ## Assign cells to cellular subpopulations
   z = unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[,i], replace=TRUE)))
 
   ## Generate transcriptional state distribution for each cell subpopulation
-  phi = rdirichlet(K, rep(beta, L))
+  phi = gtools::rdirichlet(K, rep(beta, L))
 
   ## Assign genes to transcriptional states 
-  eta = rdirichlet(1, rep(gamma, L))
+  eta = gtools::rdirichlet(1, rep(gamma, L))
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
   if(length(table(y)) < L) {
     stop("Some transcriptional states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
@@ -199,7 +198,7 @@ cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=100
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
     ind = y == i
-    psi[ind,i] = rdirichlet(1, rep(delta, sum(ind)))
+    psi[ind,i] = gtools::rdirichlet(1, rep(delta, sum(ind)))
   }
   
   ## Select transcript distribution for each cell
@@ -256,54 +255,40 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
   continue = TRUE
   while(iter <= max.iter & continue == TRUE) {
     
-    ## Determine if any clusters are below the minimum threshold and if a kick needs to be performed
-    ## Probably needs work
-    ## Alternative approach to try:
-        ## Every ith iteration, determine if splitting up each cluster and assigning 1/2 of samples
-        ## to each other cluster will result in a better log likelihood
-    z.ta = table(factor(z, levels=1:K))
-    if(min(z.ta) < min.cell & kick==TRUE) {
-      
-      all.k.to.kick = which(z.ta < min.cell)
-      
-      for(j in all.k.to.kick) { 
-        all.k.to.test = which(z.ta > 2*min.cell)
-        z = cCG.kick.z(counts, s=s, z=z, y=y, K=K, L=L, k.to.kick=j, k.to.test=all.k.to.test, min.cell=min.cell, alpha, beta, gamma, delta)
-        z.ta = table(factor(z, levels=1:K))
-      }
-      m.CP.by.S = table(factor(z, levels=1:K), s)
-      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-      n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
-    }
-    
     ## Begin process of Gibbs sampling for each cell
     n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
     ix = sample(1:ncol(counts))
     for(i in ix) {
-      # If more than one cell belongs to the current state, then sampling will proceed, otherwise this cell will be skipped
-      if(sum(z == z[i]) > 1) {
+
+      ## Subtract current cell counts from matrices
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
+      n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
+      
+      ## Calculate probabilities for each state
+      probs = rep(NA, K)
+      for(j in 1:K) {
+        temp.n.CP.by.TS = n.CP.by.TS
+        temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
+        probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, alpha=alpha, beta=beta)
+      }  
+      
+      ## Sample next state and add back counts
+      previous.z = z
+      z[i] = sample.ll(probs)
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
+      n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
+      
+      ## Perform check for empty clusters; Do not allow on last iteration
+      if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
         
-        ## Subtract current cell counts from matrices
-        m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
-        n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
+        ## Split another cluster into two
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1, gamma=1)
         
-        ## Calculate probabilities for each state
-        probs = rep(NA, K)
-        for(j in 1:K) {
-          temp.n.CP.by.TS = n.CP.by.TS
-          temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
-          probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, alpha=alpha, beta=beta)
-        }  
-        
-        ## Sample next state and add back counts
-        z[i] = sample.ll(probs)
-        m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
-        n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
-        
-      } else {
-        probs = rep(0, K)
-        probs[z[i]] = 1
+        ## Re-calculate variables
+        m.CP.by.S = table(factor(z, levels=1:K), s)
+        n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
       }
+    
       z.probs[i,] = probs
     }
     
@@ -328,7 +313,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
           temp.nG.by.TS = nG.by.TS
           temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
           
-          probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, ny=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, gamma=gamma, delta=delta)
+          probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, gamma=gamma, delta=delta)
         }  
         
         ## Sample next state and add back counts
@@ -389,55 +374,5 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
 }
 
 
-cCG.kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, alpha, beta, gamma, delta) {
-  require(cluster)
-  cat(date(), "... Cluster", k.to.kick, "has fewer than", min.cell, "cells. Performing kick by ")
-  
-  counts.norm = sweep(counts, 2, colSums(counts), "/")
-  z.kick = matrix(z, ncol=length(k.to.test), nrow=length(z))
-  
-  ## Randomly assign clusters to cells with cluster to kick
-  z.k.to.kick = sample(1:K, size=sum(z == k.to.kick), replace=TRUE)
-  z.kick[z==k.to.kick,] = z.k.to.kick
-  
-  ## Loop through each cluster, split, and determine logLik
-  k.kick.ll = rep(NA, length(k.to.test))
-  for(i in 1:length(k.to.test)) {
-    k.dist = cosineDist(counts.norm[,z==k.to.test[i]])/2
-    k.pam = pam(x=k.dist, k=2)$clustering
-    
-    ## If PAM split is too small, perform secondary hclust procedure to split into equal groups
-    if(min(table(k.pam)) < min.cell) {
-      k.hc = hclust(k.dist, method="ward.D")
-      
-      ## Get maximum sample size of each subcluster
-      k.hc.size = sapply(1:length(k.hc$height), function(i) max(table(cutree(k.hc, h=k.hc$height[i]))))
-      
-      ## Find the height of the dendrogram that best splits the samples in half
-      sample.size = round(length(k.hc$order)/ 2)
-      k.hc.select = which.min(abs(k.hc.size - sample.size))
-      k.hc.cut = cutree(k.hc, h=k.hc$height[k.hc.select])
-      k.hc.cluster = which.max(table(k.hc.cut))
-      
-      k.hc.final = ifelse(k.hc.cut == k.hc.cluster, k.to.test[i], k.to.kick)
-      
-      ix = (z == k.to.test[i])
-      z.kick[ix,i] = k.hc.final
-      
-    } else {
-      
-      k.pam.final = ifelse(k.pam == 1, k.to.test[i], k.to.kick)
-      ix = (z == k.to.test[i])
-      z.kick[ix,i] = k.pam.final
-      
-    }
-    k.kick.ll[i] = cCG.calcLLFromVariables(counts=counts, s=s, z=z.kick[,i], y=y, K=K, L=L, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
-  }
-  
-  k.to.test.select = sample.ll(k.kick.ll)
-  
-  cat("splitting Cluster", k.to.test[k.to.test.select], "\n")
-  return(z.kick[,k.to.test.select])
-}
 
 
