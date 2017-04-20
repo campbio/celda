@@ -1,15 +1,28 @@
 ---
-title: "The Legend of celda"
-author: "Josh D. Campbell, Sean Corbett, Masanao Yajima, Zichun Liu, Shiyi Yang, Tianwen Huan, Anahita Bahri"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+title: "An Introduction to celda"
+author: Josh D. Campbell, Sean Corbett, Masanao Yajima, Zichun Liu, Shiyi Yang, Tianwen
+  Huan, Anahita Bahri
+date: '`r Sys.Date()`'
+output:
+  pdf_document: default
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Vignette Title} %\VignetteEngine{knitr::rmarkdown} \usepackage[utf8]{inputenc}
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.width=8,fig.height=7 ,
+			out.width="0.7\\linewidth", fig.align = "center")
+library(RColorBrewer)
+library(ggplot2)
+library(celda)
+library(gtools)
+library(pheatmap)
+library(reshape2)
+library(vcd)
+library(corrplot)
+```
 
-## Overview
+## 1 Philosophy
 
 The purpose of this vignette is to briefly introduce package `celda`. `celda` is the abbreviation of "CELlular Latent Dirichlet Allocation."
 
@@ -22,11 +35,11 @@ library(devtools)
 install_github("definitelysean/celda")
 ```
   
-## Single-Cell RNA-Seq Data
+## 2 Single-Cell RNA-Seq Data
 
 Single Cell RNA-Seq Data
 
-## Latent Dirichlet allocation
+## 3 Latent Dirichlet allocation
 
 In natural language processing, latent Dirichlet allocation (LDA) is a generative statistical model that allows sets of observations to be explained by unobserved groups that explain why some parts of the data are similar.  
 
@@ -34,21 +47,166 @@ For example, if observations are words collected into documents, it posits that 
 
 LDA is an example of a topic model and was first presented as a graphical model for topic discovery by David Blei, Andrew Ng, and Michael I. Jordan in 2003. Essentially the same model was also proposed independently by J. K. Pritchard, M. Stephens, and P. Donnelly in the study of population genetics in 2000. Both papers have been highly influential, with 16488 and 18170 citations respectively by December 2016.([via](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation))
 
+## 4 An example using simulation data
+With the cursory background out of the way, we’ll proceed with some examples to help understand how the package is used.
 
+### 4.1 Generate data using built-in function
 
+celda provide a built-in method to generate simulation data. Directly call `cCG.generateCells`. We can specify some arguments in the function:
 
+  S: Number of Samples
+ 
+  C.Range: Range of number of cells in a sample 
+ 
+  N.Range: Range of number of transcripts in a cell
+ 
+  G: Total number of Gene types
+ 
+  K: Total number of cell populations
+ 
+  L: Total number of transcriptional states
+ 
+  alpha: Assuming the type of cell(K types) in S samples follows a multinomial distribution. $\alpha$ is the parameter of its conjugate priors distribution 
+ 
+  beta: Assuming the type of transcriptional states(L types) in K type of cell follows a multinomial distribution. $\beta$ is the parameter of its conjugate priors distribution that generate that multinomial distribution.
+ 
+  gamma: Assuming the distribution of a gene contribute to a transcriptional states(L types) is a multinomial distribution. $\gamma$ is the parameter of its conjugate priors distribution that generate that multinomial distribution.
+ 
+  delta: Assuming the proportion of different types of gene in a transcriptional state  follows a multinomial distribution. $\delta$ is the parameter of its conjugate priors distribution that generate that multinomial distribution. 
+ 
+  seed: Random seed
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,fig.width=8,fig.height=7 ,
-			out.width="0.7\\linewidth", fig.align = "center")
-#oldpar <- par()
-#par(mar=c(3,3,2,1), mgp=c(2,.7,0), tck=-.01)
-
-library(RColorBrewer)
-library(ggplot2)
+```{r simulate data}
+sim_counts = cCG.generateCells(G = 100,K = 3, L = 5)
+str(sim_counts)
 ```
 
-```{r cleaning_up,echo=FALSE}
-#par(oldpar)
-#sessionInfo()
+
+The `cCG.generateCells` will return a list with standard format of celda. In the output:
+  
+  z: Indicate which kind of cell it is for all cells in all samples
+ 
+  y: Indicate which transcriptional state a gene contributed to 
+ 
+  sample: Indicate which sample a cell is from
+ 
+  counts: In one cell what kind of gene and how many times it worked. (gene -> transcripts -> cell)
+ 
+  theta: Proportion(multinomial distribution) of different types of cells in samples
+ 
+  phi: Proportion(multinomial distribution) of different types of transcriptional states in cells
+ 
+  psi: Proportion(multinomial distribution) of different types of genes in transcriptional states
+ 
+  eta: Probability(multinomial distribution) of a gene contribute to different types of transcriptional states
+
+
+
+### 4.2 Filter cells with high gene expressions
+
+Continue using simulation data. We now perform some filtering in order to obtain obvious result.
+
+```{r filter high expression}
+ind<-rowSums(sim_counts$counts>4)>4 #filter cells with high gene expression
+counts = sim_counts$counts[ind,]
+dim(counts)
 ```
+
+### 4.3 LDA Clustering on Cells and Genes
+
+We cluster cells and genes using `celda_CG`, here we want to cluster cells into 3 categories and cluster genes into 5 categories. And due to time consumption, we limit the iteration to be 25.
+
+K = Total number of cell populations
+L = Total number of transcriptional states
+
+```{r}
+celda_cluster_assignments = celda_CG(counts, sample.label = sim_counts$sample,
+                                     K = 3, L = 5, max.iter = 25)
+str(celda_cluster_assignments)
+```
+
+z: Cell cluster assignments from the final iteration of Gibbs sampling
+ 
+y: gene cluster assignments from the final iteration of Gibbs sampling 
+
+complete.z: History of cell cluster assignments across all iterations of Gibbs
+
+complete.y: History of gene cluster assignments across all iterations of Gibbs
+
+z.stability: [0,1] measure of stability for the cell clustering chain
+
+y.stability: [0,1] measure of stability for the gene clustering chain
+
+complete.z.stability: History of z.stability over all iterations of Gibbs sampling
+
+complete.y.stability: Historyof y.stability over all iterations of Gibbs sampling
+
+completeLogLik: Log-likelihood of all gene and cell cluster assignments over all iterations of Gibbs sampling
+
+finalLogLik: Log-likelihood of final gene and cell cluster assignments
+
+z.prob:
+
+y.prob:
+
+### 4.4 Visualization
+
+#### 4.4.1 Heatmap, Mosaic plot and corrplot on Cluster cell data
+```{r }
+samp = sim_counts$sample
+
+cluster_z = celda_cluster_assignments$z
+
+tb = xtabs(~samp + cluster_z)
+
+nmat <- tb/rowSums(tb)
+
+mnmat<-melt(nmat)
+
+mnmat$samp<-factor(mnmat$samp)
+
+mnmat$cluster_z<-factor(mnmat$cluster_z,levels=sort(unique(mnmat$cluster_z),TRUE))
+```
+
+```{r fig.width=5,fig.height=3 }
+ggplot(mnmat)+geom_tile()+
+  aes(x=samp,y=cluster_z,fill=value)+scale_fill_gradient2()+
+  scale_x_discrete(position = "top")+xlab("sample")+ylab("cluster")
+
+mosaic(tb)
+
+corrplot(t(nmat),method = "circle",is.corr = FALSE)
+```
+
+
+#### 4.4.2 Use celda_heatmap to produce heatmap
+
+```{r}
+celda_heatmap(counts,
+              K=3,z = celda_cluster_assignments$z,
+              L = 10,y = celda_cluster_assignments$y)
+
+celda_heatmap(log(counts+1),
+              K=3,z = celda_cluster_assignments$z, 
+              L = 10,y = celda_cluster_assignments$y)
+
+celda_heatmap(t(apply(counts,1,scale)),
+              K=3,z = celda_cluster_assignments$z, 
+              L = 10,y = celda_cluster_assignments$y)
+```
+
+### 4.5 MCMC Diagnostic
+```{r}
+```
+
+
+## 5 An example using simulation data
+
+### 5.1 Read in data
+
+To be filled 
+
+```{r}
+#corresponding read file and compile code.
+```
+

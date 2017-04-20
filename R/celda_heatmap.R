@@ -68,6 +68,7 @@ celda_heatmap <- function(counts, K, z, L, y, scale_type="row") {
   
   ## Set color 
   #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 2, name = col))(100)  # ToDo: need to be more flexible or fixed to a better color list
+<<<<<<< HEAD
   #col.pal <- gplots::bluered(100)
   
   celda::semi_pheatmap(mat = counts, 
@@ -79,4 +80,19 @@ celda_heatmap <- function(counts, K, z, L, y, scale_type="row") {
                        row_label = y,
                        col_label = z
                        )
+=======
+  col.pal <- gplots::bluered(100)
+
+  pheatmap::pheatmap(counts.orderCell_gene, 
+                     color = col.pal,
+                     gaps_row = pos.lgene[-L],
+                     gaps_col = pos.lcell[-K],
+                     annotation_row = annotation_gene,
+                     annotation_col = annotation_cell,
+                     cluster_rows = FALSE,   # has to set to be FALSE
+                     cluster_cols = FALSE,   # has to set to be FALSE 
+                     fontsize = 6.5,
+                     fontsize_col = 5
+  )
+>>>>>>> upstream/master
 }

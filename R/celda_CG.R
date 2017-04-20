@@ -385,7 +385,11 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     y.probs.final = y.probs
   }
   
-  return(list(z=z.final, y=y.final, complete.z=z.all, complete.y=y.all, z.stability=z.stability.final, y.stability=y.stability.final, complete.z.stability=z.stability, complete.y.stability=y.stability, completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final))
+  return(list(z=z.final, y=y.final, complete.z=z.all, complete.y=y.all, 
+              z.stability=z.stability.final, y.stability=y.stability.final, 
+              complete.z.stability=z.stability, complete.y.stability=y.stability, 
+              completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
+              seed=seed))
 }
 
 
