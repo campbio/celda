@@ -83,34 +83,29 @@ cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, de
   return(final)
 }
 
-cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, alpha, beta, gamma, delta) {
+cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, gamma, delta) {
   
   ## Calculate for "Theta" component
-  #m = table(z, s)
-  ns = ncol(m.CP.by.S)
-  
-  a = ns*lgamma(K*alpha)
+  a = nS * lgamma(K*alpha)
   b = sum(lgamma(m.CP.by.S+alpha))
-  c = -ns*K*lgamma(alpha)
+  c = -nS * K *lgamma(alpha)
   d = -sum(lgamma(colSums(m.CP.by.S + alpha)))
   
   theta.ll = a + b + c + d
   
   
   ## Calculate for "Phi" component
-  a = K*lgamma(L*beta)
-  b = sum(lgamma(n.CP.by.TS+beta))
-  c = -K*L*lgamma(beta)
+  a = K * lgamma(L * beta)
+  b = sum(lgamma(n.CP.by.TS + beta))
+  c = -K * L * lgamma(beta)
   d = -sum(lgamma(rowSums(n.CP.by.TS + beta)))
   
   phi.ll = a + b + c + d
   
   ## Calculate for "Psi" component
-  ny.sum = sum(nG.by.TS)
-
   a = sum(lgamma(nG.by.TS * delta))
   b = sum(lgamma(n.by.G + delta))
-  c = -ny.sum * lgamma(delta)
+  c = -nG * lgamma(delta)
   d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll = a + b + c + d
@@ -247,9 +242,11 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
   nG.by.TS = table(y)
+  nS = length(unique(s))
+  nG = nrow(counts)
+  nM = ncol(counts)
   
-  
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
   
   iter = 1
   continue = TRUE
@@ -341,7 +338,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     y.stability = c(y.stability, stability(y.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
