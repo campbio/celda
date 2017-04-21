@@ -110,6 +110,6 @@ split.y = function(counts, y, empty.L, L, min.gene=2, LLFunction, ...) {
   
   l.to.test.select = sample.ll(l.split.ll)
   
-  cat(date(), "... Cluster", empty.L, "had", y.ta[empty.L], "genes. Splitting Cluster", l.to.test[l.to.test.select], "into two clusters.\n")
+  message(date(), " ... Cluster ", empty.L, " had ", y.ta[empty.L], " genes. Splitting Cluster ", l.to.test[l.to.test.select], " into two clusters.")
   return(y.split[,l.to.test.select])
 }
