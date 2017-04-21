@@ -49,6 +49,6 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
 
   k.to.test.select = sample.ll(k.split.ll)
   
-  message(date(), "... Cluster", empty.K, "had", z.ta[empty.K], "cells. Splitting Cluster", k.to.test[k.to.test.select], "into two clusters.\n")
+  message(date(), " ... Cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
   return(z.split[,k.to.test.select])
 }
