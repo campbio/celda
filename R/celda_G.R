@@ -174,7 +174,7 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
                        seed=12345, best=TRUE, kick=TRUE) {
   
   set.seed(seed)
-  cat(date(), "... Starting Gibbs sampling\n")
+  message(date(), " ... Starting Gibbs sampling")
 
   y <- sample(1:L, nrow(counts), replace=TRUE)
   y.all <- y
@@ -243,7 +243,7 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
     }
     ll <- c(ll, temp.ll)
     
-    cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
+    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
 
     iter <- iter + 1    
   }

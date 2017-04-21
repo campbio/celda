@@ -63,7 +63,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
   }  
   
   set.seed(seed)
-  cat(date(), "... Starting Gibbs sampling\n")
+  message(date(), " ... Starting Gibbs sampling")
   
   z = sample(1:K, ncol(counts), replace=TRUE)
   z.all = z
@@ -132,7 +132,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
     }
     ll = c(ll, temp.ll)
     
-    cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
+    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
     
     iter = iter + 1    
   }

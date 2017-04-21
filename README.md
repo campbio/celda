@@ -1,5 +1,3 @@
-# celda
-
 # celda: CELlular Latent Dirichlet Allocation
 
 Description
@@ -17,5 +15,7 @@ An analysis example using celda with RNASeq via vignette('celda-analysis')
 
 ## Installation Instructions
 
+```
 library(devtools)
 install_github("definitelysean/celda")
+```
