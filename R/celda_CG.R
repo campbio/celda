@@ -221,7 +221,7 @@ cCG.generateCells = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=100
 celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=1, max.iter=25, min.cell=5, seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
   set.seed(seed)
   
-  cat(date(), "... Starting Gibbs sampling\n")
+  message(date(), "... Starting Gibbs sampling\n")
   
   if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
@@ -363,7 +363,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     }
     ll = c(ll, temp.ll)
     
-    cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
+    message(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
     iter = iter + 1    
   }
   
@@ -395,7 +395,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
 
 cCG.kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, alpha, beta, gamma, delta) {
   require(cluster)
-  cat(date(), "... Cluster", k.to.kick, "has fewer than", min.cell, "cells. Performing kick by ")
+  message(date(), "... Cluster", k.to.kick, "has fewer than", min.cell, "cells. Performing kick by ")
   
   counts.norm = sweep(counts, 2, colSums(counts), "/")
   z.kick = matrix(z, ncol=length(k.to.test), nrow=length(z))
@@ -440,7 +440,7 @@ cCG.kick.z = function(counts, s, z, y, K, L, k.to.kick, k.to.test, min.cell=5, a
   
   k.to.test.select = sample.ll(k.kick.ll)
   
-  cat("splitting Cluster", k.to.test[k.to.test.select], "\n")
+  message("splitting Cluster", k.to.test[k.to.test.select], "\n")
   return(z.kick[,k.to.test.select])
 }
 

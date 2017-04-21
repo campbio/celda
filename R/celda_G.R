@@ -133,7 +133,7 @@ geneCluster = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5,
                        seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
   
   set.seed(seed)
-  cat(date(), "... Starting Gibbs sampling\n")
+  message(date(), "... Starting Gibbs sampling\n")
   
   co <- counts
 
@@ -162,7 +162,7 @@ geneCluster = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5,
     temp.ll <- calcLL_gene_clustering(counts=co, z=z, k=k, alpha=a, beta=b, gamma=g)
     ll <- c(ll, temp.ll)
     
-    cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
+    message(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
     
     ## Normalize Z probabilties and test for convergence
     z.probs <- exp(sweep(z.probs, 1, apply(z.probs, 1, max), "-"))
@@ -173,7 +173,7 @@ geneCluster = function(counts, k, a=1, b=1, g=1, max.iter=25,  min.cell=5,
 #    if(z.probs.second < converge & (min(z.ta) >= min.cell | kick==FALSE)) {
     if(z.probs.second < converge) {    
       continue <- FALSE
-      cat("Maximum probability of a cell changing its state is ",  z.probs.second, 
+      message("Maximum probability of a cell changing its state is ",  z.probs.second, 
           ". Exiting at iteration ", iter, ".", sep="")
     }
     
