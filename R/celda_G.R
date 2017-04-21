@@ -258,8 +258,9 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
     ll.final <- tail(ll, n=1)
   }
   
-  return(list(y=y.final, complete.y=y.all, completeLogLik=ll, 
-              finalLogLik=ll.final, y.probability=y.probs))
+  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
+              finalLogLik=ll.final, z.probability=z.probs,
+              seed=seed))
 }
 
 
