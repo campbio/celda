@@ -73,8 +73,9 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
   ## Calculate counts one time up front
   m.CP.by.S = table(factor(z, levels=1:K), s)
   n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
-
-  ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, alpha=alpha, beta=beta)
+  nS = length(unique(s))
+  
+  ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
 
   iter = 1
   continue = TRUE
@@ -107,7 +108,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
         
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, nS=nS, alpha=alpha, beta=beta)
         
         ## Re-calculate variables
         m.CP.by.S = table(factor(z, levels=1:K), s)
@@ -126,7 +127,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
     z.stability = c(z.stability, stability(z.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, alpha=alpha, beta=beta)
+    temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
     }
@@ -195,11 +196,9 @@ cC.calcLLFromVariables = function(counts, s, z, K, alpha, beta) {
   return(final)
 }
 
-cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, alpha, beta) {
+cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   
   ## Calculate for "Theta" component
-  nS = length(unique(s))
-  
   a = nS * lgamma(K * alpha)
   b = sum(lgamma(m.CP.by.S + alpha))
   c = -nS * K * lgamma(alpha)
