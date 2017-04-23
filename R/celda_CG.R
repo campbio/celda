@@ -215,7 +215,7 @@ simulateCells.celdaCG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G
 celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=1, max.iter=25, min.cell=5, seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
   set.seed(seed)
   
-  cat(date(), "... Starting Gibbs sampling\n")
+  message(date(), " ... Starting Gibbs sampling")
   
   if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
@@ -345,7 +345,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     }
     ll = c(ll, temp.ll)
     
-    cat(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, "\n")
+    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
     iter = iter + 1    
   }
   
@@ -373,7 +373,3 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
               completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
               seed=seed))
 }
-
-
-
-
