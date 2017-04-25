@@ -70,21 +70,32 @@ cG.calcLLFromVariables = function(counts, y, L, beta, gamma, delta) {
   
   psi.ll <- a + b + c + d
 
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+  #a <- lgamma(L * gamma)
+  #b <- sum(lgamma(nG.by.TS + gamma))
+  #c <- -L * lgamma(gamma)
+  #d <- -sum(lgamma(sum(nG.by.TS + gamma)))
   
-  eta.ll <- a + b + c + d
+  #eta.ll <- a + b + c + d
 
-  final <- phi.ll + psi.ll + eta.ll
+#  final <- phi.ll + psi.ll + eta.ll
+  final <- phi.ll + psi.ll
   return(final)
 }
 
 
 cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamma, delta) {
-  #n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  #y.ta = table(y, levels=1:L)
+  if(sum(nG.by.TS > 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    L = length(ind)
+    n.TS.by.C = n.TS.by.C[ind,]
+    n.by.TS = n.by.TS[ind]
+    #nG.by.TS = nG.by.TS[ind]
+  }
+
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
   b <- sum(lgamma(n.TS.by.C + beta))
@@ -102,14 +113,15 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamm
   psi.ll <- a + b + c + d
   
   ## Calculate for "Eta" component
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+  #a <- lgamma(L * gamma)
+  #b <- sum(lgamma(nG.by.TS + gamma))
+  #c <- -L * lgamma(gamma)
+  #d <- -sum(lgamma(sum(nG.by.TS + gamma)))
   
-  eta.ll <- a + b + c + d
+  #eta.ll <- a + b + c + d
   
-  final <- phi.ll + psi.ll + eta.ll
+  #final <- phi.ll + psi.ll + eta.ll
+  final <- phi.ll + psi.ll  
   return(final)
 }
 
@@ -131,9 +143,21 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamm
 #' @keywords log likelihood
 #' @examples TODO
 cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, delta, gamma) {
-  
+ 
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  #y.ta = table(y, levels=1:L)
+  if(sum(nG.by.TS == 0) > 0) {
+    print(nG.by.TS)
+    ind = which(nG.by.TS > 0)
+    L = length(ind)
+    n.TS.by.C = n.TS.by.C[ind,]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
+ 
   ## Calculate for "Eta" component
-  eta.ll <- log(nG.in.Y + gamma)
+  #eta.ll <- log(nG.in.Y + gamma)
   
   ## Calculate for "Phi" component
   b <- sum(lgamma(n.TS.by.C + beta))
@@ -145,7 +169,8 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, del
   d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   psi.ll <- a + d
   
-  final <- eta.ll + phi.ll + psi.ll
+  #final <- eta.ll + phi.ll + psi.ll
+  final <- phi.ll + psi.ll
   return(final)
 }
 
@@ -258,8 +283,8 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
     ll.final <- tail(ll, n=1)
   }
   
-  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs,
+  return(list(y=y.final, complete.y=y.all, completeLogLik=ll, 
+              finalLogLik=ll.final, y.probability=y.probs,
               seed=seed))
 }
 
