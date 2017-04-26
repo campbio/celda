@@ -141,7 +141,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 
 
 #' @export
-simulateCells.celdaCG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
+simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
   
   set.seed(seed)
 
@@ -273,37 +273,45 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.it
     n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
     ix = sample(1:nrow(counts))
     for(i in ix) {
-      if(sum(y == y[i]) > 1) {
         
-        ## Subtract current gene counts from matrices
-        nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
-        n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
-        n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-        
-        probs = rep(NA, L)
-        for(j in 1:L) {
-          ## Add in counts to each state and determine probability
-          temp.n.CP.by.TS = n.CP.by.TS
-          temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
-          temp.n.by.TS = n.by.TS
-          temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-          temp.nG.by.TS = nG.by.TS
-          temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
-          
-          probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, delta=delta)
-        }  
+	  ## Subtract current gene counts from matrices
+	  nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	  n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
+	  n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	 
+	  probs = rep(NA, L)
+	  for(j in 1:L) {
+		## Add in counts to each state and determine probability
+		temp.n.CP.by.TS = n.CP.by.TS
+		temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
+		temp.n.by.TS = n.by.TS
+		temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+		temp.nG.by.TS = nG.by.TS
+		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+	   
+		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, delta=delta)
+	  }  
 
-        ## Sample next state and add back counts
-        y[i] = sample.ll(probs)
-        nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-        n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
-        n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+	  ## Sample next state and add back counts
+	  previous.y = y
+	  y[i] = sample.ll(probs)
+	  nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+	  n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
+      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+ 
+      ## Perform check for empty clusters; Do not allow on last iteration
+      if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
         
+        ## Split another cluster into two
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cCG.calcLLFromVariables", K=K, alpha=alpha, beta=beta, delta=delta)
         
-      } else {
-        probs = rep(0, L)
-        probs[y[i]] = 1
+        ## Re-calculate variables
+        n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+        n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+        n.by.TS = as.numeric(rowsum(n.by.G, y))
+        nG.by.TS = table(y)
       }
+       
       y.probs[i,] = probs
     }
     
