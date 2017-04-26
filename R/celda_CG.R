@@ -32,7 +32,7 @@
 
 
 #' @export
-cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
+cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, delta) {
   
   ## Calculate for "Theta" component
   m = table(z, s)
@@ -69,21 +69,12 @@ cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, de
   d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll = a + b + c + d
-  
-  
-  ## Calculate for "Eta" side
-  a = lgamma(L * gamma)
-  b = sum(lgamma(nG.by.TS + gamma))
-  c = -L * lgamma(gamma)
-  d = -lgamma(sum(nG.by.TS + gamma))
-  
-  eta.ll = a + b + c + d
-  
-  final = theta.ll + phi.ll + psi.ll + eta.ll
+    
+  final = theta.ll + phi.ll + psi.ll
   return(final)
 }
 
-cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, gamma, delta) {
+cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta) {
   
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
@@ -109,17 +100,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
   d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll = a + b + c + d
-  
-  
-  ## Calculate for "Eta" side
-  a = lgamma(L*gamma)
-  b = sum(lgamma(nG.by.TS + gamma))
-  c = -L*lgamma(gamma)
-  d = -lgamma(sum(nG.by.TS + gamma))
-  
-  eta.ll = a + b + c + d
-  
-  final = theta.ll + phi.ll + psi.ll + eta.ll
+    
+  final = theta.ll + phi.ll + psi.ll
   return(final)
 }
 
@@ -139,7 +121,7 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, gamma, delta) {
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta) {
   
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
@@ -153,10 +135,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, gamm
   
   psi.ll = a + d
   
-  ## Calculate for "Eta" side
-  eta.ll = log(nG.in.Y + gamma)
-  
-  final = phi.ll + psi.ll + eta.ll
+  final = phi.ll + psi.ll 
   return(final)
 }
 
@@ -212,7 +191,7 @@ simulateCells.celdaCG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G
 
 
 #' @export
-celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=1, max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
+celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
   set.seed(seed)
   
   message(date(), " ... Starting Gibbs sampling")
@@ -246,7 +225,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
   nG = nrow(counts)
   nM = ncol(counts)
   
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta)
   
   iter = 1
   continue = TRUE
@@ -280,7 +259,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
       
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1, gamma=1)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1)
         
         ## Re-calculate variables
         m.CP.by.S = table(factor(z, levels=1:K), s)
@@ -311,7 +290,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
           temp.nG.by.TS = nG.by.TS
           temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
           
-          probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, gamma=gamma, delta=delta)
+          probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, delta=delta)
         }  
 
         ## Sample next state and add back counts
@@ -332,7 +311,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits) {
 
       message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
-      z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, gamma=gamma, delta=delta, beta=beta, s=s, LLFunction="cCG.calcLLFromVariables")
+      z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, s=s, LLFunction="cCG.calcLLFromVariables")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -353,7 +332,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     y.stability = c(y.stability, stability(y.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
