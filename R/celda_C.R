@@ -52,8 +52,8 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 }
 
 #' @export
-celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.cell=5, 
-                   seed=12345, best=TRUE, kick=TRUE) {
+celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, 
+                   seed=12345, best=TRUE, split.on.iter=3, num.splits=3) {
   
   if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
@@ -79,6 +79,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
 
   iter = 1
   continue = TRUE
+  num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
 
@@ -108,7 +109,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
         
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, nS=nS, alpha=alpha, beta=beta)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
         
         ## Re-calculate variables
         m.CP.by.S = table(factor(z, levels=1:K), s)
@@ -118,6 +119,17 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
       z.probs[i,] = probs
     }  
     
+    ## Perform split if on i-th iteration defined by split.on.iter
+    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
+
+      message(date(), " ... Determining if any clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")")
+      z = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="cC.calcLLFromVariables")
+      num.of.splits.occurred = num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      m.CP.by.S = table(factor(z, levels=1:K), s)
+      n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+    }
 
     ## Save history
     z.all = cbind(z.all, z)
