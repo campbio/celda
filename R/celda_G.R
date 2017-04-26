@@ -79,11 +79,12 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
   
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
-  if(sum(nG.by.TS > 0) > 0) {
+  if(sum(nG.by.TS == 0) > 0) {
     ind = which(nG.by.TS > 0)
     L = length(ind)
     n.TS.by.C = n.TS.by.C[ind,]
     n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
   }
 
   ## Calculate for "Phi" component
@@ -91,7 +92,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
   b <- sum(lgamma(n.TS.by.C + beta))
   c <- -nM * L * lgamma(beta)
   d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
-  
+
   phi.ll <- a + b + c + d
 
   ## Calculate for "Psi" component
@@ -101,7 +102,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
   d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll <- a + b + c + d
-  
+
   final <- phi.ll + psi.ll  
   return(final)
 }
@@ -127,7 +128,6 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, del
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
   if(sum(nG.by.TS == 0) > 0) {
-    print(nG.by.TS)
     ind = which(nG.by.TS > 0)
     L = length(ind)
     n.TS.by.C = n.TS.by.C[ind,]
@@ -242,7 +242,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
       y.probs.final = y.probs
     }
     ll <- c(ll, temp.ll)
-    
+
     message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
 
     iter <- iter + 1    
