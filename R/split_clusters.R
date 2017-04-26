@@ -30,7 +30,7 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
 
   k.to.test.select = sample.ll(k.split.ll)
   
-  message(date(), " ... Cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
+  message(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
   return(z.split[,k.to.test.select])
 }
 
@@ -88,7 +88,7 @@ split.each.z = function(counts, z, K, min.cell=3, LLFunction, ...) {
   if(select == 1) {
     message(date(), " ... No additional splitting was performed.") 
   } else {
-    message(date(), " ... Cluster ", pairs[select,1], " was randomly redistributed and cluster ", pairs[select,2], " was split in two.")
+    message(date(), " ... Cell cluster ", pairs[select,1], " was randomly redistributed and cluster ", pairs[select,2], " was split in two.")
   } 
   
   return(z.split[,select])
@@ -130,7 +130,7 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
  
   l.to.test.select = sample.ll(l.split.ll)
   
-  message(date(), " ... Cluster ", empty.L, " had ", y.ta[empty.L], " genes. Splitting Cluster ", l.to.test[l.to.test.select], " into two clusters.")
+  message(date(), " ... Gene cluster ", empty.L, " had ", y.ta[empty.L], " genes. Splitting Cluster ", l.to.test[l.to.test.select], " into two clusters.")
   return(y.split[,l.to.test.select])
 }
 
