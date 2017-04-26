@@ -16,33 +16,14 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   for(i in 1:length(k.to.test)) {
     
     k.dist = cosineDist(counts.norm[,z == k.to.test[i]])
-    k.pam = cluster::pam(x = k.dist, k=2)$clustering
-    
-    ## If PAM split is too small, perform secondary hclust procedure to split into roughly equal groups
-    if(min(table(k.pam)) < min.cell) {
-      k.hc = hclust(k.dist, method="ward.D")
-      
-      ## Get maximum sample size of each subcluster
-      k.hc.size = sapply(1:length(k.hc$height), function(i) max(table(cutree(k.hc, h=k.hc$height[i]))))
-      
-      ## Find the height of the dendrogram that best splits the samples in "roughly" half
-      sample.size = round(length(k.hc$order)/ 2)
-      k.hc.select = which.min(abs(k.hc.size - sample.size))
-      k.hc.cut = cutree(k.hc, h=k.hc$height[k.hc.select])
-      k.hc.cluster = which.max(table(k.hc.cut))
-      
-      k.hc.final = ifelse(k.hc.cut == k.hc.cluster, k.to.test[i], empty.K)
-      
-      ix = (z == k.to.test[i])
-      z.split[ix,i] = k.hc.final
-      
-    } else {
-      
-      k.pam.final = ifelse(k.pam == 1, k.to.test[i], empty.K)
-      ix = (z == k.to.test[i])
-      z.split[ix,i] = k.pam.final
-      
-    }
+    clustLabel = clusterByHC(k.dist, min=min.cell)
+	clustLabel.final = ifelse(clustLabel == 1, k.to.test[i], empty.K)
+	
+	## Assign new labels to test cluster    
+	ix = (z == k.to.test[i])
+	z.split[ix,i] = clustLabel.final
+
+    ## Calculate likelihood of split
     params = c(list(counts=counts, z=z.split[,i], K=K), list(...))
     k.split.ll[i] = do.call(LLFunction, params)
   }
@@ -52,6 +33,93 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   message(date(), " ... Cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
   return(z.split[,k.to.test.select])
 }
+
+split.each.z = function(counts, z, K, min.cell=3, LLFunction, ...) { 
+  ## Normalize counts to fraction for cosine clustering
+  counts.norm = normalizeCounts(counts, scale.factor=1)
+
+  ## Identify clusters to split
+  z.ta = table(factor(z, levels=1:K))
+  z.to.split = which(z.ta >= min.cell)
+
+  ## Set up variables for holding results with current iteration of z
+  params = c(list(counts=counts, z=z, K=K), list(...))
+  z.split.ll = do.call(LLFunction, params)
+  z.split = z
+
+  ## Loop through each split-able Z and perform split
+  clust.split = list()
+  for(i in z.to.split) {
+    d = cosineDist(counts.norm[,z == i])
+    clustLabel = clusterByHC(d, min=min.cell)
+    clust.split = c(clust.split, list(clustLabel))
+  }
+
+  pairs = c()
+  for(i in 1:K) {
+    z.to.test = setdiff(z.to.split, i)
+    temp.z = z
+
+    ## Randomly assign z labels of current cluster to other clusters
+    ix = z == i
+    temp.z[ix] = sample(1:K, sum(ix), replace=TRUE)
+
+    for(j in z.to.test) {
+      new.z = temp.z
+      ix = z == j
+      new.z[ix] = ifelse(clust.split[[j]] == 1, j, i)
+
+      ## Calculate likelihood of split
+      params = c(list(counts=counts, z=new.z, K=K), list(...))
+      new.ll = do.call(LLFunction, params)
+
+      z.split.ll = c(z.split.ll, new.ll)
+      z.split = cbind(z.split, new.z)
+      
+      pairs = rbind(pairs, c(i, j))
+    }
+  }
+  
+  select = sample.ll(z.split.ll) 
+  
+  if(select == 1) {
+    message(date(), " ... No additional splitting was performed.") 
+  } else {
+    message(date(), " ... Cluster ", pairs[select,1], " was randomly redistributed and cluster ", pairs[select,2], " was split in two.")
+  } 
+  
+  return(z.split[,select])
+}
+
+
+
+clusterByHC = function(d, min=1, method="ward.D") {
+  label = cluster::pam(x = d, k=2)$clustering
+
+  ## If PAM split is too small, perform secondary hclust procedure to split into roughly equal groups
+  if(min(table(label)) < min) {
+	d.hclust = hclust(d, method=method)
+
+	## Get maximum sample size of each subcluster
+	d.hclust.size = sapply(1:length(d.hclust$height), function(i) max(table(cutree(d.hclust, h=d.hclust$height[i]))))
+  
+	## Find the height of the dendrogram that best splits the samples in "roughly" half
+	sample.size = round(length(d.hclust$order)/ 2)
+	d.hclust.select = which.min(abs(d.hclust.size - sample.size))
+	temp = cutree(d.hclust, h=d.hclust$height[d.hclust.select])
+	
+	## Set half of the samples as the largest cluster and the other samples to the other cluster
+	label.max.cluster = which.max(table(temp))
+	label = ifelse(temp == label.max.cluster, 1, 2)
+  } 
+  
+  return(label)
+}
+
+
+
+
+
 
 
 split.y = function(counts, y, empty.L, L, min.gene=2, LLFunction, ...) { 
