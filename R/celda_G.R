@@ -171,7 +171,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, del
 #' @examples TODO
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
-                       seed=12345, best=TRUE, kick=TRUE) {
+                       seed=12345, best=TRUE, y.split.on.iter=3, y.num.splits=3) {
   
   set.seed(seed)
   message(date(), " ... Starting Gibbs sampling")
@@ -193,6 +193,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
   y.probs <- matrix(NA, nrow=nrow(counts), ncol=L)
   iter <- 1
   continue = TRUE
+  y.num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -226,7 +227,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
 	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
 
       ## Perform check for empty clusters; Do not allow on last iteration
-      if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
+      if(sum(y == previous.y[i]) == 0 & iter < max.iter & L > 2) {
         
         ## Split another cluster into two
         y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cG.calcLLFromVariables", beta=beta, delta=delta)
@@ -239,6 +240,19 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
 
       y.probs[i,] <- probs
     }
+
+    ## Perform split if on i-th iteration defined by y.split.on.iter
+    if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
+
+      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, LLFunction="cG.calcLLFromVariables")
+      y.num.of.splits.occurred = y.num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+      n.by.TS = as.numeric(rowsum(n.by.G, y))
+      nG.by.TS = table(y)
+   }
     
     ## Save history
     y.all <- cbind(y.all, y)
