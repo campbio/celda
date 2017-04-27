@@ -8,6 +8,11 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   k.pass.min = which(z.ta >= min.cell)
   k.to.test = setdiff(k.pass.min, empty.K)
 
+  if(length(k.to.test) == 0) {
+    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    break
+  }
+
   ## Set up variables for holding results
   z.split = matrix(z, ncol=K, nrow=length(z))
   k.split.ll = rep(NA, length(k.to.test))
@@ -29,7 +34,7 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   }
 
   k.to.test.select = sample.ll(k.split.ll)
-  
+
   message(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
   return(z.split[,k.to.test.select])
 }
@@ -37,14 +42,19 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
 
 
 
-split.each.z = function(counts, z, K, min.cell=3, LLFunction, ...) { 
+split.each.z = function(counts, z, K, LLFunction, min=3, ...) { 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
-
+  
   ## Identify clusters to split
   z.ta = table(factor(z, levels=1:K))
-  z.to.split = which(z.ta >= min.cell)
+  z.to.split = which(z.ta >= min)
 
+  if(length(z.to.split) == 0) {
+    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    break
+  }
+  
   ## Set up variables for holding results with current iteration of z
   params = c(list(counts=counts, z=z, K=K), list(...))
   z.split.ll = do.call(LLFunction, params)
@@ -52,47 +62,53 @@ split.each.z = function(counts, z, K, min.cell=3, LLFunction, ...) {
 
   ## Loop through each split-able Z and perform split
   clust.split = list()
-  for(i in z.to.split) {
-    d = cosineDist(counts.norm[,z == i])
-    clustLabel = clusterByHC(d, min=min.cell)
-    clust.split = c(clust.split, list(clustLabel))
+  for(i in 1:K) { 
+    if(i %in% z.to.split) {
+      d = cosineDist(counts.norm[,z == i])
+      clustLabel = clusterByHC(d)
+      clust.split = c(clust.split, list(clustLabel))
+    } else {
+      clust.split = c(clust.split, list(NA))
+    }  
   }
 
-  pairs = c()
+  pairs = c(NA, NA, NA)
   for(i in 1:K) {
-    z.to.test = setdiff(z.to.split, i)
-    temp.z = z
+    for(h in setdiff(1:K, i)) {
+      for(j in setdiff(z.to.split, c(i,h))) {
+        new.z = z
+        ix.to.move = z == i
+        ix.to.split = z == j
+        new.z[ix.to.move] = h
+        new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
 
-    ## Randomly assign z labels of current cluster to other clusters
-    ix = z == i
-    temp.z[ix] = sample(1:K, sum(ix), replace=TRUE)
+        ## Calculate likelihood of split
+        params = c(list(counts=counts, z=new.z, K=K), list(...))
+        new.ll = do.call(LLFunction, params)
 
-    for(j in z.to.test) {
-      new.z = temp.z
-      ix = z == j
-      new.z[ix] = ifelse(clust.split[[j]] == 1, j, i)
-
-      ## Calculate likelihood of split
-      params = c(list(counts=counts, z=new.z, K=K), list(...))
-      new.ll = do.call(LLFunction, params)
-
-      z.split.ll = c(z.split.ll, new.ll)
-      z.split = cbind(z.split, new.z)
-      
-      pairs = rbind(pairs, c(i, j))
+        z.split.ll = c(z.split.ll, new.ll)
+        z.split = cbind(z.split, new.z)
+     
+        pairs = rbind(pairs, c(i, j, h))
+      }  
     }
   }
   
   select = sample.ll(z.split.ll) 
-  
+
   if(select == 1) {
     message(date(), " ... No additional splitting was performed.") 
   } else {
-    message(date(), " ... Cell cluster ", pairs[select,1], " was randomly redistributed and cluster ", pairs[select,2], " was split in two.")
+    message(date(), " ... Cluster ", pairs[select,1], " was distributed to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
   } 
   
   return(z.split[,select])
 }
+
+
+
+
+
 
 
 split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) { 
@@ -105,6 +121,11 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
   l.pass.min = which(y.ta >= min.gene)
   l.to.test = setdiff(l.pass.min, empty.L)
   
+  if(length(l.to.test) == 0) {
+    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    break
+  }
+
   ## Set up variables for holding results
   y.split = matrix(y, ncol=L, nrow=length(y))
   l.pass.min = which(y.ta >= min.gene)
@@ -137,9 +158,79 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
 
 
 
+split.each.y = function(counts, y, L, LLFunction, min=3, ...) { 
+  ## Normalize counts to fraction for hierarchical clustering
+  counts.norm = normalizeCounts(counts, scale.factor=1)
+  
+  ## Identify clusters to split
+  y.ta = table(factor(y, levels=1:L))
+  y.to.split = which(y.ta >= min)
+
+  if(length(y.to.split) == 0) {
+    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    break
+  }
+
+  ## Set up variables for holding results with current iteration of y
+  params = c(list(counts=counts, y=y, L=L), list(...))
+  y.split.ll = do.call(LLFunction, params)
+  y.split = y
+
+  ## Loop through each split-able y and perform split
+  clust.split = list()
+  for(i in 1:L) {
+    if(i %in% y.to.split) {    
+      d = spearmanDist(t(counts.norm[y == i,]))
+      clustLabel = clusterByHC(d)
+      clust.split = c(clust.split, list(clustLabel))
+    } else {
+      clust.split = c(clust.split, list(NA))
+    }  
+  }
+
+  pairs = c()
+  for(i in 1:L) {
+    y.to.test = setdiff(y.to.split, i)
+    temp.y = y
+
+    ## Randomly assign y labels of current cluster to other clusters
+    ix = y == i
+    temp.y[ix] = sample(1:L, sum(ix), replace=TRUE)
+
+    for(j in y.to.test) {
+
+      new.y = temp.y
+      ix = y == j
+
+      new.y[ix] = ifelse(clust.split[[j]] == 1, j, i)
+
+      ## Calculate likelihood of split
+      params = c(list(counts=counts, y=new.y, L=L), list(...))
+      new.ll = do.call(LLFunction, params)
+
+      y.split.ll = c(y.split.ll, new.ll)
+      y.split = cbind(y.split, new.y)
+      
+      pairs = rbind(pairs, c(i, j))
+    }
+  }
+  
+  select = sample.ll(y.split.ll) 
+  
+  if(select == 1) {
+    message(date(), " ... No additional splitting was performed.") 
+  } else {
+    message(date(), " ... Cluster ", pairs[select,1], " was randomly redistributed and cluster ", pairs[select,2], " was split in two.")
+  } 
+  
+  return(y.split[,select])
+}
 
 
-clusterByHC = function(d, min=1, method="ward.D") {
+
+
+
+clusterByHC = function(d, min=3, method="ward.D") {
   label = cluster::pam(x = d, k=2)$clustering
 
   ## If PAM split is too small, perform secondary hclust procedure to split into roughly equal groups
