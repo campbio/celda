@@ -121,7 +121,7 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta) {
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, beta, delta) {
   
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
@@ -191,7 +191,9 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
 
 
 #' @export
-celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
+celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
+			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
+			y.split.on.iter=2, y.num.splits=3) {
   set.seed(seed)
   
   message(date(), " ... Starting Gibbs sampling")
@@ -230,6 +232,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.it
   iter = 1
   continue = TRUE
   z.num.of.splits.occurred = 1
+  y.num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -289,7 +292,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.it
 		temp.nG.by.TS = nG.by.TS
 		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 	   
-		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, delta=delta)
+		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, beta=beta, delta=delta)
 	  }  
 
 	  ## Sample next state and add back counts
@@ -316,7 +319,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.it
     }
     
     ## Perform split on i-th iteration defined by z.split.on.iter
-    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits) {
+    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
       message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
       z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, s=s, LLFunction="cCG.calcLLFromVariables")
@@ -328,6 +331,21 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1, max.it
       n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
       n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
     }
+    
+    ## Perform split if on i-th iteration defined by y.split.on.iter
+    if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
+
+      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, s=s, LLFunction="cCG.calcLLFromVariables")
+      y.num.of.splits.occurred = y.num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+      n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+      n.by.TS = as.numeric(rowsum(n.by.G, y))
+      nG.by.TS = table(y)
+   }
+
 
     ## Save Z history
     z.all = cbind(z.all, z)
