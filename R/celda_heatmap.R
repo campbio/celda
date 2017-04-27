@@ -27,17 +27,36 @@ order_index <- function(mat, class.label, col=F) {   # order index : gather in g
 #' @param z A numeric vector of cluster assignments for cell 
 #' @param L Total number of transcriptional states
 #' @param y A numeric vector of cluster assignments for gene
-#' @param scale_type specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed 
+#' @param scale.type specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
+#' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result 
 #' @example TODO
 #' @export 
-celda_heatmap <- function(counts, K, z, L, y, scale_type="row") {
+celda_heatmap <- function(counts, K, z, L, y, scale.type="row", z.trim) {
+  require(gtable)
+  require(grid)
+  require(scales)
+  require(stats)
+  require(RColorBrewer)
+  require(grDevices)
+  require(graphics)
   
   # matrix transformation for heatmap
-  if(scale_type=="log"){
+  if(scale.type=="log"){
     counts <- log(counts+1)
-  }else if(scale_type=="row"){
+  }else if(scale.type=="row"){
     counts <- t(apply(counts, 1, scale, center=T))
-  } # else use the raw matrix 
+    if(!is.null(z.trim)){
+      if(length(z.trim!=2)) {
+        stop("z.trim should be a 2 element vector specifying the lower and upper cutoffs")
+      }
+      counts[counts < z.trim[1]] <- z.trim[1]
+      counts[counts > z.trim[2]] <- z.trim[2]
+    }
+  }else{ # else use the raw matrix 
+    counts <- counts
+  } 
+  
+
   
   # order gene (row) 
   order.gene <- order_index(mat = counts, class.label = y, col = FALSE)
