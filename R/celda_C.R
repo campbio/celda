@@ -106,7 +106,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25,
       n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
       
       ## Perform check for empty clusters; Do not allow on last iteration
-      if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
+      if(sum(z == previous.z[i]) == 0 & iter < max.iter & K > 2) {
         
         ## Split another cluster into two
         z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
@@ -120,9 +120,9 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25,
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
-    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits) {
+    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      message(date(), " ... Determining if any clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")")
+      message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
       z = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="cC.calcLLFromVariables")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
