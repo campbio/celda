@@ -123,13 +123,12 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 #' @keywords log likelihood
 #' @examples TODO
-cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, delta) {
+cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
  
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
   if(sum(nG.by.TS == 0) > 0) {
     ind = which(nG.by.TS > 0)
-    L = length(ind)
     n.TS.by.C = n.TS.by.C[ind,]
     n.by.TS = n.by.TS[ind]
     nG.by.TS = nG.by.TS[ind]
@@ -216,7 +215,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
 		temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
 		temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
 	  
-		probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], beta=beta, delta=delta)
+		probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, beta=beta, delta=delta)
 	  }
 	
 	  ## Sample next state and add back counts
