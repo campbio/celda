@@ -75,6 +75,16 @@ cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, delta) {
 }
 
 cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta) {
+
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  if(sum(nG.by.TS == 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    L = length(ind)
+    n.CP.by.TS = n.CP.by.TS[,ind]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
   
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
@@ -123,6 +133,15 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, alpha, beta) {
 
 cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, beta, delta) {
   
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  if(sum(nG.by.TS == 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    n.CP.by.TS = n.CP.by.TS[,ind]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
+
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
   d = -sum(lgamma(rowSums(n.CP.by.TS + beta)))
@@ -193,7 +212,7 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
 #' @export
 celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
-			y.split.on.iter=2, y.num.splits=3) {
+			y.split.on.iter=3, y.num.splits=3) {
   set.seed(seed)
   
   message(date(), " ... Starting Gibbs sampling")
@@ -306,7 +325,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
       if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
         
         ## Split another cluster into two
-        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cCG.calcLLFromVariables", K=K, alpha=alpha, beta=beta, delta=delta)
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cCG.calcLLFromVariables", z=z, s=s, K=K, alpha=alpha, beta=beta, delta=delta)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
