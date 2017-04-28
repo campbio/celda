@@ -8,10 +8,15 @@ sample.ll = function(ll.probs) {
 
 cosineDist = function(x){
   x <- t(x)
-  y <- (1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2))))/2)
+  y <- (1 - cosine(x)) / 2
   return(as.dist(y))
 }
 
+cosine = function(x) {
+  y = x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2))))
+  return(y)
+}
+  
 spearmanDist = function(x){
   y = (1 - cor(x, method="spearman"))/2
   return(as.dist(y))
