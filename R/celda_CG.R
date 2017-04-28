@@ -210,17 +210,18 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
 
 
 #' @export
-celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
+celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
 			y.split.on.iter=3, y.num.splits=3) {
   set.seed(seed)
   
   message(date(), " ... Starting Gibbs sampling")
   
-  if(is.factor(sample.label)) {
+  if(is.null(sample.label)) {
+    s = rep(1, ncol(counts))
+  } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
-  }
-  else {
+  } else {
     s = as.numeric(as.factor(sample.label))
   }  
   
@@ -236,13 +237,14 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
   
   
   ## Calculate counts one time up front
-  m.CP.by.S = table(factor(z, levels=1:K), s)
+  nS = length(unique(s))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
   n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
   nG.by.TS = table(y)
-  nS = length(unique(s))
+
   nG = nrow(counts)
   nM = ncol(counts)
   
@@ -284,7 +286,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
         z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1)
         
         ## Re-calculate variables
-        m.CP.by.S = table(factor(z, levels=1:K), s)
+        m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
         n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
       }
     
@@ -345,7 +347,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, delta=1,
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
       ## Re-calculate variables
-      m.CP.by.S = table(factor(z, levels=1:K), s)
+      m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
       n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
       n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
       n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
