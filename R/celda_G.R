@@ -278,7 +278,9 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     ll.final <- tail(ll, n=1)
   }
   
-  return(list(y=y.final, complete.y=y.all, completeLogLik=ll, 
+  y.final.order = reorder.label.by.size(y.final, L)
+  
+  return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
               finalLogLik=ll.final, y.probability=y.probs,
               seed=seed))
 }
@@ -307,6 +309,7 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   if(length(table(y)) < L) {
     stop("Some states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
   }
+  y = reorder.label.by.size(y, L)
   
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
