@@ -205,7 +205,9 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
     }  
   }
   
-  return(list(z=z, y=y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
+  new = reorder.labels.by.size.then.counts(cell.counts, z=z, y=y, K=K, L=L)
+  
+  return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
@@ -408,7 +410,10 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     y.probs.final = y.probs
   }
   
-  return(list(z=z.final, y=y.final, complete.z=z.all, complete.y=y.all, 
+  ## Peform reordering
+  new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
+  
+  return(list(z=new$z, y=new$y, complete.z=z.all, complete.y=y.all, 
               z.stability=z.stability.final, y.stability=y.stability.final, 
               complete.z.stability=z.stability, complete.y.stability=y.stability, 
               completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
