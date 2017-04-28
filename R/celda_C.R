@@ -41,7 +41,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   
   ## Select state of the cells  
   cell.state <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
-  cell.state = reorder.label(cell.state, K)
+  cell.state = reorder.label.by.size(cell.state, K)
     
   ## Select number of transcripts per cell
   nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
@@ -164,7 +164,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
     ll.final = tail(ll, n=1)
   }
   
-  z.final.reorder = reorder.label(z, K)
+  z.final.reorder = reorder.label.by.size(z.final, K)
   
   return(list(z=z.final.reorder, complete.z=z.all, completeLogLik=ll, 
               finalLogLik=ll.final, z.probability=z.probs, seed=seed))
@@ -240,12 +240,3 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
 }
 
 
-reorder.label = function(z, K) {
-  z.ta = as.numeric(names(sort(table(factor(z, levels=1:K)), decreasing=TRUE)))
-  
-  new.z = z
-  for(i in 1:length(z.ta)) {
-    new.z[z == z.ta[i]] = i
-  }
-  return(new.z)
-}
