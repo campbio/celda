@@ -55,11 +55,12 @@ split.each.z = function(counts, z, K, LLFunction, min=3, ...) {
     break
   }
   
-  ## Set up variables for holding results with current iteration of z
-  params = c(list(counts=counts, z=z, K=K), list(...))
-  z.split.ll = do.call(LLFunction, params)
-  z.split = z
-
+  ## For each cluster, determine which other cluster is most closely related
+  counts.z.collapse = t(rowsum(t(counts), group=z, reorder=TRUE))
+  counts.z.collapse.norm = normalizeCounts(counts.z.collapse, scale.factor=1)
+  counts.z.cor = cosine(t(counts.z.collapse.norm))
+  diag(counts.z.cor) = 0
+  
   ## Loop through each split-able Z and perform split
   clust.split = list()
   for(i in 1:K) { 
@@ -72,26 +73,35 @@ split.each.z = function(counts, z, K, LLFunction, min=3, ...) {
     }  
   }
 
+  ## Set up variables for holding results with current iteration of z
+  params = c(list(counts=counts, z=z, K=K), list(...))
+  z.split.ll = do.call(LLFunction, params)
+  z.split = z
+
   pairs = c(NA, NA, NA)
   for(i in 1:K) {
-    for(h in setdiff(1:K, i)) {
-      for(j in setdiff(z.to.split, c(i,h))) {
-        new.z = z
-        ix.to.move = z == i
-        ix.to.split = z == j
-        new.z[ix.to.move] = h
-        new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
+	for(j in setdiff(z.to.split, i)) {
+	  new.z = z
+	  
+      ## Assign cluster i to the next most similar cluster (excluding cluster j) 
+      ## as defined above by the spearman correlation      
+      ix.to.move = z == i
+      h = setdiff(order(counts.z.cor[,i], decreasing=TRUE), j)[1]
+      new.z[ix.to.move] = h
+            
+      ## Split cluster j according to the clustering defined above
+      ix.to.split = z == j
+      new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
 
-        ## Calculate likelihood of split
-        params = c(list(counts=counts, z=new.z, K=K), list(...))
-        new.ll = do.call(LLFunction, params)
+	  ## Calculate likelihood of split
+	  params = c(list(counts=counts, z=new.z, K=K), list(...))
+	  new.ll = do.call(LLFunction, params)
 
-        z.split.ll = c(z.split.ll, new.ll)
-        z.split = cbind(z.split, new.z)
-     
-        pairs = rbind(pairs, c(i, j, h))
-      }  
-    }
+	  z.split.ll = c(z.split.ll, new.ll)
+	  z.split = cbind(z.split, new.z)
+   
+	  pairs = rbind(pairs, c(i, j, h))
+	}  
   }
   
   select = sample.ll(z.split.ll) 
@@ -99,7 +109,7 @@ split.each.z = function(counts, z, K, LLFunction, min=3, ...) {
   if(select == 1) {
     message(date(), " ... No additional splitting was performed.") 
   } else {
-    message(date(), " ... Cluster ", pairs[select,1], " was distributed to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
+    message(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
   } 
   
   return(z.split[,select])
@@ -171,12 +181,13 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
     break
   }
 
-  ## Set up variables for holding results with current iteration of y
-  params = c(list(counts=counts, y=y, L=L), list(...))
-  y.split.ll = do.call(LLFunction, params)
-  y.split = y
-
-  ## Loop through each split-able y and perform split
+  ## For each cluster, determine which other cluster is most closely related
+  counts.y.collapse = rowsum(counts, group=y, reorder=TRUE)
+  counts.y.collapse.norm = normalizeCounts(counts.y.collapse, scale.factor=1)
+  counts.y.cor = cor(t(counts.y.collapse.norm), method="spearman")
+  diag(counts.y.cor) = 0
+  
+  ## Loop through each split-able y and find best split
   clust.split = list()
   for(i in 1:L) {
     if(i %in% y.to.split) {    
@@ -188,22 +199,26 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
     }  
   }
 
+  ## Set up variables for holding results with current iteration of y
+  params = c(list(counts=counts, y=y, L=L), list(...))
+  y.split.ll = do.call(LLFunction, params)
+  y.split = y
+
   pairs = c()
   for(i in 1:L) {
-    y.to.test = setdiff(y.to.split, i)
-    temp.y = y
-
-    ## Randomly assign y labels of current cluster to other clusters
-    ix = y == i
-    temp.y[ix] = sample(1:L, sum(ix), replace=TRUE)
-
-    for(j in y.to.test) {
-
-      new.y = temp.y
-      ix = y == j
-
-      new.y[ix] = ifelse(clust.split[[j]] == 1, j, i)
-
+    for(j in setdiff(y.to.split, i)) {
+      new.y = y
+      
+      ## Assign cluster i to the next most similar cluster (excluding cluster j) 
+      ## as defined above by the spearman correlation      
+      ix.to.move = y == i
+      h = setdiff(order(counts.y.cor[,i], decreasing=TRUE), j)[1]
+      new.y[ix.to.move] = h
+            
+      ## Split cluster j according to the clustering defined above
+      ix.to.split = y == j
+      new.y[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
+      
       ## Calculate likelihood of split
       params = c(list(counts=counts, y=new.y, L=L), list(...))
       new.ll = do.call(LLFunction, params)
@@ -211,7 +226,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
       y.split.ll = c(y.split.ll, new.ll)
       y.split = cbind(y.split, new.y)
       
-      pairs = rbind(pairs, c(i, j))
+      pairs = rbind(pairs, c(i, j, h))
     }
   }
   
@@ -220,7 +235,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
   if(select == 1) {
     message(date(), " ... No additional splitting was performed.") 
   } else {
-    message(date(), " ... Cluster ", pairs[select,1], " was randomly redistributed and cluster ", pairs[select,2], " was split in two.")
+    message(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
   } 
   
   return(y.split[,select])
