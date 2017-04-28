@@ -43,3 +43,13 @@ normalizeCounts = function(counts, scale.factor=1e6) {
   return(counts.norm)
 }
   
+  
+reorder.label.by.size = function(z, K) {
+  z.ta = as.numeric(names(sort(table(factor(z, levels=1:K)), decreasing=TRUE)))
+  
+  new.z = z
+  for(i in 1:length(z.ta)) {
+    new.z[z == z.ta[i]] = i
+  }
+  return(new.z)
+}  
