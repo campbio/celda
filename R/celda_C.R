@@ -52,13 +52,14 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 }
 
 #' @export
-celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, 
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
                    seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
   
-  if(is.factor(sample.label)) {
+  if(is.null(sample.label)) {
+    s = rep(1, ncol(counts))
+  } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
-  }
-  else {
+  } else {
     s = as.numeric(as.factor(sample.label))
   }  
   
@@ -71,9 +72,10 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25,
   z.probs = matrix(NA, nrow=ncol(counts), ncol=K)
   
   ## Calculate counts one time up front
-  m.CP.by.S = table(factor(z, levels=1:K), s)
-  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
   nS = length(unique(s))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+
   
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
 
@@ -112,7 +114,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25,
         z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
         
         ## Re-calculate variables
-        m.CP.by.S = table(factor(z, levels=1:K), s)
+        m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
         n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
       }
        
@@ -127,7 +129,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25,
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
       ## Re-calculate variables
-      m.CP.by.S = table(factor(z, levels=1:K), s)
+      m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
       n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
     }
 
