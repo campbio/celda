@@ -4,7 +4,8 @@
 \alias{celda_heatmap}
 \title{plot the heatmap of the counts data}
 \usage{
-celda_heatmap(counts, K, z, L, y, scale.type = "row", z.trim)
+celda_heatmap(counts, K, z, L, y, scale.log = FALSE, scale.row = FALSE,
+  normalize = c("none", "cpm"), z.trim = NULL)
 }
 \arguments{
 \item{counts}{the counts matrix}
@@ -17,9 +18,11 @@ celda_heatmap(counts, K, z, L, y, scale.type = "row", z.trim)
 
 \item{y}{A numeric vector of cluster assignments for gene}
 
-\item{scale.type}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
+\item{scale.log}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
 
-\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result}
+\item{scale.row}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
+
+\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.}
 }
 \description{
 plot the heatmap of the counts data
