@@ -24,3 +24,6 @@ celda_heatmap(counts, K, z, L, y, scale.type = "row", z.trim)
 \description{
 plot the heatmap of the counts data
 }
+\examples{
+
+}

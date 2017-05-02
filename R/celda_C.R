@@ -41,24 +41,28 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   
   ## Select state of the cells  
   cell.state <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
-  
+  cell.state = reorder.label.by.size(cell.state, K)
+    
   ## Select number of transcripts per cell
   nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
   
   ## Select transcript distribution for each cell
   cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
+
+  
   return(list(z=cell.state, counts=cell.counts, sample=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
 #' @export
-celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.cell=5, 
-                   seed=12345, best=TRUE, kick=TRUE) {
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
+                   seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
   
-  if(is.factor(sample.label)) {
+  if(is.null(sample.label)) {
+    s = rep(1, ncol(counts))
+  } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
-  }
-  else {
+  } else {
     s = as.numeric(as.factor(sample.label))
   }  
   
@@ -71,13 +75,16 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
   z.probs = matrix(NA, nrow=ncol(counts), ncol=K)
   
   ## Calculate counts one time up front
-  m.CP.by.S = table(factor(z, levels=1:K), s)
+  nS = length(unique(s))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
   n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
 
-  ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, alpha=alpha, beta=beta)
+  
+  ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
 
   iter = 1
   continue = TRUE
+  z.num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
 
@@ -104,19 +111,30 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
       n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
       
       ## Perform check for empty clusters; Do not allow on last iteration
-      if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
+      if(sum(z == previous.z[i]) == 0 & iter < max.iter & K > 2) {
         
         ## Split another cluster into two
         z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
         
         ## Re-calculate variables
-        m.CP.by.S = table(factor(z, levels=1:K), s)
+        m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
         n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
       }
        
       z.probs[i,] = probs
     }  
     
+    ## Perform split if on i-th iteration defined by split.on.iter
+    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
+
+      message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
+      z = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="cC.calcLLFromVariables")
+      z.num.of.splits.occurred = z.num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+      n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+    }
 
     ## Save history
     z.all = cbind(z.all, z)
@@ -126,7 +144,7 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
     z.stability = c(z.stability, stability(z.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, alpha=alpha, beta=beta)
+    temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
     }
@@ -146,7 +164,9 @@ celda_C = function(counts, sample.label, K, alpha=1, beta=1, max.iter=25, min.ce
     ll.final = tail(ll, n=1)
   }
   
-  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
+  z.final.reorder = reorder.label.by.size(z.final, K)
+  
+  return(list(z=z.final.reorder, complete.z=z.all, completeLogLik=ll, 
               finalLogLik=ll.final, z.probability=z.probs, seed=seed))
 }
 
@@ -195,11 +215,9 @@ cC.calcLLFromVariables = function(counts, s, z, K, alpha, beta) {
   return(final)
 }
 
-cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, alpha, beta) {
+cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   
   ## Calculate for "Theta" component
-  nS = length(unique(s))
-  
   a = nS * lgamma(K * alpha)
   b = sum(lgamma(m.CP.by.S + alpha))
   c = -nS * K * lgamma(alpha)
@@ -220,4 +238,5 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, alpha, beta) {
   final = theta.ll + phi.ll
   return(final)
 }
+
 
