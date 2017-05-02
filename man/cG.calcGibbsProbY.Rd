@@ -4,12 +4,10 @@
 \alias{cG.calcGibbsProbY}
 \title{Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)}
 \usage{
-cG.calcGibbsProbY(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, delta, gamma)
+cG.calcGibbsProbY(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta)
 }
 \arguments{
 \item{beta}{Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution}
-
-\item{gamma}{The number of cell states ("topics")}
 
 \item{ix}{The index of the cell being assigned a cluster during the current iteration of Gibbs sampling}
 
