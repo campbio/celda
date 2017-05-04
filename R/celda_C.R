@@ -167,7 +167,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   z.final.reorder = reorder.label.by.size(z.final, K)
   
   return(list(z=z.final.reorder, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs, seed=seed))
+              finalLogLik=ll.final, z.probability=z.probs, K=K, alpha=alpha, beta=beta, seed=seed))
 }
 
 

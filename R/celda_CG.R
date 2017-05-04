@@ -417,5 +417,5 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
               z.stability=z.stability.final, y.stability=y.stability.final, 
               complete.z.stability=z.stability, complete.y.stability=y.stability, 
               completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
-              seed=seed))
+              K=K, L=L, alpha=alpha, beta=beta, delta=delta, seed=seed))
 }
