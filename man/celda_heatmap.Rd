@@ -4,26 +4,29 @@
 \alias{celda_heatmap}
 \title{plot the heatmap of the counts data}
 \usage{
-celda_heatmap(counts, K, z, L, y, scale.type = "row", z.trim)
+celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
+  scale.row = TRUE, scale_function = scale, normalize = "none",
+  z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE)
 }
 \arguments{
 \item{counts}{the counts matrix}
 
-\item{K}{The number of clusters being considered  (Question1)or: Total number of cell populations??}
-
 \item{z}{A numeric vector of cluster assignments for cell}
-
-\item{L}{Total number of transcriptional states}
 
 \item{y}{A numeric vector of cluster assignments for gene}
 
-\item{scale.type}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
+\item{scale.log}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
 
-\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result}
+\item{scale.row}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
+
+\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.}
+
+\item{cluster.row}{boolean values determining if rows should be clustered}
+
+\item{cluster.column}{boolean values determining if columns should be clustered}
+
+\item{scale_fun}{specify the function for scaling}
 }
 \description{
 plot the heatmap of the counts data
-}
-\examples{
-
 }

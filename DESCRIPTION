@@ -18,7 +18,8 @@ Imports:
     stats,
     grDevices,
     graphics,
-    Rmpfr
+    Rmpfr,
+    gplots
 Suggests:
     testthat,
     knitr,
