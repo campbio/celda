@@ -45,7 +45,7 @@
 #' @keywords log likelihood
 #' @examples TODO
 #' @export
-cG.calcLLFromVariables = function(counts, y, L, beta, gamma, delta) {
+cG.calcLLFromVariables = function(counts, y, L, beta, delta) {
   n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
   nM <- ncol(n.TS.by.C)
@@ -70,27 +70,29 @@ cG.calcLLFromVariables = function(counts, y, L, beta, gamma, delta) {
   
   psi.ll <- a + b + c + d
 
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-  
-  eta.ll <- a + b + c + d
-
-  final <- phi.ll + psi.ll + eta.ll
+  final <- phi.ll + psi.ll
   return(final)
 }
 
 
-cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamma, delta) {
-  #n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
+cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta) {
   
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  if(sum(nG.by.TS == 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    L = length(ind)
+    n.TS.by.C = n.TS.by.C[ind,]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
+
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
   b <- sum(lgamma(n.TS.by.C + beta))
   c <- -nM * L * lgamma(beta)
   d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
-  
+
   phi.ll <- a + b + c + d
 
   ## Calculate for "Psi" component
@@ -100,16 +102,8 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamm
   d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll <- a + b + c + d
-  
-  ## Calculate for "Eta" component
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-  
-  eta.ll <- a + b + c + d
-  
-  final <- phi.ll + psi.ll + eta.ll
+
+  final <- phi.ll + psi.ll  
   return(final)
 }
 
@@ -127,14 +121,19 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, gamm
 #' @param k The number of clusters being considered
 #' @param alpha Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution
 #' @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
-#' @param gamma The number of cell states ("topics")
 #' @keywords log likelihood
 #' @examples TODO
-cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, delta, gamma) {
-  
-  ## Calculate for "Eta" component
-  eta.ll <- log(nG.in.Y + gamma)
-  
+cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
+ 
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  if(sum(nG.by.TS == 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    n.TS.by.C = n.TS.by.C[ind,]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
+ 
   ## Calculate for "Phi" component
   b <- sum(lgamma(n.TS.by.C + beta))
   d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
@@ -145,7 +144,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, del
   d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   psi.ll <- a + d
   
-  final <- eta.ll + phi.ll + psi.ll
+  final <- phi.ll + psi.ll
   return(final)
 }
 
@@ -170,8 +169,8 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, L, beta, del
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
-celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
-                       seed=12345, best=TRUE, kick=TRUE) {
+celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
+                       seed=12345, best=TRUE, y.split.on.iter=3, y.num.splits=3) {
   
   set.seed(seed)
   message(date(), " ... Starting Gibbs sampling")
@@ -188,61 +187,82 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
   nG = nrow(counts)
   
   ## Calculate initial log likelihood
-  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta)
   
   y.probs <- matrix(NA, nrow=nrow(counts), ncol=L)
   iter <- 1
   continue = TRUE
+  y.num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
     ix <- sample(1:nrow(counts))
     for(i in ix) {
-      
-      if(sum(y == y[i]) > 1) {
         
-        ## Subtract current gene counts from matrices
-        nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
-        n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-        n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
-    
-        ## Calculate probabilities for each state
-        probs = rep(NA, L)
-        for(j in 1:L) {
-          temp.nG.by.TS = nG.by.TS
-          temp.n.by.TS = n.by.TS
-          temp.n.TS.by.C = n.TS.by.C
-          
-          temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
-          temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-          temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
-          
-          probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], beta=beta, delta=delta, gamma=gamma)
-        }
+	  ## Subtract current gene counts from matrices
+	  nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	  n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+
+	  ## Calculate probabilities for each state
+	  probs = rep(NA, L)
+	  for(j in 1:L) {
+		temp.nG.by.TS = nG.by.TS
+		temp.n.by.TS = n.by.TS
+		temp.n.TS.by.C = n.TS.by.C
+	  
+		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+		temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+		temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
+	  
+		probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, beta=beta, delta=delta)
+	  }
+	
+	  ## Sample next state and add back counts
+	  previous.y = y
+	  y[i] <- sample.ll(probs)
+	  nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+	  n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+
+      ## Perform check for empty clusters; Do not allow on last iteration
+      if(sum(y == previous.y[i]) == 0 & iter < max.iter & L > 2) {
         
-        ## Sample next state and add back counts
-        y[i] <- sample.ll(probs)
-        nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-        n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-        n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+        ## Split another cluster into two
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cG.calcLLFromVariables", beta=beta, delta=delta)
         
-      } else {
-        probs = rep(0, L)
-        probs[y[i]] = 1
+        ## Re-calculate variables
+        n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+        n.by.TS = as.numeric(rowsum(n.by.G, y))
+        nG.by.TS = table(y)
       }
+
       y.probs[i,] <- probs
     }
+
+    ## Perform split if on i-th iteration defined by y.split.on.iter
+    if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
+
+      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, LLFunction="cG.calcLLFromVariables")
+      y.num.of.splits.occurred = y.num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+      n.by.TS = as.numeric(rowsum(n.by.G, y))
+      nG.by.TS = table(y)
+   }
     
     ## Save history
     y.all <- cbind(y.all, y)
     
     ## Calculate complete likelihood
-    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       y.probs.final = y.probs
     }
     ll <- c(ll, temp.ll)
-    
+
     message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
 
     iter <- iter + 1    
@@ -258,8 +278,10 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
     ll.final <- tail(ll, n=1)
   }
   
-  return(list(z=z.final, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs,
+  y.final.order = reorder.label.by.size(y.final, L)
+  
+  return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
+              finalLogLik=ll.final, y.probability=y.probs,
               seed=seed))
 }
 
@@ -274,8 +296,7 @@ celda_G = function(counts, L, beta=1, gamma=1, delta=1, max.iter=25,
 #' @param N.Range The range of counts each gene should have
 #' @param G The number of genes for which to simulate counts
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param seed Parameter to set.seed() for random number generation
 #' @examples TODO
 #' @export
@@ -288,6 +309,7 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   if(length(table(y)) < L) {
     stop("Some states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
   }
+  y = reorder.label.by.size(y, L)
   
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {

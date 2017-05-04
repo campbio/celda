@@ -4,8 +4,8 @@
 \alias{celda_G}
 \title{Cluster Genes from Single Cell Sequencing Data}
 \usage{
-celda_G(counts, L, beta = 1, gamma = 1, delta = 1, max.iter = 25,
-  seed = 12345, best = TRUE, kick = TRUE)
+celda_G(counts, L, beta = 1, delta = 1, max.iter = 25, seed = 12345,
+  best = TRUE, y.split.on.iter = 3, y.num.splits = 3)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -16,8 +16,6 @@ celda_G(counts, L, beta = 1, gamma = 1, delta = 1, max.iter = 25,
 
 \item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.}
 
-\item{kick}{Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)}
-
 \item{k}{The number of clusters to generate}
 
 \item{a}{Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution}
@@ -27,6 +25,8 @@ celda_G(counts, L, beta = 1, gamma = 1, delta = 1, max.iter = 25,
 \item{g}{Number of cell states ("topics")}
 
 \item{min.cell}{Desired minimum number of cells per cluster}
+
+\item{kick}{Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)}
 
 \item{converge}{Threshold at which to consider the Markov chain converged}
 }

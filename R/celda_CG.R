@@ -32,7 +32,7 @@
 
 
 #' @export
-cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, delta) {
+cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, delta) {
   
   ## Calculate for "Theta" component
   m = table(z, s)
@@ -69,21 +69,22 @@ cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, gamma, de
   d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll = a + b + c + d
-  
-  
-  ## Calculate for "Eta" side
-  a = lgamma(L * gamma)
-  b = sum(lgamma(nG.by.TS + gamma))
-  c = -L * lgamma(gamma)
-  d = -lgamma(sum(nG.by.TS + gamma))
-  
-  eta.ll = a + b + c + d
-  
-  final = theta.ll + phi.ll + psi.ll + eta.ll
+    
+  final = theta.ll + phi.ll + psi.ll
   return(final)
 }
 
-cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, gamma, delta) {
+cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta) {
+
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  if(sum(nG.by.TS == 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    L = length(ind)
+    n.CP.by.TS = n.CP.by.TS[,ind]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
   
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
@@ -109,17 +110,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
   d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   
   psi.ll = a + b + c + d
-  
-  
-  ## Calculate for "Eta" side
-  a = lgamma(L*gamma)
-  b = sum(lgamma(nG.by.TS + gamma))
-  c = -L*lgamma(gamma)
-  d = -lgamma(sum(nG.by.TS + gamma))
-  
-  eta.ll = a + b + c + d
-  
-  final = theta.ll + phi.ll + psi.ll + eta.ll
+    
+  final = theta.ll + phi.ll + psi.ll
   return(final)
 }
 
@@ -139,8 +131,17 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, gamma, delta) {
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, beta, delta) {
   
+  ## Determine if any TS has 0 genes
+  ## Need to remove 0 gene states as this will cause the likelihood to fail
+  if(sum(nG.by.TS == 0) > 0) {
+    ind = which(nG.by.TS > 0)
+    n.CP.by.TS = n.CP.by.TS[,ind]
+    n.by.TS = n.by.TS[ind]
+    nG.by.TS = nG.by.TS[ind]
+  }
+
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
   d = -sum(lgamma(rowSums(n.CP.by.TS + beta)))
@@ -153,16 +154,13 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, gamm
   
   psi.ll = a + d
   
-  ## Calculate for "Eta" side
-  eta.ll = log(nG.in.Y + gamma)
-  
-  final = phi.ll + psi.ll + eta.ll
+  final = phi.ll + psi.ll 
   return(final)
 }
 
 
 #' @export
-simulateCells.celdaCG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
+simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
   
   set.seed(seed)
 
@@ -207,20 +205,25 @@ simulateCells.celdaCG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G
     }  
   }
   
-  return(list(z=z, y=y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
+  new = reorder.labels.by.size.then.counts(cell.counts, z=z, y=y, K=K, L=L)
+  
+  return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
 #' @export
-celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=1, max.iter=25, min.cell=5, seed=12345, best=TRUE, kick=TRUE, converge=1e-5) {
+celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
+			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
+			y.split.on.iter=3, y.num.splits=3) {
   set.seed(seed)
   
   message(date(), " ... Starting Gibbs sampling")
   
-  if(is.factor(sample.label)) {
+  if(is.null(sample.label)) {
+    s = rep(1, ncol(counts))
+  } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
-  }
-  else {
+  } else {
     s = as.numeric(as.factor(sample.label))
   }  
   
@@ -236,20 +239,23 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
   
   
   ## Calculate counts one time up front
-  m.CP.by.S = table(factor(z, levels=1:K), s)
+  nS = length(unique(s))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
   n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
   nG.by.TS = table(y)
-  nS = length(unique(s))
+
   nG = nrow(counts)
   nM = ncol(counts)
   
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta)
   
   iter = 1
   continue = TRUE
+  z.num.of.splits.occurred = 1
+  y.num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -268,7 +274,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
         temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
         probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, alpha=alpha, beta=beta)
       }  
-      
+    
       ## Sample next state and add back counts
       previous.z = z
       z[i] = sample.ll(probs)
@@ -277,12 +283,12 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
       
       ## Perform check for empty clusters; Do not allow on last iteration
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
-        
+      
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1, gamma=1)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1)
         
         ## Re-calculate variables
-        m.CP.by.S = table(factor(z, levels=1:K), s)
+        m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
         n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
       }
     
@@ -293,40 +299,77 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
     ix = sample(1:nrow(counts))
     for(i in ix) {
-      if(sum(y == y[i]) > 1) {
         
-        ## Subtract current gene counts from matrices
-        nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
-        n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
-        n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	  ## Subtract current gene counts from matrices
+	  nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	  n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
+	  n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	 
+	  probs = rep(NA, L)
+	  for(j in 1:L) {
+		## Add in counts to each state and determine probability
+		temp.n.CP.by.TS = n.CP.by.TS
+		temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
+		temp.n.by.TS = n.by.TS
+		temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+		temp.nG.by.TS = nG.by.TS
+		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+	   
+		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, beta=beta, delta=delta)
+	  }  
+
+	  ## Sample next state and add back counts
+	  previous.y = y
+	  y[i] = sample.ll(probs)
+	  nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+	  n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
+      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+ 
+      ## Perform check for empty clusters; Do not allow on last iteration
+      if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
         
-        probs = rep(NA, L)
-        for(j in 1:L) {
-          ## Add in counts to each state and determine probability
-          temp.n.CP.by.TS = n.CP.by.TS
-          temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
-          temp.n.by.TS = n.by.TS
-          temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-          temp.nG.by.TS = nG.by.TS
-          temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
-          
-          probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=nG.by.TS[j], beta=beta, gamma=gamma, delta=delta)
-        }  
+        ## Split another cluster into two
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cCG.calcLLFromVariables", z=z, s=s, K=K, alpha=alpha, beta=beta, delta=delta)
         
-        ## Sample next state and add back counts
-        y[i] = sample.ll(probs)
-        nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-        n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
-        n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-        
-        
-      } else {
-        probs = rep(0, L)
-        probs[y[i]] = 1
+        ## Re-calculate variables
+        n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+        n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+        n.by.TS = as.numeric(rowsum(n.by.G, y))
+        nG.by.TS = table(y)
       }
+       
       y.probs[i,] = probs
     }
     
+    ## Perform split on i-th iteration defined by z.split.on.iter
+    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
+
+      message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
+      z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, s=s, LLFunction="cCG.calcLLFromVariables")
+      z.num.of.splits.occurred = z.num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+      n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+      n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
+    }
+    
+    ## Perform split if on i-th iteration defined by y.split.on.iter
+    if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
+
+      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, s=s, LLFunction="cCG.calcLLFromVariables")
+      y.num.of.splits.occurred = y.num.of.splits.occurred + 1
+
+      ## Re-calculate variables
+      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+      n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+      n.by.TS = as.numeric(rowsum(n.by.G, y))
+      nG.by.TS = table(y)
+   }
+
+
     ## Save Z history
     z.all = cbind(z.all, z)
     y.all = cbind(y.all, y)
@@ -338,7 +381,7 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     y.stability = c(y.stability, stability(y.probs))
 
     ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, gamma=gamma, delta=delta)
+    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
@@ -367,7 +410,10 @@ celda_CG = function(counts, sample.label, K, L, alpha=1, beta=1, gamma=1, delta=
     y.probs.final = y.probs
   }
   
-  return(list(z=z.final, y=y.final, complete.z=z.all, complete.y=y.all, 
+  ## Peform reordering
+  new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
+  
+  return(list(z=new$z, y=new$y, complete.z=z.all, complete.y=y.all, 
               z.stability=z.stability.final, y.stability=y.stability.final, 
               complete.z.stability=z.stability, complete.y.stability=y.stability, 
               completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,

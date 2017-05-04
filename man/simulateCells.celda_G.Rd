@@ -18,9 +18,7 @@ simulateCells.celda_G(C = 100, N.Range = c(500, 5000), G = 1000, L = 5,
 
 \item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
-
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
+\item{delta}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
 
 \item{seed}{Parameter to set.seed() for random number generation}
 }

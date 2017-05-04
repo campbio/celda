@@ -4,7 +4,7 @@
 \alias{cG.calcLLFromVariables}
 \title{Calculate Log Likelihood For A Set of Gene Clusterings (Gene Clustering)}
 \usage{
-cG.calcLLFromVariables(counts, y, L, beta, gamma, delta)
+cG.calcLLFromVariables(counts, y, L, beta, delta)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -15,9 +15,9 @@ cG.calcLLFromVariables(counts, y, L, beta, gamma, delta)
 
 \item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
-
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
+
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
 }
 \description{
 This function calculates the log likelihood of each clustering of genes generated
