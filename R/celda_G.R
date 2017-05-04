@@ -282,7 +282,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
   
   return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
               finalLogLik=ll.final, y.probability=y.probs,
-              seed=seed))
+              seed=seed, L=L))
 }
 
 
