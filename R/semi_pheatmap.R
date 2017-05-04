@@ -559,7 +559,7 @@ cluster_mat <- function(mat, labels, distance, method){
   cum.hclust <- list()
   
   if(nGroup==1){  # matrix has only 1 group 
-    if(length(class.label)==1){
+    if(length(labels)==1){
       stop("only one row/column for the matrix")
     }
     group.hclust <-  hclust(dis(mat = mat, distance = distance), method = method) 
