@@ -79,9 +79,6 @@ celda_heatmap <- function(counts, z=NULL, y=NULL,
   require(grDevices)
   require(graphics)
   
-  if(length(z.trim)!=2) {
-    stop("z.trim should be a 2 element vector specifying the lower and upper cutoffs")
-  }
   
   if(normalize =="cpm"){
     counts <- cpm(counts)
@@ -96,6 +93,9 @@ celda_heatmap <- function(counts, z=NULL, y=NULL,
     counts <- t(apply(counts, 1, scale_function))
     
     if(!is.null(z.trim)){
+      if(length(z.trim)!=2) {
+        stop("z.trim should be a 2 element vector specifying the lower and upper cutoffs")
+      }
       z.trim<-sort(z.trim)
       counts[counts < z.trim[1]] <- z.trim[1]
       counts[counts > z.trim[2]] <- z.trim[2]
