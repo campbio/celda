@@ -417,5 +417,76 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
               z.stability=z.stability.final, y.stability=y.stability.final, 
               complete.z.stability=z.stability, complete.y.stability=y.stability, 
               completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
-              seed=seed))
+              K=K, L=L, alpha=alpha, beta=beta, delta=delta, seed=seed))
 }
+
+
+
+
+#' @export
+factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+
+  K = celda.obj$K
+  L = celda.obj$L
+  z = celda.obj$z
+  y = celda.obj$y
+  alpha = celda.obj$alpha
+  beta = celda.obj$beta
+  delta = celda.obj$delta
+  
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+  
+  nS = length(unique(sample.label))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+
+  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+  for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
+
+  L.names = paste0("L", 1:L)
+  K.names = paste0("K", 1:K)
+  colnames(n.TS.by.C) = colnames(counts)
+  rownames(n.TS.by.C) = L.names
+  colnames(n.G.by.TS) = L.names
+  rownames(n.G.by.TS) = rownames(counts)
+  rownames(m.CP.by.S) = K.names
+  colnames(m.CP.by.S) = colnames(counts)
+  colnames(n.CP.by.TS) = L.names
+  rownames(n.CP.by.TS) = K.names
+    
+  if(any("counts" %in% type)) {
+    counts.list = list(sample.states = m.CP.by.S,
+    				   population.states = n.CP.by.TS, 
+    				   cell.states = n.TS.by.C,
+    				   gene.states = n.G.by.TS)
+    res = c(res, list(counts=counts.list))
+  }
+  if(any("proportion" %in% type)) {
+    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
+    				   population.states = normalizeCounts(n.CP.by.TS, scale.factor=1), 
+    				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
+    				   gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
+    res = c(res, list(proportions=prop.list))
+  }
+  if(any("posterior" %in% type)) {
+    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
+    				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
+    				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+    res = c(res, posterior = list(post.list))						    
+  }
+  
+  return(res)
+}
+
+

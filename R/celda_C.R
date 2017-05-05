@@ -167,7 +167,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   z.final.reorder = reorder.label.by.size(z.final, K)
   
   return(list(z=z.final.reorder, complete.z=z.all, completeLogLik=ll, 
-              finalLogLik=ll.final, z.probability=z.probs, seed=seed, K=K))
+              finalLogLik=ll.final, z.probability=z.probs, K=K, alpha=alpha, beta=beta, seed=seed))
 }
 
 
@@ -238,3 +238,47 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   final = theta.ll + phi.ll
   return(final)
 }
+
+
+
+#' @export
+factorizeMatrix.celda_C = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+
+  K = celda.obj$K
+  z = celda.obj$z
+  alpha = celda.obj$alpha
+  beta = celda.obj$beta
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+  
+  nS = length(unique(sample.label))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
+  n.G.by.CP = t(rowsum(t(counts), group=z, reorder=TRUE))
+
+  K.names = paste0("K", 1:K)
+  rownames(n.G.by.CP) = rownames(counts)
+  colnames(n.G.by.CP) = K.names
+  rownames(m.CP.by.S) = K.names
+  colnames(m.CP.by.S) = colnames(counts)
+  
+  if(any("counts" %in% type)) {
+    counts.list = list(sample.states=m.CP.by.S, gene.states=n.G.by.CP)
+    res = c(res, list(counts=counts.list))
+  }
+  if(any("proportion" %in% type)) {
+    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
+    							  gene.states = normalizeCounts(n.G.by.CP, scale.factor=1))
+    res = c(res, list(proportions=prop.list))
+  }
+  if(any("posterior" %in% type)) {
+    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
+    						    gene.states = normalizeCounts(n.G.by.CP + beta, scale.factor=1))
+    res = c(res, posterior = list(post.list))						    
+  }
+  
+  return(res)
+}
+
