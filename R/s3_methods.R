@@ -56,7 +56,7 @@ completeLogLikelihood = function(celda.res) {
 #'
 #' @param celda.res A result object returned from celda()
 #' @export
-finalLogLiklihood = function(celda.res) {
+finalLogLikelihood = function(celda.res) {
   final.log.lik = sapply(celda.res$res.list,
                          function(chain) { chain$finalLogLik })
   return(final.log.lik)
@@ -78,7 +78,7 @@ finalClusterAssignment = function(celda.res) {
 #'
 #' @param celda.res A result object returned from celda()
 #' @export
-completeClusterHistory.celda_G = function(celda.res) {
+completeClusterHistory = function(celda.res) {
   UseMethod("completeClusterHistory", celda.res)
 }
 
@@ -113,6 +113,7 @@ chainLs = function(celda.res) {
 ################################################################################
 # celda_C                                                                      #
 ################################################################################
+#' @export
 finalClusterAssignment.celda_C = function(celda.res) {
   final.assignments = sapply(celda.res$res.list, 
                              function(chain) { chain$z })
@@ -120,6 +121,7 @@ finalClusterAssignment.celda_C = function(celda.res) {
 }
 
 
+#' @export
 completeClusterHistory.celda_C = function(celda.res) {
   complete.history = sapply(celda.res$res.list, 
                             function(chain) { chain$complete.z })
@@ -127,6 +129,7 @@ completeClusterHistory.celda_C = function(celda.res) {
 }
 
 
+#' @export
 clusterProbabilities.celda_C = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$z.probability })
@@ -134,6 +137,7 @@ clusterProbabilities.celda_C = function(celda.res) {
 }
 
 
+#' @export
 chainKs.celda_C = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$K })
@@ -141,6 +145,7 @@ chainKs.celda_C = function(celda.res) {
 }
 
 
+#' @export
 chainLs.celda_C = function(celda.res) { return(NA) }
 
 
@@ -148,6 +153,7 @@ chainLs.celda_C = function(celda.res) { return(NA) }
 ################################################################################
 # celda_G                                                                      #
 ################################################################################
+#' @export
 finalClusterAssignment.celda_G = function(celda.res) {
   final.assignments = sapply(celda.res$res.list, 
                              function(chain) { chain$y})
@@ -155,6 +161,7 @@ finalClusterAssignment.celda_G = function(celda.res) {
 }
 
 
+#' @export
 completeClusterHistory.celda_G = function(celda.res) {
   complete.history = sapply(celda.res$res.list, 
                             function(chain) { chain$complete.y })
@@ -162,6 +169,7 @@ completeClusterHistory.celda_G = function(celda.res) {
 }
 
 
+#' @export
 clusterProbabilities.celda_G = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$y.probability })
@@ -169,9 +177,11 @@ clusterProbabilities.celda_G = function(celda.res) {
 }
 
 
+#' @export
 chainKs.celda_G = function(celda.res) { return(NA) }
 
 
+#' @export
 chainLs.celda_G = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$L })
@@ -183,6 +193,7 @@ chainLs.celda_G = function(celda.res) {
 ################################################################################
 # celda_CG                                                                      #
 ################################################################################
+#' @export
 finalClusterAssignment.celda_CG = function(celda.res) {
   z.assignments = sapply(celda.res$res.list, function(chain) { chain$z })
   y.assignments = sapply(celda.res$res.list, function(chain) { chain$y })
@@ -190,6 +201,7 @@ finalClusterAssignment.celda_CG = function(celda.res) {
 }
 
 
+#' @export
 completeClusterHistory.celda_CG = function(celda.res) {
   complete.z = sapply(celda.res$res.list, function(chain) { chain$complete.z })
   complete.y = sapply(celda.res$res.list, function(chain) { chain$complete.y })
@@ -197,6 +209,7 @@ completeClusterHistory.celda_CG = function(celda.res) {
 }
 
 
+#' @export
 clusterProbabilities.celda_CG = function(celda.res) {
   z.prob = sapply(celda.res$res.list, function(chain) { chain$z.prob })
   y.prob = sapply(celda.res$res.list, function(chain) { chain$y.prob })
@@ -204,6 +217,7 @@ clusterProbabilities.celda_CG = function(celda.res) {
 }
 
 
+#' @export
 chainKs.celda_CG = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$K })
@@ -211,6 +225,7 @@ chainKs.celda_CG = function(celda.res) {
 }
 
 
+#' @export
 chainLs.celda_CG = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$L })

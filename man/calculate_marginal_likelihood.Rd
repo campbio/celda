@@ -19,3 +19,4 @@ Calculate the marginal likelihood from a single celda chain.
 Marginal likelihood is estimated as the harmonic mean of the 
 (non-log) likelihood over all iterations of Gibbs sampling.
 }
+
