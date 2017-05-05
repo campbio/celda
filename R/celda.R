@@ -16,5 +16,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
     return(list(res))
   }  
   
-  return(list(run.params=runs, res.list=res.list))
+  celda.res = list(run.params=runs, res.list=res.list)
+  class(celda.res) = model
+  return(celda.res)
 }
