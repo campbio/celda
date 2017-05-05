@@ -51,8 +51,8 @@ robust_scale <- function(x){
   madx<-ifelse(mad(x)==0,1,mad(x))
   median(x)/mad(x)
 }
-##ToDo:  Need to (1)  cluster by group(row/col label)
-##       (2) within each group(row/col label) --> hierarchical clustering 
+
+
 #' plot the heatmap of the counts data
 #' @param counts the counts matrix 
 #' @param z A numeric vector of cluster assignments for cell 
@@ -154,7 +154,6 @@ celda_heatmap <- function(counts, z=NULL, y=NULL,
                          annotation_col = annotation_cell,
                          row_label = y,
                          col_label = z,
-                         scale = "none" , 
                          clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
     )
   }

@@ -12,4 +12,3 @@ chainKs(celda.res)
 \description{
 Get the K value used for each chain in a celda run.
 }
-
