@@ -12,4 +12,3 @@ runParams(celda.res)
 \description{
 Get run parameters for a celda run.
 }
-

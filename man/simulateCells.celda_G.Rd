@@ -29,4 +29,3 @@ parameters can be provided by the user.
 \examples{
 TODO
 }
-
