@@ -12,3 +12,4 @@ clusterProbabilities(celda.res)
 \description{
 Get the probability of the cluster assignments generated during a celda run.
 }
+

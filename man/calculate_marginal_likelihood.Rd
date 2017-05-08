@@ -6,10 +6,12 @@
 Marginal likelihood is estimated as the harmonic mean of the 
 (non-log) likelihood over all iterations of Gibbs sampling.}
 \usage{
-calculate_marginal_likelihood(completeLogLik)
+calculate_marginal_likelihood(completeLogLik, burn.length = NA)
 }
 \arguments{
 \item{completeLogLik}{The complete Gibbs sampling history of log-likelihoods for a single celda chain}
+
+\item{burn.length}{The number of leading iterations from completeLogLik to ignore (as burn-in iterations)}
 }
 \value{
 The estimated marginal likelihood
@@ -19,3 +21,4 @@ Calculate the marginal likelihood from a single celda chain.
 Marginal likelihood is estimated as the harmonic mean of the 
 (non-log) likelihood over all iterations of Gibbs sampling.
 }
+

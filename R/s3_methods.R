@@ -108,6 +108,25 @@ chainKs = function(celda.res) {
 chainLs = function(celda.res) {
   UseMethod("chainLs", celda.res)
 }
+
+
+#' Render a stylable heatmap of count data based on celda clustering results.
+#'
+#' @param celda.res A result object returned from celda()
+#' plot the heatmap of the counts data
+#' @param counts the counts matrix 
+#' @param z A numeric vector of cluster assignments for cell. Resolved automatically from celda object when available.
+#' @param y A numeric vector of cluster assignments for gene. Resolved automatically from celda object when available.
+#' @param scale.log specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
+#' @param scale.row specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
+#' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.
+#' @param scale_fun specify the function for scaling 
+#' @param cluster.row boolean values determining if rows should be clustered
+#' @param cluster.column boolean values determining if columns should be clustered
+#' @export 
+celda_heatmap <- function(celda.res, counts, ...) {
+  UseMethod("celda_heatmap", celda.res)
+}
  
 
 ################################################################################
@@ -149,6 +168,12 @@ chainKs.celda_C = function(celda.res) {
 chainLs.celda_C = function(celda.res) { return(NA) }
 
 
+#' @export
+celda_heatmap.celda_C = function(celda.res, counts, ...) {
+  render_celda_heatmap(counts, z=celda.res$z, ...)
+}
+
+
 
 ################################################################################
 # celda_G                                                                      #
@@ -186,6 +211,12 @@ chainLs.celda_G = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$L })
   return(cluster.probs)
+}
+
+
+#' @export
+celda_heatmap.celda_G = function(celda.res, counts, ...) {
+  render_celda_heatmap(counts, y=celda.res$y, ...)
 }
 
 
@@ -230,4 +261,10 @@ chainLs.celda_CG = function(celda.res) {
   cluster.probs = sapply(celda.res$res.list,
                          function(chain) { chain$L })
   return(cluster.probs)
+}
+
+
+#' @export
+celda_heatmap.celda_CG = function(celda.res, counts, ...) {
+  render_celda_heatmap(counts, z=celda.res$z, y=celda.res$y, ...)
 }

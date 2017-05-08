@@ -12,3 +12,4 @@ chainLs(celda.res)
 \description{
 Get the L value used for each chain in a celda run.
 }
+

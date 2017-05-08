@@ -65,12 +65,11 @@ robust_scale <- function(x){
 #' @param cluster.column boolean values determining if columns should be clustered
 #' @example TODO
 #' @export 
-celda_heatmap <- function(counts, z=NULL, y=NULL, 
-                          scale.log=FALSE, scale.row=TRUE,
-                          scale_function=scale, normalize = "none",
-                          z.trim=c(-2,2), 
-                          cluster.row=TRUE, cluster.column = TRUE
-                          ) {
+render_celda_heatmap <- function(counts, z=NULL, y=NULL, 
+                                 scale.log=FALSE, scale.row=TRUE,
+                                 scale_function=scale, normalize = "none",
+                                 z.trim=c(-2,2), 
+                                 cluster.row=TRUE, cluster.column = TRUE) {
   require(gtable)
   require(grid)
   require(scales)
@@ -191,8 +190,4 @@ celda_heatmap <- function(counts, z=NULL, y=NULL,
                            clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
       )
       }
-    
-  
-
-
 }
