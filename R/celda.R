@@ -1,6 +1,21 @@
+available_models = c("celda_C", "celda_G", "celda_CG")
+
+
+#' Run the celda Bayesian hierarchical model on a matrix of counts.
+#' 
+#' @param counts A count matrix
+#' @param model Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)
+#' @param sample.label A numeric vector indicating the sample for each cell (column) in the count matrix
+#' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters
+#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
+#' @param L An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)
+#' @param cores The number of cores to use to speed up Gibbs sampling
+#' @param seed The base seed for random number generation. Each chain celda runs with have a seed index off of this one.
 #' @import foreach
 #' @export
 celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, ...) {
+  validate_args(counts, model, sample.label, nchains, cores, seed)
+  
   cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
@@ -20,3 +35,37 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   class(celda.res) = model
   return(celda.res)
 }
+
+
+#' Sanity check arguments to celda() to ensure a smooth run.
+validate_args = function(counts, model, sample.label, nchains, cores, seed) {
+  validate_counts(counts)
+  
+  if (!(model %in% available_models)) stop("Unavailable model specified")
+      
+  if (!is.null(sample.label)) {
+    if (!is.numeric(sample.label)) stop("Invalid sample.label; parameter should be a numeric vector")
+    if (ncol(counts) != length(sample.label)) stop("Length of sample.label does not match number of columns (cells) in counts matrix") 
+  }    
+  
+  if (!is.numeric(nchains) | length(nchains) > 1 | nchains == 0) stop("Invalid nchains specified")
+  
+  if (!is.numeric(cores) | length(cores) > 1 | cores == 0) stop("Invalid cores specified")
+  if (!is.numeric(seed) | length(seed) > 1) stop("Invalid seed specified")
+}
+    
+    
+#' Perform some simple checks on the counts matrix, to ensure celda won't choke.
+#' Currently only checks that none of the rows or columns in the count matrix are all 0.
+validate_counts = function(counts) {
+  count.row.sum = rowSums(counts)
+  count.col.sum = colSums(counts)
+  
+  if (sum(count.row.sum == 0) > 1 | sum(count.col.sum == 0) > 1) {
+    stop("Each row and column of the count matrix must have at least one count")
+  }
+}
+
+
+
+
