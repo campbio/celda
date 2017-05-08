@@ -160,7 +160,9 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, beta, delta) {
 
 
 #' @export
-simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
+simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
+                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
+                                  delta=1, seed=12345, ...) {
   
   set.seed(seed)
 

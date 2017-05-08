@@ -5,7 +5,8 @@
 \title{Cluster Genes from Single Cell Sequencing Data}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, max.iter = 25, seed = 12345,
-  best = TRUE, y.split.on.iter = 3, y.num.splits = 3, sample.label = NA)
+  best = TRUE, y.split.on.iter = 3, y.num.splits = 3, sample.label = NA,
+  ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}

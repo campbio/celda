@@ -56,7 +56,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
-                   seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
+                   seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3, ...) {
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
