@@ -275,4 +275,3 @@ pheatmap(test, clustering_callback = callback)
 \author{
 Raivo Kolde <rkolde@gmail.com>
 }
-

@@ -14,4 +14,3 @@ completeClusterHistory(celda.res)
 Get the complete history of gene / cell / gene & cell cluster assignments 
 generated during a celda run, dependent on the model provided.
 }
-

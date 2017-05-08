@@ -12,4 +12,3 @@ chainSeeds(celda.res)
 \description{
 Get seeds for all chains from a celda run.
 }
-

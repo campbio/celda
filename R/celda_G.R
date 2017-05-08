@@ -282,8 +282,8 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
   y.final.order = reorder.label.by.size(y.final, L)
   
   return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-              finalLogLik=ll.final, y.probability=y.probs,
-              seed=seed, L=L))
+              finalLogLik=ll.final, y.probability=y.probs, L=L, beta=beta, delta=delta,
+              seed=seed))
 }
 
 
@@ -334,4 +334,55 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
 
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
+
+
+
+
+
+
+#' @export
+factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
+
+  L = celda.obj$L
+  y = celda.obj$y
+  beta = celda.obj$beta
+  delta = celda.obj$delta
+  
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+  
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+
+  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+  for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
+
+  L.names = paste0("L", 1:L)
+  colnames(n.TS.by.C) = colnames(counts)
+  rownames(n.TS.by.C) = L.names
+  colnames(n.G.by.TS) = L.names
+  rownames(n.G.by.TS) = rownames(counts)
+  
+  if(any("counts" %in% type)) {
+    counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS)
+    res = c(res, list(counts=counts.list))
+  }
+  if(any("proportion" %in% type)) {
+    prop.list = list(cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
+    							  gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
+    res = c(res, list(proportions=prop.list))
+  }
+  if(any("posterior" %in% type)) {
+    post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
+    						    gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+    res = c(res, posterior = list(post.list))						    
+  }
+  
+  return(res)
+}
+
+
 
