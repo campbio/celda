@@ -171,7 +171,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
                    seed=12345, best=TRUE, y.split.on.iter=3, 
-                   y.num.splits=3, sample.label=NA, ...) {
+                   y.num.splits=3, ...) {
   
   set.seed(seed)
   message(date(), " ... Starting Gibbs sampling")
