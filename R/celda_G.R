@@ -166,15 +166,16 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
 #' @param kick Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)
 #' @param converge Threshold at which to consider the Markov chain converged
+#' @param thread The thread index, used for logging purposes
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
                    seed=12345, best=TRUE, y.split.on.iter=3, 
-                   y.num.splits=3, ...) {
+                   y.num.splits=3, thread=1, ...) {
   
   set.seed(seed)
-  message(date(), " ... Starting Gibbs sampling")
+  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
 
   y <- sample(1:L, nrow(counts), replace=TRUE)
   y.all <- y
@@ -244,7 +245,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
       y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, LLFunction="cG.calcLLFromVariables")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
@@ -264,7 +265,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     }
     ll <- c(ll, temp.ll)
 
-    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    message("Thread ", thread, " ", date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
 
     iter <- iter + 1    
   }

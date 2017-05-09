@@ -216,10 +216,10 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
-			y.split.on.iter=3, y.num.splits=3) {
+			y.split.on.iter=3, y.num.splits=3, thread=1, ...) {
   set.seed(seed)
   
-  message(date(), " ... Starting Gibbs sampling")
+  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -346,7 +346,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     ## Perform split on i-th iteration defined by z.split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
       z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, s=s, LLFunction="cCG.calcLLFromVariables")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
@@ -360,7 +360,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
       y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, s=s, LLFunction="cCG.calcLLFromVariables")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
@@ -390,7 +390,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     }
     ll = c(ll, temp.ll)
     
-    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    message("Thread ", thread, " ", date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
     iter = iter + 1    
   }
   

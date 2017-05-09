@@ -14,4 +14,3 @@ finalLogLikelihood(celda.res)
 Get the log likelihood from the final iteration of Gibbs sampling
 for each chain generated during a celda run.
 }
-

@@ -11,23 +11,30 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param L An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)
 #' @param cores The number of cores to use to speed up Gibbs sampling
 #' @param seed The base seed for random number generation. Each chain celda runs with have a seed index off of this one.
+#' @param verbose Print messages during celda chain execution
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, ...) {
+  message("Starting celda...")
   validate_args(counts, model, sample.label, nchains, cores, seed)
   
-  cl = parallel::makeCluster(cores)
+  # Redirect stderr from the worker threads if user asks for verbose
+  cl = if (verbose) parallel::makeCluster(cores, outfile="") else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
   runs = expand.grid(chain=1:nchains, ...)
-  print(runs)  # TODO Toggle based on log level
+  if (verbose) print(runs)
   
   all.seeds = seed:(seed + nchains - 1)
   
   res.list = foreach(i = 1:nrow(runs), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     chain.seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
-    res = do.call(model, c(list(counts=counts, sample.label=sample.label, seed=chain.seed), c(runs[i,-1])))
-    all = list(runs[i,], res)
+    
+    if (verbose) {
+      res = do.call(model, c(list(counts=counts, sample.label=sample.label, seed=chain.seed, thread=i), c(runs[i,-1])))
+    } else {
+      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, seed=chain.seed, thread=i), c(runs[i,-1]))))
+    }
     return(list(res))
   }  
   parallel::stopCluster(cl)

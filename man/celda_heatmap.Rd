@@ -31,4 +31,3 @@ plot the heatmap of the counts data}
 \description{
 Render a stylable heatmap of count data based on celda clustering results.
 }
-

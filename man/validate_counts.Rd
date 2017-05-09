@@ -2,13 +2,10 @@
 % Please edit documentation in R/celda.R
 \name{validate_counts}
 \alias{validate_counts}
-\title{Perform some simple checks on the counts matrix, to ensure celda won't choke.
-Currently only checks that none of the rows or columns in the count matrix are all 0.}
+\title{Perform some simple checks on the counts matrix, to ensure celda won't choke.}
 \usage{
 validate_counts(counts)
 }
 \description{
 Perform some simple checks on the counts matrix, to ensure celda won't choke.
-Currently only checks that none of the rows or columns in the count matrix are all 0.
 }
-

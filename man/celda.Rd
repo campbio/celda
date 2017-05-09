@@ -5,7 +5,7 @@
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
 celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
-  seed = 12345, ...)
+  seed = 12345, verbose = F, ...)
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -20,6 +20,8 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 
 \item{seed}{The base seed for random number generation. Each chain celda runs with have a seed index off of this one.}
 
+\item{verbose}{Print messages during celda chain execution}
+
 \item{K}{An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)}
 
 \item{L}{An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)}
@@ -27,4 +29,3 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 \description{
 Run the celda Bayesian hierarchical model on a matrix of counts.
 }
-
