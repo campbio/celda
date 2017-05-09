@@ -56,8 +56,11 @@ validate_args = function(counts, model, sample.label, nchains, cores, seed) {
     
     
 #' Perform some simple checks on the counts matrix, to ensure celda won't choke.
-#' Currently only checks that none of the rows or columns in the count matrix are all 0.
 validate_counts = function(counts) {
+  # counts has to be a matrix...
+  if (class(counts) != matrix) stop("counts argument must be of class 'matrix'")
+  
+  # And each row/column of the count matrix must have at least one count
   count.row.sum = rowSums(counts)
   count.col.sum = colSums(counts)
   
