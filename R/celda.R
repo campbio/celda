@@ -30,6 +30,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
     all = list(runs[i,], res)
     return(list(res))
   }  
+  parallel::stopCluster(cl)
   
   celda.res = list(run.params=runs, res.list=res.list)
   class(celda.res) = model
