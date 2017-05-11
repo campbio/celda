@@ -166,15 +166,16 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
 #' @param kick Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)
 #' @param converge Threshold at which to consider the Markov chain converged
+#' @param thread The thread index, used for logging purposes
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
-                       seed=12345, best=TRUE, y.split.on.iter=3, y.num.splits=3,
-                   sample.label=NA) {
+                   seed=12345, best=TRUE, y.split.on.iter=3, 
+                   y.num.splits=3, thread=1, ...) {
   
   set.seed(seed)
-  message(date(), " ... Starting Gibbs sampling")
+  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
 
   y <- sample(1:L, nrow(counts), replace=TRUE)
   y.all <- y
@@ -244,7 +245,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
       y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, LLFunction="cG.calcLLFromVariables")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
@@ -264,7 +265,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     }
     ll <- c(ll, temp.ll)
 
-    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    message("Thread ", thread, " ", date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
 
     iter <- iter + 1    
   }
@@ -282,8 +283,8 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
   y.final.order = reorder.label.by.size(y.final, L)
   
   return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-              finalLogLik=ll.final, y.probability=y.probs,
-              seed=seed, L=L))
+              finalLogLik=ll.final, y.probability=y.probs, L=L, beta=beta, delta=delta,
+              seed=seed))
 }
 
 
@@ -334,4 +335,55 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
 
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
+
+
+
+
+
+
+#' @export
+factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
+
+  L = celda.obj$L
+  y = celda.obj$y
+  beta = celda.obj$beta
+  delta = celda.obj$delta
+  
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+  
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+
+  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+  for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
+
+  L.names = paste0("L", 1:L)
+  colnames(n.TS.by.C) = colnames(counts)
+  rownames(n.TS.by.C) = L.names
+  colnames(n.G.by.TS) = L.names
+  rownames(n.G.by.TS) = rownames(counts)
+  
+  if(any("counts" %in% type)) {
+    counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS)
+    res = c(res, list(counts=counts.list))
+  }
+  if(any("proportion" %in% type)) {
+    prop.list = list(cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
+    							  gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
+    res = c(res, list(proportions=prop.list))
+  }
+  if(any("posterior" %in% type)) {
+    post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
+    						    gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+    res = c(res, posterior = list(post.list))						    
+  }
+  
+  return(res)
+}
+
+
 

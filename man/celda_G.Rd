@@ -5,7 +5,7 @@
 \title{Cluster Genes from Single Cell Sequencing Data}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, max.iter = 25, seed = 12345,
-  best = TRUE, y.split.on.iter = 3, y.num.splits = 3, sample.label = NA)
+  best = TRUE, y.split.on.iter = 3, y.num.splits = 3, thread = 1, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -15,6 +15,8 @@ celda_G(counts, L, beta = 1, delta = 1, max.iter = 25, seed = 12345,
 \item{seed}{Parameter to set.seed() for random number generation}
 
 \item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.}
+
+\item{thread}{The thread index, used for logging purposes}
 
 \item{k}{The number of clusters to generate}
 

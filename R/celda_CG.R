@@ -160,7 +160,9 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, beta, delta) {
 
 
 #' @export
-simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, delta=1, seed=12345) {
+simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
+                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
+                                  delta=1, seed=12345, ...) {
   
   set.seed(seed)
 
@@ -214,10 +216,10 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
-			y.split.on.iter=3, y.num.splits=3) {
+			y.split.on.iter=3, y.num.splits=3, thread=1, ...) {
   set.seed(seed)
   
-  message(date(), " ... Starting Gibbs sampling")
+  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -344,7 +346,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     ## Perform split on i-th iteration defined by z.split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
       z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, s=s, LLFunction="cCG.calcLLFromVariables")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
@@ -358,7 +360,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      message(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
       y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, s=s, LLFunction="cCG.calcLLFromVariables")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
@@ -388,7 +390,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
     }
     ll = c(ll, temp.ll)
     
-    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    message("Thread ", thread, " ", date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
     iter = iter + 1    
   }
   
@@ -417,5 +419,76 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1,
               z.stability=z.stability.final, y.stability=y.stability.final, 
               complete.z.stability=z.stability, complete.y.stability=y.stability, 
               completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
-              seed=seed))
+              K=K, L=L, alpha=alpha, beta=beta, delta=delta, seed=seed))
 }
+
+
+
+
+#' @export
+factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+
+  K = celda.obj$K
+  L = celda.obj$L
+  z = celda.obj$z
+  y = celda.obj$y
+  alpha = celda.obj$alpha
+  beta = celda.obj$beta
+  delta = celda.obj$delta
+  
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+  
+  nS = length(unique(sample.label))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+
+  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+  for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
+
+  L.names = paste0("L", 1:L)
+  K.names = paste0("K", 1:K)
+  colnames(n.TS.by.C) = colnames(counts)
+  rownames(n.TS.by.C) = L.names
+  colnames(n.G.by.TS) = L.names
+  rownames(n.G.by.TS) = rownames(counts)
+  rownames(m.CP.by.S) = K.names
+  colnames(m.CP.by.S) = colnames(counts)
+  colnames(n.CP.by.TS) = L.names
+  rownames(n.CP.by.TS) = K.names
+    
+  if(any("counts" %in% type)) {
+    counts.list = list(sample.states = m.CP.by.S,
+    				   population.states = n.CP.by.TS, 
+    				   cell.states = n.TS.by.C,
+    				   gene.states = n.G.by.TS)
+    res = c(res, list(counts=counts.list))
+  }
+  if(any("proportion" %in% type)) {
+    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
+    				   population.states = normalizeCounts(n.CP.by.TS, scale.factor=1), 
+    				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
+    				   gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
+    res = c(res, list(proportions=prop.list))
+  }
+  if(any("posterior" %in% type)) {
+    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
+    				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
+    				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+    res = c(res, posterior = list(post.list))						    
+  }
+  
+  return(res)
+}
+
+

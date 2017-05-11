@@ -56,7 +56,8 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
-                   seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3) {
+                   seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3, 
+                   thread=1, ...) {
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -67,7 +68,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   }  
   
   set.seed(seed)
-  message(date(), " ... Starting Gibbs sampling")
+  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
   
   z = sample(1:K, ncol(counts), replace=TRUE)
   z.all = z
@@ -127,7 +128,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
     ## Perform split if on i-th iteration defined by split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      message(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
+      message("Thread ", thread, " ", date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
       z = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="cC.calcLLFromVariables")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
@@ -150,7 +151,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
     }
     ll = c(ll, temp.ll)
     
-    message(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    message("Thread ", thread, " ",date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
     
     iter = iter + 1    
   }
@@ -238,3 +239,45 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   final = theta.ll + phi.ll
   return(final)
 }
+
+#' @export
+factorizeMatrix.celda_C = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+
+  K = celda.obj$K
+  z = celda.obj$z
+  alpha = celda.obj$alpha
+  beta = celda.obj$beta
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+        
+  nS = length(unique(sample.label))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
+  n.G.by.CP = t(rowsum(t(counts), group=z, reorder=TRUE))
+
+  K.names = paste0("K", 1:K)
+  rownames(n.G.by.CP) = rownames(counts)
+  colnames(n.G.by.CP) = K.names
+  rownames(m.CP.by.S) = K.names
+  colnames(m.CP.by.S) = colnames(counts)
+              
+  if(any("counts" %in% type)) {
+    counts.list = list(sample.states=m.CP.by.S, gene.states=n.G.by.CP)
+    res = c(res, list(counts=counts.list))
+  }
+  if(any("proportion" %in% type)) {
+    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
+                     gene.states = normalizeCounts(n.G.by.CP, scale.factor=1))
+    res = c(res, list(proportions=prop.list))
+  }
+  if(any("posterior" %in% type)) {
+    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
+                     gene.states = normalizeCounts(n.G.by.CP + beta, scale.factor=1))
+  res = c(res, posterior = list(post.list))                           
+  }
+
+return(res)
+}
+
