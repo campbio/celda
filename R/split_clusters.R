@@ -204,7 +204,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
   y.split.ll = do.call(LLFunction, params)
   y.split = y
 
-  pairs = c()
+  pairs = c(NA, NA, NA)
   for(i in 1:L) {
     for(j in setdiff(y.to.split, i)) {
       new.y = y
