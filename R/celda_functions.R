@@ -38,8 +38,10 @@ normalizeLogProbs = function(ll.probs) {
   return(probs)
 }
 
+
+#' @export
 normalizeCounts = function(counts, scale.factor=1e6) {
-  counts.norm = sweep(counts, 2, colSums(counts) * scale.factor, "/")
+  counts.norm = sweep(counts, 2, colSums(counts) / scale.factor, "/")
   return(counts.norm)
 }
   
