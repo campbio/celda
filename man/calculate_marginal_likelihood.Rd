@@ -12,7 +12,7 @@ calculate_marginal_likelihood(completeLogLik)
 \item{completeLogLik}{The complete Gibbs sampling history of log-likelihoods for a single celda chain}
 }
 \value{
-The estimated marginal likelihood
+The estimated marginal likelihood as an mpfr number
 }
 \description{
 Calculate the marginal likelihood from a single celda chain.
