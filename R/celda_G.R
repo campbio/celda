@@ -45,7 +45,7 @@
 #' @keywords log likelihood
 #' @examples TODO
 #' @export
-cG.calcLLFromVariables = function(counts, y, L, beta, delta) {
+cG.calcLLFromVariables = function(counts, y, L, beta, delta, gamma) {
   n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
   nM <- ncol(n.TS.by.C)
@@ -70,12 +70,20 @@ cG.calcLLFromVariables = function(counts, y, L, beta, delta) {
   
   psi.ll <- a + b + c + d
 
-  final <- phi.ll + psi.ll
+  a <- lgamma(L * gamma)
+  b <- sum(lgamma(nG.by.TS + gamma))
+  c <- -L * lgamma(gamma)
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+
+  eta.ll <- a + b + c + d
+
+  final <- phi.ll + psi.ll + eta.ll
+  
   return(final)
 }
 
 
-cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta) {
+cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
   
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
@@ -103,7 +111,15 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
   
   psi.ll <- a + b + c + d
 
-  final <- phi.ll + psi.ll  
+  ## Calculate for "Eta" component
+  a <- lgamma(L * gamma)
+  b <- sum(lgamma(nG.by.TS + gamma))
+  c <- -L * lgamma(gamma)
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+
+  eta.ll <- a + b + c + d
+
+  final <- phi.ll + psi.ll + eta.ll
   return(final)
 }
 
@@ -123,8 +139,11 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 #' @keywords log likelihood
 #' @examples TODO
-cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
+cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
  
+  ## Calculate for "Eta" component
+  eta.ll <- log(nG.in.Y + gamma)
+  
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
   if(sum(nG.by.TS == 0) > 0) {
@@ -144,7 +163,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
   d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
   psi.ll <- a + d
   
-  final <- phi.ll + psi.ll
+  final <- eta.ll + phi.ll + psi.ll
   return(final)
 }
 
@@ -170,7 +189,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta) {
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
-celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
+celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    seed=12345, best=TRUE, y.split.on.iter=3, 
                    y.num.splits=3, thread=1, ...) {
   
@@ -189,7 +208,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
   nG = nrow(counts)
   
   ## Calculate initial log likelihood
-  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta)
+  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
   y.probs <- matrix(NA, nrow=nrow(counts), ncol=L)
   iter <- 1
@@ -217,7 +236,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
 		temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
 		temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
 	  
-		probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, beta=beta, delta=delta)
+		probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], beta=beta, delta=delta, gamma=gamma)
 	  }
 	
 	  ## Sample next state and add back counts
@@ -231,7 +250,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
       if(sum(y == previous.y[i]) == 0 & iter < max.iter & L > 2) {
         
         ## Split another cluster into two
-        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cG.calcLLFromVariables", beta=beta, delta=delta)
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cG.calcLLFromVariables", beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -246,7 +265,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
       message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
-      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, LLFunction="cG.calcLLFromVariables")
+      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="cG.calcLLFromVariables")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -259,7 +278,7 @@ celda_G = function(counts, L, beta=1, delta=1, max.iter=25,
     y.all <- cbind(y.all, y)
     
     ## Calculate complete likelihood
-    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta)
+    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
     if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
       y.probs.final = y.probs
     }
