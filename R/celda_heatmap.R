@@ -139,11 +139,11 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   
   #  Set cell annotation  
   if(!is.null(annotation_cell)){
-    annotation_cell$cell_lable <- as.factor(z)   # has to be the original cell label order
+    annotation_cell$cell_label <- as.factor(z)   # has to be the original cell label order
     annotation_cell <- annotation_cell[order.gene_cell$ordlab, ]
     rownames(annotation_cell) <- colnames(counts)
   }else{  # annotation_cell is null
-    annotation_cell <- data.frame(cell_lable = as.factor(order.gene_cell$class.label)   ) 
+    annotation_cell <- data.frame(cell_label = as.factor(order.gene_cell$class.label)   ) 
     rownames(annotation_cell) <- colnames(counts)  # rowname should correspond to counts matrix's col(cell) name
   }
   #  Set gene annotation
