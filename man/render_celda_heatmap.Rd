@@ -6,7 +6,10 @@
 \usage{
 render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   scale.row = TRUE, scale_function = scale, normalize = "none",
-  z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE)
+  z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE,
+  annotation_cell = NULL, annotation_gene = NULL,
+  col = colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"), space =
+  "Lab")(100))
 }
 \arguments{
 \item{counts}{the counts matrix}
@@ -24,6 +27,12 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 \item{cluster.row}{boolean values determining if rows should be clustered}
 
 \item{cluster.column}{boolean values determining if columns should be clustered}
+
+\item{annotation_cell}{a dataframe for the cell annotations (columns)}
+
+\item{annotation_gene}{a dataframe for the gene annotations (rows)}
+
+\item{col}{color for the heatmap}
 
 \item{scale_fun}{specify the function for scaling}
 }

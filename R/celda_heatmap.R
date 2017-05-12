@@ -16,7 +16,7 @@ order_index <- function(mat, class.label, col=F) {   # order index : gather in g
     mat <- t(mat)
   }
   
-  return(list(mat=mat, class.label=class.label))
+  return(list(mat=mat, class.label=class.label, ordlab=ordlab))
 }
 
 
@@ -40,7 +40,7 @@ order_index.median <- function(mat, class.label, col=F) {   # order index : gath
     mat <- t(mat)
   }
   
-  return(list(mat=mat, class.label=class.label))
+  return(list(mat=mat, class.label=class.label, ordlab=ordlab))
 }
 
 cpm<- function(x){
@@ -63,13 +63,18 @@ robust_scale <- function(x){
 #' @param scale_fun specify the function for scaling 
 #' @param cluster.row boolean values determining if rows should be clustered
 #' @param cluster.column boolean values determining if columns should be clustered
+#' @param annotation_cell a dataframe for the cell annotations (columns)
+#' @param annotation_gene a dataframe for the gene annotations (rows)
+#' @param col color for the heatmap
 #' @example TODO
 #' @export 
 render_celda_heatmap <- function(counts, z=NULL, y=NULL, 
                                  scale.log=FALSE, scale.row=TRUE,
                                  scale_function=scale, normalize = "none",
                                  z.trim=c(-2,2), 
-                                 cluster.row=TRUE, cluster.column = TRUE) {
+                                 cluster.row=TRUE, cluster.column = TRUE,
+                                 annotation_cell = NULL, annotation_gene = NULL, 
+                                 col=colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)) {
   require(gtable)
   require(grid)
   require(scales)
@@ -116,8 +121,8 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   order.gene_cell <- order_index(mat = order.gene$mat, class.label = z, col = TRUE)
   
   counts <- order.gene_cell$mat
-  y <- order.gene$class.label
-  z <- order.gene_cell$class.label
+  #y <- order.gene$class.label
+  #z <- order.gene_cell$class.label
   
   K <- length(unique(z))
   L <- length(unique(y))
@@ -132,12 +137,29 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   }
   
   
-  #  Set cell annotation    
-  annotation_cell <- data.frame(cell_lable = as.factor(order.gene_cell$class.label)   ) 
-  rownames(annotation_cell) <- colnames(counts)  # rowname should correspond to counts matrix's col(cell) name
+  #  Set cell annotation  
+  if(!is.null(annotation_cell)){
+    annotation_cell$cell_lable <- as.factor(z)   # has to be the original cell label order
+    annotation_cell <- annotation_cell[order.gene_cell$ordlab, ]
+    rownames(annotation_cell) <- colnames(counts)
+  }else{  # annotation_cell is null
+    annotation_cell <- data.frame(cell_lable = as.factor(order.gene_cell$class.label)   ) 
+    rownames(annotation_cell) <- colnames(counts)  # rowname should correspond to counts matrix's col(cell) name
+  }
   #  Set gene annotation
-  annotation_gene <- data.frame(gene_label = as.factor(order.gene$class.label)  )
-  rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
+  if(!is.null(annotation_gene)){
+    annotation_gene$gene_label <- as.factor(y)  # has to be the original gene label order 
+    annotation_gene <- annotation_gene[order.gene$ordlab,]
+    rownames(annotation_gene) <- rownames(counts)
+  }else{  #annotation_gene is  null 
+    annotation_gene <- data.frame(gene_label = as.factor(order.gene$class.label)  )
+    rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
+  }
+  
+  # update the label 
+  y <- order.gene$class.label
+  z <- order.gene_cell$class.label
+  
   
   ## Set color 
   #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 3, name = "RdYlBu"))(100)  # ToDo: need to be more flexible or fixed to a better color list
@@ -146,7 +168,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   if(cluster.row & cluster.column){
     celda::semi_pheatmap(mat = counts, 
                          #color = colorRampPalette(c( "blue", "red"))(length(-12:12)),breaks=c(seq(0, 8.871147e-10, length.out = 11), 5.323741e-08 ),
-                         #color = col.pal, 
+                         color = col, 
                          cutree_rows = L,
                          cutree_cols = K,
                          annotation_row = annotation_gene,
@@ -159,6 +181,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   
   if(cluster.row & (!cluster.column)){
     celda::semi_pheatmap(mat = counts, 
+                         color = col,
                          cutree_rows = L,
                          cluster_cols = FALSE,
                          annotation_row = annotation_gene,
@@ -171,6 +194,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
     
     if((!cluster.row) & cluster.column){
       celda::semi_pheatmap(mat = counts, 
+                           color = col,
                            cluster_rows = FALSE,
                            cutree_cols = K,
                            annotation_row = annotation_gene,
@@ -181,7 +205,8 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
       }
     
     if((!cluster.row) & (!cluster.column) ){
-      celda::semi_pheatmap(mat = counts, 
+      celda::semi_pheatmap(mat = counts,
+                           color = col,
                            cluster_rows = FALSE,
                            cluster_cols = FALSE,
                            annotation_row = annotation_gene,
