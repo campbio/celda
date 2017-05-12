@@ -4,7 +4,7 @@
 \alias{cG.calcLLFromVariables}
 \title{Calculate Log Likelihood For A Set of Gene Clusterings (Gene Clustering)}
 \usage{
-cG.calcLLFromVariables(counts, y, L, beta, delta)
+cG.calcLLFromVariables(counts, y, L, beta, delta, gamma)
 }
 \arguments{
 \item{counts}{A numeric count matrix}

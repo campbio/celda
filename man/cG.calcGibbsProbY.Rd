@@ -4,7 +4,7 @@
 \alias{cG.calcGibbsProbY}
 \title{Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)}
 \usage{
-cG.calcGibbsProbY(n.TS.by.C, n.by.TS, nG.by.TS, beta, delta)
+cG.calcGibbsProbY(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma)
 }
 \arguments{
 \item{beta}{Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution}

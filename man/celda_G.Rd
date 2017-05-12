@@ -4,8 +4,9 @@
 \alias{celda_G}
 \title{Cluster Genes from Single Cell Sequencing Data}
 \usage{
-celda_G(counts, L, beta = 1, delta = 1, max.iter = 25, seed = 12345,
-  best = TRUE, y.split.on.iter = 3, y.num.splits = 3, thread = 1, ...)
+celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
+  seed = 12345, best = TRUE, y.split.on.iter = 3, y.num.splits = 3,
+  thread = 1, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
