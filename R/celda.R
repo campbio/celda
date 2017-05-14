@@ -24,6 +24,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   doParallel::registerDoParallel(cl)
   
   runs = expand.grid(chain=1:nchains, ...)
+  runs$index = as.numeric(rownames(runs))
   if (verbose) print(runs)
   
   all.seeds = seed:(seed + nchains - 1)
@@ -40,7 +41,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   }  
   parallel::stopCluster(cl)
   
-  celda.res = list(run.params=runs, res.list=res.list)
+  celda.res = list(run.params=runs, res.list=res.list, list.contents=model)
   class(celda.res) = "celda_list"
   return(celda.res)
 }

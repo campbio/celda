@@ -26,6 +26,9 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 
 \item{L}{An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)}
 }
+\value{
+Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
+}
 \description{
 Run the celda Bayesian hierarchical model on a matrix of counts.
 }
