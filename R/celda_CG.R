@@ -434,11 +434,14 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   ## Peform reordering
   new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
   
-  return(list(z=new$z, y=new$y, complete.z=z.all, complete.y=y.all, 
-              z.stability=z.stability.final, y.stability=y.stability.final, 
-              complete.z.stability=z.stability, complete.y.stability=y.stability, 
-              completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, y.prob=y.probs.final,
-              K=K, L=L, alpha=alpha, beta=beta, delta=delta, seed=seed))
+  result =  list(z=new$z, y=new$y, complete.z=z.all, complete.y=y.all, 
+                 z.stability=z.stability.final, y.stability=y.stability.final, 
+                 complete.z.stability=z.stability, complete.y.stability=y.stability, 
+                 completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, 
+                 y.prob=y.probs.final, K=K, L=L, alpha=alpha, 
+                 beta=beta, delta=delta, seed=seed)
+   class(result) = "celda_CG" 
+   return(result)
 }
 
 

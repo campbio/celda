@@ -9,3 +9,4 @@ validate_args(counts, model, sample.label, nchains, cores, seed)
 \description{
 Sanity check arguments to celda() to ensure a smooth run.
 }
+

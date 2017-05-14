@@ -301,9 +301,11 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   
   y.final.order = reorder.label.by.size(y.final, L)
   
-  return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-              finalLogLik=ll.final, y.probability=y.probs, L=L, beta=beta, delta=delta,
-              seed=seed))
+  result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
+                finalLogLik=ll.final, y.probability=y.probs, L=L, beta=beta, 
+                delta=delta, seed=seed)
+  class(result) = "celda_G"
+  return(result)
 }
 
 

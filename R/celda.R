@@ -12,6 +12,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param cores The number of cores to use to speed up Gibbs sampling
 #' @param seed The base seed for random number generation. Each chain celda runs with have a seed index off of this one.
 #' @param verbose Print messages during celda chain execution
+#' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
 celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, ...) {
@@ -40,7 +41,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   parallel::stopCluster(cl)
   
   celda.res = list(run.params=runs, res.list=res.list)
-  class(celda.res) = model
+  class(celda.res) = "celda_list"
   return(celda.res)
 }
 
@@ -76,7 +77,4 @@ validate_counts = function(counts) {
     stop("Each row and column of the count matrix must have at least one count")
   }
 }
-
-
-
 

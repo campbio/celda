@@ -29,3 +29,4 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 \description{
 Run the celda Bayesian hierarchical model on a matrix of counts.
 }
+

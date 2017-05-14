@@ -21,99 +21,91 @@
 
 #' Get run parameters for a celda run.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.res A celda_list object, as returned from celda()
 #' @export
-runParams = function(celda.res) {
-  return(celda.res$run.params)
+runParams = function(celda.list) {
+  return(celda.list$run.params)
 }
 
 
-#' Get seeds for all chains from a celda run.
+#' Get the random seed for a given celda model.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-chainSeeds = function(celda.res) {
-  seeds = sapply(celda.res$res.list,
-                 function(chain) { chain$seed })
-  return(seeds)
+seed = function(celda.mod) {
+  return(celda.mod$seed)
 }
 
 
-#' Get the complete log likelihood for each iteration of Gibbs sampling
-#' for each chain generated during a celda run.
+#' Get the complete log likelihood for a given celda model.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-completeLogLikelihood = function(celda.res) {
-  complete.log.lik = sapply(celda.res$res.list, 
-                            function(chain) { chain$completeLogLik })
-  return(complete.log.lik)
+completeLogLikelihood = function(celda.mod) {
+  return(celda.mod$completeLogLik)
 }
 
 
 #' Get the log likelihood from the final iteration of Gibbs sampling
-#' for each chain generated during a celda run.
+#' for a given celda model.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-finalLogLikelihood = function(celda.res) {
-  final.log.lik = sapply(celda.res$res.list,
-                         function(chain) { chain$finalLogLik })
-  return(final.log.lik)
+finalLogLikelihood = function(celda.mod) {
+  return(celda.mod$finalLogLik)
 }
 
 
 #' Get the final gene / cell / gene & cell cluster assignments generated during
 #' a celda run, dependent on the model provided.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-finalClusterAssignment = function(celda.res) {
-  UseMethod("finalClusterAssignment", celda.res)
+finalClusterAssignment = function(celda.mod) {
+  UseMethod("finalClusterAssignment", celda.mod)
 }
 
 
 #' Get the complete history of gene / cell / gene & cell cluster assignments 
 #' generated during a celda run, dependent on the model provided.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-completeClusterHistory = function(celda.res) {
-  UseMethod("completeClusterHistory", celda.res)
+completeClusterHistory = function(celda.mod) {
+  UseMethod("completeClusterHistory", celda.mod)
 }
 
 
 #' Get the probability of the cluster assignments generated during a celda run.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-clusterProbabilities = function(celda.res) {
-  UseMethod("clusterProbabilities", celda.res)
+clusterProbabilities = function(celda.mod) {
+  UseMethod("clusterProbabilities", celda.mod)
 }
 
 
 #' Get the K value used for each chain in a celda run.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-chainKs = function(celda.res) {
-  UseMethod("chainKs", celda.res)
+getK = function(celda.mod) {
+  UseMethod("getK", celda.mod)
 }
 
 
 #' Get the L value used for each chain in a celda run.
 #'
-#' @param celda.res A result object returned from celda()
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @export
-chainLs = function(celda.res) {
-  UseMethod("chainLs", celda.res)
+getL = function(celda.mod) {
+  UseMethod("getL", celda.mod)
 }
 
 
 #' Render a stylable heatmap of count data based on celda clustering results.
 #'
-#' @param celda.res A result object returned from celda()
-#' plot the heatmap of the counts data
+#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
 #' @param counts the counts matrix 
 #' @param z A numeric vector of cluster assignments for cell. Resolved automatically from celda object when available.
 #' @param y A numeric vector of cluster assignments for gene. Resolved automatically from celda object when available.
@@ -124,8 +116,8 @@ chainLs = function(celda.res) {
 #' @param cluster.row boolean values determining if rows should be clustered
 #' @param cluster.column boolean values determining if columns should be clustered
 #' @export 
-celda_heatmap <- function(celda.res, counts, ...) {
-  UseMethod("celda_heatmap", celda.res)
+celda_heatmap <- function(celda.mod, counts, ...) {
+  UseMethod("celda_heatmap", celda.mod)
 }
  
 
@@ -133,44 +125,36 @@ celda_heatmap <- function(celda.res, counts, ...) {
 # celda_C                                                                      #
 ################################################################################
 #' @export
-finalClusterAssignment.celda_C = function(celda.res) {
-  final.assignments = sapply(celda.res$res.list, 
-                             function(chain) { chain$z })
-  return(final.assignments)
+finalClusterAssignment.celda_C = function(celda.mod) {
+  return(celda.mod$z)
 }
 
 
 #' @export
-completeClusterHistory.celda_C = function(celda.res) {
-  complete.history = sapply(celda.res$res.list, 
-                            function(chain) { chain$complete.z })
-  return(complete.history)
+completeClusterHistory.celda_C = function(celda.mod) {
+  return(celda.mod$complete.z)
 }
 
 
 #' @export
-clusterProbabilities.celda_C = function(celda.res) {
-  cluster.probs = sapply(celda.res$res.list,
-                         function(chain) { chain$z.probability })
-  return(cluster.probs)
+clusterProbabilities.celda_C = function(celda.mod) {
+  return(celda.mod$z.probability)
 }
 
 
 #' @export
-chainKs.celda_C = function(celda.res) {
-  cluster.probs = sapply(celda.res$res.list,
-                         function(chain) { chain$K })
-  return(cluster.probs)
+getK.celda_C = function(celda.mod) {
+  return(celda.mod$K)
 }
 
 
 #' @export
-chainLs.celda_C = function(celda.res) { return(NA) }
+getL.celda_C = function(celda.mod) { return(NA) }
 
 
 #' @export
-celda_heatmap.celda_C = function(celda.res, counts, ...) {
-  render_celda_heatmap(counts, z=celda.res$z, ...)
+celda_heatmap.celda_C = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, z=celda.mod$z, ...)
 }
 
 
@@ -179,92 +163,74 @@ celda_heatmap.celda_C = function(celda.res, counts, ...) {
 # celda_G                                                                      #
 ################################################################################
 #' @export
-finalClusterAssignment.celda_G = function(celda.res) {
-  final.assignments = sapply(celda.res$res.list, 
-                             function(chain) { chain$y})
-  return(final.assignments)
+finalClusterAssignment.celda_G = function(celda.mod) {
+  return(celda.mod$y)
 }
 
 
 #' @export
-completeClusterHistory.celda_G = function(celda.res) {
-  complete.history = sapply(celda.res$res.list, 
-                            function(chain) { chain$complete.y })
-  return(complete.history)
+completeClusterHistory.celda_G = function(celda.mod) {
+  return(celda.mod$complete.y)
 }
 
 
 #' @export
-clusterProbabilities.celda_G = function(celda.res) {
-  cluster.probs = sapply(celda.res$res.list,
-                         function(chain) { chain$y.probability })
-  return(cluster.probs)
+clusterProbabilities.celda_G = function(celda.mod) {
+  return(celda.mod$y.probability)
 }
 
 
 #' @export
-chainKs.celda_G = function(celda.res) { return(NA) }
+getK.celda_G = function(celda.mod) { return(NA) }
 
 
 #' @export
-chainLs.celda_G = function(celda.res) {
-  cluster.probs = sapply(celda.res$res.list,
-                         function(chain) { chain$L })
-  return(cluster.probs)
+getL.celda_G = function(celda.mod) {
+  return(celda.mod$L)
 }
 
 
 #' @export
-celda_heatmap.celda_G = function(celda.res, counts, ...) {
-  render_celda_heatmap(counts, y=celda.res$y, ...)
+celda_heatmap.celda_G = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, y=celda.mod$y, ...)
 }
 
 
 
 ################################################################################
-# celda_CG                                                                      #
+# celda_CG                                                                     #
 ################################################################################
 #' @export
-finalClusterAssignment.celda_CG = function(celda.res) {
-  z.assignments = sapply(celda.res$res.list, function(chain) { chain$z })
-  y.assignments = sapply(celda.res$res.list, function(chain) { chain$y })
-  return(list(z.assignments=z.assignments, y.assignments=y.assignments))
+finalClusterAssignment.celda_CG = function(celda.mod) {
+  return(list(z=celda.mod$z, y=celda.mod$y))
 }
 
 
 #' @export
-completeClusterHistory.celda_CG = function(celda.res) {
-  complete.z = sapply(celda.res$res.list, function(chain) { chain$complete.z })
-  complete.y = sapply(celda.res$res.list, function(chain) { chain$complete.y })
-  return(list(complete.z=complete.z, complete.y=complete.y))
+completeClusterHistory.celda_CG = function(celda.mod) {
+  return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
 }
 
 
 #' @export
-clusterProbabilities.celda_CG = function(celda.res) {
-  z.prob = sapply(celda.res$res.list, function(chain) { chain$z.prob })
-  y.prob = sapply(celda.res$res.list, function(chain) { chain$y.prob })
-  return(list(z.prob=z.prob, y.prob=y.prob))
+clusterProbabilities.celda_CG = function(celda.mod) {
+  return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
 }
 
 
 #' @export
-chainKs.celda_CG = function(celda.res) {
-  cluster.probs = sapply(celda.res$res.list,
-                         function(chain) { chain$K })
-  return(cluster.probs)
+getK.celda_CG = function(celda.mod) {
+  return(celda.mod$K)
 }
 
 
 #' @export
-chainLs.celda_CG = function(celda.res) {
-  cluster.probs = sapply(celda.res$res.list,
-                         function(chain) { chain$L })
-  return(cluster.probs)
+getL.celda_CG = function(celda.mod) {
+  return(celda.mod$L)
 }
 
 
 #' @export
-celda_heatmap.celda_CG = function(celda.res, counts, ...) {
-  render_celda_heatmap(counts, z=celda.res$z, y=celda.res$y, ...)
+celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
 }

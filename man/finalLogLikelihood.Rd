@@ -3,14 +3,15 @@
 \name{finalLogLikelihood}
 \alias{finalLogLikelihood}
 \title{Get the log likelihood from the final iteration of Gibbs sampling
-for each chain generated during a celda run.}
+for a given celda model.}
 \usage{
-finalLogLikelihood(celda.res)
+finalLogLikelihood(celda.mod)
 }
 \arguments{
-\item{celda.res}{A result object returned from celda()}
+\item{celda.mod}{A celda model object (of class "celda_C", "celda_G" or "celda_CG")}
 }
 \description{
 Get the log likelihood from the final iteration of Gibbs sampling
-for each chain generated during a celda run.
+for a given celda model.
 }
+

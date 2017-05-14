@@ -4,11 +4,12 @@
 \alias{runParams}
 \title{Get run parameters for a celda run.}
 \usage{
-runParams(celda.res)
+runParams(celda.list)
 }
 \arguments{
-\item{celda.res}{A result object returned from celda()}
+\item{celda.res}{A celda_list object, as returned from celda()}
 }
 \description{
 Get run parameters for a celda run.
 }
+

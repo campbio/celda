@@ -9,3 +9,4 @@ validate_counts(counts)
 \description{
 Perform some simple checks on the counts matrix, to ensure celda won't choke.
 }
+
