@@ -118,3 +118,4 @@ getL = function(celda.mod) {
 #' @export 
 celda_heatmap <- function(celda.mod, counts, ...) {
   UseMethod("celda_heatmap", celda.mod)
+}

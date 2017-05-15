@@ -1,3 +1,4 @@
+#' @export
 available_models = c("celda_C", "celda_G", "celda_CG")
 
 
