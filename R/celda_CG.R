@@ -530,3 +530,40 @@ factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("cou
 }
 
 
+################################################################################
+# celda_CG S3 methods                                                          #
+################################################################################
+#' @export
+finalClusterAssignment.celda_CG = function(celda.mod) {
+  return(list(z=celda.mod$z, y=celda.mod$y))
+}
+
+
+#' @export
+completeClusterHistory.celda_CG = function(celda.mod) {
+  return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
+}
+
+
+#' @export
+clusterProbabilities.celda_CG = function(celda.mod) {
+  return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
+}
+
+
+#' @export
+getK.celda_CG = function(celda.mod) {
+  return(celda.mod$K)
+}
+
+
+#' @export
+getL.celda_CG = function(celda.mod) {
+  return(celda.mod$L)
+}
+
+
+#' @export
+celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
+}

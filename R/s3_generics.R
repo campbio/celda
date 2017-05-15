@@ -1,9 +1,9 @@
 ################################################################################
 # S3 Methods                                                                   #
 ################################################################################
-# Below are getters for the various types of celda models. They expect output  #
-# in the format provided by the celda() wrapper function in celda.R, *NOT* as  # 
-# provided in the individual model functions (e.g. celda_C()).                 #
+# Below are getters for the various types of celda models.                     #
+# Concrete implementations of these functions are in their corresponding model #
+# files (e.g. getZ.celda_C is in celda_C.R).                                   #
 #                                                                              #
 # TODO:                                                                        #
 #        * Collapse ROxygen documentation into single page for these functions #
@@ -118,119 +118,3 @@ getL = function(celda.mod) {
 #' @export 
 celda_heatmap <- function(celda.mod, counts, ...) {
   UseMethod("celda_heatmap", celda.mod)
-}
- 
-
-################################################################################
-# celda_C                                                                      #
-################################################################################
-#' @export
-finalClusterAssignment.celda_C = function(celda.mod) {
-  return(celda.mod$z)
-}
-
-
-#' @export
-completeClusterHistory.celda_C = function(celda.mod) {
-  return(celda.mod$complete.z)
-}
-
-
-#' @export
-clusterProbabilities.celda_C = function(celda.mod) {
-  return(celda.mod$z.probability)
-}
-
-
-#' @export
-getK.celda_C = function(celda.mod) {
-  return(celda.mod$K)
-}
-
-
-#' @export
-getL.celda_C = function(celda.mod) { return(NA) }
-
-
-#' @export
-celda_heatmap.celda_C = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, z=celda.mod$z, ...)
-}
-
-
-
-################################################################################
-# celda_G                                                                      #
-################################################################################
-#' @export
-finalClusterAssignment.celda_G = function(celda.mod) {
-  return(celda.mod$y)
-}
-
-
-#' @export
-completeClusterHistory.celda_G = function(celda.mod) {
-  return(celda.mod$complete.y)
-}
-
-
-#' @export
-clusterProbabilities.celda_G = function(celda.mod) {
-  return(celda.mod$y.probability)
-}
-
-
-#' @export
-getK.celda_G = function(celda.mod) { return(NA) }
-
-
-#' @export
-getL.celda_G = function(celda.mod) {
-  return(celda.mod$L)
-}
-
-
-#' @export
-celda_heatmap.celda_G = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, y=celda.mod$y, ...)
-}
-
-
-
-################################################################################
-# celda_CG                                                                     #
-################################################################################
-#' @export
-finalClusterAssignment.celda_CG = function(celda.mod) {
-  return(list(z=celda.mod$z, y=celda.mod$y))
-}
-
-
-#' @export
-completeClusterHistory.celda_CG = function(celda.mod) {
-  return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
-}
-
-
-#' @export
-clusterProbabilities.celda_CG = function(celda.mod) {
-  return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
-}
-
-
-#' @export
-getK.celda_CG = function(celda.mod) {
-  return(celda.mod$K)
-}
-
-
-#' @export
-getL.celda_CG = function(celda.mod) {
-  return(celda.mod$L)
-}
-
-
-#' @export
-celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
-}

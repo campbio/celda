@@ -413,3 +413,39 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
 
 
 
+################################################################################
+# celda_G S3 methods                                                           #
+################################################################################
+#' @export
+finalClusterAssignment.celda_G = function(celda.mod) {
+  return(celda.mod$y)
+}
+
+
+#' @export
+completeClusterHistory.celda_G = function(celda.mod) {
+  return(celda.mod$complete.y)
+}
+
+
+#' @export
+clusterProbabilities.celda_G = function(celda.mod) {
+  return(celda.mod$y.probability)
+}
+
+
+#' @export
+getK.celda_G = function(celda.mod) { return(NA) }
+
+
+#' @export
+getL.celda_G = function(celda.mod) {
+  return(celda.mod$L)
+}
+
+
+#' @export
+celda_heatmap.celda_G = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, y=celda.mod$y, ...)
+}
+

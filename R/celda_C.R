@@ -287,3 +287,41 @@ factorizeMatrix.celda_C = function(counts, sample.label, celda.obj, type=c("coun
 return(res)
 }
 
+
+
+
+################################################################################
+# celda_C S3 methods                                                           #
+################################################################################
+#' @export
+finalClusterAssignment.celda_C = function(celda.mod) {
+  return(celda.mod$z)
+}
+
+
+#' @export
+completeClusterHistory.celda_C = function(celda.mod) {
+  return(celda.mod$complete.z)
+}
+
+
+#' @export
+clusterProbabilities.celda_C = function(celda.mod) {
+  return(celda.mod$z.probability)
+}
+
+
+#' @export
+getK.celda_C = function(celda.mod) {
+  return(celda.mod$K)
+}
+
+
+#' @export
+getL.celda_C = function(celda.mod) { return(NA) }
+
+
+#' @export
+celda_heatmap.celda_C = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, z=celda.mod$z, ...)
+}
