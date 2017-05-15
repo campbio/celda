@@ -22,7 +22,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   if (celda.list$content.type == "celda_CG") {
     if (!is.null(best)) {
       matching.chain.idx = run.params[run.params$K == K & run.params$L == L, "index"]
-      requested.chain = chooseBestChain(celda.list[matching.chain.idx])
+      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     } else {
       requested.chain.idx = run.params[run.params$K == K & run.params$L == L & run.params$chain == chain,
                                        "index"]
@@ -34,7 +34,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   if (celda.list$content.type == "celda_C") {
     if (!is.null(best)) {
       matching.chain.idx = run.params[run.params$K == K, "index"]
-      requested.chain = chooseBestChain(celda.list[matching.chain.idx])
+      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     } else {
       requested.chain.idx = run.params[run.params$K == K & run.params$chain == chain, "index"]
       requested.chain = celda.list$res.list[[requested.chain.idx]]
@@ -45,7 +45,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   if (celda.list$content.type == "celda_G") {
     if (!is.null(best)) {
       matching.chain.idx = run.params[run.params$L == L, "index"]
-      requested.chain = chooseBestChain(celda.list[matching.chain.idx])
+      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     } else { 
       requested.chain.idx = run.params[run.params$L == L & run.params$chain == chain, "index"]
       requested.chain = celda.list$res.list[[requested.chain.idx]]
@@ -82,22 +82,22 @@ chooseBestChain = function(celda.mods, method="perplexity") {
   # for the other metrics...
   if (method == "perplexity"){
     metrics = lapply(celda.mods, function(mod) { calculate_perplexity(mod$completeLogLik) })
+    metrics = new("mpfr", unlist(metrics))
     best = which(metrics == min(metrics))
     return(celda.mods[[best]])
   } 
   
   else if (method == "harmonic"){
     metrics = lapply(celda.mods, function(mod) { calculate_perplexity(mod$completeLogLik) })
+    metrics = new("mpfr", unlist(metrics))
   } 
   else if (method == "loglik"){
     metrics = lapply(celda.mods, function(mod) { max(mod$completeLogLik) })
+    metrics = unlist(metrics)
   }  else {
     stop("Invalid method specified.")
   }
   best = which(metrics == max(metrics))
+  if (length(best) > 1) best = best[1]  # Choose first chain if there's a tie
   return(celda.mods[[best]])
-  
 }
-
-
-
