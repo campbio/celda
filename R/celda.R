@@ -41,7 +41,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   }  
   parallel::stopCluster(cl)
   
-  celda.res = list(run.params=runs, res.list=res.list, list.contents=model)
+  celda.res = list(run.params=runs, res.list=res.list, content.type=model)
   class(celda.res) = "celda_list"
   return(celda.res)
 }

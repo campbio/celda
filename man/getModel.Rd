@@ -6,7 +6,7 @@
 TODO: - If no chain provided, automatically choose best chain
       - Smarter subsetting of the run.params to DRY this function up}
 \usage{
-getModel(celda.list, K = NULL, L = NULL, chain = 1)
+getModel(celda.list, K = NULL, L = NULL, chain = 1, best = NULL)
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
@@ -16,6 +16,8 @@ getModel(celda.list, K = NULL, L = NULL, chain = 1)
 \item{L}{The L parameter for the desired model in the results list}
 
 \item{chain}{The desired chain for the specified model}
+
+\item{best}{Method for choosing best chain automatically. Options are c("perplexity", "harmonic", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.}
 }
 \value{
 A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
