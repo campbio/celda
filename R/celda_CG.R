@@ -235,7 +235,7 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
-			y.split.on.iter=3, y.num.splits=3, thread=1, ...) {
+			y.split.on.iter=3, y.num.splits=3, thread=1, save.history=FALSE, save.prob=FALSE, ...) {
   set.seed(seed)
   
   message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
@@ -434,12 +434,28 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   ## Peform reordering
   new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
   
-  result =  list(z=new$z, y=new$y, complete.z=z.all, complete.y=y.all, 
-                 z.stability=z.stability.final, y.stability=y.stability.final, 
-                 complete.z.stability=z.stability, complete.y.stability=y.stability, 
-                 completeLogLik=ll, finalLogLik=ll.final, z.prob=z.probs.final, 
-                 y.prob=y.probs.final, K=K, L=L, alpha=alpha, 
+  result =  list(z=new$z, y=new$y, z.stability=z.stability.final, 
+                 y.stability=y.stability.final,  complete.z.stability=z.stability, 
+                 complete.y.stability=y.stability,  completeLogLik=ll, 
+                 finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
                  beta=beta, delta=delta, seed=seed)
+  
+  if (save.prob) {
+    result$z.prob = z.probs.final
+    result$y.prob = y.probs.final
+  } else {
+    result$z.prob = NA
+    result$y.prob = NA
+  }
+  
+  if (save.history) {
+    result$complete.z = z.all
+    result$complete.y = y.all
+  } else {
+    result$complete.z = NA
+    result$complete.y = NA
+  }
+  
    class(result) = "celda_CG" 
    return(result)
 }

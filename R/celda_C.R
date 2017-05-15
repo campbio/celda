@@ -54,10 +54,11 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   return(list(z=cell.state, counts=cell.counts, sample=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
+
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
                    seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3, 
-                   thread=1, ...) {
+                   thread=1, save.history=FALSE, save.prob=FALSE, ...) {
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -167,8 +168,11 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   
   z.final.reorder = reorder.label.by.size(z.final, K)
   
-  result = list(z=z.final.reorder, complete.z=z.all, completeLogLik=ll, 
-                finalLogLik=ll.final, z.probability=z.probs, seed=seed, K=K)
+  result = list(z=z.final.reorder, completeLogLik=ll,  finalLogLik=ll.final, seed=seed, K=K)
+  if (save.prob) result$z.probability = z.probs else result$z.probability = NA
+  if (save.history) result$complete.z = z.all else result$complete.z = NA
+  
+  
   class(result) = "celda_C"
   return(result)
 }
