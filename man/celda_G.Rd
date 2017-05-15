@@ -6,7 +6,7 @@
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
   seed = 12345, best = TRUE, y.split.on.iter = 3, y.num.splits = 3,
-  thread = 1, ...)
+  thread = 1, save.prob = FALSE, save.history = FALSE, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -19,6 +19,10 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 
 \item{thread}{The thread index, used for logging purposes}
 
+\item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
+
+\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
+
 \item{k}{The number of clusters to generate}
 
 \item{a}{Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution}
@@ -30,8 +34,6 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 \item{min.cell}{Desired minimum number of cells per cluster}
 
 \item{kick}{Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)}
-
-\item{converge}{Threshold at which to consider the Markov chain converged}
 }
 \description{
 geneCluster provides cluster assignments for all genes in a provided single-cell 

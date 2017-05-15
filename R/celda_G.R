@@ -184,14 +184,16 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param seed Parameter to set.seed() for random number generation
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
 #' @param kick Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)
-#' @param converge Threshold at which to consider the Markov chain converged
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param thread The thread index, used for logging purposes
 #' @keywords LDA gene clustering gibbs
 #' @examples TODO
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    seed=12345, best=TRUE, y.split.on.iter=3, 
-                   y.num.splits=3, thread=1, ...) {
+                   y.num.splits=3, thread=1, save.prob=FALSE,
+                   save.history=FALSE, ...) {
   
   set.seed(seed)
   message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
@@ -301,9 +303,14 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   
   y.final.order = reorder.label.by.size(y.final, L)
   
-  return(list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-              finalLogLik=ll.final, y.probability=y.probs, L=L, beta=beta, delta=delta,
-              seed=seed))
+  result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
+                finalLogLik=ll.final, L=L, beta=beta, delta=delta, seed=seed)
+  
+  if (save.prob) result$y.probability = y.probs else result$y.probability = NA
+  if (save.history) result$complete.y = y.all else result$complete.y = NA
+  
+  class(result) = "celda_G"
+  return(result)
 }
 
 
@@ -405,4 +412,40 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
 }
 
 
+
+################################################################################
+# celda_G S3 methods                                                           #
+################################################################################
+#' @export
+finalClusterAssignment.celda_G = function(celda.mod) {
+  return(celda.mod$y)
+}
+
+
+#' @export
+completeClusterHistory.celda_G = function(celda.mod) {
+  return(celda.mod$complete.y)
+}
+
+
+#' @export
+clusterProbabilities.celda_G = function(celda.mod) {
+  return(celda.mod$y.probability)
+}
+
+
+#' @export
+getK.celda_G = function(celda.mod) { return(NA) }
+
+
+#' @export
+getL.celda_G = function(celda.mod) {
+  return(celda.mod$L)
+}
+
+
+#' @export
+celda_heatmap.celda_G = function(celda.mod, counts, ...) {
+  render_celda_heatmap(counts, y=celda.mod$y, ...)
+}
 
