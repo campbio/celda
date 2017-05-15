@@ -20,7 +20,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   run.params = celda.list$run.params
   
   if (celda.list$content.type == "celda_CG") {
-    if (best) {
+    if (!is.null(best)) {
       matching.chain.idx = run.params[run.params$K == K & run.params$L == L, "index"]
       requested.chain = chooseBestChain(celda.list[matching.chain.idx])
     } else {
@@ -32,7 +32,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   
   
   if (celda.list$content.type == "celda_C") {
-    if (best) {
+    if (!is.null(best)) {
       matching.chain.idx = run.params[run.params$K == K, "index"]
       requested.chain = chooseBestChain(celda.list[matching.chain.idx])
     } else {
@@ -43,7 +43,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   
   
   if (celda.list$content.type == "celda_G") {
-    if (best) {
+    if (!is.null(best)) {
       matching.chain.idx = run.params[run.params$L == L, "index"]
       requested.chain = chooseBestChain(celda.list[matching.chain.idx])
     } else { 

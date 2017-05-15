@@ -17,4 +17,3 @@ The perplexity for the provided chain as an mpfr number
 Calculate the perplexity from a single celda chain.
 Perplexity is defined as the inverse of the geometric mean of the
 }
-

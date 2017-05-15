@@ -32,4 +32,3 @@ Object of class "celda_list", which contains results for all model parameter com
 \description{
 Run the celda Bayesian hierarchical model on a matrix of counts.
 }
-

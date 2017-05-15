@@ -16,4 +16,3 @@ chooseBestChain(celda.mods, method = "perplexity")
 Determine the best chain among a set of celda_* objects with
 otherwise uniform K/L choices.
 }
-

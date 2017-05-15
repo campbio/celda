@@ -27,4 +27,3 @@ Run the celda Bayesian hierarchical model on a matrix of counts.
 TODO: - If no chain provided, automatically choose best chain
       - Smarter subsetting of the run.params to DRY this function up
 }
-
