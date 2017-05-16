@@ -105,21 +105,21 @@ lo = function(rown, coln, nrow, ncol, cellheight = NA, cellwidth = NA, treeheigh
         mat_width = unit(1, "npc") - rown_width - legend_width - treeheight_row - annot_row_width - annot_legend_width 
     }
     else{
-        mat_width = unit(cellwidth * ncol, "bigpts") + length(gaps_col) * unit(4, "bigpts")
+        mat_width = unit(cellwidth * ncol, "bigpts") + length(gaps_col) * unit(2, "bigpts")
     }
     
     if(is.na(cellheight)){
         mat_height = unit(1, "npc") - main_height - coln_height - treeheight_col - annot_col_height
     }
     else{
-        mat_height = unit(cellheight * nrow, "bigpts") + length(gaps_row) * unit(4, "bigpts")
+        mat_height = unit(cellheight * nrow, "bigpts") + length(gaps_row) * unit(2, "bigpts")
     }    
     
     # Produce gtable
     gt = gtable(widths = unit.c(treeheight_row, annot_row_width, mat_width, rown_width, legend_width, annot_legend_width), heights = unit.c(main_height, treeheight_col, annot_col_height, mat_height, coln_height), vp = viewport(gp = do.call(gpar, gp)))
     
-    cw = convertWidth(mat_width - (length(gaps_col) * unit(4, "bigpts")), "bigpts", valueOnly = T) / ncol
-    ch = convertHeight(mat_height - (length(gaps_row) * unit(4, "bigpts")), "bigpts", valueOnly = T) / nrow
+    cw = convertWidth(mat_width - (length(gaps_col) * unit(2, "bigpts")), "bigpts", valueOnly = T) / ncol
+    ch = convertHeight(mat_height - (length(gaps_row) * unit(2, "bigpts")), "bigpts", valueOnly = T) / nrow
     
     # Return minimal cell dimension in bigpts to decide if borders are drawn
     mindim = min(cw, ch) 
@@ -138,10 +138,10 @@ find_coordinates = function(n, gaps, m = 1:n){
         stop("Gaps do not match with matrix size")
     }
     
-    size = (1 / n) * (unit(1, "npc") - length(gaps) * unit("4", "bigpts"))
+    size = (1 / n) * (unit(1, "npc") - length(gaps) * unit("2", "bigpts"))
     
     gaps2 = apply(sapply(gaps, function(gap, x){x > gap}, m), 1, sum) 
-    coord = m * size + (gaps2 * unit("4", "bigpts"))
+    coord = m * size + (gaps2 * unit("2", "bigpts"))
     
     return(list(coord = coord, size = size))
 }
