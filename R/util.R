@@ -26,3 +26,43 @@ calculate_perplexity = function(completeLogLik) {
   perplexity = exp(Rmpfr::mean(mpfr_log_lik))^-1
   return(perplexity)
 }
+
+
+#' Visualize various performance metrics as a function of K / L to aid parameter choice.
+#' 
+#' @param celda.list A celda_list object as returned from *celda()*
+#' @param metric Which performance metric to visualize. One of ("perplexity", "harmonic", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "harmonic" calculates the marginal likelihood has the harmonic mean of the likelihoods. "loglik" plots the highest log-likelihood during Gibbs iteration.
+#' @return A ggplot object containing the requested plot(s), or a list of ggplots if the provided celda_list contains celda_CG models.
+#' @export
+visualize_performance = function(celda.list, method="perplexity") {
+  # TODO use celda_list getter
+  log.likelihoods = lapply(celda.list$res.list,
+                           function(mod) { return(mod$completeLogLik) })
+    
+  if (method == "perplexity") {
+    metric = lapply(log.likelihoods, calculate_perplexity)
+    metric = new("mpfr", unlist(metric))
+  } else if (method == "harmonic") {
+    metric = lapply(log.likelihoods, calculate_marginal_likelihood)
+    metric = new("mpfr", unlist(metric))
+  } else if (method == "loglik") {
+    # TODO use celda_list getter
+    metric = lapply(log.likelihoods, max)
+  } else stop("Invalid method specified")
+  
+  
+  #TODO ggplot table building below is vulnerable to error 
+  #     if the user modifies the celda_list at all..
+  if (celda.list$content.type == "celda_C") {
+    Ks = lapply(celda.list$res.list, function(mod) { mod$K })
+    plot.df = data.frame(K=as.factor(unlist(Ks)), metric=as.numeric(metric))
+    ggplot2::ggplot(plot.df, aes(x=K, y=metric)) + geom_point() +
+      xlab("K") + ylab(method)
+  }
+  
+}
+
+
+
+
+
