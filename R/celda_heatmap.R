@@ -43,6 +43,24 @@ order_index.median <- function(mat, class.label, col=F) {   # order index : gath
   return(list(mat=mat, class.label=class.label, ordlab=ordlab))
 }
 
+order_index.label <- function(mat, class.label, col=F) {   # order index : gather in group then order group
+  if(col==T){
+    mat <- t(mat)
+  }
+  
+  # order matrix
+  ordlab <-order( class.label, decreasing = FALSE)
+  mat <- mat[ordlab, ]
+  class.label <- class.label[ordlab]
+  
+  if(col==T){
+    mat <- t(mat)
+  }
+  
+  return(list(mat=mat, class.label=class.label, ordlab=ordlab))
+}
+
+
 cpm<- function(x){
   t(t(x)/colSums(x)*1e6)
 }
@@ -66,6 +84,12 @@ robust_scale <- function(x){
 #' @param annotation_cell a dataframe for the cell annotations (columns)
 #' @param annotation_gene a dataframe for the gene annotations (rows)
 #' @param col color for the heatmap
+#' @param legend logical to determine if legend should be drawn or not
+#' @param annotation_legend boolean value showing if the legend for annotation tracks should be drawn 
+#' @param annotation_names_gene boolean value showing if the names for gene annotation tracks should be drawn 
+#' @param annotation_names_cell boolean value showing if the names for cell annotation tracks should be drawn 
+#' @param show_genenames boolean specifying if gene names are be shown
+#' @param show_cellnames boolean specifying if cell names are be shown
 #' @example TODO
 #' @export 
 render_celda_heatmap <- function(counts, z=NULL, y=NULL, 
@@ -74,7 +98,13 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  z.trim=c(-2,2), 
                                  cluster.row=TRUE, cluster.column = TRUE,
                                  annotation_cell = NULL, annotation_gene = NULL, 
-                                 col=colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)) {
+                                 col=colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100),
+                                 legend = TRUE,
+                                 annotation_legend = TRUE,
+                                 annotation_names_gene = TRUE, 
+                                 annotation_names_cell = TRUE,
+                                 show_genenames = FALSE, 
+                                 show_cellnames = FALSE) {
   require(gtable)
   require(grid)
   require(scales)
@@ -116,9 +146,17 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   }
   
   # order gene (row) 
-  order.gene <- order_index(mat = counts, class.label = y, col = FALSE)
+  if(cluster.row){
+    order.gene <- order_index.median(mat = counts, class.label = y, col = FALSE) 
+  }else{
+    order.gene <- order_index.label(mat = counts, class.label = y, col = FALSE) 
+  }
   # order cell (col)
-  order.gene_cell <- order_index(mat = order.gene$mat, class.label = z, col = TRUE)
+  if(cluster.column){
+    order.gene_cell <- order_index.median(mat = order.gene$mat, class.label = z, col = TRUE) 
+  }else{
+    order.gene_cell <- order_index.label(mat = order.gene$mat, class.label = z, col = TRUE)
+  }
   
   counts <- order.gene_cell$mat
   #y <- order.gene$class.label
@@ -175,6 +213,12 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                          annotation_col = annotation_cell,
                          row_label = y,
                          col_label = z,
+                         legend = legend,
+                         annotation_legend = annotation_legend, 
+                         annotation_names_row = annotation_names_gene, 
+                         annotation_names_col = annotation_names_cell,
+                         show_rownames = show_genenames,
+                         show_colnames = show_cellnames,
                          clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
     )
   }
@@ -187,6 +231,12 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                          annotation_row = annotation_gene,
                          annotation_col = annotation_cell,
                          row_label = y,
+                         legend = legend,
+                         annotation_legend = annotation_legend, 
+                         annotation_names_row = annotation_names_gene, 
+                         annotation_names_col = annotation_names_cell,
+                         show_rownames = show_genenames,
+                         show_colnames = show_cellnames,
                          clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
     )
     }
@@ -200,6 +250,12 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                            annotation_row = annotation_gene,
                            annotation_col = annotation_cell,
                            col_label = z,
+                           legend = legend,
+                           annotation_legend = annotation_legend, 
+                           annotation_names_row = annotation_names_gene, 
+                           annotation_names_col = annotation_names_cell,
+                           show_rownames = show_genenames,
+                           show_colnames = show_cellnames,
                            clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
       )
       }
@@ -211,6 +267,12 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                            cluster_cols = FALSE,
                            annotation_row = annotation_gene,
                            annotation_col = annotation_cell,
+                           legend = legend,
+                           annotation_legend = annotation_legend, 
+                           annotation_names_row = annotation_names_gene, 
+                           annotation_names_col = annotation_names_cell,
+                           show_rownames = show_genenames,
+                           show_colnames = show_cellnames,
                            clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
       )
       }
