@@ -44,8 +44,10 @@ calculate_performance_metric = function(log.likelihoods, method="perplexity") {
 # Actually render the plot described in visualize_model_performance.
 render_model_performance_plot = function(cluster.scores, cluster.label, metric.type,
                                          title="Model Performance (All Chains") {
-  plot = ggplot2::ggplot(cluster.scores, aes(x=size, y=metric)) + geom_point() +
-           xlab(cluster.label) + ylab(metric.type) + 
-           ggtitle(title) + theme_bw()
+  plot = ggplot2::ggplot(cluster.scores, ggplot2::aes(x=factor(size), y=metric)) + 
+           ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
+           ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1)) +
+           ggplot2::xlab(cluster.label) + ggplot2::ylab(metric.type) + 
+           ggplot2::ggtitle(title) + ggplot2::theme_bw()
   return(plot)
 }
