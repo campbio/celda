@@ -325,3 +325,28 @@ getL.celda_C = function(celda.mod) { return(NA) }
 celda_heatmap.celda_C = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, z=celda.mod$z, ...)
 }
+
+
+#' @export
+visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
+                                               title="Model Performance (All Chains)") {
+  
+  cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
+  log.likelihoods = lapply(celda.list$res.list,
+                           function(mod) { completeLogLikelihood(mod) })
+  performance.metric = lapply(log.likelihoods, 
+                              calculate_performance_metric,
+                              method)
+  
+  # These methods return Rmpfr numbers that are extremely small and can't be 
+  # plotted, so log 'em first
+  if (method %in% c("perplexity", "harmonic")) {
+    performance.metric = lapply(performance.metric, log)
+    performance.metric = new("mpfr", unlist(performance.metric))
+    performance.metric = as.numeric(performance.metric)
+  }
+  
+  plot.df = data.frame(size=cluster.sizes,
+                       metric=performance.metric)
+  return(render_model_performance_plot(plot.df, "K", method, title))
+}

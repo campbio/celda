@@ -26,3 +26,26 @@ calculate_perplexity = function(completeLogLik) {
   perplexity = exp(Rmpfr::mean(mpfr_log_lik))^-1
   return(perplexity)
 }
+
+
+# Convenience function to calculate performance metrics by specifying a method. 
+calculate_performance_metric = function(log.likelihoods, method="perplexity") {
+    if (method == "perplexity") {
+    metric = calculate_perplexity(log.likelihoods)
+  } else if (method == "harmonic") {
+    metric = calculate_marginal_likelihood(log.likelihoods)
+  } else if (method == "loglik") {
+     metric = max(log.likelihoods)
+  } else stop("Invalid method specified")
+  return(metric)
+}
+
+
+# Actually render the plot described in visualize_model_performance.
+render_model_performance_plot = function(cluster.scores, cluster.label, metric.type,
+                                         title="Model Performance (All Chains") {
+  plot = ggplot2::ggplot(cluster.scores, aes(x=size, y=metric)) + geom_point() +
+           xlab(cluster.label) + ylab(metric.type) + 
+           ggtitle(title) + theme_bw()
+  return(plot)
+}
