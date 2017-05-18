@@ -10,6 +10,7 @@ Depends:
     R (>= 3.2.2)
 Imports:
     gtools,
+    ggplot2,
     entropy,
     RColorBrewer,
     pheatmap,

@@ -9,7 +9,7 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE,
   annotation_cell = NULL, annotation_gene = NULL,
   col = colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"), space =
-  "Lab")(100), legend = TRUE, annotation_legend = TRUE,
+  "Lab")(100), breaks = NULL, legend = TRUE, annotation_legend = TRUE,
   annotation_names_gene = TRUE, annotation_names_cell = TRUE,
   show_genenames = FALSE, show_cellnames = FALSE)
 }
@@ -35,6 +35,11 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 \item{annotation_gene}{a dataframe for the gene annotations (rows)}
 
 \item{col}{color for the heatmap}
+
+\item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
+element longer than color vector. Used for mapping values to colors. Useful, if needed 
+to map certain values to certain colors, to certain values. If value is NA then the 
+breaks are calculated automatically.}
 
 \item{legend}{logical to determine if legend should be drawn or not}
 
