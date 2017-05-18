@@ -9,7 +9,9 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE,
   annotation_cell = NULL, annotation_gene = NULL,
   col = colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"), space =
-  "Lab")(100))
+  "Lab")(100), breaks = NULL, legend = TRUE, annotation_legend = TRUE,
+  annotation_names_gene = TRUE, annotation_names_cell = TRUE,
+  show_genenames = FALSE, show_cellnames = FALSE)
 }
 \arguments{
 \item{counts}{the counts matrix}
@@ -33,6 +35,23 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 \item{annotation_gene}{a dataframe for the gene annotations (rows)}
 
 \item{col}{color for the heatmap}
+
+\item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
+element longer than color vector. Used for mapping values to colors. Useful, if needed 
+to map certain values to certain colors, to certain values. If value is NA then the 
+breaks are calculated automatically.}
+
+\item{legend}{logical to determine if legend should be drawn or not}
+
+\item{annotation_legend}{boolean value showing if the legend for annotation tracks should be drawn}
+
+\item{annotation_names_gene}{boolean value showing if the names for gene annotation tracks should be drawn}
+
+\item{annotation_names_cell}{boolean value showing if the names for cell annotation tracks should be drawn}
+
+\item{show_genenames}{boolean specifying if gene names are be shown}
+
+\item{show_cellnames}{boolean specifying if cell names are be shown}
 
 \item{scale_fun}{specify the function for scaling}
 }
