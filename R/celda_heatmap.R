@@ -84,6 +84,10 @@ robust_scale <- function(x){
 #' @param annotation_cell a dataframe for the cell annotations (columns)
 #' @param annotation_gene a dataframe for the gene annotations (rows)
 #' @param col color for the heatmap
+#' @param breaks a sequence of numbers that covers the range of values in mat and is one 
+#' element longer than color vector. Used for mapping values to colors. Useful, if needed 
+#' to map certain values to certain colors, to certain values. If value is NA then the 
+#' breaks are calculated automatically.
 #' @param legend logical to determine if legend should be drawn or not
 #' @param annotation_legend boolean value showing if the legend for annotation tracks should be drawn 
 #' @param annotation_names_gene boolean value showing if the names for gene annotation tracks should be drawn 
@@ -99,6 +103,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  cluster.row=TRUE, cluster.column = TRUE,
                                  annotation_cell = NULL, annotation_gene = NULL, 
                                  col=colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100),
+                                 breaks = NULL, 
                                  legend = TRUE,
                                  annotation_legend = TRUE,
                                  annotation_names_gene = TRUE, 
@@ -198,15 +203,21 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   y <- order.gene$class.label
   z <- order.gene_cell$class.label
   
-  
   ## Set color 
   #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 3, name = "RdYlBu"))(100)  # ToDo: need to be more flexible or fixed to a better color list
   #col.pal <- gplots::bluered(200)
+  if(is.null(breaks)){
+    col.len <- length(col)
+    mid.range <- quantile(seq(min(counts), max(counts), length.out = col.len), c(0.35, 0.36))
+    breaks <- c(seq(min(counts), mid.range[1], length.out = round(col.len/2) + 1  ),
+                seq(mid.range[2], max(counts), length.out = col.len-round(col.len/2) ))
+  }
   
   if(cluster.row & cluster.column){
     celda::semi_pheatmap(mat = counts, 
                          #color = colorRampPalette(c( "blue", "red"))(length(-12:12)),breaks=c(seq(0, 8.871147e-10, length.out = 11), 5.323741e-08 ),
                          color = col, 
+                         breaks = breaks, 
                          cutree_rows = L,
                          cutree_cols = K,
                          annotation_row = annotation_gene,
@@ -226,6 +237,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   if(cluster.row & (!cluster.column)){
     celda::semi_pheatmap(mat = counts, 
                          color = col,
+                         breaks = breaks, 
                          cutree_rows = L,
                          cluster_cols = FALSE,
                          annotation_row = annotation_gene,
@@ -245,6 +257,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
     if((!cluster.row) & cluster.column){
       celda::semi_pheatmap(mat = counts, 
                            color = col,
+                           breaks = breaks, 
                            cluster_rows = FALSE,
                            cutree_cols = K,
                            annotation_row = annotation_gene,
@@ -263,6 +276,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
     if((!cluster.row) & (!cluster.column) ){
       celda::semi_pheatmap(mat = counts,
                            color = col,
+                           breaks = breaks, 
                            cluster_rows = FALSE,
                            cluster_cols = FALSE,
                            annotation_row = annotation_gene,
