@@ -302,9 +302,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   }
   
   y.final.order = reorder.label.by.size(y.final, L)
-  
+  names = list(row=rownames(counts), column=colnames(counts))  
+
   result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-                finalLogLik=ll.final, L=L, beta=beta, delta=delta, seed=seed)
+                finalLogLik=ll.final, L=L, beta=beta, delta=delta, seed=seed, names=names)
   
   if (save.prob) result$y.probability = y.probs else result$y.probability = NA
   if (save.history) result$complete.y = y.all else result$complete.y = NA
@@ -388,10 +389,10 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
   for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
 
   L.names = paste0("L", 1:L)
-  colnames(n.TS.by.C) = colnames(counts)
+  colnames(n.TS.by.C) = celda.obj$names$column
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = rownames(counts)
+  rownames(n.G.by.TS) = celda.obj$names$row
   
   if(any("counts" %in% type)) {
     counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS)

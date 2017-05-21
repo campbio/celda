@@ -245,7 +245,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
   } else {
-    s = as.numeric(as.factor(sample.label))
+    sample.label = as.factor(sample.label)
+    s = as.numeric(sample.label)
   }  
   
   ## Randomly select z and y
@@ -271,7 +272,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   nG = nrow(counts)
   nM = ncol(counts)
   
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=1)
+  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   
   iter = 1
   continue = TRUE
@@ -306,7 +307,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
       
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
@@ -433,12 +434,13 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   
   ## Peform reordering
   new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
-  
+  names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
+ 
   result =  list(z=new$z, y=new$y, z.stability=z.stability.final, 
                  y.stability=y.stability.final,  complete.z.stability=z.stability, 
                  complete.y.stability=y.stability,  completeLogLik=ll, 
                  finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
-                 beta=beta, delta=delta, seed=seed)
+                 beta=beta, delta=delta, seed=seed, sample.label=sample.label, names=names)
   
   if (save.prob) {
     result$z.prob = z.probs.final
@@ -464,7 +466,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
 
 
 #' @export
-factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
   K = celda.obj$K
   L = celda.obj$L
@@ -473,6 +475,7 @@ factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("cou
   alpha = celda.obj$alpha
   beta = celda.obj$beta
   delta = celda.obj$delta
+  sample.label = celda.obj$sample.label
   
   counts.list = c()
   prop.list = c()
@@ -496,12 +499,12 @@ factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("cou
 
   L.names = paste0("L", 1:L)
   K.names = paste0("K", 1:K)
-  colnames(n.TS.by.C) = colnames(counts)
+  colnames(n.TS.by.C) = celda.obj$names$column
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = rownames(counts)
+  rownames(n.G.by.TS) = celda.obj$names$row
   rownames(m.CP.by.S) = K.names
-  colnames(m.CP.by.S) = colnames(counts)
+  colnames(m.CP.by.S) = celda.obj$names$sample
   colnames(n.CP.by.TS) = L.names
   rownames(n.CP.by.TS) = K.names
     

@@ -65,7 +65,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
   } else {
-    s = as.numeric(as.factor(sample.label))
+    sample.label = as.factor(sample.label)
+    s = as.numeric(sample.label)
   }  
   
   set.seed(seed)
@@ -167,11 +168,11 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   }
   
   z.final.reorder = reorder.label.by.size(z.final, K)
-  
-  result = list(z=z.final.reorder, completeLogLik=ll,  finalLogLik=ll.final, seed=seed, K=K)
+  names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
+
+  result = list(z=z.final.reorder, completeLogLik=ll,  finalLogLik=ll.final, seed=seed, K=K, sample.label=sample.label, alpha=alpha, beta=beta, names=names)
   if (save.prob) result$z.probability = z.probs else result$z.probability = NA
   if (save.history) result$complete.z = z.all else result$complete.z = NA
-  
   
   class(result) = "celda_C"
   return(result)
@@ -247,12 +248,13 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
 }
 
 #' @export
-factorizeMatrix.celda_C = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
   K = celda.obj$K
   z = celda.obj$z
   alpha = celda.obj$alpha
   beta = celda.obj$beta
+  sample.label = celda.obj$sample.label
 
   counts.list = c()
   prop.list = c()
@@ -264,10 +266,10 @@ factorizeMatrix.celda_C = function(counts, sample.label, celda.obj, type=c("coun
   n.G.by.CP = t(rowsum(t(counts), group=z, reorder=TRUE))
 
   K.names = paste0("K", 1:K)
-  rownames(n.G.by.CP) = rownames(counts)
+  rownames(n.G.by.CP) = celda.obj$names$row
   colnames(n.G.by.CP) = K.names
   rownames(m.CP.by.S) = K.names
-  colnames(m.CP.by.S) = colnames(counts)
+  colnames(m.CP.by.S) = celda.obj$names$sample
               
   if(any("counts" %in% type)) {
     counts.list = list(sample.states=m.CP.by.S, gene.states=n.G.by.CP)
