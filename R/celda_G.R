@@ -359,6 +359,13 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
       cell.counts[,i] = cell.counts[,i] + rmultinom(1, size=cell.dist[j], prob=psi[,j])
     }
   }
+  
+  ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
+  ## constraint:
+  zero.row.idx = which(rowSums(cell.counts) == 0)
+  cell.counts = cell.counts[-zero.row.idx, ]
+  y = y[-zero.row.idx]
+    
 
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
