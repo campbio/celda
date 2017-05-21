@@ -30,7 +30,16 @@
 
 # nG.by.TS = Number of genes in each Transcriptional State
 
-
+#' @param counts A numeric count matrix
+#' @param s The number of samples             ??
+#' @param z A numeric vector of cell cluster assignments 
+#' @param y A numeric vector of gene cluster assignments
+#' @param K The number of cell populations 
+#' @param L The number of clusters being considered
+#' @param alpha  ??   Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution  
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @export
 cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
   
@@ -177,7 +186,17 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
   return(final)
 }
 
-
+#' @param S The number of samples
+#' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample 
+#' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts
+#' @param G The number of genes 
+#' @param K The number of cell populations 
+#' @param L The number of gene clusters being considered
+#' @param alpha   ??
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param seed starting point used for generating simulated data
 #' @export
 simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
@@ -231,7 +250,24 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
-
+#' @param counts A numeric count matrix.
+#' @param sample.label  ??
+#' @param K The number of cell populations.
+#' @param L The number of gene clusters being considered.
+#' @param alpha   ??
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
+#' @param seed Parameter to set.seed() for random number generation
+#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
+#' @param z.split.on.iter   ??
+#' @param z.num.split     ??
+#' @param y.split.on.iter   ??
+#' @param y.num.splits    ??
+#' @param thread The thread index, used for logging purposes
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
