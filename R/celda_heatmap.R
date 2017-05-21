@@ -206,11 +206,19 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   ## Set color 
   #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 3, name = "RdYlBu"))(100)  # ToDo: need to be more flexible or fixed to a better color list
   #col.pal <- gplots::bluered(200)
+  
+  ## set breaks
+  #if(is.null(breaks)){
+  #  col.len <- length(col)
+  #  mid.range <- quantile(seq(min(counts), max(counts), length.out = col.len), c(0.35, 0.36))
+  #  breaks <- c(seq(min(counts), mid.range[1], length.out = round(col.len/2) + 1  ),
+  #              seq(mid.range[2], max(counts), length.out = col.len-round(col.len/2) ))
+  #}
   if(is.null(breaks)){
     col.len <- length(col)
-    mid.range <- quantile(seq(min(counts), max(counts), length.out = col.len), c(0.35, 0.36))
-    breaks <- c(seq(min(counts), mid.range[1], length.out = round(col.len/2) + 1  ),
-                seq(mid.range[2], max(counts), length.out = col.len-round(col.len/2) ))
+    bound.range <- max(abs(counts))
+    breaks <- c(seq(-bound.range, 0,  length.out = round(col.len/2) + 1  ),
+                seq(0+1e-6, bound.range, length.out = col.len-round(col.len/2) ))
   }
   
   if(cluster.row & cluster.column){
