@@ -30,7 +30,16 @@
 
 # nG.by.TS = Number of genes in each Transcriptional State
 
-
+#' @param counts A numeric count matrix
+#' @param s The number of samples             ??
+#' @param z A numeric vector of cell cluster assignments 
+#' @param y A numeric vector of gene cluster assignments
+#' @param K The number of cell populations 
+#' @param L The number of clusters being considered
+#' @param alpha  ??   Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution  
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @export
 cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
   
@@ -177,7 +186,17 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
   return(final)
 }
 
-
+#' @param S The number of samples
+#' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample 
+#' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts
+#' @param G The number of genes 
+#' @param K The number of cell populations 
+#' @param L The number of gene clusters being considered
+#' @param alpha   ??
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param seed starting point used for generating simulated data
 #' @export
 simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
@@ -228,10 +247,33 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   
   new = reorder.labels.by.size.then.counts(cell.counts, z=z, y=y, K=K, L=L)
   
+  ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
+  ## constraint (columns are guarnteed at least one count):
+  zero.row.idx = which(rowSums(cell.counts) == 0)
+  cell.counts = cell.counts[-zero.row.idx, ]
+  new$y = new$y[-zero.row.idx]
+  
   return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
-
+#' @param counts A numeric count matrix.
+#' @param sample.label  ??
+#' @param K The number of cell populations.
+#' @param L The number of gene clusters being considered.
+#' @param alpha   ??
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
+#' @param seed Parameter to set.seed() for random number generation
+#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
+#' @param z.split.on.iter   ??
+#' @param z.num.split     ??
+#' @param y.split.on.iter   ??
+#' @param y.num.splits    ??
+#' @param thread The thread index, used for logging purposes
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
@@ -245,7 +287,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
   } else {
-    s = as.numeric(as.factor(sample.label))
+    sample.label = as.factor(sample.label)
+    s = as.numeric(sample.label)
   }  
   
   ## Randomly select z and y
@@ -271,7 +314,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   nG = nrow(counts)
   nM = ncol(counts)
   
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=1)
+  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   
   iter = 1
   continue = TRUE
@@ -306,7 +349,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
       
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=1)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
@@ -433,12 +476,13 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   
   ## Peform reordering
   new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
-  
+  names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
+ 
   result =  list(z=new$z, y=new$y, z.stability=z.stability.final, 
                  y.stability=y.stability.final,  complete.z.stability=z.stability, 
                  complete.y.stability=y.stability,  completeLogLik=ll, 
                  finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
-                 beta=beta, delta=delta, seed=seed)
+                 beta=beta, delta=delta, seed=seed, sample.label=sample.label, names=names)
   
   if (save.prob) {
     result$z.prob = z.probs.final
@@ -464,7 +508,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
 
 
 #' @export
-factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
   K = celda.obj$K
   L = celda.obj$L
@@ -473,6 +517,7 @@ factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("cou
   alpha = celda.obj$alpha
   beta = celda.obj$beta
   delta = celda.obj$delta
+  sample.label = celda.obj$sample.label
   
   counts.list = c()
   prop.list = c()
@@ -496,12 +541,12 @@ factorizeMatrix.celda_CG = function(counts, sample.label, celda.obj, type=c("cou
 
   L.names = paste0("L", 1:L)
   K.names = paste0("K", 1:K)
-  colnames(n.TS.by.C) = colnames(counts)
+  colnames(n.TS.by.C) = celda.obj$names$column
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = rownames(counts)
+  rownames(n.G.by.TS) = celda.obj$names$row
   rownames(m.CP.by.S) = K.names
-  colnames(m.CP.by.S) = colnames(counts)
+  colnames(m.CP.by.S) = celda.obj$names$sample
   colnames(n.CP.by.TS) = L.names
   rownames(n.CP.by.TS) = K.names
     
