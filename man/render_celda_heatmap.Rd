@@ -7,9 +7,8 @@
 render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   scale.row = TRUE, scale_function = scale, normalize = "none",
   z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE,
-  annotation_cell = NULL, annotation_gene = NULL,
-  col = colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"), space =
-  "Lab")(100), breaks = NULL, legend = TRUE, annotation_legend = TRUE,
+  annotation_cell = NULL, annotation_gene = NULL, col = NULL,
+  breaks = NULL, legend = TRUE, annotation_legend = TRUE,
   annotation_names_gene = TRUE, annotation_names_cell = TRUE,
   show_genenames = FALSE, show_cellnames = FALSE)
 }
@@ -20,9 +19,9 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 
 \item{y}{A numeric vector of cluster assignments for gene}
 
-\item{scale.log}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
+\item{scale.log}{boolean values to specify if the log-transformation is perfomred to the count matrix}
 
-\item{scale.row}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
+\item{scale.row}{boolean values to psecify if the z-score transformation is performed to the counts matrix}
 
 \item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.}
 

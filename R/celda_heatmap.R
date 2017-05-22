@@ -75,8 +75,8 @@ robust_scale <- function(x){
 #' @param counts the counts matrix 
 #' @param z A numeric vector of cluster assignments for cell 
 #' @param y A numeric vector of cluster assignments for gene
-#' @param scale.log specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
-#' @param scale.row specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
+#' @param scale.log boolean values to specify if the log-transformation is perfomred to the count matrix 
+#' @param scale.row boolean values to psecify if the z-score transformation is performed to the counts matrix 
 #' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.
 #' @param scale_fun specify the function for scaling 
 #' @param cluster.row boolean values determining if rows should be clustered
@@ -102,7 +102,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  z.trim=c(-2,2), 
                                  cluster.row=TRUE, cluster.column = TRUE,
                                  annotation_cell = NULL, annotation_gene = NULL, 
-                                 col=colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100),
+                                 col= NULL,
                                  breaks = NULL, 
                                  legend = TRUE,
                                  annotation_legend = TRUE,
@@ -205,25 +205,28 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   
   ## Set color 
   #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 3, name = "RdYlBu"))(100)  # ToDo: need to be more flexible or fixed to a better color list
-  #col.pal <- gplots::bluered(200)
   
-  ## set breaks
-  #if(is.null(breaks)){
-  #  col.len <- length(col)
-  #  mid.range <- quantile(seq(min(counts), max(counts), length.out = col.len), c(0.35, 0.36))
-  #  breaks <- c(seq(min(counts), mid.range[1], length.out = round(col.len/2) + 1  ),
-  #              seq(mid.range[2], max(counts), length.out = col.len-round(col.len/2) ))
-  #}
-  if(is.null(breaks)){
+  ## set breaks & color
+  ubound.range <- max(counts)
+  lbound.range <- min(counts)
+  if(lbound.range<0 & 0<ubound.range){  # both sides for the counts values
+    if(is.null(col)){
+      col <- colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)
+    }
     col.len <- length(col)
-    bound.range <- max(abs(counts))
-    breaks <- c(seq(-bound.range, 0,  length.out = round(col.len/2) + 1  ),
-                seq(0+1e-6, bound.range, length.out = col.len-round(col.len/2) ))
+    if(is.null(breaks)){
+      breaks <- c(seq(lbound.range, 0,  length.out = round(col.len/2) + 1  ),
+                  seq(0+1e-6, ubound.range, length.out = col.len-round(col.len/2) ))
+    }
+  }else{  # only one side for the counts values (eihter positive or negative )
+    if(is.null(col)){
+      col <- colorRampPalette(c("#FFFFFF", RColorBrewer::brewer.pal(n = 9, name = "Reds")))(100)
+    }
   }
+
   
   if(cluster.row & cluster.column){
     celda::semi_pheatmap(mat = counts, 
-                         #color = colorRampPalette(c( "blue", "red"))(length(-12:12)),breaks=c(seq(0, 8.871147e-10, length.out = 11), 5.323741e-08 ),
                          color = col, 
                          breaks = breaks, 
                          cutree_rows = L,
