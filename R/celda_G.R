@@ -452,6 +452,7 @@ celda_heatmap.celda_G = function(celda.mod, counts, ...) {
 
 # TODO DRYer implementation in concert with celda_C
 #' @export
+#' @import Rmpfr
 visualize_model_performance.celda_G = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   
