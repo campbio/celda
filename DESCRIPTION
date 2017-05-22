@@ -21,7 +21,8 @@ Imports:
     grDevices,
     graphics,
     Rmpfr,
-    gplots
+    gplots,
+    doParallel
 Suggests:
     testthat,
     knitr,

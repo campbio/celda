@@ -334,6 +334,7 @@ celda_heatmap.celda_C = function(celda.mod, counts, ...) {
 
 
 #' @export
+#' @import Rmpfr
 visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   
@@ -354,5 +355,5 @@ visualize_model_performance.celda_C = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(render_model_performance_plot(plot.df, "K", method, title))
+  return(celda::render_model_performance_plot(plot.df, "K", method, title))
 }

@@ -460,6 +460,7 @@ celda_heatmap.celda_G = function(celda.mod, counts, ...) {
 
 # TODO DRYer implementation in concert with celda_C
 #' @export
+#' @import Rmpfr
 visualize_model_performance.celda_G = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   
@@ -480,5 +481,5 @@ visualize_model_performance.celda_G = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(render_model_performance_plot(plot.df, "L", method, title))
+  return(celda::render_model_performance_plot(plot.df, "L", method, title))
 }
