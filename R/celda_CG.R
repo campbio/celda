@@ -639,7 +639,7 @@ visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
                                                title="Model Performance (All Chains)") {
   # We can leverage the fact that the celda_C and celda_G model performance plots
   # just try to pull K and L off of each object in the result list:
-  k.plot = visualize_model_performance.celda_C(celda.list, method, title)
-  l.plot = visualize_model_performance.celda_G(celda.list, method, title)
+  k.plot = celda::visualize_model_performance.celda_C(celda.list, method, title)
+  l.plot = celda::visualize_model_performance.celda_G(celda.list, method, title)
   return(list(K=k.plot, L=l.plot))
 }
