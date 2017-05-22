@@ -28,6 +28,15 @@
 
 # nG.by.TS = Number of genes in each Transcriptional State
 
+
+
+#' @param S Total number of samples
+#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution
+#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
+#' @param G Total number of Genes to be simulated
+#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
+#' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @export
 simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
                          G=500, K=5, alpha=1, beta=1) {
@@ -49,16 +58,34 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   ## Select transcript distribution for each cell
   cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
+  ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
+  ## constraint (columns are guarnteed at least one count):
+  zero.row.idx = which(rowSums(cell.counts) == 0)
+  cell.counts = cell.counts[-zero.row.idx, ]
+  
   return(list(z=cell.state, counts=cell.counts, sample=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
 
+
+#' @param counts A numeric count matrix
+#' @param sample.label A vector indicating the sample for each cell (column) in the count matrix
+#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
+#' @param beta Non-zero concentration parameter for gene Dirichlet distribution
+#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25 
+#' @param seed Parameter to set.seed() for random number generation
+#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
+#' @param z.split.on.iter On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.
+#' @param z.num.splits Maximum number of times to perform the heuristic described in “z.split.on.iter”.
+#' @param thread The thread index, used for logging purposes
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
                    seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3, 
                    thread=1, save.history=FALSE, save.prob=FALSE, ...) {
   
-  message("celda_C entered")
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
   } else if(is.factor(sample.label)) {
@@ -193,6 +220,14 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, alpha, beta) {
   return(final)
 }
 
+
+
+#' @param counts A numeric count matrix
+#' @param s A vector indicating the sample for each cell (column) in the count matrix
+#' @param z A numeric vector of cluster assignments
+#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
+#' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @export
 cC.calcLLFromVariables = function(counts, s, z, K, alpha, beta) {
   
@@ -246,6 +281,11 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   return(final)
 }
 
+
+
+#' @param counts A numeric count matrix
+#' @param celda.obj Object return from celda_C function
+#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
@@ -282,10 +322,10 @@ factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proporti
   if(any("posterior" %in% type)) {
     post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
                      gene.states = normalizeCounts(n.G.by.CP + beta, scale.factor=1))
-    res = c(res, posterior = list(post.list))                           
+  res = c(res, posterior = list(post.list))                           
   }
 
-  return(res)
+return(res)
 }
 
 
@@ -294,40 +334,51 @@ factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proporti
 ################################################################################
 # celda_C S3 methods                                                           #
 ################################################################################
+#' @param celda.mod A celda model object of class "celda_C"
 #' @export
 finalClusterAssignment.celda_C = function(celda.mod) {
   return(celda.mod$z)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_C"
 #' @export
 completeClusterHistory.celda_C = function(celda.mod) {
   return(celda.mod$complete.z)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_C"
 #' @export
 clusterProbabilities.celda_C = function(celda.mod) {
   return(celda.mod$z.probability)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_C"
 #' @export
 getK.celda_C = function(celda.mod) {
   return(celda.mod$K)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_C"
 #' @export
 getL.celda_C = function(celda.mod) { return(NA) }
 
 
+#' @param celda.mod A celda model object of class "celda_C"
+#' @param counts A numeric count matrix
 #' @export
 celda_heatmap.celda_C = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, z=celda.mod$z, ...)
 }
 
 
+
+#' @param celda.list A celda_list object returned from celda()
+#' @param method One of “perplexity”, “harmonic”, or “loglik”
+#' @param title Title for the plot
 #' @export
 #' @import Rmpfr
 visualize_model_performance.celda_C = function(celda.list, method="perplexity", 

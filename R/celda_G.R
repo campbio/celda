@@ -322,7 +322,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 #' 
 #' @param C The number of cells
 #' @param L The number of transcriptional states
-#' @param N.Range The range of counts each gene should have
+#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
 #' @param G The number of genes for which to simulate counts
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
@@ -374,7 +374,9 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
 
 
 
-
+#' @param counts A numeric count matrix
+#' @param celda.obj Object return from celda_C function
+#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
@@ -424,34 +426,41 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
 ################################################################################
 # celda_G S3 methods                                                           #
 ################################################################################
+#' @param celda.mod A celda model object of class "celda_G"
 #' @export
 finalClusterAssignment.celda_G = function(celda.mod) {
   return(celda.mod$y)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_G"
 #' @export
 completeClusterHistory.celda_G = function(celda.mod) {
   return(celda.mod$complete.y)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_G"
 #' @export
 clusterProbabilities.celda_G = function(celda.mod) {
   return(celda.mod$y.probability)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_G"
 #' @export
 getK.celda_G = function(celda.mod) { return(NA) }
 
 
+#' @param celda.mod A celda model object of class "celda_G"
 #' @export
 getL.celda_G = function(celda.mod) {
   return(celda.mod$L)
 }
 
 
+#' @param celda.mod A celda model object of class "celda_G"
+#' @param counts A numeric count matrix
 #' @export
 celda_heatmap.celda_G = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, y=celda.mod$y, ...)
@@ -459,6 +468,9 @@ celda_heatmap.celda_G = function(celda.mod, counts, ...) {
 
 
 # TODO DRYer implementation in concert with celda_C
+#' @param celda.list A celda_list object returned from celda()
+#' @param method One of “perplexity”, “harmonic”, or “loglik”
+#' @param title Title for the plot
 #' @export
 #' @import Rmpfr
 visualize_model_performance.celda_G = function(celda.list, method="perplexity", 
