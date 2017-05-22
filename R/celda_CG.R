@@ -41,7 +41,7 @@
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @export
-cCG.calcLLFromVariables = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
+calculate_loglik_from_variables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
   
   ## Calculate for "Theta" component
   m = table(z, s)
@@ -349,7 +349,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
       if(sum(z == previous.z[i]) == 0 & iter < max.iter) {
       
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cCG.calcLLFromVariables", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_CG", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
@@ -393,7 +393,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
       if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
         
         ## Split another cluster into two
-        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cCG.calcLLFromVariables", z=z, s=s, K=K, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="calculate_loglik_from_variables.celda_CG", z=z, s=s, K=K, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -409,7 +409,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
       message("Thread ", thread, " ", date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
-      z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="cCG.calcLLFromVariables")
+      z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -423,7 +423,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
       message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
-      y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="cCG.calcLLFromVariables")
+      y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
