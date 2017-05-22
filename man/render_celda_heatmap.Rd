@@ -23,6 +23,8 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 
 \item{scale.row}{Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE.}
 
+\item{normalize}{specify the normalization type: "cpm" or "none". Defualt to be "none".}
+
 \item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)}
 
 \item{cluster.row}{Logical; determining if rows should be clustered.}
@@ -40,17 +42,17 @@ element longer than color vector. Used for mapping values to colors. Useful, if 
 to map certain values to certain colors, to certain values. If value is NA then the 
 breaks are calculated automatically.}
 
-\item{legend}{logical; determining if legend should be drawn or not.}
+\item{legend}{logical; determining if legend should be drawn or not. Default to be TRUE.}
 
 \item{annotation_legend}{Logical; showing if the legend for annotation tracks should be drawn.}
 
-\item{annotation_names_gene}{Logical; showing if the names for gene annotation tracks should be drawn.}
+\item{annotation_names_gene}{Logical; showing if the names for gene annotation tracks should be drawn. Default to be TRUE.}
 
-\item{annotation_names_cell}{Logical; showing if the names for cell annotation tracks should be drawn.}
+\item{annotation_names_cell}{Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE.}
 
-\item{show_genenames}{Logical; specifying if gene names should be shown.}
+\item{show_genenames}{Logical; specifying if gene names should be shown. Default to be FALSE.}
 
-\item{show_cellnames}{Logical; specifying if cell names should be shown.}
+\item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
 
 \item{scale_fun}{specify the function for scaling. Defualt to be scale.}
 }
