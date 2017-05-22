@@ -94,3 +94,17 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 
   return(list(z=new.z, y=new.y))  
 }  
+
+
+#' Check whether a count matrix was the one used in a given celda run
+#' 
+#' Compare the MD5 checksum of a provided count.matrix to the count matrix
+#' checksum on a celda_list object, to see if they're the same.
+#' @param count.matrix A numeric matrix of counts
+#' @param celda.checksum An MD5 checksum from a celda_list object (as returned from celda())
+#' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise
+#' @export
+compare_count_matrix = function(count.matrix, celda.checksum) {
+  count.md5 = digest::digest(count.matrix, algo="md5")
+  return(count.md5 == celda.checksum)
+}

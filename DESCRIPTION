@@ -22,7 +22,8 @@ Imports:
     graphics,
     Rmpfr,
     gplots,
-    doParallel
+    doParallel,
+    digest
 Suggests:
     testthat,
     knitr,
