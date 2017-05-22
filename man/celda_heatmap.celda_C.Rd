@@ -10,6 +10,8 @@
 \item{celda.mod}{A celda model object of class "celda_C"}
 
 \item{counts}{A numeric count matrix}
+
+\item{...}{extra parameters passed onto the render_celda_heatmap}
 }
 \description{
 celda_heatmap for celda Cell clustering function

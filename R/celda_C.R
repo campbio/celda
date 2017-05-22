@@ -81,6 +81,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param thread The thread index, used for logging purposes
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
+#' @param ... extra parameters passed onto the celda_C 
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
                    seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3, 
@@ -371,6 +372,7 @@ getL.celda_C = function(celda.mod) { return(NA) }
 #' celda_heatmap for celda Cell clustering function 
 #' @param celda.mod A celda model object of class "celda_C"
 #' @param counts A numeric count matrix
+#' @param ... extra parameters passed onto the render_celda_heatmap
 #' @export
 celda_heatmap.celda_C = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, z=celda.mod$z, ...)
@@ -403,5 +405,5 @@ visualize_model_performance.celda_C = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(celda::render_model_performance_plot(plot.df, "K", method, title))
+  return(render_model_performance_plot(plot.df, "K", method, title))
 }

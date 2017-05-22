@@ -199,6 +199,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 #' @param seed starting point used for generating simulated data.
+#' @param ... extra parameters passed onto the simulateCells.celda_CG
 #' @export
 simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
@@ -272,12 +273,13 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param seed Parameter to set.seed() for random number generation
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
 #' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
-#' @param z.num.split Maximum number of times to perform the heuristic described in z.split.on.iter.
+#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter.
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
 #' @param thread The thread index, used for logging purposes.
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE.
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.
+#' @param ... extra parameters passed onto celda_CG
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
@@ -623,6 +625,8 @@ getL.celda_CG = function(celda.mod) {
 
 #' celda_heatmap for celda Cell and Gene clustering function 
 #' @param celda.mod A celda model object of "Celda_CG"
+#' @param counts A count matrix
+#' @param ... extra parameters passed onto render_celda_heatmap
 #' @export
 celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
@@ -630,7 +634,9 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 
 
 #' visualize_model_performance for Celda Cell and Gene clustering function 
-#' @param celda.mod A celda model object of "Celda_CG"
+#' @param celda.list A celda model object of "Celda_CG"
+#' @param title Title for the visualize_model_performance
+#' @param method One of “perplexity”, “harmonic”, or “loglik”
 #' @export
 #' @import Rmpfr
 visualize_model_performance.celda_CG = function(celda.list, method="perplexity", 

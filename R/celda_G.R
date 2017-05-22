@@ -130,14 +130,15 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' This function calculates the log-likelihood of a given set of cluster assigments for the samples
 #' represented in the provided count matrix.
 #' 
-#' @param ix The index of the cell being assigned a cluster during the current iteration of Gibbs sampling
-#' @param counts A numeric count matrix
-#' @param z A numeric vector of cluster assignments
-#' @param k The number of clusters being considered
-#' @param alpha Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution
+#' 
+#' @param n.TS.by.C Number of counts in each Transcriptional State per Cell 
+#' @param n.by.TS Number of counts per Transcriptional State
+#' @param nG.by.TS Number of genes in each Transcriptional State
+#' @param nG.in.Y  Number of genes in each of the cell cluster
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 #' @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 #' @keywords log likelihood
-#' @examples TODO
 cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
  
   ## Calculate for "Eta" component
@@ -174,20 +175,20 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' sequencing count matrix, using the celda Bayesian hierarchical model.
 #' 
 #' @param counts A numeric count matrix
-#' @param k The number of clusters to generate
-#' @param a Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution
-#' @param b Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
-#' @param g Number of cell states ("topics")
+#' @param L The number of clusters to generate
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
-#' @param min.cell Desired minimum number of cells per cluster
-#' @param seed Parameter to set.seed() for random number generation
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
-#' @param kick Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)
+#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
+#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
+#' @param seed Parameter to set.seed() for random number generation.
+#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE. 
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param thread The thread index, used for logging purposes
+#' @param ...  extra parameters passed onto celda_G
 #' @keywords LDA gene clustering gibbs
-#' @examples TODO
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    seed=12345, best=TRUE, y.split.on.iter=3, 
@@ -325,8 +326,8 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 #' @param G The number of genes for which to simulate counts
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param seed Parameter to set.seed() for random number generation
-#' @examples TODO
 #' @export
 simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000, 
                                          L=5, beta=1, gamma=1, delta=1, seed=12345) {
@@ -464,6 +465,7 @@ getL.celda_G = function(celda.mod) {
 #' celda_heatmap for celda Gene clustering function 
 #' @param celda.mod A celda model object of class "celda_G"
 #' @param counts A numeric count matrix
+#' @param ... extra parameters passed onto render_celda_heatmap
 #' @export
 celda_heatmap.celda_G = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, y=celda.mod$y, ...)
@@ -497,5 +499,5 @@ visualize_model_performance.celda_G = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(celda::render_model_performance_plot(plot.df, "L", method, title))
+  return(render_model_performance_plot(plot.df, "L", method, title))
 }

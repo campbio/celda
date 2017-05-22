@@ -79,7 +79,7 @@ robust_scale <- function(x){
 #' @param scale.row Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE. 
 #' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)
 #' @param normalize specify the normalization type: "cpm" or "none". Defualt to be "none". 
-#' @param scale_fun specify the function for scaling. Defualt to be scale. 
+#' @param scale_function specify the function for scaling. Defualt to be scale. 
 #' @param cluster.row Logical; determining if rows should be clustered.
 #' @param cluster.column Logical; determining if columns should be clustered.
 #' @param annotation_cell a dataframe for the cell annotations (columns).
@@ -95,6 +95,12 @@ robust_scale <- function(x){
 #' @param annotation_names_cell Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE. 
 #' @param show_genenames Logical; specifying if gene names should be shown. Default to be FALSE. 
 #' @param show_cellnames Logical; specifying if cell names should be shown. Default to be FALSE. 
+#' @import gtable
+#' @import grid
+#' @import scales
+#' @import RColorBrewer
+#' @import grDevices
+#' @import graphics
 #' @export 
 render_celda_heatmap <- function(counts, z=NULL, y=NULL, 
                                  scale.log=FALSE, scale.row=TRUE,
@@ -110,13 +116,6 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  annotation_names_cell = TRUE,
                                  show_genenames = FALSE, 
                                  show_cellnames = FALSE) {
-  require(gtable)
-  require(grid)
-  require(scales)
-  require(stats)
-  require(RColorBrewer)
-  require(grDevices)
-  require(graphics)
   
   
   if(normalize =="cpm"){
@@ -220,13 +219,13 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
     }
   }else{  # only one side for the counts values (eihter positive or negative )
     if(is.null(col)){
-      col <- colorRampPalette(c("#FFFFFF", RColorBrewer::brewer.pal(n = 9, name = "Reds")))(100)
+      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Reds")))(100)
     }
   }
 
   
   if(cluster.row & cluster.column){
-    celda::semi_pheatmap(mat = counts, 
+           semi_pheatmap(mat = counts, 
                          color = col, 
                          breaks = breaks, 
                          cutree_rows = L,
@@ -246,7 +245,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   }
   
   if(cluster.row & (!cluster.column)){
-    celda::semi_pheatmap(mat = counts, 
+          semi_pheatmap(mat = counts, 
                          color = col,
                          breaks = breaks, 
                          cutree_rows = L,
@@ -266,7 +265,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
     
     
     if((!cluster.row) & cluster.column){
-      celda::semi_pheatmap(mat = counts, 
+            semi_pheatmap(mat = counts, 
                            color = col,
                            breaks = breaks, 
                            cluster_rows = FALSE,
@@ -285,7 +284,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
       }
     
     if((!cluster.row) & (!cluster.column) ){
-      celda::semi_pheatmap(mat = counts,
+            semi_pheatmap(mat = counts,
                            color = col,
                            breaks = breaks, 
                            cluster_rows = FALSE,

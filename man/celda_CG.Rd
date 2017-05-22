@@ -35,6 +35,8 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{z.split.on.iter}{On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3.}
 
+\item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter.}
+
 \item{y.split.on.iter}{On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3.}
 
 \item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter.}
@@ -45,7 +47,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.}
 
-\item{z.num.split}{Maximum number of times to perform the heuristic described in z.split.on.iter.}
+\item{...}{extra parameters passed onto celda_CG}
 }
 \description{
 celda Cell and Gene clustering function
