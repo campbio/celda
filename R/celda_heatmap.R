@@ -72,7 +72,7 @@ robust_scale <- function(x){
 
 
 #' render function for celda heatmap plot
-#' @param counts A counts matrix. 
+#' @param counts A count matrix. 
 #' @param z A numeric vector of cluster assignments for cell. 
 #' @param y A numeric vector of cluster assignments for gene.
 #' @param scale.log Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE. 
