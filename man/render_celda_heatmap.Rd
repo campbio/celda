@@ -7,9 +7,8 @@
 render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   scale.row = TRUE, scale_function = scale, normalize = "none",
   z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE,
-  annotation_cell = NULL, annotation_gene = NULL,
-  col = colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"), space =
-  "Lab")(100), breaks = NULL, legend = TRUE, annotation_legend = TRUE,
+  annotation_cell = NULL, annotation_gene = NULL, col = NULL,
+  breaks = NULL, legend = TRUE, annotation_legend = TRUE,
   annotation_names_gene = TRUE, annotation_names_cell = TRUE,
   show_genenames = FALSE, show_cellnames = FALSE)
 }
