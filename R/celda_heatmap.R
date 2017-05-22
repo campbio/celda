@@ -75,8 +75,8 @@ robust_scale <- function(x){
 #' @param counts the counts matrix 
 #' @param z A numeric vector of cluster assignments for cell 
 #' @param y A numeric vector of cluster assignments for gene
-#' @param scale.log specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
-#' @param scale.row specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
+#' @param scale.log boolean values to specify if the log-transformation is perfomred to the count matrix 
+#' @param scale.row boolean values to psecify if the z-score transformation is performed to the counts matrix 
 #' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.
 #' @param scale_fun specify the function for scaling 
 #' @param cluster.row boolean values determining if rows should be clustered

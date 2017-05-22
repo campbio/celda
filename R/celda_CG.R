@@ -31,12 +31,12 @@
 # nG.by.TS = Number of genes in each Transcriptional State
 
 #' @param counts A numeric count matrix
-#' @param s The number of samples             ??
+#' @param s Vector of sample labels 
 #' @param z A numeric vector of cell cluster assignments 
 #' @param y A numeric vector of gene cluster assignments
 #' @param K The number of cell populations 
 #' @param L The number of clusters being considered
-#' @param alpha  ??   Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution  
+#' @param alpha  ???   non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution  
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
@@ -257,7 +257,7 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 }
 
 #' @param counts A numeric count matrix.
-#' @param sample.label  ??
+#' @param sample.label sample labels. 
 #' @param K The number of cell populations.
 #' @param L The number of gene clusters being considered.
 #' @param alpha   ??
@@ -267,13 +267,13 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
 #' @param seed Parameter to set.seed() for random number generation
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
-#' @param z.split.on.iter   ??
-#' @param z.num.split     ??
-#' @param y.split.on.iter   ??
-#' @param y.num.splits    ??
-#' @param thread The thread index, used for logging purposes
-#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
-#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
+#' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
+#' @param z.num.split Maximum number of times to perform the heuristic described in z.split.on.iter.
+#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
+#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
+#' @param thread The thread index, used for logging purposes.
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE.
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
@@ -506,8 +506,10 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
 
 
 
-
-#' @export
+#' @param counts
+#' @param celda.obj 
+#' @param type one of the "counts", "proportion", or "posterior". 
+#' @export 
 factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
   K = celda.obj$K
