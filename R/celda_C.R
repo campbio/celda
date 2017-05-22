@@ -83,6 +83,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
+    sample.label = s 
   } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
   } else {
