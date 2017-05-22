@@ -318,10 +318,10 @@ factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proporti
   if(any("posterior" %in% type)) {
     post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
                      gene.states = normalizeCounts(n.G.by.CP + beta, scale.factor=1))
-  res = c(res, posterior = list(post.list))                           
+    res = c(res, posterior = list(post.list))                           
   }
 
-return(res)
+  return(res)
 }
 
 

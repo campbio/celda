@@ -514,6 +514,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
 #' @param counts A numerix count matrix
 #' @param celda.obj object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
+#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
@@ -559,22 +560,22 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
     
   if(any("counts" %in% type)) {
     counts.list = list(sample.states = m.CP.by.S,
-    				   population.states = n.CP.by.TS, 
-    				   cell.states = n.TS.by.C,
-    				   gene.states = n.G.by.TS)
+            				   population.states = n.CP.by.TS, 
+            				   cell.states = n.TS.by.C,
+            				   gene.states = n.G.by.TS)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
     prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
-    				   population.states = normalizeCounts(n.CP.by.TS, scale.factor=1), 
+    				   population.states = t(normalizeCounts(t(n.CP.by.TS), scale.factor=1)), 
     				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
     				   gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
     post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
-    				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
-    				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+          				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
+          				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
     res = c(res, posterior = list(post.list))						    
   }
   
