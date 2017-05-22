@@ -30,6 +30,7 @@
 
 # nG.by.TS = Number of genes in each Transcriptional State
 
+#' calculate log lileklihood for the celda Cell and Gene clustering function
 #' @param counts A numeric count matrix.
 #' @param s Vector of sample labels.
 #' @param z A numeric vector of cell cluster assignments.
@@ -186,6 +187,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
   return(final)
 }
 
+#' simulateCells for the celda Cell and Gene clustering function
 #' @param S The number of samples.
 #' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample.
 #' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts.
@@ -256,6 +258,8 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
+#' celda Cell and Gene clustering function 
+#' 
 #' @param counts A numeric count matrix.
 #' @param sample.label A vector indicating the sample for each cell in the count matrix.
 #' @param K The number of cell populations.
@@ -505,7 +509,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
 }
 
 
-
+#' factorizeMatrix for celda Cell and Gene clustering function 
 #' @param counts A numerix count matrix
 #' @param celda.obj object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
@@ -580,26 +584,28 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
 ################################################################################
 # celda_CG S3 methods                                                          #
 ################################################################################
+#' finalClusterAssignment for the celda Cell and Gene clustering function 
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 finalClusterAssignment.celda_CG = function(celda.mod) {
   return(list(z=celda.mod$z, y=celda.mod$y))
 }
 
+#' completeClusterHistory for the celda Cell and Gene clustering function
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 completeClusterHistory.celda_CG = function(celda.mod) {
   return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
 }
 
-
+#' clusterProbabilities for the celda Cell and Gene clustering function
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 clusterProbabilities.celda_CG = function(celda.mod) {
   return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
 }
 
-
+#' getK for the celda Cell and Gene clustering function 
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 getK.celda_CG = function(celda.mod) {
@@ -607,6 +613,7 @@ getK.celda_CG = function(celda.mod) {
 }
 
 
+#' getL for the celda Cell and Gene clustering function
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 getL.celda_CG = function(celda.mod) {
@@ -614,6 +621,7 @@ getL.celda_CG = function(celda.mod) {
 }
 
 
+#' celda_heatmap for celda Cell and Gene clustering function 
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
@@ -621,6 +629,7 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 }
 
 
+#' visualize_model_performance for Celda Cell and Gene clustering function 
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 #' @import Rmpfr
