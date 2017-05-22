@@ -43,7 +43,6 @@
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @keywords log likelihood
-#' @examples TODO
 #' @export
 cG.calcLLFromVariables = function(counts, y, L, beta, delta, gamma) {
   n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
@@ -374,6 +373,8 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
 
 
 
+#' factorizeMatrix for celda Gene clustering funciton
+#' 
 #' @param counts A numeric count matrix
 #' @param celda.obj Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
@@ -426,20 +427,21 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
 ################################################################################
 # celda_G S3 methods                                                           #
 ################################################################################
+#' finalClusterAssignment for celda Gene clustering function
 #' @param celda.mod A celda model object of class "celda_G"
 #' @export
 finalClusterAssignment.celda_G = function(celda.mod) {
   return(celda.mod$y)
 }
 
-
+#' completeClusterHistory for celda Gene clustering function
 #' @param celda.mod A celda model object of class "celda_G"
 #' @export
 completeClusterHistory.celda_G = function(celda.mod) {
   return(celda.mod$complete.y)
 }
 
-
+#' clusterProbabilities for celda Gene clustering function 
 #' @param celda.mod A celda model object of class "celda_G"
 #' @export
 clusterProbabilities.celda_G = function(celda.mod) {
@@ -447,18 +449,19 @@ clusterProbabilities.celda_G = function(celda.mod) {
 }
 
 
+#' getK for celda Gene clustering function 
 #' @param celda.mod A celda model object of class "celda_G"
 #' @export
 getK.celda_G = function(celda.mod) { return(NA) }
 
-
+#' getL for celda Gene clustering function 
 #' @param celda.mod A celda model object of class "celda_G"
 #' @export
 getL.celda_G = function(celda.mod) {
   return(celda.mod$L)
 }
 
-
+#' celda_heatmap for celda Gene clustering function 
 #' @param celda.mod A celda model object of class "celda_G"
 #' @param counts A numeric count matrix
 #' @export
@@ -468,6 +471,7 @@ celda_heatmap.celda_G = function(celda.mod, counts, ...) {
 
 
 # TODO DRYer implementation in concert with celda_C
+#' visualize_model_performance for the celda Gene function
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of “perplexity”, “harmonic”, or “loglik”
 #' @param title Title for the plot

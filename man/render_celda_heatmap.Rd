@@ -13,7 +13,7 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   show_genenames = FALSE, show_cellnames = FALSE)
 }
 \arguments{
-\item{counts}{A counts matrix.}
+\item{counts}{A count matrix.}
 
 \item{z}{A numeric vector of cluster assignments for cell.}
 
