@@ -26,14 +26,14 @@ spearmanDist = function(x){
 stability = function(probs) {
   nStates <- ncol(probs)
   nData <- nrow(probs)
-  stability <- sum(1-apply(probs, 1, entropy::entropy) / log(nStates)) / nData
+  stability <- sum(1-base::apply(probs, 1, entropy::entropy) / log(nStates)) / nData
   return(stability)
 }
 
 second.best = function(v) sort(v, decreasing=TRUE)[2]
 
 normalizeLogProbs = function(ll.probs) {
-  ll.probs <- exp(sweep(ll.probs, 1, apply(ll.probs, 1, max), "-"))
+  ll.probs <- exp(sweep(ll.probs, 1, base::apply(ll.probs, 1, max), "-"))
   probs <- sweep(ll.probs, 1, rowSums(ll.probs), "/")
   return(probs)
 }
