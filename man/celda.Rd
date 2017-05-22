@@ -22,9 +22,7 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 
 \item{verbose}{Print messages during celda chain execution}
 
-\item{K}{An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)}
-
-\item{L}{An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)}
+\item{...}{extra parameters passed onto expand.grid}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters

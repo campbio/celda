@@ -39,6 +39,9 @@ normalizeLogProbs = function(ll.probs) {
 }
 
 
+#' normalizeCounts function 
+#' @param counts A count matrix 
+#' @param scale.factor the scalor for the normalization 
 #' @export
 normalizeCounts = function(counts, scale.factor=1e6) {
   counts.norm = sweep(counts, 2, colSums(counts) / scale.factor, "/")

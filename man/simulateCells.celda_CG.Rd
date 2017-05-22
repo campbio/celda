@@ -30,6 +30,8 @@ simulateCells.celda_CG(S = 10, C.Range = c(50, 100), N.Range = c(500,
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.}
 
 \item{seed}{starting point used for generating simulated data.}
+
+\item{...}{extra parameters passed onto the simulateCells.celda_CG}
 }
 \description{
 simulateCells for the celda Cell and Gene clustering function
