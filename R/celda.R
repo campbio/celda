@@ -43,7 +43,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   }  
   parallel::stopCluster(cl)
   
-  count.checksum = digest::digest(counts, algo="md5", serialize=F)
+  count.checksum = digest::digest(counts, algo="md5")
   
   celda.res = list(run.params=runs, res.list=res.list, 
                    content.type=model, count.checksum=count.checksum)
