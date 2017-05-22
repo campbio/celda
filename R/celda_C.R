@@ -328,6 +328,7 @@ celda_heatmap.celda_C = function(celda.mod, counts, ...) {
 
 
 #' @export
+#' @import Rmpfr
 visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   
