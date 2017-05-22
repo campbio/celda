@@ -13,9 +13,9 @@ vignette: >
 
 We will learn how to use the package `celda` to cluster single cell RNAseq experiments.
 
-Starting from a matrix of counts of transcripts (cells by transcripts). we will discuss the preliminary steps of ________, __________, and ________. Once we are satisfied that we have high-quality expression, we will consider tests for __________ and ways to visualize results.  
+Starting from a matrix of counts of transcripts (cells by transcripts). we will discuss the preliminary steps of normalization, and the creation of the celda object, the results are then analyzed through heatmaps and PCA. Once we are satisfied that we have high-quality expression, we will consider tests for __________ and ways to visualize results.  
 
-We will apply these methods to a data set of __________, measured on _________. 
+We will apply these methods to a randomly generated dataset, measured on counts. 
 
 ```{r,eval=T, warning = FALSE}
 library(devtools)
@@ -37,7 +37,7 @@ str(sim_counts)
 
 
 ```{r fig.width = 7, fig.height = 7}
-plot(sim_counts$counts, main = "Simulated Cell Counts", xlab = "gene", ylab = "cells")
+plot(sim_counts$counts, main = "Simulated Cell Counts", xlab = "transcripts", ylab = "cells")
 
 ```
 
@@ -45,7 +45,7 @@ plot(sim_counts$counts, main = "Simulated Cell Counts", xlab = "gene", ylab = "c
 
 ```{r fig.width = 7, fig.height = 7}
 norm.counts <- normalizeCounts(sim_counts$counts)
-plot(norm.counts, main = "Normalized Simulated Cell Counts", xlab = "gene", ylab = "cells")
+plot(norm.counts, main = "Normalized Simulated Cell Counts", xlab = "transcripts", ylab = "cells")
 ```
 
 ## Exploratory Data Analysis
