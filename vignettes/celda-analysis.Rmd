@@ -17,7 +17,7 @@ Starting from a matrix of counts of transcripts (cells by transcripts). we will 
 
 We will apply these methods to a data set of __________, measured on _________. 
 
-```{r,eval=T}
+```{r,eval=T, warning = FALSE}
 library(devtools)
 library(celda)
 library(Matrix)
@@ -26,43 +26,45 @@ library(ggplot2)
 ```
 
 
-We use the built-in data generating function `cCG.generateCells`
-
-
 ## Loading and transforming data
 
+We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` creates a list containing the original cell cluster
+
 ```{r}
-sim_counts = cCG.generateCells()
+sim_counts = simulateCells.celda_CG()
 str(sim_counts)
 ```
 
 
-Sean/Josh: Can you add some description on `cCG.generateCells`?
-
-Some illustrations.
-
-```{r}
-plot(1:10)
-qplot(1:10,1:10)
-
-
+```{r fig.width = 7, fig.height = 7}
+plot(sim_counts$counts, main = "Simulated Cell Counts", xlab = "gene", ylab = "cells")
 
 ```
 
+## Normalize counts data
+
+```{r fig.width = 7, fig.height = 7}
+norm.counts <- normalizeCounts(sim_counts$counts)
+plot(norm.counts, main = "Normalized Simulated Cell Counts", xlab = "gene", ylab = "cells")
+```
 
 ## Exploratory Data Analysis
 
 Let’s explore these data with a heatmap and some PCA.
 
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r, fig.show='hold', warning = FALSE, fig.width = 7, fig.height = 7}
+celdaCG.res = celda(counts = norm.counts, model = "celda_CG", nchains = 2, K =10, L =10)
+
+z = celdaCG.res$res.list[[2]]$z
+y = celdaCG.res$res.list[[2]]$y
+render_celda_heatmap(counts=norm.counts,z=z,y=y)
 ```
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r, fig.show='hold', fig.width = 7, fig.height = 7}
+z = t(scale(t(norm.counts)))
+pc = prcomp(z, center = F, scale = F)
+plot(pc$rotation[,1], pc$rotation[,2], 
+    pch=21, col="black", bg="blue",
+    xlab="PC1", ylab="PC2")
 ```
 
-
-## TBD
 
