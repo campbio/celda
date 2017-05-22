@@ -58,11 +58,6 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   ## Select transcript distribution for each cell
   cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
-  ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
-  ## constraint (columns are guarnteed at least one count):
-  zero.row.idx = which(rowSums(cell.counts) == 0)
-  cell.counts = cell.counts[-zero.row.idx, ]
-  
   return(list(z=cell.state, counts=cell.counts, sample=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
