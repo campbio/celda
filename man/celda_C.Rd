@@ -35,6 +35,8 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
 \item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
+
+\item{...}{extra parameters passed onto the celda_C}
 }
 \description{
 celda Cell clustering function
