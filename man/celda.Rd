@@ -5,7 +5,7 @@
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
 celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
-  seed = 12345, verbose = F, ...)
+  seed = 12345, verbose = F, logfile = "", ...)
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -21,6 +21,10 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 \item{seed}{The base seed for random number generation. Each chain celda runs with have a seed index off of this one.}
 
 \item{verbose}{Print messages during celda chain execution}
+
+\item{...}{extra parameters passed onto expand.grid}
+
+\item{logfile}{Path to file for logging events from worker threads. By default, messages are redirected to stderr of the main process.}
 
 \item{K}{An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)}
 

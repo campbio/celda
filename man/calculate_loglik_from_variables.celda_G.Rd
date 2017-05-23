@@ -24,8 +24,5 @@
 This function calculates the log likelihood of each clustering of genes generated
 over multiple iterations of Gibbs sampling.
 }
-\examples{
-TODO
-}
 \keyword{likelihood}
 \keyword{log}

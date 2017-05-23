@@ -10,13 +10,15 @@ simulateCells.celda_G(C = 100, N.Range = c(500, 5000), G = 1000, L = 5,
 \arguments{
 \item{C}{The number of cells}
 
-\item{N.Range}{The range of counts each gene should have}
+\item{N.Range}{Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution}
 
 \item{G}{The number of genes for which to simulate counts}
 
 \item{L}{The number of transcriptional states}
 
 \item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
+
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
 
 \item{delta}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
 
@@ -25,7 +27,4 @@ simulateCells.celda_G(C = 100, N.Range = c(500, 5000), G = 1000, L = 5,
 \description{
 Generate a simulated count matrix, based off a generative distribution whose 
 parameters can be provided by the user.
-}
-\examples{
-TODO
 }

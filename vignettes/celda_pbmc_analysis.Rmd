@@ -1,0 +1,83 @@
+---
+title: "PBMC analysis"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.align = "center")
+library(celda)
+library(Matrix)
+library(data.table)
+# library(RColorBrewer)
+# library(ggplot2)
+# library(gtools)
+library(pheatmap)
+# library(reshape2)
+# library(vcd)
+# library(corrplot)
+# library(gtable)
+# library(scales)
+
+```
+
+
+```{r}
+### Read Data
+cmatp<-(readRDS("../data/cmatp"))
+cmatp_select <- cmatp[as.vector(tcrossprod(matrix(rep(1.0,2700),1,2700),cmatp>0))>500,]
+```
+
+### Initial Visualization
+
+```{r pheatmap_toy_1, fig.align = "center"}
+pheatmap(scale(log(as.matrix(cmatp_select+1)),center = F),cluster_rows = FALSE, cluster_cols = FALSE)
+```
+
+
+### 2.1.3 Cellular clustering
+
+```{r}
+toy_celda_c = celda(as.matrix(cmatp_select), model="celda_C",K = 15)
+```
+
+What we care most in this result is what are the cluster labels that each of the cells are assigned to.  This can be acessed as
+
+```{r}
+z <- toy_celda_c$res.list[[1]]$z
+```
+
+###  Plot heatmap with estimated cell cluster labels
+
+```{r celda_heatmap_toy_1,fig.width=7,fig.height=5 ,	out.width="0.6\\linewidth", fig.align = "center",eval=FALSE}
+log_cmatp_select<-cmatp_select
+log_cmatp_select@x<- log(cmatp_select@x)
+a= as.matrix(cmatp_select)
+png("test.png")
+render_celda_heatmap(counts =t(t(a)/colSums(a)), z = toy_celda_c15$res.list[[1]]$z, z.trim=c(-5,5),scale.row = TRUE)
+dev.off()
+```
+
+
+### 2.1.3 Cellular clustering
+
+```{r}
+toy_celda_cg = celda(as.matrix(cmatp_select), model="celda_CG",K = 15,L=20)
+a= as.matrix(cmatp_select)
+png("test.png")
+render_celda_heatmap(counts =t(t(a)/colSums(a)), z = toy_celda_cg$res.list[[1]]$z,
+                     y = toy_celda_cg$res.list[[1]]$y,
+                     z.trim=c(-5,5),scale.row = TRUE)
+dev.off()
+```
+
+
+
+
+
+
+
+
+
+
