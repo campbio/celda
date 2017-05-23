@@ -14,6 +14,9 @@ factorizeMatrix.celda_CG(counts, celda.obj, type = c("counts", "proportion",
 
 \item{type}{one of the "counts", "proportion", or "posterior".}
 }
+\value{
+A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
+}
 \description{
 factorizeMatrix for celda Cell and Gene clustering function
 }

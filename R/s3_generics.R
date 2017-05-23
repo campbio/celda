@@ -123,5 +123,5 @@ celda_heatmap <- function(celda.mod, counts, ...) {
 #' @export
 visualize_model_performance <- function(celda.list, method, title) {
   # Dispatch on the list's content type
-  UseMethod("visualize_model_performance", celda.list$content.type)
+  UseMethod("visualize_model_performance", celda.list$res.list[[1]])
 }

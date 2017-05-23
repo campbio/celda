@@ -12,16 +12,17 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param cores The number of cores to use to speed up Gibbs sampling
 #' @param seed The base seed for random number generation. Each chain celda runs with have a seed index off of this one.
 #' @param verbose Print messages during celda chain execution
-#' @param ... extra parameters passed onto expand.grid 
+#' @param logfile Path to file for logging events from worker threads. By default, messages are redirected to stderr of the main process.
+#' @param ... Model specific parameters
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="",  ...) {
   message("Starting celda...")
   validate_args(counts, model, sample.label, nchains, cores, seed)
   
   # Redirect stderr from the worker threads if user asks for verbose
-  cl = if (verbose) parallel::makeCluster(cores, outfile="") else parallel::makeCluster(cores)
+  cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
   runs = expand.grid(chain=1:nchains, ...)
@@ -42,7 +43,10 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   }  
   parallel::stopCluster(cl)
   
-  celda.res = list(run.params=runs, res.list=res.list, content.type=model)
+  count.checksum = digest::digest(counts, algo="md5")
+  
+  celda.res = list(run.params=runs, res.list=res.list, 
+                   content.type=model, count.checksum=count.checksum)
   class(celda.res) = "celda_list"
   return(celda.res)
 }
