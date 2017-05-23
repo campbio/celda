@@ -13,7 +13,7 @@ vignette: >
 
 We will learn how to use the package `celda` to cluster single cell RNAseq experiments.
 
-Starting from a matrix of counts of transcripts (cells by transcripts). we will discuss the preliminary steps of normalization, and the creation of the celda object, the results are then analyzed through heatmaps and PCA. Once we are satisfied that we have high-quality expression, we will consider tests for __________ and ways to visualize results.  
+Starting from a matrix of counts of transcripts (cells by transcripts). we will discuss the preliminary steps of normalization, and the creation of the celda object, in which the cluster results are then analyzed through plotting.
 
 We will apply these methods to a randomly generated dataset, measured on counts. 
 
@@ -28,43 +28,104 @@ library(ggplot2)
 
 ## Loading and transforming data
 
-We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` creates a list containing the original cell cluster
+We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` creates a list containing a ciunt matrix, which the clustering can be assigned by the user.
+
+How many cells are in each cluster:
 
 ```{r}
-sim_counts = simulateCells.celda_CG()
-str(sim_counts)
+sim_counts = simulateCells.celda_CG(K=3,L=10)
+```
+
+How many cells are in each cluster:
+
+```{r}
+table(sim_counts$z)
+```
+
+How many genes are in each cluster:
+
+```{r}
+table(sim_counts$y)
+```
+
+Dimensions of counts matrix:
+
+```{r}
+dim(sim_counts$counts)
+```
+
+How many of the samples are in each sample type:
+
+```{r}
+table(sim_counts$sample)
+```
+
+Sample types vs Cell cluster type:
+
+```{r}
+table(sim_counts$z, sim_counts$sample)
 ```
 
 
-```{r fig.width = 7, fig.height = 7}
-plot(sim_counts$counts, main = "Simulated Cell Counts", xlab = "transcripts", ylab = "cells")
-
-```
-
-## Normalize counts data
-
-```{r fig.width = 7, fig.height = 7}
-norm.counts <- normalizeCounts(sim_counts$counts)
-plot(norm.counts, main = "Normalized Simulated Cell Counts", xlab = "transcripts", ylab = "cells")
-```
 
 ## Exploratory Data Analysis
 
-Let’s explore these data with a heatmap and some PCA.
 
-```{r, fig.show='hold', warning = FALSE, fig.width = 7, fig.height = 7}
-celdaCG.res = celda(counts = norm.counts, model = "celda_CG", nchains = 2, K =10, L =10)
+Here is the resulting confusion matrix comparing the true cluster label to the estimated cluster label.
 
-z = celdaCG.res$res.list[[2]]$z
-y = celdaCG.res$res.list[[2]]$y
+```{r, fig.show='hold', warning = FALSE, message = FALSE}
+celdaCG.res = celda_CG(counts = sim_counts$counts, K =3, L = 10, max.iter = 10, sample.label = sim_counts$sample)
+
+table(celdaCG.res$z, sim_counts$z)
+table(celdaCG.res$y, sim_counts$y)
+
+z = celdaCG.res$z
+y = celdaCG.res$y
+```
+
+As you can see, the samples generally line up on the diagonal cell indicating that the estimated labes match the true labels.  This illustrates again that `celda` is able to recover the cluster labels accurately conditional on the correct cluster numbers.
+
+Normalize the counts matrix, then plot it with the heatmap.
+
+```{r, fig.width = 7, fig.height = 7}
+norm.counts <- normalizeCounts(sim_counts$counts)
 render_celda_heatmap(counts=norm.counts,z=z,y=y)
 ```
-```{r, fig.show='hold', fig.width = 7, fig.height = 7}
-z = t(scale(t(norm.counts)))
-pc = prcomp(z, center = F, scale = F)
-plot(pc$rotation[,1], pc$rotation[,2], 
-    pch=21, col="black", bg="blue",
-    xlab="PC1", ylab="PC2")
+
+## Exploratory Data Analysis with Multiple Cell/Gene Clusters
+
+Using the `celda` function, we can create a `celda_list` object that will contain all of the combinations of K/L parameters at each Gibbs sampling chain.
+
+```{r}
+celda.multiple.k <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
 ```
 
+Using the `visualize_model_performance` function, we can visualize various performance metrics as a function of K / L to aid parameter choice.
 
+```{r, fig.width = 7, fig.height = 7, message = FALSE}
+visualize_model_performance(celda.multiple.k,method="perplexity")
+```
+
+Since K = 4 seems to yield the lowest perplexity, we can run the following:
+
+```{r, fig.width = 7, fig.height = 7}
+celda.multiple.l <- celda(counts = sim_counts$counts,K = 4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
+visualize_model_performance(celda.multiple.l,method="perplexity")
+```
+
+In which we seem to get the lowest perplexity at L = 9.
+
+To determine how the cells/genes would cluster at these values, you can use the function `getModel`
+
+```{r}
+getModel(celda.multiple.k.l, K= 4,L=9)
+```
+```{r test corner}
+factorized <- factorizeMatrix.celda_CG(counts = sim_counts$counts, celda.obj = celdaCG.res)
+
+states = factorized$proportions$population.states
+rel.states = sweep(states, 1, rowSums(states), "/")
+render_celda_heatmap(rel.states, col=colorRampPalette(c("white", "blue","darkgreen", "green", "yellow", "orange", "red"))(70), scale.row=F, show_cellnames=T, show_genenames=T, cluster.column=F, cluster.row=F)
+render_celda_heatmap(states, col=colorRampPalette(c("white", "blue","darkgreen", "green"))(70), scale.row=F, show_cellnames=T, show_genenames=T, cluster.column=F, cluster.row=F)
+dev.off()
+```

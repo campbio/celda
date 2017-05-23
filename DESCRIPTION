@@ -27,7 +27,9 @@ Suggests:
     testthat,
     knitr,
     roxygen2,
-    rmarkdown
+    rmarkdown,
+    vcd,
+    corrplot
 VignetteBuilder: knitr
 License: MIT
 Encoding: UTF-8
