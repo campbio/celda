@@ -8,7 +8,11 @@
   method = "perplexity", title = "Model Performance (All Chains)")
 }
 \arguments{
-\item{celda.mod}{A celda model object of "Celda_CG"}
+\item{celda.list}{A celda model object of "Celda_CG"}
+
+\item{method}{One of “perplexity”, “harmonic”, or “loglik”}
+
+\item{title}{Title for the visualize_model_performance}
 }
 \description{
 visualize_model_performance for Celda Cell and Gene clustering function

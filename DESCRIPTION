@@ -23,6 +23,7 @@ Imports:
     Rmpfr,
     gplots,
     doParallel,
+    cluster,
     digest
 Suggests:
     testthat,
