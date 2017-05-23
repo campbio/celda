@@ -30,16 +30,17 @@
 
 # nG.by.TS = Number of genes in each Transcriptional State
 
-#' @param counts A numeric count matrix
-#' @param s The number of samples             ??
-#' @param z A numeric vector of cell cluster assignments 
-#' @param y A numeric vector of gene cluster assignments
-#' @param K The number of cell populations 
-#' @param L The number of clusters being considered
-#' @param alpha  ??   Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution  
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' calculate log lileklihood for the celda Cell and Gene clustering function
+#' @param counts A numeric count matrix.
+#' @param s Vector of sample labels.
+#' @param z A numeric vector of cell cluster assignments.
+#' @param y A numeric vector of gene cluster assignments.
+#' @param K The number of cell populations.
+#' @param L The number of clusters being considered.
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution.
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @export
 calculate_loglik_from_variables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
   
@@ -186,17 +187,19 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
   return(final)
 }
 
-#' @param S The number of samples
-#' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample 
-#' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts
-#' @param G The number of genes 
-#' @param K The number of cell populations 
-#' @param L The number of gene clusters being considered
-#' @param alpha   ??
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
-#' @param seed starting point used for generating simulated data
+#' simulateCells for the celda Cell and Gene clustering function
+#' @param S The number of samples.
+#' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample.
+#' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts.
+#' @param G The number of genes.
+#' @param K The number of cell populations.
+#' @param L The number of gene clusters being considered.
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution.
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
+#' @param seed starting point used for generating simulated data.
+#' @param ... extra parameters passed onto the simulateCells.celda_CG
 #' @export
 simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
@@ -256,24 +259,27 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
+#' celda Cell and Gene clustering function 
+#' 
 #' @param counts A numeric count matrix.
-#' @param sample.label  ??
+#' @param sample.label A vector indicating the sample for each cell in the count matrix.
 #' @param K The number of cell populations.
 #' @param L The number of gene clusters being considered.
-#' @param alpha   ??
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution.
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
 #' @param seed Parameter to set.seed() for random number generation
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
-#' @param z.split.on.iter   ??
-#' @param z.num.split     ??
-#' @param y.split.on.iter   ??
-#' @param y.num.splits    ??
-#' @param thread The thread index, used for logging purposes
-#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
-#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
+#' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
+#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter.
+#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
+#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
+#' @param thread The thread index, used for logging purposes.
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE.
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.
+#' @param ... extra parameters passed onto celda_CG
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
 			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
@@ -284,6 +290,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
+    sample.label = s
   } else if(is.factor(sample.label)) {
     s = as.numeric(sample.label)
   } else {
@@ -505,9 +512,12 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
 }
 
 
-
-
-#' @export
+#' factorizeMatrix for celda Cell and Gene clustering function 
+#' @param counts A numerix count matrix
+#' @param celda.obj object returned from celda_CG function 
+#' @param type one of the "counts", "proportion", or "posterior". 
+#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
+#' @export 
 factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
 
   K = celda.obj$K
@@ -552,22 +562,22 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
     
   if(any("counts" %in% type)) {
     counts.list = list(sample.states = m.CP.by.S,
-    				   population.states = n.CP.by.TS, 
-    				   cell.states = n.TS.by.C,
-    				   gene.states = n.G.by.TS)
+            				   population.states = n.CP.by.TS, 
+            				   cell.states = n.TS.by.C,
+            				   gene.states = n.G.by.TS)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
     prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
-    				   population.states = normalizeCounts(n.CP.by.TS, scale.factor=1), 
+    				   population.states = t(normalizeCounts(t(n.CP.by.TS), scale.factor=1)), 
     				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
     				   gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
     post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
-    				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
-    				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+          				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
+          				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
     res = c(res, posterior = list(post.list))						    
   }
   
@@ -578,48 +588,64 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
 ################################################################################
 # celda_CG S3 methods                                                          #
 ################################################################################
+#' finalClusterAssignment for the celda Cell and Gene clustering function 
+#' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 finalClusterAssignment.celda_CG = function(celda.mod) {
   return(list(z=celda.mod$z, y=celda.mod$y))
 }
 
-
+#' completeClusterHistory for the celda Cell and Gene clustering function
+#' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 completeClusterHistory.celda_CG = function(celda.mod) {
   return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
 }
 
-
+#' clusterProbabilities for the celda Cell and Gene clustering function
+#' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 clusterProbabilities.celda_CG = function(celda.mod) {
   return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
 }
 
-
+#' getK for the celda Cell and Gene clustering function 
+#' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 getK.celda_CG = function(celda.mod) {
   return(celda.mod$K)
 }
 
 
+#' getL for the celda Cell and Gene clustering function
+#' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 getL.celda_CG = function(celda.mod) {
   return(celda.mod$L)
 }
 
 
+#' celda_heatmap for celda Cell and Gene clustering function 
+#' @param celda.mod A celda model object of "Celda_CG"
+#' @param counts A count matrix
+#' @param ... extra parameters passed onto render_celda_heatmap
 #' @export
 celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
   render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
 }
 
 
+#' visualize_model_performance for Celda Cell and Gene clustering function 
+#' @param celda.list A celda model object of "Celda_CG"
+#' @param title Title for the visualize_model_performance
+#' @param method One of “perplexity”, “harmonic”, or “loglik”
 #' @export
+#' @import Rmpfr
 visualize_model_performance.celda_CG = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   # We can leverage the fact that the celda_C and celda_G model performance plots
   # just try to pull K and L off of each object in the result list:
-  k.plot = visualize_model_performance.celda_C(celda.list, method, title)
-  l.plot = visualize_model_performance.celda_G(celda.list, method, title)
+  k.plot = celda::visualize_model_performance.celda_C(celda.list, method, title)
+  l.plot = celda::visualize_model_performance.celda_G(celda.list, method, title)
   return(list(K=k.plot, L=l.plot))
 }

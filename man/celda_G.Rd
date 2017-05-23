@@ -11,11 +11,23 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 \arguments{
 \item{counts}{A numeric count matrix}
 
+\item{L}{The number of clusters to generate}
+
+\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.}
+
+\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.}
+
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
+
 \item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25.}
 
-\item{seed}{Parameter to set.seed() for random number generation}
+\item{seed}{Parameter to set.seed() for random number generation.}
 
-\item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.}
+\item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE.}
+
+\item{y.split.on.iter}{On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3.}
+
+\item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter.}
 
 \item{thread}{The thread index, used for logging purposes}
 
@@ -23,24 +35,11 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
-\item{k}{The number of clusters to generate}
-
-\item{a}{Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution}
-
-\item{b}{Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution}
-
-\item{g}{Number of cell states ("topics")}
-
-\item{min.cell}{Desired minimum number of cells per cluster}
-
-\item{kick}{Whether to randomize cluster assignments when a cluster has fewer than min.cell cells assigned to it during Gibbs sampling. (TODO param currently unused?)}
+\item{...}{extra parameters passed onto celda_G}
 }
 \description{
 geneCluster provides cluster assignments for all genes in a provided single-cell 
 sequencing count matrix, using the celda Bayesian hierarchical model.
-}
-\examples{
-TODO
 }
 \keyword{LDA}
 \keyword{clustering}

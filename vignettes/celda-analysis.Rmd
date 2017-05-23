@@ -9,15 +9,45 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-## Overview
+# 1 Introduction
+
+`celda` pronounced like "Zelda" is the abbreviation for "CELlular Latent Dirichlet Allocation", which is suite of algorithms and supporting functions for genes and cell clustering  specifically designed to handle single cell RNA sequence data. The algorithm is extention of the Latent Dirichlet Allocation (LDA) topic modeling framework that is popular in Machine Learning.  Single cell RNA data has high affinity with the LDA type mixture of multinomila representation due to the sparsity of discrete counts and high dimension $(n<<p)$ of the data, both of which is a problem in statistical models that assume some type of uni-modal continuous distribution.  Although our primary intent is single cell RNA sequence data, `celda` can handle any data with feature counts such as proteomics or microbiome 16S rRNA data.  In this vignette we will demonstrate how one can perform cellular clustering of single cell RNA seq data using `celda`.  For details of the underlying algoirthm, please see [??].
+
+## Installation
+
+Currently `celda` is hosted on a Github repository `definitelysean/celda`.  Although there are multiple ways to install packages from Github, such as directly downloading the source and locally compiling it, simplest way that we recommend is through the use of `install_github` function in the `devtools` package [cite]. You will need to install the devtools package using `install.packages` function in R.
+
+```{r,eval=FALSE}
+install.packages("devtools")
+library(devtools)
+install_github("definitelysean/celda")
+```
+This should automatically install `celda` on your local machine as long as you have proper internet connection.  If you encounter a problem during the installation you may want to open up a browser and acces our github repository https://github.com/definitelysean/celda.
+
+## Loading the library
+
+Once installed the package can be loaded using the `library` command.
+```{r,eval=FALSE}
+library(celda)
+```
+
+## Finding the helpfiles
+Complete list of help files are accessible using the help command with a `package` option.
+
+```{r,eval=FALSE}
+help(package=celda)
+```
+
+
+# 2. Single cell RNA-seq dataset analysis with celda
 
 We will learn how to use the package `celda` to cluster single cell RNAseq experiments.
 
-Starting from a matrix of counts of transcripts (cells by transcripts). we will discuss the preliminary steps of ________, __________, and ________. Once we are satisfied that we have high-quality expression, we will consider tests for __________ and ways to visualize results.  
+Starting from a matrix of counts of transcripts (cells by transcripts). we will discuss the preliminary steps of normalization, and the creation of the celda object, in which the cluster results are then analyzed through plotting.
 
-We will apply these methods to a data set of __________, measured on _________. 
+We will apply these methods to a randomly generated dataset, measured on counts. 
 
-```{r,eval=T}
+```{r,eval=T, warning = FALSE}
 library(devtools)
 library(celda)
 library(Matrix)
@@ -26,43 +56,164 @@ library(ggplot2)
 ```
 
 
-We use the built-in data generating function `cCG.generateCells`
-
-
 ## Loading and transforming data
 
-```{r}
-sim_counts = cCG.generateCells()
-str(sim_counts)
-```
+We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` creates a list containing a ciunt matrix, which the clustering can be assigned by the user.
 
-
-Sean/Josh: Can you add some description on `cCG.generateCells`?
-
-Some illustrations.
+How many cells are in each cluster:
 
 ```{r}
-plot(1:10)
-qplot(1:10,1:10)
+sim_counts = simulateCells.celda_CG(K=3,L=10)
+```
+
+How many cells are in each cluster:
+
+```{r}
+table(sim_counts$z)
+```
+
+How many genes are in each cluster:
+
+```{r}
+table(sim_counts$y)
+```
+
+Dimensions of counts matrix:
+
+```{r}
+dim(sim_counts$counts)
+```
+
+How many of the samples are in each sample type:
+
+```{r}
+table(sim_counts$sample)
+```
+
+Sample types vs Cell cluster type:
+
+```{r}
+table(sim_counts$z, sim_counts$sample)
+```
 
 
+
+## 2.1.1 Exploratory Data Analysis
+
+
+Here is the resulting confusion matrix comparing the true cluster label to the estimated cluster label.
+
+```{r, fig.show='hold', warning = FALSE, message = FALSE}
+celdaCG.res = celda_CG(counts = sim_counts$counts, K =3, L = 10, max.iter = 10, sample.label = sim_counts$sample)
+
+table(celdaCG.res$z, sim_counts$z)
+table(celdaCG.res$y, sim_counts$y)
+
+z = celdaCG.res$z
+y = celdaCG.res$y
+```
+
+As you can see, the samples generally line up on the diagonal cell indicating that the estimated labes match the true labels.  This illustrates again that `celda` is able to recover the cluster labels accurately conditional on the correct cluster numbers.
+
+Normalize the counts matrix, then plot it with the heatmap.
+
+```{r, fig.width = 7, fig.height = 7}
+norm.counts <- normalizeCounts(sim_counts$counts)
+render_celda_heatmap(counts=norm.counts,z=z,y=y, cluster.column = FALSE, cluster.row = FALSE)
+```
+
+## 2.1.2 Matrix factorization
+
+We will create a factorized matrix to check the relative expression of the clusters.
+
+```{r}
+factorized <- factorizeMatrix.celda_CG(counts = sim_counts$counts, celda.obj = celdaCG.res)
+
+states = factorized$proportions$population.states
+rel.states = sweep(states, 1, rowSums(states), "/")
+```
+
+
+```{r, fig.width = 7, fig.height = 7}
+render_celda_heatmap(t(states), col=colorRampPalette(c("red","white", "blue"))(70), scale.row=F, show_cellnames=T, show_genenames=T, cluster.column=F, cluster.row=F)
+```
+
+
+```{r, fig.width = 7, fig.height = 7}
+render_celda_heatmap(t(rel.states), col=colorRampPalette(c("red","white", "blue"))(70), scale.row=F, show_cellnames=T, show_genenames=T, cluster.column=F, cluster.row=F)
+```
+
+As you can see, the expression of the relative factorized matrix shown in the heatmap corresponds to the celda-clustered heatmap.
+
+## 2.1.3 Exploratory Data Analysis with Multiple Cell/Gene Clusters
+
+Using the `celda` function, we can create a `celda_list` object that will contain all of the combinations of K/L parameters at each Gibbs sampling chain.
+
+```{r}
+celda.multiple.k <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
+```
+
+Using the `visualize_model_performance` function, we can visualize various performance metrics as a function of K / L to aid parameter choice.
+
+```{r, fig.width = 7, fig.height = 7, message = FALSE}
+visualize_model_performance(celda.multiple.k,method="perplexity")
+```
+
+Since K = 4 seems to yield the lowest perplexity, we can run the following:
+
+```{r, fig.width = 7, fig.height = 7}
+celda.multiple.l <- celda(counts = sim_counts$counts,K = 4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
+visualize_model_performance(celda.multiple.l,method="perplexity")
+```
+
+In which we seem to get the lowest perplexity at L = 9.
+
+To determine how the cells/genes would cluster at these values, you can use the function `getModel`
+
+```{r}
+getModel(celda.multiple.l, K= 4,L=9)
+```
+
+# 3. PBMC Analysis with celda
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.align = "center")
+library(celda)
+library(Matrix)
+library(data.table)
+# library(RColorBrewer)
+# library(ggplot2)
+# library(gtools)
+library(pheatmap)
+# library(reshape2)
+# library(vcd)
+# library(corrplot)
+# library(gtable)
+# library(scales)
 
 ```
 
 
-## Exploratory Data Analysis
-
-Let’s explore these data with a heatmap and some PCA.
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r}
+### Read Data
+cmatp<-(readRDS("../data/cmatp"))
+cmatp_select <- cmatp[as.vector(tcrossprod(matrix(rep(1.0,2700),1,2700),cmatp>0))>500,]
 ```
 
+### Initial Visualization
 
-## TBD
+```{r pheatmap_toy_1, fig.align = "center", fig.width = 7, fig.height = 7}
+pheatmap(scale(log(as.matrix(cmatp_select+1)),center = F),cluster_rows = FALSE, cluster_cols = FALSE)
+```
 
+
+### 3.1.1 Cellular clustering
+
+```{r, fig.width = 7, fig.height = 7}
+toy_celda_cg = celda(as.matrix(cmatp_select), model="celda_CG",K = 15,L=20)
+a= as.matrix(cmatp_select)
+
+render_celda_heatmap(counts =t(t(a)/colSums(a)), z = toy_celda_cg$res.list[[1]]$z,
+                     y = toy_celda_cg$res.list[[1]]$y,
+                     z.trim=c(-5,5),scale.row = TRUE)
+```

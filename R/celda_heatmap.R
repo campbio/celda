@@ -71,30 +71,36 @@ robust_scale <- function(x){
 }
 
 
-#' plot the heatmap of the counts data
-#' @param counts the counts matrix 
-#' @param z A numeric vector of cluster assignments for cell 
-#' @param y A numeric vector of cluster assignments for gene
-#' @param scale.log specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
-#' @param scale.row specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed
-#' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.
-#' @param scale_fun specify the function for scaling 
-#' @param cluster.row boolean values determining if rows should be clustered
-#' @param cluster.column boolean values determining if columns should be clustered
-#' @param annotation_cell a dataframe for the cell annotations (columns)
-#' @param annotation_gene a dataframe for the gene annotations (rows)
-#' @param col color for the heatmap
+#' render function for celda heatmap plot
+#' @param counts A count matrix. 
+#' @param z A numeric vector of cluster assignments for cell. 
+#' @param y A numeric vector of cluster assignments for gene.
+#' @param scale.log Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE. 
+#' @param scale.row Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE. 
+#' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)
+#' @param normalize specify the normalization type: "cpm" or "none". Defualt to be "none". 
+#' @param scale_function specify the function for scaling. Defualt to be scale. 
+#' @param cluster.row Logical; determining if rows should be clustered.
+#' @param cluster.column Logical; determining if columns should be clustered.
+#' @param annotation_cell a dataframe for the cell annotations (columns).
+#' @param annotation_gene a dataframe for the gene annotations (rows).
+#' @param col color for the heatmap. 
 #' @param breaks a sequence of numbers that covers the range of values in mat and is one 
 #' element longer than color vector. Used for mapping values to colors. Useful, if needed 
 #' to map certain values to certain colors, to certain values. If value is NA then the 
 #' breaks are calculated automatically.
-#' @param legend logical to determine if legend should be drawn or not
-#' @param annotation_legend boolean value showing if the legend for annotation tracks should be drawn 
-#' @param annotation_names_gene boolean value showing if the names for gene annotation tracks should be drawn 
-#' @param annotation_names_cell boolean value showing if the names for cell annotation tracks should be drawn 
-#' @param show_genenames boolean specifying if gene names are be shown
-#' @param show_cellnames boolean specifying if cell names are be shown
-#' @example TODO
+#' @param legend logical; determining if legend should be drawn or not. Default to be TRUE.
+#' @param annotation_legend Logical; showing if the legend for annotation tracks should be drawn.
+#' @param annotation_names_gene Logical; showing if the names for gene annotation tracks should be drawn. Default to be TRUE.
+#' @param annotation_names_cell Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE. 
+#' @param show_genenames Logical; specifying if gene names should be shown. Default to be FALSE. 
+#' @param show_cellnames Logical; specifying if cell names should be shown. Default to be FALSE. 
+#' @import gtable
+#' @import grid
+#' @import scales
+#' @import RColorBrewer
+#' @import grDevices
+#' @import graphics
 #' @export 
 render_celda_heatmap <- function(counts, z=NULL, y=NULL, 
                                  scale.log=FALSE, scale.row=TRUE,
@@ -102,7 +108,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  z.trim=c(-2,2), 
                                  cluster.row=TRUE, cluster.column = TRUE,
                                  annotation_cell = NULL, annotation_gene = NULL, 
-                                 col=colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100),
+                                 col= NULL,
                                  breaks = NULL, 
                                  legend = TRUE,
                                  annotation_legend = TRUE,
@@ -110,13 +116,6 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  annotation_names_cell = TRUE,
                                  show_genenames = FALSE, 
                                  show_cellnames = FALSE) {
-  require(gtable)
-  require(grid)
-  require(scales)
-  require(stats)
-  require(RColorBrewer)
-  require(grDevices)
-  require(graphics)
   
   
   if(normalize =="cpm"){
@@ -205,25 +204,28 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   
   ## Set color 
   #col.pal <- colorRampPalette(RColorBrewer::brewer.pal(n = 3, name = "RdYlBu"))(100)  # ToDo: need to be more flexible or fixed to a better color list
-  #col.pal <- gplots::bluered(200)
   
-  ## set breaks
-  #if(is.null(breaks)){
-  #  col.len <- length(col)
-  #  mid.range <- quantile(seq(min(counts), max(counts), length.out = col.len), c(0.35, 0.36))
-  #  breaks <- c(seq(min(counts), mid.range[1], length.out = round(col.len/2) + 1  ),
-  #              seq(mid.range[2], max(counts), length.out = col.len-round(col.len/2) ))
-  #}
-  if(is.null(breaks)){
+  ## set breaks & color
+  ubound.range <- max(counts)
+  lbound.range <- min(counts)
+  if(lbound.range<0 & 0<ubound.range){  # both sides for the counts values
+    if(is.null(col)){
+      col <- colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)
+    }
     col.len <- length(col)
-    bound.range <- max(abs(counts))
-    breaks <- c(seq(-bound.range, 0,  length.out = round(col.len/2) + 1  ),
-                seq(0+1e-6, bound.range, length.out = col.len-round(col.len/2) ))
+    if(is.null(breaks)){
+      breaks <- c(seq(lbound.range, 0,  length.out = round(col.len/2) + 1  ),
+                  seq(0+1e-6, ubound.range, length.out = col.len-round(col.len/2) ))
+    }
+  }else{  # only one side for the counts values (eihter positive or negative )
+    if(is.null(col)){
+      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Reds")))(100)
+    }
   }
+
   
   if(cluster.row & cluster.column){
-    celda::semi_pheatmap(mat = counts, 
-                         #color = colorRampPalette(c( "blue", "red"))(length(-12:12)),breaks=c(seq(0, 8.871147e-10, length.out = 11), 5.323741e-08 ),
+           semi_pheatmap(mat = counts, 
                          color = col, 
                          breaks = breaks, 
                          cutree_rows = L,
@@ -243,7 +245,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   }
   
   if(cluster.row & (!cluster.column)){
-    celda::semi_pheatmap(mat = counts, 
+          semi_pheatmap(mat = counts, 
                          color = col,
                          breaks = breaks, 
                          cutree_rows = L,
@@ -263,7 +265,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
     
     
     if((!cluster.row) & cluster.column){
-      celda::semi_pheatmap(mat = counts, 
+            semi_pheatmap(mat = counts, 
                            color = col,
                            breaks = breaks, 
                            cluster_rows = FALSE,
@@ -282,7 +284,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
       }
     
     if((!cluster.row) & (!cluster.column) ){
-      celda::semi_pheatmap(mat = counts,
+            semi_pheatmap(mat = counts,
                            color = col,
                            breaks = breaks, 
                            cluster_rows = FALSE,
