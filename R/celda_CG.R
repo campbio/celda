@@ -639,8 +639,8 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param celda.list A celda model object of "Celda_CG"
 #' @param title Title for the visualize_model_performance
 #' @param method One of “perplexity”, “harmonic”, or “loglik”
-#' @export
 #' @import Rmpfr
+#' @export
 visualize_model_performance.celda_CG = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   # We can leverage the fact that the celda_C and celda_G model performance plots
