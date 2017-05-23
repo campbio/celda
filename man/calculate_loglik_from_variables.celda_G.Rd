@@ -4,8 +4,7 @@
 \alias{calculate_loglik_from_variables.celda_G}
 \title{Calculate Log Likelihood For A Set of Gene Clusterings (Gene Clustering)}
 \usage{
-\method{calculate_loglik_from_variables}{celda_G}(counts, y, L, beta, delta,
-  gamma)
+calculate_loglik_from_variables.celda_G(counts, y, L, beta, delta, gamma)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
