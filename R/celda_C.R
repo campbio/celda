@@ -140,7 +140,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
       if(sum(z == previous.z[i]) == 0 & iter < max.iter & K > 2) {
         
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="cC.calcLLFromVariables", s=s, alpha=alpha, beta=beta)
+        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_C", s=s, alpha=alpha, beta=beta)
         
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
@@ -154,7 +154,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
       message("Thread ", thread, " ", date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
-      z = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="cC.calcLLFromVariables")
+      z = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculate_loglik_from_variables.celda_C")
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -226,7 +226,7 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, alpha, beta) {
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @export
-cC.calcLLFromVariables = function(counts, s, z, K, alpha, beta) {
+calculate_loglik_from_variables.celda_C = function(counts, s, z, K, alpha, beta) {
   
   ## Calculate for "Theta" component
   m.CP.by.S = table(z, s)
@@ -379,8 +379,8 @@ celda_heatmap.celda_C = function(celda.mod, counts, ...) {
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of “perplexity”, “harmonic”, or “loglik”
 #' @param title Title for the plot
-#' @export
 #' @import Rmpfr
+#' @export
 visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   
