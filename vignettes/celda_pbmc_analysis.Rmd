@@ -25,7 +25,7 @@ library(pheatmap)
 
 ```{r}
 ### Read Data
-cmatp<-(readRDS("cmatp"))
+cmatp<-(readRDS("../data/cmatp"))
 cmatp_select <- cmatp[as.vector(tcrossprod(matrix(rep(1.0,2700),1,2700),cmatp>0))>500,]
 ```
 
