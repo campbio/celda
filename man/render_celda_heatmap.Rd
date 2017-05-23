@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_heatmap.R
 \name{render_celda_heatmap}
 \alias{render_celda_heatmap}
-\title{plot the heatmap of the counts data}
+\title{render function for celda heatmap plot}
 \usage{
 render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   scale.row = TRUE, scale_function = scale, normalize = "none",
@@ -13,50 +13,49 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   show_genenames = FALSE, show_cellnames = FALSE)
 }
 \arguments{
-\item{counts}{the counts matrix}
+\item{counts}{A count matrix.}
 
-\item{z}{A numeric vector of cluster assignments for cell}
+\item{z}{A numeric vector of cluster assignments for cell.}
 
-\item{y}{A numeric vector of cluster assignments for gene}
+\item{y}{A numeric vector of cluster assignments for gene.}
 
-\item{scale.log}{boolean values to specify if the log-transformation is perfomred to the count matrix}
+\item{scale.log}{Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE.}
 
-\item{scale.row}{boolean values to psecify if the z-score transformation is performed to the counts matrix}
+\item{scale.row}{Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE.}
 
-\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.}
+\item{normalize}{specify the normalization type: "cpm" or "none". Defualt to be "none".}
 
-\item{cluster.row}{boolean values determining if rows should be clustered}
+\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)}
 
-\item{cluster.column}{boolean values determining if columns should be clustered}
+\item{cluster.row}{Logical; determining if rows should be clustered.}
 
-\item{annotation_cell}{a dataframe for the cell annotations (columns)}
+\item{cluster.column}{Logical; determining if columns should be clustered.}
 
-\item{annotation_gene}{a dataframe for the gene annotations (rows)}
+\item{annotation_cell}{a dataframe for the cell annotations (columns).}
 
-\item{col}{color for the heatmap}
+\item{annotation_gene}{a dataframe for the gene annotations (rows).}
+
+\item{col}{color for the heatmap.}
 
 \item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
 element longer than color vector. Used for mapping values to colors. Useful, if needed 
 to map certain values to certain colors, to certain values. If value is NA then the 
 breaks are calculated automatically.}
 
-\item{legend}{logical to determine if legend should be drawn or not}
+\item{legend}{logical; determining if legend should be drawn or not. Default to be TRUE.}
 
-\item{annotation_legend}{boolean value showing if the legend for annotation tracks should be drawn}
+\item{annotation_legend}{Logical; showing if the legend for annotation tracks should be drawn.}
 
-\item{annotation_names_gene}{boolean value showing if the names for gene annotation tracks should be drawn}
+\item{annotation_names_gene}{Logical; showing if the names for gene annotation tracks should be drawn. Default to be TRUE.}
 
-\item{annotation_names_cell}{boolean value showing if the names for cell annotation tracks should be drawn}
+\item{annotation_names_cell}{Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE.}
 
-\item{show_genenames}{boolean specifying if gene names are be shown}
+\item{show_genenames}{Logical; specifying if gene names should be shown. Default to be FALSE.}
 
-\item{show_cellnames}{boolean specifying if cell names are be shown}
+\item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
 
-\item{scale_fun}{specify the function for scaling}
+\item{scale_fun}{specify the function for scaling. Defualt to be scale.}
 }
 \description{
-plot the heatmap of the counts data
-}
-\examples{
-
+render function for celda heatmap plot
 }
