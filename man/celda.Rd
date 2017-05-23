@@ -22,13 +22,9 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 
 \item{verbose}{Print messages during celda chain execution}
 
-\item{...}{extra parameters passed onto expand.grid}
-
 \item{logfile}{Path to file for logging events from worker threads. By default, messages are redirected to stderr of the main process.}
 
-\item{K}{An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)}
-
-\item{L}{An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)}
+\item{...}{Model specific parameters}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
