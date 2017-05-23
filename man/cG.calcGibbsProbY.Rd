@@ -7,24 +7,23 @@
 cG.calcGibbsProbY(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma)
 }
 \arguments{
+\item{n.TS.by.C}{Number of counts in each Transcriptional State per Cell}
+
+\item{n.by.TS}{Number of counts per Transcriptional State}
+
+\item{nG.by.TS}{Number of genes in each Transcriptional State}
+
+\item{nG.in.Y}{Number of genes in each of the cell cluster}
+
 \item{beta}{Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution}
 
-\item{ix}{The index of the cell being assigned a cluster during the current iteration of Gibbs sampling}
+\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.}
 
-\item{counts}{A numeric count matrix}
-
-\item{z}{A numeric vector of cluster assignments}
-
-\item{k}{The number of clusters being considered}
-
-\item{alpha}{Vector of non-zero concentration parameters for sample <-> cluster assignment Dirichlet distribution}
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
 }
 \description{
 This function calculates the log-likelihood of a given set of cluster assigments for the samples
 represented in the provided count matrix.
-}
-\examples{
-TODO
 }
 \keyword{likelihood}
 \keyword{log}

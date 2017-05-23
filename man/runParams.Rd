@@ -7,7 +7,7 @@
 runParams(celda.list)
 }
 \arguments{
-\item{celda.res}{A celda_list object, as returned from celda()}
+\item{celda.list}{A celda_list object, as returned from celda()}
 }
 \description{
 Get run parameters for a celda run.
