@@ -44,7 +44,7 @@
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @keywords log likelihood
 #' @export
-cG.calcLLFromVariables = function(counts, y, L, beta, delta, gamma) {
+calculate_loglik_from_variables.celda_G = function(counts, y, L, beta, delta, gamma) {
   n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
   nM <- ncol(n.TS.by.C)
@@ -252,7 +252,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       if(sum(y == previous.y[i]) == 0 & iter < max.iter & L > 2) {
         
         ## Split another cluster into two
-        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="cG.calcLLFromVariables", beta=beta, delta=delta, gamma=gamma)
+        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="calculate_loglik_from_variables.celda_G", beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -267,7 +267,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
       message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
-      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="cG.calcLLFromVariables")
+      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculate_loglik_from_variables.celda_G")
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -361,7 +361,7 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   }
   
   ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
-  ## constraint:
+  ## constraint (columns are guarnteed at least one count):
   zero.row.idx = which(rowSums(cell.counts) == 0)
   cell.counts = cell.counts[-zero.row.idx, ]
   y = y[-zero.row.idx]
@@ -477,8 +477,8 @@ celda_heatmap.celda_G = function(celda.mod, counts, ...) {
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of “perplexity”, “harmonic”, or “loglik”
 #' @param title Title for the plot
-#' @export
 #' @import Rmpfr
+#' @export
 visualize_model_performance.celda_G = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)") {
   
