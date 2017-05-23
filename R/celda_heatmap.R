@@ -71,30 +71,30 @@ robust_scale <- function(x){
 }
 
 
-#' plot the heatmap of the counts data
-#' @param counts the counts matrix 
-#' @param z A numeric vector of cluster assignments for cell 
-#' @param y A numeric vector of cluster assignments for gene
-#' @param scale.log boolean values to specify if the log-transformation is perfomred to the count matrix 
-#' @param scale.row boolean values to psecify if the z-score transformation is performed to the counts matrix 
-#' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.
-#' @param scale_fun specify the function for scaling 
-#' @param cluster.row boolean values determining if rows should be clustered
-#' @param cluster.column boolean values determining if columns should be clustered
-#' @param annotation_cell a dataframe for the cell annotations (columns)
-#' @param annotation_gene a dataframe for the gene annotations (rows)
-#' @param col color for the heatmap
+#' render function for celda heatmap plot
+#' @param counts A count matrix. 
+#' @param z A numeric vector of cluster assignments for cell. 
+#' @param y A numeric vector of cluster assignments for gene.
+#' @param scale.log Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE. 
+#' @param scale.row Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE. 
+#' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)
+#' @param normalize specify the normalization type: "cpm" or "none". Defualt to be "none". 
+#' @param scale_fun specify the function for scaling. Defualt to be scale. 
+#' @param cluster.row Logical; determining if rows should be clustered.
+#' @param cluster.column Logical; determining if columns should be clustered.
+#' @param annotation_cell a dataframe for the cell annotations (columns).
+#' @param annotation_gene a dataframe for the gene annotations (rows).
+#' @param col color for the heatmap. 
 #' @param breaks a sequence of numbers that covers the range of values in mat and is one 
 #' element longer than color vector. Used for mapping values to colors. Useful, if needed 
 #' to map certain values to certain colors, to certain values. If value is NA then the 
 #' breaks are calculated automatically.
-#' @param legend logical to determine if legend should be drawn or not
-#' @param annotation_legend boolean value showing if the legend for annotation tracks should be drawn 
-#' @param annotation_names_gene boolean value showing if the names for gene annotation tracks should be drawn 
-#' @param annotation_names_cell boolean value showing if the names for cell annotation tracks should be drawn 
-#' @param show_genenames boolean specifying if gene names are be shown
-#' @param show_cellnames boolean specifying if cell names are be shown
-#' @example TODO
+#' @param legend logical; determining if legend should be drawn or not. Default to be TRUE.
+#' @param annotation_legend Logical; showing if the legend for annotation tracks should be drawn.
+#' @param annotation_names_gene Logical; showing if the names for gene annotation tracks should be drawn. Default to be TRUE.
+#' @param annotation_names_cell Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE. 
+#' @param show_genenames Logical; specifying if gene names should be shown. Default to be FALSE. 
+#' @param show_cellnames Logical; specifying if cell names should be shown. Default to be FALSE. 
 #' @export 
 render_celda_heatmap <- function(counts, z=NULL, y=NULL, 
                                  scale.log=FALSE, scale.row=TRUE,

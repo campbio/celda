@@ -26,14 +26,14 @@ spearmanDist = function(x){
 stability = function(probs) {
   nStates <- ncol(probs)
   nData <- nrow(probs)
-  stability <- sum(1-apply(probs, 1, entropy::entropy) / log(nStates)) / nData
+  stability <- sum(1-base::apply(probs, 1, entropy::entropy) / log(nStates)) / nData
   return(stability)
 }
 
 second.best = function(v) sort(v, decreasing=TRUE)[2]
 
 normalizeLogProbs = function(ll.probs) {
-  ll.probs <- exp(sweep(ll.probs, 1, apply(ll.probs, 1, max), "-"))
+  ll.probs <- exp(sweep(ll.probs, 1, base::apply(ll.probs, 1, max), "-"))
   probs <- sweep(ll.probs, 1, rowSums(ll.probs), "/")
   return(probs)
 }
@@ -94,3 +94,17 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 
   return(list(z=new.z, y=new.y))  
 }  
+
+
+#' Check whether a count matrix was the one used in a given celda run
+#' 
+#' Compare the MD5 checksum of a provided count.matrix to the count matrix
+#' checksum on a celda_list object, to see if they're the same.
+#' @param count.matrix A numeric matrix of counts
+#' @param celda.checksum An MD5 checksum from a celda_list object (as returned from celda())
+#' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise
+#' @export
+compare_count_matrix = function(count.matrix, celda.checksum) {
+  count.md5 = digest::digest(count.matrix, algo="md5")
+  return(count.md5 == celda.checksum)
+}
