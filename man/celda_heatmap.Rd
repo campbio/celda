@@ -11,21 +11,7 @@ celda_heatmap(celda.mod, counts, ...)
 
 \item{counts}{the counts matrix}
 
-\item{z}{A numeric vector of cluster assignments for cell. Resolved automatically from celda object when available.}
-
-\item{y}{A numeric vector of cluster assignments for gene. Resolved automatically from celda object when available.}
-
-\item{scale.log}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
-
-\item{scale.row}{specify the transformation type of the matrix for (semi-)heatmap, can be "log","row"(z-acore by row),"col"(z-score by column), etc. #To be completed}
-
-\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done.}
-
-\item{scale_fun}{specify the function for scaling}
-
-\item{cluster.row}{boolean values determining if rows should be clustered}
-
-\item{cluster.column}{boolean values determining if columns should be clustered}
+\item{...}{extra parameters passed onto celda_heatmap}
 }
 \description{
 Render a stylable heatmap of count data based on celda clustering results.

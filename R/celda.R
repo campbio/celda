@@ -1,3 +1,4 @@
+#' available models
 #' @export
 available_models = c("celda_C", "celda_G", "celda_CG")
 
@@ -8,12 +9,11 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param model Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)
 #' @param sample.label A numeric vector indicating the sample for each cell (column) in the count matrix
 #' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters
-#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
-#' @param L An integer or range of integers indicating the desired number of gene clusters (for celda_G / celda_CG models)
 #' @param cores The number of cores to use to speed up Gibbs sampling
 #' @param seed The base seed for random number generation. Each chain celda runs with have a seed index off of this one.
 #' @param verbose Print messages during celda chain execution
 #' @param logfile Path to file for logging events from worker threads. By default, messages are redirected to stderr of the main process.
+#' @param ... Model specific parameters
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
@@ -53,6 +53,12 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
 
 
 #' Sanity check arguments to celda() to ensure a smooth run.
+#' @param counts A count matrix 
+#' @param model ...
+#' @param sample.label ...
+#' @param nchains ...
+#' @param cores ...
+#' @param seed ...
 validate_args = function(counts, model, sample.label, nchains, cores, seed) {
   validate_counts(counts)
   
@@ -71,6 +77,7 @@ validate_args = function(counts, model, sample.label, nchains, cores, seed) {
     
     
 #' Perform some simple checks on the counts matrix, to ensure celda won't choke.
+#' @param counts A count matrix
 validate_counts = function(counts) {
   # counts has to be a matrix...
   if (class(counts) != "matrix") stop("counts argument must be of class 'matrix'")

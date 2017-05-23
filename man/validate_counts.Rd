@@ -6,6 +6,9 @@
 \usage{
 validate_counts(counts)
 }
+\arguments{
+\item{counts}{A count matrix}
+}
 \description{
 Perform some simple checks on the counts matrix, to ensure celda won't choke.
 }

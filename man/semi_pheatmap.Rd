@@ -157,6 +157,10 @@ calculated so that the plot would fit there, unless specified otherwise.}
 
 \item{silent}{do not draw the plot (useful when using the gtable output)}
 
+\item{row_label}{row cluster labels for semi-clustering}
+
+\item{col_label}{column cluster labels for semi-clustering}
+
 \item{\dots}{graphical parameters for the text used in plot. Parameters passed to 
 \code{\link{grid.text}}, see \code{\link{gpar}}.}
 }
@@ -180,7 +184,9 @@ clustering anymore, roughly more than 1000. Instead of showing all the rows
 separately one can cluster the rows in advance and show only the cluster centers. 
 The number of clusters can be tuned with parameter kmeans_k.
 }
-\examples{
+\author{
+Raivo Kolde <rkolde@gmail.com>
+#@examples
 # Create test matrix
 test = matrix(rnorm(200), 20, 10)
 test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
@@ -199,7 +205,7 @@ pheatmap(test, legend = FALSE)
 
 # Show text within cells
 pheatmap(test, display_numbers = TRUE)
-pheatmap(test, display_numbers = TRUE, number_format = "\\\%.1e")
+pheatmap(test, display_numbers = TRUE, number_format = "\%.1e")
 pheatmap(test, display_numbers = matrix(ifelse(test > 5, "*", ""), nrow(test)))
 pheatmap(test, cluster_row = FALSE, legend_breaks = -1:4, legend_labels = c("0",
 "1e-4", "1e-3", "1e-2", "1e-1", "1"))
@@ -263,15 +269,11 @@ callback = function(hc, mat){
 
 pheatmap(test, clustering_callback = callback)
 
-\dontrun{
+dontrun{
 # Same using dendsort package
 library(dendsort)
 
 callback = function(hc, ...){dendsort(hc)}
 pheatmap(test, clustering_callback = callback)
 }
-
-}
-\author{
-Raivo Kolde <rkolde@gmail.com>
 }

@@ -6,6 +6,19 @@
 \usage{
 validate_args(counts, model, sample.label, nchains, cores, seed)
 }
+\arguments{
+\item{counts}{A count matrix}
+
+\item{model}{...}
+
+\item{sample.label}{...}
+
+\item{nchains}{...}
+
+\item{cores}{...}
+
+\item{seed}{...}
+}
 \description{
 Sanity check arguments to celda() to ensure a smooth run.
 }
