@@ -8,6 +8,10 @@
 }
 \arguments{
 \item{celda.mod}{A celda model object of "Celda_CG"}
+
+\item{counts}{A count matrix}
+
+\item{...}{extra parameters passed onto render_celda_heatmap}
 }
 \description{
 celda_heatmap for celda Cell and Gene clustering function

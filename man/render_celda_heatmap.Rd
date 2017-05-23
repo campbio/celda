@@ -23,6 +23,8 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 
 \item{scale.row}{Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE.}
 
+\item{scale_function}{specify the function for scaling. Defualt to be scale.}
+
 \item{normalize}{specify the normalization type: "cpm" or "none". Defualt to be "none".}
 
 \item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)}
@@ -53,8 +55,6 @@ breaks are calculated automatically.}
 \item{show_genenames}{Logical; specifying if gene names should be shown. Default to be FALSE.}
 
 \item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
-
-\item{scale_fun}{specify the function for scaling. Defualt to be scale.}
 }
 \description{
 render function for celda heatmap plot
