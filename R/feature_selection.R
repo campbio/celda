@@ -1,3 +1,9 @@
+#' TopRank function 
+#' @param fm factorized matrix.
+#' @param n Maximum number of items returned for each entry. 
+#' @param margin 1 for rows, 2 for columns.
+#' @param threshold only include entries in the matrix that is greader than the threshold.
+#' @param decreasing Logical; specifying if rank should be decreasing. Default to be TRUE. 
 #' @export
 topRank = function(fm, n=25, margin=2, threshold=0, decreasing=TRUE) {
   if(is.null(threshold) | is.na(threshold)) {

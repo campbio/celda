@@ -855,6 +855,8 @@ identity2 = function(x, ...){
 #' @param width manual option for determining the output file width in inches.
 #' @param height manual option for determining the output file height in inches.
 #' @param silent do not draw the plot (useful when using the gtable output)
+#' @param row_label row cluster labels for semi-clustering 
+#' @param col_label column cluster labels for semi-clustering 
 #' @param \dots graphical parameters for the text used in plot. Parameters passed to 
 #' \code{\link{grid.text}}, see \code{\link{gpar}}. 
 #' 
@@ -868,7 +870,7 @@ identity2 = function(x, ...){
 #' }
 #' 
 #' @author  Raivo Kolde <rkolde@@gmail.com>
-#' @examples
+#' #@examples
 #' # Create test matrix
 #' test = matrix(rnorm(200), 20, 10)
 #' test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
@@ -951,7 +953,7 @@ identity2 = function(x, ...){
 #' 
 #' pheatmap(test, clustering_callback = callback)
 #' 
-#' \dontrun{
+#' dontrun{
 #' # Same using dendsort package
 #' library(dendsort)
 #' 
