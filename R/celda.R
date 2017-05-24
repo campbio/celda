@@ -17,9 +17,11 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="",  ...) {
+celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, 
+                 nchains=1, cores=1, seed=12345, verbose=F, logfile="",  ...) {
   message("Starting celda...")
-  validate_args(counts, model, sample.label, nchains, cores, seed, ...)
+  validate_args(counts, model, sample.label, K, L, 
+                nchains, cores, seed, ...)
   
   # Redirect stderr from the worker threads if user asks for verbose
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
@@ -56,19 +58,19 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
 #' @param counts A count matrix 
 #' @param model ...
 #' @param sample.label ...
+#' @param K ...
+#' @param L ...
 #' @param nchains ...
 #' @param cores ...
 #' @param seed ...
-#' @param K ...
-#' @param L ...
 #' @param ... ...
-validate_args = function(counts, model, sample.label, 
-                         nchains, cores, seed, K=NULL, L=NULL, ...) {
+validate_args = function(counts, model, sample.label, K=NULL, L=NULL, 
+                         nchains, cores, seed, ...) {
   if (model %in% c("celda_C", "celda_CG") && is.null(K)) {
     stop("Must provide a K parameter when running a celda_C or celda_CG model")
   }
   if (model %in% c("celda_G", "celda_CG") && is.null(L)) {
-    stop("Must provide a K parameter when running a celda_G or celda_CG model")
+    stop("Must provide a L parameter when running a celda_G or celda_CG model")
   }
   
   validate_counts(counts, K, L)
