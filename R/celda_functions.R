@@ -95,7 +95,7 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
     new.y[y == y.order[i]] = i
   }
 
-  return(list(z=new.z, y=new.y))  
+  return(list(z=new.z, y=new.y, z.map=z.ta, y.map=y.order))  
 }  
 
 
