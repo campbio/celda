@@ -256,7 +256,7 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   cell.counts = cell.counts[-zero.row.idx, ]
   new$y = new$y[-zero.row.idx]
   
-  return(list(z=new$z, y=new$y, sample=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(z=new$z, y=new$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 #' celda Cell and Gene clustering function 
