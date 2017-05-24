@@ -50,7 +50,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   
   ## Select state of the cells  
   cell.state <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
-  cell.state = reorder.label.by.size(cell.state, K)
+  cell.state = reorder.label.by.size(cell.state, K)$new.labels
     
   ## Select number of transcripts per cell
   nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
@@ -190,12 +190,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
     ll.final = tail(ll, n=1)
   }
   
-  z.final.reorder = reorder.label.by.size(z.final, K)
+  reordered.labels = reorder.label.by.size(z.final, K)
+  z.final.reorder = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
 
   result = list(z=z.final.reorder, completeLogLik=ll,  finalLogLik=ll.final, seed=seed, K=K, sample.label=sample.label, alpha=alpha, beta=beta, names=names)
   if (save.prob) result$z.probability = z.probs else result$z.probability = NA
-  if (save.history) result$complete.z = z.all else result$complete.z = NA
+  if (save.history) {
+    ## Re-label Z history based off the reordering above:
+    result$complete.z = base::apply(z.all, 2, function(column) reordered.labels$map[column])
+  } 
   
   class(result) = "celda_C"
   return(result)
