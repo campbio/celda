@@ -507,10 +507,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
     y.all = base::apply(y.all, 2, function(column) reordered.labels$y.map[column])
     result$complete.z = z.all
     result$complete.y = y.all
-  } else {
-    result$complete.z = NA
-    result$complete.y = NA
-  }
+  } 
   
    class(result) = "celda_CG" 
    return(result)
