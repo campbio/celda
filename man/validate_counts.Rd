@@ -4,10 +4,14 @@
 \alias{validate_counts}
 \title{Perform some simple checks on the counts matrix, to ensure celda won't choke.}
 \usage{
-validate_counts(counts)
+validate_counts(counts, K, L)
 }
 \arguments{
 \item{counts}{A count matrix}
+
+\item{K}{the number of cell clusters requested}
+
+\item{L}{the number of gene clusters requested}
 }
 \description{
 Perform some simple checks on the counts matrix, to ensure celda won't choke.

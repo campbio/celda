@@ -19,7 +19,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @export
 celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="",  ...) {
   message("Starting celda...")
-  validate_args(counts, model, sample.label, nchains, cores, seed)
+  validate_args(counts, model, sample.label, nchains, cores, seed, ...)
   
   # Redirect stderr from the worker threads if user asks for verbose
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
@@ -59,8 +59,19 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
 #' @param nchains ...
 #' @param cores ...
 #' @param seed ...
-validate_args = function(counts, model, sample.label, nchains, cores, seed) {
-  validate_counts(counts)
+#' @param K ...
+#' @param L ...
+#' @param ... ...
+validate_args = function(counts, model, sample.label, 
+                         nchains, cores, seed, K=NULL, L=NULL, ...) {
+  if (model %in% c("celda_C", "celda_CG") && is.null(K)) {
+    stop("Must provide a K parameter when running a celda_C or celda_CG model")
+  }
+  if (model %in% c("celda_G", "celda_CG") && is.null(L)) {
+    stop("Must provide a K parameter when running a celda_G or celda_CG model")
+  }
+  
+  validate_counts(counts, K, L)
   
   if (!(model %in% available_models)) stop("Unavailable model specified")
       
@@ -78,7 +89,9 @@ validate_args = function(counts, model, sample.label, nchains, cores, seed) {
     
 #' Perform some simple checks on the counts matrix, to ensure celda won't choke.
 #' @param counts A count matrix
-validate_counts = function(counts) {
+#' @param K the number of cell clusters requested
+#' @param L the number of gene clusters requested
+validate_counts = function(counts, K, L) {
   # counts has to be a matrix...
   if (class(counts) != "matrix") stop("counts argument must be of class 'matrix'")
   
@@ -89,5 +102,13 @@ validate_counts = function(counts) {
   if (sum(count.row.sum == 0) > 1 | sum(count.col.sum == 0) > 1) {
     stop("Each row and column of the count matrix must have at least one count")
   }
+  
+  # Ensure that number of genes / cells is never more than
+  # the number of requested clusters for each
+  if (!is.null(L) && nrow(counts) < L) {
+    stop("Number of genes (rows) in count matrix must be >= L")
+  }
+  if (!is.null(K) && nrow(counts) < K) {
+    stop("Number of cells (counts) in count matrix must be >= K")
+  }
 }
-
