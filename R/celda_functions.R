@@ -56,7 +56,7 @@ reorder.label.by.size = function(z, K) {
   for(i in 1:length(z.ta)) {
     new.z[z == z.ta[i]] = i
   }
-  return(new.z)
+  return(list(new.labels=new.z, map=z.ta))
 }  
 
 reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
