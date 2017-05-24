@@ -481,11 +481,13 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
     y.probs.final = y.probs
   }
   
-  ## Peform reordering
-  new = reorder.labels.by.size.then.counts(counts, z=z.final, y=y.final, K=K, L=L)
+  ## Peform reordering on final Z and Y assigments:
+  reordered.labels = reorder.labels.by.size.then.counts(counts, z=z.final, 
+                                                        y=y.final, K=K, L=L)
   names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
- 
-  result =  list(z=new$z, y=new$y, z.stability=z.stability.final, 
+  
+  result =  list(z=reordered.labels$z, y=reordered.labels$y, 
+                 z.stability=z.stability.final, 
                  y.stability=y.stability.final,  complete.z.stability=z.stability, 
                  complete.y.stability=y.stability,  completeLogLik=ll, 
                  finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
@@ -500,6 +502,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   }
   
   if (save.history) {
+    ## Reorder Z and Y histories based off of final Z/Y reordering above:
+    z.all = base::apply(z.all, 2, function(column) reordered.labels$z.map[column])
+    y.all = base::apply(y.all, 2, function(column) reordered.labels$y.map[column])
     result$complete.z = z.all
     result$complete.y = y.all
   } else {
