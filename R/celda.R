@@ -68,7 +68,7 @@ validate_args = function(counts, model, sample.label,
     stop("Must provide a K parameter when running a celda_C or celda_CG model")
   }
   if (model %in% c("celda_G", "celda_CG") && is.null(L)) {
-    stop("Must provide a K parameter when running a celda_G or celda_CG model")
+    stop("Must provide a L parameter when running a celda_G or celda_CG model")
   }
   
   validate_counts(counts, K, L)
