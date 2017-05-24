@@ -87,13 +87,13 @@ dim(sim_counts$counts)
 How many of the samples are in each sample type:
 
 ```{r}
-table(sim_counts$sample)
+table(sim_counts$sample.label)
 ```
 
 Sample types vs Cell cluster type:
 
 ```{r}
-table(sim_counts$z, sim_counts$sample)
+table(sim_counts$z, sim_counts$sample.label)
 ```
 
 
@@ -104,7 +104,7 @@ table(sim_counts$z, sim_counts$sample)
 Here is the resulting confusion matrix comparing the true cluster label to the estimated cluster label.
 
 ```{r, fig.show='hold', warning = FALSE, message = FALSE}
-celdaCG.res = celda_CG(counts = sim_counts$counts, K =3, L = 10, max.iter = 10, sample.label = sim_counts$sample)
+celdaCG.res = celda_CG(counts = sim_counts$counts, K =3, L = 10, max.iter = 10, sample.label = sim_counts$sample.label)
 
 table(celdaCG.res$z, sim_counts$z)
 table(celdaCG.res$y, sim_counts$y)
