@@ -4,7 +4,8 @@
 \alias{validate_args}
 \title{Sanity check arguments to celda() to ensure a smooth run.}
 \usage{
-validate_args(counts, model, sample.label, nchains, cores, seed)
+validate_args(counts, model, sample.label, nchains, cores, seed, K = NULL,
+  L = NULL, ...)
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -18,6 +19,12 @@ validate_args(counts, model, sample.label, nchains, cores, seed)
 \item{cores}{...}
 
 \item{seed}{...}
+
+\item{K}{...}
+
+\item{L}{...}
+
+\item{...}{...}
 }
 \description{
 Sanity check arguments to celda() to ensure a smooth run.
