@@ -5,8 +5,9 @@
 \title{Cluster Genes from Single Cell Sequencing Data}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
-  seed = 12345, best = TRUE, y.split.on.iter = 3, y.num.splits = 3,
-  thread = 1, save.prob = FALSE, save.history = FALSE, ...)
+  count.checksum = NULL, seed = 12345, best = TRUE, y.split.on.iter = 3,
+  y.num.splits = 3, thread = 1, save.prob = FALSE, save.history = FALSE,
+  ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -20,6 +21,8 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
 
 \item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25.}
+
+\item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
 \item{seed}{Parameter to set.seed() for random number generation.}
 

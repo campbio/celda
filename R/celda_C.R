@@ -68,18 +68,20 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
+#' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25 
 #' @param seed Parameter to set.seed() for random number generation
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
 #' @param z.split.on.iter On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.
-#' @param z.num.splits Maximum number of times to perform the heuristic described in “z.split.on.iter”.
+#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param thread The thread index, used for logging purposes
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param ... extra parameters passed onto the celda_C 
 #' @export
-celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25, 
-                   seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3, 
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
+                   count.checksum=NULL, max.iter=25, seed=12345,
+                   best=TRUE, z.split.on.iter=3, z.num.splits=3, 
                    thread=1, save.history=FALSE, save.prob=FALSE, ...) {
   
   if(is.null(sample.label)) {
@@ -194,7 +196,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, max.iter=25,
   z.final.reorder = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
 
-  result = list(z=z.final.reorder, completeLogLik=ll,  finalLogLik=ll.final, seed=seed, K=K, sample.label=sample.label, alpha=alpha, beta=beta, names=names)
+  result = list(z=z.final.reorder, completeLogLik=ll,  
+                finalLogLik=ll.final, seed=seed, K=K, 
+                sample.label=sample.label, alpha=alpha, 
+                beta=beta, count.checksum=count.checksum, 
+                names=names)
+  
   if (save.prob) result$z.probability = z.probs else result$z.probability = NA
   if (save.history) {
     ## Re-label Z history based off the reordering above:
