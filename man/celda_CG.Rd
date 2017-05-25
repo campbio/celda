@@ -5,10 +5,10 @@
 \title{celda Cell and Gene clustering function}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, max.iter = 25, seed = 12345, best = TRUE,
-  z.split.on.iter = 3, z.num.splits = 3, y.split.on.iter = 3,
-  y.num.splits = 3, thread = 1, save.history = FALSE, save.prob = FALSE,
-  ...)
+  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
+  seed = 12345, best = TRUE, z.split.on.iter = 3, z.num.splits = 3,
+  y.split.on.iter = 3, y.num.splits = 3, thread = 1,
+  save.history = FALSE, save.prob = FALSE, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -26,6 +26,8 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.}
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.}
+
+\item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
 \item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25.}
 
