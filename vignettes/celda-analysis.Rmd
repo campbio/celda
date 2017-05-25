@@ -95,13 +95,13 @@ dim(sim_counts$counts)
 The sample vairable shows how many of the samples are in each sample type:
 
 ```{r}
-table(sim_counts$sample)
+table(sim_counts$sample.label)
 ```
 
 Each cell is assumed to come from a sample. Here is the number of cells in each subpopulation within each sample:
 
 ```{r}
-table(sim_counts$z, sim_counts$sample)
+table(sim_counts$z, sim_counts$sample.label)
 ```
 
 
@@ -111,7 +111,8 @@ table(sim_counts$z, sim_counts$sample)
 There are currently three models within this package: celda_C will cluster cells, celda_G will cluster genes, and celda_CG will simultaneously cluster cells and genes. Here is the command for celda_CG:
 
 ```{r, fig.show='hold', warning = FALSE, message = FALSE}
-celdaCG.res = celda_CG(counts = sim_counts$counts, sample.label = sim_counts$sample, K = 3, L = 10, max.iter = 10)
+
+celdaCG.res = celda_CG(counts = sim_counts$counts, K =3, L = 10, max.iter = 10, sample.label = sim_counts$sample.label)
 ```
 
 Here is a comparison between the true cluster labels and the estimated cluster labels.
