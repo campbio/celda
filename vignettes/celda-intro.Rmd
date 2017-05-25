@@ -4,8 +4,8 @@ author: Josh D. Campbell, Sean Corbett, Masanao Yajima, Zichun Liu, Shiyi Yang, 
   Huan, Anahita Bahri
 date: '`r Sys.Date()`'
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 vignette: |
   %\VignetteIndexEntry{Vignette Title} %\VignetteEngine{knitr::rmarkdown} \usepackage[utf8]{inputenc}
 ---
