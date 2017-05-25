@@ -269,6 +269,7 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.
+#' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
 #' @param seed Parameter to set.seed() for random number generation
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
@@ -281,9 +282,11 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.
 #' @param ... extra parameters passed onto celda_CG
 #' @export
-celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, gamma=1,
-			max.iter=25, seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
-			y.split.on.iter=3, y.num.splits=3, thread=1, save.history=FALSE, save.prob=FALSE, ...) {
+celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
+                    delta=1, gamma=1, count.checksum=NULL, max.iter=25,
+			              seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
+			              y.split.on.iter=3, y.num.splits=3, thread=1, 
+			              save.history=FALSE, save.prob=FALSE, ...) {
   set.seed(seed)
   
   message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
@@ -484,22 +487,24 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, delta=1, g
   ## Peform reordering on final Z and Y assigments:
   reordered.labels = reorder.labels.by.size.then.counts(counts, z=z.final, 
                                                         y=y.final, K=K, L=L)
-  names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
+  names = list(row=rownames(counts), column=colnames(counts), 
+               sample=levels(sample.label))
   
-  result =  list(z=reordered.labels$z, y=reordered.labels$y, 
-                 z.stability=z.stability.final, 
-                 y.stability=y.stability.final,  complete.z.stability=z.stability, 
-                 complete.y.stability=y.stability,  completeLogLik=ll, 
-                 finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
-                 beta=beta, delta=delta, seed=seed, sample.label=sample.label, names=names)
+  
+  result = list(z=reordered.labels$z, y=reordered.labels$y, 
+                z.stability=z.stability.final, 
+                y.stability=y.stability.final,  
+                complete.z.stability=z.stability, 
+                complete.y.stability=y.stability, completeLogLik=ll, 
+                finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
+                beta=beta, delta=delta, seed=seed, 
+                sample.label=sample.label, names=names,
+                count.checksum=count.checksum)
   
   if (save.prob) {
     result$z.prob = z.probs.final
     result$y.prob = y.probs.final
-  } else {
-    result$z.prob = NA
-    result$y.prob = NA
-  }
+  } 
   
   if (save.history) {
     ## Reorder Z and Y histories based off of final Z/Y reordering above:
