@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{clusterProbabilities.celda_G}
 \alias{clusterProbabilities.celda_G}
-\title{clusterProbabilities for celda Gene clustering function}
+\title{clusterProbabilities for celda Gene clustering model}
 \usage{
 \method{clusterProbabilities}{celda_G}(celda.mod)
 }
@@ -10,5 +10,5 @@
 \item{celda.mod}{A celda model object of class "celda_G"}
 }
 \description{
-clusterProbabilities for celda Gene clustering function
+clusterProbabilities for celda Gene clustering model
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/feature_selection.R
 \name{topRank}
 \alias{topRank}
-\title{TopRank function}
+\title{Identify features with the highest influence on clustering}
 \usage{
 topRank(fm, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
 }
@@ -18,5 +18,5 @@ topRank(fm, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
 \item{decreasing}{Logical; specifying if rank should be decreasing. Default to be TRUE.}
 }
 \description{
-TopRank function
+Identify features with the highest influence on clustering
 }
