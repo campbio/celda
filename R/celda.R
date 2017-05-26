@@ -25,25 +25,33 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
+  # Details for each model parameter / chain combination 
   runs = expand.grid(chain=1:nchains, ...)
   runs$index = as.numeric(rownames(runs))
   if (verbose) print(runs)
   
+  # Pre-generate a set of random seeds to be used for each chain
   all.seeds = seed:(seed + nchains - 1)
+  
+  # An MD5 checksum of the count matrix. Passed to models so
+  # later on, we can check on celda_* model objects which
+  # count matrix was used.
+  count.checksum = digest::digest(counts, algo="md5")
+    
   
   res.list = foreach(i = 1:nrow(runs), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     chain.seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
+    
     if (verbose) {
-      res = do.call(model, c(list(counts=counts, sample.label=sample.label, seed=chain.seed, thread=i), c(runs[i,-1])))
+      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i), c(runs[i,-1])))
     } else {
-      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, seed=chain.seed, thread=i), c(runs[i,-1]))))
+      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i), c(runs[i,-1]))))
     }
     return(list(res))
   }  
   parallel::stopCluster(cl)
   
-  count.checksum = digest::digest(counts, algo="md5")
   
   celda.res = list(run.params=runs, res.list=res.list, 
                    content.type=model, count.checksum=count.checksum)
