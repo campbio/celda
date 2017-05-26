@@ -180,6 +180,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
+#' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
 #' @param seed Parameter to set.seed() for random number generation.
@@ -191,9 +192,9 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
-                   seed=12345, best=TRUE, y.split.on.iter=3, 
-                   y.num.splits=3, thread=1, save.prob=FALSE,
-                   save.history=FALSE, ...) {
+                   count.checksum=NULL, seed=12345, best=TRUE, 
+                   y.split.on.iter=3,  y.num.splits=3, thread=1, 
+                   save.prob=FALSE, save.history=FALSE, ...) {
   
   set.seed(seed)
   message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
@@ -306,7 +307,8 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   names = list(row=rownames(counts), column=colnames(counts))  
 
   result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-                finalLogLik=ll.final, L=L, beta=beta, delta=delta, seed=seed, names=names)
+                finalLogLik=ll.final, L=L, beta=beta, delta=delta, 
+                count.checksum=count.checksum, seed=seed, names=names)
   
   if (save.prob) result$y.probability = y.probs else result$y.probability = NA
   if (save.history) {
