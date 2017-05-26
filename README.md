@@ -7,13 +7,6 @@
 # These types of models have shown good performance with sparse data.
 
 
-## Examples and vignettes
-
-Vignettes are available in the package. 
-
-An analysis example using celda with RNASeq via vignette('celda-analysis')
-
-
 ## Installation Instructions
 
 To install the beta release of celda via devtools:
@@ -21,6 +14,15 @@ To install the beta release of celda via devtools:
 library(devtools)
 install_github("compbiomed/celda@v0.1")
 ```
+
+
+## Examples and vignettes
+
+Vignettes are available in the package. 
+
+An analysis example using celda with RNASeq via vignette('celda-analysis')
+
+
 
 ## New Features and announcements
 The v0.1 release of celda represents a useable implementation of the various celda clustering models.
