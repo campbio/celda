@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_C.R
 \name{simulateCells.celda_C}
 \alias{simulateCells.celda_C}
-\title{simulateCells for celda Cell clustering function}
+\title{Simulate cells from the cell clustering generative model}
 \usage{
 simulateCells.celda_C(S = 10, C.Range = c(10, 100), N.Range = c(100,
   5000), G = 500, K = 5, alpha = 1, beta = 1)
@@ -23,5 +23,5 @@ simulateCells.celda_C(S = 10, C.Range = c(10, 100), N.Range = c(100,
 \item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
 }
 \description{
-simulateCells for celda Cell clustering function
+Simulate cells from the cell clustering generative model
 }

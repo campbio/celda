@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{factorizeMatrix.celda_G}
 \alias{factorizeMatrix.celda_G}
-\title{factorizeMatrix for celda Gene clustering funciton}
+\title{Generate factorized matrices showing each feature's influence on the celda_G model clustering}
 \usage{
 factorizeMatrix.celda_G(counts, celda.obj, type = c("counts", "proportion",
   "posterior"))
@@ -15,5 +15,5 @@ factorizeMatrix.celda_G(counts, celda.obj, type = c("counts", "proportion",
 \item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
 }
 \description{
-factorizeMatrix for celda Gene clustering funciton
+Generate factorized matrices showing each feature's influence on the celda_G model clustering
 }

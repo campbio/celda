@@ -2,23 +2,23 @@
 % Please edit documentation in R/celda_CG.R
 \name{calculate_loglik_from_variables.celda_CG}
 \alias{calculate_loglik_from_variables.celda_CG}
-\title{calculate log lileklihood for the celda Cell and Gene clustering function}
+\title{Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments}
 \usage{
 calculate_loglik_from_variables.celda_CG(counts, s, z, y, K, L, alpha, beta,
   delta, gamma)
 }
 \arguments{
-\item{counts}{A numeric count matrix.}
+\item{counts}{A numeric count matrix}
 
-\item{s}{Vector of sample labels.}
+\item{s}{A numeric vector of sample labels corresponding to the samples each cell in the count matrix originates from}
 
-\item{z}{A numeric vector of cell cluster assignments.}
+\item{z}{A numeric vector of cell cluster assignments}
 
-\item{y}{A numeric vector of gene cluster assignments.}
+\item{y}{A numeric vector of gene cluster assignments}
 
-\item{K}{The number of cell populations.}
+\item{K}{The number of cell clusters}
 
-\item{L}{The number of clusters being considered.}
+\item{L}{The number of gene clusters}
 
 \item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution.}
 
@@ -29,5 +29,5 @@ calculate_loglik_from_variables.celda_CG(counts, s, z, y, K, L, alpha, beta,
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
 }
 \description{
-calculate log lileklihood for the celda Cell and Gene clustering function
+Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
 }

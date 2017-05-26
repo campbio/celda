@@ -5,14 +5,16 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 
 #' Run the celda Bayesian hierarchical model on a matrix of counts.
 #' 
+#' Yields assigments of genes/cells to clusters, depending on the provided model type.
+#' 
 #' @param counts A count matrix
 #' @param model Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)
-#' @param sample.label A numeric vector indicating the sample for each cell (column) in the count matrix
-#' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters
-#' @param cores The number of cores to use to speed up Gibbs sampling
-#' @param seed The base seed for random number generation. Each chain celda runs with have a seed index off of this one.
-#' @param verbose Print messages during celda chain execution
-#' @param logfile Path to file for logging events from worker threads. By default, messages are redirected to stderr of the main process.
+#' @param sample.label A numeric vector indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.
+#' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1
+#' @param cores The number of cores to use for parallell Gibbs sampling. Defaults to 1.
+#' @param seed The base seed for random number generation
+#' @param verbose Print log messages during celda chain execution
+#' @param logfile Path to output file for logging messages from worker threads. By default, messages are redirected to stderr of the main process.
 #' @param ... Model specific parameters
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
@@ -60,16 +62,8 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
 }
 
 
-#' Sanity check arguments to celda() to ensure a smooth run.
-#' @param counts A count matrix 
-#' @param model ...
-#' @param sample.label ...
-#' @param nchains ...
-#' @param cores ...
-#' @param seed ...
-#' @param K ...
-#' @param L ...
-#' @param ... ...
+# Sanity check arguments to celda() to ensure a smooth run.
+# See parameter descriptions from celda() documentation.
 validate_args = function(counts, model, sample.label, 
                          nchains, cores, seed, K=NULL, L=NULL, ...) {
   if (model %in% c("celda_C", "celda_CG") && is.null(K)) {
@@ -95,10 +89,8 @@ validate_args = function(counts, model, sample.label,
 }
     
     
-#' Perform some simple checks on the counts matrix, to ensure celda won't choke.
-#' @param counts A count matrix
-#' @param K the number of cell clusters requested
-#' @param L the number of gene clusters requested
+# Perform some simple checks on the counts matrix, to ensure celda won't choke.
+# See parameter descriptions from celda() documentation.
 validate_counts = function(counts, K, L) {
   # counts has to be a matrix...
   if (class(counts) != "matrix") stop("counts argument must be of class 'matrix'")
