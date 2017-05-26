@@ -39,9 +39,10 @@ normalizeLogProbs = function(ll.probs) {
 }
 
 
-#' normalizeCounts function 
+#' Normalize a counts matrix by a scalar factor
+#' 
 #' @param counts A count matrix 
-#' @param scale.factor the scalor for the normalization 
+#' @param scale.factor the scalar for the normalization 
 #' @export
 normalizeCounts = function(counts, scale.factor=1e6) {
   counts.norm = sweep(counts, 2, colSums(counts) / scale.factor, "/")
@@ -104,7 +105,7 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 #' Compare the MD5 checksum of a provided count.matrix to the count matrix
 #' checksum on a celda_list object, to see if they're the same.
 #' @param count.matrix A numeric matrix of counts
-#' @param celda.checksum An MD5 checksum from a celda_list object (as returned from celda())
+#' @param celda.checksum An MD5 checksum from a celda_list or celda model object (celda_C, celda_G, celda_CG)
 #' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise
 #' @export
 compare_count_matrix = function(count.matrix, celda.checksum) {

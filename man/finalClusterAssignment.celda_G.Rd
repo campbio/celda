@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{finalClusterAssignment.celda_G}
 \alias{finalClusterAssignment.celda_G}
-\title{finalClusterAssignment for celda Gene clustering function}
+\title{finalClusterAssignment for celda Gene clustering model}
 \usage{
 \method{finalClusterAssignment}{celda_G}(celda.mod)
 }
@@ -10,5 +10,5 @@
 \item{celda.mod}{A celda model object of class "celda_G"}
 }
 \description{
-finalClusterAssignment for celda Gene clustering function
+finalClusterAssignment for celda Gene clustering model
 }

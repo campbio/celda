@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{celda_CG}
 \alias{celda_CG}
-\title{celda Cell and Gene clustering function}
+\title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
@@ -13,44 +13,44 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \arguments{
 \item{counts}{A numeric count matrix.}
 
-\item{sample.label}{A vector indicating the sample for each cell in the count matrix.}
+\item{sample.label}{A vector indicating the sample for each cell in the count matrix}
 
-\item{K}{The number of cell populations.}
+\item{K}{The number of cell populations}
 
-\item{L}{The number of gene clusters being considered.}
+\item{L}{The number of gene clusters being considered}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution.}
+\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1.}
+\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.}
+\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.}
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1}
 
 \item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25.}
+\item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25}
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
-\item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.}
+\item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE}
 
-\item{z.split.on.iter}{On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3.}
+\item{z.split.on.iter}{On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3}
 
-\item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter.}
+\item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter}
 
-\item{y.split.on.iter}{On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3.}
+\item{y.split.on.iter}{On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3}
 
-\item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter.}
+\item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter}
 
-\item{thread}{The thread index, used for logging purposes.}
+\item{thread}{The thread index, used for logging purposes}
 
-\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE.}
+\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
-\item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.}
+\item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
 
-\item{...}{extra parameters passed onto celda_CG}
+\item{...}{Additional parameters}
 }
 \description{
-celda Cell and Gene clustering function
+celda Cell and Gene Clustering Model
 }

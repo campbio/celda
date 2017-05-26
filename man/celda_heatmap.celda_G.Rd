@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{celda_heatmap.celda_G}
 \alias{celda_heatmap.celda_G}
-\title{celda_heatmap for celda Gene clustering function}
+\title{celda_heatmap for celda Gene clustering model}
 \usage{
 \method{celda_heatmap}{celda_G}(celda.mod, counts, ...)
 }
@@ -14,5 +14,5 @@
 \item{...}{extra parameters passed onto render_celda_heatmap}
 }
 \description{
-celda_heatmap for celda Gene clustering function
+celda_heatmap for celda Gene clustering model
 }

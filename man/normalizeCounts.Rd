@@ -2,15 +2,15 @@
 % Please edit documentation in R/celda_functions.R
 \name{normalizeCounts}
 \alias{normalizeCounts}
-\title{normalizeCounts function}
+\title{Normalize a counts matrix by a scalar factor}
 \usage{
 normalizeCounts(counts, scale.factor = 1e+06)
 }
 \arguments{
 \item{counts}{A count matrix}
 
-\item{scale.factor}{the scalor for the normalization}
+\item{scale.factor}{the scalar for the normalization}
 }
 \description{
-normalizeCounts function
+Normalize a counts matrix by a scalar factor
 }
