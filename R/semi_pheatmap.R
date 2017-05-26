@@ -140,7 +140,7 @@ find_coordinates = function(n, gaps, m = 1:n){
     
     size = (1 / n) * (unit(1, "npc") - length(gaps) * unit("0", "bigpts"))
     
-    gaps2 = apply(sapply(gaps, function(gap, x){x > gap}, m), 1, sum) 
+    gaps2 = base::apply(sapply(gaps, function(gap, x){x > gap}, m), 1, sum) 
     coord = m * size + (gaps2 * unit("0", "bigpts"))
     
     return(list(coord = coord, size = size))
@@ -655,8 +655,8 @@ cluster_mat <- function(mat, labels, distance, method){
 }
 
 scale_rows = function(x){
-    m = apply(x, 1, mean, na.rm = T)
-    s = apply(x, 1, sd, na.rm = T)
+    m = base::apply(x, 1, mean, na.rm = T)
+    s = base::apply(x, 1, sd, na.rm = T)
     return((x - m) / s)
 }
 
@@ -720,7 +720,7 @@ generate_annotation_colours = function(annotation, annotation_colors, drop){
 kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
     # Filter data
     if(!is.na(sd_limit)){
-        s = apply(mat, 1, sd)
+        s = base::apply(mat, 1, sd)
         mat = mat[s > sd_limit, ]    
     }
     

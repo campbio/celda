@@ -128,7 +128,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   }
   
   if(scale.row){
-    counts <- t(apply(counts, 1, scale_function))
+    counts <- t(base::apply(counts, 1, scale_function))
     
     if(!is.null(z.trim)){
       if(length(z.trim)!=2) {
