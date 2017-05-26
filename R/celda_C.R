@@ -29,7 +29,8 @@
 # nG.by.TS = Number of genes in each Transcriptional State
 
 
-#' simulateCells for celda Cell clustering function 
+#' Simulate cells from the cell clustering generative model
+#' 
 #' @param S Total number of samples
 #' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution
 #' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
@@ -62,7 +63,8 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 }
 
 
-#' celda Cell clustering function 
+#' Cluster a counts matrix by cells
+#' 
 #' @param counts A numeric count matrix
 #' @param sample.label A vector indicating the sample for each cell (column) in the count matrix
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
@@ -77,7 +79,8 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param thread The thread index, used for logging purposes
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
-#' @param ... extra parameters passed onto the celda_C 
+#' @param ... additonal parameters
+#' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=25, seed=12345,
@@ -229,11 +232,12 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, alpha, beta) {
 }
 
 
-#' calcLLFromVariables for celda Cell clustering function 
+#' Calculate the celda_C log likelihood for user-provided cluster assignments
+#' 
 #' @param counts A numeric count matrix
 #' @param s A vector indicating the sample for each cell (column) in the count matrix
 #' @param z A numeric vector of cluster assignments
-#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
+#' @param K The total number of clusters in z
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @export
@@ -290,7 +294,8 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
 }
 
 
-#' factorizeMatrix for celda Cell clustering funciton 
+#' Generate factorized matrices showing each feature's influence on the celda_C model clustering 
+#' 
 #' @param counts A numeric count matrix
 #' @param celda.obj Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
@@ -388,7 +393,7 @@ celda_heatmap.celda_C = function(celda.mod, counts, ...) {
 
 #' visualize_model_performance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()
-#' @param method One of “perplexity”, “harmonic”, or “loglik”
+#' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the plot
 #' @import Rmpfr
 #' @export
