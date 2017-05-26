@@ -30,13 +30,14 @@
 
 # nG.by.TS = Number of genes in each Transcriptional State
 
-#' calculate log lileklihood for the celda Cell and Gene clustering function
-#' @param counts A numeric count matrix.
-#' @param s Vector of sample labels.
-#' @param z A numeric vector of cell cluster assignments.
-#' @param y A numeric vector of gene cluster assignments.
-#' @param K The number of cell populations.
-#' @param L The number of clusters being considered.
+#' Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
+#' 
+#' @param counts A numeric count matrix
+#' @param s A numeric vector of sample labels corresponding to the samples each cell in the count matrix originates from
+#' @param z A numeric vector of cell cluster assignments
+#' @param y A numeric vector of gene cluster assignments
+#' @param K The number of cell clusters
+#' @param L The number of gene clusters
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution.
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
@@ -187,19 +188,20 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
   return(final)
 }
 
-#' simulateCells for the celda Cell and Gene clustering function
-#' @param S The number of samples.
-#' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample.
-#' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts.
-#' @param G The number of genes.
-#' @param K The number of cell populations.
-#' @param L The number of gene clusters being considered.
-#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution.
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
-#' @param seed starting point used for generating simulated data.
-#' @param ... extra parameters passed onto the simulateCells.celda_CG
+#' Simulate cells from the cell/gene clustering generative model
+#' 
+#' @param S The number of samples
+#' @param C.Range two element vector to specify the lower and upper bound of the counts of cells for each sample
+#' @param N.Range two element vector to specify the lower and upper bound of the counts of the transcripts
+#' @param G The number of genes
+#' @param K The number of cell populations
+#' @param L The number of gene clusters being considered
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param seed starting point used for generating simulated data
+#' @param ... Additional parameters
 #' @export
 simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
@@ -259,28 +261,28 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   return(list(z=new$z, y=new$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
-#' celda Cell and Gene clustering function 
+#' celda Cell and Gene Clustering Model
 #' 
 #' @param counts A numeric count matrix.
-#' @param sample.label A vector indicating the sample for each cell in the count matrix.
-#' @param K The number of cell populations.
-#' @param L The number of gene clusters being considered.
-#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution.
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1.
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1.
+#' @param sample.label A vector indicating the sample for each cell in the count matrix
+#' @param K The number of cell populations
+#' @param L The number of gene clusters being considered
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
 #' @param seed Parameter to set.seed() for random number generation
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
-#' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
-#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter.
-#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
-#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
-#' @param thread The thread index, used for logging purposes.
-#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE.
-#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE.
-#' @param ... extra parameters passed onto celda_CG
+#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE
+#' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
+#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
+#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
+#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter
+#' @param thread The thread index, used for logging purposes
+#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
+#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
+#' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
@@ -519,7 +521,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 }
 
 
-#' factorizeMatrix for celda Cell and Gene clustering function 
+#' Generate factorized matrices showing each feature's influence on the celda_CG model clustering 
+#' 
 #' @param counts A numerix count matrix
 #' @param celda.obj object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
@@ -595,28 +598,28 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
 ################################################################################
 # celda_CG S3 methods                                                          #
 ################################################################################
-#' finalClusterAssignment for the celda Cell and Gene clustering function 
+#' finalClusterAssignment for the celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 finalClusterAssignment.celda_CG = function(celda.mod) {
   return(list(z=celda.mod$z, y=celda.mod$y))
 }
 
-#' completeClusterHistory for the celda Cell and Gene clustering function
+#' completeClusterHistory for the celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 completeClusterHistory.celda_CG = function(celda.mod) {
   return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
 }
 
-#' clusterProbabilities for the celda Cell and Gene clustering function
+#' clusterProbabilities for the celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 clusterProbabilities.celda_CG = function(celda.mod) {
   return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
 }
 
-#' getK for the celda Cell and Gene clustering function 
+#' getK for the celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 getK.celda_CG = function(celda.mod) {
@@ -624,7 +627,7 @@ getK.celda_CG = function(celda.mod) {
 }
 
 
-#' getL for the celda Cell and Gene clustering function
+#' getL for the celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @export
 getL.celda_CG = function(celda.mod) {
@@ -632,7 +635,7 @@ getL.celda_CG = function(celda.mod) {
 }
 
 
-#' celda_heatmap for celda Cell and Gene clustering function 
+#' celda_heatmap for celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @param counts A count matrix
 #' @param ... extra parameters passed onto render_celda_heatmap
@@ -642,10 +645,10 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 }
 
 
-#' visualize_model_performance for Celda Cell and Gene clustering function 
+#' visualize_model_performance for Celda Cell and Gene clustering model
 #' @param celda.list A celda model object of "Celda_CG"
 #' @param title Title for the visualize_model_performance
-#' @param method One of “perplexity”, “harmonic”, or “loglik”
+#' @param method One of "perplexity", "harmonic", or "loglik"
 #' @import Rmpfr
 #' @export
 visualize_model_performance.celda_CG = function(celda.list, method="perplexity", 

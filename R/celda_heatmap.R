@@ -71,7 +71,8 @@ robust_scale <- function(x){
 }
 
 
-#' render function for celda heatmap plot
+#' Directly render a heatmap based on celda results
+#' 
 #' @param counts A count matrix. 
 #' @param z A numeric vector of cluster assignments for cell. 
 #' @param y A numeric vector of cluster assignments for gene.

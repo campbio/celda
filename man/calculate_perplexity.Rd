@@ -2,8 +2,7 @@
 % Please edit documentation in R/model_performance.R
 \name{calculate_perplexity}
 \alias{calculate_perplexity}
-\title{Calculate the perplexity from a single celda chain.
-Perplexity is defined as the inverse of the geometric mean of the}
+\title{Calculate the perplexity from a single celda chain}
 \usage{
 calculate_perplexity(completeLogLik)
 }
@@ -14,6 +13,6 @@ calculate_perplexity(completeLogLik)
 The perplexity for the provided chain as an mpfr number
 }
 \description{
-Calculate the perplexity from a single celda chain.
-Perplexity is defined as the inverse of the geometric mean of the
+Perplexity is defined as the inverse of the geometric mean of the log-likelihoods over all 
+iterations of Gibbs sampling.
 }

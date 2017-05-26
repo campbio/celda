@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_heatmap.R
 \name{render_celda_heatmap}
 \alias{render_celda_heatmap}
-\title{render function for celda heatmap plot}
+\title{Directly render a heatmap based on celda results}
 \usage{
 render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   scale.row = TRUE, scale_function = scale, normalize = "none",
@@ -57,5 +57,5 @@ breaks are calculated automatically.}
 \item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
 }
 \description{
-render function for celda heatmap plot
+Directly render a heatmap based on celda results
 }

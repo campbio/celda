@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{simulateCells.celda_G}
 \alias{simulateCells.celda_G}
-\title{Generate Count Data}
+\title{Simulate cells from the gene clustering generative model}
 \usage{
 simulateCells.celda_G(C = 100, N.Range = c(500, 5000), G = 1000, L = 5,
   beta = 1, gamma = 1, delta = 1, seed = 12345)

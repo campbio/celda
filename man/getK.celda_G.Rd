@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{getK.celda_G}
 \alias{getK.celda_G}
-\title{getK for celda Gene clustering function}
+\title{getK for celda Gene clustering model}
 \usage{
 \method{getK}{celda_G}(celda.mod)
 }
@@ -10,5 +10,5 @@
 \item{celda.mod}{A celda model object of class "celda_G"}
 }
 \description{
-getK for celda Gene clustering function
+getK for celda Gene clustering model
 }
