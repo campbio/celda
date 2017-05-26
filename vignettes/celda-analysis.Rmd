@@ -22,14 +22,14 @@ In this vignette we will demonstrate how to perform cell and gene clustering wit
 
 ## Installation Instructions
 
-Currently `celda` is hosted on a Github repository `definitelysean/celda`.
+Currently `celda` is hosted on a Github repository `compbiomed/celda`.
 
 ```{r,eval=FALSE}
 library(devtools)
 install_github("compbiomed/celda@v0.1")
 ```
 
-This should automatically install `celda` on your local machine as long as you have proper internet connection.  If you encounter a problem during the installation you may want to open up a browser and acces our github repository https://github.com/definitelysean/celda.
+This should automatically install `celda` on your local machine as long as you have proper internet connection.  If you encounter a problem during the installation you may want to open up a browser and acces our github repository https://github.com/compbiomed/celda.
 
 ## Loading the library
 
