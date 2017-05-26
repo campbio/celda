@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{factorizeMatrix.celda_CG}
 \alias{factorizeMatrix.celda_CG}
-\title{factorizeMatrix for celda Cell and Gene clustering function}
+\title{Generate factorized matrices showing each feature's influence on the celda_CG model clustering}
 \usage{
 factorizeMatrix.celda_CG(counts, celda.obj, type = c("counts", "proportion",
   "posterior"))
@@ -18,5 +18,5 @@ factorizeMatrix.celda_CG(counts, celda.obj, type = c("counts", "proportion",
 A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 }
 \description{
-factorizeMatrix for celda Cell and Gene clustering function
+Generate factorized matrices showing each feature's influence on the celda_CG model clustering
 }

@@ -2,37 +2,37 @@
 % Please edit documentation in R/celda_CG.R
 \name{simulateCells.celda_CG}
 \alias{simulateCells.celda_CG}
-\title{simulateCells for the celda Cell and Gene clustering function}
+\title{Simulate cells from the cell/gene clustering generative model}
 \usage{
 simulateCells.celda_CG(S = 10, C.Range = c(50, 100), N.Range = c(500,
   5000), G = 1000, K = 3, L = 10, alpha = 1, beta = 1, gamma = 1,
   delta = 1, seed = 12345, ...)
 }
 \arguments{
-\item{S}{The number of samples.}
+\item{S}{The number of samples}
 
-\item{C.Range}{two element vector to specify the lower and upper bound of the counts of cells for each sample.}
+\item{C.Range}{two element vector to specify the lower and upper bound of the counts of cells for each sample}
 
-\item{N.Range}{two element vector to specify the lower and upper bound of the counts of the transcripts.}
+\item{N.Range}{two element vector to specify the lower and upper bound of the counts of the transcripts}
 
-\item{G}{The number of genes.}
+\item{G}{The number of genes}
 
-\item{K}{The number of cell populations.}
+\item{K}{The number of cell populations}
 
-\item{L}{The number of gene clusters being considered.}
+\item{L}{The number of gene clusters being considered}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution.}
+\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.}
+\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.}
+\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
 
-\item{seed}{starting point used for generating simulated data.}
+\item{seed}{starting point used for generating simulated data}
 
-\item{...}{extra parameters passed onto the simulateCells.celda_CG}
+\item{...}{Additional parameters}
 }
 \description{
-simulateCells for the celda Cell and Gene clustering function
+Simulate cells from the cell/gene clustering generative model
 }

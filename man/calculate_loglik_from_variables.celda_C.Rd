@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_C.R
 \name{calculate_loglik_from_variables.celda_C}
 \alias{calculate_loglik_from_variables.celda_C}
-\title{calcLLFromVariables for celda Cell clustering function}
+\title{Calculate the celda_C log likelihood for user-provided cluster assignments}
 \usage{
 calculate_loglik_from_variables.celda_C(counts, s, z, K, alpha, beta)
 }
@@ -13,12 +13,12 @@ calculate_loglik_from_variables.celda_C(counts, s, z, K, alpha, beta)
 
 \item{z}{A numeric vector of cluster assignments}
 
-\item{K}{An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)}
+\item{K}{The total number of clusters in z}
 
 \item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
 
 \item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
 }
 \description{
-calcLLFromVariables for celda Cell clustering function
+Calculate the celda_C log likelihood for user-provided cluster assignments
 }

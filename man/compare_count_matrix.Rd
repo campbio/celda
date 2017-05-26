@@ -9,7 +9,7 @@ compare_count_matrix(count.matrix, celda.checksum)
 \arguments{
 \item{count.matrix}{A numeric matrix of counts}
 
-\item{celda.checksum}{An MD5 checksum from a celda_list object (as returned from celda())}
+\item{celda.checksum}{An MD5 checksum from a celda_list or celda model object (celda_C, celda_G, celda_CG)}
 }
 \value{
 TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise

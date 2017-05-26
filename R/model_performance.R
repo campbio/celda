@@ -1,5 +1,5 @@
-
-#' Calculate the marginal likelihood from a single celda chain.
+#' Calculate the marginal likelihood from a single celda model
+#' 
 #' Marginal likelihood is estimated as the harmonic mean of the 
 #' (non-log) likelihood over all iterations of Gibbs sampling.
 #' 
@@ -14,10 +14,10 @@ calculate_marginal_likelihood = function(completeLogLik) {
 }
 
 
-#' Calculate the perplexity from a single celda chain.
-#' Perplexity is defined as the inverse of the geometric mean of the 
+#' Calculate the perplexity from a single celda chain
 #' 
-#' 
+#' Perplexity is defined as the inverse of the geometric mean of the log-likelihoods over all 
+#' iterations of Gibbs sampling.
 #' @param completeLogLik The complete Gibbs sampling history of log-likelihoods for a single celda chain
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export

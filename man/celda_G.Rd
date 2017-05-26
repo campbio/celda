@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{celda_G}
 \alias{celda_G}
-\title{Cluster Genes from Single Cell Sequencing Data}
+\title{celda Gene Clustering Model}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
   count.checksum = NULL, seed = 12345, best = TRUE, y.split.on.iter = 3,
@@ -38,10 +38,10 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
-\item{...}{extra parameters passed onto celda_G}
+\item{...}{Additional parameters}
 }
 \description{
-geneCluster provides cluster assignments for all genes in a provided single-cell 
+Provides cluster assignments for all genes in a provided single-cell 
 sequencing count matrix, using the celda Bayesian hierarchical model.
 }
 \keyword{LDA}
