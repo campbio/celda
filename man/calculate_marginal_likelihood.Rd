@@ -2,9 +2,7 @@
 % Please edit documentation in R/model_performance.R
 \name{calculate_marginal_likelihood}
 \alias{calculate_marginal_likelihood}
-\title{Calculate the marginal likelihood from a single celda chain.
-Marginal likelihood is estimated as the harmonic mean of the 
-(non-log) likelihood over all iterations of Gibbs sampling.}
+\title{Calculate the marginal likelihood from a single celda model}
 \usage{
 calculate_marginal_likelihood(completeLogLik)
 }
@@ -15,7 +13,6 @@ calculate_marginal_likelihood(completeLogLik)
 The estimated marginal likelihood as an mpfr number
 }
 \description{
-Calculate the marginal likelihood from a single celda chain.
 Marginal likelihood is estimated as the harmonic mean of the 
 (non-log) likelihood over all iterations of Gibbs sampling.
 }

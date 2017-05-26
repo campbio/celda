@@ -1,4 +1,5 @@
-#' TopRank function 
+#' Identify features with the highest influence on clustering
+#' 
 #' @param fm factorized matrix.
 #' @param n Maximum number of items returned for each entry. 
 #' @param margin 1 for rows, 2 for columns.

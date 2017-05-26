@@ -63,7 +63,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 }
 
 
-#' Cluster a counts matrix by cells
+#' celda Cell Clustering Model
 #' 
 #' @param counts A numeric count matrix
 #' @param sample.label A vector indicating the sample for each cell (column) in the count matrix

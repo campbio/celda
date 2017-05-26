@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_C.R
 \name{celda_C}
 \alias{celda_C}
-\title{celda Cell clustering function}
+\title{celda Cell Clustering Model}
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   count.checksum = NULL, max.iter = 25, seed = 12345, best = TRUE,
@@ -38,8 +38,11 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
 
-\item{...}{extra parameters passed onto the celda_C}
+\item{...}{additonal parameters}
+}
+\value{
+An object of class celda_C with clustering results and Gibbs sampling statistics
 }
 \description{
-celda Cell clustering function
+celda Cell Clustering Model
 }
