@@ -301,14 +301,17 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     ll.final <- tail(ll, n=1)
   }
   
-  y.final.order = reorder.label.by.size(y.final, L)
+  reordered.labels = reorder.label.by.size(y.final, L)
+  y.final.order = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts))  
 
   result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
                 finalLogLik=ll.final, L=L, beta=beta, delta=delta, seed=seed, names=names)
   
   if (save.prob) result$y.probability = y.probs else result$y.probability = NA
-  if (save.history) result$complete.y = y.all else result$complete.y = NA
+  if (save.history) {
+    result$complete.y =  y.all = base::apply(y.all, 2, function(column) reordered.labels$map[column])
+  } 
   
   class(result) = "celda_G"
   return(result)
@@ -338,7 +341,7 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   if(length(table(y)) < L) {
     stop("Some states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
   }
-  y = reorder.label.by.size(y, L)
+  y = reorder.label.by.size(y, L)$new.labels
   
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
