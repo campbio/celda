@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{completeClusterHistory.celda_CG}
 \alias{completeClusterHistory.celda_CG}
-\title{completeClusterHistory for the celda Cell and Gene clustering function}
+\title{completeClusterHistory for the celda Cell and Gene clustering model}
 \usage{
 \method{completeClusterHistory}{celda_CG}(celda.mod)
 }
@@ -10,5 +10,5 @@
 \item{celda.mod}{A celda model object of "Celda_CG"}
 }
 \description{
-completeClusterHistory for the celda Cell and Gene clustering function
+completeClusterHistory for the celda Cell and Gene clustering model
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{calculate_loglik_from_variables.celda_G}
 \alias{calculate_loglik_from_variables.celda_G}
-\title{Calculate Log Likelihood For A Set of Gene Clusterings (Gene Clustering)}
+\title{Calculate the celda_G log likelihood for user-provided cluster assignments}
 \usage{
 calculate_loglik_from_variables.celda_G(counts, y, L, beta, delta, gamma)
 }
@@ -18,6 +18,9 @@ calculate_loglik_from_variables.celda_G(counts, y, L, beta, delta, gamma)
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
+}
+\value{
+The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 }
 \description{
 This function calculates the log likelihood of each clustering of genes generated
