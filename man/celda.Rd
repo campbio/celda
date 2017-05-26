@@ -12,17 +12,17 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 
 \item{model}{Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)}
 
-\item{sample.label}{A numeric vector indicating the sample for each cell (column) in the count matrix}
+\item{sample.label}{A numeric vector indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
 
-\item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters}
+\item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1}
 
-\item{cores}{The number of cores to use to speed up Gibbs sampling}
+\item{cores}{The number of cores to use for parallell Gibbs sampling. Defaults to 1.}
 
-\item{seed}{The base seed for random number generation. Each chain celda runs with have a seed index off of this one.}
+\item{seed}{The base seed for random number generation}
 
-\item{verbose}{Print messages during celda chain execution}
+\item{verbose}{Print log messages during celda chain execution}
 
-\item{logfile}{Path to file for logging events from worker threads. By default, messages are redirected to stderr of the main process.}
+\item{logfile}{Path to output file for logging messages from worker threads. By default, messages are redirected to stderr of the main process.}
 
 \item{...}{Model specific parameters}
 }
@@ -30,5 +30,5 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 }
 \description{
-Run the celda Bayesian hierarchical model on a matrix of counts.
+Yields assigments of genes/cells to clusters, depending on the provided model type.
 }
