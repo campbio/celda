@@ -26,7 +26,7 @@ topRank = function(fm, n=25, margin=2, threshold=0, decreasing=TRUE) {
   }
 
   ## Parse top ranked indices from matrix
-  top.ix = apply(fm, margin, topFunction, thresh=threshold, n=n)
+  top.ix = base::apply(fm, margin, topFunction, thresh=threshold, n=n)
   
   ## Convert to list if apply converted to a matrix because all
   ## elements had the same length
