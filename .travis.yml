@@ -1,0 +1,8 @@
+language: r
+cache: packages
+dist: trusty
+sudo: false
+warnings_are_errors: true
+bioc_required: true
+before_install:
+- Rscript -e 'update.packages(ask = FALSE)'
