@@ -6,3 +6,7 @@ warnings_are_errors: true
 bioc_required: true
 before_install:
 - Rscript -e 'update.packages(ask = FALSE)'
+addons:
+  apt:
+    packages:
+    - libmpfr-dev
