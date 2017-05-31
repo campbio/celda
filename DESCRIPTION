@@ -32,6 +32,8 @@ Suggests:
     rmarkdown,
     vcd,
     corrplot,
+    Matrix,
+    biomaRt,
     data.table
 VignetteBuilder: knitr
 License: MIT
