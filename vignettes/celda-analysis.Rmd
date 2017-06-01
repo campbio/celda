@@ -195,14 +195,14 @@ We will use the "cmatp_data" dataset, which is a dataset of 3000 Peripheral Bloo
 We will only include genes with at least 5 counts in a least 5 cells for this analysis to reduce computational time. However, `celda` is capable of analyzing genes with fewer counts. 
 
 ```{r}
-cmatp <- as.matrix(readRDS("../data/cmatp_data.RDS"))
-dim(cmatp)
-head(rownames(cmatp))
-head(colnames(cmatp))
+data("cmatp_data", package="celda")
+dim(cmatp_data)
+head(rownames(cmatp_data))
+head(colnames(cmatp_data))
 ```
 
 ```{r}
-cmatp_select <- cmatp[rowSums(cmatp>4) > 4,]
+cmatp_select <- cmatp_data[rowSums(cmatp_data>4) > 4,]
 ```
 
 ### 3.1.1 Analysis of 10X Genomics PBMC data
