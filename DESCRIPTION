@@ -31,7 +31,10 @@ Suggests:
     roxygen2,
     rmarkdown,
     vcd,
-    corrplot
+    corrplot,
+    Matrix,
+    biomaRt,
+    data.table
 VignetteBuilder: knitr
 License: MIT
 Encoding: UTF-8
