@@ -8,6 +8,8 @@ calculate_loglik_from_variables(model, ...)
 }
 \arguments{
 \item{model}{Model to use for calculating log-likelihood of assignments; one of ("celda_C", "celda_CG", "celda_G")}
+
+\item{...}{extra parameters passed onto calculate_loglik_from_variables}
 }
 \value{
 The log-likelihood of the provided cluster assignment for the provided counts matrix.

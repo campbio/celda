@@ -132,6 +132,7 @@ visualize_model_performance <- function(celda.list, method, title) {
 #' 
 #' @param model Model to use for calculating log-likelihood of assignments; one of ("celda_C", "celda_CG", "celda_G")
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
+#' @param ... extra parameters passed onto calculate_loglik_from_variables
 #' @export
 calculate_loglik_from_variables <- function(model, ...) {
   # Dispatch on the specified model
