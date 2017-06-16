@@ -51,3 +51,17 @@ render_model_performance_plot = function(cluster.scores, cluster.label, metric.t
            ggplot2::ggtitle(title) + ggplot2::theme_bw()
   return(plot)
 }
+
+
+#' Visualize log likelihood per iteration of Gibbs sampling
+#' 
+#' @param celda.obj A celda object
+#' @return A ggplot object of the likelihood per iteration of Gibbs sampling
+#' @export
+render_iteration_likelihood_plot = function(celda.obj) {
+  df = data.frame(celda.obj$completeLogLik)
+  df["iter"] = factor(as.numeric(rownames(df)))
+  plot = ggplot2::ggplot(df, ggplot2::aes(x=iter, y=df)) + ggplot2::geom_point() + theme_bw() +
+    ylab("Log likelihood") + xlab("Iterations") + ggtitle("Log Likelihood Per Iteration")
+  return(plot)
+}
