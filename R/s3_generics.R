@@ -121,7 +121,7 @@ celda_heatmap <- function(celda.mod, counts, ...) {
 #' @param title Title for the visualize_model_performance
 #' @return A ggplot object containing the requested plot(s)
 #' @export
-visualize_model_performance <- function(celda.list, method, title) {
+visualize_model_performance <- function(celda.list, method, title, by) {
   # Dispatch on the list's content type
   UseMethod("visualize_model_performance", celda.list$res.list[[1]])
 }
