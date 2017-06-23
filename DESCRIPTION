@@ -25,6 +25,7 @@ Imports:
     doParallel,
     cluster,
     digest,
+    gridExtra,
     methods
 Suggests:
     testthat,
