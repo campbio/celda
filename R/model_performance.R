@@ -46,7 +46,7 @@ render_model_performance_plot = function(cluster.scores, cluster.label, metric.t
                                          title="Model Performance (All Chains") {
   plot = ggplot2::ggplot(cluster.scores, ggplot2::aes(x=factor(size), y=metric)) + 
            ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
-           ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1)) +
+           ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
            ggplot2::xlab(cluster.label) + ggplot2::ylab(metric.type) + 
            ggplot2::ggtitle(title) + ggplot2::theme_bw()
   return(plot)
@@ -61,7 +61,9 @@ render_model_performance_plot = function(cluster.scores, cluster.label, metric.t
 render_iteration_likelihood_plot = function(celda.obj) {
   df = data.frame(celda.obj$completeLogLik)
   df["iter"] = factor(as.numeric(rownames(df)))
-  plot = ggplot2::ggplot(df, ggplot2::aes(x=iter, y=df)) + ggplot2::geom_point() + theme_bw() +
-    ylab("Log likelihood") + xlab("Iterations") + ggtitle("Log Likelihood Per Iteration")
+  plot = ggplot2::ggplot(df, ggplot2::aes(x=iter, y=df)) + ggplot2::geom_point() +
+    ggplot2::theme_bw() + ggplot2::ylab("Log likelihood") + ggplot2::xlab("Iterations") +
+    ggplot2::ggtitle("Log Likelihood Per Iteration")
   return(plot)
 }
+
