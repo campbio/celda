@@ -2,15 +2,13 @@
 % Please edit documentation in R/celda_CG.R
 \name{visualize_model_performance.celda_CG}
 \alias{visualize_model_performance.celda_CG}
-\title{Visualize the performance of celda_CG models}
+\title{Visualize the performance of celda_CG models grouped by L and K}
 \usage{
-\method{visualize_model_performance}{celda_CG}(celda.list, by = "L",
+\method{visualize_model_performance}{celda_CG}(celda.list,
   method = "perplexity", title = "Model Performance (All Chains)")
 }
 \arguments{
 \item{celda.list}{A list of celda_CG objects returned from celda function}
-
-\item{by}{Group by "L" or "K"}
 
 \item{method}{One of "perplexity", "harmonic", or "loglik"}
 

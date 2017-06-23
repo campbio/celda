@@ -4,7 +4,7 @@
 \alias{visualize_model_performance}
 \title{Visualize various performance metrics as a function of K / L to aid parameter choice.}
 \usage{
-visualize_model_performance(celda.list, method, title, by)
+visualize_model_performance(celda.list, method, title)
 }
 \arguments{
 \item{celda.list}{A celda_list object as returned from *celda()*}
@@ -12,8 +12,6 @@ visualize_model_performance(celda.list, method, title, by)
 \item{method}{Which performance metric to visualize. One of ("perplexity", "harmonic", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "harmonic" calculates the marginal likelihood has the harmonic mean of the likelihoods. "loglik" plots the highest log-likelihood during Gibbs iteration.}
 
 \item{title}{Title for the visualize_model_performance}
-
-\item{by}{For celda_CG objects. Group by number of cell clusters K or number of gene clusters L}
 }
 \value{
 A ggplot object containing the requested plot(s)
