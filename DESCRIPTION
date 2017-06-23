@@ -24,7 +24,8 @@ Imports:
     gplots,
     doParallel,
     cluster,
-    digest
+    digest,
+    gridExtra
 Suggests:
     testthat,
     knitr,
