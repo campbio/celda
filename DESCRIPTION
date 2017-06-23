@@ -26,6 +26,7 @@ Imports:
     cluster,
     digest,
     gridExtra
+    methods
 Suggests:
     testthat,
     knitr,
