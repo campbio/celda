@@ -659,7 +659,7 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 visualize_model_performance.celda_CG = function(celda.list, 
                     method = "perplexity", title="Model Performance (All Chains)") {
   # validate input parameters
-  if (class(small.sim.res) != "celda_list") {
+  if (class(celda.list) != "celda_list") {
     stop("celda.list argument must be of class 'celda_list'")
   } else if (celda.list$content.type != "celda_CG") {
     stop("celda.list must be a 'celda.list' of 'celda_CG' objects")
