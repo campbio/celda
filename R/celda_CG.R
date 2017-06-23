@@ -655,7 +655,7 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param by Group by "L" or "K"
 #' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the visualize_model_performance
-#' @import Rmpfr, gridExtra
+#' @import gridExtra
 #' @export
 visualize_model_performance.celda_CG = function(celda.list, by = "L", 
                     method = "perplexity", title="Model Performance (All Chains)") {
