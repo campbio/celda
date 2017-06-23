@@ -499,7 +499,7 @@ visualize_model_performance.celda_G = function(celda.list, method="perplexity",
   # plotted, so log 'em first
   if (method %in% c("perplexity", "harmonic")) {
     performance.metric = lapply(performance.metric, log)
-    performance.metric = new("mpfr", unlist(performance.metric))
+    performance.metric = methods::new("mpfr", unlist(performance.metric))
     performance.metric = as.numeric(performance.metric)
   }
   
