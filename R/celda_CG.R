@@ -702,11 +702,14 @@ visualize_model_performance.celda_CG = function(celda.list,
       plots = c(plots, list(ggplot2::ggplot(subset(plot.df, L==i), 
                                             ggplot2::aes(x=K, y=metric, group=K)) + 
                               ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
-                              ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
+                              ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0),
+                                                  size = 2) +
                               ggplot2::ggtitle(paste0("L = ", i)) + 
                               ggplot2::theme_bw() + 
                               ggplot2::theme(axis.title.x=ggplot2::element_blank(), 
-                                             axis.title.y=ggplot2::element_blank())))
+                                             axis.title.y=ggplot2::element_blank()) +
+                              ggplot2::scale_y_continuous(limits = c(min(plot.df$metric),
+                                                                     max(plot.df$metric)))))
     }
     gridExtra::grid.arrange(grobs = plots, ncol = nc, left = grid::textGrob(y.lab, rot = 90), 
                             top = grid::textGrob(title),
@@ -721,11 +724,14 @@ visualize_model_performance.celda_CG = function(celda.list,
       plots = c(plots, list(ggplot2::ggplot(subset(plot.df, K==i), 
                                             ggplot2::aes(x=L, y=metric, group=L)) +
                               ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
-                              ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) + 
+                              ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0),
+                                                  size = 2) + 
                               ggplot2::ggtitle(paste0("K = ", i)) + 
                               ggplot2::theme_bw() + 
                               ggplot2::theme(axis.title.x=ggplot2::element_blank(), 
-                                             axis.title.y=ggplot2::element_blank())))
+                                             axis.title.y=ggplot2::element_blank()) +
+                              ggplot2::scale_y_continuous(limits = c(min(plot.df$metric),
+                                                                     max(plot.df$metric)))))
     }
     gridExtra::grid.arrange(grobs = plots, ncol = nc, left = grid::textGrob(y.lab, rot = 90),
                             top = grid::textGrob(title),
