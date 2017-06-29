@@ -5,7 +5,8 @@
 \title{Visualize the performance of celda_CG models grouped by L and K}
 \usage{
 \method{visualize_model_performance}{celda_CG}(celda.list,
-  method = "perplexity", title = "Model Performance (All Chains)")
+  method = "perplexity", title = "Model Performance (All Chains)",
+  interactive = FALSE)
 }
 \arguments{
 \item{celda.list}{A list of celda_CG objects returned from celda function}
