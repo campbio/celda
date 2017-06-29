@@ -792,7 +792,9 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
                ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
                ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
                ggplot2::xlab("K,L Value") + ggplot2::ylab(method.label) +
-               ggplot2::ggtitle(title) +  ggplot2::theme_bw()
+               ggplot2::ggtitle(title) +  ggplot2::theme_bw() +
+               ggplot2::theme(axis.text.x=element_text(angle=90, hjust=1)) +
+               ggplot2::theme(axis.text.y=element_text(hjust=1))
   plotly::ggplotly(k.l.plot)
 }
 
