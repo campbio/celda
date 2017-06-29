@@ -657,14 +657,8 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @import Rmpfr
 #' @export
 visualize_model_performance.celda_CG = function(celda.list, 
-                        method="perplexity", title="Model Performance (All Chains)",
-                        interactive=FALSE) {
+                        method="perplexity", title="Model Performance (All Chains)") {
  
-  if (interactive) {
-    render_interactive_kl_plot(celda.list, method, title)
-    return()
-  } 
-  
   validate_kl_plot_parameters(celda.list, method)
  
   y.lab = method
