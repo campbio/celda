@@ -9,9 +9,11 @@ Description: celda leverages Bayesian hierarchical modeling to cluster genes,
 Depends:
     R (>= 3.2.2)
 Imports:
+    dplyr,
     foreach,
     gtools,
     ggplot2,
+    plotly,
     entropy,
     RColorBrewer,
     pheatmap,

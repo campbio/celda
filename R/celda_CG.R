@@ -654,85 +654,153 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param celda.list A list of celda_CG objects returned from celda function
 #' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the visualize_model_performance
-#' @import Rmpfr gridExtra
+#' @import Rmpfr
 #' @export
 visualize_model_performance.celda_CG = function(celda.list, 
-                    method = "perplexity", title="Model Performance (All Chains)") {
-  # validate input parameters
-  if (class(celda.list) != "celda_list") {
-    stop("celda.list argument must be of class 'celda_list'")
-  } else if (celda.list$content.type != "celda_CG") {
-    stop("celda.list must be a 'celda.list' of 'celda_CG' objects")
-  } else if (!(method %in% c("perplexity","harmonic","loglik"))) {
-    stop("Invalid method, 'method' has to be either 'perplexity', 'harmonic', or 'loglik'")
-  } 
-  # if every thing went well
-  else {
-    y.lab = method
-    cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
-    log.likelihoods = lapply(celda.list$res.list,
-                             function(mod) { completeLogLikelihood(mod) })
-    performance.metric = lapply(log.likelihoods, 
-                                calculate_performance_metric,
-                                method)
-    
-    # These methods return Rmpfr numbers that are extremely small and can't be 
-    # plotted, so log 'em first
-    if (method %in% c("perplexity", "harmonic")) {
-      performance.metric = lapply(performance.metric, log)
-      performance.metric = new("mpfr", unlist(performance.metric))
-      performance.metric = as.numeric(performance.metric)
-      y.lab = paste0("Log(",method,")")
-    } else {
-      performance.metric = as.numeric(performance.metric)
-    }
-    
-    plot.df = data.frame(K=cluster.sizes, L=celda.list$run.params$L,
-                         metric=performance.metric)
-    
-    L.list = sort(unique(celda.list$run.params$L))
-    K.list = sort(unique(celda.list$run.params$K))
-    #chains = sort(unique(celda.list$run.params$chain))
-    
-    plots = list()
-    nc = round(length(L.list)^.5)
-    x.lab.K = "K"
-    
-    for (i in L.list) {
-      plots = c(plots, list(ggplot2::ggplot(subset(plot.df, L==i), 
-                                            ggplot2::aes(x=K, y=metric, group=K)) + 
-                              ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
-                              ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
-                              ggplot2::ggtitle(paste0("L = ", i)) + 
-                              ggplot2::theme_bw() + 
-                              ggplot2::theme(axis.title.x=ggplot2::element_blank(), 
-                                             axis.title.y=ggplot2::element_blank()) +
-                              ggplot2::scale_y_continuous(limits = c(min(plot.df$metric),
-                                                                     max(plot.df$metric)))))
-    }
-    gridExtra::grid.arrange(grobs = plots, ncol = nc, left = grid::textGrob(y.lab, rot = 90), 
-                            top = grid::textGrob(title),
-                            bottom = grid::textGrob(x.lab.K))
-    
-    
-    plots = list()
-    nc = round(length(K.list)^.5)
-    x.lab.L = "L"
-    
-    for (i in K.list) {
-      plots = c(plots, list(ggplot2::ggplot(subset(plot.df, K==i), 
-                                            ggplot2::aes(x=L, y=metric, group=L)) +
-                              ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
-                              ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) + 
-                              ggplot2::ggtitle(paste0("K = ", i)) + 
-                              ggplot2::theme_bw() + 
-                              ggplot2::theme(axis.title.x=ggplot2::element_blank(), 
-                                             axis.title.y=ggplot2::element_blank()) +
-                              ggplot2::scale_y_continuous(limits = c(min(plot.df$metric),
-                                                                     max(plot.df$metric)))))
-    }
-    gridExtra::grid.arrange(grobs = plots, ncol = nc, left = grid::textGrob(y.lab, rot = 90),
-                            top = grid::textGrob(title),
-                            bottom = grid::textGrob(x.lab.L))
+                        method="perplexity", title="Model Performance (All Chains)") {
+ 
+  validate_kl_plot_parameters(celda.list, method)
+ 
+  y.lab = method
+  cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
+  log.likelihoods = lapply(celda.list$res.list,
+                           function(mod) { completeLogLikelihood(mod) })
+  performance.metric = lapply(log.likelihoods, 
+                              calculate_performance_metric,
+                              method)
+  
+  # These methods return Rmpfr numbers that are extremely small and can't be 
+  # plotted, so log 'em first
+  if (method %in% c("perplexity", "harmonic")) {
+    performance.metric = lapply(performance.metric, log)
+    performance.metric = new("mpfr", unlist(performance.metric))
+    performance.metric = as.numeric(performance.metric)
+    y.lab = paste0("Log(",method,")")
+  } else {
+    performance.metric = as.numeric(performance.metric)
   }
+  
+  plot.df = data.frame(K=cluster.sizes, L=celda.list$run.params$L,
+                       metric=performance.metric)
+  
+  L.list = sort(unique(celda.list$run.params$L))
+  K.list = sort(unique(celda.list$run.params$K))
+  #chains = sort(unique(celda.list$run.params$chain))
+  
+  plots = list()
+  nc = round(length(L.list)^.5)
+  x.lab.K = "K"
+  
+  for (i in L.list) {
+    plots = c(plots, list(ggplot2::ggplot(subset(plot.df, L==i), 
+                          ggplot2::aes(x=K, y=metric, group=K)) + 
+                            ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
+                            ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
+                            ggplot2::ggtitle(paste0("L = ", i)) + 
+                            ggplot2::theme_bw() + 
+                            ggplot2::theme(axis.title.x=ggplot2::element_blank(), 
+                                           axis.title.y=ggplot2::element_blank()) +
+                            ggplot2::scale_y_continuous(limits = c(min(plot.df$metric),
+                                                                   max(plot.df$metric)))))
+  }
+  gridExtra::grid.arrange(grobs = plots, ncol = nc, left = grid::textGrob(y.lab, rot = 90), 
+                          top = grid::textGrob(title),
+                          bottom = grid::textGrob(x.lab.K))
+  
+  
+  plots = list()
+  nc = round(length(K.list)^.5)
+  x.lab.L = "L"
+  
+  for (i in K.list) {
+    plots = c(plots, list(ggplot2::ggplot(subset(plot.df, K==i), 
+                                          ggplot2::aes(x=L, y=metric, group=L)) +
+                            ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
+                            ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) + 
+                            ggplot2::ggtitle(paste0("K = ", i)) + 
+                            ggplot2::theme_bw() + 
+                            ggplot2::theme(axis.title.x=ggplot2::element_blank(), 
+                                           axis.title.y=ggplot2::element_blank()) +
+                            ggplot2::scale_y_continuous(limits = c(min(plot.df$metric),
+                                                                   max(plot.df$metric)))))
+  }
+  gridExtra::grid.arrange(grobs = plots, ncol = nc, left = grid::textGrob(y.lab, rot = 90),
+                          top = grid::textGrob(title),
+                          bottom = grid::textGrob(x.lab.L))
+}
+
+
+#' Render an interactive figure demonstrating the clustering performance of different K/L parameters
+#' 
+#' Plot the performance of a list of celda_CG models returned 
+#' from running the celda function. This is visualized by rendering a boxplot for each chain
+#' run for each combination of K/L (cell/gene).
+#' 
+#' @param celda.list A list of celda_CG objects returned from celda function
+#' @param method One of "perplexity", "harmonic", or "loglik", passed through to calculate_performance_metric()
+#' @param title The plot title
+#' @import Rmpfr 
+#' @export
+render_interactive_kl_plot = function(celda.list,  method="perplexity", 
+                                      title="Model Performance (All Chains)") {
+  
+  validate_kl_plot_parameters(celda.list, method)
+  
+  chain.ks = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) })) # TODO celda_list getter
+  chain.ls = unlist(lapply(celda.list$res.list, function(mod) { getL(mod) })) # TODO celda_list getter
+  
+  
+  log.likelihoods = lapply(celda.list$res.list,
+                           function(mod) { completeLogLikelihood(mod) })
+  performance.metric = lapply(log.likelihoods, 
+                              calculate_performance_metric,
+                              method)
+  
+  # The performance metric methods return Rmpfr numbers that are extremely small and can't be 
+  # plotted via ggplot2, so log 'em first. 
+  # TODO: celda_list getter that calculates these metrics.
+  if (method %in% c("perplexity", "harmonic")) {
+    performance.metric = lapply(performance.metric, log)
+    performance.metric = new("mpfr", unlist(performance.metric))
+    performance.metric = as.numeric(performance.metric)
+  } else {
+    performance.metric = as.numeric(performance.metric)
+  }
+  
+  figure.df = data.frame(K=chain.ks, L=chain.ls, metric=performance.metric)
+  figure.df$key = paste(figure.df$K, figure.df$L, sep=",")
+  
+  # Aggregate all the K/L combinations and order them by median, 
+  # in order to arrange the boxplots for each K/L combination by descending median:
+  grouped.figure.df    = dplyr::group_by(figure.df, key)
+  sorted.key.by.median = dplyr::arrange(dplyr::summarize(grouped.figure.df, median(metric)), 
+                                        dplyr::desc(`median(metric)`))
+  figure.df$key = factor(figure.df$key, levels=sorted.key.by.median$key)
+  
+  # TODO: Return plot or nah?
+  method.label = method 
+  if (method %in% c("perplexity, harmonic")) {
+     method.label = paste("log(", method, ")", sep="")
+  }
+  k.l.plot = ggplot2::ggplot(figure.df, aes(x=key, y=metric, label=key)) +
+               ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
+               ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
+               ggplot2::xlab("K,L Value") + ggplot2::ylab(method.label) +
+               ggplot2::ggtitle(title) +  ggplot2::theme_bw() +
+               ggplot2::theme(axis.text.x=element_text(angle=90, hjust=1)) +
+               ggplot2::theme(axis.text.y=element_text(hjust=1))
+  plotly::ggplotly(k.l.plot)
+}
+
+
+# Sanity checks for parameters to the model performance plotting functions for
+# celda_CG models
+validate_kl_plot_parameters = function(celda.list, method) {
+ if (class(celda.list) != "celda_list") {
+    stop("celda.list argument must be of class 'celda_list'")
+ } else if (celda.list$content.type != "celda_CG") {
+    stop("celda.list must be a 'celda.list' of 'celda_CG' objects")
+ } else if (!(method %in% c("perplexity","harmonic","loglik"))) {
+    stop("Invalid method, 'method' has to be either 'perplexity', 'harmonic', or 'loglik'")
+ } 
 }
