@@ -142,7 +142,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
       
       ## Perform check for empty clusters; Do not allow on last iteration
-      if(sum(z == previous.z[i]) == 0 & iter < max.iter & K > 2) {
+      if(sum(z == previous.z[i]) == 0 & K > 2) {
         
         ## Split another cluster into two
         z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_C", s=s, alpha=alpha, beta=beta)
