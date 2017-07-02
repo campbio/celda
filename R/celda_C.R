@@ -107,10 +107,13 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
   ## Calculate counts one time up front
   nS = length(unique(s))
+  nG = nrow(counts)
+  nM = ncol(counts)
+
   m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
   n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  n.CP = rowSums(n.CP.by.G)  
 
-  
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
 
   iter = 1
@@ -118,7 +121,6 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   z.num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
-
     ## Begin process of Gibbs sampling for each cell
     ix = sample(1:ncol(counts))
     for(i in ix) {
@@ -126,13 +128,17 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       ## Subtract current cell counts from matrices
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
       n.CP.by.G[z[i],] = n.CP.by.G[z[i],] - counts[,i]
-        
+      n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+    
       ## Calculate probabilities for each state
       probs = rep(NA, K)
       for(j in 1:K) {
         temp.n.CP.by.G = n.CP.by.G
         temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
-        probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, alpha=alpha, beta=beta)
+        temp.n.CP = n.CP
+        temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+
+        probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
       }  
 
       ## Sample next state and add back counts
@@ -140,7 +146,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
       n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
-      
+      n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+
       ## Perform check for empty clusters; Do not allow on last iteration
       if(sum(z == previous.z[i]) == 0 & K > 2) {
         
@@ -150,6 +157,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
         n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+        n.CP = rowSums(n.CP.by.G)
       }
        
       z.probs[i,] = probs
@@ -165,6 +173,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       ## Re-calculate variables
       m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
       n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+      n.CP = rowSums(n.CP.by.G)
     }
 
     ## Save history
@@ -216,14 +225,14 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 }
 
 
-cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, alpha, beta) {
+cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, n.CP, nG, alpha, beta) {
   
   ## Calculate for "Theta" component
   theta.ll = log(m.CP.by.S + alpha)
   
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.G + beta))
-  d = -sum(lgamma(rowSums(n.CP.by.G + beta)))
+  d = -sum(lgamma(n.CP + (nG*beta)))
   
   phi.ll = b + d
   
