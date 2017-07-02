@@ -142,15 +142,15 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
   return(final)
 }
 
-cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, alpha, beta) {
+cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, n.CP, L, alpha, beta) {
 
   ## Calculate for "Theta" component
   theta.ll = log(m.CP.by.S + alpha)
   
   ## Calculate for "Phi" component
 
-  b = sum(lgamma(n.CP.by.TS+beta))
-  d = -sum(lgamma(rowSums(n.CP.by.TS + beta)))
+  b = sum(lgamma(n.CP.by.TS + beta))
+  d = -sum(lgamma(n.CP + (L * beta)))
   
   phi.ll = b + d
   
@@ -319,6 +319,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
   n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+  n.CP = rowSums(n.CP.by.TS)
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
   nG.by.TS = table(y)
@@ -342,13 +343,17 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       ## Subtract current cell counts from matrices
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
       n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
-      
+      n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+
       ## Calculate probabilities for each state
       probs = rep(NA, K)
       for(j in 1:K) {
         temp.n.CP.by.TS = n.CP.by.TS
         temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
-        probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, alpha=alpha, beta=beta)
+        temp.n.CP = n.CP
+        temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+
+        probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
       }  
     
       ## Sample next state and add back counts
@@ -356,8 +361,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
       n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
-      
-      ## Perform check for empty clusters; Do not allow on last iteration
+      n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+
+      ## Perform check for empty clusters
       if(sum(z == previous.z[i]) == 0) {
       
         ## Split another cluster into two
@@ -366,6 +372,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
         n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+        n.CP = rowSums(n.CP.by.TS)
       }
     
       z.probs[i,] = probs
@@ -428,6 +435,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
       n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
       n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+      n.CP = rowSums(n.CP.by.TS)
       n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
     }
     
@@ -441,6 +449,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       ## Re-calculate variables
       n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
       n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+      n.CP = rowSums(n.CP.by.TS)
       n.by.TS = as.numeric(rowsum(n.by.G, y))
       nG.by.TS = table(y)
    }
