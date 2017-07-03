@@ -158,7 +158,7 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, n.CP, L, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, n.CP, L, beta, delta, gamma) {
   
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
@@ -171,7 +171,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
-  d = -sum(lgamma(rowSums(n.CP.by.TS + beta)))
+  d = -sum(lgamma(n.CP + (L * beta)))
   
   phi.ll = b + d
   
@@ -398,7 +398,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 		temp.nG.by.TS = nG.by.TS
 		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 	   
-		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], beta=beta, delta=delta, gamma=gamma)
+		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], n.CP=temp.n.CP, L=L, beta=beta, delta=delta, gamma=gamma)
 	  }  
 
 	  ## Sample next state and add back counts
