@@ -398,7 +398,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 		temp.nG.by.TS = nG.by.TS
 		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 	   
-		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], n.CP=temp.n.CP, L=L, beta=beta, delta=delta, gamma=gamma)
+		probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], n.CP=n.CP, L=L, beta=beta, delta=delta, gamma=gamma)
 	  }  
 
 	  ## Sample next state and add back counts
