@@ -171,9 +171,8 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, n.CP, L, b
 
   ## Calculate for "Phi" component
   b = sum(lgamma(n.CP.by.TS + beta))
-  d = -sum(lgamma(n.CP + (L * beta)))
   
-  phi.ll = b + d
+  phi.ll = b
   
   ## Calculate for "Psi" component
   a = sum(lgamma(nG.by.TS * delta))
