@@ -401,14 +401,14 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 	  }  
 
 	  ## Sample next state and add back counts
-	  previous.y = y
-	  y[i] = sample.ll(probs)
-	  nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-	  n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
-      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+          previous.y = y
+          y[i] = sample.ll(probs)
+          nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+          n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
+          n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
  
       ## Perform check for empty clusters; Do not allow on last iteration
-      if(sum(y == previous.y[i]) == 0 & iter < max.iter) {
+      if(sum(y == previous.y[i]) == 0) {
         
         ## Split another cluster into two
         y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="calculate_loglik_from_variables.celda_CG", z=z, s=s, K=K, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
@@ -416,6 +416,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
         n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+        n.CP = rowSums(n.CP.by.TS)
         n.by.TS = as.numeric(rowsum(n.by.G, y))
         nG.by.TS = table(y)
       }
