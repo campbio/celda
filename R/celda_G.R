@@ -145,19 +145,8 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
   ## Calculate for "Eta" component
   eta.ll <- log(nG.in.Y + gamma)
   
-  ## Determine if any TS has 0 genes
-  ## Need to remove 0 gene states as this will cause the likelihood to fail
-  if(sum(nG.by.TS == 0) > 0) {
-    ind = which(nG.by.TS > 0)
-    n.TS.by.C = n.TS.by.C[ind,]
-    n.by.TS = n.by.TS[ind]
-    nG.by.TS = nG.by.TS[ind]
-  }
- 
   ## Calculate for "Phi" component
-  b <- sum(lgamma(n.TS.by.C + beta))
-  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
-  phi.ll <- b + d
+  phi.ll <- sum(lgamma(n.TS.by.C + beta))
   
   ## Calculate for "Psi" component
   a <- sum(lgamma(nG.by.TS * delta))
@@ -224,37 +213,47 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     ix <- sample(1:nrow(counts))
     for(i in ix) {
         
-	  ## Subtract current gene counts from matrices
-	  nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
-	  n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+      ## Subtract current gene counts from matrices
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+      n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+      n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
 
-	  ## Calculate probabilities for each state
-	  probs = rep(NA, L)
-	  for(j in 1:L) {
-		temp.nG.by.TS = nG.by.TS
-		temp.n.by.TS = n.by.TS
-		temp.n.TS.by.C = n.TS.by.C
+      ## Set flag if the current gene is the only one in its state
+      ADD_PSEUDO = 0
+      if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
+
+      ## Calculate probabilities for each state
+      probs = rep(NA, L)
+      for(j in 1:L) {
+        temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
+        temp.n.by.TS = n.by.TS + (nM * ADD_PSEUDO)
+        temp.n.TS.by.C = n.TS.by.C + (1 * ADD_PSEUDO)
 	  
-		temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
-		temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-		temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
+        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+        temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+        temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
 	  
-		probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C, n.by.TS=temp.n.by.TS, nG.by.TS=temp.nG.by.TS, nG.in.Y=temp.nG.by.TS[j], beta=beta, delta=delta, gamma=gamma)
-	  }
+        probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C,
+                      n.by.TS=temp.n.by.TS, 
+                      nG.by.TS=temp.nG.by.TS, 
+                      nG.in.Y=temp.nG.by.TS[j], 
+                      beta=beta, delta=delta, gamma=gamma)
+      }
 	
-	  ## Sample next state and add back counts
-	  previous.y = y
-	  y[i] <- sample.ll(probs)
-	  nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-	  n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+      ## Sample next state and add back counts
+      previous.y = y
+      y[i] <- sample.ll(probs)
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+      n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
 
-      ## Perform check for empty clusters; Do not allow on last iteration
+      ## Perform check for empty clusters
       if(sum(y == previous.y[i]) == 0 & L > 2) {
-        
         ## Split another cluster into two
-        y = split.y(counts=counts, y=y, empty.L=previous.y[i], L=L, LLFunction="calculate_loglik_from_variables.celda_G", beta=beta, delta=delta, gamma=gamma)
+        y = split.y(counts=counts, y=y, 
+                   empty.L=previous.y[i], L=L, 
+                   LLFunction="calculate_loglik_from_variables.celda_G", 
+                   beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
