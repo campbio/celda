@@ -664,9 +664,10 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param celda.list A list of celda_CG objects returned from celda function
 #' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the visualize_model_performance
+#' @param log Set log to TRUE when log(perplexity) is Inf. Does not work for harmonic
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_CG = function(celda.list, 
+visualize_model_performance.celda_CG = function(celda.list, log = FALSE,
                         method="perplexity", title="Model Performance (All Chains)") {
  
   validate_kl_plot_parameters(celda.list, method)
@@ -677,19 +678,24 @@ visualize_model_performance.celda_CG = function(celda.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
                               calculate_performance_metric,
-                              method)
+                              method, log)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
   # plotted, so log 'em first
-  if (method %in% c("perplexity", "harmonic")) {
+  if (method == "perplexity") {
+    if (!(log)) {
+      performance.metric = lapply(performance.metric, log)
+      performance.metric = new("mpfr", unlist(performance.metric))
+    }
+    y.lab = paste0("Log(",method,")")
+  } else if (method == "harmonic") {
     performance.metric = lapply(performance.metric, log)
     performance.metric = new("mpfr", unlist(performance.metric))
-    performance.metric = as.numeric(performance.metric)
     y.lab = paste0("Log(",method,")")
-  } else {
-    performance.metric = as.numeric(performance.metric)
   }
   
+  performance.metric = as.numeric(performance.metric)
+
   plot.df = data.frame(K=cluster.sizes, L=celda.list$run.params$L,
                        metric=performance.metric)
   
