@@ -19,8 +19,8 @@ calculate_marginal_likelihood = function(completeLogLik) {
 #' Perplexity is defined as the inverse of the geometric mean of the log-likelihoods over all 
 #' iterations of Gibbs sampling.
 #' @param completeLogLik The complete Gibbs sampling history of log-likelihoods for a single celda chain
+#' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @return The perplexity for the provided chain as an mpfr number
-#' log Set log to TRUE when log(perplexity) is Inf
 #' @export
 calculate_perplexity = function(completeLogLik, log = FALSE) {
   if (log) {
