@@ -667,8 +667,9 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_CG = function(celda.list, log = FALSE,
-                        method="perplexity", title="Model Performance (All Chains)") {
+visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
+                                                title="Model Performance (All Chains)",
+                                                log = FALSE) {
  
   validate_kl_plot_parameters(celda.list, method)
  
