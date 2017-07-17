@@ -404,10 +404,12 @@ celda_heatmap.celda_C = function(celda.mod, counts, ...) {
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the plot
+#' @param log Currently not working for celda_C objects
 #' @import Rmpfr
 #' @export
 visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
-                                               title="Model Performance (All Chains)") {
+                                               title="Model Performance (All Chains)",
+                                               log = F) {
   
   cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
   log.likelihoods = lapply(celda.list$res.list,
