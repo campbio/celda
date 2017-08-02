@@ -6,9 +6,9 @@
 \usage{
 render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
   scale.row = TRUE, scale_function = scale, normalize = "none",
-  z.trim = c(-2, 2), cluster.row = TRUE, cluster.column = TRUE,
-  annotation_cell = NULL, annotation_gene = NULL, col = NULL,
-  breaks = NULL, legend = TRUE, annotation_legend = TRUE,
+  z.trim = c(-2, 2), sym.legend = FALSE, cluster.row = TRUE,
+  cluster.column = TRUE, annotation_cell = NULL, annotation_gene = NULL,
+  col = NULL, breaks = NULL, legend = TRUE, annotation_legend = TRUE,
   annotation_names_gene = TRUE, annotation_names_cell = TRUE,
   show_genenames = FALSE, show_cellnames = FALSE)
 }
@@ -21,13 +21,15 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
 
 \item{scale.log}{Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE.}
 
-\item{scale.row}{Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE.}
+\item{scale.row}{Logical; specifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE.}
 
 \item{scale_function}{specify the function for scaling. Defualt to be scale.}
 
 \item{normalize}{specify the normalization type: "cpm" or "none". Defualt to be "none".}
 
 \item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)}
+
+\item{sym.legend}{Logical; specifying if the legend should be symmetric, default tobe FALSE.}
 
 \item{cluster.row}{Logical; determining if rows should be clustered.}
 
