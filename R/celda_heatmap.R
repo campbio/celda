@@ -77,8 +77,9 @@ robust_scale <- function(x){
 #' @param z A numeric vector of cluster assignments for cell. 
 #' @param y A numeric vector of cluster assignments for gene.
 #' @param scale.log Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE. 
-#' @param scale.row Logical; psecifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE. 
+#' @param scale.row Logical; specifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE. 
 #' @param z.trim two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)
+#' @param sym.legend Logical; specifying if the legend should be symmetric, default tobe FALSE.
 #' @param normalize specify the normalization type: "cpm" or "none". Defualt to be "none". 
 #' @param scale_function specify the function for scaling. Defualt to be scale. 
 #' @param cluster.row Logical; determining if rows should be clustered.
@@ -107,6 +108,7 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  scale.log=FALSE, scale.row=TRUE,
                                  scale_function=scale, normalize = "none",
                                  z.trim=c(-2,2), 
+                                 sym.legend = FALSE,
                                  cluster.row=TRUE, cluster.column = TRUE,
                                  annotation_cell = NULL, annotation_gene = NULL, 
                                  col= NULL,
@@ -209,6 +211,10 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
   ## set breaks & color
   ubound.range <- max(counts)
   lbound.range <- min(counts)
+  if(sym.legend==TRUE){
+    ubound.range <- max(abs(ubound.range), abs(lbound.range))
+    lbound.range <- -ubound.range
+  }
   if(lbound.range<0 & 0<ubound.range){  # both sides for the counts values
     if(is.null(col)){
       col <- colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)
