@@ -8,7 +8,8 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
   seed = 12345, best = TRUE, z.split.on.iter = 3, z.num.splits = 3,
   y.split.on.iter = 3, y.num.splits = 3, thread = 1,
-  save.history = FALSE, save.prob = FALSE, ...)
+  save.history = FALSE, save.prob = FALSE, log.chains = F, logfile = "",
+  ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -48,6 +49,10 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
 \item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
+
+\item{log.chains}{Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.}
+
+\item{logfile}{The name of the logfile to log to if log.chains == TRUE}
 
 \item{...}{Additional parameters}
 }
