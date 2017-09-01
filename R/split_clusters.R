@@ -41,13 +41,13 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
 
 
 
-split.each.z = function(counts, z, K, LLFunction, min=3, ...) { 
+split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
   ## Identify clusters to split
   z.ta = table(factor(z, levels=1:K))
-  z.to.split = which(z.ta >= min)
+  z.to.split = which(z.ta >= min.cell)
 
   if(length(z.to.split) == 0) {
     message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
@@ -79,11 +79,18 @@ split.each.z = function(counts, z, K, LLFunction, min=3, ...) {
 
   pairs = c(NA, NA, NA)
   for(i in 1:K) {
-	for(j in setdiff(z.to.split, i)) {
+  
+    ## Identify other clusters to test by limiting to those in "z.to.split", ordering by
+    ## similarity, and then choosing top clusters based on "max.clusters.to.try"
+    other.clusters = setdiff(z.to.split, i)
+    other.clusters.order = order(counts.z.cor[other.clusters,i], decreasing=TRUE)
+    other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
+
+	for(j in other.clusters.to.test) {
 	  new.z = z
 	  
       ## Assign cluster i to the next most similar cluster (excluding cluster j) 
-      ## as defined above by the spearman correlation      
+      ## as defined above by the correlation      
       ix.to.move = z == i
       h = setdiff(order(counts.z.cor[,i], decreasing=TRUE), j)[1]
       new.z[ix.to.move] = h
@@ -166,7 +173,7 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
 
 
 
-split.each.y = function(counts, y, L, LLFunction, min=3, ...) { 
+split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
   ## Normalize counts to fraction for hierarchical clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
@@ -204,7 +211,13 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
 
   pairs = c(NA, NA, NA)
   for(i in 1:L) {
-    for(j in setdiff(y.to.split, i)) {
+    ## Identify other clusters to test by limiting to those in "y.to.split", ordering by
+    ## similarity, and then choosing top clusters based on "max.clusters.to.try"
+    other.clusters = setdiff(y.to.split, i)
+    other.clusters.order = order(counts.y.cor[other.clusters,i], decreasing=TRUE)
+    other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
+
+    for(j in other.clusters.to.test) {
       new.y = y
       
       ## Assign cluster i to the next most similar cluster (excluding cluster j) 
