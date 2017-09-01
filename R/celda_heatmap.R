@@ -120,6 +120,8 @@ render_celda_heatmap <- function(counts, z=NULL, y=NULL,
                                  show_genenames = FALSE, 
                                  show_cellnames = FALSE) {
   
+  if (!is.null(z) & z != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
+  if (!is.null(y) & y != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
   
   if(normalize =="cpm"){
     counts <- cpm(counts)
