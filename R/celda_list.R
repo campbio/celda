@@ -52,7 +52,13 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
     }
   }
   
-  return (requested.chain)
+  # Ensure that the chain we grabbed actually has the requested K/L.
+  # This should only happen if the user alters the celda_list's run.params dataframe.
+  if ((!is.null(K) & K != requested.chain$K) | !is.null(L) & L != requested.chain$L) {
+    requested.chain = search_res_list(celda.list, K=K, L=L)
+  }
+  
+  return(requested.chain)
 }
 
 
@@ -108,4 +114,21 @@ chooseBestChain = function(celda.mods, method="perplexity") {
   best = which(metrics == max(metrics))
   if (length(best) > 1) best = best[1]  # Choose first chain if there's a tie
   return(celda.mods[[best]])
+}
+
+
+# Search through a celda_list's res.list model-by-model for one with the corresponding
+# K/L.
+search_res_list = function(celda_list, K=NULL, L=NULL) {
+  requested.chain = NULL
+  for (model in celda_list$res.list) {
+    requested.chain = model
+    if (K != model$K) next
+    if (L != model$L) next
+    break
+  }
+  if (is.null(requested.chain)) {
+    stop("K/L parameter(s) requested did not appear for any model in the celda_list. Did you modify the run.params?")
+  }
+  return(requested.chain)
 }
