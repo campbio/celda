@@ -14,7 +14,7 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   }
 
   ## Set up variables for holding results
-  z.split = matrix(z, ncol=K, nrow=length(z))
+  z.split = matrix(z, ncol=length(k.to.test), nrow=length(z))
   k.split.ll = rep(NA, length(k.to.test))
 
   ## Loop through each cluster, split, and determine logLik
@@ -32,7 +32,6 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
     params = c(list(counts=counts, z=z.split[,i], K=K), list(...))
     k.split.ll[i] = do.call(LLFunction, params)
   }
-
   k.to.test.select = sample.ll(k.split.ll)
 
   message(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
@@ -137,9 +136,8 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
   }
 
   ## Set up variables for holding results
-  y.split = matrix(y, ncol=L, nrow=length(y))
-  l.pass.min = which(y.ta >= min.gene)
-  l.split.ll = rep(NA, length(l.pass.min))
+  y.split = matrix(y, ncol=length(l.to.test), nrow=length(y))
+  l.split.ll = rep(NA, length(l.to.test))
   
   ## Loop through each cluster, split, and determine logLik
   for(i in 1:length(l.to.test)) {
