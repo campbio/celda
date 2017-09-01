@@ -120,7 +120,9 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  annotation_names_gene = TRUE, 
                                  annotation_names_cell = TRUE,
                                  show_genenames = FALSE, 
-                                 show_cellnames = FALSE) {
+                                 show_cellnames = FALSE,
+                                 hclust_method = "Ward.D2",
+                                 ...) {
   
   ## Normalize, transform, row scale, and then trim data
   if(!is.null(normalize)) {  
@@ -193,7 +195,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     annotation_gene$gene_label <- as.factor(y)  # has to be the original gene label order 
     annotation_gene <- annotation_gene[order.gene$ordlab,]
     rownames(annotation_gene) <- rownames(counts)
-  }else{  #annotation_gene is  null 
+  } else{  #annotation_gene is  null 
     annotation_gene <- data.frame(gene_label = as.factor(order.gene$class.label)  )
     rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
   }
@@ -225,81 +227,24 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     }
   }
 
-  
-  if(cluster_row & cluster_column){
-           semi_pheatmap(mat = counts, 
-                         color = col, 
-                         breaks = breaks, 
-                         cutree_rows = L,
-                         cutree_cols = K,
-                         annotation_row = annotation_gene,
-                         annotation_col = annotation_cell,
-                         row_label = y,
-                         col_label = z,
-                         legend = legend,
-                         annotation_legend = annotation_legend, 
-                         annotation_names_row = annotation_names_gene, 
-                         annotation_names_col = annotation_names_cell,
-                         show_rownames = show_genenames,
-                         show_colnames = show_cellnames,
-                         clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
-    )
-  }
-  
-  if(cluster_row & (!cluster_column)){
-          semi_pheatmap(mat = counts, 
-                         color = col,
-                         breaks = breaks, 
-                         cutree_rows = L,
-                         cluster_cols = FALSE,
-                         annotation_row = annotation_gene,
-                         annotation_col = annotation_cell,
-                         row_label = y,
-                         legend = legend,
-                         annotation_legend = annotation_legend, 
-                         annotation_names_row = annotation_names_gene, 
-                         annotation_names_col = annotation_names_cell,
-                         show_rownames = show_genenames,
-                         show_colnames = show_cellnames,
-                         clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
-    )
-    }
-    
-    
-    if((!cluster_row) & cluster_column){
-            semi_pheatmap(mat = counts, 
-                           color = col,
-                           breaks = breaks, 
-                           cluster_rows = FALSE,
-                           cutree_cols = K,
-                           annotation_row = annotation_gene,
-                           annotation_col = annotation_cell,
-                           col_label = z,
-                           legend = legend,
-                           annotation_legend = annotation_legend, 
-                           annotation_names_row = annotation_names_gene, 
-                           annotation_names_col = annotation_names_cell,
-                           show_rownames = show_genenames,
-                           show_colnames = show_cellnames,
-                           clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
-      )
-      }
-    
-    if((!cluster_row) & (!cluster_column) ){
-            semi_pheatmap(mat = counts,
-                           color = col,
-                           breaks = breaks, 
-                           cluster_rows = FALSE,
-                           cluster_cols = FALSE,
-                           annotation_row = annotation_gene,
-                           annotation_col = annotation_cell,
-                           legend = legend,
-                           annotation_legend = annotation_legend, 
-                           annotation_names_row = annotation_names_gene, 
-                           annotation_names_col = annotation_names_cell,
-                           show_rownames = show_genenames,
-                           show_colnames = show_cellnames,
-                           clustering_method =  "ward.D"   # should also add this parameter into celda_pheatmap 
-      )
-      }
+  semi_pheatmap(mat = counts,
+  	color = col,
+    breaks = breaks, 
+    cluster_cols = cluster_column,
+    cluster_rows = cluster_row,
+    annotation_row = annotation_gene,
+    annotation_col = annotation_cell,
+    legend = legend,
+    annotation_legend = annotation_legend, 
+    annotation_names_row = annotation_names_gene, 
+    annotation_names_col = annotation_names_cell,
+    show_rownames = show_genenames,
+    show_colnames = show_cellnames,
+    clustering_method =  hclust_method,
+    row_label = y,
+    col_label = z,
+    cutree_cols = K,
+    cutree_rows = L,
+    ...   
+  )
 }
