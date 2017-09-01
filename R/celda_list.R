@@ -104,7 +104,7 @@ chooseBestChain = function(celda.mods, method="perplexity") {
   else if (method == "harmonic"){
     metrics = lapply(celda.mods, function(mod) { calculate_perplexity(mod$completeLogLik) })
     metrics = new("mpfr", unlist(metrics))
-  } 
+   }
   else if (method == "loglik"){
     metrics = lapply(celda.mods, function(mod) { max(mod$completeLogLik) })
     metrics = unlist(metrics)
