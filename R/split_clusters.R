@@ -14,7 +14,7 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   }
 
   ## Set up variables for holding results
-  z.split = matrix(z, ncol=K, nrow=length(z))
+  z.split = matrix(z, ncol=length(k.to.test), nrow=length(z))
   k.split.ll = rep(NA, length(k.to.test))
 
   ## Loop through each cluster, split, and determine logLik
@@ -32,7 +32,6 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
     params = c(list(counts=counts, z=z.split[,i], K=K), list(...))
     k.split.ll[i] = do.call(LLFunction, params)
   }
-
   k.to.test.select = sample.ll(k.split.ll)
 
   message(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
@@ -42,13 +41,13 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
 
 
 
-split.each.z = function(counts, z, K, LLFunction, min=3, ...) { 
+split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
   ## Identify clusters to split
   z.ta = table(factor(z, levels=1:K))
-  z.to.split = which(z.ta >= min)
+  z.to.split = which(z.ta >= min.cell)
 
   if(length(z.to.split) == 0) {
     message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
@@ -80,11 +79,18 @@ split.each.z = function(counts, z, K, LLFunction, min=3, ...) {
 
   pairs = c(NA, NA, NA)
   for(i in 1:K) {
-	for(j in setdiff(z.to.split, i)) {
+  
+    ## Identify other clusters to test by limiting to those in "z.to.split", ordering by
+    ## similarity, and then choosing top clusters based on "max.clusters.to.try"
+    other.clusters = setdiff(z.to.split, i)
+    other.clusters.order = order(counts.z.cor[other.clusters,i], decreasing=TRUE)
+    other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
+
+	for(j in other.clusters.to.test) {
 	  new.z = z
 	  
       ## Assign cluster i to the next most similar cluster (excluding cluster j) 
-      ## as defined above by the spearman correlation      
+      ## as defined above by the correlation      
       ix.to.move = z == i
       h = setdiff(order(counts.z.cor[,i], decreasing=TRUE), j)[1]
       new.z[ix.to.move] = h
@@ -137,9 +143,8 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
   }
 
   ## Set up variables for holding results
-  y.split = matrix(y, ncol=L, nrow=length(y))
-  l.pass.min = which(y.ta >= min.gene)
-  l.split.ll = rep(NA, length(l.pass.min))
+  y.split = matrix(y, ncol=length(l.to.test), nrow=length(y))
+  l.split.ll = rep(NA, length(l.to.test))
   
   ## Loop through each cluster, split, and determine logLik
   for(i in 1:length(l.to.test)) {
@@ -168,7 +173,7 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
 
 
 
-split.each.y = function(counts, y, L, LLFunction, min=3, ...) { 
+split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
   ## Normalize counts to fraction for hierarchical clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
@@ -206,7 +211,13 @@ split.each.y = function(counts, y, L, LLFunction, min=3, ...) {
 
   pairs = c(NA, NA, NA)
   for(i in 1:L) {
-    for(j in setdiff(y.to.split, i)) {
+    ## Identify other clusters to test by limiting to those in "y.to.split", ordering by
+    ## similarity, and then choosing top clusters based on "max.clusters.to.try"
+    other.clusters = setdiff(y.to.split, i)
+    other.clusters.order = order(counts.y.cor[other.clusters,i], decreasing=TRUE)
+    other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
+
+    for(j in other.clusters.to.test) {
       new.y = y
       
       ## Assign cluster i to the next most similar cluster (excluding cluster j) 
