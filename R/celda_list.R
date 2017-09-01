@@ -70,6 +70,14 @@ validate_get_model_params = function(celda.list, K, L, chain, best) {
   if (is.null(L) & celda.list$content.type == "celda_G") {
     stop("L parameter needed when subsetting celda_G result lists")
   }
+  
+  if (!is.null(K) & !(K %in% celda.list$run.params$K)) {
+    stop("Provided K was not profiled in the provided celda_list object")
+  }
+  
+  if (!is.null(L) & !(L %in% celda.list$run.params$L)) {
+    stop("Provided L was not profiled in the provided celda_list object")
+  }
 }
 
 
