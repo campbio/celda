@@ -79,13 +79,21 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param thread The thread index, used for logging purposes
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
+#' @param log.chains Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.
+#' @param logfile The name of the logfile to log to if log.chains == TRUE
 #' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=25, seed=12345,
                    best=TRUE, z.split.on.iter=3, z.num.splits=3, 
-                   thread=1, save.history=FALSE, save.prob=FALSE, ...) {
+                   thread=1, save.history=FALSE, save.prob=FALSE, 
+                   log.chains=FALSE, logfile="", ...) {
+  
+  if (log.chains & logfile != "") { 
+    log.handle = file(paste("K", K, "chain", thread, logfile, sep="_"), "wt")
+    sink(log.handle, type="message")
+  }
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -221,6 +229,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   } 
   
   class(result) = "celda_C"
+  
+  if (log.chains & logfile != "") sink()
   return(result)
 }
 
