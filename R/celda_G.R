@@ -178,13 +178,21 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param thread The thread index, used for logging purposes
+#' @param log.chains Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.
+#' @param logfile The name of the logfile to log to if log.chains == TRUE
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    count.checksum=NULL, seed=12345, best=TRUE, 
                    y.split.on.iter=3,  y.num.splits=3, thread=1, 
-                   save.prob=FALSE, save.history=FALSE, ...) {
+                   save.prob=FALSE, save.history=FALSE, 
+                   log.chains=FALSE, logfile="", ...) {
+  
+  if (log.chains & logfile != "") { 
+    log.handle = file(paste("L", L, "chain", thread, logfile, sep="_"), "wt")
+    sink(log.handle, type="message")
+  }
   
   set.seed(seed)
   message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
@@ -314,8 +322,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   if (save.history) {
     result$complete.y =  y.all = base::apply(y.all, 2, function(column) reordered.labels$map[column])
   } 
-  
   class(result) = "celda_G"
+  
+  if (log.chains & logfile != "") sink()
   return(result)
 }
 
@@ -482,10 +491,12 @@ celda_heatmap.celda_G = function(celda.mod, counts, ...) {
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the plot
+#' @param log Currently not working for celda.G objects
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_G = function(celda.list, method="perplexity", 
-                                               title="Model Performance (All Chains)") {
+visualize_model_performance.celda_G = function(celda.list, method="perplexity",
+                                               title="Model Performance (All Chains)",
+                                               log = F) {
   
   cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getL(mod) }))
   log.likelihoods = lapply(celda.list$res.list,
