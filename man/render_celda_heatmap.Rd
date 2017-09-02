@@ -4,6 +4,7 @@
 \alias{render_celda_heatmap}
 \title{Render a heatmap based on a matrix of counts where rows are genes and columns are cells.}
 \usage{
+
 render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
   pseudocount_normalize = 0, pseudocount_log = 0, cluster_row = TRUE,

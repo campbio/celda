@@ -4,10 +4,12 @@
 \alias{calculate_perplexity}
 \title{Calculate the perplexity from a single celda chain}
 \usage{
-calculate_perplexity(completeLogLik)
+calculate_perplexity(completeLogLik, log = FALSE)
 }
 \arguments{
 \item{completeLogLik}{The complete Gibbs sampling history of log-likelihoods for a single celda chain}
+
+\item{log}{Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.}
 }
 \value{
 The perplexity for the provided chain as an mpfr number

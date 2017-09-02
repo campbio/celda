@@ -5,7 +5,8 @@
 \title{visualize_model_performance for celda Cell clustering function}
 \usage{
 \method{visualize_model_performance}{celda_C}(celda.list,
-  method = "perplexity", title = "Model Performance (All Chains)")
+  method = "perplexity", title = "Model Performance (All Chains)",
+  log = F)
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
@@ -13,6 +14,8 @@
 \item{method}{One of "perplexity", "harmonic", or "loglik"}
 
 \item{title}{Title for the plot}
+
+\item{log}{Currently not working for celda_C objects}
 }
 \description{
 visualize_model_performance for celda Cell clustering function
