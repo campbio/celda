@@ -14,6 +14,7 @@
 #' @param annotation_cell a dataframe for the cell annotations (columns).
 #' @param annotation_gene a dataframe for the gene annotations (rows).
 #' @param col color for the heatmap. 
+#' @param symmetric_legend Boolean; When the data contains both positive and negative numbers and the legend is divergent, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.
 #' @param breaks a sequence of numbers that covers the range of values in mat and is one 
 #' element longer than color vector. Used for mapping values to colors. Useful, if needed 
 #' to map certain values to certain colors, to certain values. If value is NA then the 
@@ -24,6 +25,7 @@
 #' @param annotation_names_cell Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE. 
 #' @param show_genenames Logical; specifying if gene names should be shown. Default to be FALSE. 
 #' @param show_cellnames Logical; specifying if cell names should be shown. Default to be FALSE. 
+#' @param hclust_method Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values. 
 #' @import gtable
 #' @import grid
 #' @import scales
@@ -39,6 +41,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  pseudocount_normalize=0,
                                  pseudocount_log=0,
                                  cluster_row = TRUE, cluster_column = TRUE,
+                                 symmetric_legend = TRUE,
                                  annotation_cell = NULL, annotation_gene = NULL, 
                                  col= NULL,
                                  breaks = NULL, 
@@ -51,6 +54,10 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  hclust_method = "ward.D2",
                                  ...) {
   
+  # Check for same lengths for z and y group variables
+  if (!is.null(z) & z != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
+  if (!is.null(y) & y != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
+
   ## Normalize, transform, row scale, and then trim data
   if(!is.null(normalize)) {  
     counts <- do.call(normalize, list(counts + pseudocount_normalize))
@@ -69,8 +76,6 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     counts[counts < trim[1]] <- trim[1]
     counts[counts > trim[2]] <- trim[2]
   }
-
-  
   
   #if null y or z 
   if(is.null(y)){
@@ -80,10 +85,8 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     z <- rep(1, ncol(counts))
   }
   
-  
   K <- length(unique(z))
   L <- length(unique(y))
-  
   
   ## Set row and column name to counts matrix 
   if(is.null(rownames(counts))){
@@ -110,15 +113,14 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
   }
     
-  ## Set color 
-  #  # ToDo: need to be more flexible or fixed to a better color list
-  
   ## set breaks & color
   ubound.range <- max(counts)
   lbound.range <- min(counts)
-  total.range <- max(abs(c(ubound.range, lbound.range)))
-
-  if(lbound.range < 0 & 0 < ubound.range){  # both sides of zero for the counts values
+  if(symmetric_legend == TRUE){
+    ubound.range <- max(abs(ubound.range), abs(lbound.range))
+    lbound.range <- -ubound.range
+  }
+  if(lbound.range<0 & 0<ubound.range){  # both sides for the counts values
     if(is.null(col)){
       col <- colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)
     }
