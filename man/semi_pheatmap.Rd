@@ -10,18 +10,19 @@ semi_pheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
   cluster_cols = TRUE, clustering_distance_rows = "euclidean",
   clustering_distance_cols = "euclidean", clustering_method = "complete",
   clustering_callback = identity2, cutree_rows = NA, cutree_cols = NA,
-  treeheight_row = ifelse((class(cluster_rows) == "hclust") || cluster_rows,
-  50, 0), treeheight_col = ifelse((class(cluster_cols) == "hclust") ||
-  cluster_cols, 50, 0), legend = TRUE, legend_breaks = NA,
-  legend_labels = NA, annotation_row = NA, annotation_col = NA,
-  annotation = NA, annotation_colors = NA, annotation_legend = TRUE,
-  annotation_names_row = TRUE, annotation_names_col = TRUE,
-  drop_levels = TRUE, show_rownames = T, show_colnames = T, main = NA,
-  fontsize = 10, fontsize_row = fontsize, fontsize_col = fontsize,
-  display_numbers = F, number_format = "\%.2f", number_color = "grey30",
-  fontsize_number = 0.8 * fontsize, gaps_row = NULL, gaps_col = NULL,
-  labels_row = NULL, labels_col = NULL, filename = NA, width = NA,
-  height = NA, silent = FALSE, row_label, col_label, ...)
+  treeheight_row = ifelse(cluster_rows, 50, 0),
+  treeheight_col = ifelse(cluster_cols, 50, 0), legend = TRUE,
+  legend_breaks = NA, legend_labels = NA, annotation_row = NA,
+  annotation_col = NA, annotation = NA, annotation_colors = NA,
+  annotation_legend = TRUE, annotation_names_row = TRUE,
+  annotation_names_col = TRUE, drop_levels = TRUE, show_rownames = TRUE,
+  show_colnames = TRUE, main = NA, fontsize = 10,
+  fontsize_row = fontsize, fontsize_col = fontsize,
+  display_numbers = FALSE, number_format = "\%.2f",
+  number_color = "grey30", fontsize_number = 0.8 * fontsize,
+  gaps_row = NULL, gaps_col = NULL, labels_row = NULL,
+  labels_col = NULL, filename = NA, width = NA, height = NA,
+  silent = FALSE, row_label, col_label, ...)
 }
 \arguments{
 \item{mat}{numeric matrix of the values to be plotted.}
