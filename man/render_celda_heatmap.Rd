@@ -7,11 +7,12 @@
 render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
   pseudocount_normalize = 0, pseudocount_log = 0, cluster_row = TRUE,
-  cluster_column = TRUE, annotation_cell = NULL, annotation_gene = NULL,
-  col = NULL, breaks = NULL, legend = TRUE, annotation_legend = TRUE,
-  annotation_names_gene = TRUE, annotation_names_cell = TRUE,
-  show_genenames = FALSE, show_cellnames = FALSE,
-  hclust_method = "ward.D2", ...)
+  cluster_column = TRUE, color_scheme = c("divergent", "sequential"),
+  color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
+  annotation_cell = NULL, annotation_gene = NULL, breaks = NULL,
+  legend = TRUE, annotation_legend = TRUE, annotation_names_gene = TRUE,
+  annotation_names_cell = TRUE, show_genenames = FALSE,
+  show_cellnames = FALSE, hclust_method = "ward.D2", ...)
 }
 \arguments{
 \item{counts}{A count matrix where rows are genes and columns are cells.}
@@ -36,11 +37,18 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
 
 \item{cluster_column}{Logical; determining if columns should be clustered.}
 
+\item{color_scheme}{One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
+A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.}
+
+\item{color_scheme_symmetric}{Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.}
+
+\item{color_scheme_center}{Numeric. Indicates the center of a "divergent" color_scheme. Default 0.}
+
+\item{col}{color for the heatmap.}
+
 \item{annotation_cell}{a dataframe for the cell annotations (columns).}
 
 \item{annotation_gene}{a dataframe for the gene annotations (rows).}
-
-\item{col}{color for the heatmap.}
 
 \item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
 element longer than color vector. Used for mapping values to colors. Useful, if needed 
@@ -58,6 +66,8 @@ breaks are calculated automatically.}
 \item{show_genenames}{Logical; specifying if gene names should be shown. Default to be FALSE.}
 
 \item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
+
+\item{hclust_method}{Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values.}
 }
 \description{
 Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
