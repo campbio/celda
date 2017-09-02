@@ -15,16 +15,17 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param seed The base seed for random number generation
 #' @param verbose Print log messages during celda chain execution
 #' @param logfile Path to output file for logging messages from worker threads. By default, messages are redirected to stderr of the main process.
+#' @param log.chains Whether celda should generate a logfile per chain run, rather than a single one. Use in conjunction with verbose. Defaults to FALSE.
 #' @param ... Model specific parameters
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="",  ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="", log.chains=F,  ...) {
   message("Starting celda...")
   validate_args(counts, model, sample.label, nchains, cores, seed, ...)
   
   # Redirect stderr from the worker threads if user asks for verbose
-  cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
+  cl = if (verbose & !log.chains) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
   # Details for each model parameter / chain combination 
@@ -46,9 +47,9 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
     
     
     if (verbose) {
-      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i), c(runs[i,-1])))
+      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i, logfile=logfile, log.chains=log.chains), c(runs[i,-1])))
     } else {
-      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i), c(runs[i,-1]))))
+      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i, logfile=logfile, log.chains=log.chains), c(runs[i,-1]))))
     }
     return(list(res))
   }  

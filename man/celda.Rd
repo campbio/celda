@@ -5,7 +5,7 @@
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
 celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
-  seed = 12345, verbose = F, logfile = "", ...)
+  seed = 12345, verbose = F, logfile = "", log.chains = F, ...)
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -23,6 +23,8 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 \item{verbose}{Print log messages during celda chain execution}
 
 \item{logfile}{Path to output file for logging messages from worker threads. By default, messages are redirected to stderr of the main process.}
+
+\item{log.chains}{Whether celda should generate a logfile per chain run, rather than a single one. Use in conjunction with verbose. Defaults to FALSE.}
 
 \item{...}{Model specific parameters}
 }
