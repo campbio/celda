@@ -13,8 +13,11 @@
 #' @param cluster_column Logical; determining if columns should be clustered.
 #' @param annotation_cell a dataframe for the cell annotations (columns).
 #' @param annotation_gene a dataframe for the gene annotations (rows).
+#' @param color_scheme One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
+#' A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.
+#' @param color_scheme_symmetric Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.
+#' @param color_scheme_center Numeric. Indicates the center of a "divergent" color_scheme. Default 0.
 #' @param col color for the heatmap. 
-#' @param symmetric_legend Boolean; When the data contains both positive and negative numbers and the legend is divergent, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.
 #' @param breaks a sequence of numbers that covers the range of values in mat and is one 
 #' element longer than color vector. Used for mapping values to colors. Useful, if needed 
 #' to map certain values to certain colors, to certain values. If value is NA then the 
@@ -41,9 +44,11 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  pseudocount_normalize=0,
                                  pseudocount_log=0,
                                  cluster_row = TRUE, cluster_column = TRUE,
-                                 symmetric_legend = TRUE,
-                                 annotation_cell = NULL, annotation_gene = NULL, 
+                                 color_scheme = c("divergent", "sequential"),
+                                 color_scheme_symmetric = TRUE,
+                                 color_scheme_center = 0,
                                  col= NULL,
+                                 annotation_cell = NULL, annotation_gene = NULL, 
                                  breaks = NULL, 
                                  legend = TRUE,
                                  annotation_legend = TRUE,
@@ -55,8 +60,9 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  ...) {
   
   # Check for same lengths for z and y group variables
-  if (!is.null(z) & z != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
-  if (!is.null(y) & y != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
+  if (!is.null(z) & length(z) != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
+  if (!is.null(y) & length(y) != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
+  color_scheme = match.arg(color_scheme)
 
   ## Normalize, transform, row scale, and then trim data
   if(!is.null(normalize)) {  
@@ -113,25 +119,30 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
   }
     
-  ## set breaks & color
+  ## Set color scheme and breaks
   ubound.range <- max(counts)
   lbound.range <- min(counts)
-  if(symmetric_legend == TRUE){
-    ubound.range <- max(abs(ubound.range), abs(lbound.range))
-    lbound.range <- -ubound.range
-  }
-  if(lbound.range<0 & 0<ubound.range){  # both sides for the counts values
+
+  if(color_scheme == "divergent"){  
+    if(color_scheme_symmetric == TRUE){
+      ubound.range <- max(abs(ubound.range), abs(lbound.range))
+      lbound.range <- -ubound.range
+    }
     if(is.null(col)){
       col <- colorRampPalette(c("#1E90FF","#FFFFFF","#CD2626"),space = "Lab")(100)
     }
     col.len <- length(col)
     if(is.null(breaks)){
-      breaks <- c(seq(-total.range, 0,  length.out = round(col.len/2) + 1  ),
-                  seq(0+1e-6, total.range, length.out = col.len-round(col.len/2) ))
+      breaks <- c(seq(lbound.range, color_scheme_center, length.out = round(col.len/2) + 1  ),
+                  seq(color_scheme_center+1e-6, ubound.range, length.out = col.len-round(col.len/2) ))
     }
-  } else {  # only one side for the counts values (either positive or negative, for probabilities)
+  } else {  # Sequential color scheme
     if(is.null(col)){
-      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Reds")))(100)
+      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(100)
+      col.len = length(col)
+	  if(is.null(breaks)){
+        breaks <- seq(lbound.range, ubound.range, length.out = col.len)
+      }  
     }
   }
 
