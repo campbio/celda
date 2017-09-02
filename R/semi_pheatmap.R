@@ -537,8 +537,9 @@ cluster_mat <- function(mat, labels, distance, method){
   if(!(method %in% c("ward.D", "ward.D2", "ward", "single", "complete", "average", "mcquitty", "median", "centroid"))){
     stop("clustering method has to one form the list: 'ward', 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median' or 'centroid'.")
   }
-  
+
   class.label <- unique(labels)
+
   nGroup <- length(class.label)    # [#group]
   # get "hclust" object for each group then wrap them up as group.hclust
   
@@ -571,6 +572,7 @@ cluster_mat <- function(mat, labels, distance, method){
     
   }else {           #  matrix has more than 1 groups
     group.hclust <- sapply(class.label, function(x) {
+
       class.pos <- which(labels==x)   # get the positions of class label
       if(length(class.pos)==1){  # if only 1 row in the group return a manually made "hclust" object
         sub.hclust <- as.list(1:7)
@@ -646,7 +648,7 @@ cluster_mat <- function(mat, labels, distance, method){
   }
   
   cum.hclust$labels <-NULL
-  cum.hclust$call <- NULL
+  cum.hclust$call <- NULL	
   cum.hclust$method <- NULL
   cum.hclust$dist.method <- NULL
   
@@ -962,25 +964,60 @@ identity2 = function(x, ...){
 #' }
 #' 
 #' @export
-semi_pheatmap = function(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100), kmeans_k = NA, breaks = NA, border_color = "grey60", cellwidth = NA, cellheight = NA, scale = "none", cluster_rows = TRUE, cluster_cols = TRUE, clustering_distance_rows = "euclidean", clustering_distance_cols = "euclidean", clustering_method = "complete", clustering_callback = identity2, cutree_rows = NA, cutree_cols = NA,  treeheight_row = ifelse((class(cluster_rows) == "hclust") || cluster_rows, 50, 0), treeheight_col = ifelse((class(cluster_cols) == "hclust") || cluster_cols, 50, 0), legend = TRUE, legend_breaks = NA, legend_labels = NA, annotation_row = NA, annotation_col = NA, annotation = NA, annotation_colors = NA, annotation_legend = TRUE, annotation_names_row = TRUE, annotation_names_col = TRUE, drop_levels = TRUE, show_rownames = T, show_colnames = T, main = NA, fontsize = 10, fontsize_row = fontsize, fontsize_col = fontsize, display_numbers = F, number_format = "%.2f", number_color = "grey30", fontsize_number = 0.8 * fontsize, gaps_row = NULL, gaps_col = NULL, labels_row = NULL, labels_col = NULL, filename = NA, width = NA, height = NA, silent = FALSE, 
-                    row_label, col_label,   # this two parameters are added by Iris , so change the tree_row & tree_col 
-                    ...){
+semi_pheatmap = function(mat, 
+	color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100), 
+	kmeans_k = NA, 
+	breaks = NA, 
+	border_color = "grey60", 
+	cellwidth = NA, 
+	cellheight = NA, 
+	scale = "none", 
+	cluster_rows = TRUE, 
+	cluster_cols = TRUE, 
+	clustering_distance_rows = "euclidean", 
+	clustering_distance_cols = "euclidean", 
+	clustering_method = "complete", 
+	clustering_callback = identity2, 
+	cutree_rows = NA, 
+	cutree_cols = NA,  
+	treeheight_row = ifelse(cluster_rows, 50, 0), 
+	treeheight_col = ifelse(cluster_cols, 50, 0), 
+	legend = TRUE, legend_breaks = NA, legend_labels = NA, 
+	annotation_row = NA, annotation_col = NA, 
+	annotation = NA, annotation_colors = NA, 
+	annotation_legend = TRUE, annotation_names_row = TRUE, annotation_names_col = TRUE, 
+	drop_levels = TRUE, show_rownames = TRUE, show_colnames = TRUE,
+	main = NA, fontsize = 10, 
+	fontsize_row = fontsize, fontsize_col = fontsize, 
+	display_numbers = FALSE,
+	number_format = "%.2f",
+	number_color = "grey30",
+	fontsize_number = 0.8 * fontsize,
+	gaps_row = NULL, gaps_col = NULL, labels_row = NULL, labels_col = NULL, 
+	filename = NA, width = NA, height = NA, silent = FALSE, 
+    row_label, col_label,   
+    ...){
     
     # Set labels
-    if(is.null(labels_row)){
+    if(is.null(labels_row) & !is.null(rownames(mat))){
         labels_row = rownames(mat)
     }
-    if(is.null(labels_col)){
+    if(is.null(labels_row) & is.null(rownames(mat))){
+        labels_row = 1:nrow(mat)
+        rownames(mat) = 1:nrow(mat)
+    }
+
+    if(is.null(labels_col) & !is.null(colnames(mat))){
         labels_col = colnames(mat)
     }
+    if(is.null(labels_col) & is.null(colnames(mat))){
+        labels_col = 1:ncol(mat)
+        colnames(mat) = 1:ncol(mat)
+    }
+
     
-    # Preprocess matrix
-    mat = as.matrix(mat)
-    if(scale != "none"){
-        mat = scale_mat(mat, scale)
-        if(is.na2(breaks)){
-            breaks = generate_breaks(mat, length(color), center = T)
-        }
+    if(is.na2(breaks)){
+      breaks = generate_breaks(mat, length(color), center = T)
     }
     
     
@@ -1020,51 +1057,71 @@ semi_pheatmap = function(mat, color = colorRampPalette(rev(brewer.pal(n = 7, nam
         }
     }
     
-    # Do clustering
-    if((class(cluster_rows) == "hclust") || cluster_rows){
-        if(class(cluster_rows) == "hclust"){
-            tree_row = cluster_rows
-        } else {
-            tree_row = cluster_mat(mat, row_label , distance = clustering_distance_rows, method = clustering_method)
-            tree_row = clustering_callback(tree_row, mat)
-        }
-        mat = mat[tree_row$order, , drop = FALSE]
-        fmat = fmat[tree_row$order, , drop = FALSE]
-        labels_row = labels_row[tree_row$order]
-        if(!is.na(cutree_rows)){
-            gaps_row = find_gaps(tree_row, cutree_rows)
-        }
-        else{
-            gaps_row = NULL
-        }
-    }
-    else{
-        tree_row = NA
-        treeheight_row = 0
-    }
+    # Do clustering for rows
+    if(cluster_rows == TRUE) { 
+      if (is.null(row_label)) {
+        row_label = rep(1, nrow(mat))
+      } else {
+        o = order(row_label)
+        mat = mat[o,,drop=FALSE]
+        fmat = fmat[o, , drop = FALSE]
+        row_label = row_label[o]
+        if(!is.null(annotation_row)) {
+          annotation_row = annotation_row[o,,drop=FALSE]
+        }  
+      }
+
+   	  tree_row = cluster_mat(mat, row_label , distance = clustering_distance_rows, method = clustering_method)
+      tree_row = clustering_callback(tree_row, mat)
     
-    if((class(cluster_cols) == "hclust") || cluster_cols){
-        if(class(cluster_cols) == "hclust"){
-            tree_col = cluster_cols
-        } else {
-            tree_col = cluster_mat(t(mat), col_label , distance = clustering_distance_cols, method = clustering_method)
-            tree_col = clustering_callback(tree_col, t(mat))
-        }
-        mat = mat[, tree_col$order, drop = FALSE]
-        fmat = fmat[, tree_col$order, drop = FALSE]
-        labels_col = labels_col[tree_col$order]
-        if(!is.na(cutree_cols)){
-            gaps_col = find_gaps(tree_col, cutree_cols)
-        }
-        else{
-            gaps_col = NULL
-        }
-    }
-    else{
-        tree_col = NA
-        treeheight_col = 0
-    }
+      mat = mat[tree_row$order, , drop = FALSE]
+      fmat = fmat[tree_row$order, , drop = FALSE]
+      labels_row = labels_row[tree_row$order]
+      if(!is.na(cutree_rows)){
+        gaps_row = find_gaps(tree_row, cutree_rows)
+      }
+      else {
+        gaps_row = NULL
+      }
+    } else {
+      tree_row = NA
+      treeheight_row = 0
+    } 
     
+    
+    ## Do clustering for columns
+    if(cluster_cols == TRUE) {
+      if(is.null(col_label)) {
+        col_label = rep(1, ncol(mat))
+      } else {
+        o = order(col_label)
+        mat = mat[,o,drop=FALSE]
+        fmat = fmat[,o,drop = FALSE]
+        col_label = col_label[o]
+        if(!is.null(annotation_col)) {
+          annotation_col = annotation_col[o,,drop=FALSE]
+        }  
+      }
+ 
+
+      tree_col = cluster_mat(t(mat), col_label , distance = clustering_distance_cols, method = clustering_method)
+      tree_col = clustering_callback(tree_col, t(mat))
+
+      mat = mat[, tree_col$order, drop = FALSE]
+      fmat = fmat[, tree_col$order, drop = FALSE]
+      labels_col = labels_col[tree_col$order]
+
+      if(!is.na(cutree_cols)){
+        gaps_col = find_gaps(tree_col, cutree_cols)
+      }
+      else {
+        gaps_col = NULL
+      }  
+    } else {
+      tree_col = NA
+      treeheight_col = 0
+    }  
+  
     attr(fmat, "draw") = fmat_draw
     
     # Colors and scales
