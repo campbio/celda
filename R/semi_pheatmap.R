@@ -978,8 +978,8 @@ semi_pheatmap = function(mat,
 	clustering_callback = identity2, 
 	cutree_rows = NA, 
 	cutree_cols = NA,  
-	treeheight_row = ifelse((class(cluster_rows) == "hclust") || cluster_rows, 50, 0), 
-	treeheight_col = ifelse((class(cluster_cols) == "hclust") || cluster_cols, 50, 0), 
+	treeheight_row = ifelse(cluster_rows, 50, 0), 
+	treeheight_col = ifelse(cluster_cols, 50, 0), 
 	legend = TRUE, legend_breaks = NA, legend_labels = NA, 
 	annotation_row = NA, annotation_col = NA, 
 	annotation = NA, annotation_colors = NA, 
@@ -1061,50 +1061,48 @@ semi_pheatmap = function(mat,
     }
     
     # Do clustering
-    if((class(cluster_rows) == "hclust") || cluster_rows){
-        if(class(cluster_rows) == "hclust"){
-            tree_row = cluster_rows
-        } else {
-            tree_row = cluster_mat(mat, row_label , distance = clustering_distance_rows, method = clustering_method)
-            tree_row = clustering_callback(tree_row, mat)
-        }
-        mat = mat[tree_row$order, , drop = FALSE]
-        fmat = fmat[tree_row$order, , drop = FALSE]
-        labels_row = labels_row[tree_row$order]
-        if(!is.na(cutree_rows)){
-            gaps_row = find_gaps(tree_row, cutree_rows)
-        }
-        else{
-            gaps_row = NULL
-        }
+    if (is.null(row_label)) {
+      row_label = rep(1, nrow(mat))
     }
-    else{
-        tree_row = NA
-        treeheight_row = 0
-    }
+    if(cluster_rows == TRUE) { 
+   	  tree_row = cluster_mat(mat, row_label , distance = clustering_distance_rows, method = clustering_method)
+      tree_row = clustering_callback(tree_row, mat)
     
-    if((class(cluster_cols) == "hclust") || cluster_cols){
-        if(class(cluster_cols) == "hclust"){
-            tree_col = cluster_cols
-        } else {
-            tree_col = cluster_mat(t(mat), col_label , distance = clustering_distance_cols, method = clustering_method)
-            tree_col = clustering_callback(tree_col, t(mat))
-        }
-        mat = mat[, tree_col$order, drop = FALSE]
-        fmat = fmat[, tree_col$order, drop = FALSE]
-        labels_col = labels_col[tree_col$order]
-        if(!is.na(cutree_cols)){
-            gaps_col = find_gaps(tree_col, cutree_cols)
-        }
-        else{
-            gaps_col = NULL
-        }
-    }
-    else{
-        tree_col = NA
-        treeheight_col = 0
-    }
+      mat = mat[tree_row$order, , drop = FALSE]
+      fmat = fmat[tree_row$order, , drop = FALSE]
+      labels_row = labels_row[tree_row$order]
+      if(!is.na(cutree_rows)){
+        gaps_row = find_gaps(tree_row, cutree_rows)
+      }
+      else {
+        gaps_row = NULL
+      }
+    } else {
+      tree_row = NA
+      treeheight_row = 0
+    } 
     
+    if(is.null(col_label)) {
+      col_label = rep(1, ncol(mat))
+    }  
+    if(cluster_cols == TRUE) {
+      tree_col = cluster_mat(t(mat), col_label , distance = clustering_distance_cols, method = clustering_method)
+      tree_col = clustering_callback(tree_col, t(mat))
+
+      mat = mat[, tree_col$order, drop = FALSE]
+      fmat = fmat[, tree_col$order, drop = FALSE]
+      labels_col = labels_col[tree_col$order]
+      if(!is.na(cutree_cols)){
+        gaps_col = find_gaps(tree_col, cutree_cols)
+      }
+      else {
+        gaps_col = NULL
+      }  
+    } else {
+      tree_col = NA
+      treeheight_col = 0
+    }  
+  
     attr(fmat, "draw") = fmat_draw
     
     # Colors and scales
