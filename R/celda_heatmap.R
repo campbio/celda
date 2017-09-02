@@ -31,6 +31,7 @@
 #' @import grDevices
 #' @import graphics
 #' @export 
+
 render_celda_heatmap <- function(counts, z = NULL, y = NULL, 
                                  scale_log = NULL,
                                  scale_row = scale,
@@ -51,6 +52,10 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  hclust_method = "ward.D2",
                                  ...) {
   
+  ## Check length of z/y variables
+  if (!is.null(z) & z != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
+  if (!is.null(y) & y != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
+  
   ## Normalize, transform, row scale, and then trim data
   if(!is.null(normalize)) {  
     counts <- do.call(normalize, list(counts + pseudocount_normalize))
@@ -70,8 +75,6 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     counts[counts > trim[2]] <- trim[2]
   }
 
-  
-  
   #if null y or z 
   if(is.null(y)){
     y <- rep(1, nrow(counts))
@@ -110,12 +113,10 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
   }
     
-  ## Set color 
-  #  # ToDo: need to be more flexible or fixed to a better color list
-  
   ## set breaks & color
   ubound.range <- max(counts)
   lbound.range <- min(counts)
+
   total.range <- max(abs(c(ubound.range, lbound.range)))
 
   if(lbound.range < 0 & 0 < ubound.range){  # both sides of zero for the counts values
