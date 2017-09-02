@@ -5,7 +5,8 @@
 \title{Visualize the performance of celda_CG models grouped by L and K}
 \usage{
 \method{visualize_model_performance}{celda_CG}(celda.list,
-  method = "perplexity", title = "Model Performance (All Chains)")
+  method = "perplexity", title = "Model Performance (All Chains)",
+  log = FALSE)
 }
 \arguments{
 \item{celda.list}{A list of celda_CG objects returned from celda function}
@@ -13,6 +14,8 @@
 \item{method}{One of "perplexity", "harmonic", or "loglik"}
 
 \item{title}{Title for the visualize_model_performance}
+
+\item{log}{Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric}
 }
 \description{
 Plot the performance of a list of celda_CG models returned 

@@ -270,15 +270,22 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param thread The thread index, used for logging purposes
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
+#' @param log.chains Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.
+#' @param logfile The name of the logfile to log to if log.chains == TRUE
 #' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
 			              seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
 			              y.split.on.iter=3, y.num.splits=3, thread=1, 
-			              save.history=FALSE, save.prob=FALSE, ...) {
-  set.seed(seed)
+			              save.history=FALSE, save.prob=FALSE, log.chains=F, logfile="", ...) {
   
+  if (log.chains & logfile != "") { 
+    log.handle = file(paste("K", K, "L", L, "chain", thread, logfile, sep="_"), "wt")
+    sink(log.handle, type="message")
+  }
+  
+  set.seed(seed)
   message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
   
   if(is.null(sample.label)) {
@@ -525,8 +532,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     result$complete.z = z.all
     result$complete.y = y.all
   } 
-  
    class(result) = "celda_CG" 
+   
+  if (log.chains & logfile != "") sink()
    return(result)
 }
 
@@ -664,10 +672,12 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param celda.list A list of celda_CG objects returned from celda function
 #' @param method One of "perplexity", "harmonic", or "loglik"
 #' @param title Title for the visualize_model_performance
+#' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_CG = function(celda.list, 
-                        method="perplexity", title="Model Performance (All Chains)") {
+visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
+                                                title="Model Performance (All Chains)",
+                                                log = FALSE) {
  
   validate_kl_plot_parameters(celda.list, method)
  
@@ -677,19 +687,24 @@ visualize_model_performance.celda_CG = function(celda.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
                               calculate_performance_metric,
-                              method)
+                              method, log)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
   # plotted, so log 'em first
-  if (method %in% c("perplexity", "harmonic")) {
+  if (method == "perplexity") {
+    if (!(log)) {
+      performance.metric = lapply(performance.metric, log)
+      performance.metric = new("mpfr", unlist(performance.metric))
+    }
+    y.lab = paste0("Log(",method,")")
+  } else if (method == "harmonic") {
     performance.metric = lapply(performance.metric, log)
     performance.metric = new("mpfr", unlist(performance.metric))
-    performance.metric = as.numeric(performance.metric)
     y.lab = paste0("Log(",method,")")
-  } else {
-    performance.metric = as.numeric(performance.metric)
   }
   
+  performance.metric = as.numeric(performance.metric)
+
   plot.df = data.frame(K=cluster.sizes, L=celda.list$run.params$L,
                        metric=performance.metric)
   
