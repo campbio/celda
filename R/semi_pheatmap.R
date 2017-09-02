@@ -537,8 +537,9 @@ cluster_mat <- function(mat, labels, distance, method){
   if(!(method %in% c("ward.D", "ward.D2", "ward", "single", "complete", "average", "mcquitty", "median", "centroid"))){
     stop("clustering method has to one form the list: 'ward', 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median' or 'centroid'.")
   }
-  
+
   class.label <- unique(labels)
+
   nGroup <- length(class.label)    # [#group]
   # get "hclust" object for each group then wrap them up as group.hclust
   
@@ -571,6 +572,7 @@ cluster_mat <- function(mat, labels, distance, method){
     
   }else {           #  matrix has more than 1 groups
     group.hclust <- sapply(class.label, function(x) {
+
       class.pos <- which(labels==x)   # get the positions of class label
       if(length(class.pos)==1){  # if only 1 row in the group return a manually made "hclust" object
         sub.hclust <- as.list(1:7)
@@ -646,7 +648,7 @@ cluster_mat <- function(mat, labels, distance, method){
   }
   
   cum.hclust$labels <-NULL
-  cum.hclust$call <- NULL
+  cum.hclust$call <- NULL	
   cum.hclust$method <- NULL
   cum.hclust$dist.method <- NULL
   
@@ -1009,18 +1011,13 @@ semi_pheatmap = function(mat,
         labels_col = colnames(mat)
     }
     if(is.null(labels_col) & is.null(colnames(mat))){
-        labels_row = 1:ncol(mat)
-        rownames(mat) = 1:ncol(mat)
+        labels_col = 1:ncol(mat)
+        colnames(mat) = 1:ncol(mat)
     }
 
     
-    # Preprocess matrix
-    mat = as.matrix(mat)
-    if(scale != "none"){
-        mat = scale_mat(mat, scale)
-        if(is.na2(breaks)){
-            breaks = generate_breaks(mat, length(color), center = T)
-        }
+    if(is.na2(breaks)){
+      breaks = generate_breaks(mat, length(color), center = T)
     }
     
     
@@ -1060,11 +1057,20 @@ semi_pheatmap = function(mat,
         }
     }
     
-    # Do clustering
-    if (is.null(row_label)) {
-      row_label = rep(1, nrow(mat))
-    }
+    # Do clustering for rows
     if(cluster_rows == TRUE) { 
+      if (is.null(row_label)) {
+        row_label = rep(1, nrow(mat))
+      } else {
+        o = order(row_label)
+        mat = mat[o,,drop=FALSE]
+        fmat = fmat[o, , drop = FALSE]
+        row_label = row_label[o]
+        if(!is.null(annotation_row)) {
+          annotation_row = annotation_row[o,,drop=FALSE]
+        }  
+      }
+
    	  tree_row = cluster_mat(mat, row_label , distance = clustering_distance_rows, method = clustering_method)
       tree_row = clustering_callback(tree_row, mat)
     
@@ -1082,16 +1088,29 @@ semi_pheatmap = function(mat,
       treeheight_row = 0
     } 
     
-    if(is.null(col_label)) {
-      col_label = rep(1, ncol(mat))
-    }  
+    
+    ## Do clustering for columns
     if(cluster_cols == TRUE) {
+      if(is.null(col_label)) {
+        col_label = rep(1, ncol(mat))
+      } else {
+        o = order(col_label)
+        mat = mat[,o,drop=FALSE]
+        fmat = fmat[,o,drop = FALSE]
+        col_label = col_label[o]
+        if(!is.null(annotation_col)) {
+          annotation_col = annotation_col[o,,drop=FALSE]
+        }  
+      }
+ 
+
       tree_col = cluster_mat(t(mat), col_label , distance = clustering_distance_cols, method = clustering_method)
       tree_col = clustering_callback(tree_col, t(mat))
 
       mat = mat[, tree_col$order, drop = FALSE]
       fmat = fmat[, tree_col$order, drop = FALSE]
       labels_col = labels_col[tree_col$order]
+
       if(!is.na(cutree_cols)){
         gaps_col = find_gaps(tree_col, cutree_cols)
       }
