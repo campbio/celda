@@ -2,44 +2,53 @@
 % Please edit documentation in R/celda_heatmap.R
 \name{render_celda_heatmap}
 \alias{render_celda_heatmap}
-\title{Directly render a heatmap based on celda results}
+\title{Render a heatmap based on a matrix of counts where rows are genes and columns are cells.}
 \usage{
-render_celda_heatmap(counts, z = NULL, y = NULL, scale.log = FALSE,
-  scale.row = TRUE, scale_function = scale, normalize = "none",
-  z.trim = c(-2, 2), sym.legend = FALSE, cluster.row = TRUE,
-  cluster.column = TRUE, annotation_cell = NULL, annotation_gene = NULL,
-  col = NULL, breaks = NULL, legend = TRUE, annotation_legend = TRUE,
-  annotation_names_gene = TRUE, annotation_names_cell = TRUE,
-  show_genenames = FALSE, show_cellnames = FALSE)
+render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
+  scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
+  pseudocount_normalize = 0, pseudocount_log = 0, cluster_row = TRUE,
+  cluster_column = TRUE, color_scheme = c("divergent", "sequential"),
+  color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
+  annotation_cell = NULL, annotation_gene = NULL, breaks = NULL,
+  legend = TRUE, annotation_legend = TRUE, annotation_names_gene = TRUE,
+  annotation_names_cell = TRUE, show_genenames = FALSE,
+  show_cellnames = FALSE, hclust_method = "ward.D2", ...)
 }
 \arguments{
-\item{counts}{A count matrix.}
+\item{counts}{A count matrix where rows are genes and columns are cells.}
 
 \item{z}{A numeric vector of cluster assignments for cell.}
 
 \item{y}{A numeric vector of cluster assignments for gene.}
 
-\item{scale.log}{Logical; specifying if the log-transformation is perfomred to the count matrix. Default to be FALSE.}
+\item{scale_log}{Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.}
 
-\item{scale.row}{Logical; specifying if the z-score transformation is performed to the counts matrix. Defualt to be TRUE.}
+\item{scale_row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
 
-\item{scale_function}{specify the function for scaling. Defualt to be scale.}
+\item{normalize}{A function to normalize the columns. Set to NULL to disable. Default is 'normalizeCounts', which normalizes to counts per million (CPM).}
 
-\item{normalize}{specify the normalization type: "cpm" or "none". Defualt to be "none".}
+\item{trim}{A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).}
 
-\item{z.trim}{two element vector to specify the lower and upper cutoff of the z-score normalization result by default it is set to NULL so no trimming will be done. Default to be (-2,2)}
+\item{pseudocount_normalize}{Numeric; A pseudocount to add to data before normalization. Default  1.}
 
-\item{sym.legend}{Logical; specifying if the legend should be symmetric, default tobe FALSE.}
+\item{pseudocount_log}{Numeric; A pseudocount to add to data before log transforming. Default  0.}
 
-\item{cluster.row}{Logical; determining if rows should be clustered.}
+\item{cluster_row}{Logical; determining if rows should be clustered.}
 
-\item{cluster.column}{Logical; determining if columns should be clustered.}
+\item{cluster_column}{Logical; determining if columns should be clustered.}
+
+\item{color_scheme}{One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
+A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.}
+
+\item{color_scheme_symmetric}{Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.}
+
+\item{color_scheme_center}{Numeric. Indicates the center of a "divergent" color_scheme. Default 0.}
+
+\item{col}{color for the heatmap.}
 
 \item{annotation_cell}{a dataframe for the cell annotations (columns).}
 
 \item{annotation_gene}{a dataframe for the gene annotations (rows).}
-
-\item{col}{color for the heatmap.}
 
 \item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
 element longer than color vector. Used for mapping values to colors. Useful, if needed 
@@ -57,7 +66,9 @@ breaks are calculated automatically.}
 \item{show_genenames}{Logical; specifying if gene names should be shown. Default to be FALSE.}
 
 \item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
+
+\item{hclust_method}{Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values.}
 }
 \description{
-Directly render a heatmap based on celda results
+Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
 }
