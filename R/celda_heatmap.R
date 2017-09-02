@@ -121,7 +121,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  annotation_names_cell = TRUE,
                                  show_genenames = FALSE, 
                                  show_cellnames = FALSE,
-                                 hclust_method = "Ward.D2",
+                                 hclust_method = "ward.D2",
                                  ...) {
   
   ## Normalize, transform, row scale, and then trim data
@@ -243,8 +243,6 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     clustering_method =  hclust_method,
     row_label = y,
     col_label = z,
-    cutree_cols = K,
-    cutree_rows = L,
     ...   
   )
 }
