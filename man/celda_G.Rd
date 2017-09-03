@@ -6,8 +6,8 @@
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
   count.checksum = NULL, seed = 12345, best = TRUE, y.split.on.iter = 3,
-  y.num.splits = 3, thread = 1, save.prob = FALSE, save.history = FALSE,
-  log.chains = FALSE, logfile = "", ...)
+  y.num.splits = 3, save.prob = FALSE, save.history = FALSE,
+  logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -32,15 +32,11 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 
 \item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter.}
 
-\item{thread}{The thread index, used for logging purposes}
-
 \item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
 
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
-\item{log.chains}{Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.}
-
-\item{logfile}{The name of the logfile to log to if log.chains == TRUE}
+\item{logfile}{The name of the logfile to redirect messages to.}
 
 \item{...}{Additional parameters}
 }
