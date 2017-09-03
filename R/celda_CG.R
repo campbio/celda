@@ -279,7 +279,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 			              save.history=FALSE, save.prob=FALSE, logfile=NULL, ...) {
   
   set.seed(seed)
-  log_messages(date(), " ... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -434,7 +434,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split on i-th iteration defined by z.split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE)
+      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
       log_messages(res$message, logfile=logfile, append=TRUE)
 
@@ -452,7 +452,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE)
+      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
 	  log_messages(res$message, logfile=logfile, append=TRUE)
 	  
@@ -486,7 +486,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     }
     ll = c(ll, temp.ll)
     
-    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE)
+    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
     iter = iter + 1    
   }
   

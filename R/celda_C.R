@@ -99,7 +99,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   }  
   
   set.seed(seed)
-  log_messages(date(), " ... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   z = sample(1:K, ncol(counts), replace=TRUE)
   z.all = z
@@ -169,7 +169,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     ## Perform split if on i-th iteration defined by split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE)
+      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculate_loglik_from_variables.celda_C")
       log_messages(res$message, logfile=logfile, append=TRUE)
       
@@ -196,7 +196,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     }
     ll = c(ll, temp.ll)
     
-    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE)
+    log_messages(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
     
     iter = iter + 1    
   }
