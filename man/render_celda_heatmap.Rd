@@ -68,6 +68,8 @@ breaks are calculated automatically.}
 \item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
 
 \item{hclust_method}{Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values.}
+
+\item{...}{Other arguments to be passed to underlying pheatmap function}
 }
 \description{
 Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
