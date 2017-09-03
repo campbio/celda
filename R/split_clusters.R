@@ -1,4 +1,4 @@
-split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) { 
+split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, logfile=NULL, ...) { 
   
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
@@ -9,8 +9,8 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   k.to.test = setdiff(k.pass.min, empty.K)
 
   if(length(k.to.test) == 0) {
-    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    break
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(z=z, message=m))
   }
 
   ## Set up variables for holding results
@@ -34,14 +34,14 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, ...) {
   }
   k.to.test.select = sample.ll(k.split.ll)
 
-  message(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
-  return(z.split[,k.to.test.select])
+  m = paste0(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
+  return(list(z = z.split[,k.to.test.select], message = m))
 }
 
 
 
 
-split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
+split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, logfile=NULL, ...) { 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
@@ -50,8 +50,8 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   z.to.split = which(z.ta >= min.cell)
 
   if(length(z.to.split) == 0) {
-    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    break
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(z=z,message=m))
   }
   
   ## For each cluster, determine which other cluster is most closely related
@@ -113,12 +113,12 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   select = sample.ll(z.split.ll) 
 
   if(select == 1) {
-    message(date(), " ... No additional splitting was performed.") 
+    m = paste0(date(), " ... No additional splitting was performed.") 
   } else {
-    message(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
   } 
   
-  return(z.split[,select])
+  return(list(z=z.split[,select], message=m))
 }
 
 
@@ -127,7 +127,7 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
 
 
 
-split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) { 
+split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, logfile=NULL, ...) { 
 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
@@ -138,8 +138,8 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
   l.to.test = setdiff(l.pass.min, empty.L)
   
   if(length(l.to.test) == 0) {
-    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    break
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(y=y, message=m))
   }
 
   ## Set up variables for holding results
@@ -166,14 +166,14 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) {
  
   l.to.test.select = sample.ll(l.split.ll)
   
-  message(date(), " ... Gene cluster ", empty.L, " had ", y.ta[empty.L], " genes. Splitting Cluster ", l.to.test[l.to.test.select], " into two clusters.")
-  return(y.split[,l.to.test.select])
+  m = paste0(date(), " ... Gene cluster ", empty.L, " had ", y.ta[empty.L], " genes. Splitting Cluster ", l.to.test[l.to.test.select], " into two clusters.")
+  return(list(y = y.split[,l.to.test.select], message = m))
 }
 
 
 
 
-split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
+split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, logfile=NULL, ...) { 
   ## Normalize counts to fraction for hierarchical clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
@@ -182,8 +182,8 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   y.to.split = which(y.ta >= min)
 
   if(length(y.to.split) == 0) {
-    message(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    break
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(y=y, message=m))
   }
 
   ## For each cluster, determine which other cluster is most closely related
@@ -244,12 +244,12 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   select = sample.ll(y.split.ll) 
   
   if(select == 1) {
-    message(date(), " ... No additional splitting was performed.") 
+    m = paste0(date(), " ... No additional splitting was performed.") 
   } else {
-    message(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
   } 
   
-  return(y.split[,select])
+  return(list(y=y.split[,select], message=m))
 }
 
 
