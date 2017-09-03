@@ -14,18 +14,18 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param cores The number of cores to use for parallell Gibbs sampling. Defaults to 1.
 #' @param seed The base seed for random number generation
 #' @param verbose Print log messages during celda chain execution
-#' @param logfile Path to output file for logging messages from worker threads. By default, messages are redirected to stderr of the main process.
-#' @param log.chains Whether celda should generate a logfile per chain run, rather than a single one. Use in conjunction with verbose. Defaults to FALSE.
+#' @param logfile_prefix Prefix for log files from worker threads and main process. 
 #' @param ... Model specific parameters
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="", log.chains=F,  ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=TRUE, logfile_prefix="Celda", ...) {
   message("Starting celda...")
   validate_args(counts, model, sample.label, nchains, cores, seed, ...)
   
   # Redirect stderr from the worker threads if user asks for verbose
-  cl = if (verbose & !log.chains) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
+  logfile = paste0(logfile_prefix, "_main_log.txt")
+  cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
   # Details for each model parameter / chain combination 
@@ -45,11 +45,12 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   res.list = foreach(i = 1:nrow(runs), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     chain.seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
-    
     if (verbose) {
-      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i, logfile=logfile, log.chains=log.chains), c(runs[i,-1])))
+      ## Generate a unique log file name based on given prefix and parameters
+      logfile = paste0(logfile_prefix, "_", paste(paste(colnames(runs), runs[i,], sep="-"), collapse="_"), "_Seed-", chain.seed, "_log.txt")
+      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, logfile=logfile), c(runs[i,-1])))
     } else {
-      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i, logfile=logfile, log.chains=log.chains), c(runs[i,-1]))))
+      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, logfile=NULL), c(runs[i,-1]))))
     }
     return(list(res))
   }  
