@@ -267,26 +267,19 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter
-#' @param thread The thread index, used for logging purposes
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
-#' @param log.chains Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.
-#' @param logfile The name of the logfile to log to if log.chains == TRUE
+#' @param logfile The name of the logfile to redirect messages to.
 #' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
 			              seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
-			              y.split.on.iter=3, y.num.splits=3, thread=1, 
-			              save.history=FALSE, save.prob=FALSE, log.chains=F, logfile="", ...) {
-  
-  if (log.chains & logfile != "") { 
-    log.handle = file(paste("K", K, "L", L, "chain", thread, logfile, sep="_"), "wt")
-    sink(log.handle, type="message")
-  }
+			              y.split.on.iter=3, y.num.splits=3, 
+			              save.history=FALSE, save.prob=FALSE, logfile=NULL, ...) {
   
   set.seed(seed)
-  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
+  log_messages(date(), " ... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -362,7 +355,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       if(sum(z == previous.z[i]) == 0) {
       
         ## Split another cluster into two
-        z = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_CG", s=s, y=y, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_CG", s=s, y=y, L=L,
+        alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+        z = res$z
+        log_messages(res$message, logfile=logfile, append=TRUE)
+
         
         ## Re-calculate variables
         m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
@@ -416,10 +413,12 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       if(sum(y == previous.y[i]) == 0) {
         
         ## Split another cluster into two
-        y = split.y(counts=counts, y=y, empty.L=previous.y[i],
+        res = split.y(counts=counts, y=y, empty.L=previous.y[i],
                     L=L, LLFunction="calculate_loglik_from_variables.celda_CG",
                     z=z, s=s, K=K, 
                     alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+        y = res$y
+        log_messages(res$message, logfile=logfile, append=TRUE)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -435,8 +434,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split on i-th iteration defined by z.split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      message("Thread ", thread, " ", date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")")
-      z = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
+      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE)
+      res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
+      log_messages(res$message, logfile=logfile, append=TRUE)
+
+      z = res$z      
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -450,8 +452,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
-      y = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
+      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE)
+      res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
+	  log_messages(res$message, logfile=logfile, append=TRUE)
+	  
+      y = res$y
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -481,7 +486,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     }
     ll = c(ll, temp.ll)
     
-    message("Thread ", thread, " ", date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE)
     iter = iter + 1    
   }
   
@@ -532,10 +537,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     result$complete.z = z.all
     result$complete.y = y.all
   } 
-   class(result) = "celda_CG" 
+  class(result) = "celda_CG" 
    
-  if (log.chains & logfile != "") sink()
-   return(result)
+  return(result)
 }
 
 

@@ -177,25 +177,18 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE. 
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
-#' @param thread The thread index, used for logging purposes
-#' @param log.chains Logical; passed through from celda(). Defines whether this model should write messages / errors to its own logfile.
-#' @param logfile The name of the logfile to log to if log.chains == TRUE
+#' @param logfile The name of the logfile to redirect messages to.
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    count.checksum=NULL, seed=12345, best=TRUE, 
-                   y.split.on.iter=3,  y.num.splits=3, thread=1, 
+                   y.split.on.iter=3,  y.num.splits=3, 
                    save.prob=FALSE, save.history=FALSE, 
-                   log.chains=FALSE, logfile="", ...) {
-  
-  if (log.chains & logfile != "") { 
-    log.handle = file(paste("L", L, "chain", thread, logfile, sep="_"), "wt")
-    sink(log.handle, type="message")
-  }
+                   logfile=NULL, ...) {
   
   set.seed(seed)
-  message("Thread ", thread, " ", date(), " ... Starting Gibbs sampling")
+  log_messages(date(), " ... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
   y <- sample(1:L, nrow(counts), replace=TRUE)
   y.all <- y
@@ -275,8 +268,11 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      message("Thread ", thread, " ", date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")")
-      y = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculate_loglik_from_variables.celda_G")
+      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE)
+      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculate_loglik_from_variables.celda_G")
+      log_messages(res$message, logfile=logfile, append=TRUE)
+      
+      y = res$y
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
@@ -295,7 +291,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     }
     ll <- c(ll, temp.ll)
 
-    message("Thread ", thread, " ", date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll)
+    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE)
 
     iter <- iter + 1    
   }
@@ -324,7 +320,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   } 
   class(result) = "celda_G"
   
-  if (log.chains & logfile != "") sink()
   return(result)
 }
 

@@ -20,7 +20,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=F, logfile="", log.chains=F,  ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=FALSE, logfile_prefix="Celda_", log.chains=TRUE,  ...) {
   message("Starting celda...")
   validate_args(counts, model, sample.label, nchains, cores, seed, ...)
   
@@ -45,8 +45,9 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   res.list = foreach(i = 1:nrow(runs), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     chain.seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
-    
     if (verbose) {
+      ## Generate a unique log file name based on given prefix and parameters
+      logfile = paste0(logfile_prefix, paste(paste(colnames(runs), runs[i,], sep="-"), collapse="_"), "_log.txt")
       res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i, logfile=logfile, log.chains=log.chains), c(runs[i,-1])))
     } else {
       res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, thread=i, logfile=logfile, log.chains=log.chains), c(runs[i,-1]))))
