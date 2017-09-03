@@ -29,6 +29,7 @@
 #' @param show_genenames Logical; specifying if gene names should be shown. Default to be FALSE. 
 #' @param show_cellnames Logical; specifying if cell names should be shown. Default to be FALSE. 
 #' @param hclust_method Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values. 
+#' @param ... Other arguments to be passed to underlying pheatmap function
 #' @import gtable
 #' @import grid
 #' @import scales
