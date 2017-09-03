@@ -112,3 +112,16 @@ compare_count_matrix = function(count.matrix, celda.checksum) {
   count.md5 = digest::digest(count.matrix, algo="md5")
   return(count.md5 == celda.checksum)
 }
+
+
+log_messages = function(..., sep = " ", logfile = NULL, append = FALSE) {
+  if(!is.null(logfile)) {
+    if(!is.character(logfile) || length(logfile) > 1) {
+      stop("The log file parameter needs to be a single character string.")
+    }    
+    cat(paste(..., "\n", sep=sep), file=logfile, append=append)
+    
+  } else {
+    message(paste(..., sep=sep))
+  }
+}
