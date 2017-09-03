@@ -78,7 +78,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
-#' @param logfile The name of the logfile to redirect messages to.
+#' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
