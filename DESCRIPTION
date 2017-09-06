@@ -29,7 +29,8 @@ Imports:
     digest,
     gridExtra,
     methods,
-    randomcoloR
+    randomcoloR,
+    V8
 Suggests:
     testthat,
     knitr,
