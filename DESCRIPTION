@@ -30,7 +30,10 @@ Imports:
     gridExtra,
     methods,
     randomcoloR,
-    V8
+    V8,
+    jsonlite,
+    curl,
+    Rcpp
 Suggests:
     testthat,
     knitr,
