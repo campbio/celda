@@ -28,7 +28,8 @@ Imports:
     cluster,
     digest,
     gridExtra,
-    methods
+    methods,
+    randomcoloR
 Suggests:
     testthat,
     knitr,
