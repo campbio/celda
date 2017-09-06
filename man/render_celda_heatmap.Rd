@@ -9,10 +9,11 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   pseudocount_normalize = 0, pseudocount_log = 0, cluster_row = TRUE,
   cluster_column = TRUE, color_scheme = c("divergent", "sequential"),
   color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
-  annotation_cell = NULL, annotation_gene = NULL, breaks = NULL,
-  legend = TRUE, annotation_legend = TRUE, annotation_names_gene = TRUE,
-  annotation_names_cell = TRUE, show_genenames = FALSE,
-  show_cellnames = FALSE, hclust_method = "ward.D2", ...)
+  annotation_cell = NULL, annotation_gene = NULL, annotation_color = NULL,
+  breaks = NULL, legend = TRUE, annotation_legend = TRUE,
+  annotation_names_gene = TRUE, annotation_names_cell = TRUE,
+  show_genenames = FALSE, show_cellnames = FALSE,
+  hclust_method = "ward.D2", ...)
 }
 \arguments{
 \item{counts}{A count matrix where rows are genes and columns are cells.}
@@ -46,9 +47,11 @@ A "sequential" scheme is best for data that are ordered low to high such as raw 
 
 \item{col}{color for the heatmap.}
 
-\item{annotation_cell}{a dataframe for the cell annotations (columns).}
+\item{annotation_cell}{A data frame for the cell annotations (columns).}
 
-\item{annotation_gene}{a dataframe for the gene annotations (rows).}
+\item{annotation_gene}{A data frame for the gene annotations (rows).}
+
+\item{annotation_color}{A list containing color scheme for cell and/or gene annotation. See '?pheatmap' for more details.}
 
 \item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
 element longer than color vector. Used for mapping values to colors. Useful, if needed 
