@@ -174,7 +174,6 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
 #' @param seed Parameter to set.seed() for random number generation.
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE. 
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param logfile The name of the logfile to redirect messages to.
@@ -182,7 +181,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
-                   count.checksum=NULL, seed=12345, best=TRUE, 
+                   count.checksum=NULL, seed=12345, 
                    y.split.on.iter=3,  y.num.splits=3, 
                    save.prob=FALSE, save.history=FALSE, 
                    logfile=NULL, ...) {
@@ -296,15 +295,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     iter <- iter + 1    
   }
   
-  
-  if(best == TRUE) {
-    ix <- which.max(ll)
-    y.final <- y.all[,ix]
-    ll.final <- ll[ix]
-  } else {
-    y.final <- y
-    ll.final <- tail(ll, n=1)
-  }
+  ## Identify best iteration
+  ix <- which.max(ll)
+  y.final <- y.all[,ix]
+  ll.final <- ll[ix]
   
   reordered.labels = reorder.label.by.size(y.final, L)
   y.final.order = reordered.labels$new.labels
