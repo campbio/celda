@@ -37,7 +37,6 @@
 #' @import RColorBrewer
 #' @import grDevices
 #' @import graphics
-#' @import randomcoloR
 #' @export 
 render_celda_heatmap <- function(counts, z = NULL, y = NULL, 
                                  scale_log = NULL,
