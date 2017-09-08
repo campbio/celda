@@ -1056,7 +1056,7 @@ semi_pheatmap = function(mat,
             fmat_draw = FALSE
         }
     }
-    
+
     # Do clustering for rows
     if(cluster_rows == TRUE) { 
       if (is.null(row_label)) {
@@ -1154,20 +1154,7 @@ semi_pheatmap = function(mat,
         legend = NA
     }
     mat = scale_colours(mat, col = color, breaks = breaks)
-    
-    # Preparing annotations
-    if(is.na2(annotation_col) & !is.na2(annotation)){
-        annotation_col = annotation
-    }
-    # Select only the ones present in the matrix
-    if(!is.na2(annotation_col)){
-        annotation_col = annotation_col[colnames(mat), , drop = F]
-    }
-    
-    if(!is.na2(annotation_row)){
-        annotation_row = annotation_row[rownames(mat), , drop = F]
-    }
-    
+        
     annotation = c(annotation_row, annotation_col)
     annotation = annotation[unlist(lapply(annotation, function(x) !is.na2(x)))]
     if(length(annotation) != 0){
