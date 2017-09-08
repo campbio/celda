@@ -337,7 +337,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param seed Parameter to set.seed() for random number generation
-#' @export
 simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000, 
                                          L=5, beta=1, gamma=1, delta=1, seed=12345) {
   set.seed(seed)
