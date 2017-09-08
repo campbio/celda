@@ -150,7 +150,7 @@ calculate_loglik_from_variables <- function(model, ...) {
 #' (one of celda_C, celda_G, celda_CG) as well as any desired tuning parameters for those model's simulation
 #' functions as detailed below.
 #' 
-#' 
+#' @param model The celda generative model to use (one of celda_C, celda_G, celda_CG)
 #' @param S Total number of samples (celda_C, celda_CG)
 #' @param C The number of cells (celda_G)
 #' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution (celda_C, celda_CG)
