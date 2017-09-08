@@ -129,7 +129,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
   if(!is.null(z)) {
     K = sort(unique(z))
     set.seed(12345)    
-    K.col = suppressWarnings(randomcoloR::distinctColorPalette(length(K)))
+    K.col = distinct_colors(length(K))
     names(K.col) = K
 
     if(!is.null(annotation_color)) {
@@ -144,7 +144,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
   if(!is.null(y)) {
     L = sort(unique(y))
     set.seed(54321)
-    L.col = suppressWarnings(randomcoloR::distinctColorPalette(length(L)))
+    L.col = distinct_colors(length(L))
     names(L.col) = L
 
     if(!is.null(annotation_color)) {
