@@ -8,7 +8,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
   seed = 12345, best = TRUE, z.split.on.iter = 3, z.num.splits = 3,
   y.split.on.iter = 3, y.num.splits = 3, save.history = FALSE,
-  save.prob = FALSE, logfile = NULL, ...)
+  logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -44,8 +44,6 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter}
 
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
-
-\item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
 
 \item{logfile}{The name of the logfile to redirect messages to.}
 
