@@ -190,7 +190,6 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param seed starting point used for generating simulated data
 #' @param ... Additional parameters
-#' @export
 simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
                                   delta=1, seed=12345, ...) {
@@ -268,7 +267,6 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
-#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ... Additional parameters
 #' @export
@@ -276,7 +274,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
 			              seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
 			              y.split.on.iter=3, y.num.splits=3, 
-			              save.history=FALSE, save.prob=FALSE, logfile=NULL, ...) {
+			              save.history=FALSE, logfile=NULL, ...) {
   
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
@@ -523,12 +521,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
                 finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
                 beta=beta, delta=delta, seed=seed, 
                 sample.label=sample.label, names=names,
-                count.checksum=count.checksum)
-  
-  if (save.prob) {
-    result$z.prob = z.probs.final
-    result$y.prob = y.probs.final
-  } 
+                count.checksum=count.checksum,
+                z.prob = z.probs.final,
+                y.prob = y.probs.final)
   
   if (save.history) {
     ## Reorder Z and Y histories based off of final Z/Y reordering above:
