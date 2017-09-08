@@ -176,7 +176,6 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE. 
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
-#' @param save.prob Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
@@ -184,8 +183,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    count.checksum=NULL, seed=12345, best=TRUE, 
                    y.split.on.iter=3,  y.num.splits=3, 
-                   save.prob=FALSE, save.history=FALSE, 
-                   logfile=NULL, ...) {
+                    save.history=FALSE, logfile=NULL, ...) {
   
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
@@ -312,9 +310,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 
   result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
                 finalLogLik=ll.final, L=L, beta=beta, delta=delta, 
-                count.checksum=count.checksum, seed=seed, names=names)
+                count.checksum=count.checksum, seed=seed, names=names,
+                y.probability = y.probs)
   
-  if (save.prob) result$y.probability = y.probs else result$y.probability = NA
   if (save.history) {
     result$complete.y =  y.all = base::apply(y.all, 2, function(column) reordered.labels$map[column])
   } 
@@ -337,7 +335,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param seed Parameter to set.seed() for random number generation
-#' @export
 simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000, 
                                          L=5, beta=1, gamma=1, delta=1, seed=12345) {
   set.seed(seed)
