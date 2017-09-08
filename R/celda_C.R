@@ -38,7 +38,6 @@
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @export
 simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
                          G=500, K=5, alpha=1, beta=1) {
   
