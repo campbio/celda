@@ -9,8 +9,8 @@
 #' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
 #' @param trim A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).
 #' @param normalize A function to normalize the columns. Set to NULL to disable. Default is 'normalizeCounts', which normalizes to counts per million (CPM). 
-#' @param cluster_row Logical; determining if rows should be clustered.
-#' @param cluster_column Logical; determining if columns should be clustered.
+#' @param cluster_gene Logical; determining if rows should be clustered.
+#' @param cluster_cell Logical; determining if columns should be clustered.
 #' @param annotation_cell A data frame for the cell annotations (columns).
 #' @param annotation_gene A data frame for the gene annotations (rows).
 #' @param annotation_color A list containing color scheme for cell and/or gene annotation. See '?pheatmap' for more details.
@@ -45,7 +45,9 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  trim=c(-2,2), 
                                  pseudocount_normalize=0,
                                  pseudocount_log=0,
-                                 cluster_row = TRUE, cluster_column = TRUE,
+                                 gene.ix = NULL,
+                                 cell.ix = NULL,
+                                 cluster_gene = TRUE, cluster_cell = TRUE,
                                  color_scheme = c("divergent", "sequential"),
                                  color_scheme_symmetric = TRUE,
                                  color_scheme_center = 0,
@@ -86,7 +88,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     counts[counts > trim[2]] <- trim[2]
   }
   
-  # Create cell annotation  
+  ## Create cell annotation  
   if(!is.null(annotation_cell) & !is.null(z)){
   
     if(is.null(rownames(annotation_cell))) {
@@ -128,7 +130,6 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
   ## Set annotation colors
   if(!is.null(z)) {
     K = sort(unique(z))
-    set.seed(12345)    
     K.col = distinct_colors(length(K))
     names(K.col) = K
 
@@ -143,7 +144,6 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
      
   if(!is.null(y)) {
     L = sort(unique(y))
-    set.seed(54321)
     L.col = distinct_colors(length(L))
     names(L.col) = L
 
@@ -155,7 +155,28 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
       annotation_color = list(gene = L.col)
     }
   }
-    
+
+
+  ## Select subsets of genes/cells
+  if(!is.null(gene.ix)) {
+    counts = counts[gene.ix,,drop=FALSE]
+    if(length(annotation_gene) > 1 || (length(annotation_gene) == 1 & !is.na(annotation_gene))) {
+      annotation_gene = annotation_gene[gene.ix,,drop=FALSE]
+    }
+    if(!is.null(y)) {
+      y = y[gene.ix]
+    }
+  }
+  if(!is.null(cell.ix)) {
+    counts = counts[,cell.ix,drop=FALSE]
+    if(length(annotation_cell) > 1 || (length(annotation_cell) == 1 & !is.na(annotation_cell))) {
+      annotation_cell = annotation_cell[,cell.ix,drop=FALSE]
+    }
+    if(!is.null(z)) {  
+      z = z[cell.ix]
+    }  
+  }
+
   ## Set color scheme and breaks
   ubound.range <- max(counts)
   lbound.range <- min(counts)
@@ -186,8 +207,8 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
   semi_pheatmap(mat = counts,
   	color = col,
     breaks = breaks, 
-    cluster_cols = cluster_column,
-    cluster_rows = cluster_row,
+    cluster_cols = cluster_cell,
+    cluster_rows = cluster_gene,
     annotation_row = annotation_gene,
     annotation_col = annotation_cell,
     annotation_colors = annotation_color,
