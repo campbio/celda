@@ -130,7 +130,6 @@ visualize_model_performance <- function(celda.list, method, title, log = FALSE) 
 
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
-#' 
 #' @param model Model to use for calculating log-likelihood of assignments; one of ("celda_C", "celda_CG", "celda_G")
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @param ... extra parameters passed onto calculate_loglik_from_variables
@@ -143,3 +142,32 @@ calculate_loglik_from_variables <- function(model, ...) {
   else stop("Invalid model specified.")
 }
 
+
+#' Simulate count data from the celda generative models.
+#' 
+#' This function generates a list containing a simulated counts matrix, as well as various parameters
+#' used in the simulation which can be useful for running celda. The user must provide the desired model
+#' (one of celda_C, celda_G, celda_CG) as well as any desired tuning parameters for those model's simulation
+#' functions as detailed below.
+#' 
+#' @param model The celda generative model to use (one of celda_C, celda_G, celda_CG)
+#' @param S Total number of samples (celda_C, celda_CG)
+#' @param C The number of cells (celda_G)
+#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution (celda_C, celda_CG)
+#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution (all model types)
+#' @param G Total number of Genes to be simulated (celda_C, celda_CG)
+#' @param K An integer or range of integers indicating the desired number of cell clusters (celda_C, celda_CG)
+#' @param L The number of transcriptional states (celda_G, celda_CG)
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution (celda_C, celda_CG)
+#' @param beta Non-zero concentration parameter for gene Dirichlet distribution (all models)
+#' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G, celda_CG)
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G, celda_CG)
+#' @param seed Parameter to set.seed() for random number generation (all models)
+#' 
+#' @export
+simulateCells = function(model, ...) {
+  switch(model, celda_C = simulateCells.celda_C(...),
+         celda_G = simulateCells.celda_G(...),
+         celda_CG = simulateCells.celda_CG(...),
+         stop("Invalid model specified"))
+}

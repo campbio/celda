@@ -7,7 +7,7 @@
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   count.checksum = NULL, max.iter = 25, seed = 12345, best = TRUE,
   z.split.on.iter = 3, z.num.splits = 3, save.history = FALSE,
-  save.prob = FALSE, logfile = NULL, ...)
+  logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -33,8 +33,6 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter}
 
 \item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
-
-\item{save.prob}{Logical; whether to return the history of cluster assignment probabilities. Defaults to FALSE}
 
 \item{logfile}{If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.}
 
