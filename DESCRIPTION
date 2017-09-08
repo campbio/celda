@@ -28,12 +28,7 @@ Imports:
     cluster,
     digest,
     gridExtra,
-    methods,
-    randomcoloR,
-    V8,
-    jsonlite,
-    curl,
-    Rcpp
+    methods
 Suggests:
     testthat,
     knitr,
