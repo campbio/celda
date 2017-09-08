@@ -6,8 +6,9 @@
 \usage{
 render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
-  pseudocount_normalize = 0, pseudocount_log = 0, cluster_row = TRUE,
-  cluster_column = TRUE, color_scheme = c("divergent", "sequential"),
+  pseudocount_normalize = 0, pseudocount_log = 0, gene.ix = NULL,
+  cell.ix = NULL, cluster_gene = TRUE, cluster_cell = TRUE,
+  color_scheme = c("divergent", "sequential"),
   color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
   annotation_cell = NULL, annotation_gene = NULL, annotation_color = NULL,
   breaks = NULL, legend = TRUE, annotation_legend = TRUE,
@@ -34,9 +35,9 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
 
 \item{pseudocount_log}{Numeric; A pseudocount to add to data before log transforming. Default  0.}
 
-\item{cluster_row}{Logical; determining if rows should be clustered.}
+\item{cluster_gene}{Logical; determining if rows should be clustered.}
 
-\item{cluster_column}{Logical; determining if columns should be clustered.}
+\item{cluster_cell}{Logical; determining if columns should be clustered.}
 
 \item{color_scheme}{One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
 A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.}
