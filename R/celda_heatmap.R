@@ -170,7 +170,7 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
   if(!is.null(cell.ix)) {
     counts = counts[,cell.ix,drop=FALSE]
     if(length(annotation_cell) > 1 || (length(annotation_cell) == 1 & !is.na(annotation_cell))) {
-      annotation_cell = annotation_cell[,cell.ix,drop=FALSE]
+      annotation_cell = annotation_cell[cell.ix,,drop=FALSE]
     }
     if(!is.null(z)) {  
       z = z[cell.ix]
