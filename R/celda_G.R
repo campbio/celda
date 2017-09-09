@@ -285,7 +285,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     
     ## Calculate complete likelihood
     temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
+    if((all(temp.ll > ll)) | iter == 1) {
       y.probs.final = y.probs
     }
     ll <- c(ll, temp.ll)
@@ -369,7 +369,9 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   cell.counts = cell.counts[-zero.row.idx, ]
   y = y[-zero.row.idx]
     
-
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
+  
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 

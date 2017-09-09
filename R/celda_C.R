@@ -59,6 +59,10 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   ## Select transcript distribution for each cell
   cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts)) 
+  cell.sample = paste0("Sample_", 1:S)[cell.sample]
+
   return(list(z=cell.state, counts=cell.counts, sample.label=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
@@ -190,7 +194,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
     ## Calculate complete likelihood
     temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
+    if((all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
     }
     ll = c(ll, temp.ll)
