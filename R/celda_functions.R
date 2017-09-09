@@ -160,12 +160,13 @@ log_messages = function(..., sep = " ", logfile = NULL, append = FALSE) {
 
 
 
-#' Generate a distinct palette for coloring clusters
+#' Generate a distinct palette for coloring different clusters
 #' 
 #' @param n Integer; Number of colors to generate
+#' @param hues Character vector of R colors available from the colors() function. These will be used as the base colors for the clustering scheme. Different saturations and values (i.e. darkness) will be generated for each hue.
 #' @param saturation.range Numeric vector of length 2 with values between 0 and 1. Default: c(0.25, 1)
 #' @param value.range Numeric vector of length 2 with values between 0 and 1. Default: c(0.5, 1)
-#' @return A vector of distinct colors in HEX
+#' @return A vector of distinct colors that have been converted to  HEX from HSV.
 #' @export
 distinct_colors = function(n,
 						   hues = c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta"),
