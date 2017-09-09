@@ -244,7 +244,12 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   zero.row.idx = which(rowSums(cell.counts) == 0)
   cell.counts = cell.counts[-zero.row.idx, ]
   new$y = new$y[-zero.row.idx]
-  
+ 
+  ## Assign gene/cell/sample names 
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
+  cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
+
   return(list(z=new$z, y=new$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
@@ -261,7 +266,6 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
 #' @param seed Parameter to set.seed() for random number generation
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE
 #' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
@@ -272,7 +276,7 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
-			              seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
+			              seed=12345, z.split.on.iter=3, z.num.splits=3,
 			              y.split.on.iter=3, y.num.splits=3, 
 			              save.history=FALSE, logfile=NULL, ...) {
   
@@ -478,7 +482,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
     ## Calculate complete likelihood
     temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
+    if((all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
     }
@@ -489,22 +493,12 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   }
   
   ## Identify which model is the best overall in terms of maximum likelihood
-  if(best == TRUE) {
-    ix = which.max(ll)
-    z.final = z.all[,ix]
-    y.final = y.all[,ix]
-    ll.final = ll[ix]
-    z.stability.final = z.stability[ix]
-    y.stability.final = y.stability[ix]
-  } else {
-    z.final = z
-    y.final = y
-    ll.final = tail(ll, n=1)
-    z.stability.final = tail(z.stability, n=1)
-    y.stability.final = tail(y.stability, n=1)
-    z.probs.final = z.probs
-    y.probs.final = y.probs
-  }
+  ix = which.max(ll)
+  z.final = z.all[,ix]
+  y.final = y.all[,ix]
+  ll.final = ll[ix]
+  z.stability.final = z.stability[ix]
+  y.stability.final = y.stability[ix]
   
   ## Peform reordering on final Z and Y assigments:
   reordered.labels = reorder.labels.by.size.then.counts(counts, z=z.final, 
