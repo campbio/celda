@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_functions.R
 \name{distinct_colors}
 \alias{distinct_colors}
-\title{Generate a distinct palette for coloring clusters}
+\title{Generate a distinct palette for coloring different clusters}
 \usage{
 distinct_colors(n, hues = c("red", "cyan", "orange", "blue", "yellow",
   "purple", "green", "magenta"), saturation.range = c(0.4, 1),
@@ -11,13 +11,15 @@ distinct_colors(n, hues = c("red", "cyan", "orange", "blue", "yellow",
 \arguments{
 \item{n}{Integer; Number of colors to generate}
 
+\item{hues}{Character vector of R colors available from the colors() function. These will be used as the base colors for the clustering scheme. Different saturations and values (i.e. darkness) will be generated for each hue.}
+
 \item{saturation.range}{Numeric vector of length 2 with values between 0 and 1. Default: c(0.25, 1)}
 
 \item{value.range}{Numeric vector of length 2 with values between 0 and 1. Default: c(0.5, 1)}
 }
 \value{
-A vector of distinct colors in HEX
+A vector of distinct colors that have been converted to  HEX from HSV.
 }
 \description{
-Generate a distinct palette for coloring clusters
+Generate a distinct palette for coloring different clusters
 }

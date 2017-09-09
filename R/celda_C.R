@@ -58,6 +58,10 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   ## Select transcript distribution for each cell
   cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts)) 
+  cell.sample = paste0("Sample_", 1:S)[cell.sample]
+
   return(list(z=cell.state, counts=cell.counts, sample.label=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
@@ -72,7 +76,6 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25 
 #' @param seed Parameter to set.seed() for random number generation
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE.
 #' @param z.split.on.iter On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
@@ -82,7 +85,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=25, seed=12345,
-                   best=TRUE, z.split.on.iter=3, z.num.splits=3, 
+                   z.split.on.iter=3, z.num.splits=3, 
                    save.history=FALSE, logfile=NULL, ...) {
     
   if(is.null(sample.label)) {
@@ -188,7 +191,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
     ## Calculate complete likelihood
     temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
+    if((all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
     }
     ll = c(ll, temp.ll)
@@ -198,14 +201,10 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     iter = iter + 1    
   }
   
-  if (best == TRUE) {
-    ix = which.max(ll)
-    z.final = z.all[,ix]
-    ll.final = ll[ix]
-  } else {
-    z.final = z
-    ll.final = tail(ll, n=1)
-  }
+  ## Identify best state
+  ix = which.max(ll)
+  z.final = z.all[,ix]
+  ll.final = ll[ix]
   
   reordered.labels = reorder.label.by.size(z.final, K)
   z.final.reorder = reordered.labels$new.labels
