@@ -245,7 +245,12 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   zero.row.idx = which(rowSums(cell.counts) == 0)
   cell.counts = cell.counts[-zero.row.idx, ]
   new$y = new$y[-zero.row.idx]
-  
+ 
+  ## Assign gene/cell/sample names 
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
+  cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
+
   return(list(z=new$z, y=new$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
@@ -479,7 +484,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
     ## Calculate complete likelihood
     temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
+    if((all(temp.ll > ll)) | iter == 1) {
       z.probs.final = z.probs
       y.probs.final = y.probs
     }
