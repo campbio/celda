@@ -513,7 +513,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
                 complete.z.stability=z.stability, 
                 complete.y.stability=y.stability, completeLogLik=ll, 
                 finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
-                beta=beta, delta=delta, seed=seed, 
+                beta=beta, delta=delta, gamma=gamma, seed=seed, 
                 sample.label=sample.label, names=names,
                 count.checksum=count.checksum,
                 z.prob = z.probs.final,
@@ -548,6 +548,7 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
   alpha = celda.obj$alpha
   beta = celda.obj$beta
   delta = celda.obj$delta
+  gamma = celda.obj$gamma
   sample.label = celda.obj$sample.label
   
   counts.list = c()
@@ -605,6 +606,97 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
   return(res)
 }
 
+
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_CG' function
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @export
+cluster_probability.celda_CG = function(counts, celda.mod) {
+  
+  s = celda.mod$sample.label
+  z = celda.mod$z
+  K = celda.mod$K  
+  y = celda.mod$y
+  L = celda.mod$L
+  alpha = celda.mod$alpha
+  delta = celda.mod$delta
+  beta = celda.mod$beta
+  gamma = celda.mod$gamma
+
+  nS = length(unique(s))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+  n.CP = rowSums(n.CP.by.TS)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  nG.by.TS = table(y)
+
+  nG = nrow(counts)
+  nM = ncol(counts)
+
+  z.prob = matrix(NA, ncol=K, nrow=ncol(counts))
+  for(i in 1:ncol(counts)) {
+
+	## Subtract current cell counts from matrices
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
+	n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
+	n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+
+	## Calculate probabilities for each state
+	for(j in 1:K) {
+	  temp.n.CP.by.TS = n.CP.by.TS
+	  temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
+	  temp.n.CP = n.CP
+	  temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+
+	  z.prob[i,j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+	}  
+  
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
+	n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
+	n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+  }
+  
+  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  y.prob = matrix(NA, ncol=L, nrow=nrow(counts))
+  for(i in 1:nrow(counts)) {
+	  
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+   
+	## Set flag if the current gene is the only one in the state
+	ADD_PSEUDO = 0
+	if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
+
+	for(j in 1:L) {
+	  ## Add in counts to each state and determine probability
+	  temp.n.CP.by.TS = n.CP.by.TS + (1 * ADD_PSEUDO)
+	  temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
+	  temp.n.by.TS = n.by.TS + (K * ADD_PSEUDO)
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+
+	  y.prob[i,j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
+		  n.by.TS=temp.n.by.TS,
+		  nG.by.TS=temp.nG.by.TS,
+		  nG.in.Y=temp.nG.by.TS[j],
+		  beta=beta, delta=delta, gamma=gamma)
+	}  
+
+	## Sample next state and add back counts
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
+	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+  }      
+  
+  return(list(z.probability=normalizeLogProbs(z.prob), y.probability=normalizeLogProbs(y.prob)))
+}
 
 ################################################################################
 # celda_CG S3 methods                                                          #

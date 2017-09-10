@@ -5,7 +5,7 @@
 \title{celda Gene Clustering Model}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
-  count.checksum = NULL, seed = 12345, best = TRUE, y.split.on.iter = 3,
+  count.checksum = NULL, seed = 12345, y.split.on.iter = 3,
   y.num.splits = 3, save.history = FALSE, logfile = NULL, ...)
 }
 \arguments{
@@ -24,8 +24,6 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 \item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
 \item{seed}{Parameter to set.seed() for random number generation.}
-
-\item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE.}
 
 \item{y.split.on.iter}{On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3.}
 

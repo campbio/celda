@@ -242,6 +242,59 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, n.CP, nG, alpha, beta) {
   return(final)
 }
 
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_C' function
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @export
+cluster_probability.celda_C = function(counts, celda.mod) {
+
+  z = celda.mod$z
+  s = celda.mod$sample.label
+  K = celda.mod$K
+  alpha = celda.mod$alpha
+  beta = celda.mod$beta
+  
+  nS = length(unique(s))
+  nG = nrow(counts)
+  nM = ncol(counts)
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  n.CP = rowSums(n.CP.by.G)  
+
+  z.prob = matrix(NA, ncol=K, nrow=ncol(counts))
+  for(i in 1:ncol(counts)) {
+  
+	## Subtract current cell counts from matrices
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
+	n.CP.by.G[z[i],] = n.CP.by.G[z[i],] - counts[,i]
+	n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+
+	## Calculate probabilities for each state
+	for(j in 1:K) {
+	  temp.n.CP.by.G = n.CP.by.G
+	  temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
+	  temp.n.CP = n.CP
+	  temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+
+	  z.prob[i,j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
+	}  
+
+	## Add back counts
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
+	n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
+	n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+  }
+  
+  return(list(z.probability=normalizeLogProbs(z.prob)))
+}
+
+
+
+
+
+
 
 #' Calculate the celda_C log likelihood for user-provided cluster assignments
 #' 
