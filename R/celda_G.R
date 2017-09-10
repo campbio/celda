@@ -303,7 +303,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   names = list(row=rownames(counts), column=colnames(counts))  
 
   result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-                finalLogLik=ll.final, L=L, beta=beta, delta=delta, 
+                finalLogLik=ll.final, L=L, beta=beta, delta=delta, gamma=gamma,
                 count.checksum=count.checksum, seed=seed, names=names,
                 y.probability = y.probs)
   
@@ -373,6 +373,64 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
 }
 
 
+
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_G' function
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @export
+cluster_probability.celda_G = function(counts, celda.mod) {
+
+  y = celda.mod$y
+  L = celda.mod$L
+  delta = celda.mod$delta
+  beta = celda.mod$beta
+  gamma = celda.mod$gamma
+  
+  ## Calculate counts one time up front
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  nG.by.TS = table(y)
+  nM = ncol(counts)
+  nG = nrow(counts)
+
+  y.prob = matrix(NA, ncol=L, nrow=nrow(counts))
+  for(i in 1:nrow(counts)) {
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+
+	## Set flag if the current gene is the only one in its state
+	ADD_PSEUDO = 0
+	if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
+
+	## Calculate probabilities for each state
+	for(j in 1:L) {
+	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
+	  temp.n.by.TS = n.by.TS + (nM * ADD_PSEUDO)
+	  temp.n.TS.by.C = n.TS.by.C + (1 * ADD_PSEUDO)
+	
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
+	
+	  y.prob[i,j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C,
+					n.by.TS=temp.n.by.TS, 
+					nG.by.TS=temp.nG.by.TS, 
+					nG.in.Y=temp.nG.by.TS[j], 
+					beta=beta, delta=delta, gamma=gamma)
+	}
+	
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+    n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+    n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+
+  }
+  return(list(y.probability=normalizeLogProbs(y.prob)))
+}
 
 
 
