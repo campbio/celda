@@ -6,7 +6,7 @@
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
-  seed = 12345, best = TRUE, z.split.on.iter = 3, z.num.splits = 3,
+  seed = 12345, z.split.on.iter = 3, z.num.splits = 3,
   y.split.on.iter = 3, y.num.splits = 3, save.history = FALSE,
   logfile = NULL, ...)
 }
@@ -32,8 +32,6 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25}
 
 \item{seed}{Parameter to set.seed() for random number generation}
-
-\item{best}{Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE}
 
 \item{z.split.on.iter}{On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3}
 
