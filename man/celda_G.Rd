@@ -6,7 +6,7 @@
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
   count.checksum = NULL, seed = 12345, y.split.on.iter = 3,
-  y.num.splits = 3, save.history = FALSE, logfile = NULL, ...)
+  y.num.splits = 3, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -29,11 +29,11 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 
 \item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter.}
 
-\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
-
 \item{logfile}{The name of the logfile to redirect messages to.}
 
 \item{...}{Additional parameters}
+
+\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 }
 \description{
 Provides cluster assignments for all genes in a provided single-cell 
