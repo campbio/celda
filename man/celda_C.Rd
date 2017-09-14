@@ -6,8 +6,7 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   count.checksum = NULL, max.iter = 25, seed = 12345,
-  z.split.on.iter = 3, z.num.splits = 3, save.history = FALSE,
-  logfile = NULL, ...)
+  z.split.on.iter = 3, z.num.splits = 3, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -29,8 +28,6 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{z.split.on.iter}{On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.}
 
 \item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter}
-
-\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 
 \item{logfile}{If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.}
 
