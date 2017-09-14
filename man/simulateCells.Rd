@@ -9,29 +9,7 @@ simulateCells(model, ...)
 \arguments{
 \item{model}{The celda generative model to use (one of celda_C, celda_G, celda_CG)}
 
-\item{S}{Total number of samples (celda_C, celda_CG)}
-
-\item{C}{The number of cells (celda_G)}
-
-\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution (celda_C, celda_CG)}
-
-\item{N.Range}{Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution (all model types)}
-
-\item{G}{Total number of Genes to be simulated (celda_C, celda_CG)}
-
-\item{K}{An integer or range of integers indicating the desired number of cell clusters (celda_C, celda_CG)}
-
-\item{L}{The number of transcriptional states (celda_G, celda_CG)}
-
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution (celda_C, celda_CG)}
-
-\item{beta}{Non-zero concentration parameter for gene Dirichlet distribution (all models)}
-
-\item{delta}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G, celda_CG)}
-
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G, celda_CG)}
-
-\item{seed}{Parameter to set.seed() for random number generation (all models)}
+\item{...}{Parameters to pass to underlying model.}
 }
 \description{
 This function generates a list containing a simulated counts matrix, as well as various parameters
