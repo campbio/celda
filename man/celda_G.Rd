@@ -32,8 +32,6 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
 \item{logfile}{The name of the logfile to redirect messages to.}
 
 \item{...}{Additional parameters}
-
-\item{save.history}{Logical; whether to return the history of cluster assignments. Defaults to FALSE}
 }
 \description{
 Provides cluster assignments for all genes in a provided single-cell 
