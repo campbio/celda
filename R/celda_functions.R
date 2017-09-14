@@ -9,7 +9,7 @@ sample.ll = function(ll.probs) {
 cosineDist = function(x){
   x <- t(x)
   y <- (1 - cosine(x)) / 2
-  return(as.dist(y))
+  return(stats::as.dist(y))
 }
 
 cosine = function(x) {
@@ -18,19 +18,9 @@ cosine = function(x) {
 }
   
 spearmanDist = function(x){
-  y = (1 - cor(x, method="spearman"))/2
-  return(as.dist(y))
+  y = (1 - stats::cor(x, method="spearman"))/2
+  return(stats::as.dist(y))
 }
-
-
-stability = function(probs) {
-  nStates <- ncol(probs)
-  nData <- nrow(probs)
-  stability <- sum(1-base::apply(probs, 1, entropy::entropy) / log(nStates)) / nData
-  return(stability)
-}
-
-second.best = function(v) sort(v, decreasing=TRUE)[2]
 
 normalizeLogProbs = function(ll.probs) {
   ll.probs <- exp(sweep(ll.probs, 1, base::apply(ll.probs, 1, max), "-"))

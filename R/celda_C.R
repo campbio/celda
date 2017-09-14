@@ -78,7 +78,6 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param seed Parameter to set.seed() for random number generation
 #' @param z.split.on.iter On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
-#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
@@ -86,7 +85,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=25, seed=12345,
                    z.split.on.iter=3, z.num.splits=3, 
-                   save.history=FALSE, logfile=NULL, ...) {
+                   logfile=NULL, ...) {
     
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -102,9 +101,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   z = sample(1:K, ncol(counts), replace=TRUE)
-  z.all = z
-  z.stability = c(NA)
-  z.probs = matrix(NA, nrow=ncol(counts), ncol=K)
+  z.best = z
   
   ## Calculate counts one time up front
   nS = length(unique(s))
@@ -162,8 +159,6 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
         n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
         n.CP = rowSums(n.CP.by.G)
       }
-       
-      z.probs[i,] = probs
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
@@ -182,17 +177,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       n.CP = rowSums(n.CP.by.G)
     }
 
-    ## Save history
-    z.all = cbind(z.all, z)
-
-    ## Normalize Z and Y marginal probabilties and calculate stability
-    z.probs = normalizeLogProbs(z.probs)
-    z.stability = c(z.stability, stability(z.probs))
 
     ## Calculate complete likelihood
     temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
     if((all(temp.ll > ll)) | iter == 1) {
-      z.probs.final = z.probs
+      z.best = z
+      ll.best = temp.ll
     }
     ll = c(ll, temp.ll)
     
@@ -200,26 +190,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     
     iter = iter + 1    
   }
-  
-  ## Identify best state
-  ix = which.max(ll)
-  z.final = z.all[,ix]
-  ll.final = ll[ix]
-  
-  reordered.labels = reorder.label.by.size(z.final, K)
+    
+  reordered.labels = reorder.label.by.size(z.best, K)
   z.final.reorder = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
 
   result = list(z=z.final.reorder, completeLogLik=ll,  
-                finalLogLik=ll.final, seed=seed, K=K, 
+                finalLogLik=ll.best, seed=seed, K=K, 
                 sample.label=sample.label, alpha=alpha, 
                 beta=beta, count.checksum=count.checksum, 
-                names=names, z.probability = z.probs)
-  
-  if (save.history) {
-    ## Re-label Z history based off the reordering above:
-    result$complete.z = base::apply(z.all, 2, function(column) reordered.labels$map[column])
-  } 
+                names=names)
   
   class(result) = "celda_C"
   
@@ -417,21 +397,6 @@ factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proporti
 finalClusterAssignment.celda_C = function(celda.mod) {
   return(celda.mod$z)
 }
-
-#' completeClusterHistory for celda Cell clustering funciton 
-#' @param celda.mod A celda model object of class "celda_C"
-#' @export
-completeClusterHistory.celda_C = function(celda.mod) {
-  return(celda.mod$complete.z)
-}
-
-#' clusterProbabilities for celda Cell clustering function 
-#' @param celda.mod A celda model object of class "celda_C"
-#' @export
-clusterProbabilities.celda_C = function(celda.mod) {
-  return(celda.mod$z.probability)
-}
-
 
 #' getK for celda Cell clustering function 
 #' @param celda.mod A celda model object of class "celda_C"
