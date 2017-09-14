@@ -151,18 +151,7 @@ calculate_loglik_from_variables <- function(model, ...) {
 #' functions as detailed below.
 #' 
 #' @param model The celda generative model to use (one of celda_C, celda_G, celda_CG)
-#' @param S Total number of samples (celda_C, celda_CG)
-#' @param C The number of cells (celda_G)
-#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution (celda_C, celda_CG)
-#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution (all model types)
-#' @param G Total number of Genes to be simulated (celda_C, celda_CG)
-#' @param K An integer or range of integers indicating the desired number of cell clusters (celda_C, celda_CG)
-#' @param L The number of transcriptional states (celda_G, celda_CG)
-#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution (celda_C, celda_CG)
-#' @param beta Non-zero concentration parameter for gene Dirichlet distribution (all models)
-#' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G, celda_CG)
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G, celda_CG)
-#' @param seed Parameter to set.seed() for random number generation (all models)
+#' @param ... Parameters to pass to underlying model.
 #' 
 #' @export
 simulateCells = function(model, ...) {
