@@ -8,7 +8,7 @@
 #' @export
 topRank = function(fm, n=25, margin=2, threshold=0, decreasing=TRUE) {
   if(is.null(threshold) | is.na(threshold)) {
-    threshold = min(m) - 1 
+    threshold = min(fm) - 1 
   }
   
   ## Function to sort values in a vector and return 'n' top results
