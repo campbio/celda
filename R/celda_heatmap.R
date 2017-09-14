@@ -6,6 +6,8 @@
 #' @param scale_log Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.
 #' @param pseudocount_log Numeric; A pseudocount to add to data before log transforming. Default  0. 
 #' @param pseudocount_normalize Numeric; A pseudocount to add to data before normalization. Default  1. 
+#' @param gene.ix Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.
+#' @param cell.ix Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.
 #' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
 #' @param trim A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).
 #' @param normalize A function to normalize the columns. Set to NULL to disable. Default is 'normalizeCounts', which normalizes to counts per million (CPM). 
