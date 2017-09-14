@@ -9,7 +9,7 @@ sample.ll = function(ll.probs) {
 cosineDist = function(x){
   x <- t(x)
   y <- (1 - cosine(x)) / 2
-  return(as.dist(y))
+  return(stats::as.dist(y))
 }
 
 cosine = function(x) {
@@ -18,8 +18,8 @@ cosine = function(x) {
 }
   
 spearmanDist = function(x){
-  y = (1 - cor(x, method="spearman"))/2
-  return(as.dist(y))
+  y = (1 - stats::cor(x, method="spearman"))/2
+  return(stats::as.dist(y))
 }
 
 normalizeLogProbs = function(ll.probs) {
