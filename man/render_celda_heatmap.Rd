@@ -35,6 +35,10 @@ render_celda_heatmap(counts, z = NULL, y = NULL, scale_log = NULL,
 
 \item{pseudocount_log}{Numeric; A pseudocount to add to data before log transforming. Default  0.}
 
+\item{gene.ix}{Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.}
+
+\item{cell.ix}{Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.}
+
 \item{cluster_gene}{Logical; determining if rows should be clustered.}
 
 \item{cluster_cell}{Logical; determining if columns should be clustered.}

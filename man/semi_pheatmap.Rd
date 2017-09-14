@@ -257,8 +257,8 @@ labels_row = c("", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
 pheatmap(test, annotation_col = annotation_col, labels_row = labels_row)
 
 # Specifying clustering from distance matrix
-drows = dist(test, method = "minkowski")
-dcols = dist(t(test), method = "minkowski")
+drows = stats::dist(test, method = "minkowski")
+dcols = stats::dist(t(test), method = "minkowski")
 pheatmap(test, clustering_distance_rows = drows, clustering_distance_cols = dcols)
 
 # Modify ordering of the clusters using clustering callback option
