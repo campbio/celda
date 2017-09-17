@@ -583,7 +583,7 @@ cluster_mat <- function(mat, labels, distance, method){
         sub.hclust$order <- 1
         return(sub.hclust)
       }else if(length(class.pos)>1){   # if >1 rows return the "hclust" object 
-        return(stats::hclust(stats::dist(mat =  mat[class.pos,], distance = distance ),method = method ))
+        return(stats::hclust(stats::dis(mat =  mat[class.pos,], distance = distance ),method = method ))
       } }
     ) 
     # the length(group.hclust) is the [#group] == nGroup   ,   group.hclust[[i]] to get each "hclust"
