@@ -11,7 +11,7 @@
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
-\item{method}{One of "perplexity", "harmonic", or "loglik"}
+\item{method}{One of "perplexity" or "loglik"}
 
 \item{title}{Title for the plot}
 

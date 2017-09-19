@@ -10,7 +10,7 @@ render_interactive_kl_plot(celda.list, method = "perplexity",
 \arguments{
 \item{celda.list}{A list of celda_CG objects returned from celda function}
 
-\item{method}{One of "perplexity", "harmonic", or "loglik", passed through to calculate_performance_metric()}
+\item{method}{One of "perplexity" or "loglik", passed through to calculate_performance_metric()}
 
 \item{title}{The plot title}
 }

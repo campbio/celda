@@ -29,7 +29,8 @@ Imports:
     cluster,
     digest,
     gridExtra,
-    methods
+    methods,
+    lintr
 Suggests:
     testthat,
     knitr,

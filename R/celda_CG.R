@@ -669,9 +669,9 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' L (cell clusters K), plot the performance of each number of cell
 #' clusters K (gene clusters L).
 #' @param celda.list A list of celda_CG objects returned from celda function
-#' @param method One of "perplexity", "harmonic", or "loglik"
+#' @param method One of "perplexity" or "loglik"
 #' @param title Title for the visualize_model_performance
-#' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric
+#' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @import Rmpfr
 #' @export
 visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
@@ -696,11 +696,7 @@ visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
       performance.metric = new("mpfr", unlist(performance.metric))
     }
     y.lab = paste0("Log(",method,")")
-  } else if (method == "harmonic") {
-    performance.metric = lapply(performance.metric, log)
-    performance.metric = new("mpfr", unlist(performance.metric))
-    y.lab = paste0("Log(",method,")")
-  }
+  } 
   
   performance.metric = as.numeric(performance.metric)
 
@@ -761,7 +757,7 @@ visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
 #' run for each combination of K/L (cell/gene).
 #' 
 #' @param celda.list A list of celda_CG objects returned from celda function
-#' @param method One of "perplexity", "harmonic", or "loglik", passed through to calculate_performance_metric()
+#' @param method One of "perplexity" or "loglik", passed through to calculate_performance_metric()
 #' @param title The plot title
 #' @import Rmpfr 
 #' @export
@@ -783,7 +779,7 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
   # The performance metric methods return Rmpfr numbers that are extremely small and can't be 
   # plotted via ggplot2, so log 'em first. 
   # TODO: celda_list getter that calculates these metrics.
-  if (method %in% c("perplexity", "harmonic")) {
+  if (method %in% c("perplexity")) {
     performance.metric = lapply(performance.metric, log)
     performance.metric = new("mpfr", unlist(performance.metric))
     performance.metric = as.numeric(performance.metric)
@@ -803,7 +799,7 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
   
   # TODO: Return plot or nah?
   method.label = method 
-  if (method %in% c("perplexity, harmonic")) {
+  if (method %in% c("perplexity")) {
      method.label = paste("log(", method, ")", sep="")
   }
   k.l.plot = ggplot2::ggplot(figure.df, aes(x=key, y=metric, label=key)) +
@@ -824,7 +820,7 @@ validate_kl_plot_parameters = function(celda.list, method) {
     stop("celda.list argument must be of class 'celda_list'")
  } else if (celda.list$content.type != "celda_CG") {
     stop("celda.list must be a 'celda.list' of 'celda_CG' objects")
- } else if (!(method %in% c("perplexity","harmonic","loglik"))) {
-    stop("Invalid method, 'method' has to be either 'perplexity', 'harmonic', or 'loglik'")
+ } else if (!(method %in% c("perplexity", "loglik"))) {
+    stop("Invalid method, 'method' has to be either 'perplexity' or 'loglik'")
  } 
 }
