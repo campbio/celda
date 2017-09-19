@@ -10,7 +10,7 @@ chooseBestChain(celda.mods, method = "perplexity")
 \arguments{
 \item{celda.mods}{A list of celda class objects (celda_C, celda_CG, celda_G)}
 
-\item{method}{How to choose the best chain. Choices are c("perplexity", "harmonic", "loglik"). Defaults to perplexity. "perplexity" calculates each chain's perplexity as the inverse of the geometric mean, per the original LDA description. "harmonic" calculates each chain's marginal likelihood as the harmonic mean of each iteration of Gibbs sampling's log likelihoods. "loglik" chooses the chain which reached the maximal log likelihood during Gibbs sampling.}
+\item{method}{How to choose the best chain. Choices are c("perplexity", "loglik"). Defaults to perplexity. "perplexity" calculates each chain's perplexity as the inverse of the geometric mean, per the original LDA description. "loglik" chooses the chain which reached the maximal log likelihood during Gibbs sampling.}
 }
 \description{
 Determine the best chain among a set of celda_* objects with
