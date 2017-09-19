@@ -174,22 +174,20 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
 #' @param seed Parameter to set.seed() for random number generation.
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE. Default to be TRUE. 
-#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
-                   count.checksum=NULL, seed=12345, best=TRUE, 
+                   count.checksum=NULL, seed=12345, 
                    y.split.on.iter=3,  y.num.splits=3, 
-                    save.history=FALSE, logfile=NULL, ...) {
+                    logfile=NULL, ...) {
   
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
   y <- sample(1:L, nrow(counts), replace=TRUE)
-  y.all <- y
+  y.best <- y
 
   ## Calculate counts one time up front
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -202,7 +200,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   ## Calculate initial log likelihood
   ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
-  y.probs <- matrix(NA, nrow=nrow(counts), ncol=L)
+
   iter <- 1
   continue = TRUE
   y.num.of.splits.occurred = 1
@@ -259,8 +257,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
         n.by.TS = as.numeric(rowsum(n.by.G, y))
         nG.by.TS = table(y)
       }
-
-      y.probs[i,] <- probs
     }
 
     ## Perform split if on i-th iteration defined by y.split.on.iter
@@ -277,15 +273,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
       n.by.TS = as.numeric(rowsum(n.by.G, y))
       nG.by.TS = table(y)
-   }
-    
-    ## Save history
-    y.all <- cbind(y.all, y)
-    
+    }
+        
     ## Calculate complete likelihood
     temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
-      y.probs.final = y.probs
+    if((all(temp.ll > ll)) | iter == 1) {
+      y.best = y
+      ll.best = temp.ll
     }
     ll <- c(ll, temp.ll)
 
@@ -293,29 +287,15 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 
     iter <- iter + 1    
   }
-  
-  
-  if(best == TRUE) {
-    ix <- which.max(ll)
-    y.final <- y.all[,ix]
-    ll.final <- ll[ix]
-  } else {
-    y.final <- y
-    ll.final <- tail(ll, n=1)
-  }
-  
-  reordered.labels = reorder.label.by.size(y.final, L)
+    
+  reordered.labels = reorder.label.by.size(y.best, L)
   y.final.order = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts))  
 
-  result = list(y=y.final.order, complete.y=y.all, completeLogLik=ll, 
-                finalLogLik=ll.final, L=L, beta=beta, delta=delta, 
-                count.checksum=count.checksum, seed=seed, names=names,
-                y.probability = y.probs)
+  result = list(y=y.final.order, completeLogLik=ll, 
+                finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
+                count.checksum=count.checksum, seed=seed, names=names)
   
-  if (save.history) {
-    result$complete.y =  y.all = base::apply(y.all, 2, function(column) reordered.labels$map[column])
-  } 
   class(result) = "celda_G"
   
   return(result)
@@ -372,11 +352,71 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   cell.counts = cell.counts[-zero.row.idx, ]
   y = y[-zero.row.idx]
     
-
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
+  
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
+
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_G' function
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @export
+cluster_probability.celda_G = function(counts, celda.mod) {
+
+  y = celda.mod$y
+  L = celda.mod$L
+  delta = celda.mod$delta
+  beta = celda.mod$beta
+  gamma = celda.mod$gamma
+  
+  ## Calculate counts one time up front
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  nG.by.TS = table(y)
+  nM = ncol(counts)
+  nG = nrow(counts)
+
+  y.prob = matrix(NA, ncol=L, nrow=nrow(counts))
+  for(i in 1:nrow(counts)) {
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+
+	## Set flag if the current gene is the only one in its state
+	ADD_PSEUDO = 0
+	if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
+
+	## Calculate probabilities for each state
+	for(j in 1:L) {
+	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
+	  temp.n.by.TS = n.by.TS + (nM * ADD_PSEUDO)
+	  temp.n.TS.by.C = n.TS.by.C + (1 * ADD_PSEUDO)
+	
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
+	
+	  y.prob[i,j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C,
+					n.by.TS=temp.n.by.TS, 
+					nG.by.TS=temp.nG.by.TS, 
+					nG.in.Y=temp.nG.by.TS[j], 
+					beta=beta, delta=delta, gamma=gamma)
+	}
+	
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+    n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+    n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+
+  }
+  return(list(y.probability=normalizeLogProbs(y.prob)))
+}
 
 
 
@@ -440,21 +480,6 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
 finalClusterAssignment.celda_G = function(celda.mod) {
   return(celda.mod$y)
 }
-
-#' completeClusterHistory for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-completeClusterHistory.celda_G = function(celda.mod) {
-  return(celda.mod$complete.y)
-}
-
-#' clusterProbabilities for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-clusterProbabilities.celda_G = function(celda.mod) {
-  return(celda.mod$y.probability)
-}
-
 
 #' getK for celda Gene clustering model
 #' @param celda.mod A celda model object of class "celda_G"
