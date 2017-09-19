@@ -6,13 +6,16 @@
 #' @param scale_log Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.
 #' @param pseudocount_log Numeric; A pseudocount to add to data before log transforming. Default  0. 
 #' @param pseudocount_normalize Numeric; A pseudocount to add to data before normalization. Default  1. 
+#' @param gene.ix Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.
+#' @param cell.ix Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.
 #' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
 #' @param trim A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).
 #' @param normalize A function to normalize the columns. Set to NULL to disable. Default is 'normalizeCounts', which normalizes to counts per million (CPM). 
-#' @param cluster_row Logical; determining if rows should be clustered.
-#' @param cluster_column Logical; determining if columns should be clustered.
-#' @param annotation_cell a dataframe for the cell annotations (columns).
-#' @param annotation_gene a dataframe for the gene annotations (rows).
+#' @param cluster_gene Logical; determining if rows should be clustered.
+#' @param cluster_cell Logical; determining if columns should be clustered.
+#' @param annotation_cell A data frame for the cell annotations (columns).
+#' @param annotation_gene A data frame for the gene annotations (rows).
+#' @param annotation_color A list containing color scheme for cell and/or gene annotation. See '?pheatmap' for more details.
 #' @param color_scheme One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
 #' A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.
 #' @param color_scheme_symmetric Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.
@@ -44,12 +47,15 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
                                  trim=c(-2,2), 
                                  pseudocount_normalize=0,
                                  pseudocount_log=0,
-                                 cluster_row = TRUE, cluster_column = TRUE,
+                                 gene.ix = NULL,
+                                 cell.ix = NULL,
+                                 cluster_gene = TRUE, cluster_cell = TRUE,
                                  color_scheme = c("divergent", "sequential"),
                                  color_scheme_symmetric = TRUE,
                                  color_scheme_center = 0,
                                  col= NULL,
                                  annotation_cell = NULL, annotation_gene = NULL, 
+                                 annotation_color = NULL,
                                  breaks = NULL, 
                                  legend = TRUE,
                                  annotation_legend = TRUE,
@@ -84,42 +90,95 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
     counts[counts > trim[2]] <- trim[2]
   }
   
-  #if null y or z 
-  if(is.null(y)){
-    y <- rep(1, nrow(counts))
-  }
-  if(is.null(z)){
-    z <- rep(1, ncol(counts))
-  }
+  ## Create cell annotation  
+  if(!is.null(annotation_cell) & !is.null(z)){
   
-  K <- length(unique(z))
-  L <- length(unique(y))
-  
-  ## Set row and column name to counts matrix 
-  if(is.null(rownames(counts))){
-    rownames(counts) <- 1:nrow(counts)
-  } 
-  if(is.null(colnames(counts))) {
-    colnames(counts) <- 1:ncol(counts)
-  }  
-  
-  #  Set cell annotation  
-  if(!is.null(annotation_cell)){
-    annotation_cell$cell_label <- as.factor(z)   # has to be the original cell label order
-    rownames(annotation_cell) <- colnames(counts)
-  }else{  # annotation_cell is null
-	annotation_cell <- data.frame(cell_label = as.factor(z)) 
-    rownames(annotation_cell) <- colnames(counts)  # rowname should correspond to counts matrix's col(cell) name
-  }
-  #  Set gene annotation
-  if(!is.null(annotation_gene)){
-    annotation_gene$gene_label <- as.factor(y)  # has to be the original gene label order 
-    rownames(annotation_gene) <- rownames(counts)
-  } else{  #annotation_gene is  null 
-	annotation_gene <- data.frame(gene_label = as.factor(y))
-    rownames(annotation_gene) <- rownames(counts)  # rowname should correspond to counts matrix's row(gene) name
-  }
+    if(is.null(rownames(annotation_cell))) {
+      rownames(annotation_cell) = colnames(counts)
+    } else {
+      if(any(rownames(annotation_cell) != colnames(counts))) {
+        stop("Row names of 'annotation_cell' are different than the column names of 'counts'")
+      }
+    }
+    annotation_cell = data.frame(cell = as.factor(z), annotation_cell)
     
+  } else if(is.null(annotation_cell) & !is.null(z)) { 
+	annotation_cell <- data.frame(cell = as.factor(z)) 
+    rownames(annotation_cell) <- colnames(counts)  
+  } else {
+    annotation_cell = NA
+  }
+  
+  
+  # Set gene annotation
+  if(!is.null(annotation_gene) & !is.null(y)){
+  
+    if(is.null(rownames(annotation_gene))) {
+      rownames(annotation_cell) = rownames(counts)
+    } else {
+      if(any(rownames(annotation_cell) != rownames(counts))) {
+        stop("Row names of 'annotation_gene' are different than the row names of 'counts'")
+      }
+    }
+    annotation_gene = data.frame(gene = as.factor(y), annotation_gene)   
+    
+  } else if(is.null(annotation_gene) & !is.null(y)) { 
+	annotation_gene <- data.frame(gene = as.factor(y)) 
+    rownames(annotation_gene) <- rownames(counts)  
+  } else {
+    annotation_gene = NA
+  }
+  
+  ## Set annotation colors
+  if(!is.null(z)) {
+    K = sort(unique(z))
+    K.col = distinct_colors(length(K))
+    names(K.col) = K
+
+    if(!is.null(annotation_color)) {
+      if(!("cell" %in% names(annotation_color))) {
+        annotation_color = c(list(cell = K.col), annotation_color)
+      }
+    } else {
+      annotation_color = list(cell = K.col)
+    }
+  }
+     
+  if(!is.null(y)) {
+    L = sort(unique(y))
+    L.col = distinct_colors(length(L))
+    names(L.col) = L
+
+    if(!is.null(annotation_color)) {
+      if(!("gene" %in% names(annotation_color))) {
+        annotation_color = c(list(gene = L.col), annotation_color)
+      }
+    } else {
+      annotation_color = list(gene = L.col)
+    }
+  }
+
+
+  ## Select subsets of genes/cells
+  if(!is.null(gene.ix)) {
+    counts = counts[gene.ix,,drop=FALSE]
+    if(length(annotation_gene) > 1 || (length(annotation_gene) == 1 & !is.na(annotation_gene))) {
+      annotation_gene = annotation_gene[gene.ix,,drop=FALSE]
+    }
+    if(!is.null(y)) {
+      y = y[gene.ix]
+    }
+  }
+  if(!is.null(cell.ix)) {
+    counts = counts[,cell.ix,drop=FALSE]
+    if(length(annotation_cell) > 1 || (length(annotation_cell) == 1 & !is.na(annotation_cell))) {
+      annotation_cell = annotation_cell[cell.ix,,drop=FALSE]
+    }
+    if(!is.null(z)) {  
+      z = z[cell.ix]
+    }  
+  }
+
   ## Set color scheme and breaks
   ubound.range <- max(counts)
   lbound.range <- min(counts)
@@ -150,10 +209,11 @@ render_celda_heatmap <- function(counts, z = NULL, y = NULL,
   semi_pheatmap(mat = counts,
   	color = col,
     breaks = breaks, 
-    cluster_cols = cluster_column,
-    cluster_rows = cluster_row,
+    cluster_cols = cluster_cell,
+    cluster_rows = cluster_gene,
     annotation_row = annotation_gene,
     annotation_col = annotation_cell,
+    annotation_colors = annotation_color,
     legend = legend,
     annotation_legend = annotation_legend, 
     annotation_names_row = annotation_names_gene, 
