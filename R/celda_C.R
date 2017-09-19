@@ -405,7 +405,7 @@ celda_heatmap.celda_C = function(celda.mod, counts, ...) {
 
 #' visualize_model_performance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()
-#' @param method One of "perplexity", "harmonic", or "loglik"
+#' @param method One of "perplexity", "loglik"
 #' @param title Title for the plot
 #' @param log Currently not working for celda_C objects
 #' @import Rmpfr
@@ -423,7 +423,7 @@ visualize_model_performance.celda_C = function(celda.list, method="perplexity",
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
   # plotted, so log 'em first
-  if (method %in% c("perplexity", "harmonic")) {
+  if (method %in% c("perplexity")) {
     performance.metric = lapply(performance.metric, log)
     performance.metric = methods::new("mpfr", unlist(performance.metric))
     performance.metric = as.numeric(performance.metric)

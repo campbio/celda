@@ -17,7 +17,7 @@ getModel(celda.list, K = NULL, L = NULL, chain = 1, best = NULL)
 
 \item{chain}{The desired chain for the specified model}
 
-\item{best}{Method for choosing best chain automatically. Options are c("perplexity", "harmonic", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.}
+\item{best}{Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.}
 }
 \value{
 A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.

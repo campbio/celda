@@ -10,7 +10,7 @@
 #' @param K The K parameter for the desired model in the results list
 #' @param L The L parameter for the desired model in the results list
 #' @param chain The desired chain for the specified model
-#' @param best Method for choosing best chain automatically. Options are c("perplexity", "harmonic", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.
+#' @param best Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.
 #' @return A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
 getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
@@ -90,7 +90,7 @@ validate_get_model_params = function(celda.list, K, L, chain, best) {
 #' Determine the best chain among a set of celda_* objects with
 #' otherwise uniform K/L choices.
 #' @param celda.mods A list of celda class objects (celda_C, celda_CG, celda_G)
-#' @param method How to choose the best chain. Choices are c("perplexity", "harmonic", "loglik"). Defaults to perplexity. "perplexity" calculates each chain's perplexity as the inverse of the geometric mean, per the original LDA description. "harmonic" calculates each chain's marginal likelihood as the harmonic mean of each iteration of Gibbs sampling's log likelihoods. "loglik" chooses the chain which reached the maximal log likelihood during Gibbs sampling.
+#' @param method How to choose the best chain. Choices are c("perplexity", "loglik"). Defaults to perplexity. "perplexity" calculates each chain's perplexity as the inverse of the geometric mean, per the original LDA description. "loglik" chooses the chain which reached the maximal log likelihood during Gibbs sampling.
 chooseBestChain = function(celda.mods, method="perplexity") {
   # We want to get the *most negative* perplexity, as opposed to the *least* negative
   # for the other metrics...
@@ -101,10 +101,6 @@ chooseBestChain = function(celda.mods, method="perplexity") {
     return(celda.mods[[best]])
   } 
   
-  else if (method == "harmonic"){
-    metrics = lapply(celda.mods, function(mod) { calculate_perplexity(mod$completeLogLik) })
-    metrics = new("mpfr", unlist(metrics))
-   }
   else if (method == "loglik"){
     metrics = lapply(celda.mods, function(mod) { max(mod$completeLogLik) })
     metrics = unlist(metrics)
