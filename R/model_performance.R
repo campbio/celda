@@ -1,19 +1,3 @@
-#' Calculate the marginal likelihood from a single celda model
-#' 
-#' Marginal likelihood is estimated as the harmonic mean of the 
-#' (non-log) likelihood over all iterations of Gibbs sampling.
-#' 
-#' @param completeLogLik The complete Gibbs sampling history of log-likelihoods for a single celda chain
-#' @return The estimated marginal likelihood as an mpfr number
-#' @export
-calculate_marginal_likelihood = function(completeLogLik) {
-  mpfr_log_lik = Rmpfr::mpfr(completeLogLik, 512)
-  complete_likelihood = exp(mpfr_log_lik)
-  marginal_likelihood = (Rmpfr::mean((1/complete_likelihood)))^-1
-  return(marginal_likelihood)
-}
-
-
 #' Calculate the perplexity from a single celda chain
 #' 
 #' Perplexity is defined as the inverse of the geometric mean of the log-likelihoods over all 
@@ -34,10 +18,8 @@ calculate_perplexity = function(completeLogLik, log = FALSE) {
 
 # Convenience function to calculate performance metrics by specifying a method. 
 calculate_performance_metric = function(log.likelihoods, method="perplexity", log = FALSE) {
-    if (method == "perplexity") {
+  if (method == "perplexity") {
     metric = calculate_perplexity(log.likelihoods, log)
-  } else if (method == "harmonic") {
-    metric = calculate_marginal_likelihood(log.likelihoods)
   } else if (method == "loglik") {
      metric = max(log.likelihoods)
   } else stop("Invalid method specified")
