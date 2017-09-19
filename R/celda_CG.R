@@ -244,7 +244,12 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   zero.row.idx = which(rowSums(cell.counts) == 0)
   cell.counts = cell.counts[-zero.row.idx, ]
   new$y = new$y[-zero.row.idx]
-  
+ 
+  ## Assign gene/cell/sample names 
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
+  cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
+
   return(list(z=new$z, y=new$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
@@ -261,20 +266,18 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
 #' @param seed Parameter to set.seed() for random number generation
-#' @param best Whether to return the cluster assignment with the highest log-likelihood. Defaults to TRUE. Returns last generated cluster assignment when FALSE
 #' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter
-#' @param save.history Logical; whether to return the history of cluster assignments. Defaults to FALSE
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
-			              seed=12345, best=TRUE, z.split.on.iter=3, z.num.splits=3,
+			              seed=12345, z.split.on.iter=3, z.num.splits=3,
 			              y.split.on.iter=3, y.num.splits=3, 
-			              save.history=FALSE, logfile=NULL, ...) {
+			              logfile=NULL, ...) {
   
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
@@ -292,13 +295,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   ## Randomly select z and y
   z = sample(1:K, ncol(counts), replace=TRUE)
   y = sample(1:L, nrow(counts), replace=TRUE)
-  z.all = z
-  y.all = y
-  z.stability = c(NA)
-  y.stability = c(NA)
-  z.probs = matrix(NA, nrow=ncol(counts), ncol=K)
-  y.probs = matrix(NA, nrow=nrow(counts), ncol=L)
-  
+  z.best = z
+  y.best = y  
   
   ## Calculate counts one time up front
   nS = length(unique(s))
@@ -364,8 +362,6 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
         n.CP = rowSums(n.CP.by.TS)
       }
-
-      z.probs[i,] = probs
     }
     
     ## Begin process of Gibbs sampling for each gene
@@ -425,8 +421,6 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         n.by.TS = as.numeric(rowsum(n.by.G, y))
         nG.by.TS = table(y)
       }
-       
-      y.probs[i,] = probs
     }
     
     ## Perform split on i-th iteration defined by z.split.on.iter
@@ -465,73 +459,32 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       nG.by.TS = table(y)
    }
 
-
-    ## Save Z history
-    z.all = cbind(z.all, z)
-    y.all = cbind(y.all, y)
-
-    ## Normalize Z and Y marginal probabilties and calculate stability
-    z.probs = normalizeLogProbs(z.probs)
-    y.probs = normalizeLogProbs(y.probs)
-    z.stability = c(z.stability, stability(z.probs))
-    y.stability = c(y.stability, stability(y.probs))
-
     ## Calculate complete likelihood
     temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-    if((best == TRUE & all(temp.ll > ll)) | iter == 1) {
-      z.probs.final = z.probs
-      y.probs.final = y.probs
+    if((all(temp.ll > ll)) | iter == 1) {
+      z.best = z
+      y.best = y
+      ll.best = temp.ll
     }
     ll = c(ll, temp.ll)
     
     log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
     iter = iter + 1    
   }
-  
-  ## Identify which model is the best overall in terms of maximum likelihood
-  if(best == TRUE) {
-    ix = which.max(ll)
-    z.final = z.all[,ix]
-    y.final = y.all[,ix]
-    ll.final = ll[ix]
-    z.stability.final = z.stability[ix]
-    y.stability.final = y.stability[ix]
-  } else {
-    z.final = z
-    y.final = y
-    ll.final = tail(ll, n=1)
-    z.stability.final = tail(z.stability, n=1)
-    y.stability.final = tail(y.stability, n=1)
-    z.probs.final = z.probs
-    y.probs.final = y.probs
-  }
-  
+    
   ## Peform reordering on final Z and Y assigments:
-  reordered.labels = reorder.labels.by.size.then.counts(counts, z=z.final, 
-                                                        y=y.final, K=K, L=L)
+  reordered.labels = reorder.labels.by.size.then.counts(counts, z=z.best, 
+                                                        y=y.best, K=K, L=L)
   names = list(row=rownames(counts), column=colnames(counts), 
                sample=levels(sample.label))
   
   
-  result = list(z=reordered.labels$z, y=reordered.labels$y, 
-                z.stability=z.stability.final, 
-                y.stability=y.stability.final,  
-                complete.z.stability=z.stability, 
-                complete.y.stability=y.stability, completeLogLik=ll, 
-                finalLogLik=ll.final, K=K, L=L, alpha=alpha, 
-                beta=beta, delta=delta, seed=seed, 
+  result = list(z=reordered.labels$z, y=reordered.labels$y, completeLogLik=ll, 
+                finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
+                beta=beta, delta=delta, gamma=gamma, seed=seed, 
                 sample.label=sample.label, names=names,
-                count.checksum=count.checksum,
-                z.prob = z.probs.final,
-                y.prob = y.probs.final)
+                count.checksum=count.checksum)
   
-  if (save.history) {
-    ## Reorder Z and Y histories based off of final Z/Y reordering above:
-    z.all = base::apply(z.all, 2, function(column) reordered.labels$z.map[column])
-    y.all = base::apply(y.all, 2, function(column) reordered.labels$y.map[column])
-    result$complete.z = z.all
-    result$complete.y = y.all
-  } 
   class(result) = "celda_CG" 
    
   return(result)
@@ -554,6 +507,7 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
   alpha = celda.obj$alpha
   beta = celda.obj$beta
   delta = celda.obj$delta
+  gamma = celda.obj$gamma
   sample.label = celda.obj$sample.label
   
   counts.list = c()
@@ -612,6 +566,97 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
 }
 
 
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_CG' function
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @export
+cluster_probability.celda_CG = function(counts, celda.mod) {
+  
+  s = celda.mod$sample.label
+  z = celda.mod$z
+  K = celda.mod$K  
+  y = celda.mod$y
+  L = celda.mod$L
+  alpha = celda.mod$alpha
+  delta = celda.mod$delta
+  beta = celda.mod$beta
+  gamma = celda.mod$gamma
+
+  nS = length(unique(s))
+  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+  n.CP = rowSums(n.CP.by.TS)
+  n.by.G = rowSums(counts)
+  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  nG.by.TS = table(y)
+
+  nG = nrow(counts)
+  nM = ncol(counts)
+
+  z.prob = matrix(NA, ncol=K, nrow=ncol(counts))
+  for(i in 1:ncol(counts)) {
+
+	## Subtract current cell counts from matrices
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
+	n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
+	n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+
+	## Calculate probabilities for each state
+	for(j in 1:K) {
+	  temp.n.CP.by.TS = n.CP.by.TS
+	  temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
+	  temp.n.CP = n.CP
+	  temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+
+	  z.prob[i,j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+	}  
+  
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
+	n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
+	n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+  }
+  
+  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  y.prob = matrix(NA, ncol=L, nrow=nrow(counts))
+  for(i in 1:nrow(counts)) {
+	  
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+   
+	## Set flag if the current gene is the only one in the state
+	ADD_PSEUDO = 0
+	if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
+
+	for(j in 1:L) {
+	  ## Add in counts to each state and determine probability
+	  temp.n.CP.by.TS = n.CP.by.TS + (1 * ADD_PSEUDO)
+	  temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
+	  temp.n.by.TS = n.by.TS + (K * ADD_PSEUDO)
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+
+	  y.prob[i,j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
+		  n.by.TS=temp.n.by.TS,
+		  nG.by.TS=temp.nG.by.TS,
+		  nG.in.Y=temp.nG.by.TS[j],
+		  beta=beta, delta=delta, gamma=gamma)
+	}  
+
+	## Sample next state and add back counts
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
+	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+  }      
+  
+  return(list(z.probability=normalizeLogProbs(z.prob), y.probability=normalizeLogProbs(y.prob)))
+}
+
 ################################################################################
 # celda_CG S3 methods                                                          #
 ################################################################################
@@ -622,19 +667,6 @@ finalClusterAssignment.celda_CG = function(celda.mod) {
   return(list(z=celda.mod$z, y=celda.mod$y))
 }
 
-#' completeClusterHistory for the celda Cell and Gene clustering model
-#' @param celda.mod A celda model object of "Celda_CG"
-#' @export
-completeClusterHistory.celda_CG = function(celda.mod) {
-  return(list(complete.z=celda.mod$complete.z, complete.y=celda.mod$complete.y))
-}
-
-#' clusterProbabilities for the celda Cell and Gene clustering model
-#' @param celda.mod A celda model object of "Celda_CG"
-#' @export
-clusterProbabilities.celda_CG = function(celda.mod) {
-  return(list(z.prob=celda.mod$z.prob, y.prob=celda.mod$y.prob))
-}
 
 #' getK for the celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"

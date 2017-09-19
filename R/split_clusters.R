@@ -189,7 +189,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   ## For each cluster, determine which other cluster is most closely related
   counts.y.collapse = rowsum(counts, group=y, reorder=TRUE)
   counts.y.collapse.norm = normalizeCounts(counts.y.collapse, scale.factor=1)
-  counts.y.cor = cor(t(counts.y.collapse.norm), method="spearman")
+  counts.y.cor = stats::cor(t(counts.y.collapse.norm), method="spearman")
   diag(counts.y.cor) = 0
   
   ## Loop through each split-able y and find best split
@@ -261,15 +261,15 @@ clusterByHC = function(d, min=3, method="ward.D") {
 
   ## If PAM split is too small, perform secondary hclust procedure to split into roughly equal groups
   if(min(table(label)) < min) {
-	d.hclust = hclust(d, method=method)
+	d.hclust = stats::hclust(d, method=method)
 
 	## Get maximum sample size of each subcluster
-	d.hclust.size = sapply(1:length(d.hclust$height), function(i) max(table(cutree(d.hclust, h=d.hclust$height[i]))))
+	d.hclust.size = sapply(1:length(d.hclust$height), function(i) max(table(stats::cutree(d.hclust, h=d.hclust$height[i]))))
   
 	## Find the height of the dendrogram that best splits the samples in "roughly" half
 	sample.size = round(length(d.hclust$order)/ 2)
 	d.hclust.select = which.min(abs(d.hclust.size - sample.size))
-	temp = cutree(d.hclust, h=d.hclust$height[d.hclust.select])
+	temp = stats::cutree(d.hclust, h=d.hclust$height[d.hclust.select])
 	
 	## Set half of the samples as the largest cluster and the other samples to the other cluster
 	label.max.cluster = which.max(table(temp))

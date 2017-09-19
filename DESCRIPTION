@@ -15,7 +15,6 @@ Imports:
     gtools,
     ggplot2,
     plotly,
-    entropy,
     RColorBrewer,
     pheatmap,
     grid,

@@ -550,10 +550,10 @@ cluster_mat <- function(mat, labels, distance, method){
     }
     if(distance[1] == "correlation"){
       # this part should be confirmed whether being wrong? ToDo: how is the correlation matrix converted to a dsit matrix 
-      d <- as.dist(1 - cor(t(mat))) 
+      d <- stats::as.dist(1 - stats::cor(t(mat))) 
     }
     else{
-      d <- dist(mat, method = distance)
+      d <- stats::dist(mat, method = distance)
     }
     
     return(d)
@@ -566,7 +566,7 @@ cluster_mat <- function(mat, labels, distance, method){
     if(length(labels)==1){
       stop("only one row/column for the matrix")
     }
-    group.hclust <-  hclust(dis(mat = mat, distance = distance), method = method) 
+    group.hclust <-  stats::hclust(dis(mat = mat, distance = distance), method = method) 
     
     cum.hclust <- group.hclust
     
@@ -583,7 +583,7 @@ cluster_mat <- function(mat, labels, distance, method){
         sub.hclust$order <- 1
         return(sub.hclust)
       }else if(length(class.pos)>1){   # if >1 rows return the "hclust" object 
-        return(hclust(dis(mat =  mat[class.pos,], distance = distance ),method = method ))
+        return(stats::hclust(stats::dist(mat =  mat[class.pos,], distance = distance ),method = method ))
       } }
     ) 
     # the length(group.hclust) is the [#group] == nGroup   ,   group.hclust[[i]] to get each "hclust"
@@ -740,7 +740,7 @@ kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
 }
 
 find_gaps = function(tree, cutree_n){
-    v = cutree(tree, cutree_n)[tree$order]
+    v = stats::cutree(tree, cutree_n)[tree$order]
     gaps = which((v[-1] - v[-length(v)]) != 0)
     
 }
@@ -942,8 +942,8 @@ identity2 = function(x, ...){
 #' pheatmap(test, annotation_col = annotation_col, labels_row = labels_row)
 #' 
 #' # Specifying clustering from distance matrix
-#' drows = dist(test, method = "minkowski")
-#' dcols = dist(t(test), method = "minkowski")
+#' drows = stats::dist(test, method = "minkowski")
+#' dcols = stats::dist(t(test), method = "minkowski")
 #' pheatmap(test, clustering_distance_rows = drows, clustering_distance_cols = dcols)
 #' 
 #' # Modify ordering of the clusters using clustering callback option
@@ -1056,7 +1056,7 @@ semi_pheatmap = function(mat,
             fmat_draw = FALSE
         }
     }
-    
+
     # Do clustering for rows
     if(cluster_rows == TRUE) { 
       if (is.null(row_label)) {
@@ -1154,20 +1154,7 @@ semi_pheatmap = function(mat,
         legend = NA
     }
     mat = scale_colours(mat, col = color, breaks = breaks)
-    
-    # Preparing annotations
-    if(is.na2(annotation_col) & !is.na2(annotation)){
-        annotation_col = annotation
-    }
-    # Select only the ones present in the matrix
-    if(!is.na2(annotation_col)){
-        annotation_col = annotation_col[colnames(mat), , drop = F]
-    }
-    
-    if(!is.na2(annotation_row)){
-        annotation_row = annotation_row[rownames(mat), , drop = F]
-    }
-    
+        
     annotation = c(annotation_row, annotation_col)
     annotation = annotation[unlist(lapply(annotation, function(x) !is.na2(x)))]
     if(length(annotation) != 0){
