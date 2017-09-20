@@ -131,15 +131,13 @@ visualize_model_performance <- function(celda.list, method, title, log = FALSE) 
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
 #' @param model Model to use for calculating log-likelihood of assignments; one of ("celda_C", "celda_CG", "celda_G")
+#' @param counts The counts matrix used to generate the provided cluster assignments
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @param ... extra parameters passed onto calculate_loglik_from_variables
 #' @export
-calculate_loglik_from_variables <- function(model, ...) {
-  # Dispatch on the specified model
-  if (model == "celda_C") calculate_loglik_from_variables.celda_C(...)
-  else if (model == "celda_G") calculate_loglik_from_variables.celda_G(...)
-  else if (model == "celda_CG") calculate_loglik_from_variables.celda_CG(...)
-  else stop("Invalid model specified.")
+calculate_loglik_from_variables <- function(model, counts, ...) {
+  class(counts) = c(class(counts), model)
+  UseMethod("calculate_loglik_from_variables", counts)
 }
 
 
