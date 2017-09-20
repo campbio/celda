@@ -1,6 +1,6 @@
 ## ----eval=FALSE----------------------------------------------------------
 #  library(devtools)
-#  install_github("compbiomed/celda@v0.1")
+#  install_github("compbiomed/celda")
 
 ## ----eval=FALSE----------------------------------------------------------
 #  library(celda)
@@ -16,7 +16,7 @@ library(gtools)
 library(ggplot2)
 
 ## ------------------------------------------------------------------------
-sim_counts = simulateCells.celda_CG(K=3,L=10)
+sim_counts = simulateCells("celda_CG", K=3,L=10)
 
 ## ------------------------------------------------------------------------
 dim(sim_counts$counts)
@@ -82,13 +82,13 @@ library(pheatmap)
 library(biomaRt)
 
 ## ------------------------------------------------------------------------
-cmatp <- as.matrix(readRDS("../data/cmatp_data.RDS"))
-dim(cmatp)
-head(rownames(cmatp))
-head(colnames(cmatp))
+load(file="../data/cmatp_data.rda")
+dim(cmatp_data)
+head(rownames(cmatp_data))
+head(colnames(cmatp_data))
 
 ## ------------------------------------------------------------------------
-cmatp_select <- cmatp[rowSums(cmatp>4) > 4,]
+cmatp_select <- cmatp_data[rowSums(cmatp_data>4) > 4,]
 
 ## ---- message = FALSE, verbose = FALSE-----------------------------------
 cmatp.res = celda_CG(cmatp_select, sample.label = rep(1,ncol(cmatp_select)), K = 15, L = 20)

@@ -340,9 +340,9 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
   ## Select transcript distribution for each cell
   cell.counts = matrix(0, nrow=G, ncol=C)
   for(i in 1:C) {
-    cell.dist = rmultinom(1, size=nN[i], prob=phi[i,])
+    cell.dist = stats::rmultinom(1, size=nN[i], prob=phi[i,])
     for(j in 1:L) {
-      cell.counts[,i] = cell.counts[,i] + rmultinom(1, size=cell.dist[j], prob=psi[,j])
+      cell.counts[,i] = cell.counts[,i] + stats::rmultinom(1, size=cell.dist[j], prob=psi[,j])
     }
   }
   

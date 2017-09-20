@@ -96,7 +96,7 @@ chooseBestChain = function(celda.mods, method="perplexity") {
   # for the other metrics...
   if (method == "perplexity"){
     metrics = lapply(celda.mods, function(mod) { calculate_perplexity(mod$completeLogLik) })
-    metrics = new("mpfr", unlist(metrics))
+    metrics = methods::new("mpfr", unlist(metrics))
     best = which(metrics == min(metrics))
     return(celda.mods[[best]])
   } 
