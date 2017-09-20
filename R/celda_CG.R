@@ -229,10 +229,10 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   ## Select transcript distribution for each cell
   cell.counts = matrix(0, nrow=G, ncol=nC.sum)
   for(i in 1:nC.sum) {
-    transcriptional.state.dist = as.numeric(rmultinom(1, size=nN[i], prob=phi[z[i],]))
+    transcriptional.state.dist = as.numeric(stats::rmultinom(1, size=nN[i], prob=phi[z[i],]))
     for(j in 1:L) {
       if(transcriptional.state.dist[j] > 0) {
-        cell.counts[,i] = cell.counts[,i] + rmultinom(1, size=transcriptional.state.dist[j], prob=psi[,j])
+        cell.counts[,i] = cell.counts[,i] + stats::rmultinom(1, size=transcriptional.state.dist[j], prob=psi[,j])
       }
     }  
   }
@@ -725,7 +725,7 @@ visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
   if (method == "perplexity") {
     if (!(log)) {
       performance.metric = lapply(performance.metric, log)
-      performance.metric = new("mpfr", unlist(performance.metric))
+      performance.metric = methods::new("mpfr", unlist(performance.metric))
     }
     y.lab = paste0("Log(",method,")")
   } 
@@ -813,7 +813,7 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
   # TODO: celda_list getter that calculates these metrics.
   if (method %in% c("perplexity")) {
     performance.metric = lapply(performance.metric, log)
-    performance.metric = new("mpfr", unlist(performance.metric))
+    performance.metric = methods::new("mpfr", unlist(performance.metric))
     performance.metric = as.numeric(performance.metric)
   } else {
     performance.metric = as.numeric(performance.metric)
@@ -834,13 +834,13 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
   if (method %in% c("perplexity")) {
      method.label = paste("log(", method, ")", sep="")
   }
-  k.l.plot = ggplot2::ggplot(figure.df, aes(x=key, y=metric, label=key)) +
+  k.l.plot = ggplot2::ggplot(figure.df, ggplot2::aes(x=key, y=metric, label=key)) +
                ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
                ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
                ggplot2::xlab("K,L Value") + ggplot2::ylab(method.label) +
                ggplot2::ggtitle(title) +  ggplot2::theme_bw() +
-               ggplot2::theme(axis.text.x=element_text(angle=90, hjust=1)) +
-               ggplot2::theme(axis.text.y=element_text(hjust=1))
+               ggplot2::theme(axis.text.x=ggplot2::element_text(angle=90, hjust=1)) +
+               ggplot2::theme(axis.text.y=ggplot2::element_text(hjust=1))
   plotly::ggplotly(k.l.plot)
 }
 
