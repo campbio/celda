@@ -4,7 +4,8 @@
 \alias{calculate_loglik_from_variables.celda_C}
 \title{Calculate the celda_C log likelihood for user-provided cluster assignments}
 \usage{
-calculate_loglik_from_variables.celda_C(counts, s, z, K, alpha, beta)
+\method{calculate_loglik_from_variables}{celda_C}(counts, s, z, K, alpha, beta,
+  ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
