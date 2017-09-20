@@ -8,7 +8,7 @@ simulateCells(model, ...)
 }
 \arguments{
 \item{model}{The celda generative model to use (one of celda_C, celda_G, celda_CG)}
-\item{S}{Total number of samples (celda_C, celda_CG)}
+
 \item{...}{Parameters to pass to underlying model.}
 }
 \description{

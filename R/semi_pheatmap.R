@@ -583,7 +583,7 @@ cluster_mat <- function(mat, labels, distance, method){
         sub.hclust$order <- 1
         return(sub.hclust)
       }else if(length(class.pos)>1){   # if >1 rows return the "hclust" object 
-        return(stats::hclust(stats::dist(mat =  mat[class.pos,], distance = distance ),method = method ))
+        return(stats::hclust(dis(mat =  mat[class.pos,], distance = distance ),method = method ))
       } }
     ) 
     # the length(group.hclust) is the [#group] == nGroup   ,   group.hclust[[i]] to get each "hclust"
@@ -736,7 +736,7 @@ kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
     rownames(mat2) = sprintf("cl%s_size_%d", names(t), t)
     
     # Draw heatmap
-    pheatmap(mat2, ...)
+    pheatmap::pheatmap(mat2, ...)
 }
 
 find_gaps = function(tree, cutree_n){
