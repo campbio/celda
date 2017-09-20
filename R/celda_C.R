@@ -56,7 +56,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
   nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
   
   ## Select transcript distribution for each cell
-  cell.counts <- sapply(1:length(cell.sample), function(i) rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
+  cell.counts <- sapply(1:length(cell.sample), function(i) stats::rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts)) 

@@ -736,7 +736,7 @@ kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
     rownames(mat2) = sprintf("cl%s_size_%d", names(t), t)
     
     # Draw heatmap
-    pheatmap(mat2, ...)
+    pheatmap::pheatmap(mat2, ...)
 }
 
 find_gaps = function(tree, cutree_n){

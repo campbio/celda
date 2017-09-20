@@ -26,7 +26,7 @@ Currently `celda` is hosted on a Github repository `compbiomed/celda`.
 
 ```{r,eval=FALSE}
 library(devtools)
-install_github("compbiomed/celda@v0.1")
+install_github("compbiomed/celda")
 ```
 
 This should automatically install `celda` on your local machine as long as you have proper internet connection.  If you encounter a problem during the installation you may want to open up a browser and acces our github repository https://github.com/compbiomed/celda.
@@ -62,7 +62,7 @@ library(ggplot2)
 We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` returns a list containing a count matrix where each row is a gene and each column is a cell. The K parameter determines the number of cell clusters while the L parameter determines the number of gene clusters within the dataset.
 
 ```{r}
-sim_counts = simulateCells.celda_CG(K=3,L=10)
+sim_counts = simulateCells("celda_CG", K=3,L=10)
 ```
 
 The `counts` variable from `simulateCells.celda_CG` contains the counts matrix.
