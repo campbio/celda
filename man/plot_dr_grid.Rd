@@ -4,8 +4,7 @@
 \alias{plot_dr_grid}
 \title{Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)}
 \usage{
-plot_dr_grid(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, color_high,
-  var_label)
+plot_dr_grid(dim1, dim2, matrix, xlab, ylab, color_low, color_high, var_label)
 }
 \arguments{
 \item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
@@ -19,8 +18,6 @@ plot_dr_grid(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, color_high,
 \item{ylab}{Character vector, used as label for y axis.}
 
 \item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale.}
-
-\item{color_mid}{Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale.}
 
 \item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale.}
 
