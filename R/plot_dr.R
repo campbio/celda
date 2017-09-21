@@ -10,11 +10,11 @@
 #' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. 
 #' @param var_label Character vector, used as label for the scale.
 #' @export
-plot_dr_grid <- function(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, color_high, scale_label){
+plot_dr_grid <- function(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, color_high, var_label){
   df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
   m <- reshape2::melt(df, id.vars = c("dim1","dim2"))
-  colnames(m) <- c(xlab,ylab,"facet",scale_label)
-  ggplot2::ggplot(m, aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity",ggplot2::aes_string(color = scale_label)) + 
+  colnames(m) <- c(xlab,ylab,"facet",var_label)
+  ggplot2::ggplot(m, aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity",ggplot2::aes_string(color = var_label)) + 
     ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, mid = color_mid, high = color_high, midpoint = (max(m[,4])-min(m[,4]))/2) + 
     ggplot2::theme(strip.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.spacing = unit(0,"lines"),
                    panel.background = element_blank(), axis.line = ggplot2::element_line(colour = "black"))
@@ -45,8 +45,8 @@ plot_dr_gene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, xl
       matrix[matrix > trim[2]] <- trim[2]
     }
   }
-  scale_label = "Expression"
-  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_mid,color_high, scale_label)
+  var_label = "Expression"
+  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
 #' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
@@ -68,8 +68,8 @@ plot_dr_state <- function(dim1, dim2, matrix, rescale = FALSE, xlab = "Dimension
       matrix[x,] <- matrix[x,]/max(matrix[x,])
     }
   }
-  scale_label = "Normalized_Prob"
-  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_mid,color_high, scale_label)
+  var_label = "Normalized_Prob"
+  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
 #' Create a scatterplot based on celda cluster labels.
@@ -79,12 +79,10 @@ plot_dr_state <- function(dim1, dim2, matrix, rescale = FALSE, xlab = "Dimension
 #' @param cluster Vector; Contains cluster labels (e.g. from celda_C or celda_CG).
 #' @param xlab Character vector, used as label for rows. Default "Dimension_1".
 #' @param ylab Character vector, used as label for columns. Default "Dimension_2".
-#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'blue'
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. Default: 'yellow'
-#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'red'
 #' @export 
 plot_dr_cluster <- function(dim1, dim2, cluster, xlab = "Dimension_1", ylab = "Dimension_2"){
   df <- data.frame(dim1,dim2,cluster)
   colnames(df) <- c(xlab,ylab,"Cluster") 
-  ggplot2::ggplot(df, aes_string(x = xlab,y = ylab)) + ggplot2::geom_point(stat = "identity", ggplot2::aes(color = Cluster))
+  ggplot2::ggplot(df, aes_string(x = xlab,y = ylab)) + ggplot2::geom_point(stat = "identity", ggplot2::aes(color = Cluster)) + 
+    ggplot2::theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(color = "black"))
 }

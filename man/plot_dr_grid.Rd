@@ -5,7 +5,7 @@
 \title{Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)}
 \usage{
 plot_dr_grid(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, color_high,
-  scale_label)
+  var_label)
 }
 \arguments{
 \item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
