@@ -6,16 +6,15 @@
 #' @param xlab Character vector, used as label for x axis. 
 #' @param ylab Character vector, used as label for y axis. 
 #' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. 
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. 
 #' @param var_label Character vector, used as label for the scale.
 #' @export
-plot_dr_grid <- function(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, color_high, var_label){
+plot_dr_grid <- function(dim1, dim2, matrix, xlab, ylab, color_low, color_high, var_label){
   df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
   m <- reshape2::melt(df, id.vars = c("dim1","dim2"))
   colnames(m) <- c(xlab,ylab,"facet",var_label)
   ggplot2::ggplot(m, aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity",ggplot2::aes_string(color = var_label)) + 
-    ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, mid = color_mid, high = color_high, midpoint = (max(m[,4])-min(m[,4]))/2) + 
+    ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient(low = color_low, high = color_high) + 
     ggplot2::theme(strip.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.spacing = unit(0,"lines"),
                    panel.background = element_blank(), axis.line = ggplot2::element_line(colour = "black"))
 }
@@ -29,11 +28,10 @@ plot_dr_grid <- function(dim1, dim2, matrix, xlab, ylab, color_low, color_mid, c
 #' @param rescale Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default FALSE.
 #' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
 #' @param ylab Character vector, used as label for y axis. Default "Dimension_2".
-#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'blue'
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. Default: 'yellow'
-#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'red'
+#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'
+#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'
 #' @export 
-plot_dr_gene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "blue", color_mid = "yellow", color_high = "red"){
+plot_dr_gene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_high = "blue"){
   if(rescale == TRUE){
     matrix <- t(scale(t(matrix)))
     if(!is.null(trim)){
@@ -46,7 +44,7 @@ plot_dr_gene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, xl
     }
   }
   var_label = "Expression"
-  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_mid,color_high, var_label)
+  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_high, var_label)
 }
 
 #' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
@@ -57,11 +55,10 @@ plot_dr_gene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, xl
 #' @param rescale Boolean. If TRUE z-score normalize the matrix. Default FALSE.
 #' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
 #' @param ylab Character vector, used as label for y axis. Default "Dimension_2".
-#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'blue'
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. Default: 'yellow'
-#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'red'
+#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'
+#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'
 #' @export 
-plot_dr_state <- function(dim1, dim2, matrix, rescale = FALSE, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "blue", color_mid = "yellow", color_high = "red"){
+plot_dr_state <- function(dim1, dim2, matrix, rescale = FALSE, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_high = "blue"){
   if(rescale == TRUE){
     for(x in 1:nrow(matrix)){ 
       matrix[x,] <- matrix[x,]-min(matrix[x,])
@@ -69,7 +66,7 @@ plot_dr_state <- function(dim1, dim2, matrix, rescale = FALSE, xlab = "Dimension
     }
   }
   var_label = "Normalized_Prob"
-  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_mid,color_high, var_label)
+  plot_dr_grid(dim1,dim2,matrix,xlab,ylab,color_low,color_high, var_label)
 }
 
 #' Create a scatterplot based on celda cluster labels.

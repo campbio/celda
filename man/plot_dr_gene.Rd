@@ -5,8 +5,8 @@
 \title{Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.}
 \usage{
 plot_dr_gene(dim1, dim2, matrix, trim = c(-2, 2), rescale = FALSE,
-  xlab = "Dimension_1", ylab = "Dimension_2", color_low = "blue",
-  color_mid = "yellow", color_high = "red")
+  xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
+  color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
@@ -23,11 +23,9 @@ plot_dr_gene(dim1, dim2, matrix, trim = c(-2, 2), rescale = FALSE,
 
 \item{ylab}{Character vector, used as label for y axis. Default "Dimension_2".}
 
-\item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'blue'}
+\item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'}
 
-\item{color_mid}{Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. Default: 'yellow'}
-
-\item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'red'}
+\item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'}
 }
 \description{
 Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
