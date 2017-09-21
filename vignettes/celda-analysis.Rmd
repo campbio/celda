@@ -127,7 +127,7 @@ We can display the clustering results with a heatmap of the normalized counts:
  c
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE, message = FALSE}
 norm.counts <- normalizeCounts(sim_counts$counts)
-render_celda_heatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_scheme = "divergent")
+render_celda_heatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_scheme = "divergent",cluster_gene = TRUE, cluster_cell = TRUE)
 ```
 
 ## 2.1.2 Matrix factorization
