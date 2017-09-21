@@ -87,10 +87,6 @@ validate_get_model_params = function(celda.list, K, L, chain, best) {
 }
 
 
-#' Determine the best chain among a set of celda_* objects with
-#' otherwise uniform K/L choices.
-#' @param celda.mods A list of celda class objects (celda_C, celda_CG, celda_G)
-#' @param method How to choose the best chain. Choices are c("perplexity", "loglik"). Defaults to perplexity. "perplexity" calculates each chain's perplexity as the inverse of the geometric mean, per the original LDA description. "loglik" chooses the chain which reached the maximal log likelihood during Gibbs sampling.
 chooseBestChain = function(celda.mods, method="perplexity") {
   # We want to get the *most negative* perplexity, as opposed to the *least* negative
   # for the other metrics...
