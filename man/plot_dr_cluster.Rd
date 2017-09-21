@@ -17,12 +17,6 @@ plot_dr_cluster(dim1, dim2, cluster, xlab = "Dimension_1",
 \item{xlab}{Character vector, used as label for rows. Default "Dimension_1".}
 
 \item{ylab}{Character vector, used as label for columns. Default "Dimension_2".}
-
-\item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'blue'}
-
-\item{color_mid}{Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. Default: 'yellow'}
-
-\item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'red'}
 }
 \description{
 Create a scatterplot based on celda cluster labels.
