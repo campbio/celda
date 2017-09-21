@@ -222,7 +222,7 @@ After matrix factorization, the top genes can be selected using the `topRank` fu
 
 ```{r}
 factorize.matrix = factorizeMatrix.celda_CG(counts = cmatp_select, celda.obj = model.res.list)
-top.genes <- topRank(factorize.matrix$proportions$gene.states, n = 1000)
+top.genes <- topRank(factorize.matrix$proportions$gene.states, n = 25)
 ```
 
 ```{r}
@@ -244,10 +244,9 @@ render_celda_heatmap(norm.cmatp.counts[top.genes.ix,], z = model.res.list$z, y =
 We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression of a specific transcriptional state and visualize each cell's expression of a set of genes, respectively. 
 
 ```{r, message = FALSE}
-log.matrix <- log2(cmatp_select + 1)
-z.score <- t(scale(t(log.matrix)))
+norm_cmatp <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-cmatp_tsne <- tsne(t(z.score), k = 2)
+cmatp_tsne <- tsne(t(norm_cmatp), k = 2)
 
 ```
 
