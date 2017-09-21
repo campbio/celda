@@ -29,7 +29,8 @@ Imports:
     digest,
     gridExtra,
     methods,
-    lintr
+    lintr,
+    reshape2
 Suggests:
     testthat,
     knitr,
