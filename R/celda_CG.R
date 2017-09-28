@@ -42,7 +42,7 @@
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-calculate_loglik_from_variables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma, ...) {
+calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma, ...) {
   
   ## Calculate for "Theta" component
   m = table(z, s)
