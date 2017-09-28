@@ -295,7 +295,7 @@ cluster_probability.celda_C = function(counts, celda.mod) {
 #' @param K The total number of clusters in z
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-calculate_loglik_from_variables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
+calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
   
   ## Calculate for "Theta" component
   m.CP.by.S = table(z, s)
