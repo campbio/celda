@@ -44,7 +44,7 @@
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
-calculate_loglik_from_variables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
+calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
   n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
   nM <- ncol(n.TS.by.C)

@@ -135,9 +135,9 @@ visualize_model_performance <- function(celda.list, method, title, log = FALSE) 
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @param ... extra parameters passed onto calculate_loglik_from_variables
 #' @export
-calculate_loglik_from_variables <- function(model, counts, ...) {
+calculateLoglikFromVariables <- function(model, counts, ...) {
   class(counts) = c(class(counts), model)
-  UseMethod("calculate_loglik_from_variables", counts)
+  UseMethod("calculateLoglikFromVariables", counts)
 }
 
 
