@@ -242,7 +242,9 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
   ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
   ## constraint (columns are guarnteed at least one count):
   zero.row.idx = which(rowSums(cell.counts) == 0)
-  cell.counts = cell.counts[-zero.row.idx, ]
+  if (length(zero.row.idx > 0)) {
+    cell.counts = cell.counts[-zero.row.idx, ]
+  }
   new$y = new$y[-zero.row.idx]
  
   ## Assign gene/cell/sample names 
