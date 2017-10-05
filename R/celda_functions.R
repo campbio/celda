@@ -90,32 +90,50 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 }  
 
 
-#' Re-code cluster label by provided mapping scheme
+#' Re-code cell cluster labels by provided mapping scheme
 #' 
-#' This function will re-code cluster labels based off of a mapping provided by the user,
+#' This function will re-code _cell_ cluster labels based off of a mapping provided by the user,
 #' for all fields on a celda object involving cluster labels.
-#' e.g. if Z values range from 1-4 and the user would like all 3's switched to 1's and
+#' e.g. if Z (cell cluster) values range from 1-4 and the user would like all 3's switched to 1's and
 #' vice versa, this function can be useful. NOTE: it is recommended that this function's results
 #' aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
 #' 
-#' @param celda.mod An object of class celda_C, celda_G, or celda_CG
+#' @param celda.mod An object of class celda_C or celda_CG
 #' @param from A numeric vector of the "keys", corresponding to the "values" in the to parameter
 #' @param to A numeric vector of the "values"; what each corresponding number in "from" should be mapped to
 #' @export
-recode_cluster_labels = function(celda.mod, from, to) {
-  # Make sure that every value gets a replacement
+recode_cluster_z = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
     stop("All values in 'from' must have a mapping in 'to'")
   }
+  if (is.null(celda.mod$z)) {
+    stop("Provided celda.mod argument does not have a z attribute")
+  }
+  celda.mod$z = plyr::mapvalues(celda.mod$z, from, to)
+  return(celda.mod)
+}
   
-  if (class(celda.mod) %in% c("celda_C", "celda_CG")) {
-    celda.mod$z = plyr::mapvalues(celda.mod$z, from, to)
-    celda.mod$z.probability = celda.mod$z.probability[, to]
+
+#' Re-code gene cluster labels by provided mapping scheme
+#' 
+#' This function will re-code _gene_ cluster labels based off of a mapping provided by the user,
+#' for all fields on a celda object involving cluster labels.
+#' e.g. if Y (gene cluster) values range from 1-4 and the user would like all 3's switched to 1's and
+#' vice versa, this function can be useful. NOTE: it is recommended that this function's results
+#' aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
+#' 
+#' @param celda.mod An object of class celda_G or celda_CG
+#' @param from A numeric vector of the "keys", corresponding to the "values" in the to parameter
+#' @param to A numeric vector of the "values"; what each corresponding number in "from" should be mapped to
+#' @export
+recode_cluster_y = function(celda.mod, from, to) {
+  if (length(setdiff(from, to)) != 0) {
+    stop("All values in 'from' must have a mapping in 'to'")
   }
-  if (class(celda.mod) %in% c("celda_G", "celda_CG")) {
-    celda.mod$y = plyr::mapvalues(celda.mod$y, from, to)
-    celda.mod$y.probability = celda.mod$y.probability[, to]
+  if (is.null(celda.mod$y)) {
+    stop("Provided celda.mod argument does not have a y attribute")
   }
+  celda.mod$y = plyr::mapvalues(celda.mod$y, from, to)
   return(celda.mod)
 }
 
