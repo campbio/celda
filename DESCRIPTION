@@ -40,7 +40,8 @@ Suggests:
     corrplot,
     Matrix,
     biomaRt,
-    data.table
+    data.table,
+    tsne
 VignetteBuilder: knitr
 License: MIT
 Encoding: UTF-8
