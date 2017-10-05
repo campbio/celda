@@ -12,7 +12,7 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 
 \item{model}{Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)}
 
-\item{sample.label}{A numeric vector indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
+\item{sample.label}{A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
 
 \item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1}
 
