@@ -272,6 +272,8 @@ simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000),
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter
+#' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
+#' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ... Additional parameters
 #' @export
@@ -279,7 +281,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
                     delta=1, gamma=1, count.checksum=NULL, max.iter=25,
 			              seed=12345, z.split.on.iter=3, z.num.splits=3,
 			              y.split.on.iter=3, y.num.splits=3, 
-			              logfile=NULL, ...) {
+			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
@@ -294,9 +296,24 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     s = as.numeric(sample.label)
   }  
   
-  ## Randomly select z and y
-  z = sample(1:K, ncol(counts), replace=TRUE)
-  y = sample(1:L, nrow(counts), replace=TRUE)
+  ## Randomly select z and y or set z/y to supplied initial values
+  if(is.null(z.init)) {
+    z = sample(1:K, ncol(counts), replace=TRUE)
+  } else {
+    if(length(unique(z.init)) != K || length(z.init) != ncol(counts)) {
+      stop("'z.init' needs to be a combination of K unique values that is the same length as the number of columns in 'counts' matrix.")
+    }
+    z = as.numeric(as.factor(z.init))
+  }  
+  if(is.null(y.init)) {
+    y = sample(1:L, nrow(counts), replace=TRUE)
+  } else {
+    if(length(unique(y.init)) != L || length(y.init) != nrow(counts)) {
+      stop("'y.init' needs to be a combination of L unique values that is the same length as the number of rows in 'counts' matrix.")
+    }
+    y = as.numeric(as.factor(y.init))
+  }  
+
   z.best = z
   y.best = y  
   
