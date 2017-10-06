@@ -78,6 +78,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 #' @param seed Parameter to set.seed() for random number generation
 #' @param z.split.on.iter On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.
 #' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
+#' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
@@ -85,7 +86,7 @@ simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000),
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=25, seed=12345,
                    z.split.on.iter=3, z.num.splits=3, 
-                   logfile=NULL, ...) {
+                   z.init = NULL, logfile=NULL, ...) {
     
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -100,7 +101,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
-  z = sample(1:K, ncol(counts), replace=TRUE)
+  ## Randomly select z or set z to supplied initial values
+  if(is.null(z.init)) {
+    z = sample(1:K, ncol(counts), replace=TRUE)
+  } else {
+    if(length(unique(z.init)) != K || length(z.init) != ncol(counts)) {
+      stop("'z.init' needs to be a combination of K unique values that is the same length as the number of columns in 'counts' matrix.")
+    }
+    z = as.numeric(as.factor(z.init))
+  }  
+
   z.best = z
   
   ## Calculate counts one time up front
