@@ -174,6 +174,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
 #' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
 #' @param seed Parameter to set.seed() for random number generation.
+#' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
@@ -181,12 +182,21 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    count.checksum=NULL, seed=12345, 
                    y.split.on.iter=3,  y.num.splits=3, 
-                    logfile=NULL, ...) {
+                   y.init=NULL, logfile=NULL, ...) {
   
   set.seed(seed)
   log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
-  y <- sample(1:L, nrow(counts), replace=TRUE)
+  ## Randomly select y or set y to supplied initial values
+  if(is.null(y.init)) {
+    y = sample(1:L, nrow(counts), replace=TRUE)
+  } else {
+    if(length(unique(y.init)) != L || length(y.init) != nrow(counts)) {
+      stop("'y.init' needs to be a combination of L unique values that is the same length as the number of rows in 'counts' matrix.")
+    }
+    y = as.numeric(as.factor(y.init))
+  }  
+
   y.best <- y
 
   ## Calculate counts one time up front
@@ -199,7 +209,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   
   ## Calculate initial log likelihood
   ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-  
 
   iter <- 1
   continue = TRUE
