@@ -41,7 +41,7 @@ Suggests:
     Matrix,
     biomaRt,
     data.table,
-    tsne
+    Rtsne
 VignetteBuilder: knitr
 License: MIT
 Encoding: UTF-8
