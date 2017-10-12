@@ -124,7 +124,7 @@ table(y, sim_counts$y)
 ```
 
 We can display the clustering results with a heatmap of the normalized counts:
- c
+
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE, message = FALSE}
 norm.counts <- normalizeCounts(sim_counts$counts)
 render_celda_heatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_scheme = "divergent",cluster_gene = TRUE, cluster_cell = TRUE)
@@ -146,9 +146,9 @@ head(pop.states)
 ```{r, fig.width = 7, fig.height = 7}
 data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),scale = F, center = F)
 
-plot_dr_cluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], cluster = as.factor(celdaCG.res$z))
+plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], cluster = as.factor(celdaCG.res$z))
 
-plot_dr_state(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], matrix = factorized$proportions$cell.states, rescale = TRUE)
+plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], matrix = factorized$proportions$cell.states, rescale = TRUE)
 ```
 
 The transcriptional and cell states can also be visualized with a heatmap:
@@ -193,6 +193,7 @@ library(celda)
 library(Matrix)
 library(data.table)
 library(pheatmap)
+library(Rtsne)
 ```
 
 We will use the "cmatp_data" dataset, which is a dataset of 3000 Peripheral Blood Mononuclear Cells (PBMC), available from 10X Genomics. The rows are organized by gene names, while the columns are organized by barcodes. For this tutorial, the dataset has been slightly modified so the rownames are comprised of the Ensembl gene ID as well as the gene name. The raw dataset can be found at https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit.
@@ -215,7 +216,7 @@ cmatp_select <- cmatp_data[rowSums(cmatp_data>4) > 4,]
 
 ```{r, message = FALSE, verbose = FALSE}
 cmatp.res = celda(cmatp_select, K = 15, L = 20, model = "celda_CG", nchains = 3, cores = 1)
-model.res.list<-getModel(cmatp.res, K = 15, L = 20)
+model.res.list<-getModel(cmatp.res, K = 15, L = 20, best = "loglik")
 ```
 
 After matrix factorization, the top genes can be selected using the `topRank` function on the "gene.states" matrix:  
@@ -246,18 +247,18 @@ We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gen
 ```{r, message = FALSE}
 norm_cmatp <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-cmatp_tsne <- tsne(t(norm_cmatp), k = 2)
-
+tsne <- Rtsne(t(norm_cmatp))
+cmatp_tsne <- tsne$Y
 ```
 
 ```{r, fig.width = 7, fig.height = 7}
-plot_dr_cluster(dim1 = cmatp_tsne[,1], dim2 = cmatp_tsne[,2], cluster = as.factor(model.res.list$z))
+plotDrCluster(dim1 = cmatp_tsne[,1], dim2 = cmatp_tsne[,2], cluster = as.factor(model.res.list$z))
 
-plot_dr_state(dim1 = cmatp_tsne[,1], dim2 = cmatp_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
+plotDrState(dim1 = cmatp_tsne[,1], dim2 = cmatp_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
 
 marker.genes <- c("ENSG00000179639_FCER1A","ENSG00000105374_NKG7","ENSG00000153563_CD8A" ,"ENSG00000168685_IL7R", "ENSG00000198851_CD3E", "ENSG00000156738_MS4A1", "ENSG00000203747_FCGR3A","ENSG00000163736_PPBP","ENSG00000090382_LYZ")
 gene.counts <- cmatp_select[marker.genes,]
-plot_dr_gene(dim1 = cmatp_tsne[,1],dim2 = cmatp_tsne[,2], matrix = gene.counts, rescale = TRUE)
+plotDrGene(dim1 = cmatp_tsne[,1],dim2 = cmatp_tsne[,2], matrix = gene.counts, rescale = TRUE)
 ```
 
-With the use of the plots, it is also possible to determine which genes express sepcific marker genes. For instance, the same cell cluster that highly expresses the transcriptional state L20 highly expresses PPBP, a known marker gene for megakaryocytes. This is consistent with what we see in the above, in which transcriptional state L20 highly expresses PPBP.
+With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. For instance, the same cell cluster that highly expresses the transcriptional state L20 highly expresses PPBP, a known marker gene for megakaryocytes. This is consistent with what we see in the above, in which transcriptional state L20 highly expresses PPBP.
