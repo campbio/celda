@@ -189,7 +189,8 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param seed starting point used for generating simulated data
 #' @param ... Additional parameters
-simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
+#' @param model Dummy parameter for S3 dispatch
+simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
                                   delta=1, seed=12345, ...) {
   

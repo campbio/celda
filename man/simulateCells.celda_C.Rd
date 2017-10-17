@@ -4,10 +4,12 @@
 \alias{simulateCells.celda_C}
 \title{Simulate cells from the cell clustering generative model}
 \usage{
-simulateCells.celda_C(S = 10, C.Range = c(10, 100), N.Range = c(100,
-  5000), G = 500, K = 5, alpha = 1, beta = 1)
+\method{simulateCells}{celda_C}(model, S = 10, C.Range = c(10, 100),
+  N.Range = c(100, 5000), G = 500, K = 5, alpha = 1, beta = 1)
 }
 \arguments{
+\item{model}{Dummy parameter for S3 dispatch}
+
 \item{S}{Total number of samples}
 
 \item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution}
