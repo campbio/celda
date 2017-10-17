@@ -242,7 +242,7 @@ norm.cmatp.counts <- normalizeCounts(cmatp_select)
 render_celda_heatmap(norm.cmatp.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
 ```
 
-We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression of a specific transcriptional state and visualize each cell's expression of a set of genes, respectively. 
+We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectivelyof a specific transcriptional state and visualize each cell's expression of a set of genes, . 
 
 ```{r, message = FALSE}
 norm_cmatp <- normalizeCounts(factorize.matrix$counts$cell.states)
