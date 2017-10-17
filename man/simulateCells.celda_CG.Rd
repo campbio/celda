@@ -4,11 +4,13 @@
 \alias{simulateCells.celda_CG}
 \title{Simulate cells from the cell/gene clustering generative model}
 \usage{
-simulateCells.celda_CG(S = 10, C.Range = c(50, 100), N.Range = c(500,
-  5000), G = 1000, K = 3, L = 10, alpha = 1, beta = 1, gamma = 1,
-  delta = 1, seed = 12345, ...)
+\method{simulateCells}{celda_CG}(model, S = 10, C.Range = c(50, 100),
+  N.Range = c(500, 5000), G = 1000, K = 3, L = 10, alpha = 1,
+  beta = 1, gamma = 1, delta = 1, seed = 12345, ...)
 }
 \arguments{
+\item{model}{Dummy parameter for S3 dispatch}
+
 \item{S}{The number of samples}
 
 \item{C.Range}{two element vector to specify the lower and upper bound of the counts of cells for each sample}

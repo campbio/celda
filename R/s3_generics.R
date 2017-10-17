@@ -149,12 +149,10 @@ calculateLoglikFromVariables <- function(model, counts, ...) {
 #' functions as detailed below.
 #' 
 #' @param model The celda generative model to use (one of celda_C, celda_G, celda_CG)
-#' @param ... Parameters to pass to underlying model.
+#' @param ... Parameters to pass to underlying generative model simulation
 #' 
 #' @export
 simulateCells = function(model, ...) {
-  switch(model, celda_C = simulateCells.celda_C(...),
-         celda_G = simulateCells.celda_G(...),
-         celda_CG = simulateCells.celda_CG(...),
-         stop("Invalid model specified"))
+  class(model) = c(class(model), model)
+  UseMethod("simulateCells", model)
 }
