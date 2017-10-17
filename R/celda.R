@@ -68,10 +68,11 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
 # See parameter descriptions from celda() documentation.
 validate_args = function(counts, model, sample.label, 
                          nchains, cores, seed, K=NULL, L=NULL, ...) {
-  if (model %in% c("celda_C", "celda_CG") && is.null(K)) {
+  model_args = names(formals(model))
+  if ("K" %in% model_args && is.null(K)) {
     stop("Must provide a K parameter when running a celda_C or celda_CG model")
   }
-  if (model %in% c("celda_G", "celda_CG") && is.null(L)) {
+  if ("L" %in% model_args && is.null(L)) {
     stop("Must provide a L parameter when running a celda_G or celda_CG model")
   }
   
