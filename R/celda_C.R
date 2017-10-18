@@ -161,7 +161,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       if(sum(z == previous.z[i]) == 0 & K > 2) {
         
         ## Split another cluster into two
-        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_C", s=s, alpha=alpha, beta=beta)
+        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculateLoglikFromVariables.celda_C", s=s, alpha=alpha, beta=beta)
         log_messages(res$message, logfile=logfile, append=TRUE)
         z = res$z
         
@@ -176,7 +176,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
       log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculate_loglik_from_variables.celda_C")
+      res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
       log_messages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
