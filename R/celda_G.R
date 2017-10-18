@@ -257,7 +257,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
         ## Split another cluster into two
         y = split.y(counts=counts, y=y, 
                    empty.L=previous.y[i], L=L, 
-                   LLFunction="calculate_loglik_from_variables.celda_G", 
+                   LLFunction="calculateLoglikFromVariables.celda_G", 
                    beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
@@ -271,7 +271,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
       log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculate_loglik_from_variables.celda_G")
+      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       log_messages(res$message, logfile=logfile, append=TRUE)
       
       y = res$y
