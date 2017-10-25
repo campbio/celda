@@ -6,7 +6,7 @@
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
-calculate_perplexity = function(completeLogLik, log = FALSE) {
+calculatePerplexity = function(completeLogLik, log = FALSE) {
   if (log) {
     return(-mean(completeLogLik))
   }
@@ -19,7 +19,7 @@ calculate_perplexity = function(completeLogLik, log = FALSE) {
 # Convenience function to calculate performance metrics by specifying a method. 
 calculate_performance_metric = function(log.likelihoods, method="perplexity", log = FALSE) {
   if (method == "perplexity") {
-    metric = calculate_perplexity(log.likelihoods, log)
+    metric = calculatePerplexity(log.likelihoods, log)
   } else if (method == "loglik") {
      metric = max(log.likelihoods)
   } else stop("Invalid method specified")
