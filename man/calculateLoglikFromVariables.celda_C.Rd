@@ -19,6 +19,8 @@
 \item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
 
 \item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+
+\item{...}{Additional parameters}
 }
 \description{
 Calculate the celda_C log likelihood for user-provided cluster assignments
