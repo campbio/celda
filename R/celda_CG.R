@@ -730,7 +730,7 @@ visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
                                                 title="Model Performance (All Chains)",
                                                 log = FALSE) {
  
-  validate_kl_plot_parameters(celda.list, method)
+  validateKLPlotParameters(celda.list, method)
  
   y.lab = method
   cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
@@ -813,10 +813,10 @@ visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
 #' @param title The plot title
 #' @import Rmpfr 
 #' @export
-render_interactive_kl_plot = function(celda.list,  method="perplexity", 
-                                      title="Model Performance (All Chains)") {
+renderInteractiveKLPlot = function(celda.list,  method="perplexity", 
+                                   title="Model Performance (All Chains)") {
   
-  validate_kl_plot_parameters(celda.list, method)
+  validateKLPlotParameters(celda.list, method)
   
   chain.ks = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) })) # TODO celda_list getter
   chain.ls = unlist(lapply(celda.list$res.list, function(mod) { getL(mod) })) # TODO celda_list getter
@@ -867,7 +867,7 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
 
 # Sanity checks for parameters to the model performance plotting functions for
 # celda_CG models
-validate_kl_plot_parameters = function(celda.list, method) {
+validateKLPlotParameters = function(celda.list, method) {
  if (class(celda.list) != "celda_list") {
     stop("celda.list argument must be of class 'celda_list'")
  } else if (celda.list$content.type != "celda_CG") {
