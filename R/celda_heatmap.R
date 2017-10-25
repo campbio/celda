@@ -40,7 +40,7 @@
 #' @import grDevices
 #' @import graphics
 #' @export 
-render_celda_heatmap <- function(counts, z = NULL, y = NULL, 
+renderCeldaHeatmap <- function(counts, z = NULL, y = NULL, 
                                  scale_log = NULL,
                                  scale_row = scale,
                                  normalize = normalizeCounts,

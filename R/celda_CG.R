@@ -707,10 +707,10 @@ getL.celda_CG = function(celda.mod) {
 #' celdaHeatmap for celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @param counts A count matrix
-#' @param ... extra parameters passed onto render_celda_heatmap
+#' @param ... extra parameters passed onto renderCeldaHeatmap
 #' @export
 celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
+  renderCeldaHeatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
 }
 
 

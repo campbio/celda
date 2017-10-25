@@ -425,10 +425,10 @@ getL.celda_C = function(celda.mod) { return(NA) }
 #' celdaHeatmap for celda Cell clustering function 
 #' @param celda.mod A celda model object of class "celda_C"
 #' @param counts A numeric count matrix
-#' @param ... extra parameters passed onto the render_celda_heatmap
+#' @param ... extra parameters passed onto the renderCeldaHeatmap
 #' @export
 celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, z=celda.mod$z, ...)
+  renderCeldaHeatmap(counts, z=celda.mod$z, ...)
 }
 
 
