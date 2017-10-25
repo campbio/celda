@@ -514,14 +514,14 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 
 
 # TODO DRYer implementation in concert with celda_C
-#' visualize_model_performance for the celda Gene function
+#' visualizeModelPerformance for the celda Gene function
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of "perplexity" or "loglik"
 #' @param title Title for the plot
 #' @param log Currently not working for celda.G objects
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_G = function(celda.list, method="perplexity",
+visualizeModelPerformance.celda_G = function(celda.list, method="perplexity",
                                                title="Model Performance (All Chains)",
                                                log = F) {
   

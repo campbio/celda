@@ -722,11 +722,11 @@ celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
 #' clusters K (gene clusters L).
 #' @param celda.list A list of celda_CG objects returned from celda function
 #' @param method One of "perplexity" or "loglik"
-#' @param title Title for the visualize_model_performance
+#' @param title Title for the visualizeModelPerformance
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
+visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
                                                 title="Model Performance (All Chains)",
                                                 log = FALSE) {
  
