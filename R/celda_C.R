@@ -240,7 +240,7 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, n.CP, nG, alpha, beta) {
 #' @param celda.mod A model returned from the 'celda_C' function
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-cluster_probability.celda_C = function(counts, celda.mod) {
+clusterProbability.celda_C = function(counts, celda.mod) {
 
   z = celda.mod$z
   s = celda.mod$sample.label
