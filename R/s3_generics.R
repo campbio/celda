@@ -109,8 +109,8 @@ getL = function(celda.mod) {
 #' @param counts the counts matrix 
 #' @param ... extra parameters passed onto celda_heatmap
 #' @export 
-celda_heatmap <- function(celda.mod, counts, ...) {
-  UseMethod("celda_heatmap", celda.mod)
+celdaHeatmap <- function(celda.mod, counts, ...) {
+  UseMethod("celdaHeatmap", celda.mod)
 }
 
 
