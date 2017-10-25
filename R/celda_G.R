@@ -529,7 +529,7 @@ visualizeModelPerformance.celda_G = function(celda.list, method="perplexity",
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
