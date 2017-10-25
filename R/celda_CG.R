@@ -592,7 +592,7 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
 #' @param celda.mod A model returned from the 'celda_CG' function
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-cluster_probability.celda_CG = function(counts, celda.mod) {
+clusterProbability.celda_CG = function(counts, celda.mod) {
   
   s = celda.mod$sample.label
   z = celda.mod$z

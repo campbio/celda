@@ -376,7 +376,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 #' @param celda.mod A model returned from the 'celda_G' function
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-cluster_probability.celda_G = function(counts, celda.mod) {
+clusterProbability.celda_G = function(counts, celda.mod) {
 
   y = celda.mod$y
   L = celda.mod$L
