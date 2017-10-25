@@ -17,7 +17,7 @@ calculatePerplexity = function(completeLogLik, log = FALSE) {
 
 
 # Convenience function to calculate performance metrics by specifying a method. 
-calculate_performance_metric = function(log.likelihoods, method="perplexity", log = FALSE) {
+calculatePerformanceMetric = function(log.likelihoods, method="perplexity", log = FALSE) {
   if (method == "perplexity") {
     metric = calculatePerplexity(log.likelihoods, log)
   } else if (method == "loglik") {
