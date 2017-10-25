@@ -460,5 +460,5 @@ visualizeModelPerformance.celda_C = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(render_model_performance_plot(plot.df, "K", method, title))
+  return(renderModelPerformancePlot(plot.df, "K", method, title))
 }
