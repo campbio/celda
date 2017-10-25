@@ -28,8 +28,8 @@ calculatePerformanceMetric = function(log.likelihoods, method="perplexity", log 
 
 
 # Actually render the plot described in visualizeModelPerformance.
-render_model_performance_plot = function(cluster.scores, cluster.label, metric.type,
-                                         title="Model Performance (All Chains") {
+renderModelPerformancePlot = function(cluster.scores, cluster.label, metric.type,
+                                      title="Model Performance (All Chains") {
   plot = ggplot2::ggplot(cluster.scores, ggplot2::aes(x=factor(size), y=metric)) + 
            ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
            ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
@@ -44,7 +44,7 @@ render_model_performance_plot = function(cluster.scores, cluster.label, metric.t
 #' @param celda.obj A celda object
 #' @return A ggplot object of the likelihood per iteration of Gibbs sampling
 #' @export
-render_iteration_likelihood_plot = function(celda.obj) {
+renderIterationLikelihoodPlot = function(celda.obj) {
   df = data.frame(celda.obj$completeLogLik)
   df["iter"] = factor(as.numeric(rownames(df)))
   plot = ggplot2::ggplot(df, ggplot2::aes(x=iter, y=df)) + ggplot2::geom_point() +
