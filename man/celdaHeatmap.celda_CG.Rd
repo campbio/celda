@@ -11,7 +11,7 @@
 
 \item{counts}{A count matrix}
 
-\item{...}{extra parameters passed onto render_celda_heatmap}
+\item{...}{extra parameters passed onto renderCeldaHeatmap}
 }
 \description{
 celdaHeatmap for celda Cell and Gene clustering model
