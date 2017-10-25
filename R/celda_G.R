@@ -42,6 +42,7 @@
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param ... Additional parameters
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {

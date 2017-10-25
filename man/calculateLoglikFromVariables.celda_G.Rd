@@ -19,6 +19,8 @@
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
+
+\item{...}{Additional parameters}
 }
 \value{
 The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
