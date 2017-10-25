@@ -432,14 +432,14 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 }
 
 
-#' visualize_model_performance for celda Cell clustering function
+#' visualizeModelPerformance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of "perplexity", "loglik"
 #' @param title Title for the plot
 #' @param log Currently not working for celda_C objects
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
+visualizeModelPerformance.celda_C = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)",
                                                log = F) {
   
