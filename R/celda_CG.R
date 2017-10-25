@@ -737,7 +737,7 @@ visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method, log)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
@@ -809,7 +809,7 @@ visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
 #' run for each combination of K/L (cell/gene).
 #' 
 #' @param celda.list A list of celda_CG objects returned from celda function
-#' @param method One of "perplexity" or "loglik", passed through to calculate_performance_metric()
+#' @param method One of "perplexity" or "loglik", passed through to calculatePerformanceMetric()
 #' @param title The plot title
 #' @import Rmpfr 
 #' @export
@@ -825,7 +825,7 @@ renderInteractiveKLPlot = function(celda.list,  method="perplexity",
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method)
   
   # The performance metric methods return Rmpfr numbers that are extremely small and can't be 
