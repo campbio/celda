@@ -83,8 +83,6 @@ breaks are calculated automatically.}
 \item{treeheight_cell}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
 
 \item{...}{Other arguments to be passed to underlying pheatmap function}
-
-\item{legend}{Boolean; Whether to plot the legend. Default TRUE.}
 }
 \description{
 Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
