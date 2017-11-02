@@ -513,7 +513,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 #' Generate factorized matrices showing each feature's influence on the celda_CG model clustering 
 #' 
 #' @param counts A numerix count matrix
-#' @param celda.obj object returned from celda_CG function 
+#' @param celda.mod object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
