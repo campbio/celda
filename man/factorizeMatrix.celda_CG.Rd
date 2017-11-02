@@ -10,9 +10,9 @@ factorizeMatrix.celda_CG(counts, celda.mod, type = c("counts", "proportion",
 \arguments{
 \item{counts}{A numerix count matrix}
 
-\item{type}{one of the "counts", "proportion", or "posterior".}
+\item{celda.mod}{object returned from celda_CG function}
 
-\item{celda.obj}{object returned from celda_CG function}
+\item{type}{one of the "counts", "proportion", or "posterior".}
 }
 \value{
 A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
