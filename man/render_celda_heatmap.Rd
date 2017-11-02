@@ -78,11 +78,11 @@ breaks are calculated automatically.}
 
 \item{hclust_method}{Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values.}
 
+\item{treeheight_gene}{Numeric; Width of the gene dedrogram. Set to 0 to disable plotting of this dendrogram.}
+
+\item{treeheight_cell}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
+
 \item{...}{Other arguments to be passed to underlying pheatmap function}
-
-\item{treeheight_row}{Numeric; Width of the gene dedrogram. Set to 0 to disable plotting of this dendrogram.}
-
-\item{treeheight_col}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
 
 \item{legend}{Boolean; Whether to plot the legend. Default TRUE.}
 }
