@@ -14,7 +14,8 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   breaks = NULL, legend = TRUE, annotation_legend = TRUE,
   annotation_names_gene = TRUE, annotation_names_cell = TRUE,
   show_genenames = FALSE, show_cellnames = FALSE,
-  hclust_method = "ward.D2", ...)
+  hclust_method = "ward.D2", treeheight_gene = ifelse(cluster_gene, 50, 0),
+  treeheight_cell = ifelse(cluster_cell, 50, 0), ...)
 }
 \arguments{
 \item{counts}{A count matrix where rows are genes and columns are cells.}
@@ -76,6 +77,10 @@ breaks are calculated automatically.}
 \item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
 
 \item{hclust_method}{Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values.}
+
+\item{treeheight_gene}{Numeric; Width of the gene dedrogram. Set to 0 to disable plotting of this dendrogram.}
+
+\item{treeheight_cell}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
 
 \item{...}{Other arguments to be passed to underlying pheatmap function}
 }

@@ -433,15 +433,15 @@ clusterProbability.celda_G = function(counts, celda.mod) {
 #' Generate factorized matrices showing each feature's influence on the celda_G model clustering 
 #' 
 #' @param counts A numeric count matrix
-#' @param celda.obj Object return from celda_C function
+#' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
-  L = celda.obj$L
-  y = celda.obj$y
-  beta = celda.obj$beta
-  delta = celda.obj$delta
+  L = celda.mod$L
+  y = celda.mod$y
+  beta = celda.mod$beta
+  delta = celda.mod$delta
   
   counts.list = c()
   prop.list = c()
@@ -456,10 +456,10 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
   for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
 
   L.names = paste0("L", 1:L)
-  colnames(n.TS.by.C) = celda.obj$names$column
+  colnames(n.TS.by.C) = celda.mod$names$column
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = celda.obj$names$row
+  rownames(n.G.by.TS) = celda.mod$names$row
   
   if(any("counts" %in% type)) {
     counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS)
@@ -471,8 +471,13 @@ factorizeMatrix.celda_G = function(counts, celda.obj, type=c("counts", "proporti
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
+  
+    gs = n.G.by.TS
+    gs[gs > 0] = gs[gs > 0] + delta
+    gs = normalizeCounts(gs, scale.factor=1)
+
     post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
-    						    gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+    						    gene.states = gs)
     res = c(res, posterior = list(post.list))						    
   }
   
