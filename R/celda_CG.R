@@ -191,6 +191,7 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 #' @param seed starting point used for generating simulated data
 #' @param ... Additional parameters
 #' @param model Dummy parameter for S3 dispatch
+#' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
                                   delta=1, seed=12345, ...) {
