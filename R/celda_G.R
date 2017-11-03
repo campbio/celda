@@ -185,7 +185,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    y.init=NULL, logfile=NULL, ...) {
   
   set.seed(seed)
-  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
   ## Randomly select y or set y to supplied initial values
   if(is.null(y.init)) {
@@ -271,9 +271,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
-      log_messages(res$message, logfile=logfile, append=TRUE)
+      logMessages(res$message, logfile=logfile, append=TRUE)
       
       y = res$y
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
@@ -292,7 +292,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     }
     ll <- c(ll, temp.ll)
 
-    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
+    logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
 
     iter <- iter + 1    
   }

@@ -100,7 +100,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   }  
   
   set.seed(seed)
-  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   ## Randomly select z or set z to supplied initial values
   if(is.null(z.init)) {
@@ -162,7 +162,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
         
         ## Split another cluster into two
         res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculateLoglikFromVariables.celda_C", s=s, alpha=alpha, beta=beta)
-        log_messages(res$message, logfile=logfile, append=TRUE)
+        logMessages(res$message, logfile=logfile, append=TRUE)
         z = res$z
         
         ## Re-calculate variables
@@ -175,9 +175,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     ## Perform split if on i-th iteration defined by split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
-      log_messages(res$message, logfile=logfile, append=TRUE)
+      logMessages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
@@ -197,7 +197,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     }
     ll = c(ll, temp.ll)
     
-    log_messages(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
+    logMessages(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
     
     iter = iter + 1    
   }
