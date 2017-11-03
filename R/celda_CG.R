@@ -514,21 +514,21 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 #' Generate factorized matrices showing each feature's influence on the celda_CG model clustering 
 #' 
 #' @param counts A numerix count matrix
-#' @param celda.obj object returned from celda_CG function 
+#' @param celda.mod object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
-factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
-  K = celda.obj$K
-  L = celda.obj$L
-  z = celda.obj$z
-  y = celda.obj$y
-  alpha = celda.obj$alpha
-  beta = celda.obj$beta
-  delta = celda.obj$delta
-  gamma = celda.obj$gamma
-  sample.label = celda.obj$sample.label
+  K = celda.mod$K
+  L = celda.mod$L
+  z = celda.mod$z
+  y = celda.mod$y
+  alpha = celda.mod$alpha
+  beta = celda.mod$beta
+  delta = celda.mod$delta
+  gamma = celda.mod$gamma
+  sample.label = celda.mod$sample.label
   
   counts.list = c()
   prop.list = c()
@@ -552,33 +552,38 @@ factorizeMatrix.celda_CG = function(counts, celda.obj, type=c("counts", "proport
 
   L.names = paste0("L", 1:L)
   K.names = paste0("K", 1:K)
-  colnames(n.TS.by.C) = celda.obj$names$column
+  colnames(n.TS.by.C) = celda.mod$names$column
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = celda.obj$names$row
+  rownames(n.G.by.TS) = celda.mod$names$row
   rownames(m.CP.by.S) = K.names
-  colnames(m.CP.by.S) = celda.obj$names$sample
+  colnames(m.CP.by.S) = celda.mod$names$sample
   colnames(n.CP.by.TS) = L.names
   rownames(n.CP.by.TS) = K.names
     
   if(any("counts" %in% type)) {
     counts.list = list(sample.states = m.CP.by.S,
-            				   population.states = n.CP.by.TS, 
+            				   population.states = t(n.CP.by.TS), 
             				   cell.states = n.TS.by.C,
             				   gene.states = n.G.by.TS)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
     prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
-    				   population.states = t(normalizeCounts(t(n.CP.by.TS), scale.factor=1)), 
+    				   population.states = normalizeCounts(t(n.CP.by.TS), scale.factor=1), 
     				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
     				   gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
+
+    gs = n.G.by.TS
+    gs[gs > 0] = gs[gs > 0] + delta
+    gs = normalizeCounts(gs, scale.factor=1)
+
     post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
-          				   population.states = normalizeCounts(n.CP.by.TS + beta, scale.factor=1), 
-          				   gene.states = normalizeCounts(n.G.by.TS + delta, scale.factor=1))
+          				   population.states = normalizeCounts(t(n.CP.by.TS + beta), scale.factor=1), 
+          				   gene.states = gs)
     res = c(res, posterior = list(post.list))						    
   }
   
