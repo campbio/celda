@@ -155,3 +155,10 @@ simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
   UseMethod("simulateCells", model)
 }
+
+
+#'
+#'@export
+factorizeMatrix = function(res, mat, ...) {
+  UseMethod("factorizeMatrix", res)
+}
