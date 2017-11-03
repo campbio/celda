@@ -518,7 +518,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 #' @param type one of the "counts", "proportion", or "posterior". 
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
-factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
 
   K = celda.mod$K
   L = celda.mod$L
