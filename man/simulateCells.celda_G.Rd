@@ -5,7 +5,8 @@
 \title{Simulate cells from the gene clustering generative model}
 \usage{
 \method{simulateCells}{celda_G}(model, C = 100, N.Range = c(500, 5000),
-  G = 1000, L = 5, beta = 1, gamma = 1, delta = 1, seed = 12345)
+  G = 1000, L = 5, beta = 1, gamma = 1, delta = 1, seed = 12345,
+  ...)
 }
 \arguments{
 \item{model}{Dummy parameter for S3 dispatch}
@@ -25,6 +26,8 @@
 \item{delta}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
 
 \item{seed}{Parameter to set.seed() for random number generation}
+
+\item{...}{Unused arguments}
 }
 \description{
 Generate a simulated count matrix, based off a generative distribution whose 

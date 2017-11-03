@@ -4,7 +4,7 @@
 \alias{factorizeMatrix}
 \title{Generate factorized matrices showing each feature's influence on cell / gene clustering}
 \usage{
-factorizeMatrix(celda.mod, counts, ...)
+factorizeMatrix(celda.mod, counts, type)
 }
 \arguments{
 \item{celda.mod}{An object from a celda_list's res.list property}
