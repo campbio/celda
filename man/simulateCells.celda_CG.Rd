@@ -33,7 +33,7 @@
 
 \item{seed}{starting point used for generating simulated data}
 
-\item{...}{Additional parameters}
+\item{...}{Unused arguments}
 }
 \description{
 Simulate cells from the cell/gene clustering generative model
