@@ -356,7 +356,7 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_C = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
 
   K = celda.mod$K
   z = celda.mod$z
