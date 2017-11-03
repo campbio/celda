@@ -351,16 +351,16 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
 #' Generate factorized matrices showing each feature's influence on the celda_C model clustering 
 #' 
 #' @param counts A numeric count matrix
-#' @param celda.obj Object return from celda_C function
+#' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_C = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
-  K = celda.obj$K
-  z = celda.obj$z
-  alpha = celda.obj$alpha
-  beta = celda.obj$beta
-  sample.label = celda.obj$sample.label
+  K = celda.mod$K
+  z = celda.mod$z
+  alpha = celda.mod$alpha
+  beta = celda.mod$beta
+  sample.label = celda.mod$sample.label
 
   counts.list = c()
   prop.list = c()
@@ -372,10 +372,10 @@ factorizeMatrix.celda_C = function(counts, celda.obj, type=c("counts", "proporti
   n.G.by.CP = t(rowsum(t(counts), group=z, reorder=TRUE))
 
   K.names = paste0("K", 1:K)
-  rownames(n.G.by.CP) = celda.obj$names$row
+  rownames(n.G.by.CP) = celda.mod$names$row
   colnames(n.G.by.CP) = K.names
   rownames(m.CP.by.S) = K.names
-  colnames(m.CP.by.S) = celda.obj$names$sample
+  colnames(m.CP.by.S) = celda.mod$names$sample
               
   if(any("counts" %in% type)) {
     counts.list = list(sample.states=m.CP.by.S, gene.states=n.G.by.CP)
