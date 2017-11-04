@@ -6,7 +6,7 @@
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
-calculate_perplexity = function(completeLogLik, log = FALSE) {
+calculatePerplexity = function(completeLogLik, log = FALSE) {
   if (log) {
     return(-mean(completeLogLik))
   }
@@ -17,9 +17,9 @@ calculate_perplexity = function(completeLogLik, log = FALSE) {
 
 
 # Convenience function to calculate performance metrics by specifying a method. 
-calculate_performance_metric = function(log.likelihoods, method="perplexity", log = FALSE) {
+calculatePerformanceMetric = function(log.likelihoods, method="perplexity", log = FALSE) {
   if (method == "perplexity") {
-    metric = calculate_perplexity(log.likelihoods, log)
+    metric = calculatePerplexity(log.likelihoods, log)
   } else if (method == "loglik") {
      metric = max(log.likelihoods)
   } else stop("Invalid method specified")
@@ -27,9 +27,9 @@ calculate_performance_metric = function(log.likelihoods, method="perplexity", lo
 }
 
 
-# Actually render the plot described in visualize_model_performance.
-render_model_performance_plot = function(cluster.scores, cluster.label, metric.type,
-                                         title="Model Performance (All Chains") {
+# Actually render the plot described in visualizeModelPerformance.
+renderModelPerformancePlot = function(cluster.scores, cluster.label, metric.type,
+                                      title="Model Performance (All Chains") {
   plot = ggplot2::ggplot(cluster.scores, ggplot2::aes(x=factor(size), y=metric)) + 
            ggplot2::geom_boxplot(outlier.color=NA, fill=NA) + 
            ggplot2::geom_point(position=ggplot2::position_jitter(width=0.1, height=0)) +
@@ -44,7 +44,7 @@ render_model_performance_plot = function(cluster.scores, cluster.label, metric.t
 #' @param celda.obj A celda object
 #' @return A ggplot object of the likelihood per iteration of Gibbs sampling
 #' @export
-render_iteration_likelihood_plot = function(celda.obj) {
+renderIterationLikelihoodPlot = function(celda.obj) {
   df = data.frame(celda.obj$completeLogLik)
   df["iter"] = factor(as.numeric(rownames(df)))
   plot = ggplot2::ggplot(df, ggplot2::aes(x=iter, y=df)) + ggplot2::geom_point() +

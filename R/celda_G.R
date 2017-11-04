@@ -42,10 +42,10 @@
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param ... Additional parameters
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
-#' @export
-calculate_loglik_from_variables.celda_G = function(counts, y, L, beta, delta, gamma) {
+calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
   n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
   
   nM <- ncol(n.TS.by.C)
@@ -185,7 +185,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
                    y.init=NULL, logfile=NULL, ...) {
   
   set.seed(seed)
-  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
   ## Randomly select y or set y to supplied initial values
   if(is.null(y.init)) {
@@ -258,7 +258,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
         ## Split another cluster into two
         y = split.y(counts=counts, y=y, 
                    empty.L=previous.y[i], L=L, 
-                   LLFunction="calculate_loglik_from_variables.celda_G", 
+                   LLFunction="calculateLoglikFromVariables.celda_G", 
                    beta=beta, delta=delta, gamma=gamma)
         
         ## Re-calculate variables
@@ -271,9 +271,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculate_loglik_from_variables.celda_G")
-      log_messages(res$message, logfile=logfile, append=TRUE)
+      logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
+      logMessages(res$message, logfile=logfile, append=TRUE)
       
       y = res$y
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
@@ -292,7 +292,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     }
     ll <- c(ll, temp.ll)
 
-    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
+    logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
 
     iter <- iter + 1    
   }
@@ -324,8 +324,11 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param seed Parameter to set.seed() for random number generation
-simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000, 
-                                         L=5, beta=1, gamma=1, delta=1, seed=12345) {
+#' @param model Dummy parameter for S3 dispatch
+#' @param ... Unused arguments
+#' @export
+simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
+                                 L=5, beta=1, gamma=1, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = gtools::rdirichlet(1, rep(gamma, L))
   
@@ -375,7 +378,7 @@ simulateCells.celda_G = function(C=100, N.Range=c(500,5000),  G=1000,
 #' @param celda.mod A model returned from the 'celda_G' function
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-cluster_probability.celda_G = function(counts, celda.mod) {
+clusterProbability.celda_G = function(counts, celda.mod) {
 
   y = celda.mod$y
   L = celda.mod$L
@@ -435,7 +438,7 @@ cluster_probability.celda_G = function(counts, celda.mod) {
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
 
   L = celda.mod$L
   y = celda.mod$y
@@ -507,25 +510,25 @@ getL.celda_G = function(celda.mod) {
   return(celda.mod$L)
 }
 
-#' celda_heatmap for celda Gene clustering model
+#' celdaHeatmap for celda Gene clustering model
 #' @param celda.mod A celda model object of class "celda_G"
 #' @param counts A numeric count matrix
-#' @param ... extra parameters passed onto render_celda_heatmap
+#' @param ... extra parameters passed onto renderCeldaHeatmap
 #' @export
-celda_heatmap.celda_G = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, y=celda.mod$y, ...)
+celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
+  renderCeldaHeatmap(counts, y=celda.mod$y, ...)
 }
 
 
 # TODO DRYer implementation in concert with celda_C
-#' visualize_model_performance for the celda Gene function
+#' visualizeModelPerformance for the celda Gene function
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of "perplexity" or "loglik"
 #' @param title Title for the plot
 #' @param log Currently not working for celda.G objects
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_G = function(celda.list, method="perplexity",
+visualizeModelPerformance.celda_G = function(celda.list, method="perplexity",
                                                title="Model Performance (All Chains)",
                                                log = F) {
   
@@ -533,7 +536,7 @@ visualize_model_performance.celda_G = function(celda.list, method="perplexity",
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
@@ -546,5 +549,5 @@ visualize_model_performance.celda_G = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(render_model_performance_plot(plot.df, "L", method, title))
+  return(renderModelPerformancePlot(plot.df, "L", method, title))
 }
