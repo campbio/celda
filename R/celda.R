@@ -21,7 +21,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @export
 celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=TRUE, logfile_prefix="Celda", ...) {
   message("Starting celda...")
-  validate_args(counts, model, sample.label, nchains, cores, seed, ...)
+  validateArgs(counts, model, sample.label, nchains, cores, seed, ...)
   
   # Redirect stderr from the worker threads if user asks for verbose
   logfile = paste0(logfile_prefix, "_main_log.txt")
@@ -66,16 +66,17 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
 
 # Sanity check arguments to celda() to ensure a smooth run.
 # See parameter descriptions from celda() documentation.
-validate_args = function(counts, model, sample.label, 
+validateArgs = function(counts, model, sample.label, 
                          nchains, cores, seed, K=NULL, L=NULL, ...) {
-  if (model %in% c("celda_C", "celda_CG") && is.null(K)) {
+  model_args = names(formals(model))
+  if ("K" %in% model_args && is.null(K)) {
     stop("Must provide a K parameter when running a celda_C or celda_CG model")
   }
-  if (model %in% c("celda_G", "celda_CG") && is.null(L)) {
+  if ("L" %in% model_args && is.null(L)) {
     stop("Must provide a L parameter when running a celda_G or celda_CG model")
   }
   
-  validate_counts(counts, K, L)
+  validateCounts(counts, K, L)
   
   if (!(model %in% available_models)) stop("Unavailable model specified")
       
@@ -98,7 +99,7 @@ validate_args = function(counts, model, sample.label,
     
 # Perform some simple checks on the counts matrix, to ensure celda won't choke.
 # See parameter descriptions from celda() documentation.
-validate_counts = function(counts, K, L) {
+validateCounts = function(counts, K, L) {
   # counts has to be a matrix...
   if (class(counts) != "matrix") stop("counts argument must be of class 'matrix'")
   

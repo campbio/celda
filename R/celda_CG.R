@@ -42,8 +42,8 @@
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @export
-calculate_loglik_from_variables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
+#' @param ... Additional parameters 
+calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma, ...) {
   
   ## Calculate for "Theta" component
   m = table(z, s)
@@ -189,8 +189,10 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param seed starting point used for generating simulated data
-#' @param ... Additional parameters
-simulateCells.celda_CG = function(S=10, C.Range=c(50,100), N.Range=c(500,5000), 
+#' @param ... Unused arguments
+#' @param model Dummy parameter for S3 dispatch
+#' @export
+simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
                                   delta=1, seed=12345, ...) {
   
@@ -284,7 +286,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   set.seed(seed)
-  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -370,10 +372,10 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       if(sum(z == previous.z[i]) == 0) {
       
         ## Split another cluster into two
-        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_CG", s=s, y=y, L=L,
+        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculateLoglikFromVariables.celda_CG", s=s, y=y, L=L,
         alpha=alpha, beta=beta, delta=delta, gamma=gamma)
         z = res$z
-        log_messages(res$message, logfile=logfile, append=TRUE)
+        logMessages(res$message, logfile=logfile, append=TRUE)
 
         
         ## Re-calculate variables
@@ -427,11 +429,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         
         ## Split another cluster into two
         res = split.y(counts=counts, y=y, empty.L=previous.y[i],
-                    L=L, LLFunction="calculate_loglik_from_variables.celda_CG",
+                    L=L, LLFunction="calculateLoglikFromVariables.celda_CG",
                     z=z, s=s, K=K, 
                     alpha=alpha, beta=beta, delta=delta, gamma=gamma)
         y = res$y
-        log_messages(res$message, logfile=logfile, append=TRUE)
+        logMessages(res$message, logfile=logfile, append=TRUE)
         
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -445,9 +447,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split on i-th iteration defined by z.split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
-      log_messages(res$message, logfile=logfile, append=TRUE)
+      logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+      logMessages(res$message, logfile=logfile, append=TRUE)
 
       z = res$z      
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
@@ -463,9 +465,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
 
-      log_messages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculate_loglik_from_variables.celda_CG")
-	  log_messages(res$message, logfile=logfile, append=TRUE)
+      logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+	  logMessages(res$message, logfile=logfile, append=TRUE)
 	  
       y = res$y
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
@@ -487,7 +489,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     }
     ll = c(ll, temp.ll)
     
-    log_messages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
+    logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
     iter = iter + 1    
   }
     
@@ -517,7 +519,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 #' @param type one of the "counts", "proportion", or "posterior". 
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
-factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
 
   K = celda.mod$K
   L = celda.mod$L
@@ -596,7 +598,7 @@ factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proport
 #' @param celda.mod A model returned from the 'celda_CG' function
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-cluster_probability.celda_CG = function(counts, celda.mod) {
+clusterProbability.celda_CG = function(counts, celda.mod) {
   
   s = celda.mod$sample.label
   z = celda.mod$z
@@ -708,13 +710,13 @@ getL.celda_CG = function(celda.mod) {
 }
 
 
-#' celda_heatmap for celda Cell and Gene clustering model
+#' celdaHeatmap for celda Cell and Gene clustering model
 #' @param celda.mod A celda model object of "Celda_CG"
 #' @param counts A count matrix
-#' @param ... extra parameters passed onto render_celda_heatmap
+#' @param ... extra parameters passed onto renderCeldaHeatmap
 #' @export
-celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
+celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
+  renderCeldaHeatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
 }
 
 
@@ -726,22 +728,22 @@ celda_heatmap.celda_CG = function(celda.mod, counts, ...) {
 #' clusters K (gene clusters L).
 #' @param celda.list A list of celda_CG objects returned from celda function
 #' @param method One of "perplexity" or "loglik"
-#' @param title Title for the visualize_model_performance
+#' @param title Title for the visualizeModelPerformance
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
+visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
                                                 title="Model Performance (All Chains)",
                                                 log = FALSE) {
  
-  validate_kl_plot_parameters(celda.list, method)
+  validateKLPlotParameters(celda.list, method)
  
   y.lab = method
   cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method, log)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
@@ -813,14 +815,14 @@ visualize_model_performance.celda_CG = function(celda.list, method="perplexity",
 #' run for each combination of K/L (cell/gene).
 #' 
 #' @param celda.list A list of celda_CG objects returned from celda function
-#' @param method One of "perplexity" or "loglik", passed through to calculate_performance_metric()
+#' @param method One of "perplexity" or "loglik", passed through to calculatePerformanceMetric()
 #' @param title The plot title
 #' @import Rmpfr 
 #' @export
-render_interactive_kl_plot = function(celda.list,  method="perplexity", 
-                                      title="Model Performance (All Chains)") {
+renderInteractiveKLPlot = function(celda.list,  method="perplexity", 
+                                   title="Model Performance (All Chains)") {
   
-  validate_kl_plot_parameters(celda.list, method)
+  validateKLPlotParameters(celda.list, method)
   
   chain.ks = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) })) # TODO celda_list getter
   chain.ls = unlist(lapply(celda.list$res.list, function(mod) { getL(mod) })) # TODO celda_list getter
@@ -829,7 +831,7 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method)
   
   # The performance metric methods return Rmpfr numbers that are extremely small and can't be 
@@ -871,7 +873,7 @@ render_interactive_kl_plot = function(celda.list,  method="perplexity",
 
 # Sanity checks for parameters to the model performance plotting functions for
 # celda_CG models
-validate_kl_plot_parameters = function(celda.list, method) {
+validateKLPlotParameters = function(celda.list, method) {
  if (class(celda.list) != "celda_list") {
     stop("celda.list argument must be of class 'celda_list'")
  } else if (celda.list$content.type != "celda_CG") {

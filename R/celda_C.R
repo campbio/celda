@@ -38,8 +38,11 @@
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-simulateCells.celda_C = function(S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
-                         G=500, K=5, alpha=1, beta=1) {
+#' @param model Dummy parameter for S3 dispatch
+#' @param ... Unused arguments
+#' @export
+simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
+                         G=500, K=5, alpha=1, beta=1, ...) {
   
   phi <- gtools::rdirichlet(K, rep(beta, G))
   theta <- gtools::rdirichlet(S, rep(alpha, K))
@@ -99,7 +102,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   }  
   
   set.seed(seed)
-  log_messages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   ## Randomly select z or set z to supplied initial values
   if(is.null(z.init)) {
@@ -160,8 +163,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       if(sum(z == previous.z[i]) == 0 & K > 2) {
         
         ## Split another cluster into two
-        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculate_loglik_from_variables.celda_C", s=s, alpha=alpha, beta=beta)
-        log_messages(res$message, logfile=logfile, append=TRUE)
+        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculateLoglikFromVariables.celda_C", s=s, alpha=alpha, beta=beta)
+        logMessages(res$message, logfile=logfile, append=TRUE)
         z = res$z
         
         ## Re-calculate variables
@@ -174,9 +177,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     ## Perform split if on i-th iteration defined by split.on.iter
     if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
 
-      log_messages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculate_loglik_from_variables.celda_C")
-      log_messages(res$message, logfile=logfile, append=TRUE)
+      logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
+      logMessages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
       z.num.of.splits.occurred = z.num.of.splits.occurred + 1
@@ -196,7 +199,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     }
     ll = c(ll, temp.ll)
     
-    log_messages(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
+    logMessages(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
     
     iter = iter + 1    
   }
@@ -232,13 +235,14 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, n.CP, nG, alpha, beta) {
   return(final)
 }
 
+
 #' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
 #'
 #' @param counts The original count matrix used in the model
 #' @param celda.mod A model returned from the 'celda_C' function
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-cluster_probability.celda_C = function(counts, celda.mod) {
+clusterProbability.celda_C = function(counts, celda.mod) {
 
   z = celda.mod$z
   s = celda.mod$sample.label
@@ -294,8 +298,8 @@ cluster_probability.celda_C = function(counts, celda.mod) {
 #' @param K The total number of clusters in z
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @export
-calculate_loglik_from_variables.celda_C = function(counts, s, z, K, alpha, beta) {
+#' @param ... Additional parameters
+calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
   
   ## Calculate for "Theta" component
   m.CP.by.S = table(z, s)
@@ -354,7 +358,7 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_C = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
 
   K = celda.mod$K
   z = celda.mod$z
@@ -420,24 +424,24 @@ getK.celda_C = function(celda.mod) {
 #' @export
 getL.celda_C = function(celda.mod) { return(NA) }
 
-#' celda_heatmap for celda Cell clustering function 
+#' celdaHeatmap for celda Cell clustering function 
 #' @param celda.mod A celda model object of class "celda_C"
 #' @param counts A numeric count matrix
-#' @param ... extra parameters passed onto the render_celda_heatmap
+#' @param ... extra parameters passed onto the renderCeldaHeatmap
 #' @export
-celda_heatmap.celda_C = function(celda.mod, counts, ...) {
-  render_celda_heatmap(counts, z=celda.mod$z, ...)
+celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
+  renderCeldaHeatmap(counts, z=celda.mod$z, ...)
 }
 
 
-#' visualize_model_performance for celda Cell clustering function
+#' visualizeModelPerformance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()
 #' @param method One of "perplexity", "loglik"
 #' @param title Title for the plot
 #' @param log Currently not working for celda_C objects
 #' @import Rmpfr
 #' @export
-visualize_model_performance.celda_C = function(celda.list, method="perplexity", 
+visualizeModelPerformance.celda_C = function(celda.list, method="perplexity", 
                                                title="Model Performance (All Chains)",
                                                log = F) {
   
@@ -445,7 +449,7 @@ visualize_model_performance.celda_C = function(celda.list, method="perplexity",
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
   performance.metric = lapply(log.likelihoods, 
-                              calculate_performance_metric,
+                              calculatePerformanceMetric,
                               method)
   
   # These methods return Rmpfr numbers that are extremely small and can't be 
@@ -458,5 +462,5 @@ visualize_model_performance.celda_C = function(celda.list, method="perplexity",
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
-  return(render_model_performance_plot(plot.df, "K", method, title))
+  return(renderModelPerformancePlot(plot.df, "K", method, title))
 }
