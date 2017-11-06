@@ -102,7 +102,7 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 #' @param from A numeric vector of the "keys", corresponding to the "values" in the to parameter
 #' @param to A numeric vector of the "values"; what each corresponding number in "from" should be mapped to
 #' @export
-recode_cluster_z = function(celda.mod, from, to) {
+recodeClusterZ = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
     stop("All values in 'from' must have a mapping in 'to'")
   }
@@ -126,7 +126,7 @@ recode_cluster_z = function(celda.mod, from, to) {
 #' @param from A numeric vector of the "keys", corresponding to the "values" in the to parameter
 #' @param to A numeric vector of the "values"; what each corresponding number in "from" should be mapped to
 #' @export
-recode_cluster_y = function(celda.mod, from, to) {
+recodeClusterY = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
     stop("All values in 'from' must have a mapping in 'to'")
   }
@@ -146,13 +146,13 @@ recode_cluster_y = function(celda.mod, from, to) {
 #' @param celda.checksum An MD5 checksum from a celda_list or celda model object (celda_C, celda_G, celda_CG)
 #' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise
 #' @export
-compare_count_matrix = function(count.matrix, celda.checksum) {
+compareCountMatrix = function(count.matrix, celda.checksum) {
   count.md5 = digest::digest(count.matrix, algo="md5")
   return(count.md5 == celda.checksum)
 }
 
 
-log_messages = function(..., sep = " ", logfile = NULL, append = FALSE) {
+logMessages = function(..., sep = " ", logfile = NULL, append = FALSE) {
   if(!is.null(logfile)) {
     if(!is.character(logfile) || length(logfile) > 1) {
       stop("The log file parameter needs to be a single character string.")
