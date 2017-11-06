@@ -109,8 +109,8 @@ getL = function(celda.mod) {
 #' @param counts the counts matrix 
 #' @param ... extra parameters passed onto celda_heatmap
 #' @export 
-celda_heatmap <- function(celda.mod, counts, ...) {
-  UseMethod("celda_heatmap", celda.mod)
+celdaHeatmap <- function(celda.mod, counts, ...) {
+  UseMethod("celdaHeatmap", celda.mod)
 }
 
 
@@ -118,28 +118,26 @@ celda_heatmap <- function(celda.mod, counts, ...) {
 #' 
 #' @param celda.list A celda_list object as returned from *celda()*
 #' @param method Which performance metric to visualize. One of ("perplexity", "harmonic", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "harmonic" calculates the marginal likelihood has the harmonic mean of the likelihoods. "loglik" plots the highest log-likelihood during Gibbs iteration.
-#' @param title Title for the visualize_model_performance
+#' @param title Title for the visualizeModelPerformance
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric
 #' @return A ggplot object containing the requested plot(s)
 #' @export
-visualize_model_performance <- function(celda.list, method, title, log = FALSE) {
+visualizeModelPerformance <- function(celda.list, method, title, log = FALSE) {
   # Dispatch on the list's content type
-  UseMethod("visualize_model_performance", celda.list$res.list[[1]])
+  UseMethod("visualizeModelPerformance", celda.list$res.list[[1]])
 }
 
 
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
 #' @param model Model to use for calculating log-likelihood of assignments; one of ("celda_C", "celda_CG", "celda_G")
+#' @param counts The counts matrix used to generate the provided cluster assignments
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
-#' @param ... extra parameters passed onto calculate_loglik_from_variables
+#' @param ... extra parameters passed onto calculateLoglikFromVariables
 #' @export
-calculate_loglik_from_variables <- function(model, ...) {
-  # Dispatch on the specified model
-  if (model == "celda_C") calculate_loglik_from_variables.celda_C(...)
-  else if (model == "celda_G") calculate_loglik_from_variables.celda_G(...)
-  else if (model == "celda_CG") calculate_loglik_from_variables.celda_CG(...)
-  else stop("Invalid model specified.")
+calculateLoglikFromVariables <- function(model, counts, ...) {
+  class(counts) = c(class(counts), model)
+  UseMethod("calculateLoglikFromVariables", counts)
 }
 
 
@@ -151,12 +149,20 @@ calculate_loglik_from_variables <- function(model, ...) {
 #' functions as detailed below.
 #' 
 #' @param model The celda generative model to use (one of celda_C, celda_G, celda_CG)
-#' @param ... Parameters to pass to underlying model.
-#' 
+#' @param ... Parameters to pass to underlying generative model simulation
 #' @export
 simulateCells = function(model, ...) {
-  switch(model, celda_C = simulateCells.celda_C(...),
-         celda_G = simulateCells.celda_G(...),
-         celda_CG = simulateCells.celda_CG(...),
-         stop("Invalid model specified"))
+  class(model) = c(class(model), model)
+  UseMethod("simulateCells", model)
+}
+
+
+#' Generate factorized matrices showing each feature's influence on cell / gene clustering
+#' 
+#' @param celda.mod An object from a celda_list's res.list property
+#' @param counts A numeric count matrix
+#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @export
+factorizeMatrix = function(celda.mod, counts, type) {
+  UseMethod("factorizeMatrix", celda.mod)
 }
