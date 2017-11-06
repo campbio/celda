@@ -14,7 +14,7 @@
 #' @return A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
 getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
-  validate_get_model_params(celda.list, K, L, chain, best)  # Sanity check params
+  validateGetModelParams(celda.list, K, L, chain, best)  # Sanity check params
   
   requested.chain = NA
   run.params = celda.list$run.params
@@ -55,14 +55,14 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
   # Ensure that the chain we grabbed actually has the requested K/L.
   # This should only happen if the user alters the celda_list's run.params dataframe.
   if ((!is.null(K) & K != requested.chain$K) | !is.null(L) & L != requested.chain$L) {
-    requested.chain = search_res_list(celda.list, K=K, L=L)
+    requested.chain = searchResList(celda.list, K=K, L=L)
   }
   
   return(requested.chain)
 }
 
 
-validate_get_model_params = function(celda.list, K, L, chain, best) {
+validateGetModelParams = function(celda.list, K, L, chain, best) {
   if (class(celda.list) != "celda_list") stop("First argument to getModel() should be an object of class 'celda_list'")
   
   if ((is.null(K) | is.null(L)) & celda.list$content.type == "celda_CG") {
@@ -91,7 +91,7 @@ chooseBestChain = function(celda.mods, method="perplexity") {
   # We want to get the *most negative* perplexity, as opposed to the *least* negative
   # for the other metrics...
   if (method == "perplexity"){
-    metrics = lapply(celda.mods, function(mod) { calculate_perplexity(mod$completeLogLik) })
+    metrics = lapply(celda.mods, function(mod) { calculatePerplexity(mod$completeLogLik) })
     metrics = methods::new("mpfr", unlist(metrics))
     best = which(metrics == min(metrics))
     return(celda.mods[[best]])
@@ -111,7 +111,7 @@ chooseBestChain = function(celda.mods, method="perplexity") {
 
 # Search through a celda_list's res.list model-by-model for one with the corresponding
 # K/L.
-search_res_list = function(celda_list, K=NULL, L=NULL) {
+searchResList = function(celda_list, K=NULL, L=NULL) {
   requested.chain = NULL
   for (model in celda_list$res.list) {
     requested.chain = model

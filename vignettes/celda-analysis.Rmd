@@ -57,15 +57,14 @@ library(celda)
 library(Matrix)
 library(gtools)
 library(ggplot2)
-library(tsne)
+library(Rtsne)
 library(reshape2)
 ```
 
 We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` returns a list containing a count matrix where each row is a gene and each column is a cell. The K parameter determines the number of cell clusters while the L parameter determines the number of gene clusters within the dataset.
 
 ```{r}
-sim_counts = simulateCells(K = 3, L = 10,model = "celda_CG")
-
+sim_counts = simulateCells("celda_CG", K = 3, L = 10)
 ```
 
 The `counts` variable from `simulateCells.celda_CG` contains the counts matrix.
@@ -127,7 +126,7 @@ We can display the clustering results with a heatmap of the normalized counts:
 
 ```{r, fig.width = 7, fig.height = 7, warning = FALSE, message = FALSE}
 norm.counts <- normalizeCounts(sim_counts$counts)
-render_celda_heatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_scheme = "divergent",cluster_gene = TRUE, cluster_cell = TRUE)
+renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_scheme = "divergent",cluster_gene = TRUE, cluster_cell = TRUE)
 ```
 
 ## 2.1.2 Matrix factorization
@@ -135,7 +134,7 @@ render_celda_heatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_sch
 `celda` can also perform matrix factorization to summarize the contribution of each transcriptional state to each cellular subpopulation. 
 
 ```{r}
-factorized <- factorizeMatrix.celda_CG(counts = sim_counts$counts, celda.obj = celdaCG.res)
+factorized <- factorizeMatrix(celdaCG.res, sim_counts$count)
 
 pop.states = t(factorized$proportions$population.states)
 head(pop.states)
@@ -154,14 +153,14 @@ plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], matrix =
 The transcriptional and cell states can also be visualized with a heatmap:
 
 ```{r, fig.width = 7, fig.height = 7}
-render_celda_heatmap(pop.states, color_scheme = "sequential", show_cellnames=T, show_genenames=T, breaks = NA, z= 1:3, y = 1:10)
+renderCeldaHeatmap(pop.states, color_scheme = "sequential", show_cellnames=T, show_genenames=T, breaks = NA, z= 1:ncol(pop.states), y = 1:nrow(pop.states))
 ```
 
 Sometimes it may be helpful to visualize the relative probability of each transcriptional state in each cellular subpopulation. We can do this by z-score normalizing the probability matrix:
 
 ```{r, fig.width = 7, fig.height = 7}
 rel.states = sweep(pop.states, 1, rowSums(pop.states), "/")
-render_celda_heatmap(rel.states, color_scheme = "sequential", show_cellnames=T, show_genenames=T, breaks = NA, z= 1:3, y = 1:10)
+renderCeldaHeatmap(rel.states, color_scheme = "sequential", show_cellnames=T, show_genenames=T, breaks = NA, z= 1:ncol(rel.states), y = 1:nrow(rel.states))
 ```
 
 The relative probabilities will tend to reflect the patterns observed in the heatmap as the genes in the heatmaps are Z-score transformed and thus on a relative scale as well.
@@ -222,7 +221,7 @@ model.res.list<-getModel(cmatp.res, K = 15, L = 20, best = "loglik")
 After matrix factorization, the top genes can be selected using the `topRank` function on the "gene.states" matrix:  
 
 ```{r}
-factorize.matrix = factorizeMatrix.celda_CG(counts = cmatp_select, celda.obj = model.res.list)
+factorize.matrix = factorizeMatrix(model.res.list, counts=cmatp_select)
 top.genes <- topRank(factorize.matrix$proportions$gene.states, n = 25)
 ```
 
@@ -239,7 +238,7 @@ We can make a heatmap of these top genes as follows:
 ```{r, fig.width = 7, fig.height = 7}
 top.genes.ix <- unique(unlist(top.genes$index))
 norm.cmatp.counts <- normalizeCounts(cmatp_select)
-render_celda_heatmap(norm.cmatp.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
+renderCeldaHeatmap(norm.cmatp.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
 ```
 
 We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectivelyof a specific transcriptional state and visualize each cell's expression of a set of genes, . 
