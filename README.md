@@ -11,10 +11,10 @@
 
 ## Installation Instructions
 
-To install the beta release of celda via devtools:
+To install the most recent beta release of celda via devtools:
 ```
 library(devtools)
-install_github("compbiomed/celda@v0.2")
+install_github("compbiomed/celda@v0.3")
 ```
 The most up-to-date (but potentially less stable) version of celda can similarly be installed with:
 ```
