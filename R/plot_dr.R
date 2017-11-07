@@ -27,7 +27,7 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 #' @param dim2 Numeric vector; second dimension from data dimensionality reduction output.
 #' @param matrix Counts matrix, will have cell name for column name and gene name for row name.
 #' @param trim A two element vector to specify the lower and upper cutoff for the data. Occurs after row scaling. Set to NULL to disable. Default c(-2,2).A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).
-#' @param rescale Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default FALSE.
+#' @param rescale Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default TRUE.
 #' @param size Numeic vector; size of point on plot. Default = 1.
 #' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
 #' @param ylab Character vector, used as label for y axis. Default "Dimension_2".
@@ -35,7 +35,7 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 #' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'
 #' @export 
-plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
     matrix <- t(scale(t(matrix)))
     if(!is.null(trim)){
@@ -56,7 +56,7 @@ plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, size
 #' @param dim1 Numeric vector; first dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector; second dimension from data dimensionality reduction output.
 #' @param matrix Cell state probability matrix, will have cell name for column name and state probability for row name.
-#' @param rescale Boolean. If TRUE z-score normalize the matrix. Default FALSE.
+#' @param rescale Boolean. If TRUE z-score normalize the matrix. Default TRUE.
 #' @param size Numeic vector; size of point on plot. Default = 1.
 #' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
 #' @param ylab Character vector, used as label for y axis. Default "Dimension_2".
@@ -64,7 +64,7 @@ plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = FALSE, size
 #' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'
 #' @export 
-plotDrState <- function(dim1, dim2, matrix, rescale = FALSE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
     for(x in 1:nrow(matrix)){ 
       matrix[x,] <- matrix[x,]-min(matrix[x,])

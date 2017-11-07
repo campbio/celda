@@ -61,27 +61,27 @@ library(Rtsne)
 library(reshape2)
 ```
 
-We use the built-in data generating function `simulateCells.celda_CG` to simulate a single-cell RNA-Seq dataset. `simulateCells.celda_CG` returns a list containing a count matrix where each row is a gene and each column is a cell. The K parameter determines the number of cell clusters while the L parameter determines the number of gene clusters within the dataset.
+We use the built-in data generating function `simulateCells` to simulate a single-cell RNA-Seq dataset. `simulateCells` returns a list containing a count matrix where each row is a gene and each column is a cell. The K parameter determines the number of cell clusters while the L parameter determines the number of gene clusters within the dataset.
 
 ```{r}
 sim_counts = simulateCells("celda_CG", K = 3, L = 10)
 ```
 
-The `counts` variable from `simulateCells.celda_CG` contains the counts matrix.
+The `counts` variable contains the counts matrix.
 The dimensions of counts matrix:
 
 ```{r}
 dim(sim_counts$counts)
 ```
 
-The `z` variable from `simulateCells.celda_CG` contains the cluster for each cell.
+The `z` variable contains the cluster for each cell.
 Here is the number of cells in each subpopulation:
 
 ```{r}
 table(sim_counts$z)
 ```
 
-The `y` variable from `simulateCells.celda_CG` contains the transcriptional state assignment for each gene. 
+The `y` variable contains the transcriptional state assignment for each gene. 
 Here is the number of genes in each transcriptional state:
 
 ```{r}
@@ -136,7 +136,7 @@ renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_schem
 ```{r}
 factorized <- factorizeMatrix(celdaCG.res, sim_counts$count)
 
-pop.states = t(factorized$proportions$population.states)
+pop.states = factorized$proportions$population.states
 head(pop.states)
 ```
 
@@ -174,7 +174,7 @@ The optimal number of K and L will likely not be known a priori. Therefore multi
 celda.res.list <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
 ```
 
-Here, `celda` will fit the model for every combination of K between 2 and 4 and L between 9 and 11. Three chains will be run for each combination. The parameter "ncores" can be set to something more than 1 to run multiple chains in parallel.
+Here, `celda` will fit the model for every combination of K between 2 and 4 and L between 9 and 11. Three chains will be run for each combination. The parameter "cores" can be set to something more than 1 to run multiple chains in parallel.
 
 We can use the function "getModel" to select a particular model from the list of models once we have selected the optimal K and L.
 
@@ -183,6 +183,8 @@ model = getModel(celda.res.list, K = 3, L = 10, best = "loglik")
 ```
 
 The chain with the best log likelihood will be returned from all models that were run with K = 3 and L = 10.
+
+
 
 # 3. PBMC Analysis with celda
 
@@ -195,69 +197,69 @@ library(pheatmap)
 library(Rtsne)
 ```
 
-We will use the "cmatp_data" dataset, which is a dataset of 3000 Peripheral Blood Mononuclear Cells (PBMC), available from 10X Genomics. The rows are organized by gene names, while the columns are organized by barcodes. For this tutorial, the dataset has been slightly modified so the rownames are comprised of the Ensembl gene ID as well as the gene name. The raw dataset can be found at https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit.
+We will use the "pbmc_data" dataset, which is a dataset of 3000 Peripheral Blood Mononuclear Cells (PBMC), available from 10X Genomics. The rows are organized by gene names, while the columns are organized by barcodes. For this tutorial, the dataset has been slightly modified so the rownames are comprised of the Ensembl gene ID as well as the gene name. The raw dataset can be found at https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit.
 
 We will only include genes with at least 5 counts in a least 5 cells for this analysis to reduce computational time. However, `celda` is capable of analyzing genes with fewer counts. 
 
 ```{r}
-load(file="../data/cmatp_data.rda")
-dim(cmatp_data)
-head(rownames(cmatp_data))
-head(colnames(cmatp_data))
+dim(pbmc_data)
+head(rownames(pbmc_data))
+head(colnames(pbmc_data))
 ```
 
 ```{r}
-cmatp_select <- cmatp_data[rowSums(cmatp_data>4) > 4,]
+pbmc_select <- pbmc_data[rowSums(pbmc_data>4) > 4,]
 ```
+
 
 ### 3.1.1 Analysis of 10X Genomics PBMC data
 
 
 ```{r, message = FALSE, verbose = FALSE}
-cmatp.res = celda(cmatp_select, K = 15, L = 20, model = "celda_CG", nchains = 3, cores = 1)
-model.res.list<-getModel(cmatp.res, K = 15, L = 20, best = "loglik")
+pbmc.res = celda(pbmc_select, K = 15, L = 20, cores = 1, model = "celda_CG", nchains = 10, max.iter = 100)
+model.res.list<-getModel(pbmc.res, K = 15, L = 20, best = "loglik")
 ```
 
 After matrix factorization, the top genes can be selected using the `topRank` function on the "gene.states" matrix:  
 
 ```{r}
-factorize.matrix = factorizeMatrix(model.res.list, counts=cmatp_select)
+factorize.matrix = factorizeMatrix(model.res.list, counts=pbmc_select)
 top.genes <- topRank(factorize.matrix$proportions$gene.states, n = 25)
 ```
 
 ```{r}
-top.genes$names$L16
+top.genes$names$L6
 ```
 
 ```{r}
-top.genes$names$L20
+top.genes$names$L15
 ```
 
 We can make a heatmap of these top genes as follows: 
 
 ```{r, fig.width = 7, fig.height = 7}
 top.genes.ix <- unique(unlist(top.genes$index))
-norm.cmatp.counts <- normalizeCounts(cmatp_select)
-renderCeldaHeatmap(norm.cmatp.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
+norm.pbmc.counts <- normalizeCounts(pbmc_select)
+renderCeldaHeatmap(norm.pbmc.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
 ```
 
-We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression of a specific transcriptional state and visualize each cell's expression of a set of genes, respectively. 
+We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectivelyof a specific transcriptional state and visualize each cell's expression of a set of genes, . 
 
 ```{r, message = FALSE}
-norm_cmatp <- normalizeCounts(factorize.matrix$counts$cell.states)
+norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-tsne <- Rtsne(t(norm_cmatp))
-cmatp_tsne <- tsne$Y
+tsne <- Rtsne(t(norm_pbmc), pca = FALSE, max_iter = 5000)
+pbmc_tsne <- tsne$Y
 ```
 
 ```{r, fig.width = 7, fig.height = 7}
-plotDrCluster(dim1 = cmatp_tsne[,1], dim2 = cmatp_tsne[,2], cluster = as.factor(model.res.list$z))
+plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.res.list$z))
 
-plotDrState(dim1 = cmatp_tsne[,1], dim2 = cmatp_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
+plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
 
-marker.genes <- c("ENSG00000179639_FCER1A","ENSG00000105374_NKG7","ENSG00000153563_CD8A" ,"ENSG00000168685_IL7R", "ENSG00000198851_CD3E", "ENSG00000156738_MS4A1", "ENSG00000203747_FCGR3A","ENSG00000163736_PPBP","ENSG00000090382_LYZ")
-gene.counts <- cmatp_select[marker.genes,]
-plotDrGene(dim1 = cmatp_tsne[,1],dim2 = cmatp_tsne[,2], matrix = gene.counts, rescale = TRUE)
+marker.genes <- c("ENSG00000168685_IL7R","ENSG00000198851_CD3E","ENSG00000105374_NKG7","ENSG00000203747_FCGR3A","ENSG00000090382_LYZ","ENSG00000179639_FCER1A","ENSG00000156738_MS4A1", "ENSG00000163736_PPBP")
+gene.counts <- pbmc_select[marker.genes,]
+plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, rescale = TRUE)
 ```
 
-With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. For instance, the same cell cluster that highly expresses the transcriptional state L20 highly expresses PPBP, a known marker gene for megakaryocytes. This is consistent with what we see in the above, in which transcriptional state L20 highly expresses PPBP.
+With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. For instance, the same cell cluster that highly expresses the transcriptional state L6 highly expresses LYZ, a known marker gene for monocytes. This is consistent with what we see in the above, in which transcriptional state L6 highly expresses monocytes.
