@@ -15,7 +15,7 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
   df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
   m <- reshape2::melt(df, id.vars = c("dim1","dim2"))
   colnames(m) <- c(xlab,ylab,"facet",var_label)
-  ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity",ggplot2::aes_string(color = var_label)) + 
+  ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes_string(color = var_label)) + 
     ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, high = color_high, mid = color_mid, midpoint = (max(m[,4])-min(m[,4]))/2 ,name = gsub("_"," ",var_label)) + 
     ggplot2::theme(strip.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.spacing = unit(0,"lines"),
                    panel.background = element_blank(), axis.line = ggplot2::element_line(colour = "black"))
@@ -89,7 +89,7 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
 plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2"){
   df <- data.frame(dim1,dim2,cluster)
   colnames(df) <- c(xlab,ylab,"Cluster")
-  ggplot2::ggplot(df, ggplot2::aes_string(x = xlab,y = ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = Cluster)) + 
+  ggplot2::ggplot(df, ggplot2::aes_string(x = xlab,y = ylab)) + ggplot2::geom_point(stat = "identity",size = size, ggplot2::aes(color = Cluster)) + 
     ggplot2::theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(color = "black")) + 
     scale_color_manual(values = distinct_colors(nlevels(cluster))) + 
     guides(color = guide_legend(override.aes = list(size = 1)))
