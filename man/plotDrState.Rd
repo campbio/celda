@@ -4,7 +4,7 @@
 \alias{plotDrState}
 \title{Create a scatterplot based off of a matrix containing the celda state probabilities per cell.}
 \usage{
-plotDrState(dim1, dim2, matrix, rescale = FALSE, size = 1,
+plotDrState(dim1, dim2, matrix, rescale = TRUE, size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
   color_mid = NULL, color_high = "blue")
 }
@@ -15,7 +15,7 @@ plotDrState(dim1, dim2, matrix, rescale = FALSE, size = 1,
 
 \item{matrix}{Cell state probability matrix, will have cell name for column name and state probability for row name.}
 
-\item{rescale}{Boolean. If TRUE z-score normalize the matrix. Default FALSE.}
+\item{rescale}{Boolean. If TRUE z-score normalize the matrix. Default TRUE.}
 
 \item{size}{Numeic vector; size of point on plot. Default = 1.}
 
