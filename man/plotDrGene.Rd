@@ -4,7 +4,7 @@
 \alias{plotDrGene}
 \title{Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.}
 \usage{
-plotDrGene(dim1, dim2, matrix, trim = c(-2, 2), rescale = FALSE, size = 1,
+plotDrGene(dim1, dim2, matrix, trim = c(-2, 2), rescale = TRUE, size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
   color_mid = NULL, color_high = "blue")
 }
@@ -17,7 +17,7 @@ plotDrGene(dim1, dim2, matrix, trim = c(-2, 2), rescale = FALSE, size = 1,
 
 \item{trim}{A two element vector to specify the lower and upper cutoff for the data. Occurs after row scaling. Set to NULL to disable. Default c(-2,2).A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).}
 
-\item{rescale}{Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default FALSE.}
+\item{rescale}{Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default TRUE.}
 
 \item{size}{Numeic vector; size of point on plot. Default = 1.}
 
