@@ -10,7 +10,7 @@
 
 #' 3000 Peripheral Blood Mononuclear Cells (PBMC) from 10X Genomics.
 #'
-#' @title cmatp_data
+#' @title pbmc_data
 #' @description A dataset of 3000 Peripheral Blood Mononuclear Cells (PBMC),
 #' available from 10X Genomics.  The raw dataset can be found at the URL below.
 #' @format The rows are organized by gene names, while the
@@ -18,4 +18,4 @@
 #' slightly modified so the rownames are comprised of the Ensembl gene ID as
 #' well as the gene name.
 #' @source \url{https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit}
-"cmatp_data"
+"pbmc_data"
