@@ -85,12 +85,23 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
 #' @param size Numeic vector; size of point on plot.Default 1.
 #' @param xlab Character vector, used as label for rows. Default "Dimension_1".
 #' @param ylab Character vector, used as label for columns. Default "Dimension_2".
+#' @param specific_clusters Numeic vector; Contains specific cluster labels.
 #' @export 
-plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2"){
-  df <- data.frame(dim1,dim2,cluster)
+plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
+  df <- data.frame(dim1, dim2, cluster)
   colnames(df) <- c(xlab,ylab,"Cluster")
-  ggplot2::ggplot(df, ggplot2::aes_string(x = xlab,y = ylab)) + ggplot2::geom_point(stat = "identity",size = size, ggplot2::aes(color = Cluster)) + 
-    ggplot2::theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(color = "black")) + 
-    scale_color_manual(values = distinct_colors(nlevels(cluster))) + 
-    guides(color = guide_legend(override.aes = list(size = 1)))
+  if(!is.null(specific_clusters)){
+    df[3][!(df[[3]] %in% specific_clusters),] <- 0
+    df <- df[order(df[[3]]),]
+    df[3] <- as.factor(df[[3]])
+    cluster_colors <- c('grey',distinct_colors(nlevels(as.factor(cluster)))[sort(specific_clusters)])
+  } else{
+    cluster_colors <- distinct_colors(nlevels(as.factor(cluster)))
+    df[3] <- as.factor(df[[3]])
+  }
+  ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
+    ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = Cluster)) +
+    ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(color = "black")) +
+    ggplot2::scale_color_manual(values = cluster_colors) +
+    ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
 }
