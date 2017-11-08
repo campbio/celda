@@ -5,7 +5,7 @@
 \title{Create a scatterplot based on celda cluster labels.}
 \usage{
 plotDrCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2")
+  ylab = "Dimension_2", specific_clusters = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
@@ -19,6 +19,8 @@ plotDrCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
 \item{xlab}{Character vector, used as label for rows. Default "Dimension_1".}
 
 \item{ylab}{Character vector, used as label for columns. Default "Dimension_2".}
+
+\item{specific_clusters}{Numeic vector; Contains specific cluster labels.}
 }
 \description{
 Create a scatterplot based on celda cluster labels.
