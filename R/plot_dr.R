@@ -17,8 +17,8 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
   colnames(m) <- c(xlab,ylab,"facet",var_label)
   ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes_string(color = var_label)) + 
     ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, high = color_high, mid = color_mid, midpoint = (max(m[,4])-min(m[,4]))/2 ,name = gsub("_"," ",var_label)) + 
-    ggplot2::theme(strip.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.spacing = unit(0,"lines"),
-                   panel.background = element_blank(), axis.line = ggplot2::element_line(colour = "black"))
+    ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = unit(0,"lines"),
+                   panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black"))
 }
 
 #' Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.  
