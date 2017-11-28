@@ -2,37 +2,38 @@
 # S3 Methods for celda_list objects                                            #
 ################################################################################
 
-#' Run the celda Bayesian hierarchical model on a matrix of counts.
-#' TODO: - If no chain provided, automatically choose best chain
-#'       - Smarter subsetting of the run.params to DRY this function up
+# TODO: - If no chain provided, automatically choose best chain
+#       - Smarter subsetting of the run.params to DRY this function up
+
+#' Select the best model amongst a list of models generated in a celda run.
 #' 
 #' @param celda.list A celda_list object returned from celda()
-#' @param K The K parameter for the desired model in the results list
-#' @param L The L parameter for the desired model in the results list
-#' @param chain The desired chain for the specified model
-#' @param best Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided. Defaults to "loglik."
+#' @param K The K parameter for the desired model in the results list. Defaults to NULL.
+#' @param L The L parameter for the desired model in the results list. Defaults to NULL.
+#' @param chain The desired chain for the specified model. Defaults to NULL. Overrides best parameter if provided.
+#' @param best Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Defaults to "loglik."
 #' @return A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
-getModel = function(celda.list, K=NULL, L=NULL, chain=1, best="loglik") {
+getModel = function(celda.list, K=NULL, L=NULL, chain=NULL, best="loglik") {
   validateGetModelParams(celda.list, K, L, chain, best)  # Sanity check params
   
   requested.chain = NA
   run.params = celda.list$run.params
   
   if (celda.list$content.type == "celda_CG") {
-    if (!is.null(best)) {
-      matching.chain.idx = run.params[run.params$K == K & run.params$L == L, "index"]
-      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
-    } else {
+    if (is.null(chain)) {
       requested.chain.idx = run.params[run.params$K == K & run.params$L == L & run.params$chain == chain,
                                        "index"]
       requested.chain = celda.list$res.list[[requested.chain.idx]]
+    } else {
+      matching.chain.idx = run.params[run.params$K == K & run.params$L == L, "index"]
+      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     }
   }
   
   
   if (celda.list$content.type == "celda_C") {
-    if (!is.null(best)) {
+    if (is.null(chain)) {
       matching.chain.idx = run.params[run.params$K == K, "index"]
       requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     } else {
@@ -43,7 +44,7 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best="loglik") {
   
   
   if (celda.list$content.type == "celda_G") {
-    if (!is.null(best)) {
+    if (is.null(chain)) {
       matching.chain.idx = run.params[run.params$L == L, "index"]
       requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     } else { 
@@ -59,6 +60,30 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=1, best="loglik") {
   }
   
   return(requested.chain)
+}
+
+
+#' Select a set of models from a celda_list objects based off of rows in its run.params attribute.
+#' 
+#' @param celda.list A celda_list object returned from celda()
+#' @param run.param.idx Row indices in the celda.list's run params corresponding to the desired models.
+#' @return A celda_list containing celda model objects matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
+#' @export
+selectModels = function(celda.list, run.param.rows) {
+  desired.models = lapply(run.param.rows,
+                          function(row.idx) {
+                            if (!is.numeric(row.idx) | 
+                                row.idx < 0 | 
+                                row.idx > nrow(celda.list$run.params)) {
+                                  stop("Invalid row index provided") 
+                            }
+                            params = celda.list$run.params[row.idx, ]
+                            getModel(celda.list, params$K, params$L, params$chain)
+                          })
+  subsetted.celda.list = list(run.params=celda.list$run.params[run.param.rows, ],
+                              res.list=desired.models, content.type=celda.list$content.type,
+                              count.checksum=celda.list$count.checksum)
+  return(subsetted.celda.list)
 }
 
 
