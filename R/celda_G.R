@@ -361,8 +361,10 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
   ## constraint (columns are guarnteed at least one count):
   zero.row.idx = which(rowSums(cell.counts) == 0)
-  cell.counts = cell.counts[-zero.row.idx, ]
-  y = y[-zero.row.idx]
+  if (length(zero.row.idx > 0)) {
+    cell.counts = cell.counts[-zero.row.idx, ]
+    y = y[-zero.row.idx]
+  }
     
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
