@@ -10,10 +10,10 @@
 #' @param K The K parameter for the desired model in the results list
 #' @param L The L parameter for the desired model in the results list
 #' @param chain The desired chain for the specified model
-#' @param best Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.
+#' @param best Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided. Defaults to "loglik."
 #' @return A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
-getModel = function(celda.list, K=NULL, L=NULL, chain=1, best=NULL) {
+getModel = function(celda.list, K=NULL, L=NULL, chain=1, best="loglik") {
   validateGetModelParams(celda.list, K, L, chain, best)  # Sanity check params
   
   requested.chain = NA
