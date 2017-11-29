@@ -9,7 +9,7 @@ selectModels(celda.list, run.param.rows)
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
-\item{run.param.idx}{Row indices in the celda.list's run params corresponding to the desired models.}
+\item{run.param.rows}{Row indices in the celda.list's run params corresponding to the desired models.}
 }
 \value{
 A celda_list containing celda model objects matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
