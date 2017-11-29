@@ -34,8 +34,6 @@ Imports:
     MAST,
     SummarizedExperiment,
     GenomicRanges,
-    edgeR,
-    zingeR,
     ineq
 Suggests:
     testthat,
