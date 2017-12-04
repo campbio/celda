@@ -246,8 +246,8 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   zero.row.idx = which(rowSums(cell.counts) == 0)
   if (length(zero.row.idx > 0)) {
     cell.counts = cell.counts[-zero.row.idx, ]
-  }
-  new$y = new$y[-zero.row.idx]
+    new$y = new$y[-zero.row.idx]
+  } 
  
   ## Assign gene/cell/sample names 
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
