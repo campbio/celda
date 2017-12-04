@@ -89,24 +89,6 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
   return(list(z=new.z, y=new.y, z.map=z.ta, y.map=y.order))  
 }  
 
-reorder.hclust.cells.then.genes = function(counts,res){
-  #Reorder K
-  fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  fm.norm <- t(normalizeCounts(t(fm$proportions$population.states),scale.factor = 1))
-  d <- dist(t(fm.norm),diag = TRUE, upper = TRUE)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterZ(res,from = h$order,
-                        to = c(1:ncol(fm$counts$population.states)))
-  
-  #Reorder L
-  fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  fm.norm <- t(normalizeCounts(t(fm$proportions$population.states),scale.factor = 1))
-  d <- dist((fm.norm),diag = TRUE, upper = TRUE)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterY(res,from = h$order,
-                        to = c(1:nrow(fm$counts$population.states)))
-  return(res)
-}
 
 #' Re-code cell cluster labels by provided mapping scheme
 #' 
