@@ -22,12 +22,12 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=NULL, best="loglik") {
   
   if (celda.list$content.type == "celda_CG") {
     if (is.null(chain)) {
+      matching.chain.idx = run.params[run.params$K == K & run.params$L == L, "index"]
+      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
+    } else {
       requested.chain.idx = run.params[run.params$K == K & run.params$L == L & run.params$chain == chain,
                                        "index"]
       requested.chain = celda.list$res.list[[requested.chain.idx]]
-    } else {
-      matching.chain.idx = run.params[run.params$K == K & run.params$L == L, "index"]
-      requested.chain = chooseBestChain(celda.list$res.list[matching.chain.idx], best)
     }
   }
   
