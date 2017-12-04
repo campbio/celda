@@ -176,6 +176,25 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   return(final)
 }
 
+reorder.celdaCG = function(counts,res){
+  #Reorder K
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  fm.norm <- t(normalizeCounts(t(fm$proportions$population.states),scale.factor = 1))
+  d <- dist(t(fm.norm),diag = TRUE, upper = TRUE)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterZ(res,from = h$order,
+                        to = c(1:ncol(fm$counts$population.states)))
+  
+  #Reorder L
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  fm.norm <- t(normalizeCounts(t(fm$proportions$population.states),scale.factor = 1))
+  d <- dist((fm.norm),diag = TRUE, upper = TRUE)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterY(res,from = h$order,
+                        to = c(1:nrow(fm$counts$population.states)))
+  return(res)
+}
+
 #' Simulate cells from the cell/gene clustering generative model
 #' 
 #' @param S The number of samples
@@ -507,7 +526,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   class(result) = "celda_CG" 
    
   ## Peform reordering on final Z and Y assigments:
-  result = reorder.hclust.cells.then.genes(counts = counts, res = result)
+  result = reorder.celdaCG(counts = counts, res = result)
   return(result)
 }
 
