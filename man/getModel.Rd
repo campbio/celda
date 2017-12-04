@@ -2,28 +2,24 @@
 % Please edit documentation in R/celda_list.R
 \name{getModel}
 \alias{getModel}
-\title{Run the celda Bayesian hierarchical model on a matrix of counts.
-TODO: - If no chain provided, automatically choose best chain
-      - Smarter subsetting of the run.params to DRY this function up}
+\title{Select the best model amongst a list of models generated in a celda run.}
 \usage{
-getModel(celda.list, K = NULL, L = NULL, chain = 1, best = NULL)
+getModel(celda.list, K = NULL, L = NULL, chain = NULL, best = "loglik")
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
-\item{K}{The K parameter for the desired model in the results list}
+\item{K}{The K parameter for the desired model in the results list. Defaults to NULL.}
 
-\item{L}{The L parameter for the desired model in the results list}
+\item{L}{The L parameter for the desired model in the results list. Defaults to NULL.}
 
-\item{chain}{The desired chain for the specified model}
+\item{chain}{The desired chain for the specified model. Defaults to NULL. Overrides best parameter if provided.}
 
-\item{best}{Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Overrides chain parameter if provided.}
+\item{best}{Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Defaults to "loglik."}
 }
 \value{
 A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 }
 \description{
-Run the celda Bayesian hierarchical model on a matrix of counts.
-TODO: - If no chain provided, automatically choose best chain
-      - Smarter subsetting of the run.params to DRY this function up
+Select the best model amongst a list of models generated in a celda run.
 }
