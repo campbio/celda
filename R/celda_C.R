@@ -204,17 +204,17 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     iter = iter + 1    
   }
     
-  reordered.labels = reorder.label.by.size(z.best, K)
-  z.final.reorder = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
 
-  result = list(z=z.final.reorder, completeLogLik=ll,  
+  result = list(z=z.best, completeLogLik=ll,  
                 finalLogLik=ll.best, seed=seed, K=K, 
                 sample.label=sample.label, alpha=alpha, 
                 beta=beta, count.checksum=count.checksum, 
                 names=names)
   
   class(result) = "celda_C"
+  
+  result = reorder.celdaC(counts = counts, res = result)
   
   return(result)
 }
@@ -351,6 +351,16 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   return(final)
 }
 
+reorder.celdaC = function(counts,res){
+  #Reorder K
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  fm.norm <- t(normalizeCounts(t(fm$proportions$gene.states),scale.factor = 1))
+  d <- dist(t(fm.norm),diag = TRUE, upper = TRUE)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterZ(res,from = h$order,
+                        to = c(1:ncol(fm$counts$gene.states)))
+  return(res)
+}
 
 #' Generate factorized matrices showing each feature's influence on the celda_C model clustering 
 #' 
