@@ -37,11 +37,11 @@ table(sim_counts$z, sim_counts$sample.label)
 
 ## ---- fig.show='hold', warning = FALSE, message = FALSE------------------
 
-celdaCG.res = celda_CG(counts = sim_counts$counts, K = 3, L = 10, max.iter = 10, sample.label = sim_counts$sample.label)
+celda.res = celda(counts = sim_counts$counts, model = "celda_CG", K = 3, L = 10, max.iter = 10, cores = 1, nchains = 1)
 
 ## ------------------------------------------------------------------------
-z = celdaCG.res$z
-y = celdaCG.res$y
+z = celda.res$res.list[[1]]$z
+y = celda.res$res.list[[1]]$y
 
 table(z, sim_counts$z)
 table(y, sim_counts$y)
@@ -52,15 +52,26 @@ norm.counts <- normalizeCounts(sim_counts$counts)
 renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_scheme = "divergent",cluster_gene = TRUE, cluster_cell = TRUE)
 
 ## ------------------------------------------------------------------------
-factorized <- factorizeMatrix(celdaCG.res, sim_counts$count)
+model <- getModel(celda.res, K = 3, L = 10, best = "loglik")
+factorized <- factorizeMatrix(model, sim_counts$count)
 
+## ------------------------------------------------------------------------
+dim(factorized$proportions$gene.states)
+head(factorized$proportions$gene.states)
+
+## ------------------------------------------------------------------------
+dim(factorized$proportions$cell.states)
+factorized$proportions$cell.states[1:10,1:3]
+
+## ------------------------------------------------------------------------
 pop.states = factorized$proportions$population.states
+dim(pop.states)
 head(pop.states)
 
 ## ---- fig.width = 7, fig.height = 7--------------------------------------
 data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),scale = F, center = F)
 
-plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], cluster = as.factor(celdaCG.res$z))
+plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], cluster = celda.res$res.list[[1]]$z)
 
 plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], matrix = factorized$proportions$cell.states, rescale = TRUE)
 
@@ -72,7 +83,7 @@ rel.states = sweep(pop.states, 1, rowSums(pop.states), "/")
 renderCeldaHeatmap(rel.states, color_scheme = "sequential", show_cellnames=T, show_genenames=T, breaks = NA, z= 1:ncol(rel.states), y = 1:nrow(rel.states))
 
 ## ------------------------------------------------------------------------
-celda.res.list <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
+celda.res.list <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG", cores = 1)
 
 ## ------------------------------------------------------------------------
 model = getModel(celda.res.list, K = 3, L = 10, best = "loglik")
@@ -94,32 +105,32 @@ head(colnames(pbmc_data))
 pbmc_select <- pbmc_data[rowSums(pbmc_data>4) > 4,]
 
 ## ---- message = FALSE, verbose = FALSE-----------------------------------
-pbmc.res = celda(pbmc_select, K = 15, L = 20, cores = 1, model = "celda_CG", nchains = 10, max.iter = 100)
-model.res.list<-getModel(pbmc.res, K = 15, L = 20, best = "loglik")
+pbmc.res = celda(pbmc_select, K = 10, L = 20, cores = 1, model = "celda_CG", nchains = 8, max.iter = 100)
+model<-getModel(pbmc.res, K = 10, L = 20, best = "loglik")
 
 ## ------------------------------------------------------------------------
-factorize.matrix = factorizeMatrix(model.res.list, counts=pbmc_select)
+factorize.matrix = factorizeMatrix(model, counts=pbmc_select)
 top.genes <- topRank(factorize.matrix$proportions$gene.states, n = 25)
 
 ## ------------------------------------------------------------------------
-top.genes$names$L6
+top.genes$names$L3
 
 ## ------------------------------------------------------------------------
-top.genes$names$L15
+top.genes$names$L4
 
 ## ---- fig.width = 7, fig.height = 7--------------------------------------
 top.genes.ix <- unique(unlist(top.genes$index))
 norm.pbmc.counts <- normalizeCounts(pbmc_select)
-renderCeldaHeatmap(norm.pbmc.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
+renderCeldaHeatmap(norm.pbmc.counts[top.genes.ix,], z = model$z, y = model$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
 
 ## ---- message = FALSE----------------------------------------------------
 norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-tsne <- Rtsne(t(norm_pbmc), pca = FALSE, max_iter = 5000)
+tsne <- Rtsne(t(norm_pbmc), pca = FALSE, max_iter = 2000)
 pbmc_tsne <- tsne$Y
 
 ## ---- fig.width = 7, fig.height = 7--------------------------------------
-plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.res.list$z))
+plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model$z))
 
 plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
 
