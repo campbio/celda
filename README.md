@@ -30,7 +30,7 @@ An analysis example using celda with RNASeq via vignette('celda-analysis')
 
 
 ## New Features and announcements
-The v0.2 release of celda represents a useable implementation of the various celda clustering models.
+The v0.3 release of celda represents a useable implementation of the various celda clustering models.
 Please submit any usability issues or bugs to the issue tracker at https://github.com/compbiomed/celda
 
 You can discuss celda, or ask the developers usage questions, in our [Google Group.](https://groups.google.com/forum/#!forum/celda-list)
