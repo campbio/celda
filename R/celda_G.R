@@ -123,7 +123,16 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
   return(final)
 }
 
-
+reorder.celdaG = function(counts,res){
+  #Reorder L
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  fm.norm <- t(normalizeCounts(fm$proportions$gene.states,scale.factor = 1))
+  d <- dist((fm.norm),diag = TRUE, upper = TRUE)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterY(res,from = h$order,
+                        to = c(1:nrow(fm$counts$cell.states)))
+  return(res)
+}
 
 
 # Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)
@@ -297,15 +306,15 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
     iter <- iter + 1    
   }
     
-  reordered.labels = reorder.label.by.size(y.best, L)
-  y.final.order = reordered.labels$new.labels
   names = list(row=rownames(counts), column=colnames(counts))  
 
-  result = list(y=y.final.order, completeLogLik=ll, 
+  result = list(y=y.best, completeLogLik=ll, 
                 finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
                 count.checksum=count.checksum, seed=seed, names=names)
   
   class(result) = "celda_G"
+  
+  result = reorder.celdaG(counts = counts, res = result)
   
   return(result)
 }
@@ -361,8 +370,10 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   ## Ensure that there are no all-0 rows in the counts matrix, which violates a celda modeling
   ## constraint (columns are guarnteed at least one count):
   zero.row.idx = which(rowSums(cell.counts) == 0)
-  cell.counts = cell.counts[-zero.row.idx, ]
-  y = y[-zero.row.idx]
+  if (length(zero.row.idx > 0)) {
+    cell.counts = cell.counts[-zero.row.idx, ]
+    y = y[-zero.row.idx]
+  }
     
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
