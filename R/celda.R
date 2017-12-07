@@ -19,7 +19,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=TRUE, logfile_prefix="Celda", ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=FALSE, logfile_prefix="Celda", ...) {
   message("Starting celda...")
   validateArgs(counts, model, sample.label, nchains, cores, seed, ...)
   

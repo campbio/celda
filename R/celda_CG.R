@@ -93,7 +93,7 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   return(final)
 }
 
-cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) {
+.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) {
 
   ## Determine if any TS has 0 genes
   ## Need to remove 0 gene states as this will cause the likelihood to fail
@@ -142,7 +142,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
   return(final)
 }
 
-cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, n.CP, L, alpha, beta) {
+.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, n.CP, L, alpha, beta) {
 
   ## Calculate for "Theta" component
   theta.ll = log(m.CP.by.S + alpha)
@@ -158,7 +158,7 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, n.CP, L, alpha, beta) {
   return(final)
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
+.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
   
   ## Calculate for "Phi" component
   phi.ll = sum(lgamma(n.CP.by.TS + beta))
@@ -174,6 +174,25 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delt
 
   final = phi.ll + psi.ll + eta.ll
   return(final)
+}
+
+reorder.celdaCG = function(counts,res){
+  #Reorder K
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  fm.norm <- t(normalizeCounts(t(fm$proportions$population.states),scale.factor = 1))
+  d <- dist(t(fm.norm),diag = TRUE, upper = TRUE)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterZ(res,from = h$order,
+                        to = c(1:ncol(fm$counts$population.states)))
+  
+  #Reorder L
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  fm.norm <- t(normalizeCounts(t(fm$proportions$population.states),scale.factor = 1))
+  d <- dist((fm.norm),diag = TRUE, upper = TRUE)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterY(res,from = h$order,
+                        to = c(1:nrow(fm$counts$population.states)))
+  return(res)
 }
 
 #' Simulate cells from the cell/gene clustering generative model
@@ -246,8 +265,8 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   zero.row.idx = which(rowSums(cell.counts) == 0)
   if (length(zero.row.idx > 0)) {
     cell.counts = cell.counts[-zero.row.idx, ]
-  }
-  new$y = new$y[-zero.row.idx]
+    new$y = new$y[-zero.row.idx]
+  } 
  
   ## Assign gene/cell/sample names 
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
@@ -332,7 +351,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   nG = nrow(counts)
   nM = ncol(counts)
   
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+  ll = .calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   
   iter = 1
   continue = TRUE
@@ -358,7 +377,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         temp.n.CP = n.CP
         temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
 
-        probs[j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+        probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
       }  
     
       ## Sample next state and add back counts
@@ -410,7 +429,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
         temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 
-        probs[j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
+        probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
 			n.by.TS=temp.n.by.TS,
 			nG.by.TS=temp.nG.by.TS,
 			nG.in.Y=temp.nG.by.TS[j],
@@ -481,7 +500,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
    }
 
     ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+    temp.ll = .calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
     if((all(temp.ll > ll)) | iter == 1) {
       z.best = z
       y.best = y
@@ -493,14 +512,12 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     iter = iter + 1    
   }
     
-  ## Peform reordering on final Z and Y assigments:
-  reordered.labels = reorder.labels.by.size.then.counts(counts, z=z.best, 
-                                                        y=y.best, K=K, L=L)
+
   names = list(row=rownames(counts), column=colnames(counts), 
                sample=levels(sample.label))
   
   
-  result = list(z=reordered.labels$z, y=reordered.labels$y, completeLogLik=ll, 
+  result = list(z=z.best, y=y.best, completeLogLik=ll, 
                 finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
                 beta=beta, delta=delta, gamma=gamma, seed=seed, 
                 sample.label=sample.label, names=names,
@@ -508,6 +525,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   
   class(result) = "celda_CG" 
    
+  ## Peform reordering on final Z and Y assigments:
+  result = reorder.celdaCG(counts = counts, res = result)
   return(result)
 }
 
@@ -637,7 +656,7 @@ clusterProbability.celda_CG = function(counts, celda.mod) {
 	  temp.n.CP = n.CP
 	  temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
 
-	  z.prob[i,j] = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+	  z.prob[i,j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
 	}  
   
 	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
@@ -667,7 +686,7 @@ clusterProbability.celda_CG = function(counts, celda.mod) {
 	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
 	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 
-	  y.prob[i,j] = cCG.calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
+	  y.prob[i,j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
 		  n.by.TS=temp.n.by.TS,
 		  nG.by.TS=temp.nG.by.TS,
 		  nG.in.Y=temp.nG.by.TS[j],

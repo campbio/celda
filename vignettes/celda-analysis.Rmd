@@ -1,6 +1,6 @@
 ---
 title: "Analyzing single-cell RNA-seq count data with Celda"
-author: "Josh D. Campbell, Masanao Yajima, Sean Corbett, Zichun Liu, Shiyi Yang, Tianwen Huan, Anahita Bahri, Zhe Wang, Yusuke Koga"
+author: "Josh D. Campbell, Masanao Yajima, Sean Corbett, Zichun Liu, Shiyi Yang, Tianwen Huan, Anahita Bahri, Zhe Wang, Yusuke Koga, Jiangyuan Liu"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -104,18 +104,18 @@ table(sim_counts$z, sim_counts$sample.label)
 
 ## 2.1.1 How to Run Celda
 
-There are currently three models within this package: `celda_C` will cluster cells, `celda_G` will cluster genes, and `celda_CG` will simultaneously cluster cells and genes. Here is the command for `celda_CG`:
+There are currently three models within this package: `celda_C` will cluster cells, `celda_G` will cluster genes, and `celda_CG` will simultaneously cluster cells and genes. The `celda` function will use these models and take in a counts matrix to create a `celda` object that contains the cluster labels for each cell and gene.
 
 ```{r, fig.show='hold', warning = FALSE, message = FALSE}
 
-celdaCG.res = celda_CG(counts = sim_counts$counts, K = 3, L = 10, max.iter = 10, sample.label = sim_counts$sample.label)
+celda.res = celda(counts = sim_counts$counts, model = "celda_CG", K = 3, L = 10, max.iter = 10, cores = 1, nchains = 1)
 ```
 
 Here is a comparison between the true cluster labels and the estimated cluster labels.
 
 ```{r}
-z = celdaCG.res$z
-y = celdaCG.res$y
+z = celda.res$res.list[[1]]$z
+y = celda.res$res.list[[1]]$y
 
 table(z, sim_counts$z)
 table(y, sim_counts$y)
@@ -131,12 +131,28 @@ renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL, color_schem
 
 ## 2.1.2 Matrix factorization
 
-`celda` can also perform matrix factorization to summarize the contribution of each transcriptional state to each cellular subpopulation. 
+`celda` can also perform matrix factorization to summarize the contribution of each transcriptional state to each cellular subpopulation. Matrix factorization decomposes the counts matrix into multiple matrices, using the given `celda` model. The gene.states contains each gene's contribution to the transcriptional state it belongs. The cell.states contains each sample's contribution to each transcriptional state. The population.states contains each transcriptional states' contribution to each of the cell states. Each of these matrices can be viewed as raw counts values or proportional values.
 
 ```{r}
-factorized <- factorizeMatrix(celdaCG.res, sim_counts$count)
+model <- getModel(celda.res, K = 3, L = 10, best = "loglik")
+factorized <- factorizeMatrix(model, sim_counts$count)
+```
 
+```{r}
+dim(factorized$proportions$gene.states)
+head(factorized$proportions$gene.states)
+```
+
+```{r}
+dim(factorized$proportions$cell.states)
+factorized$proportions$cell.states[1:10,1:3]
+```
+
+For instance, roughly 30% of the population in cell state K2 is in transcriptional state L1. 
+
+```{r}
 pop.states = factorized$proportions$population.states
+dim(pop.states)
 head(pop.states)
 ```
 
@@ -145,7 +161,7 @@ head(pop.states)
 ```{r, fig.width = 7, fig.height = 7}
 data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),scale = F, center = F)
 
-plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], cluster = as.factor(celdaCG.res$z))
+plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], cluster = celda.res$res.list[[1]]$z)
 
 plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], matrix = factorized$proportions$cell.states, rescale = TRUE)
 ```
@@ -171,7 +187,7 @@ The relative probabilities will tend to reflect the patterns observed in the hea
 The optimal number of K and L will likely not be known a priori. Therefore multiple choices of K and L may need to tested and compared. Additionally, `celda` is sensitive to initial start conditions, so it is good practice to run multiple chains for each combination of K and L to increase the chances of finding the most optimal solution. We have built a wrapper function that will run multiple combinations of K and L with multiple chains for each combination in parallel. 
 
 ```{r}
-celda.res.list <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG")
+celda.res.list <- celda(counts = sim_counts$counts,K = 2:4, L = 9:11, nchains = 3, max.iter = 10, model = "celda_CG", cores = 1)
 ```
 
 Here, `celda` will fit the model for every combination of K between 2 and 4 and L between 9 and 11. Three chains will be run for each combination. The parameter "cores" can be set to something more than 1 to run multiple chains in parallel.
@@ -216,23 +232,23 @@ pbmc_select <- pbmc_data[rowSums(pbmc_data>4) > 4,]
 
 
 ```{r, message = FALSE, verbose = FALSE}
-pbmc.res = celda(pbmc_select, K = 15, L = 20, cores = 1, model = "celda_CG", nchains = 10, max.iter = 100)
-model.res.list<-getModel(pbmc.res, K = 15, L = 20, best = "loglik")
+pbmc.res = celda(pbmc_select, K = 10, L = 20, cores = 1, model = "celda_CG", nchains = 8, max.iter = 100)
+model<-getModel(pbmc.res, K = 10, L = 20, best = "loglik")
 ```
 
 After matrix factorization, the top genes can be selected using the `topRank` function on the "gene.states" matrix:  
 
 ```{r}
-factorize.matrix = factorizeMatrix(model.res.list, counts=pbmc_select)
+factorize.matrix = factorizeMatrix(model, counts=pbmc_select)
 top.genes <- topRank(factorize.matrix$proportions$gene.states, n = 25)
 ```
 
 ```{r}
-top.genes$names$L6
+top.genes$names$L3
 ```
 
 ```{r}
-top.genes$names$L15
+top.genes$names$L4
 ```
 
 We can make a heatmap of these top genes as follows: 
@@ -240,7 +256,7 @@ We can make a heatmap of these top genes as follows:
 ```{r, fig.width = 7, fig.height = 7}
 top.genes.ix <- unique(unlist(top.genes$index))
 norm.pbmc.counts <- normalizeCounts(pbmc_select)
-renderCeldaHeatmap(norm.pbmc.counts[top.genes.ix,], z = model.res.list$z, y = model.res.list$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
+renderCeldaHeatmap(norm.pbmc.counts[top.genes.ix,], z = model$z, y = model$y[top.genes.ix], normalize = NULL, color_scheme = "divergent")
 ```
 
 We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectivelyof a specific transcriptional state and visualize each cell's expression of a set of genes, . 
@@ -248,12 +264,12 @@ We can plot tSNE results via `plot_dr_cluster`, `plot_dr_state` and `plot_dr_gen
 ```{r, message = FALSE}
 norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-tsne <- Rtsne(t(norm_pbmc), pca = FALSE, max_iter = 5000)
+tsne <- Rtsne(t(norm_pbmc), pca = FALSE, max_iter = 2000)
 pbmc_tsne <- tsne$Y
 ```
 
 ```{r, fig.width = 7, fig.height = 7}
-plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.res.list$z))
+plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model$z))
 
 plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
 
@@ -262,4 +278,4 @@ gene.counts <- pbmc_select[marker.genes,]
 plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, rescale = TRUE)
 ```
 
-With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. For instance, the same cell cluster that highly expresses the transcriptional state L6 highly expresses LYZ, a known marker gene for monocytes. This is consistent with what we see in the above, in which transcriptional state L6 highly expresses monocytes.
+With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. For instance, the same cell cluster that highly expresses the transcriptional state L4 highly expresses LYZ, a known marker gene for monocytes. This is consistent with what we see in the above, in which transcriptional state L6 highly expresses monocytes.
