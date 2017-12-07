@@ -5,7 +5,7 @@
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
 celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
-  seed = 12345, verbose = TRUE, logfile_prefix = "Celda", ...)
+  seed = 12345, verbose = FALSE, logfile_prefix = "Celda", ...)
 }
 \arguments{
 \item{counts}{A count matrix}
