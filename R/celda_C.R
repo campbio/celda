@@ -175,7 +175,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
-    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
+    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
@@ -214,7 +214,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
   class(result) = "celda_C"
   
-  result = reorder.celdaC(counts = counts, res = result)
+  #result = reorder.celdaC(counts = counts, res = result)
   
   return(result)
 }
