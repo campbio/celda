@@ -346,7 +346,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   n.CP = rowSums(n.CP.by.TS)
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
-  nG.by.TS = table(y)
+  nG.by.TS = table(factor(y, 1:L))
 
   nG = nrow(counts)
   nM = ncol(counts)
@@ -459,7 +459,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
         n.CP = rowSums(n.CP.by.TS)
         n.by.TS = as.numeric(rowsum(n.by.G, y))
-        nG.by.TS = table(y)
+        nG.by.TS = table(factor(y, 1:L))
       }
     }
     

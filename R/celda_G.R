@@ -60,7 +60,7 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
   n.by.G <- rowSums(counts)
   n.by.TS <- as.numeric(rowsum(n.by.G, y))
   
-  nG.by.TS <- table(y)
+  nG.by.TS = table(factor(y, 1:L))
   nG <- nrow(counts)
 
   a <- sum(lgamma(nG.by.TS * delta))
@@ -85,15 +85,7 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 
 cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
   
-  ## Determine if any TS has 0 genes
-  ## Need to remove 0 gene states as this will cause the likelihood to fail
-  if(sum(nG.by.TS == 0) > 0) {
-    ind = which(nG.by.TS > 0)
-    L = length(ind)
-    n.TS.by.C = n.TS.by.C[ind,]
-    n.by.TS = n.by.TS[ind]
-    nG.by.TS = nG.by.TS[ind]
-  }
+  nG.by.TS[nG.by.TS == 0] = 1
 
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
@@ -150,7 +142,8 @@ reorder.celdaG = function(counts,res){
 # @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 # @keywords log likelihood
 cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
- 
+  nG.by.TS[nG.by.TS == 0] = 1
+  
   ## Calculate for "Eta" component
   eta.ll <- log(nG.in.Y + gamma)
   
@@ -212,7 +205,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
-  nG.by.TS = table(y)
+  nG.by.TS = table(factor(y, 1:L))
   nM = ncol(counts)
   nG = nrow(counts)
   
@@ -273,13 +266,12 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
         ## Re-calculate variables
         n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
         n.by.TS = as.numeric(rowsum(n.by.G, y))
-        nG.by.TS = table(y)
+        nG.by.TS = table(factor(y, 1:L))
       }
     }
 
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
-
       logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
@@ -290,7 +282,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       ## Re-calculate variables
       n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
       n.by.TS = as.numeric(rowsum(n.by.G, y))
-      nG.by.TS = table(y)
+      nG.by.TS = table(factor(y, 1:L))
     }
         
     ## Calculate complete likelihood
