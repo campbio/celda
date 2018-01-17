@@ -70,8 +70,9 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   ## Calculate for "Psi" component
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
-  
-  nG.by.TS = table(y)
+
+  nG.by.TS = table(factor(y, levels=1:L))
+  nG.by.TS[nG.by.TS == 0] = 1
   nG = length(y)
   
   a = sum(lgamma(nG.by.TS * delta))
@@ -94,16 +95,7 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 }
 
 .calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) {
-
-  ## Determine if any TS has 0 genes
-  ## Need to remove 0 gene states as this will cause the likelihood to fail
-  if(sum(nG.by.TS == 0) > 0) {
-    ind = which(nG.by.TS > 0)
-    L = length(ind)
-    n.CP.by.TS = n.CP.by.TS[,ind]
-    n.by.TS = n.by.TS[ind]
-    nG.by.TS = nG.by.TS[ind]
-  }
+  nG.by.TS[nG.by.TS == 0] = 1
   
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
@@ -159,7 +151,13 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 }
 
 .calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
+  nG.by.TS[nG.by.TS == 0] = 1
   
+  ## Calculate for "Eta" component
+  b <- sum(lgamma(nG.by.TS + gamma))
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+  eta.ll <- b + d
+    
   ## Calculate for "Phi" component
   phi.ll = sum(lgamma(n.CP.by.TS + beta))
   
@@ -169,9 +167,6 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 
   psi.ll = a + d
   
-  ## Calculate for "Eta" side
-  eta.ll = log(nG.in.Y + gamma)
-
   final = phi.ll + psi.ll + eta.ll
   return(final)
 }
@@ -318,23 +313,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   }  
   
   ## Randomly select z and y or set z/y to supplied initial values
-  if(is.null(z.init)) {
-    z = sample(1:K, ncol(counts), replace=TRUE)
-  } else {
-    if(length(unique(z.init)) != K || length(z.init) != ncol(counts)) {
-      stop("'z.init' needs to be a combination of K unique values that is the same length as the number of columns in 'counts' matrix.")
-    }
-    z = as.numeric(as.factor(z.init))
-  }  
-  if(is.null(y.init)) {
-    y = sample(1:L, nrow(counts), replace=TRUE)
-  } else {
-    if(length(unique(y.init)) != L || length(y.init) != nrow(counts)) {
-      stop("'y.init' needs to be a combination of L unique values that is the same length as the number of rows in 'counts' matrix.")
-    }
-    y = as.numeric(as.factor(y.init))
-  }  
-
+  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
+  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
   z.best = z
   y.best = y  
   
@@ -414,19 +394,14 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
       n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
 	 
-      ## Set flag if the current gene is the only one in the state
-      ADD_PSEUDO = 0
-      if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
-      
-
       probs = rep(NA, L)
       for(j in 1:L) {
         ## Add in counts to each state and determine probability
-        temp.n.CP.by.TS = n.CP.by.TS + (1 * ADD_PSEUDO)
+        temp.n.CP.by.TS = n.CP.by.TS 
         temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
-        temp.n.by.TS = n.by.TS + (K * ADD_PSEUDO)
+        temp.n.by.TS = n.by.TS 
         temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-        temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
+        temp.nG.by.TS = nG.by.TS 
         temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 
         probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
@@ -496,7 +471,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
       n.CP = rowSums(n.CP.by.TS)
       n.by.TS = as.numeric(rowsum(n.by.G, y))
-      nG.by.TS = table(y)
+      nG.by.TS = table(factor(y, levels=1:L))
    }
 
     ## Calculate complete likelihood
