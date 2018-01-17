@@ -141,6 +141,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   ## Identify clusters to split
   y.ta = table(factor(y, levels=1:L))
   y.to.split = which(y.ta >= min)
+  y.non.empty = which(y.ta > 0)
 
   if(length(y.to.split) == 0) {
     m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
@@ -150,14 +151,17 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   ## For each cluster, determine which other cluster is most closely related
   counts.y.collapse = rowsum(counts, group=y, reorder=TRUE)
   counts.y.collapse.norm = normalizeCounts(counts.y.collapse, scale.factor=1)
-  counts.y.cor = stats::cor(t(counts.y.collapse.norm), method="spearman")
+  counts.y.cor.temp = stats::cor(t(counts.y.collapse.norm), method="spearman")
+  counts.y.cor = matrix(NA, nrow=L, ncol=L)
+  m = reshape::melt(counts.y.cor.temp)
+  counts.y.cor[cbind(m[,1], m[,2])] = m[,3]
   diag(counts.y.cor) = 0
   
   ## Loop through each split-able y and find best split
   clust.split = list()
   for(i in 1:L) {
     if(i %in% y.to.split) {    
-      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5))
+      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, y.num.splits=0))
       clust.split = c(clust.split, list(clustLabel$y))
     } else {
       clust.split = c(clust.split, list(NA))
@@ -170,7 +174,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   y.split = y
 
   pairs = c(NA, NA, NA)
-  for(i in 1:L) {
+  for(i in y.non.empty) {
     ## Identify other clusters to test by limiting to those in "y.to.split", ordering by
     ## similarity, and then choosing top clusters based on "max.clusters.to.try"
     other.clusters = setdiff(y.to.split, i)
@@ -208,7 +212,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   } else {
     m = paste0(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
   } 
-  
+ 
   return(list(y=y.split[,select], message=m))
 }
 
