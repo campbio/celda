@@ -84,56 +84,6 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
 
 
 
-
-
-
-
-split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) { 
-
-  ## Normalize counts to fraction for cosine clustering
-  counts.norm = normalizeCounts(counts, scale.factor=1)
-  
-  ## Identify other clusters to split
-  y.ta = table(factor(y, levels=1:L))
-  l.pass.min = which(y.ta >= min.gene)
-  l.to.test = setdiff(l.pass.min, empty.L)
-  
-  if(length(l.to.test) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(y=y, message=m))
-  }
-
-  ## Set up variables for holding results
-  y.split = matrix(y, ncol=length(l.to.test), nrow=length(y))
-  l.split.ll = rep(NA, length(l.to.test))
-  
-  ## Loop through each cluster, split, and determine logLik
-  for(i in 1:length(l.to.test)) {
-    
-    ind = y == l.to.test[i]
-    l.dist = spearmanDist(t(counts.norm[ind,]))
-
-    clustLabel = clusterByHC(l.dist, min=min.gene)
-	clustLabel.final = ifelse(clustLabel == 1, l.to.test[i], empty.L)
-
-	## Assign new labels to test cluster    
-	ix = (y == l.to.test[i])
-	y.split[ix,i] = clustLabel.final
-
-    ## Calculate likelihood of split
-    params = c(list(counts=counts, y=y.split[,i], L=L), list(...))
-    l.split.ll[i] = do.call(LLFunction, params)
-  }
- 
-  l.to.test.select = sample.ll(l.split.ll)
-  
-  m = paste0(date(), " ... Gene cluster ", empty.L, " had ", y.ta[empty.L], " genes. Splitting Cluster ", l.to.test[l.to.test.select], " into two clusters.")
-  return(list(y = y.split[,l.to.test.select], message = m))
-}
-
-
-
-
 split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
   ## Normalize counts to fraction for hierarchical clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
@@ -242,7 +192,3 @@ clusterByHC = function(d, min=3, method="ward.D") {
   
   return(label)
 }
-
-
-
-

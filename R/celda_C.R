@@ -87,8 +87,8 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
-                   count.checksum=NULL, max.iter=25, seed=12345,
-                   z.split.on.iter=3, z.num.splits=3, 
+                   count.checksum=NULL, max.iter=50, seed=12345,
+                   z.split.on.iter=5, z.num.splits=5, 
                    z.init = NULL, logfile=NULL, ...) {
     
   if(is.null(sample.label)) {
@@ -279,6 +279,7 @@ clusterProbability.celda_C = function(counts, celda.mod) {
 calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
   
   ## Calculate for "Theta" component
+  z = factor(z, 1:K)
   m.CP.by.S = table(z, s)
   nS = length(unique(s))
   
