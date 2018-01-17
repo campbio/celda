@@ -41,7 +41,7 @@ split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, logfile=NULL, 
 
 
 
-split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, logfile=NULL, ...) { 
+split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
   
@@ -59,7 +59,7 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   counts.z.collapse.norm = normalizeCounts(counts.z.collapse, scale.factor=1)
   counts.z.cor = cosine(t(counts.z.collapse.norm))
   diag(counts.z.cor) = 0
-  
+
   ## Loop through each split-able Z and perform split
   clust.split = list()
   for(i in 1:K) { 
@@ -126,7 +126,7 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
 
 
 
-split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, logfile=NULL, ...) { 
+split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, ...) { 
 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
@@ -172,10 +172,10 @@ split.y = function(counts, y, empty.L, L, min.gene=3, LLFunction, logfile=NULL, 
 
 
 
-split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, logfile=NULL, ...) { 
+split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
   ## Normalize counts to fraction for hierarchical clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
-  
+
   ## Identify clusters to split
   y.ta = table(factor(y, levels=1:L))
   y.to.split = which(y.ta >= min)
