@@ -61,6 +61,7 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
   n.by.TS <- as.numeric(rowsum(n.by.G, y))
   
   nG.by.TS = table(factor(y, 1:L))
+  nG.by.TS[nG.by.TS == 0] = 1
   nG <- nrow(counts)
 
   a <- sum(lgamma(nG.by.TS * delta))
@@ -145,8 +146,10 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
   nG.by.TS[nG.by.TS == 0] = 1
   
   ## Calculate for "Eta" component
-  eta.ll <- log(nG.in.Y + gamma)
-  
+  b <- sum(lgamma(nG.by.TS + gamma))
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+  eta.ll <- b + d
+    
   ## Calculate for "Phi" component
   phi.ll <- sum(lgamma(n.TS.by.C + beta))
   
@@ -189,17 +192,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   set.seed(seed)
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
-  ## Randomly select y or set y to supplied initial values
-  if(is.null(y.init)) {
-    y = sample(1:L, nrow(counts), replace=TRUE)
-  } else {
-    if(length(unique(y.init)) != L || length(y.init) != nrow(counts)) {
-      stop("'y.init' needs to be a combination of L unique values that is the same length as the number of rows in 'counts' matrix.")
-    }
-    y = as.numeric(as.factor(y.init))
-  }  
+  ## Randomly select z and y or set z/y to supplied initial values
+  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
+  y.best = y  
 
-  y.best <- y
 
   ## Calculate counts one time up front
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
@@ -226,16 +222,12 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
       n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
 
-      ## Set flag if the current gene is the only one in its state
-      ADD_PSEUDO = 0
-      if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
-
       ## Calculate probabilities for each state
       probs = rep(NA, L)
       for(j in 1:L) {
-        temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
-        temp.n.by.TS = n.by.TS + (nM * ADD_PSEUDO)
-        temp.n.TS.by.C = n.TS.by.C + (1 * ADD_PSEUDO)
+        temp.nG.by.TS = nG.by.TS 
+        temp.n.by.TS = n.by.TS 
+        temp.n.TS.by.C = n.TS.by.C
 	  
         temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
         temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
@@ -256,7 +248,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
 
       ## Perform check for empty clusters
-      if(sum(y == previous.y[i]) == 0 & L > 2) {
+      if(sum(y == previous.y[i]) == 0 & L > 2 & FALSE) {
         ## Split another cluster into two
         y = split.y(counts=counts, y=y, 
                    empty.L=previous.y[i], L=L, 
