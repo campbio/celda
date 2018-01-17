@@ -46,7 +46,7 @@
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
-  n.TS.by.C <- rowsum(counts, group=y, reorder=TRUE)
+  n.TS.by.C <- rowsum.y(counts, y=y, L=L)
   
   nM <- ncol(n.TS.by.C)
   
@@ -58,7 +58,7 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
   phi.ll <- a + b + c + d
 
   n.by.G <- rowSums(counts)
-  n.by.TS <- as.numeric(rowsum(n.by.G, y))
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
   
   nG.by.TS = table(factor(y, 1:L))
   nG.by.TS[nG.by.TS == 0] = 1
@@ -144,7 +144,7 @@ reorder.celdaG = function(counts,res){
 # @keywords log likelihood
 cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
   nG.by.TS[nG.by.TS == 0] = 1
-  
+
   ## Calculate for "Eta" component
   b <- sum(lgamma(nG.by.TS + gamma))
   d <- -sum(lgamma(sum(nG.by.TS + gamma)))
@@ -196,11 +196,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
   y.best = y  
 
-
   ## Calculate counts one time up front
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
   n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
   nG.by.TS = table(factor(y, 1:L))
   nM = ncol(counts)
   nG = nrow(counts)
@@ -241,25 +240,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       }
 	
       ## Sample next state and add back counts
-      previous.y = y
       y[i] <- sample.ll(probs)
       nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
       n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
       n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
-
-      ## Perform check for empty clusters
-      if(sum(y == previous.y[i]) == 0 & L > 2 & FALSE) {
-        ## Split another cluster into two
-        y = split.y(counts=counts, y=y, 
-                   empty.L=previous.y[i], L=L, 
-                   LLFunction="calculateLoglikFromVariables.celda_G", 
-                   beta=beta, delta=delta, gamma=gamma)
-        
-        ## Re-calculate variables
-        n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-        n.by.TS = as.numeric(rowsum(n.by.G, y))
-        nG.by.TS = table(factor(y, 1:L))
-      }
     }
 
     ## Perform split if on i-th iteration defined by y.split.on.iter
@@ -272,11 +256,11 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
-      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-      n.by.TS = as.numeric(rowsum(n.by.G, y))
+      n.TS.by.C = rowsum.y(counts, y=y, L=L)
+      n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
       nG.by.TS = table(factor(y, 1:L))
     }
-        
+     
     ## Calculate complete likelihood
     temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
     if((all(temp.ll > ll)) | iter == 1) {
@@ -298,7 +282,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
   
   class(result) = "celda_G"
   
-  result = reorder.celdaG(counts = counts, res = result)
+  #result = reorder.celdaG(counts = counts, res = result)
   
   return(result)
 }
