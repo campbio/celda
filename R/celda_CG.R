@@ -322,7 +322,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   nS = length(unique(s))
   m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
   n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-  n.CP.by.TS = rowsum.mod(n.TS.by.C, z=z, K=K)
+  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
   n.CP = rowSums(n.CP.by.TS)
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum(n.by.G, y))
@@ -368,7 +368,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     }
     
     ## Begin process of Gibbs sampling for each gene
-    n.CP.by.G = rowsum.mod(counts, z=z, K=K) 
+    n.CP.by.G = rowsum.z(counts, z=z, K=K) 
     ix = sample(1:nrow(counts))
     for(i in ix) {
         
@@ -434,7 +434,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       ## Re-calculate variables
       m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
       n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-      n.CP.by.TS = rowsum.mod(n.TS.by.C, z=z, K=K)
+      n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
       n.CP = rowSums(n.CP.by.TS)
       n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
     }
