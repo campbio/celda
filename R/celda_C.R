@@ -104,16 +104,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   set.seed(seed)
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
-  ## Randomly select z or set z to supplied initial values
-  if(is.null(z.init)) {
-    z = sample(1:K, ncol(counts), replace=TRUE)
-  } else {
-    if(length(unique(z.init)) != K || length(z.init) != ncol(counts)) {
-      stop("'z.init' needs to be a combination of K unique values that is the same length as the number of columns in 'counts' matrix.")
-    }
-    z = as.numeric(as.factor(z.init))
-  }  
-
+  ## Randomly select z and y or set z/y to supplied initial values
+  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
   z.best = z
   
   ## Calculate counts one time up front
