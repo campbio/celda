@@ -259,10 +259,16 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 }
 
 
-rowsum.mod = function(counts, z, K) {
+rowsum.z = function(counts, z, K) {
   mat = matrix(0, nrow=K, ncol=nrow(counts))
   rs = rowsum(t(counts), group=z, reorder=TRUE)
   mat[sort(unique(z)),] = rs
+  return(mat)
+}
+rowsum.y = function(counts, y, L) {
+  mat = matrix(0, nrow=L, ncol=ncol(counts))
+  rs = rowsum(counts, group=y, reorder=TRUE)
+  mat[sort(unique(y)),] = rs
   return(mat)
 }
 
