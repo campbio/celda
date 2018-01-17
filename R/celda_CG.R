@@ -361,31 +361,14 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       }  
     
       ## Sample next state and add back counts
-      previous.z = z
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
       n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
       n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
-
-      ## Perform check for empty clusters
-      if(sum(z == previous.z[i]) == 0) {
-      
-        ## Split another cluster into two
-        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculateLoglikFromVariables.celda_CG", s=s, y=y, L=L,
-        alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-        z = res$z
-        logMessages(res$message, logfile=logfile, append=TRUE)
-
-        
-        ## Re-calculate variables
-        m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-        n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
-        n.CP = rowSums(n.CP.by.TS)
-      }
     }
     
     ## Begin process of Gibbs sampling for each gene
-    n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+    n.CP.by.G = rowsum.mod(counts, z=z, K=K) 
     ix = sample(1:nrow(counts))
     for(i in ix) {
         
@@ -501,7 +484,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   class(result) = "celda_CG" 
    
   ## Peform reordering on final Z and Y assigments:
-  result = reorder.celdaCG(counts = counts, res = result)
+  #result = reorder.celdaCG(counts = counts, res = result)
   return(result)
 }
 
