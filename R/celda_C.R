@@ -145,25 +145,10 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       }  
 
       ## Sample next state and add back counts
-      previous.z = z
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
       n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
       n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
-
-      ## Perform check for empty clusters; Do not allow on last iteration
-      if(sum(z == previous.z[i]) == 0 & K > 2) {
-        
-        ## Split another cluster into two
-        res = split.z(counts=counts, z=z, empty.K=previous.z[i], K=K, LLFunction="calculateLoglikFromVariables.celda_C", s=s, alpha=alpha, beta=beta)
-        logMessages(res$message, logfile=logfile, append=TRUE)
-        z = res$z
-        
-        ## Re-calculate variables
-        m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-        n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
-        n.CP = rowSums(n.CP.by.G)
-      }
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
