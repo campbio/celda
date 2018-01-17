@@ -46,6 +46,7 @@
 calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma, ...) {
   
   ## Calculate for "Theta" component
+  z = factor(z, 1:K)
   m = table(z, s)
   ns = ncol(m)
   
@@ -58,8 +59,9 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   
   
   ## Calculate for "Phi" component
-  n.CP.by.TS = rowsum(t(rowsum(counts, group=y, reorder=TRUE)), group=z, reorder=TRUE)
-  
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+    
   a = K * lgamma(L * beta)
   b = sum(lgamma(n.CP.by.TS + beta))
   c = -K * L * lgamma(beta)
@@ -69,7 +71,7 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   
   ## Calculate for "Psi" component
   n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
 
   nG.by.TS = table(factor(y, levels=1:L))
   nG.by.TS[nG.by.TS == 0] = 1
@@ -294,9 +296,9 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
-                    delta=1, gamma=1, count.checksum=NULL, max.iter=25,
-			              seed=12345, z.split.on.iter=3, z.num.splits=3,
-			              y.split.on.iter=3, y.num.splits=3, 
+                    delta=1, gamma=1, count.checksum=NULL, max.iter=50,
+			              seed=12345, z.split.on.iter=5, z.num.splits=5,
+			              y.split.on.iter=5, y.num.splits=5, 
 			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   set.seed(seed)
@@ -321,11 +323,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   ## Calculate counts one time up front
   nS = length(unique(s))
   m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
   n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
   n.CP = rowSums(n.CP.by.TS)
   n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
   nG.by.TS = table(factor(y, 1:L))
 
   nG = nrow(counts)
@@ -340,7 +342,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
-    n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+    n.TS.by.C = rowsum.y(counts, y=y, L=L)
     ix = sample(1:ncol(counts))
     for(i in ix) {
 
@@ -395,30 +397,10 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       }  
 
       ## Sample next state and add back counts
-      previous.y = y
       y[i] = sample.ll(probs)
       nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
       n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
       n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-      
-      ## Perform check for empty clusters
-      if(sum(y == previous.y[i]) == 0) {
-        
-        ## Split another cluster into two
-        res = split.y(counts=counts, y=y, empty.L=previous.y[i],
-                    L=L, LLFunction="calculateLoglikFromVariables.celda_CG",
-                    z=z, s=s, K=K, 
-                    alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-        y = res$y
-        logMessages(res$message, logfile=logfile, append=TRUE)
-        
-        ## Re-calculate variables
-        n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-        n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
-        n.CP = rowSums(n.CP.by.TS)
-        n.by.TS = as.numeric(rowsum(n.by.G, y))
-        nG.by.TS = table(factor(y, 1:L))
-      }
     }
     
     ## Perform split on i-th iteration defined by z.split.on.iter
@@ -450,10 +432,10 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       y.num.of.splits.occurred = y.num.of.splits.occurred + 1
 
       ## Re-calculate variables
-      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-      n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
+      n.TS.by.C = rowsum.y(counts, y=y, L=L)
+      n.CP.by.TS = n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
       n.CP = rowSums(n.CP.by.TS)
-      n.by.TS = as.numeric(rowsum(n.by.G, y))
+      n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
       nG.by.TS = table(factor(y, levels=1:L))
    }
 
