@@ -1,46 +1,3 @@
-split.z = function(counts, z, empty.K, K, min.cell=3, LLFunction, logfile=NULL, ...) { 
-  
-  ## Normalize counts to fraction for cosine clustering
-  counts.norm = normalizeCounts(counts, scale.factor=1)
-
-  ## Identify other clusters to split
-  z.ta = table(factor(z, levels=1:K))
-  k.pass.min = which(z.ta >= min.cell)
-  k.to.test = setdiff(k.pass.min, empty.K)
-
-  if(length(k.to.test) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(z=z, message=m))
-  }
-
-  ## Set up variables for holding results
-  z.split = matrix(z, ncol=length(k.to.test), nrow=length(z))
-  k.split.ll = rep(NA, length(k.to.test))
-
-  ## Loop through each cluster, split, and determine logLik
-  for(i in 1:length(k.to.test)) {
-    
-    k.dist = cosineDist(counts.norm[,z == k.to.test[i]])
-    clustLabel = clusterByHC(k.dist, min=min.cell)
-	clustLabel.final = ifelse(clustLabel == 1, k.to.test[i], empty.K)
-	
-	## Assign new labels to test cluster    
-	ix = (z == k.to.test[i])
-	z.split[ix,i] = clustLabel.final
-
-    ## Calculate likelihood of split
-    params = c(list(counts=counts, z=z.split[,i], K=K), list(...))
-    k.split.ll[i] = do.call(LLFunction, params)
-  }
-  k.to.test.select = sample.ll(k.split.ll)
-
-  m = paste0(date(), " ... Cell cluster ", empty.K, " had ", z.ta[empty.K], " cells. Splitting Cluster ", k.to.test[k.to.test.select], " into two clusters.")
-  return(list(z = z.split[,k.to.test.select], message = m))
-}
-
-
-
-
 split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
   ## Normalize counts to fraction for cosine clustering
   counts.norm = normalizeCounts(counts, scale.factor=1)
@@ -48,7 +5,8 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   ## Identify clusters to split
   z.ta = table(factor(z, levels=1:K))
   z.to.split = which(z.ta >= min.cell)
-
+  z.non.empty = which(z.ta > 0)
+  
   if(length(z.to.split) == 0) {
     m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
     return(list(z=z,message=m))
@@ -57,7 +15,10 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   ## For each cluster, determine which other cluster is most closely related
   counts.z.collapse = t(rowsum(t(counts), group=z, reorder=TRUE))
   counts.z.collapse.norm = normalizeCounts(counts.z.collapse, scale.factor=1)
-  counts.z.cor = cosine(t(counts.z.collapse.norm))
+  counts.z.cor.temp = cosine(t(counts.z.collapse.norm))
+  counts.z.cor = matrix(NA, nrow=K, ncol=K)
+  m = reshape::melt(counts.z.cor.temp)
+  counts.z.cor[cbind(m[,1], m[,2])] = m[,3]
   diag(counts.z.cor) = 0
 
   ## Loop through each split-able Z and perform split
@@ -77,11 +38,12 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   z.split = z
 
   pairs = c(NA, NA, NA)
-  for(i in 1:K) {
-  
+  for(i in z.non.empty) {
+    
     ## Identify other clusters to test by limiting to those in "z.to.split", ordering by
     ## similarity, and then choosing top clusters based on "max.clusters.to.try"
     other.clusters = setdiff(z.to.split, i)
+   
     other.clusters.order = order(counts.z.cor[other.clusters,i], decreasing=TRUE)
     other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
 
