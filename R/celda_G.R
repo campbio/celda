@@ -184,9 +184,9 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
 #' @export
-celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=25,
+celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
                    count.checksum=NULL, seed=12345, 
-                   y.split.on.iter=3,  y.num.splits=3, 
+                   y.split.on.iter=5,  y.num.splits=5, 
                    y.init=NULL, logfile=NULL, ...) {
   
   set.seed(seed)
