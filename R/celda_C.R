@@ -152,9 +152,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
-    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
+    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & K > 2) {
 
-      logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
