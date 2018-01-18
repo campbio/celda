@@ -1,26 +1,12 @@
 split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
-  ## Normalize counts to fraction for cosine clustering
-  counts.norm = normalizeCounts(counts, scale.factor=1)
+
+  dot.args = list(...)
   
   ## Identify clusters to split
   z.ta = table(factor(z, levels=1:K))
   z.to.split = which(z.ta >= min.cell)
   z.non.empty = which(z.ta > 0)
   
-  if(length(z.to.split) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(z=z,message=m))
-  }
-  
-  ## For each cluster, determine which other cluster is most closely related
-  counts.z.collapse = t(rowsum(t(counts), group=z, reorder=TRUE))
-  counts.z.collapse.norm = normalizeCounts(counts.z.collapse, scale.factor=1)
-  counts.z.cor.temp = cosine(t(counts.z.collapse.norm))
-  counts.z.cor = matrix(NA, nrow=K, ncol=K)
-  m = reshape::melt(counts.z.cor.temp)
-  counts.z.cor[cbind(m[,1], m[,2])] = m[,3]
-  diag(counts.z.cor) = 0
-
   ## Loop through each split-able Z and perform split
   clust.split = list()
   for(i in 1:K) { 
@@ -32,51 +18,67 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
     }  
   }
 
+  ## Find second best assignment give current assignments for each cell
+  celda.mod = list(counts=counts, z=z, K=K, sample.label=dot.args$s, alpha=dot.args$alpha, beta=dot.args$beta)
+  class(celda.mod) = "celda_C"
+  z.prob = clusterProbability.celda_C(counts, celda.mod, log=TRUE)$z.probability
+  z.prob[cbind(1:nrow(z.prob), z)] = NA
+  z.second = apply(z.prob, 1, function(v) order(v, decreasing = TRUE)[1])
+
+  ll.shuffle = rep(NA, K)
+  for(i in z.non.empty) {
+    ix = z == i
+    new.z = z
+    new.z[ix] = z.second[ix]
+    params = c(list(counts=counts, z=new.z, K=K), dot.args)
+    ll.shuffle[i] = do.call(LLFunction, params)
+  }
+  z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  
+  if(length(z.to.split) == 0 | length(z.to.shuffle) == 0) {
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(z=z,message=m))
+  }
+  
   ## Set up variables for holding results with current iteration of z
-  params = c(list(counts=counts, z=z, K=K), list(...))
+  params = c(list(counts=counts, z=z, K=K), dot.args)
   z.split.ll = do.call(LLFunction, params)
   z.split = z
 
-  pairs = c(NA, NA, NA)
-  for(i in z.non.empty) {
+  pairs = c(NA, NA)
+  for(i in z.to.shuffle) {
     
-    ## Identify other clusters to test by limiting to those in "z.to.split", ordering by
-    ## similarity, and then choosing top clusters based on "max.clusters.to.try"
     other.clusters = setdiff(z.to.split, i)
    
-    other.clusters.order = order(counts.z.cor[other.clusters,i], decreasing=TRUE)
-    other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
-
-	for(j in other.clusters.to.test) {
+	for(j in other.clusters) {
 	  new.z = z
 	  
       ## Assign cluster i to the next most similar cluster (excluding cluster j) 
       ## as defined above by the correlation      
       ix.to.move = z == i
-      h = setdiff(order(counts.z.cor[,i], decreasing=TRUE), j)[1]
-      new.z[ix.to.move] = h
+      new.z[ix.to.move] = z.second[ix.to.move]
             
       ## Split cluster j according to the clustering defined above
       ix.to.split = z == j
       new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
 
 	  ## Calculate likelihood of split
-	  params = c(list(counts=counts, z=new.z, K=K), list(...))
+	  params = c(list(counts=counts, z=new.z, K=K), dot.args)
 	  new.ll = do.call(LLFunction, params)
 
 	  z.split.ll = c(z.split.ll, new.ll)
 	  z.split = cbind(z.split, new.z)
    
-	  pairs = rbind(pairs, c(i, j, h))
+	  pairs = rbind(pairs, c(i, j))
 	}  
   }
   
-  select = sample.ll(z.split.ll) 
+  select = which.max(z.split.ll) 
 
   if(select == 1) {
     m = paste0(date(), " ... No additional splitting was performed.") 
   } else {
-    m = paste0(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
   
   return(list(z=z.split[,select], message=m))
@@ -85,27 +87,14 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
 
 
 split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
-  ## Normalize counts to fraction for hierarchical clustering
-  counts.norm = normalizeCounts(counts, scale.factor=1)
-
+  
+  dot.args = list(...)
+  
   ## Identify clusters to split
   y.ta = table(factor(y, levels=1:L))
   y.to.split = which(y.ta >= min)
   y.non.empty = which(y.ta > 0)
 
-  if(length(y.to.split) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(y=y, message=m))
-  }
-
-  ## For each cluster, determine which other cluster is most closely related
-  counts.y.collapse = rowsum(counts, group=y, reorder=TRUE)
-  counts.y.collapse.norm = normalizeCounts(counts.y.collapse, scale.factor=1)
-  counts.y.cor.temp = stats::cor(t(counts.y.collapse.norm), method="spearman")
-  counts.y.cor = matrix(NA, nrow=L, ncol=L)
-  m = reshape::melt(counts.y.cor.temp)
-  counts.y.cor[cbind(m[,1], m[,2])] = m[,3]
-  diag(counts.y.cor) = 0
   
   ## Loop through each split-able y and find best split
   clust.split = list()
@@ -118,49 +107,67 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
     }  
   }
 
+  ## Find second best assignment give current assignments for each cell
+  celda.mod = list(counts=counts, y=y, L=L, beta=dot.args$beta, delta=dot.args$delta, gamma=dot.args$gamma)
+  class(celda.mod) = "celda_G"
+  y.prob = clusterProbability.celda_G(counts, celda.mod, log=TRUE)$y.probability
+  y.prob[cbind(1:nrow(y.prob), y)] = NA
+  y.second = apply(y.prob, 1, function(v) order(v, decreasing = TRUE)[1])
+
+  ll.shuffle = rep(NA, L)
+  for(i in y.non.empty) {
+    ix = y == i
+    new.y = y
+    new.y[ix] = y.second[ix]
+    params = c(list(counts=counts, y=new.y, L=L), dot.args)
+    ll.shuffle[i] = do.call(LLFunction, params)
+  }
+  y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+
+  if(length(y.to.split) == 0 | length(y.to.shuffle) == 0) {
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(y=y, message=m))
+  }
+ 
   ## Set up variables for holding results with current iteration of y
-  params = c(list(counts=counts, y=y, L=L), list(...))
+  params = c(list(counts=counts, y=y, L=L), dot.args)
   y.split.ll = do.call(LLFunction, params)
   y.split = y
 
-  pairs = c(NA, NA, NA)
-  for(i in y.non.empty) {
-    ## Identify other clusters to test by limiting to those in "y.to.split", ordering by
-    ## similarity, and then choosing top clusters based on "max.clusters.to.try"
-    other.clusters = setdiff(y.to.split, i)
-    other.clusters.order = order(counts.y.cor[other.clusters,i], decreasing=TRUE)
-    other.clusters.to.test = head(other.clusters[other.clusters.order], n = max.clusters.to.try)
+  pairs = c(NA, NA)
+  for(i in y.to.shuffle) {
 
-    for(j in other.clusters.to.test) {
+    other.clusters = setdiff(y.to.split, i)
+    
+    for(j in other.clusters) {
       new.y = y
       
       ## Assign cluster i to the next most similar cluster (excluding cluster j) 
       ## as defined above by the spearman correlation      
       ix.to.move = y == i
-      h = setdiff(order(counts.y.cor[,i], decreasing=TRUE), j)[1]
-      new.y[ix.to.move] = h
+      new.y[ix.to.move] = y.second[ix.to.move]
             
       ## Split cluster j according to the clustering defined above
       ix.to.split = y == j
       new.y[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
       
       ## Calculate likelihood of split
-      params = c(list(counts=counts, y=new.y, L=L), list(...))
+      params = c(list(counts=counts, y=new.y, L=L), dot.args)
       new.ll = do.call(LLFunction, params)
 
       y.split.ll = c(y.split.ll, new.ll)
       y.split = cbind(y.split, new.y)
       
-      pairs = rbind(pairs, c(i, j, h))
+      pairs = rbind(pairs, c(i, j))
     }
   }
   
-  select = sample.ll(y.split.ll) 
+  select = which.max(y.split.ll) 
   
   if(select == 1) {
     m = paste0(date(), " ... No additional splitting was performed.") 
   } else {
-    m = paste0(date(), " ... Cluster ", pairs[select,1], " was moved to cluster ", pairs[select,3], " and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
  
   return(list(y=y.split[,select], message=m))
