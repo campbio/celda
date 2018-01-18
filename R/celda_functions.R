@@ -1,7 +1,7 @@
 sample.ll = function(ll.probs) {
   probs.sub <- exp(ll.probs - max(ll.probs))
   probs.norm <- probs.sub / sum(probs.sub)
-  probs.select <- sample(1:length(ll.probs), size=1, prob=probs.norm)
+  probs.select <- .Internal(sample(length(probs.norm), 1L, replace=TRUE, prob=probs.norm))
   return(probs.select)
 }
 
@@ -260,13 +260,13 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 
 
 rowsum.z = function(counts, z, K) {
-  mat = matrix(0, nrow=K, ncol=nrow(counts))
+  mat = matrix(integer(0), nrow=K, ncol=nrow(counts))
   rs = rowsum(t(counts), group=z, reorder=TRUE)
   mat[sort(unique(z)),] = rs
   return(mat)
 }
 rowsum.y = function(counts, y, L) {
-  mat = matrix(0, nrow=L, ncol=ncol(counts))
+  mat = matrix(integer(0), nrow=L, ncol=ncol(counts))
   rs = rowsum(counts, group=y, reorder=TRUE)
   mat[sort(unique(y)),] = rs
   return(mat)
