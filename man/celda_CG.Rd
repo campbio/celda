@@ -5,9 +5,9 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
-  seed = 12345, z.split.on.iter = 3, z.num.splits = 3,
-  y.split.on.iter = 3, y.num.splits = 3, z.init = NULL, y.init = NULL,
+  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 50,
+  seed = 12345, z.split.on.iter = 5, z.num.splits = 5,
+  y.split.on.iter = 5, y.num.splits = 5, z.init = NULL, y.init = NULL,
   logfile = NULL, ...)
 }
 \arguments{
