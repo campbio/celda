@@ -248,7 +248,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
 
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & L > 2) {
-      logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
       

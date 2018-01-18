@@ -402,7 +402,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     ## Perform split on i-th iteration defined by z.split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
       if(K > 2) {
-		logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+		logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
 		res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 		logMessages(res$message, logfile=logfile, append=TRUE)
 		z = res$z      
@@ -415,7 +415,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 		n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
 	  }  
       if(L > 2) {
-        logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+        logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
         res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 	    logMessages(res$message, logfile=logfile, append=TRUE)
         y = res$y
