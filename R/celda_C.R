@@ -114,7 +114,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   nM = ncol(counts)
 
   m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  n.CP.by.G = rowsum.z(counts, z=z, K=K)
   n.CP = rowSums(n.CP.by.G)  
 
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
@@ -217,9 +217,10 @@ cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, n.CP, nG, alpha, beta) {
 #'
 #' @param counts The original count matrix used in the model
 #' @param celda.mod A model returned from the 'celda_C' function
+#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-clusterProbability.celda_C = function(counts, celda.mod) {
+clusterProbability.celda_C = function(counts, celda.mod, log=FALSE) {
 
   z = celda.mod$z
   s = celda.mod$sample.label
@@ -231,7 +232,7 @@ clusterProbability.celda_C = function(counts, celda.mod) {
   nG = nrow(counts)
   nM = ncol(counts)
   m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  n.CP.by.G = rowsum.z(counts, z=z, K=K)
   n.CP = rowSums(n.CP.by.G)  
 
   z.prob = matrix(NA, ncol=K, nrow=ncol(counts))
@@ -258,7 +259,11 @@ clusterProbability.celda_C = function(counts, celda.mod) {
 	n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
   }
   
-  return(list(z.probability=normalizeLogProbs(z.prob)))
+  if(!isTRUE(log)) {
+    z.prob = normalizeLogProbs(z.prob)
+  }
+   
+  return(list(z.probability=z.prob))
 }
 
 
