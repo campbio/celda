@@ -286,10 +286,8 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
 #' @param seed Parameter to set.seed() for random number generation
-#' @param z.split.on.iter On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
-#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
-#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3
-#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter
+#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 5. 
+#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 5.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
@@ -297,8 +295,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=50,
-			              seed=12345, z.split.on.iter=5, z.num.splits=5,
-			              y.split.on.iter=5, y.num.splits=5, 
+			              seed=12345, split.on.iter=5, num.splits=5,
 			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   set.seed(seed)
@@ -337,8 +334,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   
   iter = 1
   continue = TRUE
-  z.num.of.splits.occurred = 1
-  y.num.of.splits.occurred = 1
+  num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -404,40 +400,35 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     }
     
     ## Perform split on i-th iteration defined by z.split.on.iter
-    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits & K > 2) {
+    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
+      if(K > 2) {
+		logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+		res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+		logMessages(res$message, logfile=logfile, append=TRUE)
+		z = res$z      
 
-      logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
-      logMessages(res$message, logfile=logfile, append=TRUE)
+		## Re-calculate variables
+		m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+		n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+		n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+		n.CP = rowSums(n.CP.by.TS)
+		n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
+	  }  
+      if(L > 2) {
+        logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
+        res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+	    logMessages(res$message, logfile=logfile, append=TRUE)
+        y = res$y
 
-      z = res$z      
-      z.num.of.splits.occurred = z.num.of.splits.occurred + 1
-
-      ## Re-calculate variables
-      m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-      n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-      n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-      n.CP = rowSums(n.CP.by.TS)
-      n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
+        ## Re-calculate variables
+        n.TS.by.C = rowsum.y(counts, y=y, L=L)
+        n.CP.by.TS = n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+        n.CP = rowSums(n.CP.by.TS)
+        n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+        nG.by.TS = table(factor(y, levels=1:L))
+      }
+      num.of.splits.occurred = num.of.splits.occurred + 1
     }
-    
-    ## Perform split if on i-th iteration defined by y.split.on.iter
-    if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
-
-      logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
-	  logMessages(res$message, logfile=logfile, append=TRUE)
-	  
-      y = res$y
-      y.num.of.splits.occurred = y.num.of.splits.occurred + 1
-
-      ## Re-calculate variables
-      n.TS.by.C = rowsum.y(counts, y=y, L=L)
-      n.CP.by.TS = n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-      n.CP = rowSums(n.CP.by.TS)
-      n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-      nG.by.TS = table(factor(y, levels=1:L))
-   }
 
     ## Calculate complete likelihood
     temp.ll = .calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
@@ -455,7 +446,6 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
   names = list(row=rownames(counts), column=colnames(counts), 
                sample=levels(sample.label))
-  
   
   result = list(z=z.best, y=y.best, completeLogLik=ll, 
                 finalLogLik=ll.best, K=K, L=L, alpha=alpha, 

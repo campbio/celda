@@ -176,8 +176,8 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param y.split.on.iter  On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3. 
-#' @param y.num.splits Maximum number of times to perform the heuristic described in y.split.on.iter.
+#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 5. 
+#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 5.
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
@@ -186,7 +186,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
                    count.checksum=NULL, seed=12345, 
-                   y.split.on.iter=5,  y.num.splits=5, 
+                   split.on.iter=5,  num.splits=5, 
                    y.init=NULL, logfile=NULL, ...) {
   
   set.seed(seed)
@@ -209,7 +209,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
 
   iter <- 1
   continue = TRUE
-  y.num.of.splits.occurred = 1
+  num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -247,13 +247,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
     }
 
     ## Perform split if on i-th iteration defined by y.split.on.iter
-    if(iter %% y.split.on.iter == 0 & y.num.of.splits.occurred <= y.num.splits & L > 2) {
+    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & L > 2) {
       logMessages(date(), " ... Determining if any gene clusters should be split (", y.num.of.splits.occurred, " of ", y.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       y = res$y
-      y.num.of.splits.occurred = y.num.of.splits.occurred + 1
+      num.of.splits.occurred = num.of.splits.occurred + 1
 
       ## Re-calculate variables
       n.TS.by.C = rowsum.y(counts, y=y, L=L)
