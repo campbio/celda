@@ -355,9 +355,10 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 #'
 #' @param counts The original count matrix used in the model
 #' @param celda.mod A model returned from the 'celda_G' function
+#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-clusterProbability.celda_G = function(counts, celda.mod) {
+clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
 
   y = celda.mod$y
   L = celda.mod$L
@@ -366,10 +367,10 @@ clusterProbability.celda_G = function(counts, celda.mod) {
   gamma = celda.mod$gamma
   
   ## Calculate counts one time up front
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
   n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
-  nG.by.TS = table(y)
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = table(factor(y, 1:L))
   nM = ncol(counts)
   nG = nrow(counts)
 
@@ -380,15 +381,11 @@ clusterProbability.celda_G = function(counts, celda.mod) {
 	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
 	n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
 
-	## Set flag if the current gene is the only one in its state
-	ADD_PSEUDO = 0
-	if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
-
 	## Calculate probabilities for each state
 	for(j in 1:L) {
-	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
-	  temp.n.by.TS = n.by.TS + (nM * ADD_PSEUDO)
-	  temp.n.TS.by.C = n.TS.by.C + (1 * ADD_PSEUDO)
+	  temp.nG.by.TS = nG.by.TS 
+	  temp.n.by.TS = n.by.TS 
+	  temp.n.TS.by.C = n.TS.by.C 
 	
 	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
@@ -406,7 +403,12 @@ clusterProbability.celda_G = function(counts, celda.mod) {
     n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
 
   }
-  return(list(y.probability=normalizeLogProbs(y.prob)))
+  
+  if(!isTRUE(log)) {
+    y.prob = normalizeLogProbs(y.prob)
+  }
+  
+  return(list(y.probability=y.prob))
 }
 
 
