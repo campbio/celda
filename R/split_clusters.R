@@ -11,7 +11,7 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   clust.split = list()
   for(i in 1:K) { 
     if(i %in% z.to.split) {
-      clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, z.num.splits = 0))
+      clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, num.splits = 0))
       clust.split = c(clust.split, list(clustLabel$z))
     } else {
       clust.split = c(clust.split, list(NA))
@@ -100,7 +100,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   clust.split = list()
   for(i in 1:L) {
     if(i %in% y.to.split) {    
-      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, y.num.splits=0))
+      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, num.splits=0))
       clust.split = c(clust.split, list(clustLabel$y))
     } else {
       clust.split = c(clust.split, list(NA))
