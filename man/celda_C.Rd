@@ -5,9 +5,8 @@
 \title{celda Cell Clustering Model}
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
-  count.checksum = NULL, max.iter = 50, seed = 12345,
-  z.split.on.iter = 5, z.num.splits = 5, z.init = NULL, logfile = NULL,
-  ...)
+  count.checksum = NULL, max.iter = 50, seed = 12345, split.on.iter = 5,
+  num.splits = 5, z.init = NULL, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -26,9 +25,9 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
-\item{z.split.on.iter}{On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.}
+\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a cell cluster should be reassigned and another cell cluster should be split into two clusters. Default to be 5.}
 
-\item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter}
+\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 5.}
 
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
