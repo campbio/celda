@@ -5,8 +5,8 @@
 \title{celda Cell Clustering Model}
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
-  count.checksum = NULL, max.iter = 25, seed = 12345,
-  z.split.on.iter = 3, z.num.splits = 3, z.init = NULL, logfile = NULL,
+  count.checksum = NULL, max.iter = 50, seed = 12345,
+  z.split.on.iter = 5, z.num.splits = 5, z.init = NULL, logfile = NULL,
   ...)
 }
 \arguments{
