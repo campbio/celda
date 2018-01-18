@@ -79,8 +79,8 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25 
 #' @param seed Parameter to set.seed() for random number generation
-#' @param z.split.on.iter On every "z.split.on.iter" iteration, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization.
-#' @param z.num.splits Maximum number of times to perform the heuristic described in z.split.on.iter
+#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a cell cluster should be reassigned and another cell cluster should be split into two clusters. Default to be 5. 
+#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 5.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @param ... additonal parameters
@@ -88,7 +88,7 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=50, seed=12345,
-                   z.split.on.iter=5, z.num.splits=5, 
+                   split.on.iter=5, num.splits=5, 
                    z.init = NULL, logfile=NULL, ...) {
     
   if(is.null(sample.label)) {
@@ -121,7 +121,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
   iter = 1
   continue = TRUE
-  z.num.of.splits.occurred = 1
+  num.of.splits.occurred = 1
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -152,14 +152,14 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
-    if(iter %% z.split.on.iter == 0 & z.num.of.splits.occurred <= z.num.splits) {
+    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split (", z.num.of.splits.occurred, " of ", z.num.splits, ")", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
-      z.num.of.splits.occurred = z.num.of.splits.occurred + 1
+      num.of.splits.occurred = num.of.splits.occurred + 1
 
       ## Re-calculate variables
       m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
