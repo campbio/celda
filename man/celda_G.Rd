@@ -4,9 +4,9 @@
 \alias{celda_G}
 \title{celda Gene Clustering Model}
 \usage{
-celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 25,
-  count.checksum = NULL, seed = 12345, y.split.on.iter = 3,
-  y.num.splits = 3, y.init = NULL, logfile = NULL, ...)
+celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 50,
+  count.checksum = NULL, seed = 12345, y.split.on.iter = 5,
+  y.num.splits = 5, y.init = NULL, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
