@@ -30,7 +30,11 @@ Imports:
     gridExtra,
     methods,
     lintr,
-    reshape2
+    reshape2,
+    MAST,
+    SummarizedExperiment,
+    GenomicRanges,
+    ineq
 Suggests:
     testthat,
     knitr,
