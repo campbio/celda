@@ -64,7 +64,7 @@ library(reshape2)
 We use the built-in data generating function `simulateCells` to simulate a single-cell RNA-Seq dataset. `simulateCells` returns a list containing a count matrix where each row is a gene and each column is a cell. The K parameter determines the number of cell clusters while the L parameter determines the number of gene clusters within the dataset.
 
 ```{r}
-sim_counts = simulateCells("celda_CG", K = 3, L = 10)
+sim_counts = simulateCells("celda_CG", K = 6, L = 8)
 ```
 
 The `counts` variable contains the counts matrix.
@@ -108,7 +108,7 @@ There are currently three models within this package: `celda_C` will cluster cel
 
 ```{r, fig.show='hold', warning = FALSE, message = FALSE}
 
-celda.res = celda(counts = sim_counts$counts, model = "celda_CG", K = 3, L = 10, max.iter = 10, cores = 1, nchains = 1)
+celda.res = celda(counts = sim_counts$counts, model = "celda_CG", K = 6, L = 9, max.iter = 10, cores = 1, nchains = 1)
 ```
 
 Here is a comparison between the true cluster labels and the estimated cluster labels.
