@@ -298,9 +298,9 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 			              seed=12345, split.on.iter=5, num.splits=5,
 			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
-  set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
-  
+  ## Error checking and variable processing
+  counts = processCounts(counts)
+    
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
     sample.label = s
@@ -319,22 +319,25 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   
   ## Calculate counts one time up front
   nS = length(unique(s))
-  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
   n.TS.by.C = rowsum.y(counts, y=y, L=L)
   n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-  n.CP = rowSums(n.CP.by.TS)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = table(factor(y, 1:L))
+  n.CP = as.integer(rowSums(n.CP.by.TS))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
 
   nG = nrow(counts)
   nM = ncol(counts)
   
   ll = .calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+
+  set.seed(seed)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
-  iter = 1
+  iter = 1L
   continue = TRUE
-  num.of.splits.occurred = 1
+  num.of.splits.occurred = 1L
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -343,7 +346,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     for(i in ix) {
 
       ## Subtract current cell counts from matrices
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
       n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
       n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
 
@@ -364,19 +367,18 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
       ## Sample next state and add back counts
       z[i] = sample.ll(probs)
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
       n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
       n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
     }
 
     ## Begin process of Gibbs sampling for each gene
     n.CP.by.G = rowsum.z(counts, z=z, K=K) 
-
     ix = sample(1:nrow(counts))
     for(i in ix) {
         
       ## Subtract current gene counts from matrices
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
       n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
       n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
 	 
@@ -388,11 +390,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         temp.n.by.TS = n.by.TS 
         temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
         temp.nG.by.TS = nG.by.TS 
-        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
 
         #probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,n.by.TS=temp.n.by.TS,nG.by.TS=temp.nG.by.TS,nG.in.Y=temp.nG.by.TS[j],beta=beta, delta=delta, gamma=gamma)
 		pseudo.nG.by.TS = temp.nG.by.TS
-		pseudo.nG.by.TS[nG.by.TS == 0] = 1
+		pseudo.nG.by.TS[nG.by.TS == 0L] = 1L
 
 		probs[j] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
 					sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
@@ -404,7 +406,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
       ## Sample next state and add back counts
       y[i] = sample.ll(probs)
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
       n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
       n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
     }
@@ -418,11 +420,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 		z = res$z      
 
 		## Re-calculate variables
-		m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-		n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
+		m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+		n.TS.by.C = rowsum.y(counts, y=y, L=L)
 		n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-		n.CP = rowSums(n.CP.by.TS)
-		n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)      
+		n.CP = as.integer(rowSums(n.CP.by.TS))
+		n.CP.by.G = rowsum.z(counts, z=z, K=K)      
 	  }  
       if(L > 2) {
         logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
@@ -433,11 +435,11 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         ## Re-calculate variables
         n.TS.by.C = rowsum.y(counts, y=y, L=L)
         n.CP.by.TS = n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-        n.CP = rowSums(n.CP.by.TS)
-        n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-        nG.by.TS = table(factor(y, levels=1:L))
+        n.CP = as.integer(rowSums(n.CP.by.TS))
+        n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+        nG.by.TS = as.integer(table(factor(y, levels=1:L)))
       }
-      num.of.splits.occurred = num.of.splits.occurred + 1
+      num.of.splits.occurred = num.of.splits.occurred + 1L
     }
 
     ## Calculate complete likelihood
