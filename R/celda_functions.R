@@ -273,3 +273,12 @@ rowsum.y = function(counts, y, L) {
   return(mat)
 }
 
+
+processCounts = function(counts) {
+  if(class(counts) != "integer") {
+    counts = round(counts)
+    class(counts) = "integer"
+  }
+  return(counts)  
+}
+
