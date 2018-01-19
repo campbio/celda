@@ -324,6 +324,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
   n.CP = as.integer(rowSums(n.CP.by.TS))
   n.by.G = as.integer(rowSums(counts))
+  n.by.C = as.integer(colSums(counts))
   n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
   nG.by.TS = as.integer(table(factor(y, 1:L)))
 
@@ -342,25 +343,26 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     
     ## Begin process of Gibbs sampling for each cell
     n.TS.by.C = rowsum.y(counts, y=y, L=L)
+    n.TS.by.CP = t(n.CP.by.TS)
     ix = sample(1:ncol(counts))
     for(i in ix) {
 
       ## Subtract current cell counts from matrices
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
-      n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
-      n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+      n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] - n.TS.by.C[,i]
+      n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
 
       ## Calculate probabilities for each state
       probs = rep(NA, K)
       for(j in 1:K) {
-        temp.n.CP.by.TS = n.CP.by.TS
-        temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
+        temp.n.TS.by.CP = n.TS.by.CP
+        temp.n.TS.by.CP[,j] = temp.n.TS.by.CP[,j] + n.TS.by.C[,i]
         temp.n.CP = n.CP
-        temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+        temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
 
         #probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
         probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
-  					sum(lgamma(temp.n.CP.by.TS + beta)) -	## Phi Numerator
+  					sum(lgamma(temp.n.TS.by.CP + beta)) -	## Phi Numerator
   					sum(lgamma(temp.n.CP + (L * beta)))		## Phi Denominator
 
       }  
@@ -368,12 +370,13 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       ## Sample next state and add back counts
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
-      n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
-      n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+      n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] + n.TS.by.C[,i]
+      n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
     }
 
     ## Begin process of Gibbs sampling for each gene
-    n.CP.by.G = rowsum.z(counts, z=z, K=K) 
+    n.CP.by.G = rowsum.z(counts, z=z, K=K)
+    n.CP.by.TS = t(n.TS.by.CP) 
     ix = sample(1:nrow(counts))
     for(i in ix) {
         
