@@ -355,18 +355,23 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         temp.n.CP = n.CP
         temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
 
-        probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+        #probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+        probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
+  					sum(lgamma(temp.n.CP.by.TS + beta)) -	## Phi Numerator
+  					sum(lgamma(temp.n.CP + (L * beta)))		## Phi Denominator
+
       }  
-    
+
       ## Sample next state and add back counts
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
       n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
       n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
     }
-    
+
     ## Begin process of Gibbs sampling for each gene
     n.CP.by.G = rowsum.z(counts, z=z, K=K) 
+
     ix = sample(1:nrow(counts))
     for(i in ix) {
         
@@ -385,11 +390,16 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
         temp.nG.by.TS = nG.by.TS 
         temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 
-        probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
-			n.by.TS=temp.n.by.TS,
-			nG.by.TS=temp.nG.by.TS,
-			nG.in.Y=temp.nG.by.TS[j],
-			beta=beta, delta=delta, gamma=gamma)
+        #probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,n.by.TS=temp.n.by.TS,nG.by.TS=temp.nG.by.TS,nG.in.Y=temp.nG.by.TS[j],beta=beta, delta=delta, gamma=gamma)
+		pseudo.nG.by.TS = temp.nG.by.TS
+		pseudo.nG.by.TS[nG.by.TS == 0] = 1
+
+		probs[j] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
+					sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
+					sum(lgamma(temp.n.CP.by.TS + beta)) +					## Phi Numerator
+					sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
+					sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))	## Psi Denominator
+	
       }  
 
       ## Sample next state and add back counts
