@@ -397,7 +397,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
         #probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,n.by.TS=temp.n.by.TS,nG.by.TS=temp.nG.by.TS,nG.in.Y=temp.nG.by.TS[j],beta=beta, delta=delta, gamma=gamma)
 		pseudo.nG.by.TS = temp.nG.by.TS
-		pseudo.nG.by.TS[nG.by.TS == 0L] = 1L
+		pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
 
 		probs[j] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
 					sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
