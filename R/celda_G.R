@@ -116,18 +116,6 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
   return(final)
 }
 
-reorder.celdaG = function(counts,res){
-  #Reorder L
-  fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  fm.norm <- t(normalizeCounts(fm$proportions$gene.states,scale.factor = 1))
-  d <- dist((fm.norm),diag = TRUE, upper = TRUE)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterY(res,from = h$order,
-                        to = c(1:nrow(fm$counts$cell.states)))
-  return(res)
-}
-
-
 # Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)
 #
 # This function calculates the log-likelihood of a given set of cluster assigments for the samples
@@ -292,10 +280,8 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
   result = list(y=y.best, completeLogLik=ll, 
                 finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
                 count.checksum=count.checksum, seed=seed, names=names)
-  
   class(result) = "celda_G"
-  
-  #result = reorder.celdaG(counts = counts, res = result)
+  result = reorder.celda_G(counts = counts, res = result)
   
   return(result)
 }
@@ -477,6 +463,16 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
     res = c(res, posterior = list(post.list))						    
   }
   
+  return(res)
+}
+
+
+reorder.celda_G = function(counts, res){
+  fm <- factorizeMatrix(counts = counts, celda.mod = res)
+  cs = prop.table(t(fm$proportions$cell.states), 2)
+  d <- cosineDist(cs)
+  h <- hclust(d, method = "complete")
+  res <- recodeClusterY(res, from = h$order, to = 1:res$L)
   return(res)
 }
 
