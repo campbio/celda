@@ -84,15 +84,15 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 }
 
 
-cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
+cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
   
   nG.by.TS[nG.by.TS == 0] = 1
 
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
-  b <- sum(lgamma(n.TS.by.C + beta))
+  b <- sum(lgamma(n.C.by.TS + beta))
   c <- -nM * L * lgamma(beta)
-  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
+  d <- -sum(lgamma(rowSums(n.C.by.TS + beta)))
 
   phi.ll <- a + b + c + d
 
@@ -142,7 +142,7 @@ reorder.celdaG = function(counts,res){
 # @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 # @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 # @keywords log likelihood
-cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
+cG.calcGibbsProbY = function(n.C.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
   nG.by.TS[nG.by.TS == 0] = 1
 
   ## Calculate for "Eta" component
@@ -151,7 +151,7 @@ cG.calcGibbsProbY = function(n.TS.by.C, n.by.TS, nG.by.TS, nG.in.Y, beta, delta,
   eta.ll <- b + d
     
   ## Calculate for "Phi" component
-  phi.ll <- sum(lgamma(n.TS.by.C + beta))
+  phi.ll <- sum(lgamma(n.C.by.TS + beta))
   
   ## Calculate for "Psi" component
   a <- sum(lgamma(nG.by.TS * delta))
@@ -188,28 +188,32 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
                    count.checksum=NULL, seed=12345, 
                    split.on.iter=5,  num.splits=5, 
                    y.init=NULL, logfile=NULL, ...) {
-  
-  set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
 
+  ## Error checking and variable processing
+  counts = processCounts(counts)  
+  counts.t = t(counts)
+  
   ## Randomly select z and y or set z/y to supplied initial values
   y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
   y.best = y  
 
   ## Calculate counts one time up front
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = table(factor(y, 1:L))
+  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
   nM = ncol(counts)
   nG = nrow(counts)
+
+  set.seed(seed)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   ## Calculate initial log likelihood
-  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 
-  iter <- 1
+  iter <- 1L
   continue = TRUE
-  num.of.splits.occurred = 1
+  num.of.splits.occurred = 1L
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -217,22 +221,22 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
     for(i in ix) {
         
       ## Subtract current gene counts from matrices
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
       n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-      n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+      n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts.t[,i]
 
       ## Calculate probabilities for each state
       probs = rep(NA, L)
       for(j in 1:L) {
         temp.nG.by.TS = nG.by.TS 
         temp.n.by.TS = n.by.TS 
-        temp.n.TS.by.C = n.TS.by.C
+        temp.n.C.by.TS = n.C.by.TS
 	  
-        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
+        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
         temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-        temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
-	  
-        probs[j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C,
+        temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
+
+        probs[j] <- cG.calcGibbsProbY(n.C.by.TS=temp.n.C.by.TS,
                       n.by.TS=temp.n.by.TS, 
                       nG.by.TS=temp.nG.by.TS, 
                       nG.in.Y=temp.nG.by.TS[j], 
@@ -241,9 +245,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
 	
       ## Sample next state and add back counts
       y[i] <- sample.ll(probs)
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
+      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
       n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-      n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+      n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
     }
 
     ## Perform split if on i-th iteration defined by y.split.on.iter
@@ -253,16 +257,16 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       y = res$y
-      num.of.splits.occurred = num.of.splits.occurred + 1
+      num.of.splits.occurred = num.of.splits.occurred + 1L
 
       ## Re-calculate variables
-      n.TS.by.C = rowsum.y(counts, y=y, L=L)
-      n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-      nG.by.TS = table(factor(y, 1:L))
+      n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
+      n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+      nG.by.TS = as.integer(table(factor(y, 1:L)))
     }
      
     ## Calculate complete likelihood
-    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+    temp.ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
     if((all(temp.ll > ll)) | iter == 1) {
       y.best = y
       ll.best = temp.ll
@@ -271,7 +275,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
 
     logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
 
-    iter <- iter + 1    
+    iter <- iter + 1L
   }
     
   names = list(row=rownames(counts), column=colnames(counts))  
