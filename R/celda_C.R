@@ -90,6 +90,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
                    count.checksum=NULL, max.iter=50, seed=12345,
                    split.on.iter=5, num.splits=5, 
                    z.init = NULL, logfile=NULL, ...) {
+
+  ## Error checking and variable processing
+  counts = processCounts(counts)  
     
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
@@ -101,9 +104,6 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     s = as.numeric(sample.label)
   }  
   
-  set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
-  
   ## Randomly select z and y or set z/y to supplied initial values
   z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
   z.best = z
@@ -113,15 +113,22 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   nG = nrow(counts)
   nM = ncol(counts)
 
-  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  #n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
   n.CP.by.G = rowsum.z(counts, z=z, K=K)
-  n.CP = rowSums(n.CP.by.G)  
-
+  #n.CP = as.integer(colSums(n.G.by.CP))
+  n.CP = as.integer(rowSums(n.CP.by.G))
+  n.by.C = as.integer(colSums(counts))
+  
+  #ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=t(n.G.by.CP), s=s, K=K, nS=nS, alpha=alpha, beta=beta)
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
 
-  iter = 1
+  set.seed(seed)
+  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  
+  iter = 1L
   continue = TRUE
-  num.of.splits.occurred = 1
+  num.of.splits.occurred = 1L
   while(iter <= max.iter & continue == TRUE) {
     
     ## Begin process of Gibbs sampling for each cell
@@ -129,26 +136,34 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     for(i in ix) {
       
       ## Subtract current cell counts from matrices
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
-      n.CP.by.G[z[i],] = n.CP.by.G[z[i],] - counts[,i]
-      n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
+      #n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
+      n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
+      n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
     
       ## Calculate probabilities for each state
       probs = rep(NA, K)
       for(j in 1:K) {
+        #temp.n.G.by.CP = n.G.by.CP
         temp.n.CP.by.G = n.CP.by.G
+        #temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
         temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
         temp.n.CP = n.CP
-        temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
+        temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
 
-        probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
+        #probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
+        probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
+  					#sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
+  					sum(lgamma(temp.n.CP.by.G + beta)) -	## Phi Numerator
+  					sum(lgamma(temp.n.CP + (nG * beta)))	## Phi Denominator
       }  
 
       ## Sample next state and add back counts
       z[i] = sample.ll(probs)
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
-      n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
-      n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
+#      n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
+	  n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
+      n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
     }  
     
     ## Perform split if on i-th iteration defined by split.on.iter
@@ -159,16 +174,17 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
-      num.of.splits.occurred = num.of.splits.occurred + 1
+      num.of.splits.occurred = num.of.splits.occurred + 1L
 
       ## Re-calculate variables
-      m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-      n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
-      n.CP = rowSums(n.CP.by.G)
+      m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+      n.CP.by.G = rowsum.z(counts, z=z, K=K)
+      n.CP = as.integer(rowSums(n.CP.by.G))
     }
 
 
     ## Calculate complete likelihood
+    #temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=t(n.G.by.CP), s=s, K=K, nS=nS, alpha=alpha, beta=beta)
     temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
     if((all(temp.ll > ll)) | iter == 1) {
       z.best = z
