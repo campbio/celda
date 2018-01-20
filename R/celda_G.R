@@ -228,6 +228,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
       ## Calculate probabilities for each state
       probs = rep(NA, L)
       for(j in 1:L) {
+      
         temp.nG.by.TS = nG.by.TS 
         temp.n.by.TS = n.by.TS 
         temp.n.C.by.TS = n.C.by.TS
@@ -236,11 +237,19 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
         temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
         temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
 
-        probs[j] <- cG.calcGibbsProbY(n.C.by.TS=temp.n.C.by.TS,
-                      n.by.TS=temp.n.by.TS, 
-                      nG.by.TS=temp.nG.by.TS, 
-                      nG.in.Y=temp.nG.by.TS[j], 
-                      beta=beta, delta=delta, gamma=gamma)
+        #probs[j] <- cG.calcGibbsProbY(n.C.by.TS=temp.n.C.by.TS,
+        #              n.by.TS=temp.n.by.TS, 
+        #              nG.by.TS=temp.nG.by.TS, 
+        #              nG.in.Y=temp.nG.by.TS[j], 
+        #              beta=beta, delta=delta, gamma=gamma)
+		pseudo.nG.by.TS = temp.nG.by.TS
+		pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
+		
+		probs[j] = 	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
+					sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
+					sum(lgamma(temp.n.C.by.TS + beta)) +					## Phi Numerator
+					sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
+					sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))   ## Psi Denominator
       }
 	
       ## Sample next state and add back counts
