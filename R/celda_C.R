@@ -197,8 +197,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
                 names=names)
   
   class(result) = "celda_C"
-  
-  #result = reorder.celdaC(counts = counts, res = result)
+  result = reorder.celda_C(counts = counts, res = result)
   
   return(result)
 }
@@ -339,14 +338,11 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
   return(final)
 }
 
-reorder.celdaC = function(counts,res){
-  #Reorder K
+reorder.celda_C = function(counts,res){
   fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  fm.norm <- t(normalizeCounts(t(fm$proportions$gene.states),scale.factor = 1))
-  d <- dist(t(fm.norm),diag = TRUE, upper = TRUE)
+  d <- cosineDist(fm$proportions$gene.states)
   h <- hclust(d, method = "complete")
-  res <- recodeClusterZ(res,from = h$order,
-                        to = c(1:ncol(fm$counts$gene.states)))
+  res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
   return(res)
 }
 
