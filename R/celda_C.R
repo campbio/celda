@@ -114,14 +114,11 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   nM = ncol(counts)
 
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  #n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
-  n.CP.by.G = rowsum.z(counts, z=z, K=K)
-  #n.CP = as.integer(colSums(n.G.by.CP))
-  n.CP = as.integer(rowSums(n.CP.by.G))
+  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
+  n.CP = as.integer(colSums(n.G.by.CP))
   n.by.C = as.integer(colSums(counts))
   
-  #ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=t(n.G.by.CP), s=s, K=K, nS=nS, alpha=alpha, beta=beta)
-  ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
+  ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
   set.seed(seed)
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
@@ -137,32 +134,27 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
       
       ## Subtract current cell counts from matrices
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
-      #n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
-      n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
+      n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
       n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
     
       ## Calculate probabilities for each state
       probs = rep(NA, K)
       for(j in 1:K) {
-        #temp.n.G.by.CP = n.G.by.CP
-        temp.n.CP.by.G = n.CP.by.G
-        #temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
-        temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
+        temp.n.G.by.CP = n.G.by.CP
+        temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
         temp.n.CP = n.CP
         temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
 
         #probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
         probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
-  					#sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
-  					sum(lgamma(temp.n.CP.by.G + beta)) -	## Phi Numerator
+  					sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
   					sum(lgamma(temp.n.CP + (nG * beta)))	## Phi Denominator
       }  
 
       ## Sample next state and add back counts
       z[i] = sample.ll(probs)
       m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
-#      n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
-	  n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
+      n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
       n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
     }  
     
@@ -184,8 +176,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
 
     ## Calculate complete likelihood
-    #temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=t(n.G.by.CP), s=s, K=K, nS=nS, alpha=alpha, beta=beta)
-    temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.CP.by.G=n.CP.by.G, s=s, K=K, nS=nS, alpha=alpha, beta=beta)
+    temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
     if((all(temp.ll > ll)) | iter == 1) {
       z.best = z
       ll.best = temp.ll
@@ -326,7 +317,7 @@ calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ..
   return(final)
 }
 
-cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
+cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
   
   ## Calculate for "Theta" component
   a = nS * lgamma(K * alpha)
@@ -337,12 +328,10 @@ cC.calcLL = function(m.CP.by.S, n.CP.by.G, s, z, K, nS, alpha, beta) {
   theta.ll = a + b + c + d
   
   ## Calculate for "Phi" component
-  nG = ncol(n.CP.by.G)
-  
   a = K * lgamma(nG * beta)
-  b = sum(lgamma(n.CP.by.G + beta))
+  b = sum(lgamma(n.G.by.CP + beta))
   c = -K * nG * lgamma(beta)
-  d = -sum(lgamma(rowSums(n.CP.by.G + beta)))
+  d = -sum(lgamma(colSums(n.G.by.CP + beta)))
   
   phi.ll = a + b + c + d
   
