@@ -136,61 +136,80 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   return(final)
 }
 
-.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.TS, n.CP, L, alpha, beta) {
+cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z, s, L, K, nM, alpha, beta) {
 
-  ## Calculate for "Theta" component
-  theta.ll = log(m.CP.by.S + alpha)
-  
-  ## Calculate for "Phi" component
+  ix = sample(1:nM)
+  for(i in ix) {
 
-  b = sum(lgamma(n.CP.by.TS + beta))
-  d = -sum(lgamma(n.CP + (L * beta)))
-  
-  phi.ll = b + d
-  
-  final = theta.ll + phi.ll 
-  return(final)
-}
+	## Subtract current cell counts from matrices
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
+	n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] - n.TS.by.C[,i]
+	n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
 
-.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
-  nG.by.TS[nG.by.TS == 0] = 1
-  
-  ## Calculate for "Eta" component
-  b <- sum(lgamma(nG.by.TS + gamma))
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-  eta.ll <- b + d
-    
-  ## Calculate for "Phi" component
-  phi.ll = sum(lgamma(n.CP.by.TS + beta))
-  
-  ## Calculate for "Psi" component
-  a = sum(lgamma(nG.by.TS * delta))
-  d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
+	## Calculate probabilities for each state
+	probs = rep(NA, K)
+	for(j in 1:K) {
+	  temp.n.TS.by.CP = n.TS.by.CP
+	  temp.n.TS.by.CP[,j] = temp.n.TS.by.CP[,j] + n.TS.by.C[,i]
+	  temp.n.CP = n.CP
+	  temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
 
-  psi.ll = a + d
-  
-  final = phi.ll + psi.ll + eta.ll
-  return(final)
-}
+	  #probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.TS.by.CP=temp.n.TS.by.CP, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
+	  probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
+				  sum(lgamma(temp.n.TS.by.CP + beta)) -		## Phi Numerator
+				  sum(lgamma(temp.n.CP + (L * beta)))		## Phi Denominator
 
-reorder.celda_CG = function(counts,res){
-  # Reorder K
-  if(res$K > 2) {
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    d <- cosineDist(fm$proportions$population.states)
-    h <- hclust(d, method = "complete")
-    res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
-  }  
-  
-  # Reorder L
-  if(res$L > 2) {
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    cs <- prop.table(t(fm$proportions$population.states), 2)
-    d <- cosineDist(cs)
-    h <- hclust(d, method = "complete")
-    res <- recodeClusterY(res, from = h$order, to = 1:res$L)
+	}  
+
+	## Sample next state and add back counts
+	z[i] = sample.ll(probs)
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
+	n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] + n.TS.by.C[,i]
+	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
   }
-  return(res)
+  
+  return(list(m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.CP=n.CP, z=z))
+}
+
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, y, nG, L, beta, delta, gamma) {
+
+  ix = sample(1:nG)
+  for(i in ix) {
+	  
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
+	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+   
+	probs = rep(NA, L)
+	for(j in 1:L) {
+	  ## Add in counts to each state and determine probability
+	  temp.n.CP.by.TS = n.CP.by.TS 
+	  temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
+	  temp.n.by.TS = n.by.TS 
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.nG.by.TS = nG.by.TS 
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
+
+	  #probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,n.by.TS=temp.n.by.TS,nG.by.TS=temp.nG.by.TS,nG.in.Y=temp.nG.by.TS[j],beta=beta, delta=delta, gamma=gamma)
+	  pseudo.nG.by.TS = temp.nG.by.TS
+	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
+
+	  probs[j] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
+				  sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
+				  sum(lgamma(temp.n.CP.by.TS + beta)) +						## Phi Numerator
+				  sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
+				  sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))		## Psi Denominator
+	}  
+
+	## Sample next state and add back counts
+	y[i] = sample.ll(probs)
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
+	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
+	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+  }
+  
+  return(list(n.CP.by.TS=n.CP.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y))
 }
 
 #' Simulate cells from the cell/gene clustering generative model
@@ -342,80 +361,27 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   num.of.splits.occurred = 1L
   while(iter <= max.iter & continue == TRUE) {
     
-    ## Begin process of Gibbs sampling for each cell
+    ## Gibbs sampling for each cell
     n.TS.by.C = rowsum.y(counts, y=y, L=L)
     n.TS.by.CP = t(n.CP.by.TS)
-    ix = sample(1:ncol(counts))
-    for(i in ix) {
-
-      ## Subtract current cell counts from matrices
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
-      n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] - n.TS.by.C[,i]
-      n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
-
-      ## Calculate probabilities for each state
-      probs = rep(NA, K)
-      for(j in 1:K) {
-        temp.n.TS.by.CP = n.TS.by.CP
-        temp.n.TS.by.CP[,j] = temp.n.TS.by.CP[,j] + n.TS.by.C[,i]
-        temp.n.CP = n.CP
-        temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
-
-        #probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
-        probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
-  					sum(lgamma(temp.n.TS.by.CP + beta)) -	## Phi Numerator
-  					sum(lgamma(temp.n.CP + (L * beta)))		## Phi Denominator
-
-      }  
-
-      ## Sample next state and add back counts
-      z[i] = sample.ll(probs)
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
-      n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] + n.TS.by.C[,i]
-      n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
-    }
-
-    ## Begin process of Gibbs sampling for each gene
+	next.z = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.TS.by.C=n.TS.by.C, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, L=L, K=K, nM=nM, alpha=alpha, beta=beta)
+    m.CP.by.S = next.z$m.CP.by.S
+    n.TS.by.CP = next.z$n.TS.by.CP
+    n.CP = next.z$n.CP
+    z = next.z$z
+    rm(next.z)
+    
+    ## Gibbs sampling for each gene
     n.CP.by.G = rowsum.z(counts, z=z, K=K)
     n.CP.by.TS = t(n.TS.by.CP) 
-    ix = sample(1:nrow(counts))
-    for(i in ix) {
-        
-      ## Subtract current gene counts from matrices
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
-      n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
-      n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	 
-      probs = rep(NA, L)
-      for(j in 1:L) {
-        ## Add in counts to each state and determine probability
-        temp.n.CP.by.TS = n.CP.by.TS 
-        temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
-        temp.n.by.TS = n.by.TS 
-        temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-        temp.nG.by.TS = nG.by.TS 
-        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
-
-        #probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,n.by.TS=temp.n.by.TS,nG.by.TS=temp.nG.by.TS,nG.in.Y=temp.nG.by.TS[j],beta=beta, delta=delta, gamma=gamma)
-		pseudo.nG.by.TS = temp.nG.by.TS
-		pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
-
-		probs[j] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
-					sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
-					sum(lgamma(temp.n.CP.by.TS + beta)) +					## Phi Numerator
-					sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
-					sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))	## Psi Denominator
-	
-      }  
-
-      ## Sample next state and add back counts
-      y[i] = sample.ll(probs)
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
-      n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
-      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-    }
+	next.y = cCG.calcGibbsProbY(n.CP.by.TS=n.CP.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.CP.by.G=n.CP.by.G, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	n.CP.by.TS = next.y$n.CP.by.TS
+	nG.by.TS = next.y$nG.by.TS
+	n.by.TS = next.y$n.by.TS
+	y = next.y$y
+	rm(next.y)
     
-    ## Perform split on i-th iteration defined by z.split.on.iter
+    ## Perform split on i-th iteration defined by split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
       if(K > 2) {
 		logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
@@ -647,6 +613,28 @@ clusterProbability.celda_CG = function(counts, celda.mod) {
   
   return(list(z.probability=normalizeLogProbs(z.prob), y.probability=normalizeLogProbs(y.prob)))
 }
+
+reorder.celda_CG = function(counts,res){
+  # Reorder K
+  if(res$K > 2) {
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    d <- cosineDist(fm$proportions$population.states)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+  }  
+  
+  # Reorder L
+  if(res$L > 2) {
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    cs <- prop.table(t(fm$proportions$population.states), 2)
+    d <- cosineDist(cs)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterY(res, from = h$order, to = 1:res$L)
+  }
+  return(res)
+}
+
+
 
 ################################################################################
 # celda_CG S3 methods                                                          #
