@@ -136,8 +136,9 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   return(final)
 }
 
-cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z, s, L, K, nM, alpha, beta) {
+cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z, s, L, K, nM, alpha, beta, do.sample=TRUE) {
 
+  probs = matrix(NA, ncol=nM, nrow=K)
   ix = sample(1:nM)
   for(i in ix) {
 
@@ -147,32 +148,32 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z,
 	n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
 
 	## Calculate probabilities for each state
-	probs = rep(NA, K)
 	for(j in 1:K) {
 	  temp.n.TS.by.CP = n.TS.by.CP
 	  temp.n.TS.by.CP[,j] = temp.n.TS.by.CP[,j] + n.TS.by.C[,i]
 	  temp.n.CP = n.CP
 	  temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
 
-	  #probs[j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.TS.by.CP=temp.n.TS.by.CP, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
-	  probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
+	  probs[j,i] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
 				  sum(lgamma(temp.n.TS.by.CP + beta)) -		## Phi Numerator
 				  sum(lgamma(temp.n.CP + (L * beta)))		## Phi Denominator
 
 	}  
 
 	## Sample next state and add back counts
-	z[i] = sample.ll(probs)
+	if(isTRUE(do.sample)) z[i] = sample.ll(probs[,i])
+	
 	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
 	n.TS.by.CP[,z[i]] = n.TS.by.CP[,z[i]] + n.TS.by.C[,i]
 	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
   }
   
-  return(list(m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.CP=n.CP, z=z))
+  return(list(m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
-cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, y, nG, L, beta, delta, gamma) {
+cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, y, nG, L, beta, delta, gamma, do.sample=TRUE) {
 
+  probs = matrix(NA, ncol=nG, nrow=L)
   ix = sample(1:nG)
   for(i in ix) {
 	  
@@ -181,7 +182,6 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, 
 	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
 	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
    
-	probs = rep(NA, L)
 	for(j in 1:L) {
 	  ## Add in counts to each state and determine probability
 	  temp.n.CP.by.TS = n.CP.by.TS 
@@ -191,11 +191,10 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, 
 	  temp.nG.by.TS = nG.by.TS 
 	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
 
-	  #probs[j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,n.by.TS=temp.n.by.TS,nG.by.TS=temp.nG.by.TS,nG.in.Y=temp.nG.by.TS[j],beta=beta, delta=delta, gamma=gamma)
 	  pseudo.nG.by.TS = temp.nG.by.TS
 	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
 
-	  probs[j] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
+	  probs[j,i] <-	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
 				  sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
 				  sum(lgamma(temp.n.CP.by.TS + beta)) +						## Phi Numerator
 				  sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
@@ -203,13 +202,14 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, 
 	}  
 
 	## Sample next state and add back counts
-	y[i] = sample.ll(probs)
+	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
+	
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
 	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
 	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
   }
-  
-  return(list(n.CP.by.TS=n.CP.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y))
+
+  return(list(n.CP.by.TS=n.CP.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
 #' Simulate cells from the cell/gene clustering generative model
@@ -369,8 +369,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     n.TS.by.CP = next.z$n.TS.by.CP
     n.CP = next.z$n.CP
     z = next.z$z
-    rm(next.z)
-    
+
     ## Gibbs sampling for each gene
     n.CP.by.G = rowsum.z(counts, z=z, K=K)
     n.CP.by.TS = t(n.TS.by.CP) 
@@ -379,7 +378,6 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 	nG.by.TS = next.y$nG.by.TS
 	n.by.TS = next.y$n.by.TS
 	y = next.y$y
-	rm(next.y)
     
     ## Perform split on i-th iteration defined by split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
@@ -527,9 +525,10 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
 #'
 #' @param counts The original count matrix used in the model
 #' @param celda.mod A model returned from the 'celda_CG' function
+#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-clusterProbability.celda_CG = function(counts, celda.mod) {
+clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE) {
   
   s = celda.mod$sample.label
   z = celda.mod$z
@@ -542,76 +541,33 @@ clusterProbability.celda_CG = function(counts, celda.mod) {
   gamma = celda.mod$gamma
 
   nS = length(unique(s))
-  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-  n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
-  n.CP = rowSums(n.CP.by.TS)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
-  nG.by.TS = table(y)
-
   nG = nrow(counts)
   nM = ncol(counts)
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+  n.CP = as.integer(rowSums(n.CP.by.TS))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.C = as.integer(colSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  n.CP.by.G = rowsum.z(counts, z=z, K=K)
 
-  z.prob = matrix(NA, ncol=K, nrow=ncol(counts))
-  for(i in 1:ncol(counts)) {
+  ## Gibbs sampling for each cell
+  n.TS.by.CP = t(n.CP.by.TS)
+  next.z = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.TS.by.C=n.TS.by.C, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, L=L, K=K, nM=nM, alpha=alpha, beta=beta)
+  z.prob = t(next.z$probs)
 
-	## Subtract current cell counts from matrices
-	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
-	n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] - n.TS.by.C[,i]
-	n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
+  ## Gibbs sampling for each gene
+  next.y = cCG.calcGibbsProbY(n.CP.by.TS=n.CP.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.CP.by.G=n.CP.by.G, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  y.prob = t(next.y$probs)
 
-	## Calculate probabilities for each state
-	for(j in 1:K) {
-	  temp.n.CP.by.TS = n.CP.by.TS
-	  temp.n.CP.by.TS[j,] = temp.n.CP.by.TS[j,] + n.TS.by.C[,i]
-	  temp.n.CP = n.CP
-	  temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
-
-	  z.prob[i,j] = .calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.TS=temp.n.CP.by.TS, n.CP=temp.n.CP, L=L, alpha=alpha, beta=beta)
-	}  
-  
-	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
-	n.CP.by.TS[z[i],] = n.CP.by.TS[z[i],] + n.TS.by.C[,i]
-	n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
+  if(!isTRUE(log)) {
+    z.prob = normalizeLogProbs(z.prob)
+    y.prob = normalizeLogProbs(y.prob)
   }
-  
-  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
-  y.prob = matrix(NA, ncol=L, nrow=nrow(counts))
-  for(i in 1:nrow(counts)) {
-	  
-	## Subtract current gene counts from matrices
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
-	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] - n.CP.by.G[,i]
-	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-   
-	## Set flag if the current gene is the only one in the state
-	ADD_PSEUDO = 0
-	if(nG.by.TS[y[i]] == 0) { ADD_PSEUDO = 1 }
-
-	for(j in 1:L) {
-	  ## Add in counts to each state and determine probability
-	  temp.n.CP.by.TS = n.CP.by.TS + (1 * ADD_PSEUDO)
-	  temp.n.CP.by.TS[,j] = temp.n.CP.by.TS[,j] + n.CP.by.G[,i]
-	  temp.n.by.TS = n.by.TS + (K * ADD_PSEUDO)
-	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-	  temp.nG.by.TS = nG.by.TS + (1 * ADD_PSEUDO)
-	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
-
-	  y.prob[i,j] = .calcGibbsProbY(n.CP.by.TS=temp.n.CP.by.TS,
-		  n.by.TS=temp.n.by.TS,
-		  nG.by.TS=temp.nG.by.TS,
-		  nG.in.Y=temp.nG.by.TS[j],
-		  beta=beta, delta=delta, gamma=gamma)
-	}  
-
-	## Sample next state and add back counts
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-	n.CP.by.TS[,y[i]] = n.CP.by.TS[,y[i]] + n.CP.by.G[,i]
-	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-  }      
-  
-  return(list(z.probability=normalizeLogProbs(z.prob), y.probability=normalizeLogProbs(y.prob)))
+       
+  return(list(z.probability=z.prob, y.probability=y.prob))
 }
 
 reorder.celda_CG = function(counts,res){
