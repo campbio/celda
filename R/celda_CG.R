@@ -173,7 +173,7 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
   return(final)
 }
 
-reorder.celdaCG = function(counts,res){
+reorder.celda_CG = function(counts,res){
   # Reorder K
   if(res$K > 2) {
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
@@ -184,7 +184,8 @@ reorder.celdaCG = function(counts,res){
   
   # Reorder L
   if(res$L > 2) {
-    cs = prop.table(t(fm$proportions$population.states), 2)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    cs <- prop.table(t(fm$proportions$population.states), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
     res <- recodeClusterY(res, from = h$order, to = 1:res$L)
@@ -471,7 +472,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   class(result) = "celda_CG" 
    
   ## Peform reordering on final Z and Y assigments:
-  #result = reorder.celdaCG(counts = counts, res = result)
+  result = reorder.celda_CG(counts = counts, res = result)
   return(result)
 }
 
