@@ -339,10 +339,12 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 }
 
 reorder.celda_C = function(counts,res){
-  fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  d <- cosineDist(fm$proportions$gene.states)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+  if(res$K > 2) {
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    d <- cosineDist(fm$proportions$gene.states)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+  }  
   return(res)
 }
 
@@ -367,7 +369,7 @@ factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proporti
         
   nS = length(unique(sample.label))
   m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
-  n.G.by.CP = t(rowsum(t(counts), group=z, reorder=TRUE))
+  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
 
   K.names = paste0("K", 1:K)
   rownames(n.G.by.CP) = celda.mod$names$row
