@@ -467,12 +467,14 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
 }
 
 
-reorder.celda_G = function(counts, res){
-  fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  cs = prop.table(t(fm$proportions$cell.states), 2)
-  d <- cosineDist(cs)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterY(res, from = h$order, to = 1:res$L)
+reorder.celda_G = function(counts, res) {
+  if(res$L > 2) {
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    cs = prop.table(t(fm$proportions$cell.states), 2)
+    d <- cosineDist(cs)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterY(res, from = h$order, to = 1:res$L)
+  }  
   return(res)
 }
 
