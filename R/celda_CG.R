@@ -175,17 +175,20 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 
 reorder.celdaCG = function(counts,res){
   # Reorder K
-  fm <- factorizeMatrix(counts = counts, celda.mod = res)
-  d <- cosineDist(fm$proportions$population.states)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+  if(res$K > 2) {
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    d <- cosineDist(fm$proportions$population.states)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+  }  
   
   # Reorder L
-  cs = prop.table(t(fm$proportions$population.states), 2)
-  d <- cosineDist(cs)
-  h <- hclust(d, method = "complete")
-  res <- recodeClusterY(res, from = h$order, to = 1:res$L)
-  
+  if(res$L > 2) {
+    cs = prop.table(t(fm$proportions$population.states), 2)
+    d <- cosineDist(cs)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterY(res, from = h$order, to = 1:res$L)
+  }
   return(res)
 }
 
