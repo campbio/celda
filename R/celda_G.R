@@ -130,7 +130,7 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 # @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 # @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 # @keywords log likelihood
-cG.calcGibbsProbY = function(n.C.by.TS, n.by.TS, nG.by.TS, nG.in.Y, beta, delta, gamma) {
+cG.calcGibbsProbY = function(n.C.by.TS, n.by.TS, nG.by.TS, beta, delta, gamma) {
   nG.by.TS[nG.by.TS == 0] = 1
 
   ## Calculate for "Eta" component
@@ -366,10 +366,10 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
   gamma = celda.mod$gamma
   
   ## Calculate counts one time up front
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = table(factor(y, 1:L))
+  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
   nM = ncol(counts)
   nG = nrow(counts)
 
@@ -378,28 +378,27 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
 	## Subtract current gene counts from matrices
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
 	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	n.TS.by.C[y[i],] = n.TS.by.C[y[i],] - counts[i,]
+	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts[i,]
 
 	## Calculate probabilities for each state
 	for(j in 1:L) {
 	  temp.nG.by.TS = nG.by.TS 
 	  temp.n.by.TS = n.by.TS 
-	  temp.n.TS.by.C = n.TS.by.C 
+	  temp.n.C.by.TS = n.C.by.TS
 	
 	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
 	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-	  temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
+	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts[i,]
 	
-	  y.prob[i,j] <- cG.calcGibbsProbY(n.TS.by.C=temp.n.TS.by.C,
+	  y.prob[i,j] <- cG.calcGibbsProbY(n.C.by.TS=temp.n.C.by.TS,
 					n.by.TS=temp.n.by.TS, 
 					nG.by.TS=temp.nG.by.TS, 
-					nG.in.Y=temp.nG.by.TS[j], 
 					beta=beta, delta=delta, gamma=gamma)
 	}
 	
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
     n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-    n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+    n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts[i,]
 
   }
   
