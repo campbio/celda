@@ -197,7 +197,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
                    count.checksum=NULL, seed=12345, 
-                   split.on.iter=5,  num.splits=5, 
+                   split.on.iter=10,  num.splits=3, 
                    y.init=NULL, logfile=NULL, ...) {
 
   ## Error checking and variable processing

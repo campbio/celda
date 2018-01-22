@@ -1,4 +1,4 @@
-split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.try = 10, ...) { 
+split.each.z = function(counts, z, K, LLFunction, z.prob, min.cell=3, max.clusters.to.try = 10, ...) { 
 
   dot.args = list(...)
   
@@ -11,20 +11,17 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   clust.split = list()
   for(i in 1:K) { 
     if(i %in% z.to.split) {
-      clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, num.splits = 0))
+      clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=3, num.splits = 0))
       clust.split = c(clust.split, list(clustLabel$z))
     } else {
       clust.split = c(clust.split, list(NA))
     }  
   }
-
+  
   ## Find second best assignment give current assignments for each cell
-  celda.mod = list(counts=counts, z=z, K=K, sample.label=dot.args$s, alpha=dot.args$alpha, beta=dot.args$beta)
-  class(celda.mod) = "celda_C"
-  z.prob = clusterProbability.celda_C(counts, celda.mod, log=TRUE)$z.probability
   z.prob[cbind(1:nrow(z.prob), z)] = NA
-  z.second = apply(z.prob, 1, function(v) order(v, decreasing = TRUE)[1])
-
+  z.second = apply(z.prob, 1, which.max)
+  
   ll.shuffle = rep(NA, K)
   for(i in z.non.empty) {
     ix = z == i
@@ -72,7 +69,7 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
 	  pairs = rbind(pairs, c(i, j))
 	}  
   }
-  
+
   select = which.max(z.split.ll) 
 
   if(select == 1) {
@@ -80,14 +77,14 @@ split.each.z = function(counts, z, K, LLFunction, min.cell=3, max.clusters.to.tr
   } else {
     m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
-  
+
   return(list(z=z.split[,select], message=m))
 }
 
 
 
-split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10, ...) { 
-  
+split.each.y = function(counts, y, L, LLFunction, y.prob, min=3, max.clusters.to.try=10, ...) { 
+
   dot.args = list(...)
   
   ## Identify clusters to split
@@ -95,25 +92,20 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
   y.to.split = which(y.ta >= min)
   y.non.empty = which(y.ta > 0)
 
-  
   ## Loop through each split-able y and find best split
   clust.split = list()
   for(i in 1:L) {
     if(i %in% y.to.split) {    
-      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, num.splits=0))
+      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=3, num.splits=0))
       clust.split = c(clust.split, list(clustLabel$y))
     } else {
       clust.split = c(clust.split, list(NA))
     }  
   }
-
+  
   ## Find second best assignment give current assignments for each cell
-  celda.mod = list(counts=counts, y=y, L=L, beta=dot.args$beta, delta=dot.args$delta, gamma=dot.args$gamma)
-  class(celda.mod) = "celda_G"
-  y.prob = clusterProbability.celda_G(counts, celda.mod, log=TRUE)$y.probability
   y.prob[cbind(1:nrow(y.prob), y)] = NA
-  y.second = apply(y.prob, 1, function(v) order(v, decreasing = TRUE)[1])
-
+  y.second = apply(y.prob, 1, which.max)
   ll.shuffle = rep(NA, L)
   for(i in y.non.empty) {
     ix = y == i
@@ -123,7 +115,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
     ll.shuffle[i] = do.call(LLFunction, params)
   }
   y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
-
+  
   if(length(y.to.split) == 0 | length(y.to.shuffle) == 0) {
     m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
     return(list(y=y, message=m))
@@ -161,7 +153,7 @@ split.each.y = function(counts, y, L, LLFunction, min=3, max.clusters.to.try=10,
       pairs = rbind(pairs, c(i, j))
     }
   }
-  
+
   select = which.max(y.split.ll) 
   
   if(select == 1) {
