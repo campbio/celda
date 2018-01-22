@@ -460,26 +460,20 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   gamma = celda.mod$gamma
   sample.label = celda.mod$sample.label
   
-  counts.list = c()
-  prop.list = c()
-  post.list = c()
-  res = list()
-
-  counts.list = c()
-  prop.list = c()
-  post.list = c()
-  res = list()
-  
-  nS = length(unique(sample.label))
-  m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-  n.CP.by.TS = rowsum(t(n.TS.by.C), group=z, reorder=TRUE)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
+ 
+  ## Calculate counts one time up front
+  nS = length(unique(s))
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+  n.by.G = as.integer(rowSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
 
   n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
   for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
 
+  nG = nrow(counts)
+  nM = ncol(counts)
   L.names = paste0("L", 1:L)
   K.names = paste0("K", 1:K)
   colnames(n.TS.by.C) = celda.mod$names$column
@@ -490,6 +484,11 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   colnames(m.CP.by.S) = celda.mod$names$sample
   colnames(n.CP.by.TS) = L.names
   rownames(n.CP.by.TS) = K.names
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
     
   if(any("counts" %in% type)) {
     counts.list = list(sample.states = m.CP.by.S,
@@ -573,19 +572,25 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE) {
 reorder.celda_CG = function(counts,res){
   # Reorder K
   if(res$K > 2) {
+    res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    d <- cosineDist(fm$proportions$population.states)
+    unique.z = unique(res$z)
+    d <- cosineDist(fm$posterior$population.states[,unique.z])
     h <- hclust(d, method = "complete")
-    res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+    
+    res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
   }  
   
   # Reorder L
   if(res$L > 2) {
+    res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    cs <- prop.table(t(fm$proportions$population.states), 2)
+    unique.y = unique(res$y)    
+    cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
-    res <- recodeClusterY(res, from = h$order, to = 1:res$L)
+    
+    res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
   }
   return(res)
 }

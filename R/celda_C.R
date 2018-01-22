@@ -315,10 +315,12 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 
 reorder.celda_C = function(counts,res){
   if(res$K > 2) {
+    res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    d <- cosineDist(fm$proportions$gene.states)
+    unique.z = unique(res$z)
+    d <- cosineDist(fm$posterior$gene.states[,unique.z])
     h <- hclust(d, method = "complete")
-    res <- recodeClusterZ(res, from = h$order, to = 1:res$K)
+    res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
   }  
   return(res)
 }
