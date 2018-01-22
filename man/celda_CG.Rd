@@ -5,10 +5,9 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 25,
-  seed = 12345, z.split.on.iter = 3, z.num.splits = 3,
-  y.split.on.iter = 3, y.num.splits = 3, z.init = NULL, y.init = NULL,
-  logfile = NULL, ...)
+  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 50,
+  seed = 12345, split.on.iter = 10, num.splits = 3, z.init = NULL,
+  y.init = NULL, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -33,13 +32,9 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
-\item{z.split.on.iter}{On z.split.on.iter-th iterations, a heuristic will be applied using hierarchical clustering to determine if a cell cluster should be merged with another cell cluster and a third cell cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3}
+\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10.}
 
-\item{z.num.splits}{Maximum number of times to perform the heuristic described in z.split.on.iter}
-
-\item{y.split.on.iter}{On every y.split.on.iter iteration, a heuristic will be applied using hierarchical clustering to determine if a gene cluster should be merged with another gene cluster and a third gene cluster should be split into two clusters. This helps avoid local optimum during the initialization. Default to be 3}
-
-\item{y.num.splits}{Maximum number of times to perform the heuristic described in y.split.on.iter}
+\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 3.}
 
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
