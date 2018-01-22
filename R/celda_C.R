@@ -88,7 +88,7 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                    count.checksum=NULL, max.iter=50, seed=12345,
-                   split.on.iter=5, num.splits=5, 
+                   split.on.iter=10, num.splits=3, 
                    z.init = NULL, logfile=NULL, ...) {
 
   ## Error checking and variable processing
