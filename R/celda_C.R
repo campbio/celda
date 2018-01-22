@@ -128,35 +128,11 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   num.of.splits.occurred = 1L
   while(iter <= max.iter & continue == TRUE) {
     
-    ## Begin process of Gibbs sampling for each cell
-    ix = sample(1:ncol(counts))
-    for(i in ix) {
-      
-      ## Subtract current cell counts from matrices
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
-      n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
-      n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
-    
-      ## Calculate probabilities for each state
-      probs = rep(NA, K)
-      for(j in 1:K) {
-        temp.n.G.by.CP = n.G.by.CP
-        temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
-        temp.n.CP = n.CP
-        temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
-
-        #probs[j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
-        probs[j] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
-  					sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
-  					sum(lgamma(temp.n.CP + (nG * beta)))	## Phi Denominator
-      }  
-
-      ## Sample next state and add back counts
-      z[i] = sample.ll(probs)
-      m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
-      n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
-      n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
-    }  
+    next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+    m.CP.by.S = next.z$m.CP.by.S
+    n.G.by.CP = next.z$n.G.by.CP
+    n.CP = next.z$n.CP
+    z = next.z$z
     
     ## Perform split if on i-th iteration defined by split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & K > 2) {
@@ -203,19 +179,38 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 }
 
 
-cC.calcGibbsProbZ = function(m.CP.by.S, n.CP.by.G, n.CP, nG, alpha, beta) {
+cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
   
-  ## Calculate for "Theta" component
-  theta.ll = log(m.CP.by.S + alpha)
+  probs = matrix(NA, ncol=nM, nrow=K)
+  ix = sample(1:nM)
+  for(i in ix) {
+	
+	## Subtract current cell counts from matrices
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
+	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
+	n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
   
-  ## Calculate for "Phi" component
-  b = sum(lgamma(n.CP.by.G + beta))
-  d = -sum(lgamma(n.CP + (nG*beta)))
-  
-  phi.ll = b + d
-  
-  final = theta.ll + phi.ll 
-  return(final)
+	## Calculate probabilities for each state
+	for(j in 1:K) {
+	  temp.n.G.by.CP = n.G.by.CP
+	  temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
+	  temp.n.CP = n.CP
+	  temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
+
+	  probs[j,i] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
+				  sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
+				  sum(lgamma(temp.n.CP + (nG * beta)))	## Phi Denominator
+	}  
+
+	## Sample next state and add back counts
+	if(isTRUE(do.sample)) z[i] = sample.ll(probs[,i])
+	
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
+	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
+	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
+  }  
+
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
 
@@ -237,33 +232,13 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE) {
   nS = length(unique(s))
   nG = nrow(counts)
   nM = ncol(counts)
-  m.CP.by.S = matrix(table(factor(z, levels=1:K), s), ncol=nS)
-  n.CP.by.G = rowsum.z(counts, z=z, K=K)
-  n.CP = rowSums(n.CP.by.G)  
-
-  z.prob = matrix(NA, ncol=K, nrow=ncol(counts))
-  for(i in 1:ncol(counts)) {
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), nrow=K, ncol=nS)
+  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
+  n.CP = as.integer(colSums(n.G.by.CP))
+  n.by.C = as.integer(colSums(counts))
   
-	## Subtract current cell counts from matrices
-	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1
-	n.CP.by.G[z[i],] = n.CP.by.G[z[i],] - counts[,i]
-	n.CP[z[i]] = n.CP[z[i]] - sum(counts[,i])
-
-	## Calculate probabilities for each state
-	for(j in 1:K) {
-	  temp.n.CP.by.G = n.CP.by.G
-	  temp.n.CP.by.G[j,] = temp.n.CP.by.G[j,] + counts[,i]
-	  temp.n.CP = n.CP
-	  temp.n.CP[j] = temp.n.CP[j] + sum(counts[,i])
-
-	  z.prob[i,j] = cC.calcGibbsProbZ(m.CP.by.S=m.CP.by.S[j,s[i]], n.CP.by.G=temp.n.CP.by.G, n.CP=temp.n.CP, nG=nG, alpha=alpha, beta=beta)
-	}  
-
-	## Add back counts
-	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1
-	n.CP.by.G[z[i],] = n.CP.by.G[z[i],] + counts[,i]
-	n.CP[z[i]] = n.CP[z[i]] + sum(counts[,i])
-  }
+  next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta, do.sample=FALSE)  
+  z.prob = t(next.z$probs)
   
   if(!isTRUE(log)) {
     z.prob = normalizeLogProbs(z.prob)
