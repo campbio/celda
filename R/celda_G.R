@@ -187,8 +187,8 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 5. 
-#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 5.
+#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 10. 
+#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
