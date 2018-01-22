@@ -1,18 +1,23 @@
-#' Calculate the perplexity from a single celda chain
+#' Calculate the perplexity from a single celda run
 #' 
-#' Perplexity is defined as the inverse of the geometric mean of the log-likelihoods over all 
-#' iterations of Gibbs sampling.
-#' @param completeLogLik The complete Gibbs sampling history of log-likelihoods for a single celda chain
-#' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
+#' Perplexity can be seen as a measure of how well a provided set of 
+#' cluster assignments fit the count data being modeled.
+#' 
+#' Perplexity is defined in LDA as the exp of the log likelihood of the model
+#' divided by the total amount of word tokens. The corresponding perplexity
+#' for the celda models are derived in their respective model description 
+#' documents. These documents will not be made publicly available until 
+#' after publication of celda.
+#' 
+#' @param celdaRun A single celda run (usually from the _res.list_ property of a celda_list)
+#' @param counts The count matrix modeled in the celdaRun parameter
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
-calculatePerplexity = function(completeLogLik, log = FALSE) {
-  if (log) {
-    return(-mean(completeLogLik))
+calculatePerplexity = function(celdaRun, counts, precision=512) {
+  if (class(celdaRun) != "celda_C") {
+    stop("Perplexity can only currently be calculated for celda_C models.")
   }
-  mpfr_log_lik = Rmpfr::mpfr(completeLogLik, 512)
-  perplexity = exp(Rmpfr::mean(mpfr_log_lik))^-1
-  return(perplexity)
+  UseMethod("calculatePerplexity", celdaRun)
 }
 
 
