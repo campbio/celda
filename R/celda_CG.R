@@ -306,8 +306,8 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
 #' @param seed Parameter to set.seed() for random number generation
-#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 5. 
-#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 5.
+#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10. 
+#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.

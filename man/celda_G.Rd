@@ -5,8 +5,8 @@
 \title{celda Gene Clustering Model}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 50,
-  count.checksum = NULL, seed = 12345, split.on.iter = 5,
-  num.splits = 5, y.init = NULL, logfile = NULL, ...)
+  count.checksum = NULL, seed = 12345, split.on.iter = 10,
+  num.splits = 3, y.init = NULL, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -25,9 +25,9 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 50,
 
 \item{seed}{Parameter to set.seed() for random number generation.}
 
-\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 5.}
+\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 10.}
 
-\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 5.}
+\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 3.}
 
 \item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL.}
 

@@ -6,7 +6,7 @@
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, count.checksum = NULL, max.iter = 50,
-  seed = 12345, split.on.iter = 5, num.splits = 5, z.init = NULL,
+  seed = 12345, split.on.iter = 10, num.splits = 3, z.init = NULL,
   y.init = NULL, logfile = NULL, ...)
 }
 \arguments{
@@ -32,9 +32,9 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
-\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 5.}
+\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10.}
 
-\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 5.}
+\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 3.}
 
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
