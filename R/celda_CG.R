@@ -315,7 +315,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL, max.iter=50,
-			              seed=12345, split.on.iter=5, num.splits=5,
+			              seed=12345, split.on.iter=10, num.splits=3,
 			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
@@ -383,7 +383,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
       if(K > 2) {
 		logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-		res = split.each.z(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+		res = split.each.z(counts=counts, z=z, y=y, z.prob=t(next.z$probs), K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 		logMessages(res$message, logfile=logfile, append=TRUE)
 		z = res$z      
 
@@ -396,7 +396,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 	  }  
       if(L > 2) {
         logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-        res = split.each.y(counts=counts, z=z, y=y, K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+        res = split.each.y(counts=counts, z=z, y=y, y.prob=t(next.y$probs), K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 	    logMessages(res$message, logfile=logfile, append=TRUE)
         y = res$y
 
