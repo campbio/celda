@@ -338,29 +338,38 @@ factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proporti
   alpha = celda.mod$alpha
   beta = celda.mod$beta
   sample.label = celda.mod$sample.label
-
-  counts.list = c()
-  prop.list = c()
-  post.list = c()
-  res = list()
+  s = as.integer(as.factor(sample.label))
         
-  nS = length(unique(sample.label))
-  m.CP.by.S = matrix(table(factor(z, levels=1:K), sample.label), ncol=nS)
-  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
+  nS = length(unique(s))
+  nG = nrow(counts)
+  nM = ncol(counts)
 
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
+  
   K.names = paste0("K", 1:K)
   rownames(n.G.by.CP) = celda.mod$names$row
   colnames(n.G.by.CP) = K.names
   rownames(m.CP.by.S) = K.names
   colnames(m.CP.by.S) = celda.mod$names$sample
-              
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
+                
   if(any("counts" %in% type)) {
     counts.list = list(sample.states=m.CP.by.S, gene.states=n.G.by.CP)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
+    ## Need to avoid normalizing cell/gene states with zero cells/genes
+    unique.z = unique(z)
+    temp.n.G.by.CP = n.G.by.CP
+    temp.n.G.by.CP[,unique.z] = normalizeCounts(temp.n.G.by.CP[,unique.z], scale.factor=1)
+
     prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
-                     gene.states = normalizeCounts(n.G.by.CP, scale.factor=1))
+                     gene.states = temp.n.G.by.CP)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
