@@ -1,7 +1,7 @@
 sample.ll = function(ll.probs) {
   probs.sub <- exp(ll.probs - max(ll.probs))
   probs.norm <- probs.sub / sum(probs.sub)
-  probs.select <- .Internal(sample(length(probs.norm), 1L, replace=TRUE, prob=probs.norm))
+  probs.select <- sample.int(length(probs.norm), size=1L, replace=TRUE, prob=probs.norm)
   return(probs.select)
 }
 
