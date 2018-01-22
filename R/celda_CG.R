@@ -468,12 +468,12 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
   n.by.G = as.integer(rowSums(counts))
   n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-
-  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
-  for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
-
   nG = nrow(counts)
   nM = ncol(counts)
+
+  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+  n.G.by.TS[cbind(1:nG,y)] = n.by.G
+
   L.names = paste0("L", 1:L)
   K.names = paste0("K", 1:K)
   colnames(n.TS.by.C) = celda.mod$names$column
@@ -504,7 +504,7 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
     temp.n.CP.by.TS = t(n.CP.by.TS)
     temp.n.CP.by.TS[,unique.z] = normalizeCounts(temp.n.CP.by.TS[,unique.z], scale.factor=1)
 
-    unique.y = unique(y)
+     unique.y = unique(y)
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
     

@@ -385,31 +385,39 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   beta = celda.mod$beta
   delta = celda.mod$delta
   
-  counts.list = c()
-  prop.list = c()
-  post.list = c()
-  res = list()
+  ## Calculate counts one time up front
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  n.by.G = as.integer(rowSums(counts))
+  nM = ncol(counts)
+  nG = nrow(counts)
   
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum(n.by.G, y))
-
   n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
-  for(i in 1:length(y)) {n.G.by.TS[i,y[i]] = n.by.G[i]}
+  n.G.by.TS[cbind(1:nG,y)] = n.by.G
 
   L.names = paste0("L", 1:L)
   colnames(n.TS.by.C) = celda.mod$names$column
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
   rownames(n.G.by.TS) = celda.mod$names$row
+
+  counts.list = c()
+  prop.list = c()
+  post.list = c()
+  res = list()
   
   if(any("counts" %in% type)) {
     counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
+    ## Need to avoid normalizing cell/gene states with zero cells/genes
+    unique.y = unique(y)
+    temp.n.G.by.TS = n.G.by.TS
+    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
+
     prop.list = list(cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
-    							  gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
+    							  gene.states = temp.n.G.by.TS)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
