@@ -130,24 +130,47 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 # @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 # @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 # @keywords log likelihood
-cG.calcGibbsProbY = function(n.C.by.TS, n.by.TS, nG.by.TS, beta, delta, gamma) {
-  nG.by.TS[nG.by.TS == 0] = 1
+cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
 
-  ## Calculate for "Eta" component
-  b <- sum(lgamma(nG.by.TS + gamma))
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-  eta.ll <- b + d
-    
-  ## Calculate for "Phi" component
-  phi.ll <- sum(lgamma(n.C.by.TS + beta))
+  probs = matrix(NA, ncol=nG, nrow=L)
+  ix <- sample(1:nG)
+  for(i in ix) {
+	  
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts.t[,i]
+
+	## Calculate probabilities for each state
+	for(j in 1:L) {
+	
+	  temp.nG.by.TS = nG.by.TS 
+	  temp.n.by.TS = n.by.TS 
+	  temp.n.C.by.TS = n.C.by.TS
+	
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
+
+	  pseudo.nG.by.TS = temp.nG.by.TS
+	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
+	  
+	  probs[j,i] = 	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
+				  sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
+				  sum(lgamma(temp.n.C.by.TS + beta)) +						## Phi Numerator
+				  sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
+				  sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))  	## Psi Denominator
+	}
   
-  ## Calculate for "Psi" component
-  a <- sum(lgamma(nG.by.TS * delta))
-  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
-  psi.ll <- a + d
+	## Sample next state and add back counts
+	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
+	
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
+	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
+  }
   
-  final <- eta.ll + phi.ll + psi.ll
-  return(final)
+  return(list(n.C.by.TS=n.C.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
 
@@ -203,50 +226,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
   continue = TRUE
   num.of.splits.occurred = 1L
   while(iter <= max.iter & continue == TRUE) {
+
+	next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	n.C.by.TS = next.y$n.C.by.TS
+	nG.by.TS = next.y$nG.by.TS
+	n.by.TS = next.y$n.by.TS
+	y = next.y$y
     
-    ## Begin process of Gibbs sampling for each cell
-    ix <- sample(1:nrow(counts))
-    for(i in ix) {
-        
-      ## Subtract current gene counts from matrices
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
-      n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-      n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts.t[,i]
-
-      ## Calculate probabilities for each state
-      probs = rep(NA, L)
-      for(j in 1:L) {
-      
-        temp.nG.by.TS = nG.by.TS 
-        temp.n.by.TS = n.by.TS 
-        temp.n.C.by.TS = n.C.by.TS
-	  
-        temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
-        temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-        temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
-
-        #probs[j] <- cG.calcGibbsProbY(n.C.by.TS=temp.n.C.by.TS,
-        #              n.by.TS=temp.n.by.TS, 
-        #              nG.by.TS=temp.nG.by.TS, 
-        #              nG.in.Y=temp.nG.by.TS[j], 
-        #              beta=beta, delta=delta, gamma=gamma)
-		pseudo.nG.by.TS = temp.nG.by.TS
-		pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
-		
-		probs[j] = 	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
-					sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
-					sum(lgamma(temp.n.C.by.TS + beta)) +					## Phi Numerator
-					sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
-					sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))   ## Psi Denominator
-      }
-	
-      ## Sample next state and add back counts
-      y[i] <- sample.ll(probs)
-      nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
-      n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-      n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
-    }
-
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & L > 2) {
       logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
@@ -372,35 +358,10 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
   nG.by.TS = as.integer(table(factor(y, 1:L)))
   nM = ncol(counts)
   nG = nrow(counts)
+  counts.t = t(counts)
 
-  y.prob = matrix(NA, ncol=L, nrow=nrow(counts))
-  for(i in 1:nrow(counts)) {
-	## Subtract current gene counts from matrices
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1
-	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts[i,]
-
-	## Calculate probabilities for each state
-	for(j in 1:L) {
-	  temp.nG.by.TS = nG.by.TS 
-	  temp.n.by.TS = n.by.TS 
-	  temp.n.C.by.TS = n.C.by.TS
-	
-	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1
-	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts[i,]
-	
-	  y.prob[i,j] <- cG.calcGibbsProbY(n.C.by.TS=temp.n.C.by.TS,
-					n.by.TS=temp.n.by.TS, 
-					nG.by.TS=temp.nG.by.TS, 
-					beta=beta, delta=delta, gamma=gamma)
-	}
-	
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1
-    n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-    n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts[i,]
-
-  }
+  next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)  
+  y.prob = t(next.y$probs)
   
   if(!isTRUE(log)) {
     y.prob = normalizeLogProbs(y.prob)
