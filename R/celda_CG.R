@@ -459,8 +459,8 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   delta = celda.mod$delta
   gamma = celda.mod$gamma
   sample.label = celda.mod$sample.label
+  s = as.integer(as.factor(sample.label))
   
- 
   ## Calculate counts one time up front
   nS = length(unique(s))
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
@@ -498,10 +498,20 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
-    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
-    				   population.states = normalizeCounts(t(n.CP.by.TS), scale.factor=1), 
+
+    ## Need to avoid normalizing cell/gene states with zero cells/genes
+    unique.z = unique(z)
+    temp.n.CP.by.TS = t(n.CP.by.TS)
+    temp.n.CP.by.TS[,unique.z] = normalizeCounts(temp.n.CP.by.TS[,unique.z], scale.factor=1)
+
+    unique.y = unique(y)
+    temp.n.G.by.TS = n.G.by.TS
+    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
+    
+    prop.list = list(sample.states =  normalizeCounts(m.CP.by.S, scale.factor=1),
+    				   population.states = temp.n.CP.by.TS, 
     				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
-    				   gene.states = normalizeCounts(n.G.by.TS, scale.factor=1))
+    				   gene.states = temp.n.G.by.TS)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
@@ -573,7 +583,7 @@ reorder.celda_CG = function(counts,res){
   # Reorder K
   if(res$K > 2) {
     res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.z = unique(res$z)
     d <- cosineDist(fm$posterior$population.states[,unique.z])
     h <- hclust(d, method = "complete")
@@ -584,7 +594,7 @@ reorder.celda_CG = function(counts,res){
   # Reorder L
   if(res$L > 2) {
     res$y = as.integer(as.factor(res$y))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.y = unique(res$y)    
     cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
     d <- cosineDist(cs)
