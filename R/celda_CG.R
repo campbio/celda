@@ -402,7 +402,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 
         ## Re-calculate variables
         n.TS.by.C = rowsum.y(counts, y=y, L=L)
-        n.CP.by.TS = n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+        n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
         n.CP = as.integer(rowSums(n.CP.by.TS))
         n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
         nG.by.TS = as.integer(table(factor(y, levels=1:L)))
