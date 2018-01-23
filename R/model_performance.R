@@ -11,9 +11,10 @@
 #' 
 #' @param celdaRun A single celda run (usually from the _res.list_ property of a celda_list)
 #' @param counts The count matrix modeled in the celdaRun parameter
+#' @param precision The amount of bits of precision to pass to Rmpfr
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
-calculatePerplexity = function(celdaRun, counts, precision=512) {
+calculatePerplexity = function(celdaRun, counts, precision=128) {
   if (class(celdaRun) != "celda_C") {
     stop("Perplexity can only currently be calculated for celda_C models.")
   }
