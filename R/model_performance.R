@@ -16,7 +16,15 @@
 #' @export
 calculatePerplexity = function(celdaRun, counts, precision=128) {
   if (class(celdaRun) != "celda_C") {
-    stop("Perplexity can only currently be calculated for celda_C models.")
+    # Calculate perplexity as harmonic mean of complete log likelihood over all iterations
+    # of Gibbs sampling; we want to eventually remove this once the sub-methods are
+    # finished for celda_G, celda_CG
+    if (log) {
+      return(-mean(completeLogLik))
+    }
+    mpfr_log_lik = Rmpfr::mpfr(completeLogLik, 512)
+    perplexity = exp(Rmpfr::mean(mpfr_log_lik))^-1
+    return(perplexity)
   }
   UseMethod("calculatePerplexity", celdaRun)
 }
