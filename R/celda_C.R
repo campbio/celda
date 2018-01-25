@@ -444,46 +444,26 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 }
 
 #' @export
-calculatePerplexity.celda_C = function(celdaRun, counts, precision=512) {
-  if (!compareCountMatrix(counts, celdaRun$count.checksum)) {
-    stop("Provided celda object's count matrix checksum doesn't match the provided count matrix")
+calculatePerplexity.celda_C = function(celda.mod, counts, precision=512) {
+  
+  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  theta = log(factorized$posterior$sample.states)
+  phi   = log(factorized$posterior$gene.states)
+  sl = celda.mod$sample.label
+  
+  inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
+  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
+  inner.log.prob.exp = exp(inner.log.prob)
+  
+  log.px = 0
+  for(i in 1:ncol(inner.log.prob.exp)) {
+    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
   }
+  log.px 
   
-  factorized = factorizeMatrix(celdaRun, counts, "posterior")
-  theta = factorized$posterior$sample.states
-  phi   = factorized$posterior$gene.states
-  
-  # Make sure phi's rows are ordered the same as the count matrix (both G's),
-  # and the rows in theta correspond to the columns in phi (they're both Ks):
-  log.phi = log(phi[rownames(counts), ])
-  log.theta = log(theta[colnames(phi), ])
-  
-  # Per Equation 15 in in the celda C model derivation,
-  # simplified to matrix operations for speed:
-  log.p.x = Rmpfr::mpfr(0, precision)
-  for (i in unique(celdaRun$sample.label)) {
-    for (j in which(celdaRun$sample.label == i)) {
-        # Before summing over k=1:K, calculate the 
-        # log of the inner expression for simplicity:
-        log.inner.sums.by.k = sapply(1:k, 
-                                     function(k) {
-                                       log.theta.term = log.theta[k, i]
-                                       log.phi.term = sum(t(counts) %*% log.phi[, k])
-                                       return(log.theta.term + log.phi.term)
-                                     })
-        
-        # Given the inner expression, unlog to sum 1:K terms, then re-log:
-        log.inner.sums.by.k = Rmpfr::mpfr(log.inner.sums.by.k, precision)
-        inner.sums.by.k = exp(log.inner.sums.by.k)
-        sum.over.k = sum(inner.sums.by.k)
-        
-        log.p.x = log.p.x + log.sum.over.k
-    }
-  }
-  
-  perplexity = exp(-(log.p.x/sum(counts)))
+  perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
-}
+}  
 
 #' visualizeModelPerformance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()

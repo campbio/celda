@@ -15,17 +15,6 @@
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
 calculatePerplexity = function(celdaRun, counts, precision=128) {
-  if (class(celdaRun) != "celda_C") {
-    # Calculate perplexity as harmonic mean of complete log likelihood over all iterations
-    # of Gibbs sampling; we want to eventually remove this once the sub-methods are
-    # finished for celda_G, celda_CG
-    if (log) {
-      return(-mean(completeLogLik))
-    }
-    mpfr_log_lik = Rmpfr::mpfr(completeLogLik, 512)
-    perplexity = exp(Rmpfr::mean(mpfr_log_lik))^-1
-    return(perplexity)
-  }
   UseMethod("calculatePerplexity", celdaRun)
 }
 
@@ -33,7 +22,7 @@ calculatePerplexity = function(celdaRun, counts, precision=128) {
 # Convenience function to calculate performance metrics by specifying a method. 
 calculatePerformanceMetric = function(log.likelihoods, method="perplexity", log = FALSE) {
   if (method == "perplexity") {
-    metric = calculatePerplexity(log.likelihoods, log)
+    metric = calculatePerplexity(log.likelihoods)
   } else if (method == "loglik") {
      metric = max(log.likelihoods)
   } else stop("Invalid method specified")
