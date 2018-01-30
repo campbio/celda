@@ -9,13 +9,13 @@
 #' documents. These documents will not be made publicly available until 
 #' after publication of celda.
 #' 
-#' @param celdaRun A single celda run (usually from the _res.list_ property of a celda_list)
+#' @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
 #' @param counts The count matrix modeled in the celdaRun parameter
 #' @param precision The amount of bits of precision to pass to Rmpfr
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
-calculatePerplexity = function(celdaRun, counts, precision=128) {
-  UseMethod("calculatePerplexity", celdaRun)
+calculatePerplexity = function(celda.mod, counts, precision=128) {
+  UseMethod("calculatePerplexity", celda.mod)
 }
 
 
