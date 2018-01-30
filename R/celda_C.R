@@ -471,29 +471,24 @@ calculatePerplexity.celda_C = function(celda.mod, counts, precision=128) {
 
 #' visualizeModelPerformance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()
+#' @param counts The counts used to generate the celda.list results
 #' @param method One of "perplexity", "loglik"
 #' @param title Title for the plot
 #' @param log Currently not working for celda_C objects
 #' @import Rmpfr
 #' @export
-visualizeModelPerformance.celda_C = function(celda.list, method="perplexity", 
-                                               title="Model Performance (All Chains)",
-                                               log = F) {
+visualizeModelPerformance.celda_C = function(celda.list, counts,
+                                             method="perplexity", 
+                                             title="Model Performance (All Chains)",
+                                             log = F) {
   
   cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
-  performance.metric = lapply(log.likelihoods, 
+  performance.metric = lapply(celda.list$res.list, 
                               calculatePerformanceMetric,
+                              counts, log.likelihoods,
                               method)
-  
-  # These methods return Rmpfr numbers that are extremely small and can't be 
-  # plotted, so log 'em first
-  if (method %in% c("perplexity")) {
-    performance.metric = lapply(performance.metric, log)
-    performance.metric = methods::new("mpfr", unlist(performance.metric))
-    performance.metric = as.numeric(performance.metric)
-  }
   
   plot.df = data.frame(size=cluster.sizes,
                        metric=performance.metric)
