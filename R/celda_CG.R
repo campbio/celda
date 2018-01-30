@@ -773,34 +773,27 @@ calculatePerplexity.celda_CG = function(celda.mod, counts, precision=128) {
 #' L (cell clusters K), plot the performance of each number of cell
 #' clusters K (gene clusters L).
 #' @param celda.list A list of celda_CG objects returned from celda function
+#' @param counts The counts used to generate the celda.list results
 #' @param method One of "perplexity" or "loglik"
 #' @param title Title for the visualizeModelPerformance
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.
 #' @import Rmpfr
 #' @export
-visualizeModelPerformance.celda_CG = function(celda.list, method="perplexity",
-                                                title="Model Performance (All Chains)",
-                                                log = FALSE) {
- 
+visualizeModelPerformance.celda_CG = function(celda.list, counts,
+                                              method="perplexity",
+                                              title="Model Performance (All Chains)",
+                                              log = FALSE) {
   validateKLPlotParameters(celda.list, method)
  
   y.lab = method
   cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
   log.likelihoods = lapply(celda.list$res.list,
                            function(mod) { completeLogLikelihood(mod) })
-  performance.metric = lapply(log.likelihoods, 
+  performance.metric = lapply(celda.list$res.list, 
                               calculatePerformanceMetric,
+                              counts,
+                              log.likelihoods,
                               method, log)
-  
-  # These methods return Rmpfr numbers that are extremely small and can't be 
-  # plotted, so log 'em first
-  if (method == "perplexity") {
-    if (!(log)) {
-      performance.metric = lapply(performance.metric, log)
-      performance.metric = methods::new("mpfr", unlist(performance.metric))
-    }
-    y.lab = paste0("Log(",method,")")
-  } 
   
   performance.metric = as.numeric(performance.metric)
 
