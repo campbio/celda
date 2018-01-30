@@ -739,6 +739,33 @@ celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
 }
 
 
+#' @export
+calculatePerplexity.celda_CG = function(celda.mod, counts, precision=128) {
+  if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
+    stop("Provided count matrix was not used to generate the provided celda model.")
+  }
+  
+  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  theta = log(factorized$posterior$sample.states)
+  phi   = factorized$posterior$population.states
+  psi   = factorized$posterior$gene.states
+  sl = celda.mod$sample.label
+  
+  gene.by.pop.prob = log(psi %*% phi)
+  inner.log.prob = (t(gene.by.pop.prob) %*% counts) + theta[, sl]  
+  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
+  inner.log.prob.exp = exp(inner.log.prob)
+  
+  log.px = 0
+  for(i in 1:ncol(inner.log.prob.exp)) {
+    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
+  }
+  
+  perplexity = exp(-(log.px/sum(counts)))
+  return(perplexity)
+}
+
+
 #' Visualize the performance of celda_CG models grouped by L and K
 #' 
 #' Plot the performance of a list of celda_CG models returned 
