@@ -20,9 +20,10 @@ calculatePerplexity = function(celdaRun, counts, precision=128) {
 
 
 # Convenience function to calculate performance metrics by specifying a method. 
-calculatePerformanceMetric = function(log.likelihoods, method="perplexity", log = FALSE) {
+calculatePerformanceMetric = function(celdaRun, counts, log.likelihoods, 
+                                      method="perplexity", log = FALSE) {
   if (method == "perplexity") {
-    metric = calculatePerplexity(log.likelihoods)
+    metric = calculatePerplexity(celdaRun, counts)
   } else if (method == "loglik") {
      metric = max(log.likelihoods)
   } else stop("Invalid method specified")
