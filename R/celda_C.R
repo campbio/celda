@@ -443,8 +443,12 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
   renderCeldaHeatmap(counts, z=celda.mod$z, ...)
 }
 
+
 #' @export
-calculatePerplexity.celda_C = function(celda.mod, counts, precision=512) {
+calculatePerplexity.celda_C = function(celda.mod, counts, precision=128) {
+  if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
+    stop("Provided count matrix was not used to generate the provided celda model.")
+  }
   
   factorized = factorizeMatrix(celda.mod, counts, "posterior")
   theta = log(factorized$posterior$sample.states)
@@ -459,11 +463,11 @@ calculatePerplexity.celda_C = function(celda.mod, counts, precision=512) {
   for(i in 1:ncol(inner.log.prob.exp)) {
     log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
   }
-  log.px 
   
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
 }  
+
 
 #' visualizeModelPerformance for celda Cell clustering function
 #' @param celda.list A celda_list object returned from celda()
