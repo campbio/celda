@@ -531,6 +531,24 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 }
 
 
+#' @export
+calculatePerplexity.celda_G = function(celda.mod, counts, precision=128) {
+  if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
+    stop("Provided count matrix was not used to generate the provided celda model.")
+  }
+  
+  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  phi   = factorized$posterior$gene.states
+  psi   = factorized$posterior$cell.states
+  
+  gene.by.cell.prob = log(phi %*% psi)
+  log.px = sum(gene.by.cell.prob * counts)
+  
+  perplexity = exp(-(log.px/sum(counts)))
+  return(perplexity)
+}
+
+
 # TODO DRYer implementation in concert with celda_C
 #' visualizeModelPerformance for the celda Gene function
 #' @param celda.list A celda_list object returned from celda()
