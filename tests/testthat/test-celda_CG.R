@@ -9,4 +9,3 @@ celdaCG.res <- celda(counts=celdacg$counts, nchains=1, K = 2:4, L = 4:6,
 test_that("visualizeModelPerformance Returns a Plot",{
   expect_equal(TRUE, all(!is.na(visualizeModelPerformance(celdaCG.res, celdacg$counts))))
 })
-
