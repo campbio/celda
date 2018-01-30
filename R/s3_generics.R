@@ -117,12 +117,13 @@ celdaHeatmap <- function(celda.mod, counts, ...) {
 #' Visualize various performance metrics as a function of K / L to aid parameter choice.
 #' 
 #' @param celda.list A celda_list object as returned from *celda()*
+#' @param counts The counts matrix used to generate the provided celda.list
 #' @param method Which performance metric to visualize. One of ("perplexity", "harmonic", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "harmonic" calculates the marginal likelihood has the harmonic mean of the likelihoods. "loglik" plots the highest log-likelihood during Gibbs iteration.
 #' @param title Title for the visualizeModelPerformance
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric
 #' @return A ggplot object containing the requested plot(s)
 #' @export
-visualizeModelPerformance <- function(celda.list, method, title, log = FALSE) {
+visualizeModelPerformance <- function(celda.list, counts, method, title, log = FALSE) {
   # Dispatch on the list's content type
   UseMethod("visualizeModelPerformance", celda.list$res.list[[1]])
 }

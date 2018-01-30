@@ -4,10 +4,10 @@
 \alias{calculatePerplexity}
 \title{Calculate the perplexity from a single celda run}
 \usage{
-calculatePerplexity(celdaRun, counts, precision = 128)
+calculatePerplexity(celda.mod, counts, precision = 128)
 }
 \arguments{
-\item{celdaRun}{A single celda run (usually from the _res.list_ property of a celda_list)}
+\item{celda.mod}{A single celda run (usually from the _res.list_ property of a celda_list)}
 
 \item{counts}{The count matrix modeled in the celdaRun parameter}
 
