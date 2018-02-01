@@ -317,7 +317,7 @@ reorder.celda_C = function(counts,res){
   if(res$K > 2) {
     res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.z = unique(res$z)
+    unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$gene.states[,unique.z])
     h <- hclust(d, method = "complete")
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
@@ -364,7 +364,7 @@ factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proporti
   }
   if(any("proportion" %in% type)) {
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.z = unique(z)
+    unique.z = sort(unique(z))
     temp.n.G.by.CP = n.G.by.CP
     temp.n.G.by.CP[,unique.z] = normalizeCounts(temp.n.G.by.CP[,unique.z], scale.factor=1)
 

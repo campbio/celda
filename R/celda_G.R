@@ -412,7 +412,7 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   }
   if(any("proportion" %in% type)) {
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.y = unique(y)
+    unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
 
@@ -439,7 +439,7 @@ reorder.celda_G = function(counts, res) {
   if(res$L > 2) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.y = unique(res$y)
+    unique.y = sort(unique(res$y))
     cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
