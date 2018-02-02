@@ -138,7 +138,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & K > 2) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
+      res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
@@ -180,8 +180,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
 
 cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
-  
+
+  ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
+  temp.n.G.by.CP = n.G.by.CP
+  temp.n.CP
+  
   ix = sample(1:nM)
   for(i in ix) {
 	
@@ -317,7 +321,7 @@ reorder.celda_C = function(counts,res){
   if(res$K > 2) {
     res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.z = unique(res$z)
+    unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$gene.states[,unique.z])
     h <- hclust(d, method = "complete")
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
@@ -364,7 +368,7 @@ factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proporti
   }
   if(any("proportion" %in% type)) {
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.z = unique(z)
+    unique.z = sort(unique(z))
     temp.n.G.by.CP = n.G.by.CP
     temp.n.G.by.CP[,unique.z] = normalizeCounts(temp.n.G.by.CP[,unique.z], scale.factor=1)
 
