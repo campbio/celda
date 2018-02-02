@@ -325,8 +325,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
                     delta=1, gamma=1, count.checksum=NULL,
-                    max.iter=100, stop.iter=10,
-			        seed=12345, split.on.iter=10, num.splits=3,
+                    max.iter=100, seed=12345, split.on.iter=10, num.splits=3,
 			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
