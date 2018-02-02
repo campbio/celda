@@ -5,7 +5,7 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 50,
+  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 100,
   seed = 12345, split.on.iter = 10, num.splits = 3, z.init = NULL,
   y.init = NULL, logfile = NULL, ...)
 }
@@ -28,7 +28,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25}
+\item{max.iter}{Maximum iterations of Gibbs sampling to perform. Default 100.}
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
