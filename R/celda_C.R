@@ -138,7 +138,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & K > 2) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, K=K, alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
+      res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       z = res$z
@@ -180,8 +180,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
 
 cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
-  
+
+  ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
+  temp.n.G.by.CP = n.G.by.CP
+  temp.n.CP
+  
   ix = sample(1:nM)
   for(i in ix) {
 	
