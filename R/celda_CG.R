@@ -138,7 +138,11 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 
 cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z, s, L, K, nM, alpha, beta, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nM, nrow=K)
+  temp.n.TS.by.CP = n.TS.by.CP
+  temp.n.CP = n.CP
+  
   ix = sample(1:nM)
   for(i in ix) {
 
@@ -173,7 +177,13 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z,
 
 cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, y, nG, L, beta, delta, gamma, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
+  temp.n.CP.by.TS = n.CP.by.TS
+  temp.n.by.TS = n.by.TS
+  temp.nG.by.TS = nG.by.TS
+  pseudo.nG.by.TS = temp.nG.by.TS
+  
   ix = sample(1:nG)
   for(i in ix) {
 	  
