@@ -184,7 +184,7 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
   ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
   temp.n.G.by.CP = n.G.by.CP
-  temp.n.CP
+  temp.n.CP = n.CP
   
   ix = sample(1:nM)
   for(i in ix) {
