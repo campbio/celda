@@ -140,8 +140,8 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z,
 
   ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nM, nrow=K)
-  temp.n.TS.by.CP = n.TS.by.CP
-  temp.n.CP = n.CP
+ # temp.n.TS.by.CP = n.TS.by.CP
+ # temp.n.CP = n.CP
   
   ix = sample(1:nM)
   for(i in ix) {
@@ -314,18 +314,19 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param max.iter Maximum iterations of Gibbs sampling to perform. Default 100.
 #' @param seed Parameter to set.seed() for random number generation
-#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10. 
-#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
+#' @param split.iter  Number of iterations without improvement in the log likelihood to apply a heuristic to test for jumps to more optimal solutions. This heuristic determines if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default 5. 
+#' @param converge Number of iterations without improvement in the log likelihood to stop sampling. Default 10.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ... Additional parameters
 #' @export
-celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
-                    delta=1, gamma=1, count.checksum=NULL,
-                    max.iter=100, seed=12345, split.on.iter=10, num.splits=3,
+celda_CG = function(counts, sample.label=NULL, K, L,
+					alpha=1, beta=1, delta=1, gamma=1, 
+                    max.iter=200, converge = 10, split.iter=5,
+                    seed=12345, count.checksum=NULL,
 			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
@@ -367,10 +368,8 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   iter = 1L
-  continue = TRUE
-  num.of.splits.occurred = 1L
-  num.iter.with.improvement = 0L
-  while(iter <= max.iter & continue == TRUE) {
+  num.iter.without.improvement = 0L
+  while(iter <= max.iter & num.iter.without.improvement <= converge) {
     
     ## Gibbs sampling for each cell
     n.TS.by.C = rowsum.y(counts, y=y, L=L)
@@ -391,34 +390,43 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 	y = next.y$y
     
     ## Perform split on i-th iteration defined by split.on.iter
-    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
+    if(num.iter.without.improvement == split.iter) {
       if(K > 2) {
-		logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
+		logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
 		res = split.each.z(counts=counts, z=z, y=y, z.prob=t(next.z$probs), K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 		logMessages(res$message, logfile=logfile, append=TRUE)
-		z = res$z      
+
+        # Reset convergence iter if a split occured
+	    if(!isTRUE(all.equal(z, res$z))) {
+	      num.iter.without.improvement = 0L
+	    }
 
 		## Re-calculate variables
+		z = res$z      
 		m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
 		n.TS.by.C = rowsum.y(counts, y=y, L=L)
 		n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
 		n.CP = as.integer(rowSums(n.CP.by.TS))
-		n.CP.by.G = rowsum.z(counts, z=z, K=K)      
+		n.CP.by.G = rowsum.z(counts, z=z, K=K)     
 	  }  
       if(L > 2) {
-        logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
+        logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
         res = split.each.y(counts=counts, z=z, y=y, y.prob=t(next.y$probs), K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 	    logMessages(res$message, logfile=logfile, append=TRUE)
-        y = res$y
+
+        # Reset convergence iter if a split occured	    
+	    if(!isTRUE(all.equal(y, res$y))) {
+	      num.iter.without.improvement = 1L
+	    }
 
         ## Re-calculate variables
+        y = res$y        
         n.TS.by.C = rowsum.y(counts, y=y, L=L)
         n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
         n.CP = as.integer(rowSums(n.CP.by.TS))
         n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
         nG.by.TS = as.integer(table(factor(y, levels=1:L)))
-      }
-      num.of.splits.occurred = num.of.splits.occurred + 1L
+      }      
     }
 
     ## Calculate complete likelihood
@@ -427,12 +435,15 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       z.best = z
       y.best = y
       ll.best = temp.ll
-      num.inter.with.improvement = 0L
+      num.iter.without.improvement = 1L
+    } else {  
+      num.iter.without.improvement = num.iter.without.improvement + 1L   
     }
     ll = c(ll, temp.ll)
-    
+  
     logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
-    iter = iter + 1    
+    iter = iter + 1L
+    
   }
     
 
