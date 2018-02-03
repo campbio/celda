@@ -76,20 +76,21 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
+#' @param split.iter  Number of iterations without improvement in the log likelihood to apply a heuristic to test for jumps to more optimal solutions. This heuristic determines if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default 5. 
+#' @param converge Number of iterations without improvement in the log likelihood to stop sampling. Default 10.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25 
 #' @param seed Parameter to set.seed() for random number generation
-#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a cell cluster should be reassigned and another cell cluster should be split into two clusters. Default to be 10. 
-#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
-celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
-                   count.checksum=NULL, max.iter=50, seed=12345,
-                   split.on.iter=10, num.splits=3, 
-                   z.init = NULL, logfile=NULL, ...) {
+celda_C = function(counts, sample.label=NULL, K,
+					alpha=1, beta=1, 
+                   	max.iter=200, converge = 10, split.iter=5,
+                   	count.checksum=NULL, seed=12345,
+                   	z.init = NULL, logfile=NULL, ...) {
 
   ## Error checking and variable processing
   counts = processCounts(counts)  
@@ -124,9 +125,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   iter = 1L
-  continue = TRUE
-  num.of.splits.occurred = 1L
-  while(iter <= max.iter & continue == TRUE) {
+  num.iter.without.improvement = 0L
+  while(iter <= max.iter & num.iter.without.improvement <= converge) {
     
     next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
     m.CP.by.S = next.z$m.CP.by.S
@@ -134,17 +134,20 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     n.CP = next.z$n.CP
     z = next.z$z
     
-    ## Perform split if on i-th iteration defined by split.on.iter
-    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & K > 2) {
+    ## Perform split on i-th iteration of no improvement in log likelihood
+    if(num.iter.without.improvement == split.iter & K > 2) {
 
-      logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
+      logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
       logMessages(res$message, logfile=logfile, append=TRUE)
-      
-      z = res$z
-      num.of.splits.occurred = num.of.splits.occurred + 1L
 
+      # Reset convergence iter if a split occured
+	  if(!isTRUE(all.equal(z, res$z))) {
+	    num.iter.without.improvement = 1L
+	  }
+            
       ## Re-calculate variables
+      z = res$z
       m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
       n.CP.by.G = rowsum.z(counts, z=z, K=K)
       n.CP = as.integer(rowSums(n.CP.by.G))
@@ -156,11 +159,13 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     if((all(temp.ll > ll)) | iter == 1) {
       z.best = z
       ll.best = temp.ll
+      num.iter.without.improvement = 1L
+    } else {  
+      num.iter.without.improvement = num.iter.without.improvement + 1L   
     }
     ll = c(ll, temp.ll)
     
     logMessages(date(), "... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
-    
     iter = iter + 1    
   }
     
@@ -184,7 +189,7 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
   ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
   temp.n.G.by.CP = n.G.by.CP
-  temp.n.CP
+  temp.n.CP = n.CP
   
   ix = sample(1:nM)
   for(i in ix) {
