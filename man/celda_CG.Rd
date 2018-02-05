@@ -30,6 +30,8 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
 
+\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+
 \item{seed}{Parameter to set.seed() for random number generation}
 
 \item{count.checksum}{An MD5 checksum for the provided counts matrix}
@@ -41,8 +43,6 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{logfile}{The name of the logfile to redirect messages to.}
 
 \item{...}{Additional parameters}
-
-\item{split.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
 }
 \description{
 celda Cell and Gene Clustering Model
