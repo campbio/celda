@@ -11,19 +11,21 @@
 #' 
 #' @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
 #' @param counts The count matrix modeled in the celdaRun parameter
+#' @param resample The number of resamplings of the counts matrix to calculate perplexity for
 #' @param precision The amount of bits of precision to pass to Rmpfr
 #' @return The perplexity for the provided chain as an mpfr number
 #' @export
-calculatePerplexity = function(celda.mod, counts, precision=128) {
+calculatePerplexity = function(celda.mod, counts, resample=1, precision=128) {
   UseMethod("calculatePerplexity", celda.mod)
 }
 
 
 # Convenience function to calculate performance metrics by specifying a method. 
 calculatePerformanceMetric = function(celdaRun, counts, log.likelihoods, 
-                                      method="perplexity", log = FALSE) {
+                                      method="perplexity", log = FALSE,
+                                      resample=1) {
   if (method == "perplexity") {
-    metric = calculatePerplexity(celdaRun, counts)
+    metric = calculatePerplexity(celdaRun, counts, resample)
   } else if (method == "loglik") {
      metric = max(log.likelihoods)
   } else stop("Invalid method specified")
@@ -104,5 +106,24 @@ celdaLogLik = function(celda.res, group.by, exclude.iter = 1:10, line.size=0.5, 
   return(gg)
 }  
 
+
+# Resample a counts matrix for evaluating perplexity
+#
+# Normalizes each column (cell) of a count matrix by the column sum to 
+# create a distribution of observing a given number of counts for a given gene in that cell,
+# then samples across all cells.
+#
+# This is primarily used to evaluate the stability of the perplexity for a given K/L combination.
+# 
+# @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
+# @return The perplexity for the provided chain as an mpfr number
+resampleCountMatrix = function(count.matrix) {
+  colsums  = colSums(count.matrix)
+  prob     = t(t(count.matrix) / colsums)
+  resample = sapply(1:ncol(count.matrix), function(idx){
+                      rmultinom(n=1, size=colsums[idx], prob=prob[, idx])
+                   })
+  return(resample)
+}
 
 
