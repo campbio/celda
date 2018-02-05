@@ -4,9 +4,9 @@
 \alias{celda_G}
 \title{celda Gene Clustering Model}
 \usage{
-celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 50,
-  count.checksum = NULL, seed = 12345, split.on.iter = 10,
-  num.splits = 3, y.init = NULL, logfile = NULL, ...)
+celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
+  split.on.iter = 10, max.iter = 200, count.checksum = NULL,
+  seed = 12345, y.init = NULL, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -19,15 +19,15 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, max.iter = 50,
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25.}
+\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+
+\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+
+\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
 
 \item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
 \item{seed}{Parameter to set.seed() for random number generation.}
-
-\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 10.}
-
-\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 3.}
 
 \item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL.}
 
