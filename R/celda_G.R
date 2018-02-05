@@ -483,7 +483,8 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 
 
 #' @export
-calculatePerplexity.celda_G = function(celda.mod, counts, precision=128) {
+calculatePerplexity.celda_G = function(celda.mod, counts,
+                                     resample, precision=128) {
   if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
     stop("Provided count matrix was not used to generate the provided celda model.")
   }
@@ -505,12 +506,14 @@ calculatePerplexity.celda_G = function(celda.mod, counts, precision=128) {
 #' @param celda.list A celda_list object returned from celda()
 #' @param counts The counts used to generate the celda.list results
 #' @param method One of "perplexity" or "loglik"
+#' @param resample Number of resamplings to evaluate for perplexity, if method = "perplexity"
 #' @param title Title for the plot
 #' @param log Currently not working for celda.G objects
 #' @import Rmpfr
 #' @export
 visualizeModelPerformance.celda_G = function(celda.list, counts,
                                              method="perplexity",
+                                             resample=1,
                                              title="Model Performance (All Chains)",
                                              log = F) {
   
