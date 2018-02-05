@@ -190,8 +190,8 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param split.iter  Number of iterations without improvement in the log likelihood to apply a heuristic to test for jumps to more optimal solutions. This heuristic determines if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default 5. 
-#' @param converge Number of iterations without improvement in the log likelihood to stop sampling. Default 10.
+#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
+#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation.
@@ -202,7 +202,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @export
 celda_G = function(counts, L,
 					beta=1, delta=1, gamma=1,
-					converge=10, split.iter=5, max.iter=200,
+					stop.iter=10, split.on.iter=10, max.iter=200,
                     count.checksum=NULL, seed=12345, 
                     y.init=NULL, logfile=NULL, ...) {
 
@@ -230,7 +230,8 @@ celda_G = function(counts, L,
 
   iter <- 1L
   num.iter.without.improvement = 0L
-  while(iter <= max.iter & num.iter.without.improvement <= converge) {
+  do.gene.split = TRUE
+  while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
 	next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 	n.C.by.TS = next.y$n.C.by.TS
@@ -239,16 +240,19 @@ celda_G = function(counts, L,
 	y = next.y$y
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(num.iter.without.improvement == split.iter & L > 2) {
+    if(L > 2 & (num.iter.without.improvement == stop.iter | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
       logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
-      # Reset convergence iter if a split occured	    
-      if(!isTRUE(all.equal(y, res$y))) {
-        num.iter.without.improvement = 1L
-      }
-
+	  # Reset convergence counter if a split occured	    
+	  if(!isTRUE(all.equal(y, res$y))) {
+		num.iter.without.improvement = 1L
+		do.gene.split = TRUE
+	  } else {
+		do.gene.split = FALSE
+	  }
+	  
       ## Re-calculate variables
       y = res$y
       n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
