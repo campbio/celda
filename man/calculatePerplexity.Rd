@@ -4,12 +4,14 @@
 \alias{calculatePerplexity}
 \title{Calculate the perplexity from a single celda run}
 \usage{
-calculatePerplexity(celda.mod, counts, precision = 128)
+calculatePerplexity(celda.mod, counts, resample = 1, precision = 128)
 }
 \arguments{
 \item{celda.mod}{A single celda run (usually from the _res.list_ property of a celda_list)}
 
 \item{counts}{The count matrix modeled in the celdaRun parameter}
+
+\item{resample}{The number of resamplings of the counts matrix to calculate perplexity for}
 
 \item{precision}{The amount of bits of precision to pass to Rmpfr}
 }
