@@ -138,7 +138,11 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 
 cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z, s, L, K, nM, alpha, beta, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nM, nrow=K)
+  temp.n.TS.by.CP = n.TS.by.CP
+  temp.n.CP = n.CP
+  
   ix = sample(1:nM)
   for(i in ix) {
 
@@ -173,7 +177,13 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z,
 
 cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, y, nG, L, beta, delta, gamma, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
+  temp.n.CP.by.TS = n.CP.by.TS
+  temp.n.by.TS = n.by.TS
+  temp.nG.by.TS = nG.by.TS
+  pseudo.nG.by.TS = temp.nG.by.TS
+  
   ix = sample(1:nG)
   for(i in ix) {
 	  
@@ -304,7 +314,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
+#' @param max.iter Maximum iterations of Gibbs sampling to perform. Default 100.
 #' @param seed Parameter to set.seed() for random number generation
 #' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10. 
 #' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
@@ -314,9 +324,9 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
-                    delta=1, gamma=1, count.checksum=NULL, max.iter=50,
-			              seed=12345, split.on.iter=10, num.splits=3,
-			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
+                    delta=1, gamma=1, count.checksum=NULL,
+                    max.iter=100, seed=12345, split.on.iter=10, num.splits=3,
+			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
   counts = processCounts(counts)
@@ -359,6 +369,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   iter = 1L
   continue = TRUE
   num.of.splits.occurred = 1L
+  num.iter.with.improvement = 0L
   while(iter <= max.iter & continue == TRUE) {
     
     ## Gibbs sampling for each cell
@@ -416,6 +427,7 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       z.best = z
       y.best = y
       ll.best = temp.ll
+      num.inter.with.improvement = 0L
     }
     ll = c(ll, temp.ll)
     
@@ -500,11 +512,11 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   if(any("proportion" %in% type)) {
 
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.z = unique(z)
+    unique.z = sort(unique(z))
     temp.n.CP.by.TS = t(n.CP.by.TS)
     temp.n.CP.by.TS[,unique.z] = normalizeCounts(temp.n.CP.by.TS[,unique.z], scale.factor=1)
 
-     unique.y = unique(y)
+    unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
     
@@ -584,7 +596,7 @@ reorder.celda_CG = function(counts,res){
   if(res$K > 2) {
     res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.z = unique(res$z)
+    unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$population.states[,unique.z])
     h <- hclust(d, method = "complete")
     
@@ -595,7 +607,7 @@ reorder.celda_CG = function(counts,res){
   if(res$L > 2) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.y = unique(res$y)    
+    unique.y = sort(unique(res$y))
     cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")

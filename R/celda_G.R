@@ -132,7 +132,12 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 # @keywords log likelihood
 cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
+  temp.nG.by.TS = nG.by.TS 
+  temp.n.by.TS = n.by.TS 
+  temp.n.C.by.TS = n.C.by.TS
+
   ix <- sample(1:nG)
   for(i in ix) {
 	  
@@ -236,7 +241,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
     ## Perform split if on i-th iteration defined by y.split.on.iter
     if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & L > 2) {
       logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
+      res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
       y = res$y
@@ -412,7 +417,7 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   }
   if(any("proportion" %in% type)) {
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.y = unique(y)
+    unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
 
@@ -439,7 +444,7 @@ reorder.celda_G = function(counts, res) {
   if(res$L > 2) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.y = unique(res$y)
+    unique.y = sort(unique(res$y))
     cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
