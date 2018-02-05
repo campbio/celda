@@ -461,7 +461,7 @@ calculatePerplexity.celda_C = function(celda.mod, counts,
 #' @param celda.list A celda_list object returned from celda()
 #' @param counts The counts used to generate the celda.list results
 #' @param method One of "perplexity", "loglik"
-#' @param resamples Number of resamplings to evaluate for perplexity, if method = "perplexity"
+#' @param resample Number of resamplings to evaluate for perplexity, if method = "perplexity"
 #' @param title Title for the plot
 #' @param log Currently not working for celda_C objects
 #' @import Rmpfr
