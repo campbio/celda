@@ -15,11 +15,11 @@
 
 \item{method}{One of "perplexity", "loglik"}
 
+\item{resample}{Number of resamplings to evaluate for perplexity, if method = "perplexity"}
+
 \item{title}{Title for the plot}
 
 \item{log}{Currently not working for celda_C objects}
-
-\item{resamples}{Number of resamplings to evaluate for perplexity, if method = "perplexity"}
 }
 \description{
 visualizeModelPerformance for celda cell clustering function
