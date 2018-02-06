@@ -436,7 +436,7 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 calculatePerplexity.celda_C = function(celda.mod, counts, 
                                        resample=1, precision=128) {
   if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
-    stop("Provided count matrix was not used to generate the provided celda model.")
+    warning("Provided count matrix was not used to generate the provided celda model.")
   }
   
   # By default, just calculate perplexity for the original
