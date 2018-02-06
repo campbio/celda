@@ -5,9 +5,9 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, count.checksum = NULL, max.iter = 50,
-  seed = 12345, split.on.iter = 10, num.splits = 3, z.init = NULL,
-  y.init = NULL, logfile = NULL, ...)
+  delta = 1, gamma = 1, max.iter = 200, stop.iter = 10,
+  split.on.iter = 10, seed = 12345, count.checksum = NULL,
+  z.init = NULL, y.init = NULL, logfile = NULL, ...)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -20,21 +20,21 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1}
+\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1}
+\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1}
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default 1.}
 
-\item{count.checksum}{An MD5 checksum for the provided counts matrix}
+\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform. Defaults to 25}
+\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+
+\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
-\item{split.on.iter}{On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10.}
-
-\item{num.splits}{Maximum number of times to perform the heuristic described in split.on.iter. Default 3.}
+\item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
