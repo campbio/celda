@@ -94,7 +94,7 @@ celda_C = function(counts, sample.label=NULL, K,
                    	z.init = NULL, process.counts=TRUE, logfile=NULL, ...) {
 
   ## Error checking and variable processing
-  if (process.counts) {
+  if (isTRUE(process.counts)) {
     counts = processCounts(counts)  
   }
     
