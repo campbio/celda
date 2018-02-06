@@ -196,6 +196,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
+#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
@@ -204,10 +205,12 @@ celda_G = function(counts, L,
 					beta=1, delta=1, gamma=1,
 					stop.iter=10, split.on.iter=10, max.iter=200,
                     count.checksum=NULL, seed=12345, 
-                    y.init=NULL, logfile=NULL, ...) {
+                    y.init=NULL, process.counts=TRUE, logfile=NULL, ...) {
 
   ## Error checking and variable processing
-  counts = processCounts(counts)  
+  if (isTRUE(process.counts)) {
+    counts = processCounts(counts)  
+  }
   counts.t = t(counts)
   
   ## Randomly select z and y or set z/y to supplied initial values
