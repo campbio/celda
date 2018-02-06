@@ -1,5 +1,6 @@
 # celda_CG.R
 library(celda)
+library(testthat)
 context("Testing celda_CG")
 
 #celdacg <- simulateCells.celda_CG(K = 3, L = 5)
@@ -12,7 +13,9 @@ context("Testing celda_CG")
 ##celda_CG.R##
 test_that(desc = "Checking celda_CG",{
   celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
-  expect_equal(celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3),c(1,2))
+  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3)
+  expect_equal(length(celdaCG.res$res.list[[1]]$z),ncol(celdacg$counts))
+  expect_equal(length(celdaCG.res$res.list[[1]]$y),nrow(celdacg$counts)) 
 })
 
 
