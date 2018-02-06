@@ -208,7 +208,7 @@ celda_G = function(counts, L,
                     y.init=NULL, process.counts=TRUE, logfile=NULL, ...) {
 
   ## Error checking and variable processing
-  if (process.counts) {
+  if (isTRUE(process.counts)) {
     counts = processCounts(counts)  
   }
   counts.t = t(counts)
