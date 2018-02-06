@@ -235,12 +235,14 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, 
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param seed starting point used for generating simulated data
+#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param ... Unused arguments
 #' @param model Dummy parameter for S3 dispatch
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
-                                  delta=1, seed=12345, ...) {
+                                  delta=1, seed=12345,
+                                  process.counts=TRUE, ...) {
   
   set.seed(seed)
 
@@ -330,7 +332,9 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
-  counts = processCounts(counts)
+  if (isTRUE(processCounts)) {
+    counts = processCounts(counts)
+  }
     
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
