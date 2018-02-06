@@ -1,6 +1,7 @@
 # celda_CG.R
 library(celda)
 library(testthat)
+library(Rtsne)
 context("Testing celda_CG")
 
 #celdacg <- simulateCells.celda_CG(K = 3, L = 5)
