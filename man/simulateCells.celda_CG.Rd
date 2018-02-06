@@ -6,7 +6,8 @@
 \usage{
 \method{simulateCells}{celda_CG}(model, S = 10, C.Range = c(50, 100),
   N.Range = c(500, 5000), G = 1000, K = 3, L = 10, alpha = 1,
-  beta = 1, gamma = 1, delta = 1, seed = 12345, ...)
+  beta = 1, gamma = 1, delta = 1, seed = 12345, process.counts = TRUE,
+  ...)
 }
 \arguments{
 \item{model}{Dummy parameter for S3 dispatch}
@@ -32,6 +33,8 @@
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
 
 \item{seed}{starting point used for generating simulated data}
+
+\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
 
 \item{...}{Unused arguments}
 }
