@@ -332,7 +332,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
-  if (processCounts) {
+  if (isTRUE(processCounts)) {
     counts = processCounts(counts)
   }
     
