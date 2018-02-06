@@ -138,7 +138,11 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 
 cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z, s, L, K, nM, alpha, beta, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nM, nrow=K)
+ # temp.n.TS.by.CP = n.TS.by.CP
+ # temp.n.CP = n.CP
+  
   ix = sample(1:nM)
   for(i in ix) {
 
@@ -173,7 +177,13 @@ cCG.calcGibbsProbZ = function(m.CP.by.S, n.TS.by.CP, n.TS.by.C, n.CP, n.by.C, z,
 
 cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, y, nG, L, beta, delta, gamma, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
+  temp.n.CP.by.TS = n.CP.by.TS
+  temp.n.by.TS = n.by.TS
+  temp.nG.by.TS = nG.by.TS
+  pseudo.nG.by.TS = temp.nG.by.TS
+  
   ix = sample(1:nG)
   for(i in ix) {
 	  
@@ -225,12 +235,14 @@ cCG.calcGibbsProbY = function(n.CP.by.TS, n.by.TS, nG.by.TS, n.CP.by.G, n.by.G, 
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
 #' @param seed starting point used for generating simulated data
+#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param ... Unused arguments
 #' @param model Dummy parameter for S3 dispatch
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
-                                  delta=1, seed=12345, ...) {
+                                  delta=1, seed=12345,
+                                  process.counts=TRUE, ...) {
   
   set.seed(seed)
 
@@ -300,35 +312,38 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param K The number of cell populations
 #' @param L The number of gene clusters being considered
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default to 1
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default to 1
-#' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default 1.
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default 1.
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default 1.
+#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
+#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param seed Parameter to set.seed() for random number generation
-#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene or cell cluster should be reassigned and another gene or cell cluster should be split into two clusters. Default to be 10. 
-#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
+#' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param ... Additional parameters
 #' @export
-celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1, 
-                    delta=1, gamma=1, count.checksum=NULL, max.iter=50,
-			              seed=12345, split.on.iter=10, num.splits=3,
-			              z.init = NULL, y.init = NULL, logfile=NULL, ...) {
+celda_CG = function(counts, sample.label=NULL, K, L,
+					alpha=1, beta=1, delta=1, gamma=1, 
+                    max.iter=200, stop.iter = 10, split.on.iter=10,
+                    seed=12345, count.checksum=NULL,
+			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
   
   ## Error checking and variable processing
-  counts = processCounts(counts)
+  if (isTRUE(processCounts)) {
+    counts = processCounts(counts)
+  }
     
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
     sample.label = s
   } else if(is.factor(sample.label)) {
-    s = as.numeric(sample.label)
+    s = as.integer(sample.label)
   } else {
     sample.label = as.factor(sample.label)
-    s = as.numeric(sample.label)
+    s = as.integer(sample.label)
   }  
   
   ## Randomly select z and y or set z/y to supplied initial values
@@ -357,9 +372,10 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
   
   iter = 1L
-  continue = TRUE
-  num.of.splits.occurred = 1L
-  while(iter <= max.iter & continue == TRUE) {
+  num.iter.without.improvement = 0L
+  do.cell.split = TRUE
+  do.gene.split = TRUE  
+  while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
     
     ## Gibbs sampling for each cell
     n.TS.by.C = rowsum.y(counts, y=y, L=L)
@@ -378,37 +394,50 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
 	nG.by.TS = next.y$nG.by.TS
 	n.by.TS = next.y$n.by.TS
 	y = next.y$y
-    
+  
     ## Perform split on i-th iteration defined by split.on.iter
-    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits) {
-      if(K > 2) {
-		logMessages(date(), " ... Determining if any cell clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-		res = split.each.z(counts=counts, z=z, y=y, z.prob=t(next.z$probs), K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
-		logMessages(res$message, logfile=logfile, append=TRUE)
-		z = res$z      
+	if(K > 2 & (num.iter.without.improvement == stop.iter | (iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+	  logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
+	  res = split.each.z(counts=counts, z=z, y=y, z.prob=t(next.z$probs), K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+	  logMessages(res$message, logfile=logfile, append=TRUE)
 
-		## Re-calculate variables
-		m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-		n.TS.by.C = rowsum.y(counts, y=y, L=L)
-		n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-		n.CP = as.integer(rowSums(n.CP.by.TS))
-		n.CP.by.G = rowsum.z(counts, z=z, K=K)      
-	  }  
-      if(L > 2) {
-        logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-        res = split.each.y(counts=counts, z=z, y=y, y.prob=t(next.y$probs), K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
-	    logMessages(res$message, logfile=logfile, append=TRUE)
-        y = res$y
+	  # Reset convergence counter if a split occured
+	  if(!isTRUE(all.equal(z, res$z))) {
+		num.iter.without.improvement = 0L
+		do.cell.split = TRUE
+	  } else {
+		do.cell.split = FALSE
+	  }
 
-        ## Re-calculate variables
-        n.TS.by.C = rowsum.y(counts, y=y, L=L)
-        n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-        n.CP = as.integer(rowSums(n.CP.by.TS))
-        n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-        nG.by.TS = as.integer(table(factor(y, levels=1:L)))
-      }
-      num.of.splits.occurred = num.of.splits.occurred + 1L
-    }
+	  ## Re-calculate variables
+	  z = res$z      
+	  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+	  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+	  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+	  n.CP = as.integer(rowSums(n.CP.by.TS))
+	  n.CP.by.G = rowsum.z(counts, z=z, K=K)     
+	}  
+	if(L > 2 & (num.iter.without.improvement == stop.iter | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+	  logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
+	  res = split.each.y(counts=counts, z=z, y=y, y.prob=t(next.y$probs), K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+	  logMessages(res$message, logfile=logfile, append=TRUE)
+
+	  # Reset convergence counter if a split occured	    
+	  if(!isTRUE(all.equal(y, res$y))) {
+		num.iter.without.improvement = 1L
+		do.gene.split = TRUE
+	  } else {
+		do.gene.split = FALSE
+	  }
+
+	  ## Re-calculate variables
+	  y = res$y        
+	  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+	  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+	  n.CP = as.integer(rowSums(n.CP.by.TS))
+	  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+	  nG.by.TS = as.integer(table(factor(y, levels=1:L)))
+	}      
 
     ## Calculate complete likelihood
     temp.ll = .calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
@@ -416,11 +445,15 @@ celda_CG = function(counts, sample.label=NULL, K, L, alpha=1, beta=1,
       z.best = z
       y.best = y
       ll.best = temp.ll
+      num.iter.without.improvement = 1L
+    } else {  
+      num.iter.without.improvement = num.iter.without.improvement + 1L   
     }
     ll = c(ll, temp.ll)
-    
+  
     logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
-    iter = iter + 1    
+    iter = iter + 1L
+    
   }
     
 
@@ -500,11 +533,11 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   if(any("proportion" %in% type)) {
 
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.z = unique(z)
+    unique.z = sort(unique(z))
     temp.n.CP.by.TS = t(n.CP.by.TS)
     temp.n.CP.by.TS[,unique.z] = normalizeCounts(temp.n.CP.by.TS[,unique.z], scale.factor=1)
 
-     unique.y = unique(y)
+    unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
     
@@ -584,7 +617,7 @@ reorder.celda_CG = function(counts,res){
   if(res$K > 2) {
     res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.z = unique(res$z)
+    unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$population.states[,unique.z])
     h <- hclust(d, method = "complete")
     
@@ -595,7 +628,7 @@ reorder.celda_CG = function(counts,res){
   if(res$L > 2) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.y = unique(res$y)    
+    unique.y = sort(unique(res$y))
     cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
