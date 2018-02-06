@@ -55,9 +55,14 @@ getModel = function(celda.list, K=NULL, L=NULL, chain=NULL, best="loglik") {
   
   # Ensure that the chain we grabbed actually has the requested K/L.
   # This should only happen if the user alters the celda_list's run.params dataframe.
-  if ((!is.null(K) & K != requested.chain$K) | !is.null(L) & L != requested.chain$L) {
-    requested.chain = searchResList(celda.list, K=K, L=L)
-  }
+  
+  if (!is.null(K)){
+    if (K != requested.chain$K){
+      requested.chain = searchResList(celda.list, K=K, L=L)
+    }}else if (!is.null(L)){
+      if(L != requested.chain$L) {
+      requested.chain = searchResList(celda.list, K=K, L=L)
+  }}
   
   return(requested.chain)
 }
@@ -102,13 +107,15 @@ validateGetModelParams = function(celda.list, K, L, chain, best) {
     stop("L parameter needed when subsetting celda_G result lists")
   }
   
-  if (!is.null(K) & !(K %in% celda.list$run.params$K)) {
-    stop("Provided K was not profiled in the provided celda_list object")
-  }
+  if (!is.null(K)){
+    if(!(K %in% celda.list$run.params$K)) {
+      stop("Provided K was not profiled in the provided celda_list object")
+  }}
   
-  if (!is.null(L) & !(L %in% celda.list$run.params$L)) {
-    stop("Provided L was not profiled in the provided celda_list object")
-  }
+  if (!is.null(L)){ 
+    if(!(L %in% celda.list$run.params$L)) {
+      stop("Provided L was not profiled in the provided celda_list object")
+  }}
 }
 
 
