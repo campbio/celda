@@ -132,7 +132,12 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 # @keywords log likelihood
 cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
 
+  ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
+  temp.nG.by.TS = nG.by.TS 
+  temp.n.by.TS = n.by.TS 
+  temp.n.C.by.TS = n.C.by.TS
+
   ix <- sample(1:nG)
   for(i in ix) {
 	  
@@ -185,23 +190,27 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param max.iter Maximum iterations of Gibbs sampling to perform. Defaults to 25.
+#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
+#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
+#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param split.on.iter  On every split.on.iter iteration, a heuristic will be applied to determine if a gene cluster should be reassigned and another gene cluster should be split into two clusters. Default to be 10. 
-#' @param num.splits Maximum number of times to perform the heuristic described in split.on.iter. Default 3.
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
+#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
 #' @export
-celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
-                   count.checksum=NULL, seed=12345, 
-                   split.on.iter=10,  num.splits=3, 
-                   y.init=NULL, logfile=NULL, ...) {
+celda_G = function(counts, L,
+					beta=1, delta=1, gamma=1,
+					stop.iter=10, split.on.iter=10, max.iter=200,
+                    count.checksum=NULL, seed=12345, 
+                    y.init=NULL, process.counts=TRUE, logfile=NULL, ...) {
 
   ## Error checking and variable processing
-  counts = processCounts(counts)  
+  if (isTRUE(process.counts)) {
+    counts = processCounts(counts)  
+  }
   counts.t = t(counts)
   
   ## Randomly select z and y or set z/y to supplied initial values
@@ -223,9 +232,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
   ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 
   iter <- 1L
-  continue = TRUE
-  num.of.splits.occurred = 1L
-  while(iter <= max.iter & continue == TRUE) {
+  num.iter.without.improvement = 0L
+  do.gene.split = TRUE
+  while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
 	next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 	n.C.by.TS = next.y$n.C.by.TS
@@ -233,16 +242,22 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
 	n.by.TS = next.y$n.by.TS
 	y = next.y$y
     
-    ## Perform split if on i-th iteration defined by y.split.on.iter
-    if(iter %% split.on.iter == 0 & num.of.splits.occurred <= num.splits & L > 2) {
-      logMessages(date(), " ... Determining if any gene clusters should be split (", num.of.splits.occurred, " of ", num.splits, ")", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, y=y, L=L, beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
+    ## Perform split on i-th iteration of no improvement in log likelihood
+    if(L > 2 & (num.iter.without.improvement == stop.iter | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+      logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
+      res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
       
-      y = res$y
-      num.of.splits.occurred = num.of.splits.occurred + 1L
-
+	  # Reset convergence counter if a split occured	    
+	  if(!isTRUE(all.equal(y, res$y))) {
+		num.iter.without.improvement = 1L
+		do.gene.split = TRUE
+	  } else {
+		do.gene.split = FALSE
+	  }
+	  
       ## Re-calculate variables
+      y = res$y
       n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
       n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
       nG.by.TS = as.integer(table(factor(y, 1:L)))
@@ -253,6 +268,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1, max.iter=50,
     if((all(temp.ll > ll)) | iter == 1) {
       y.best = y
       ll.best = temp.ll
+      num.iter.without.improvement = 1L
+    } else {  
+      num.iter.without.improvement = num.iter.without.improvement + 1L   
     }
     ll <- c(ll, temp.ll)
 
@@ -412,7 +430,7 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   }
   if(any("proportion" %in% type)) {
     ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.y = unique(y)
+    unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
 
@@ -439,7 +457,7 @@ reorder.celda_G = function(counts, res) {
   if(res$L > 2) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.y = unique(res$y)
+    unique.y = sort(unique(res$y))
     cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
