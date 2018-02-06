@@ -39,6 +39,7 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   # An MD5 checksum of the count matrix. Passed to models so
   # later on, we can check on celda_* model objects which
   # count matrix was used.
+  counts = processCounts(counts)
   count.checksum = digest::digest(counts, algo="md5")
     
   
@@ -48,9 +49,9 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
     if (verbose) {
       ## Generate a unique log file name based on given prefix and parameters
       logfile = paste0(logfile_prefix, "_", paste(paste(colnames(runs), runs[i,], sep="-"), collapse="_"), "_Seed-", chain.seed, "_log.txt")
-      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, logfile=logfile), c(runs[i,-1])))
+      res = do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, logfile=logfile, process.counts=F), c(runs[i,-1])))
     } else {
-      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, logfile=NULL), c(runs[i,-1]))))
+      res = suppressMessages(do.call(model, c(list(counts=counts, sample.label=sample.label, count.checksum=count.checksum, seed=chain.seed, logfile=NULL, process.counts=F), c(runs[i,-1]))))
     }
     return(list(res))
   }  

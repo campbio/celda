@@ -82,6 +82,7 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
+#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
@@ -90,10 +91,12 @@ celda_C = function(counts, sample.label=NULL, K,
 					alpha=1, beta=1, 
                    	stop.iter = 10, split.on.iter=10, max.iter=200, 
                    	count.checksum=NULL, seed=12345,
-                   	z.init = NULL, logfile=NULL, ...) {
+                   	z.init = NULL, process.counts=TRUE, logfile=NULL, ...) {
 
   ## Error checking and variable processing
-  counts = processCounts(counts)  
+  if (process.counts) {
+    counts = processCounts(counts)  
+  }
     
   if(is.null(sample.label)) {
     s = rep(1, ncol(counts))
