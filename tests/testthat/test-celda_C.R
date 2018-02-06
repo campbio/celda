@@ -124,8 +124,6 @@ test_that(desc = "Checking celda_C",{
 })
 
 
-
-
 #plotDrCluster
 test_that(desc = "Checking plotDrCluster",{
   rtsne <- Rtsne::Rtsne(X = t(celdaC.sim$counts),max_iter = 500,pca = FALSE)
