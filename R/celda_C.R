@@ -433,50 +433,38 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 
 
 #' @export
-calculatePerplexity.celda_C = function(celda.mod, counts, 
-                                       resample=1, precision=128) {
+calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
   if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
     warning("Provided count matrix was not used to generate the provided celda model.")
-  }
-  
-  # By default, just calculate perplexity for the original
-  # counts matrix; otherwise, 
-  countsList = list(counts)
-  for(i in 2:resample) {
-    countsList[[i]] = resampleCountMatrix(counts)
-    i = i - 1  
   }
   
   # TODO Can try to turn into a single giant matrix multiplication by duplicating
   #     phi / theta / sl
   # TODO Cast to sparse matrices?
-  perplexities = lapply(countsList, function(counts){ 
-    factorized = factorizeMatrix(celda.mod, counts, "posterior")
-    theta = log(factorized$posterior$sample.states)
-    phi = log(factorized$posterior$gene.states)
-    sl = celda.mod$sample.label
-    
-    inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
-    inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
-    inner.log.prob.exp = exp(inner.log.prob)
-    
-    log.px = 0
-    for(i in 1:ncol(inner.log.prob.exp)) {
-      log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
-    }
-    
-    perplexity = exp(-(log.px/sum(counts)))
-    return(perplexity)
-  })
+  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  theta = log(factorized$posterior$sample.states)
+  phi = log(factorized$posterior$gene.states)
+  sl = celda.mod$sample.label
   
-  return(perplexities)
+  inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
+  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
+  inner.log.prob.exp = exp(inner.log.prob)
+  
+  log.px = 0
+  for(i in 1:ncol(inner.log.prob.exp)) {
+    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
+  }
+  
+  perplexity = exp(-(log.px/sum(counts)))
+  return(perplexity)
 }  
 
 
+# TODO Remove visualizeModelPerformance? We're only using perplexity currently.
 #' visualizeModelPerformance for celda cell clustering function
 #' @param celda.list A celda_list object returned from celda()
 #' @param counts The counts used to generate the celda.list results
-#' @param method One of "perplexity", "loglik"
+#' @param method Currently only supports "perplexity"
 #' @param resample Number of resamplings to evaluate for perplexity, if method = "perplexity"
 #' @param title Title for the plot
 #' @param log Currently not working for celda_C objects
