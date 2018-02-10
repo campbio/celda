@@ -680,7 +680,7 @@ celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @export
 calculatePerplexity.celda_CG = function(counts, celda.mod, precision=128) {
   if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
-    stop("Provided count matrix was not used to generate the provided celda model.")
+    warning("Provided count matrix was not used to generate the provided celda model.")
   }
   
   factorized = factorizeMatrix(celda.mod, counts, "posterior")
