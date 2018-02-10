@@ -501,7 +501,7 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 
 
 #' @export
-calculatePerplexity.celda_G = function(celda.mod, counts, precision=128) {
+calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
   if (!compareCountMatrix(counts, celda.mod$count.checksum)) {
     stop("Provided count matrix was not used to generate the provided celda model.")
   }
