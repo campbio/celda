@@ -118,7 +118,7 @@ celdaHeatmap <- function(celda.mod, counts, ...) {
 #' 
 #' @param celda.list A celda_list object as returned from *celda()*
 #' @param counts The counts matrix used to generate the provided celda.list
-#' @param method Which performance metric to visualize. One of ("perplexity", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "loglik" plots the highest log-likelihood during Gibbs iteration.
+#' @param method Which performance metric to visualize. "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. Other options are currently not supported.
 #' @param resample The number of times to resample the counts matrix for evaluating perplexity. Works with method="perplexity."
 #' @param title Title for the visualizeModelPerformance
 #' @param log Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. 

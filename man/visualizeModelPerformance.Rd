@@ -12,7 +12,7 @@ visualizeModelPerformance(celda.list, counts, method, resample, title,
 
 \item{counts}{The counts matrix used to generate the provided celda.list}
 
-\item{method}{Which performance metric to visualize. One of ("perplexity", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "loglik" plots the highest log-likelihood during Gibbs iteration.}
+\item{method}{Which performance metric to visualize. "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. Other options are currently not supported.}
 
 \item{resample}{The number of times to resample the counts matrix for evaluating perplexity. Works with method="perplexity."}
 
