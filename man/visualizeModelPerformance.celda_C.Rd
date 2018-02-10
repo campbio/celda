@@ -13,7 +13,7 @@
 
 \item{counts}{The counts used to generate the celda.list results}
 
-\item{method}{One of "perplexity", "loglik"}
+\item{method}{Currently only supports "perplexity"}
 
 \item{resample}{Number of resamplings to evaluate for perplexity, if method = "perplexity"}
 
