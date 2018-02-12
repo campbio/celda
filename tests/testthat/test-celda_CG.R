@@ -22,13 +22,13 @@ test_that(desc = "Checking celda_CG",{
 
 celdaCG.sim <- simulateCells(K = 5, L = 3, model = "celda_CG")
 celdaCG.res <- celda(counts = celdaCG.sim$counts, model = "celda_CG", nchains = 2, K = 5, L = 3)
-model = getModel(celdaCG.res, K = 5, L = 3)
-factorized <- factorizeMatrix(model, celdaCG.sim$counts)
+model_CG = getModel(celdaCG.res, K = 5, L = 3)
+factorized <- factorizeMatrix(model_CG, celdaCG.sim$counts)
 
 
 #Making sure getModel if functioning correctly
 test_that(desc = "Sanity checking getModel",{
-  expect_equal(celdaCG.res$content.type, class(model))
+  expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
@@ -54,17 +54,17 @@ test_that(desc = "Checking normalizeCounts",{
 
 #recodeClusterY
 test_that(desc = "Checking recodeClusterY",{
-  expect_error(recodeClusterY(celda.mod = model, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_CG, from = NULL, to = ))
 })
 
 #recodeClusterZ
 test_that(desc = "Checking recodeClusterZ",{
-  expect_error(recodeClusterY(celda.mod = model, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_CG, from = NULL, to = ))
 })
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.checksum = model$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.checksum = model_CG$count.checksum))
 })
 
 #distinct_colors
@@ -75,7 +75,7 @@ test_that(desc = "Checking distinct_colors",{
 
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaCG.sim$counts, z = model$z, y = model$y)),
+  expect_equal(names(renderCeldaHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
@@ -88,21 +88,21 @@ test_that(desc = "Checking topRank",{
 
 #GiniPlot
 test_that(desc = "Checking GiniPlot",{
-  expect_equal(class(GiniPlot(counts = celdaCG.sim$counts, celda.mod = model)),
+  expect_equal(class(GiniPlot(counts = celdaCG.sim$counts, celda.mod = model_CG)),
                c("gg","ggplot"))
 })
 
 
 #stateHeatmap
 test_that(desc = "Checking stateHeatmap",{
-  expect_equal(names(stateHeatmap(celdaCG.sim$counts, celda.mod = model)),
+  expect_equal(names(stateHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
 #plotDrCluster
 test_that(desc = "Checking plotDrCluster",{
   rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 500,pca = FALSE)
-  expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model$z))),
+  expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model_CG$z))),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
 })
 

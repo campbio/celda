@@ -6,12 +6,12 @@ context("Testing celda_G")
 
 celdaG.sim <- simulateCells(L = 5, model = "celda_G")
 celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5)
-model = getModel(celdaG.res, L = 5, best = "loglik")
-factorized <- factorizeMatrix(celda.mod = model, counts = celdaG.sim$counts)
+model_G = getModel(celdaG.res, L = 5, best = "loglik")
+factorized <- factorizeMatrix(celda.mod = model_G, counts = celdaG.sim$counts)
 
 #Making sure getModel if functioning correctly
 test_that(desc = "Sanity checking getModel",{
-  expect_equal(celdaG.res$content.type, class(model))
+  expect_equal(celdaG.res$content.type, class(model_G))
 })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
@@ -70,17 +70,17 @@ test_that(desc = "Checking normalizeCounts",{
 
 #recodeClusterY
 test_that(desc = "Checking recodeClusterY",{
-  expect_error(recodeClusterY(celda.mod = model, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_G, from = NULL, to = ))
 })
 
 #recodeClusterZ
 test_that(desc = "Checking recodeClusterZ",{
-  expect_error(recodeClusterY(celda.mod = model, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_G, from = NULL, to = ))
 })
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.checksum = model$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.checksum = model_G$count.checksum))
 })
 
 #distinct_colors
@@ -96,7 +96,7 @@ test_that(desc = "Checking distinct_colors",{
 
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model$z, y = model$y)),
+  expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 

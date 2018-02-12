@@ -16,12 +16,12 @@ context("Testing celda_C")
 
 celdaC.sim <- simulateCells(K = 5, model = "celda_C")
 celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5)
-model = getModel(celdaC.res, K = 5, best = "loglik")
-factorized <- factorizeMatrix(celda.mod = model, counts = celdaC.sim$counts)
+model_C = getModel(celdaC.res, K = 5, best = "loglik")
+factorized <- factorizeMatrix(celda.mod = model_C, counts = celdaC.sim$counts)
 
 #Making sure getModel if functioning correctly
 test_that(desc = "Sanity checking getModel",{
-  expect_equal(celdaC.res$content.type, class(model))
+  expect_equal(celdaC.res$content.type, class(model_C))
 })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
@@ -80,17 +80,17 @@ test_that(desc = "Checking normalizeCounts",{
 
 #recodeClusterY
 test_that(desc = "Checking recodeClusterY",{
-  expect_error(recodeClusterY(celda.mod = model, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_C, from = NULL, to = ))
 })
 
 #recodeClusterZ
 test_that(desc = "Checking recodeClusterZ",{
-  expect_error(recodeClusterY(celda.mod = model, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_C, from = NULL, to = ))
 })
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.checksum = model$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.checksum = model_C$count.checksum))
 })
 
 #distinct_colors
@@ -106,7 +106,7 @@ test_that(desc = "Checking distinct_colors",{
 
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaC.sim$counts, z = model$z, y = model$y)),
+  expect_equal(names(renderCeldaHeatmap(counts = celdaC.sim$counts, z = model_C$z, y = model_C$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
@@ -127,6 +127,6 @@ test_that(desc = "Checking celda_C",{
 #plotDrCluster
 test_that(desc = "Checking plotDrCluster",{
   rtsne <- Rtsne::Rtsne(X = t(celdaC.sim$counts),max_iter = 500,pca = FALSE)
-  expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model$z))),
+  expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model_C$z))),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
 })
