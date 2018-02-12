@@ -20,8 +20,14 @@ test_that(desc = "Checking celda_CG",{
 })
 
 
-celdaCG.sim <- simulateCells(K = 5, L = 3, model = "celda_CG")
-celdaCG.res <- celda(counts = celdaCG.sim$counts, model = "celda_CG", nchains = 2, K = 5, L = 3)
+# celdaCG.sim <- simulateCells(K = 5, L = 3, model = "celda_CG")
+# save(celdaCG.sim,file = "celdaCGsim.rda")
+# celdaCG.res <- celda(counts = celdaCG.sim$counts, model = "celda_CG", nchains = 2, K = 5, L = 3)
+# save(celdaCG.res, file = "celdaCG.rda")
+
+
+load("../celdaCGsim.rda")
+load("../celdaCG.rda")
 model_CG = getModel(celdaCG.res, K = 5, L = 3)
 factorized <- factorizeMatrix(model_CG, celdaCG.sim$counts)
 
@@ -101,14 +107,14 @@ test_that(desc = "Checking stateHeatmap",{
 
 #plotDrCluster
 test_that(desc = "Checking plotDrCluster",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 500,pca = FALSE)
+  rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 100,pca = FALSE)
   expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model_CG$z))),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
 })
 
 #plotDrState
 test_that(desc = "Checking plotDrState",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 500,pca = FALSE)
+  rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 100,pca = FALSE)
   expect_equal(names(plotDrState(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))
 })
