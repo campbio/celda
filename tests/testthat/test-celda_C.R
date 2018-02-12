@@ -3,20 +3,16 @@ library(celda)
 library(Rtsne)
 context("Testing celda_C")
 
-#celdac <- simulateCells.celda_C(K=10)
-#celdaC.res <- celda(counts=celdac$counts, model="celda_C", nchains=1, K=10)
 
-#test_that("CheckingVisualizeModelPerformace",{
-#	expect_equal(TRUE, all(!is.na(visualizeModelPerformance(celdaC.res))))
-#	})
-#test_that("finalClusterAssignment.celda_C",{
-#  expect_equal(celdaC.res$res.list[[1]]$z, finalClusterAssignment(celdaC.res$res.list[[1]]))
-#})
+# celdaC.sim <- simulateCells(K = 5, model = "celda_C")
+# save(celdaC.sim,file = "celdaCsim.rda")
+# celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5)
+# save(celdaC.res, file = "celdaC.rda")
 
 
-celdaC.sim <- simulateCells(K = 5, model = "celda_C")
-celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5)
-model_C = getModel(celdaC.res, K = 5, best = "loglik")
+load("../celdaCsim.rda")
+load("../celdaC.rda")
+model_C = getModel(celdaC.res, K = 5)
 factorized <- factorizeMatrix(celda.mod = model_C, counts = celdaC.sim$counts)
 
 #Making sure getModel if functioning correctly
@@ -126,7 +122,7 @@ test_that(desc = "Checking celda_C",{
 
 #plotDrCluster
 test_that(desc = "Checking plotDrCluster",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaC.sim$counts),max_iter = 500,pca = FALSE)
+  rtsne <- Rtsne::Rtsne(X = t(celdaC.sim$counts),max_iter = 100,pca = FALSE)
   expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model_C$z))),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
 })
