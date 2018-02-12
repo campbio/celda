@@ -3,9 +3,14 @@ library(celda)
 context("Testing celda_G")
 
 #celdaG 
+# celdaG.sim <- simulateCells(L = 5, model = "celda_G")
+# save(celdaG.sim,file = "celdaGsim.rda")
+# celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5)
+# save(celdaG.res, file = "celdaG.rda")
 
-celdaG.sim <- simulateCells(L = 5, model = "celda_G")
-celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5)
+
+load("../celdaGsim.rda")
+load("../celdaG.rda")
 model_G = getModel(celdaG.res, L = 5, best = "loglik")
 factorized <- factorizeMatrix(celda.mod = model_G, counts = celdaG.sim$counts)
 
@@ -117,7 +122,7 @@ test_that(desc = "Checking celda_G",{
 
 #plotDrState
 test_that(desc = "Checking plotDrState",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaG.sim$counts),max_iter = 500,pca = FALSE)
+  rtsne <- Rtsne::Rtsne(X = t(celdaG.sim$counts),max_iter = 100,pca = FALSE)
   expect_equal(names(plotDrState(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))
 })
