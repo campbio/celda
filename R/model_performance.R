@@ -53,8 +53,9 @@ calculatePerplexityWithResampling <- function(celda.list, counts, resample,
   })
   
   plot.df = do.call("rbind", perplexities.per.model)
-  plot.obj = ggplot2::ggplot(plot.df, ggplot2::aes(x=k, y=perplexity)) +
-              ggplot2::geom_boxplot() +
+  plot.obj = ggplot2::ggplot(plot.df, ggplot2::aes(x=as.factor(k), y=perplexity)) +
+              ggplot2::geom_violin() +
+              ggplot2::geom_jitter(height=0, width=0.1) +
               ggplot2::ggtitle(paste("Perplexity for All Provided Chains",
                                      "\n", title)) + 
               ggplot2::theme_bw()
