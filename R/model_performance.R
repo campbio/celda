@@ -53,16 +53,25 @@ calculatePerplexityWithResampling <- function(celda.list, counts, resample,
   })
   
   plot.df = do.call("rbind", perplexities.per.model)
-  plot.obj = ggplot2::ggplot(plot.df, ggplot2::aes(x=as.factor(k), y=perplexity)) +
-              ggplot2::geom_violin() +
+  
+  l.means.by.k = setNames(aggregate(plot.df$perplexity,
+                                    by=list(plot.df$k, plot.df$l),
+                                    FUN=mean),
+                          c("k", "l", "perplexity"))
+  l.means.by.k$l = as.factor(l.means.by.k$l)
+  l.means.by.k$k = as.factor(l.means.by.k$k)
+  
+  perp.plot = ggplot2::ggplot(plot.df, ggplot2::aes(x=k, y=perplexity)) +
               ggplot2::geom_jitter(height=0, width=0.1, ggplot2::aes(color=as.factor(plot.df$l))) +
               ggplot2::ggtitle(paste("Perplexity for All Provided Chains",
                                      "\n", title)) + 
               ggplot2::xlab("K") + ggplot2::ylab("Perplexity") +
               ggplot2::scale_color_discrete(name="L") +
-              ggplot2::theme_bw()
+              ggplot2::theme_bw() +
+              ggplot2::geom_path(data=l.means.by.k,
+                                 ggplot2::aes(x=as.numeric(k), y=perplexity, group=l, color=l))
   
-  return(list(perplexity.info=plot.df, plot=plot.obj))
+  return(list(perplexity.info=plot.df, plot=perp.plot))
 }
 
 
