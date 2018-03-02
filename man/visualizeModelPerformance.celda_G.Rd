@@ -4,13 +4,18 @@
 \alias{visualizeModelPerformance.celda_G}
 \title{visualizeModelPerformance for the celda Gene function}
 \usage{
-\method{visualizeModelPerformance}{celda_G}(celda.list, method = "perplexity",
+\method{visualizeModelPerformance}{celda_G}(celda.list, counts,
+  method = "perplexity", resample = 1,
   title = "Model Performance (All Chains)", log = F)
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
+\item{counts}{The counts used to generate the celda.list results}
+
 \item{method}{One of "perplexity" or "loglik"}
+
+\item{resample}{Number of resamplings to evaluate for perplexity, if method = "perplexity"}
 
 \item{title}{Title for the plot}
 

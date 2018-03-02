@@ -2,20 +2,25 @@
 % Please edit documentation in R/celda_C.R
 \name{visualizeModelPerformance.celda_C}
 \alias{visualizeModelPerformance.celda_C}
-\title{visualizeModelPerformance for celda Cell clustering function}
+\title{visualizeModelPerformance for celda cell clustering function}
 \usage{
-\method{visualizeModelPerformance}{celda_C}(celda.list, method = "perplexity",
+\method{visualizeModelPerformance}{celda_C}(celda.list, counts,
+  method = "perplexity", resample = NA,
   title = "Model Performance (All Chains)", log = F)
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
-\item{method}{One of "perplexity", "loglik"}
+\item{counts}{The counts used to generate the celda.list results}
+
+\item{method}{Currently only supports "perplexity"}
+
+\item{resample}{Number of resamplings to evaluate for perplexity, if method = "perplexity"}
 
 \item{title}{Title for the plot}
 
 \item{log}{Currently not working for celda_C objects}
 }
 \description{
-visualizeModelPerformance for celda Cell clustering function
+visualizeModelPerformance for celda cell clustering function
 }

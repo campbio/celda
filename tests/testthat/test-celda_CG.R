@@ -4,12 +4,9 @@ library(testthat)
 library(Rtsne)
 context("Testing celda_CG")
 
-#celdacg <- simulateCells.celda_CG(K = 3, L = 5)
-#celdaCG.res <- celda(counts=celdacg$counts, nchains=1, K = 2:4, L = 4:6, ncores=1, model = "celda_CG")
-
-#test_that("CheckingVisualizeModelPerformace",{
-#        expect_equal(TRUE, all(!is.na(visualizeModelPerformance(celdaCG.res))))
-#        })
+celdacg <- simulateCells.celda_CG(K=3, L=5)
+celdaCG.res <- celda(counts=celdacg$counts, nchains=1, K = 2:4, L = 4:6, 
+                     ncores=1, model="celda_CG")
 
 ##celda_CG.R##
 test_that(desc = "Checking celda_CG",{
@@ -70,7 +67,7 @@ test_that(desc = "Checking recodeClusterZ",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.checksum = model_CG$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.obj = model_CG))
 })
 
 #distinct_colors
