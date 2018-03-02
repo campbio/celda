@@ -85,7 +85,7 @@ test_that(desc = "Checking recodeClusterZ",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.checksum = model_C$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.obj = model_C))
 })
 
 #distinct_colors
@@ -98,7 +98,7 @@ test_that(desc = "Checking distinct_colors",{
 #  expect_equal(initialize.cluster(N = 3, len = 3), c(2,3,1))
 #})
 
-save("celdaC_example.rda")
+# save("celdaC_example.rda")
 celdaC.res = load("celdaC_example.rda")
 
 ###renderCeldaHeatmap###
