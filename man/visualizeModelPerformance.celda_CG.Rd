@@ -4,14 +4,18 @@
 \alias{visualizeModelPerformance.celda_CG}
 \title{Visualize the performance of celda_CG models grouped by L and K}
 \usage{
-\method{visualizeModelPerformance}{celda_CG}(celda.list,
-  method = "perplexity", title = "Model Performance (All Chains)",
-  log = FALSE)
+\method{visualizeModelPerformance}{celda_CG}(celda.list, counts,
+  method = "perplexity", resample = 1,
+  title = "Model Performance (All Chains)", log = FALSE)
 }
 \arguments{
 \item{celda.list}{A list of celda_CG objects returned from celda function}
 
+\item{counts}{The counts used to generate the celda.list results}
+
 \item{method}{One of "perplexity" or "loglik"}
+
+\item{resample}{Number of resamplings to evaluate for perplexity, if method = "perplexity"}
 
 \item{title}{Title for the visualizeModelPerformance}
 

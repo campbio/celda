@@ -85,7 +85,7 @@ test_that(desc = "Checking recodeClusterZ",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.checksum = model_G$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.obj = model_G))
 })
 
 #distinct_colors

@@ -3,7 +3,6 @@ library(celda)
 library(Rtsne)
 context("Testing celda_C")
 
-
 # celdaC.sim <- simulateCells(K = 5, model = "celda_C")
 # save(celdaC.sim,file = "celdaCsim.rda")
 # celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5)
@@ -86,7 +85,7 @@ test_that(desc = "Checking recodeClusterZ",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.checksum = model_C$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.obj = model_C))
 })
 
 #distinct_colors
