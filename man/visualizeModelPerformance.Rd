@@ -4,16 +4,21 @@
 \alias{visualizeModelPerformance}
 \title{Visualize various performance metrics as a function of K / L to aid parameter choice.}
 \usage{
-visualizeModelPerformance(celda.list, method, title, log = FALSE)
+visualizeModelPerformance(celda.list, counts, method, resample, title,
+  log = FALSE)
 }
 \arguments{
 \item{celda.list}{A celda_list object as returned from *celda()*}
 
-\item{method}{Which performance metric to visualize. One of ("perplexity", "harmonic", "loglik"). "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. "harmonic" calculates the marginal likelihood has the harmonic mean of the likelihoods. "loglik" plots the highest log-likelihood during Gibbs iteration.}
+\item{counts}{The counts matrix used to generate the provided celda.list}
+
+\item{method}{Which performance metric to visualize. "perplexity" calculates the inverse of the geometric mean of the log likelihoods from each iteration of Gibbs sampling. Other options are currently not supported.}
+
+\item{resample}{The number of times to resample the counts matrix for evaluating perplexity. Works with method="perplexity."}
 
 \item{title}{Title for the visualizeModelPerformance}
 
-\item{log}{Set log to TRUE to visualize the log(perplexity) of Celda_CG objects. Does not work for "harmonic" metric}
+\item{log}{Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.}
 }
 \value{
 A ggplot object containing the requested plot(s)
