@@ -98,8 +98,6 @@ test_that(desc = "Checking distinct_colors",{
 #  expect_equal(initialize.cluster(N = 3, len = 3), c(2,3,1))
 #})
 
-# save("celdaC_example.rda")
-celdaC.res = load("celdaC_example.rda")
 
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap",{
