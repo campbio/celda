@@ -20,7 +20,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @import foreach
 #' @export
 celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=FALSE, logfile_prefix="Celda", ...) {
-  message("Starting celda...")
+  message(paste(Sys.time(), "Starting celda."))
   validateArgs(counts, model, sample.label, nchains, cores, seed, ...)
   
   # Redirect stderr from the worker threads if user asks for verbose
@@ -61,6 +61,8 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
   celda.res = list(run.params=runs, res.list=res.list, 
                    content.type=model, count.checksum=count.checksum)
   class(celda.res) = "celda_list"
+  
+  message(paste(Sys.time(), "Completed celda run."))
   return(celda.res)
 }
 
