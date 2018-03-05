@@ -204,9 +204,9 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
     if(is.null(col)){
       col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(100)
       col.len = length(col)
-	  if(is.null(breaks)){
+    }
+    if(is.null(breaks)){
         breaks <- seq(lbound.range, ubound.range, length.out = col.len)
-      }  
     }
   }
 
