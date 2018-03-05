@@ -458,33 +458,3 @@ calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
 }  
-
-
-# TODO Remove visualizeModelPerformance? We're only using perplexity currently.
-#' visualizeModelPerformance for celda cell clustering function
-#' @param celda.list A celda_list object returned from celda()
-#' @param counts The counts used to generate the celda.list results
-#' @param method Currently only supports "perplexity"
-#' @param resample Number of resamplings to evaluate for perplexity, if method = "perplexity"
-#' @param title Title for the plot
-#' @param log Currently not working for celda_C objects
-#' @import Rmpfr
-#' @export
-visualizeModelPerformance.celda_C = function(celda.list, counts,
-                                             method="perplexity", 
-                                             resample=NA,
-                                             title="Model Performance (All Chains)",
-                                             log = F) {
-  
-  cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
-  log.likelihoods = lapply(celda.list$res.list,
-                           function(mod) { completeLogLikelihood(mod) })
-  performance.metric = lapply(celda.list$res.list, 
-                              calculatePerformanceMetric,
-                              counts, log.likelihoods,
-                              method)
-  
-  plot.df = data.frame(size=cluster.sizes,
-                       metric=performance.metric)
-  return(renderModelPerformancePlot(plot.df, "K", method, title))
-}
