@@ -16,6 +16,7 @@
 #'    than this threshold (1 by default).
 #' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
 #'    and associated statistics (p-value, log2fc and FDR).
+#' @import data.table
 #' @export
 diffExp_MAST <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = 0, fdr.threshold = 1) {
   if (is.null(counts)) {
