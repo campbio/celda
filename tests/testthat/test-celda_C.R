@@ -67,14 +67,6 @@ test_that(desc = "Checking topRank to see if it runs without errors",{
 
 ##celda_C.R##
 test_that(desc = "Checking celda_C to see if it runs without errors",{
-  celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5)
+  celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5, max.iter = 15)
   expect_equal(celdaC.res$run.params$chain,c(1,2))
-})
-
-
-#plotDrCluster
-test_that(desc = "Checking plotDrCluster to see if it runs without errors",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaC.sim$counts),max_iter = 100,pca = FALSE)
-  expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model_C$z))),
-               c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
 })

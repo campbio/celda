@@ -7,7 +7,7 @@ context("Testing celda_CG")
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
   celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3)
+  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3, max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z),ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y),nrow(celdacg$counts)) 
 })
@@ -104,16 +104,11 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
-#plotDrCluster
+#plotDrCluster,State
 test_that(desc = "Checking plotDrCluster to see if it runs",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 100,pca = FALSE)
-  expect_equal(names(plotDrCluster(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],cluster = as.factor(model_CG$z))),
+  celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50,celda.mod = model_CG)
+  expect_equal(names(plotDrCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z))),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
-})
-
-#plotDrState
-test_that(desc = "Checking plotDrState to see if it runs",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaCG.sim$counts),max_iter = 100,pca = FALSE)
-  expect_equal(names(plotDrState(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],matrix = factorized$proportions$cell.states)),
-               c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))
+  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
+               c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
 })
