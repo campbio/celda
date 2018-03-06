@@ -2,19 +2,28 @@
 % Please edit documentation in R/model_performance.R
 \name{calculatePerplexity}
 \alias{calculatePerplexity}
-\title{Calculate the perplexity from a single celda chain}
+\title{Calculate the perplexity from a single celda run}
 \usage{
-calculatePerplexity(completeLogLik, log = FALSE)
+calculatePerplexity(counts, celda.mod, precision = 128)
 }
 \arguments{
-\item{completeLogLik}{The complete Gibbs sampling history of log-likelihoods for a single celda chain}
+\item{counts}{The count matrix modeled in the celdaRun parameter}
 
-\item{log}{Set log to TRUE to visualize the log(perplexity) of Celda_CG objects.}
+\item{celda.mod}{A single celda run (usually from the _res.list_ property of a celda_list)}
+
+\item{precision}{The amount of bits of precision to pass to Rmpfr}
 }
 \value{
 The perplexity for the provided chain as an mpfr number
 }
 \description{
-Perplexity is defined as the inverse of the geometric mean of the log-likelihoods over all 
-iterations of Gibbs sampling.
+Perplexity can be seen as a measure of how well a provided set of 
+cluster assignments fit the count data being modeled.
+}
+\details{
+Perplexity is defined in LDA as the exp of the log likelihood of the model
+divided by the total amount of word tokens. The corresponding perplexity
+for the celda models are derived in their respective model description 
+documents. These documents will not be made publicly available until 
+after publication of celda.
 }
