@@ -432,33 +432,29 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 }
 
 
-#' visualizeModelPerformance for celda Cell clustering function
-#' @param celda.list A celda_list object returned from celda()
-#' @param method One of "perplexity", "loglik"
-#' @param title Title for the plot
-#' @param log Currently not working for celda_C objects
-#' @import Rmpfr
 #' @export
-visualizeModelPerformance.celda_C = function(celda.list, method="perplexity", 
-                                               title="Model Performance (All Chains)",
-                                               log = F) {
-  
-  cluster.sizes = unlist(lapply(celda.list$res.list, function(mod) { getK(mod) }))
-  log.likelihoods = lapply(celda.list$res.list,
-                           function(mod) { completeLogLikelihood(mod) })
-  performance.metric = lapply(log.likelihoods, 
-                              calculatePerformanceMetric,
-                              method)
-  
-  # These methods return Rmpfr numbers that are extremely small and can't be 
-  # plotted, so log 'em first
-  if (method %in% c("perplexity")) {
-    performance.metric = lapply(performance.metric, log)
-    performance.metric = methods::new("mpfr", unlist(performance.metric))
-    performance.metric = as.numeric(performance.metric)
+calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
+  if (!compareCountMatrix(counts, celda.mod)) {
+    warning("Provided count matrix was not used to generate the provided celda model.")
   }
   
-  plot.df = data.frame(size=cluster.sizes,
-                       metric=performance.metric)
-  return(renderModelPerformancePlot(plot.df, "K", method, title))
-}
+  # TODO Can try to turn into a single giant matrix multiplication by duplicating
+  #     phi / theta / sl
+  # TODO Cast to sparse matrices?
+  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  theta = log(factorized$posterior$sample.states)
+  phi = log(factorized$posterior$gene.states)
+  sl = celda.mod$sample.label
+  
+  inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
+  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
+  inner.log.prob.exp = exp(inner.log.prob)
+  
+  log.px = 0
+  for(i in 1:ncol(inner.log.prob.exp)) {
+    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
+  }
+  
+  perplexity = exp(-(log.px/sum(counts)))
+  return(perplexity)
+}  
