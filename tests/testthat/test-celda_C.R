@@ -3,8 +3,6 @@ library(celda)
 library(Rtsne)
 context("Testing celda_C")
 
-#Loading pre-made simulated cells/celda objects
-
 load("../celdaCsim.rda")
 load("../celdaC.rda")
 model_C = getModel(celdaC.res, K = 5)
@@ -45,7 +43,7 @@ test_that(desc = "Checking recodeClusterZ gets correct order",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.checksum = model_C$count.checksum))
+  expect_true(compareCountMatrix(count.matrix = celdaC.sim$counts, celda.obj = model_C))
 })
 
 #distinct_colors
