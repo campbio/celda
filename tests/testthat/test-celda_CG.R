@@ -104,6 +104,12 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
+#diffExp_MAST
+test_that(desc = "Checking diffExp_MAST",{
+ expect_equal(class(diffexp_K1 <- diffExp_MAST(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
+		c("data.table","data.frame"))
+})
+
 #plotDrCluster,State
 test_that(desc = "Checking plotDrCluster to see if it runs",{
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50,celda.mod = model_CG)
