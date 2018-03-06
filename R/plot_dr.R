@@ -105,3 +105,31 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
     ggplot2::scale_color_manual(values = cluster_colors) +
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
 }
+
+#' Runs tSNE via Rtsne based on the CELDA model and specified cell states.
+#' 
+#' @param counts Counts matrix, will have cell name for column name and gene name for row name.
+#' @param celda.mod Celda model to use for tsne.
+#' @param states Vector; determines which cell states to use for tsne. If not defined, all states will be used.
+#' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
+#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @export
+celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=1000) {
+  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
+  
+  states.to.use = 1:nrow(fm$counts$cell.states)
+  if(!is.null(states)) {
+    if(!all(states %in% states.to.use)) {
+      stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+    }
+    states.to.use = states 
+  } 
+  new.counts = fm$counts$cell.states[states.to.use,]
+  norm = normalizeCounts(new.counts, scale.factor=1)
+  d = cosineDist(norm)
+  
+  res = Rtsne::Rtsne(d, pca=FALSE, max_iter=max.iter, perplexity = perplexity, check_duplicates = FALSE, is_distance = TRUE)$Y
+  colnames(res) = c("tsne_1", "tsne_2")
+  return(res)
+}
+

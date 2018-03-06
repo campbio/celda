@@ -19,3 +19,10 @@
 #' well as the gene name.
 #' @source \url{https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit}
 "pbmc_data"
+
+#' Celda model created from 3000 Peripheral Blood Mononuclear Cells (PBMC) from 10X Genomics.
+#'
+#' @title pbmc_res
+#' @description A celda model made from pbmc_data, run with parameters K = 10,15 and L = 15,20.
+#' @source \url{https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit}
+"pbmc_res"
