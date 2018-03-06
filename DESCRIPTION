@@ -34,7 +34,8 @@ Imports:
     MAST,
     SummarizedExperiment,
     GenomicRanges,
-    ineq
+    ineq,
+    data.table
 Suggests:
     testthat,
     knitr,
@@ -44,7 +45,6 @@ Suggests:
     corrplot,
     Matrix,
     biomaRt,
-    data.table,
     Rtsne
 VignetteBuilder: knitr
 License: MIT
