@@ -68,13 +68,13 @@ test_that(desc = "Checking topRank function",{
 
 ##celda_G.R##
 test_that(desc = "Making sure celda_G runs without errors",{
-  celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5)
+  celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5, max.iter = 15)
   expect_equal(celdaG.res$run.params$chain,c(1,2))
 })
 
 #plotDrState
 test_that(desc = "Checking plotDrState",{
-  rtsne <- Rtsne::Rtsne(X = t(celdaG.sim$counts),max_iter = 100,pca = FALSE)
-  expect_equal(names(plotDrState(dim1 = rtsne$Y[,1], dim2 = rtsne$Y[,2],matrix = factorized$proportions$cell.states)),
+  celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod=model_G)
+  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))
 })
