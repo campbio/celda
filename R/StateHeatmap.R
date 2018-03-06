@@ -81,9 +81,13 @@ stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, gen
   filtered_norm.counts <- norm.counts[rev(filtered_genes), filtered_cells]
   gene_ix = match(rownames(filtered_norm.counts), celda.mod$names$row)
   cell_ix = match(colnames(filtered_norm.counts), celda.mod$names$column)
-  cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell_ix]))]
-  names(cell) <- sort(unique(celda.mod$z[cell_ix]))
-  anno_cell_colors <- list(cell = cell)
+  if(!is.null(celda.mod$x)){
+    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell_ix]))]
+    names(cell) <- sort(unique(celda.mod$z[cell_ix]))
+    anno_cell_colors <- list(cell = cell)
+  }else{
+    anno_cell_colors <- NULL
+  }
   renderCeldaHeatmap(
     filtered_norm.counts,
     z = celda.mod$z[cell_ix],
