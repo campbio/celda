@@ -8,14 +8,14 @@ context("Testing celda_CG")
 test_that(desc = "Making sure celda_CG runs without crashing",{
   celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
   celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3, max.iter = 15)
-  expect_equal(length(celdaCG.res$res.list[[1]]$z),ncol(celdacg$counts))
-  expect_equal(length(celdaCG.res$res.list[[1]]$y),nrow(celdacg$counts)) 
+  expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
+  expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
 
 #Loading pre-made simulatedcells/celda objects
 load("../celdaCGsim.rda")
 load("../celdaCG.rda")
-model_CG = getModel(celdaCG.res, K = 5, L = 3)
+model_CG = getModel(celdaCG.res, K = 5, L = 3)[[1]]
 factorized <- factorizeMatrix(model_CG, celdaCG.sim$counts)
 counts.matrix <- celdaCG.sim$counts
 
