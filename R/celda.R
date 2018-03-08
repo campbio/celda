@@ -63,7 +63,15 @@ celda = function(counts, model, sample.label=NULL, nchains=1, bestChainsOnly=TRU
   
   
   if (isTRUE(bestChainsOnly)) {
-    celda.res = getBestChainPerKL(celda.res)
+    new.run.params = unique(run.params[, c("K", "L")])
+    new.run.params$index = 1:nrow(new.run.params)
+    new.run.params$chain = rep(1, nrow(new.run.params))
+    best.chains = apply(new.run.params,
+                        function(params) {
+                          getBestModel(celda.res, params[["K"]], params[["L"]])
+                        })
+    celda.res$run.params = new.run.params
+    celda.res$res.list = best.chains
   }
   
   message(paste(Sys.time(), "Completed celda run."))
