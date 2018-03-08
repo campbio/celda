@@ -4,8 +4,9 @@
 \alias{celda}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
-  seed = 12345, verbose = FALSE, logfile_prefix = "Celda", ...)
+celda(counts, model, sample.label = NULL, nchains = 1,
+  bestChainsOnly = TRUE, cores = 1, seed = 12345, verbose = FALSE,
+  logfile_prefix = "Celda", ...)
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -15,6 +16,8 @@ celda(counts, model, sample.label = NULL, nchains = 1, cores = 1,
 \item{sample.label}{A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
 
 \item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1}
+
+\item{bestChainsOnly}{Return only the best chain (by final log-likelihood) per K/L combination.}
 
 \item{cores}{The number of cores to use for parallell Gibbs sampling. Defaults to 1.}
 
