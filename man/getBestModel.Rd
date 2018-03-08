@@ -4,14 +4,14 @@
 \alias{getBestModel}
 \title{Select the best model from a celda_list, as determined by final log-likelihood.}
 \usage{
-getBestModel(celda.list, K, L)
+getBestModel(celda.list, K = c(), L = c())
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
-\item{K}{Limit search for best model to models with this number of cell clusters. Defaults to NULL.}
+\item{K}{Limit search for best model to models with this number of cell clusters.}
 
-\item{L}{Limit search for best model to models with this number of gene clusters. Defaults to NULL.}
+\item{L}{Limit search for best model to models with this number of gene clusters.}
 }
 \value{
 The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided

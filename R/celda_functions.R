@@ -174,23 +174,25 @@ validateRunParams = function(celda.list) {
     stop("Provided object is not of class celda_list")
   }
   
+  run.params = celda.list$run.params
   new.run.params = newRunParamsFromResList(celda.list)
-  if (!all.equal(new.run.params$K, celda.list$run.params$K) |
-      !all.equal(new.run.params$L, celda.list$run.params$L)) {
-    return(FALSE)
+  if (!is.null(run.params$K)) {
+    if (!isTRUE(all.equal(new.run.params$K, run.params$K))) return(FALSE)
   }
+  if (!is.null(run.params$L)) {
+    if (!isTRUE(all.equal(new.run.params$L, run.params$L))) return(FALSE)
+  }
+  
   return(TRUE)
 } 
 
 
 newRunParamsFromResList = function(celda.list) {
-  new.res.list = as.data.frame(do.call(rbind, lapply(celda.list$res.list, 
-                                                     function(res){
-                                                       list(res$K, res$L)
-                                                     })))
-  colnames(new.res.list) = c("K", "L")
-  new.res.list$K = as.numeric(new.res.list$K)
-  new.res.list$L = as.numeric(new.res.list$L)
+  new.res.list = switch(celda.list$content.type,
+                        "celda_CG" = data.frame(K=sapply(celda.list$res.list, getK), 
+                                                L=sapply(celda.list$res.list, getL)),
+                        "celda_C" = data.frame(K=sapply(celda.list$res.list, getK)), 
+                        "celda_G" = data.frame(L=sapply(celda.list$res.list, getL))) 
   new.res.list$index = 1:nrow(new.res.list)
   return(new.res.list)
 }
