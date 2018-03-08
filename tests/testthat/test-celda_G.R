@@ -64,7 +64,11 @@ test_that(desc = "Checking topRank function",{
                c("index","names"))
 })
 
-
+#stateHeatmap
+test_that(desc = "Checking stateHeatmap to see if it runs",{
+  expect_equal(names(stateHeatmap(celdaG.sim$counts, celda.mod = model_G)),
+               c("tree_row","tree_col","kmeans","gtable"))
+})
 
 ##celda_G.R##
 test_that(desc = "Making sure celda_G runs without errors",{
