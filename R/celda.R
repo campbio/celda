@@ -11,6 +11,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param model Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)
 #' @param sample.label A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.
 #' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1
+#' @param bestChainsOnly Return only the best chain (by final log-likelihood) per K/L combination.
 #' @param cores The number of cores to use for parallell Gibbs sampling. Defaults to 1.
 #' @param seed The base seed for random number generation
 #' @param verbose Print log messages during celda chain execution
@@ -19,7 +20,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=12345, verbose=FALSE, logfile_prefix="Celda", ...) {
+celda = function(counts, model, sample.label=NULL, nchains=1, bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, logfile_prefix="Celda", ...) {
   message(paste(Sys.time(), "Starting celda."))
   validateArgs(counts, model, sample.label, nchains, cores, seed, ...)
   
@@ -56,11 +57,23 @@ celda = function(counts, model, sample.label=NULL, nchains=1, cores=1, seed=1234
     return(list(res))
   }  
   parallel::stopCluster(cl)
-  
-  
   celda.res = list(run.params=runs, res.list=res.list, 
                    content.type=model, count.checksum=count.checksum)
   class(celda.res) = "celda_list"
+  
+  if (isTRUE(bestChainsOnly)) {
+    new.run.params = unique(dplyr::select(runs, -index, -chain))
+    new.run.params$index = 1:nrow(new.run.params)
+    new.run.params$chain = rep(1, nrow(new.run.params))
+    best.chains = apply(new.run.params, 1,
+                        function(params) {
+                          k = if ("K" %in% names(params)) params[["K"]] else NULL
+                          l = if ("L" %in% names(params)) params[["L"]] else NULL
+                          getBestModel(celda.res, k, l)
+                        })
+    celda.res$run.params = new.run.params
+    celda.res$res.list = best.chains
+  }
   
   message(paste(Sys.time(), "Completed celda run."))
   return(celda.res)
