@@ -9,13 +9,13 @@ getModel(celda.list, K = c(), L = c(), chain = c(), index = NULL)
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
+\item{K}{The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.}
+
+\item{L}{The L parameter for the desired model in the results list. Matches all L by default. Accepts ranges.}
+
 \item{chain}{The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.}
 
 \item{index}{The index of the desired model in the run.parameters in the provided celda_list. Overrides all other parameters if provided. Defaults to NULL.}
-
-\item{k}{The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.}
-
-\item{l}{The L parameter for the desired model in the results list. Matches all L by default. Accepts ranges.}
 }
 \value{
 A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
