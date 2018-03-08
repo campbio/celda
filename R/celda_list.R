@@ -12,11 +12,11 @@
 #' @param celda.list A celda_list object returned from celda()
 #' @param k The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.
 #' @param l The L parameter for the desired model in the results list. Matches all L by default. Accepts ranges.
-#' @param chainNum The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.
+#' @param chain The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.
 #' @param index The index of the desired model in the run.parameters in the provided celda_list. Overrides all other parameters if provided. Defaults to NULL.
 #' @return A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
-getModel = function(celda.list, k=c(), l=c(), chainNum=c(), index=NULL) {
+getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
   validateGetModelParams(celda.list, K, L, chain) 
   
   # If user provides index / range of indices to select, override all else
@@ -35,13 +35,13 @@ getModel = function(celda.list, k=c(), l=c(), chainNum=c(), index=NULL) {
   # Filter the run params to find matching indices.
   # Is there a more concise way to do this ..?
   if (length(K) > 0) {
-    filtered.run.params = dplyr::filter(filtered.run.params, K %in% k)
+    filtered.run.params = filtered.run.params[filtered.run.params$K %in% K, ]
   }
   if (length(L) > 0) {
-    filtered.run.params = dplyr::filter(filtered.run.params, L %in% l)
+    filtered.run.params = filtered.run.params[filtered.run.params$L %in% L, ]
   }
-  if (length(chainNum) > 0) {
-    filtered.run.params = dplyr::filter(filtered.run.params, chain %in% chainNum)
+  if (length(chain) > 0) {
+    filtered.run.params = filtered.run.params[filtered.run.params$chain %in% chain, ]
   }
   return(celda.list$res.list[filtered.run.params$index])
 }
@@ -54,23 +54,21 @@ getModel = function(celda.list, k=c(), l=c(), chainNum=c(), index=NULL) {
 #' the model with these K/L and the highest log-likelihood is returned.
 #' 
 #' @param celda.list A celda_list object returned from celda()
-#' @param K Limit search for best model to models with this number of cell clusters. Defaults to NULL.
-#' @param L Limit search for best model to models with this number of gene clusters. Defaults to NULL.
+#' @param K Limit search for best model to models with this number of cell clusters.
+#' @param L Limit search for best model to models with this number of gene clusters.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @export
-getBestModel = function(celda.list, K, L) {
+getBestModel = function(celda.list, K=c(), L=c()) {
   if (class(celda.list) != "celda_list") {
     stop("Provided object is not of class celda_list")
-  } else if (!is.numeric(K) | !length(K) == 1 | !is.numeric(L) | !length(L) == 1){
-    stop("Invalid K/L parameter provided")
   }
  
-  matching.models = getModel(celda.list, k=K, l=L)
+  matching.models = getModel(celda.list, K=K, L=L)
   
   logliks = unlist(sapply(matching.models, function(mod) { mod[["finalLogLik"]] }))
   max.idx = which(logliks == max(logliks, na.rm=T))
   
-  return(matching.models[[max.idx]])
+  return(matching.models[[max.idx[1]]])
 }
 
 
