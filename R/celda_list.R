@@ -65,9 +65,12 @@ getBestModel = function(celda.list, K, L) {
     stop("Invalid K/L parameter provided")
   }
  
-  logliks = unlist(sapply(celda.list$res.list, function(mod) { mod[["finalLogLik"]] }))
+  matching.models = getModel(celda.list, k=K, l=L)
+  
+  logliks = unlist(sapply(matching.models, function(mod) { mod[["finalLogLik"]] }))
   max.idx = which(logliks == max(logliks, na.rm=T))
-  return(celda.list$res.list[[max.idx]])
+  
+  return(matching.models[[max.idx]])
 }
 
 
