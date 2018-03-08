@@ -61,14 +61,15 @@ celda = function(counts, model, sample.label=NULL, nchains=1, bestChainsOnly=TRU
                    content.type=model, count.checksum=count.checksum)
   class(celda.res) = "celda_list"
   
-  
   if (isTRUE(bestChainsOnly)) {
-    new.run.params = unique(run.params[, c("K", "L")])
+    new.run.params = unique(dplyr::select(runs, -index, -chain))
     new.run.params$index = 1:nrow(new.run.params)
     new.run.params$chain = rep(1, nrow(new.run.params))
-    best.chains = apply(new.run.params,
+    best.chains = apply(new.run.params, 1,
                         function(params) {
-                          getBestModel(celda.res, params[["K"]], params[["L"]])
+                          k = if ("K" %in% names(params)) params[["K"]] else NULL
+                          l = if ("L" %in% names(params)) params[["L"]] else NULL
+                          getBestModel(celda.res, k, l)
                         })
     celda.res$run.params = new.run.params
     celda.res$res.list = best.chains
