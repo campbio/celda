@@ -65,6 +65,12 @@ test_that(desc = "Checking topRank to see if it runs without errors",{
                c("index","names"))
 })
 
+#diffExp_MAST
+test_that(desc = "Checking diffExp_MAST",{
+ expect_equal(class(diffexp_K1 <- diffExp_MAST(counts = counts.matrix, celda.mod = model_C, c1 = 1)),
+                c("data.table","data.frame"))
+})
+
 ##celda_C.R##
 test_that(desc = "Checking celda_C to see if it runs without errors",{
   celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5, max.iter = 15)
