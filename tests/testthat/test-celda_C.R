@@ -5,7 +5,7 @@ context("Testing celda_C")
 
 load("../celdaCsim.rda")
 load("../celdaC.rda")
-model_C = getModel(celdaC.res, K = 5)
+model_C = getModel(celdaC.res, K = 5)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_C, counts = celdaC.sim$counts)
 counts.matrix <- celdaC.sim$counts
 
@@ -73,6 +73,6 @@ test_that(desc = "Checking diffExp_MAST",{
 
 ##celda_C.R##
 test_that(desc = "Checking celda_C to see if it runs without errors",{
-  celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C", nchains = 2, K = 5, max.iter = 15)
-  expect_equal(celdaC.res$run.params$chain,c(1,2))
+  celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K = 5, max.iter = 15)
+  expect_equal(celdaC.res$run.params$chain, 1)  # Only best chain is returned
 })
