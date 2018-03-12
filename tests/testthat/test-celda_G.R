@@ -4,7 +4,7 @@ context("Testing celda_G")
 
 load("../celdaGsim.rda")
 load("../celdaG.rda")
-model_G = getModel(celdaG.res, L = 5, best = "loglik")
+model_G = getModel(celdaG.res, L = 5)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_G, counts = celdaG.sim$counts)
 counts.matrix <- celdaG.sim$counts
 
@@ -73,7 +73,7 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
 ##celda_G.R##
 test_that(desc = "Making sure celda_G runs without errors",{
   celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5, max.iter = 15)
-  expect_equal(celdaG.res$run.params$chain,c(1,2))
+  expect_equal(celdaG.res$run.params$chain,c(1))  # Only best chain returned by default
 })
 
 #plotDrState
