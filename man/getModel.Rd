@@ -2,24 +2,26 @@
 % Please edit documentation in R/celda_list.R
 \name{getModel}
 \alias{getModel}
-\title{Select the best model amongst a list of models generated in a celda run.}
+\title{Select models from a list of results generated in a celda run.}
 \usage{
-getModel(celda.list, K = NULL, L = NULL, chain = NULL, best = "loglik")
+getModel(celda.list, K = c(), L = c(), chain = c(), index = NULL)
 }
 \arguments{
 \item{celda.list}{A celda_list object returned from celda()}
 
-\item{K}{The K parameter for the desired model in the results list. Defaults to NULL.}
+\item{K}{The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.}
 
-\item{L}{The L parameter for the desired model in the results list. Defaults to NULL.}
+\item{L}{The L parameter for the desired model in the results list. Matches all L by default. Accepts ranges.}
 
-\item{chain}{The desired chain for the specified model. Defaults to NULL. Overrides best parameter if provided.}
+\item{chain}{The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.}
 
-\item{best}{Method for choosing best chain automatically. Options are c("perplexity", "loglik"). See documentation for chooseBestModel for details. Defaults to "loglik."}
+\item{index}{The index of the desired model in the run.parameters in the provided celda_list. Overrides all other parameters if provided. Defaults to NULL.}
 }
 \value{
-A celda model object matching the provided parameters (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
+A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 }
 \description{
-Select the best model amongst a list of models generated in a celda run.
+Convenience function for picking out specific models from a celda_list, returned from celda().
+Models can be selected by various parameters, most importantly the K/L parameters (number of cell
+ clusters / number of gene clusters).
 }
