@@ -1,16 +1,11 @@
 # celda_CG.R
 library(celda)
 library(testthat)
-library(Rtsne)
 context("Testing model performance functions")
 
 #Loading pre-made simulatedcells/celda objects
 load("../celdaCGsim.rda")
 load("../celdaCG.rda")
-model_CG = getModel(celdaCG.res, K = 5, L = 3)[[1]]
-factorized <- factorizeMatrix(model_CG, celdaCG.sim$counts)
-counts.matrix <- celdaCG.sim$counts
-
 
 test_that(desc = "Testing calculatePerplexityWithResampling", {
   perplexity.results = calculatePerplexityWithResampling(celdaCG.res, celdaCG.sim$counts, resample=2)
