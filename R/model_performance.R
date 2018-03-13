@@ -54,7 +54,7 @@ calculatePerplexityWithResampling <- function(celda.list, counts, resample,
   
   plot.df = do.call("rbind", perplexities.per.model)
   plot = visualizePerplexityByKL(plot.df)
-  return(list(perplexity.info=plot.df, plot=perp.plot))
+  return(list(perplexity.info=plot.df, plot=plot))
 }
 
 
@@ -103,6 +103,8 @@ visualizePerplexityByKL = function(perplexity.df, title="") {
          ggplot2::xlab(ifelse(is.null(perplexity.df$k), "L", "K")) +
          ggplot2::ylab("Perplexity") +
          ggplot2::theme_bw()
+  
+  return(plot)
 }
 
 
