@@ -328,3 +328,21 @@ processCounts = function(counts) {
   return(counts)  
 }
 
+
+## Generate n random deviates from the Dirichlet function with shape parameters alpha
+## Adapted from gtools v3.5
+rdirichlet <- function(n, alpha) {
+    l <- length(alpha);
+    x <- matrix(rgamma(l * n, alpha), ncol = l, byrow=TRUE);
+    
+    ## Check for case where all sampled entries are zero due to round off
+    ## One entry will be randomly chosen to be one
+    is_zero <- rowSums(x) == 0
+    assignment <- sample(1:l, size=sum(is_zero), replace=TRUE)
+    x[cbind(which(is_zero), assignment)] <- 1
+    
+    ## Normalize
+    sm <- x %*% rep(1, l);
+    y <- x / as.vector(sm);
+    return(y)
+}
