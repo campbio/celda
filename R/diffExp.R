@@ -18,7 +18,7 @@
 #'    and associated statistics (p-value, log2fc and FDR).
 #' @import data.table
 #' @export
-diffExp_MAST <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
+diffExp <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
