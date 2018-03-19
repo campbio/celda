@@ -255,16 +255,16 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   nN = sample(N.Range[1]:N.Range[2], size=length(cell.sample.label), replace=TRUE)
   
   ## Generate cell population distribution for each sample
-  theta = t(gtools::rdirichlet(S, rep(alpha, K)))
+  theta = t(rdirichlet(S, rep(alpha, K)))
 
   ## Assign cells to cellular subpopulations
   z = unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[,i], replace=TRUE)))
 
   ## Generate transcriptional state distribution for each cell subpopulation
-  phi = gtools::rdirichlet(K, rep(beta, L))
+  phi = rdirichlet(K, rep(beta, L))
 
   ## Assign genes to transcriptional states 
-  eta = gtools::rdirichlet(1, rep(gamma, L))
+  eta = rdirichlet(1, rep(gamma, L))
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
   if(length(table(y)) < L) {
     stop("Some transcriptional states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
@@ -273,7 +273,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
     ind = y == i
-    psi[ind,i] = gtools::rdirichlet(1, rep(delta, sum(ind)))
+    psi[ind,i] = rdirichlet(1, rep(delta, sum(ind)))
   }
   
   ## Select transcript distribution for each cell
