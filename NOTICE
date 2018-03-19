@@ -1,3 +1,18 @@
+The celda package incldues other open source software components, including 
+functions adapted from other R libraries. The use of these components is annotated
+throughout the codebase.
+
+The following is a list of these components; their corresponding licenses are listed below.
+
+- gtools
+- pheatmap
+
+
+
+
+
+gtools, pheatmap
+-----------------
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
@@ -337,4 +352,3 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
-
