@@ -310,7 +310,7 @@ celda_G = function(counts, L,
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
                                  L=5, beta=1, gamma=1, delta=1, seed=12345, ...) {
   set.seed(seed)
-  eta = gtools::rdirichlet(1, rep(gamma, L))
+  eta = rdirichlet(1, rep(gamma, L))
   
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
   if(length(table(y)) < L) {
@@ -321,10 +321,10 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
     ind = y == i
-    psi[ind,i] = gtools::rdirichlet(1, rep(delta, sum(ind)))
+    psi[ind,i] = rdirichlet(1, rep(delta, sum(ind)))
   }
   
-  phi = gtools::rdirichlet(C, rep(beta, L))
+  phi = rdirichlet(C, rep(beta, L))
   
   ## Select number of transcripts per cell
   nN = sample(N.Range[1]:N.Range[2], size=C, replace=TRUE)
