@@ -44,8 +44,8 @@
 simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
                          G=500, K=5, alpha=1, beta=1, ...) {
   
-  phi <- gtools::rdirichlet(K, rep(beta, G))
-  theta <- gtools::rdirichlet(S, rep(alpha, K))
+  phi <- rdirichlet(K, rep(beta, G))
+  theta <- rdirichlet(S, rep(alpha, K))
   
   ## Select the number of cells per sample
   nC <- sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)  
