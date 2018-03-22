@@ -4,7 +4,7 @@
 #'    co-expression of those genes grouped into transcriptional states by Celda.
 #'    
 #' @param counts A numeric count matrix.
-#' @param celda.mod An object of class celda_C or celda_CG.
+#' @param celda.mod An object of class celda_G or celda_CG.
 #' @param state.use Numeric. A transcriptional state to plot.
 #' @param cells.use Numeric or character. If a number, plot only this number of cells with respectively 
 #'    highest and lowest proportions of counts in the transcriptional state. If a list of cell names, 

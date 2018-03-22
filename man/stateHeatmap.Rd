@@ -11,7 +11,7 @@ stateHeatmap(counts, celda.mod, state.use = 1, cells.use = NULL,
 \arguments{
 \item{counts}{A numeric count matrix.}
 
-\item{celda.mod}{An object of class celda_C or celda_CG.}
+\item{celda.mod}{An object of class celda_G or celda_CG.}
 
 \item{state.use}{Numeric. A transcriptional state to plot.}
 
