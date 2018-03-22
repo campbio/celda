@@ -11,14 +11,14 @@
 #'    other cells for comparison.
 #' @param only.pos Logical. Only return markers with positive log2fc (FALSE by default).
 #' @param log2fc.threshold Numeric. Only return markers whose the absolute values of log2fc
-#'    are greater than this threshold (0 by default).
+#'    are greater than this threshold (NULL by default).
 #' @param fdr.threshold Numeric. Only return markers whose false discovery rates (FDRs) are less
 #'    than this threshold (1 by default).
 #' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
 #'    and associated statistics (p-value, log2fc and FDR).
 #' @import data.table
 #' @export
-diffExp_MAST <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = 0, fdr.threshold = 1) {
+diffExp <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
@@ -72,14 +72,20 @@ diffExp_MAST <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log
                       component == 'logFC', .(primerid, coef, ci.hi, ci.lo)], by = 'primerid')
   
   fcHurdle[, fdr := p.adjust(`Pr(>Chisq)`, 'fdr')]
+  ###Some genes aren't outputted because log2FC gets NaN if one or both clusters have 0 counts for a gene
+  ###and then they're discarded because NaN !> 0
+  if(is.null(log2fc.threshold)){
+   fcHurdleSig <-fcHurdle  
+  }else{
   fcHurdleSig <-
     merge(fcHurdle[fdr < fdr.threshold &
                      abs(coef) > log2fc.threshold], data.table::as.data.table(GenomicRanges::mcols(sca)), by = 'primerid')
+    if(only.pos){
+      fcHurdleSig <- fcHurdleSig[which(fcHurdleSig$log2fc > 0),]
+    }
+  }
   fcHurdleSig <- fcHurdleSig[,-c(4,5)]
   names(fcHurdleSig)[c(1,3)] <- c("Gene", "log2fc")
-  if(only.pos){
-    fcHurdleSig <- fcHurdleSig[which(fcHurdleSig$log2fc > 0),]
-  }
   fcHurdleSig <- fcHurdleSig[order(abs(fcHurdleSig$log2fc), decreasing = TRUE),]
   return(fcHurdleSig)
 }
