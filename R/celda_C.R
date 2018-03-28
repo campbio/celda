@@ -84,15 +84,13 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
-#' @param ... additonal parameters
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
-celda_C = function(counts, sample.label=NULL, K,
-					alpha=1, beta=1, 
-                   	stop.iter = 10, split.on.iter=10, max.iter=200, 
-                   	count.checksum=NULL, seed=12345,
-                   	z.init = NULL, process.counts=TRUE, logfile=NULL, ...) {
-
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
+                 	 stop.iter = 10, split.on.iter=10, max.iter=200, 
+                 	 count.checksum=NULL, seed=12345,
+                 	 z.init = c(), process.counts=TRUE, logfile=NULL) {
+  
   ## Error checking and variable processing
   if (isTRUE(process.counts)) {
     counts = processCounts(counts)  
@@ -130,6 +128,7 @@ celda_C = function(counts, sample.label=NULL, K,
   iter = 1L
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
+  logMessages(date(), "Max iter:", max.iter, logfile=logfile, append=TRUE)
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
     
     next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
