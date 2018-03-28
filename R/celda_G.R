@@ -31,155 +31,6 @@
 # nG.by.TS = Number of genes in each Transcriptional State
 
 
-#' Calculate the celda_G log likelihood for user-provided cluster assignments
-#'
-#' This function calculates the log likelihood of each clustering of genes generated
-#' over multiple iterations of Gibbs sampling.
-#' 
-#' @param counts A numeric count matrix
-#' @param y A numeric vector of gene cluster assignments
-#' @param L The number of clusters being considered
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
-#' @param ... Additional parameters
-#' @keywords log likelihood
-#' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
-calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
-  n.TS.by.C <- rowsum.y(counts, y=y, L=L)
-  
-  nM <- ncol(n.TS.by.C)
-  
-  a <- nM * lgamma(L * beta)
-  b <- sum(lgamma(n.TS.by.C + beta))
-  c <- -nM * L * lgamma(beta)
-  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
-  
-  phi.ll <- a + b + c + d
-
-  n.by.G <- rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  
-  nG.by.TS = table(factor(y, 1:L))
-  nG.by.TS[nG.by.TS == 0] = 1
-  nG <- nrow(counts)
-
-  a <- sum(lgamma(nG.by.TS * delta))
-  b <- sum(lgamma(n.by.G + delta))
-  c <- -nG * lgamma(delta)
-  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
-  
-  psi.ll <- a + b + c + d
-
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-
-  eta.ll <- a + b + c + d
-
-  final <- phi.ll + psi.ll + eta.ll
-  
-  return(final)
-}
-
-
-cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
-  
-  nG.by.TS[nG.by.TS == 0] = 1
-
-  ## Calculate for "Phi" component
-  a <- nM * lgamma(L * beta)
-  b <- sum(lgamma(n.C.by.TS + beta))
-  c <- -nM * L * lgamma(beta)
-  d <- -sum(lgamma(rowSums(n.C.by.TS + beta)))
-
-  phi.ll <- a + b + c + d
-
-  ## Calculate for "Psi" component
-  a <- sum(lgamma(nG.by.TS * delta))
-  b <- sum(lgamma(n.by.G + delta))
-  c <- -nG * lgamma(delta)
-  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
-  
-  psi.ll <- a + b + c + d
-
-  ## Calculate for "Eta" component
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-
-  eta.ll <- a + b + c + d
-
-  final <- phi.ll + psi.ll + eta.ll
-  return(final)
-}
-
-# Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)
-#
-# This function calculates the log-likelihood of a given set of cluster assigments for the samples
-# represented in the provided count matrix.
-# 
-# 
-# @param n.TS.by.C Number of counts in each Transcriptional State per Cell 
-# @param n.by.TS Number of counts per Transcriptional State
-# @param nG.by.TS Number of genes in each Transcriptional State
-# @param nG.in.Y  Number of genes in each of the cell cluster
-# @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-# @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
-# @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
-# @keywords log likelihood
-cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
-
-  ## Set variables up front outside of loop
-  probs = matrix(NA, ncol=nG, nrow=L)
-  temp.nG.by.TS = nG.by.TS 
-  temp.n.by.TS = n.by.TS 
-  temp.n.C.by.TS = n.C.by.TS
-
-  ix <- sample(1:nG)
-  for(i in ix) {
-	  
-	## Subtract current gene counts from matrices
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
-	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts.t[,i]
-
-	## Calculate probabilities for each state
-	for(j in 1:L) {
-	
-	  temp.nG.by.TS = nG.by.TS 
-	  temp.n.by.TS = n.by.TS 
-	  temp.n.C.by.TS = n.C.by.TS
-	
-	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
-	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
-
-	  pseudo.nG.by.TS = temp.nG.by.TS
-	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
-	  
-	  probs[j,i] = 	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
-				  sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
-				  sum(lgamma(temp.n.C.by.TS + beta)) +						## Phi Numerator
-				  sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
-				  sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))  	## Psi Denominator
-	}
-  
-	## Sample next state and add back counts
-	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
-	
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
-	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
-  }
-  
-  return(list(n.C.by.TS=n.C.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
-}
-
-
-
 #' celda Gene Clustering Model
 #'
 #' Provides cluster assignments for all genes in a provided single-cell 
@@ -289,6 +140,69 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 }
 
 
+# Calculate Log Likelihood For Single Set of Cluster Assignments (Gene Clustering)
+#
+# This function calculates the log-likelihood of a given set of cluster assigments for the samples
+# represented in the provided count matrix.
+# 
+# 
+# @param n.TS.by.C Number of counts in each Transcriptional State per Cell 
+# @param n.by.TS Number of counts per Transcriptional State
+# @param nG.by.TS Number of genes in each Transcriptional State
+# @param nG.in.Y  Number of genes in each of the cell cluster
+# @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
+# @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
+# @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
+# @keywords log likelihood
+cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
+
+  ## Set variables up front outside of loop
+  probs = matrix(NA, ncol=nG, nrow=L)
+  temp.nG.by.TS = nG.by.TS 
+  temp.n.by.TS = n.by.TS 
+  temp.n.C.by.TS = n.C.by.TS
+
+  ix <- sample(1:nG)
+  for(i in ix) {
+	  
+	## Subtract current gene counts from matrices
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
+	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
+	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts.t[,i]
+
+	## Calculate probabilities for each state
+	for(j in 1:L) {
+	
+	  temp.nG.by.TS = nG.by.TS 
+	  temp.n.by.TS = n.by.TS 
+	  temp.n.C.by.TS = n.C.by.TS
+	
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
+	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
+	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
+
+	  pseudo.nG.by.TS = temp.nG.by.TS
+	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
+	  
+	  probs[j,i] = 	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
+				  sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
+				  sum(lgamma(temp.n.C.by.TS + beta)) +						## Phi Numerator
+				  sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
+				  sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))  	## Psi Denominator
+	}
+  
+	## Sample next state and add back counts
+	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
+	
+	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
+	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
+	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
+  }
+  
+  return(list(n.C.by.TS=n.C.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
+}
+
+
 #' Simulate cells from the gene clustering generative model
 #'
 #' Generate a simulated count matrix, based off a generative distribution whose 
@@ -349,43 +263,6 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   
   return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
-
-
-
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
-#'
-#' @param counts The original count matrix used in the model
-#' @param celda.mod A model returned from the 'celda_G' function
-#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
-#' @return A list containging a matrix for the conditional cell cluster probabilities. 
-#' @export
-clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
-
-  y = celda.mod$y
-  L = celda.mod$L
-  delta = celda.mod$delta
-  beta = celda.mod$beta
-  gamma = celda.mod$gamma
-  
-  ## Calculate counts one time up front
-  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
-  n.by.G = as.integer(rowSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
-  nM = ncol(counts)
-  nG = nrow(counts)
-  counts.t = t(counts)
-
-  next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)  
-  y.prob = t(next.y$probs)
-  
-  if(!isTRUE(log)) {
-    y.prob = normalizeLogProbs(y.prob)
-  }
-  
-  return(list(y.probability=y.prob))
-}
-
 
 
 #' Generate factorized matrices showing each feature's influence on the celda_G model clustering 
@@ -451,50 +328,125 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
 }
 
 
-reorder.celda_G = function(counts, res) {
-  if(res$L > 2) {
-    res$y = as.integer(as.factor(res$y))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.y = sort(unique(res$y))
-    cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
-    d <- cosineDist(cs)
-    h <- hclust(d, method = "complete")
-    res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
-  }  
-  return(res)
+# Calculate log-likelihood of celda_CG model
+cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
+  
+  nG.by.TS[nG.by.TS == 0] = 1
+
+  ## Calculate for "Phi" component
+  a <- nM * lgamma(L * beta)
+  b <- sum(lgamma(n.C.by.TS + beta))
+  c <- -nM * L * lgamma(beta)
+  d <- -sum(lgamma(rowSums(n.C.by.TS + beta)))
+
+  phi.ll <- a + b + c + d
+
+  ## Calculate for "Psi" component
+  a <- sum(lgamma(nG.by.TS * delta))
+  b <- sum(lgamma(n.by.G + delta))
+  c <- -nG * lgamma(delta)
+  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
+  
+  psi.ll <- a + b + c + d
+
+  ## Calculate for "Eta" component
+  a <- lgamma(L * gamma)
+  b <- sum(lgamma(nG.by.TS + gamma))
+  c <- -L * lgamma(gamma)
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+
+  eta.ll <- a + b + c + d
+
+  final <- phi.ll + psi.ll + eta.ll
+  return(final)
 }
 
 
-
-################################################################################
-# celda_G S3 methods                                                           #
-################################################################################
-#' finalClusterAssignment for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-finalClusterAssignment.celda_G = function(celda.mod) {
-  return(celda.mod$y)
-}
-
-#' getK for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-getK.celda_G = function(celda.mod) { return(NA) }
-
-#' getL for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-getL.celda_G = function(celda.mod) {
-  return(celda.mod$L)
-}
-
-#' celdaHeatmap for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
+#' Calculate the celda_G log likelihood for user-provided cluster assignments
+#'
+#' This function calculates the log likelihood of each clustering of genes generated
+#' over multiple iterations of Gibbs sampling.
+#' 
 #' @param counts A numeric count matrix
-#' @param ... extra parameters passed onto renderCeldaHeatmap
+#' @param y A numeric vector of gene cluster assignments
+#' @param L The number of clusters being considered
+#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
+#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
+#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param ... Additional parameters
+#' @keywords log likelihood
+#' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
+calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
+  n.TS.by.C <- rowsum.y(counts, y=y, L=L)
+  
+  nM <- ncol(n.TS.by.C)
+  
+  a <- nM * lgamma(L * beta)
+  b <- sum(lgamma(n.TS.by.C + beta))
+  c <- -nM * L * lgamma(beta)
+  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
+  
+  phi.ll <- a + b + c + d
+
+  n.by.G <- rowSums(counts)
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  
+  nG.by.TS = table(factor(y, 1:L))
+  nG.by.TS[nG.by.TS == 0] = 1
+  nG <- nrow(counts)
+
+  a <- sum(lgamma(nG.by.TS * delta))
+  b <- sum(lgamma(n.by.G + delta))
+  c <- -nG * lgamma(delta)
+  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
+  
+  psi.ll <- a + b + c + d
+
+  a <- lgamma(L * gamma)
+  b <- sum(lgamma(nG.by.TS + gamma))
+  c <- -L * lgamma(gamma)
+  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
+
+  eta.ll <- a + b + c + d
+
+  final <- phi.ll + psi.ll + eta.ll
+  
+  return(final)
+}
+
+
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_G' function
+#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
-  renderCeldaHeatmap(counts, y=celda.mod$y, ...)
+clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
+
+  y = celda.mod$y
+  L = celda.mod$L
+  delta = celda.mod$delta
+  beta = celda.mod$beta
+  gamma = celda.mod$gamma
+  
+  ## Calculate counts one time up front
+  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  nM = ncol(counts)
+  nG = nrow(counts)
+  counts.t = t(counts)
+
+  next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)  
+  y.prob = t(next.y$probs)
+  
+  if(!isTRUE(log)) {
+    y.prob = normalizeLogProbs(y.prob)
+  }
+  
+  return(list(y.probability=y.prob))
 }
 
 
@@ -513,4 +465,50 @@ calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
   
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
+}
+
+
+reorder.celda_G = function(counts, res) {
+  if(res$L > 2) {
+    res$y = as.integer(as.factor(res$y))
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    unique.y = sort(unique(res$y))
+    cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
+    d <- cosineDist(cs)
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
+  }  
+  return(res)
+}
+
+
+#' finalClusterAssignment for celda Gene clustering model
+#' @param celda.mod A celda model object of class "celda_G"
+#' @export
+finalClusterAssignment.celda_G = function(celda.mod) {
+  return(celda.mod$y)
+}
+
+
+#' getK for celda Gene clustering model
+#' @param celda.mod A celda model object of class "celda_G"
+#' @export
+getK.celda_G = function(celda.mod) { return(NA) }
+
+
+#' getL for celda Gene clustering model
+#' @param celda.mod A celda model object of class "celda_G"
+#' @export
+getL.celda_G = function(celda.mod) {
+  return(celda.mod$L)
+}
+
+
+#' celdaHeatmap for celda Gene clustering model
+#' @param celda.mod A celda model object of class "celda_G"
+#' @param counts A numeric count matrix
+#' @param ... extra parameters passed onto renderCeldaHeatmap
+#' @export
+celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
+  renderCeldaHeatmap(counts, y=celda.mod$y, ...)
 }
