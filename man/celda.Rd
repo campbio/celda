@@ -29,6 +29,18 @@ celda(counts, model, sample.label = NULL, K = NULL, L = NULL, alpha = 1,
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G / celda_CG only)}
 
+\item{max.iter}{The maximum number of iterations}
+
+\item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL. (celda_C / celda_CG only)}
+
+\item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL. (celda_G / celda_CG only)}
+
+\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+
+\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+
+\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
+
 \item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)}
 
 \item{bestChainsOnly}{Return only the best chain (by final log-likelihood) per K/L combination.}
