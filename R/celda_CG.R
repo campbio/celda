@@ -319,17 +319,17 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param seed Parameter to set.seed() for random number generation
+#' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
+#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile The name of the logfile to redirect messages to.
-#' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
-					alpha=1, beta=1, delta=1, gamma=1, 
+                    alpha=1, beta=1, delta=1, gamma=1, 
                     max.iter=200, stop.iter = 10, split.on.iter=10,
                     seed=12345, count.checksum=NULL,
-			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
+                    z.init = NULL, y.init = NULL, process.counts=TRUE, logfile=NULL) {
   
   ## Error checking and variable processing
   if (isTRUE(processCounts)) {
