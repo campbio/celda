@@ -29,46 +29,6 @@
 # nG.by.TS = Number of genes in each Transcriptional State
 
 
-#' Simulate cells from the cell clustering generative model
-#' 
-#' @param S Total number of samples
-#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution
-#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
-#' @param G Total number of Genes to be simulated
-#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
-#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
-#' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @param model Dummy parameter for S3 dispatch
-#' @param ... Unused arguments
-#' @export
-simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
-                         G=500, K=5, alpha=1, beta=1, ...) {
-  
-  phi <- rdirichlet(K, rep(beta, G))
-  theta <- rdirichlet(S, rep(alpha, K))
-  
-  ## Select the number of cells per sample
-  nC <- sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)  
-  cell.sample <- rep(1:S, nC)
-  
-  ## Select state of the cells  
-  cell.state <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
-  cell.state = reorder.label.by.size(cell.state, K)$new.labels
-    
-  ## Select number of transcripts per cell
-  nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
-  
-  ## Select transcript distribution for each cell
-  cell.counts <- sapply(1:length(cell.sample), function(i) stats::rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
-  
-  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
-  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts)) 
-  cell.sample = paste0("Sample_", 1:S)[cell.sample]
-
-  return(list(z=cell.state, counts=cell.counts, sample.label=cell.sample, K=K, alpha=alpha, beta=beta))
-}
-
-
 #' celda Cell Clustering Model
 #' 
 #' @param counts A numeric count matrix
@@ -190,6 +150,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 }
 
 
+# Gibbs sampling for the celda_C Model
 cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
 
   ## Set variables up front outside of loop  
@@ -229,116 +190,45 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 }
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
-#'
-#' @param counts The original count matrix used in the model
-#' @param celda.mod A model returned from the 'celda_C' function
-#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
-#' @return A list containging a matrix for the conditional cell cluster probabilities. 
-#' @export
-clusterProbability.celda_C = function(counts, celda.mod, log=FALSE) {
-
-  z = celda.mod$z
-  s = celda.mod$sample.label
-  K = celda.mod$K
-  alpha = celda.mod$alpha
-  beta = celda.mod$beta
-  
-  nS = length(unique(s))
-  nG = nrow(counts)
-  nM = ncol(counts)
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), nrow=K, ncol=nS)
-  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
-  n.CP = as.integer(colSums(n.G.by.CP))
-  n.by.C = as.integer(colSums(counts))
-  
-  next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta, do.sample=FALSE)  
-  z.prob = t(next.z$probs)
-  
-  if(!isTRUE(log)) {
-    z.prob = normalizeLogProbs(z.prob)
-  }
-   
-  return(list(z.probability=z.prob))
-}
-
-
-
-
-
-
-
-#' Calculate the celda_C log likelihood for user-provided cluster assignments
+#' Simulate cells from the cell clustering generative model
 #' 
-#' @param counts A numeric count matrix
-#' @param s A vector indicating the sample for each cell (column) in the count matrix
-#' @param z A numeric vector of cluster assignments
-#' @param K The total number of clusters in z
+#' @param S Total number of samples
+#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution
+#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
+#' @param G Total number of Genes to be simulated
+#' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @param ... Additional parameters
-calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
+#' @param model Dummy parameter for S3 dispatch
+#' @param ... Unused arguments
+#' @export
+simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
+                         G=500, K=5, alpha=1, beta=1, ...) {
   
-  ## Calculate for "Theta" component
-  z = factor(z, 1:K)
-  m.CP.by.S = table(z, s)
-  nS = length(unique(s))
+  phi <- rdirichlet(K, rep(beta, G))
+  theta <- rdirichlet(S, rep(alpha, K))
   
-  a = nS * lgamma(K*alpha)
-  b = sum(lgamma(m.CP.by.S + alpha))
-  c = -nS * K * lgamma(alpha)
-  d = -sum(lgamma(colSums(m.CP.by.S + alpha)))
+  ## Select the number of cells per sample
+  nC <- sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)  
+  cell.sample <- rep(1:S, nC)
   
-  theta.ll = a + b + c + d
- 
-  ## Calculate for "Phi" component
-  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
-  nG = ncol(n.CP.by.G)
+  ## Select state of the cells  
+  cell.state <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
+  cell.state = reorder.label.by.size(cell.state, K)$new.labels
+    
+  ## Select number of transcripts per cell
+  nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
   
-  a = K * lgamma(nG * beta)
-  b = sum(lgamma(n.CP.by.G + beta))
-  c = -K * nG * lgamma(beta)
-  d = -sum(lgamma(rowSums(n.CP.by.G + beta)))
+  ## Select transcript distribution for each cell
+  cell.counts <- sapply(1:length(cell.sample), function(i) stats::rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
   
-  phi.ll = a + b + c + d
+  rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
+  colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts)) 
+  cell.sample = paste0("Sample_", 1:S)[cell.sample]
 
-  final = theta.ll + phi.ll
-  return(final)
+  return(list(z=cell.state, counts=cell.counts, sample.label=cell.sample, K=K, alpha=alpha, beta=beta))
 }
 
-cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
-  
-  ## Calculate for "Theta" component
-  a = nS * lgamma(K * alpha)
-  b = sum(lgamma(m.CP.by.S + alpha))
-  c = -nS * K * lgamma(alpha)
-  d = -sum(lgamma(colSums(m.CP.by.S + alpha)))
-  
-  theta.ll = a + b + c + d
-  
-  ## Calculate for "Phi" component
-  a = K * lgamma(nG * beta)
-  b = sum(lgamma(n.G.by.CP + beta))
-  c = -K * nG * lgamma(beta)
-  d = -sum(lgamma(colSums(n.G.by.CP + beta)))
-  
-  phi.ll = a + b + c + d
-  
-  final = theta.ll + phi.ll
-  return(final)
-}
-
-reorder.celda_C = function(counts,res){
-  if(res$K > 2) {
-    res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.z = sort(unique(res$z))
-    d <- cosineDist(fm$posterior$gene.states[,unique.z])
-    h <- hclust(d, method = "complete")
-    res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
-  }  
-  return(res)
-}
 
 #' Generate factorized matrices showing each feature's influence on the celda_C model clustering 
 #' 
@@ -397,37 +287,100 @@ factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proporti
 }
 
 
-
-
-################################################################################
-# celda_C S3 methods                                                           #
-################################################################################
-#' finalClusterAssignment for celda Cell clustering funciton 
-#' @param celda.mod A celda model object of class "celda_C"
-#' @export
-finalClusterAssignment.celda_C = function(celda.mod) {
-  return(celda.mod$z)
+# Calculate log-likelihood for celda_C model
+cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
+  
+  ## Calculate for "Theta" component
+  a = nS * lgamma(K * alpha)
+  b = sum(lgamma(m.CP.by.S + alpha))
+  c = -nS * K * lgamma(alpha)
+  d = -sum(lgamma(colSums(m.CP.by.S + alpha)))
+  
+  theta.ll = a + b + c + d
+  
+  ## Calculate for "Phi" component
+  a = K * lgamma(nG * beta)
+  b = sum(lgamma(n.G.by.CP + beta))
+  c = -K * nG * lgamma(beta)
+  d = -sum(lgamma(colSums(n.G.by.CP + beta)))
+  
+  phi.ll = a + b + c + d
+  
+  final = theta.ll + phi.ll
+  return(final)
 }
 
-#' getK for celda Cell clustering function 
-#' @param celda.mod A celda model object of class "celda_C"
-#' @export
-getK.celda_C = function(celda.mod) {
-  return(celda.mod$K)
-}
 
-#' getL for celda Cell clustering function 
-#' @param celda.mod A celda model object of class "celda_C"
-#' @export
-getL.celda_C = function(celda.mod) { return(NA) }
-
-#' celdaHeatmap for celda Cell clustering function 
-#' @param celda.mod A celda model object of class "celda_C"
+#' Calculate the celda_C log likelihood for user-provided cluster assignments
+#' 
 #' @param counts A numeric count matrix
-#' @param ... extra parameters passed onto the renderCeldaHeatmap
+#' @param s A vector indicating the sample for each cell (column) in the count matrix
+#' @param z A numeric vector of cluster assignments
+#' @param K The total number of clusters in z
+#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
+#' @param beta Non-zero concentration parameter for gene Dirichlet distribution
+#' @param ... Additional parameters
+calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
+  
+  ## Calculate for "Theta" component
+  z = factor(z, 1:K)
+  m.CP.by.S = table(z, s)
+  nS = length(unique(s))
+  
+  a = nS * lgamma(K*alpha)
+  b = sum(lgamma(m.CP.by.S + alpha))
+  c = -nS * K * lgamma(alpha)
+  d = -sum(lgamma(colSums(m.CP.by.S + alpha)))
+  
+  theta.ll = a + b + c + d
+ 
+  ## Calculate for "Phi" component
+  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
+  nG = ncol(n.CP.by.G)
+  
+  a = K * lgamma(nG * beta)
+  b = sum(lgamma(n.CP.by.G + beta))
+  c = -K * nG * lgamma(beta)
+  d = -sum(lgamma(rowSums(n.CP.by.G + beta)))
+  
+  phi.ll = a + b + c + d
+
+  final = theta.ll + phi.ll
+  return(final)
+}
+
+
+#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#'
+#' @param counts The original count matrix used in the model
+#' @param celda.mod A model returned from the 'celda_C' function
+#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
+#' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
-  renderCeldaHeatmap(counts, z=celda.mod$z, ...)
+clusterProbability.celda_C = function(counts, celda.mod, log=FALSE) {
+
+  z = celda.mod$z
+  s = celda.mod$sample.label
+  K = celda.mod$K
+  alpha = celda.mod$alpha
+  beta = celda.mod$beta
+  
+  nS = length(unique(s))
+  nG = nrow(counts)
+  nM = ncol(counts)
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), nrow=K, ncol=nS)
+  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
+  n.CP = as.integer(colSums(n.G.by.CP))
+  n.by.C = as.integer(colSums(counts))
+  
+  next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta, do.sample=FALSE)  
+  z.prob = t(next.z$probs)
+  
+  if(!isTRUE(log)) {
+    z.prob = normalizeLogProbs(z.prob)
+  }
+   
+  return(list(z.probability=z.prob))
 }
 
 
@@ -457,3 +410,50 @@ calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
 }  
+
+
+reorder.celda_C = function(counts,res){
+  if(res$K > 2) {
+    res$z = as.integer(as.factor(res$z))
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    unique.z = sort(unique(res$z))
+    d <- cosineDist(fm$posterior$gene.states[,unique.z])
+    h <- hclust(d, method = "complete")
+    res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
+  }  
+  return(res)
+}
+
+
+#' finalClusterAssignment for celda Cell clustering funciton 
+#' @param celda.mod A celda model object of class "celda_C"
+#' @export
+finalClusterAssignment.celda_C = function(celda.mod) {
+  return(celda.mod$z)
+}
+
+
+#' getK for celda Cell clustering function 
+#' @param celda.mod A celda model object of class "celda_C"
+#' @export
+getK.celda_C = function(celda.mod) {
+  return(celda.mod$K)
+}
+
+
+#' getL for celda Cell clustering function 
+#' @param celda.mod A celda model object of class "celda_C"
+#' @export
+getL.celda_C = function(celda.mod) { return(NA) }
+
+
+#' celdaHeatmap for celda Cell clustering function 
+#' @param celda.mod A celda model object of class "celda_C"
+#' @param counts A numeric count matrix
+#' @param ... extra parameters passed onto the renderCeldaHeatmap
+#' @export
+celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
+  renderCeldaHeatmap(counts, z=celda.mod$z, ...)
+}
+
+
