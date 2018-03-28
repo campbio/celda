@@ -105,7 +105,6 @@ buildParamList = function(counts, model, sample.label, K, L, alpha, beta, delta,
   validateArgs(counts, model, sample.label, nchains, cores, seed, K=K, L=L)
   
   params.list = list(counts=counts,
-                     sample.label=sample.label,
                      max.iter=max.iter,
                      stop.iter=stop.iter,
                      split.on.iter=split.on.iter,
@@ -115,14 +114,15 @@ buildParamList = function(counts, model, sample.label, K, L, alpha, beta, delta,
     params.list$alpha = alpha
     params.list$beta = beta
     params.list$K = K
-    z.init=z.init
+    params.list$z.init=z.init
+    params.list$sample.label=sample.label
   } 
   if (model %in% c("celda_G", "celda_CG")) {
     params.list$beta = beta
     params.list$delta = delta
     params.list$gamma = gamma
     params.list$L = L
-    y.init=y.init
+    params.list$y.init = y.init
   }
   
   return(params.list)
