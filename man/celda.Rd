@@ -4,9 +4,11 @@
 \alias{celda}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celda(counts, model, sample.label = NULL, nchains = 1,
-  bestChainsOnly = TRUE, cores = 1, seed = 12345, verbose = FALSE,
-  logfile_prefix = "Celda", ...)
+celda(counts, model, sample.label = NULL, K = NULL, L = NULL, alpha = 1,
+  beta = 1, delta = 1, gamma = 1, max.iter = 200, z.init = NULL,
+  y.init = NULL, stop.iter = 10, split.on.iter = 10,
+  process.counts = FALSE, nchains = 1, bestChainsOnly = TRUE, cores = 1,
+  seed = 12345, verbose = FALSE, logfile_prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -15,7 +17,19 @@ celda(counts, model, sample.label = NULL, nchains = 1,
 
 \item{sample.label}{A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
 
-\item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1}
+\item{K}{Number of desired cell subpopulation clusters. Required for celda_C and celda_CG models.}
+
+\item{L}{Number of desired gene clusters. Required for celda_G and celda_CG models.}
+
+\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution (celda_C / celda_CG only)}
+
+\item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+
+\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state (celda_G / celda_CG only)}
+
+\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G / celda_CG only)}
+
+\item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)}
 
 \item{bestChainsOnly}{Return only the best chain (by final log-likelihood) per K/L combination.}
 
@@ -26,8 +40,6 @@ celda(counts, model, sample.label = NULL, nchains = 1,
 \item{verbose}{Print log messages during celda chain execution}
 
 \item{logfile_prefix}{Prefix for log files from worker threads and main process.}
-
-\item{...}{Model specific parameters}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
