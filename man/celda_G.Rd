@@ -6,8 +6,7 @@
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
   split.on.iter = 10, max.iter = 200, count.checksum = NULL,
-  seed = 12345, y.init = NULL, process.counts = TRUE, logfile = NULL,
-  ...)
+  seed = 12345, y.init = NULL, process.counts = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -35,8 +34,6 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 \item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
 
 \item{logfile}{The name of the logfile to redirect messages to.}
-
-\item{...}{Additional parameters}
 }
 \description{
 Provides cluster assignments for all genes in a provided single-cell 
