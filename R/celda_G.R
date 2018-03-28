@@ -198,14 +198,12 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile The name of the logfile to redirect messages to.
-#' @param ...  Additional parameters
 #' @keywords LDA gene clustering gibbs
 #' @export
-celda_G = function(counts, L,
-					beta=1, delta=1, gamma=1,
+celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, split.on.iter=10, max.iter=200,
-                    count.checksum=NULL, seed=12345, 
-                    y.init=NULL, process.counts=TRUE, logfile=NULL, ...) {
+          count.checksum=NULL, seed=12345, 
+          y.init=NULL, process.counts=TRUE, logfile=NULL) {
 
   ## Error checking and variable processing
   if (isTRUE(process.counts)) {
