@@ -6,8 +6,8 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   stop.iter = 10, split.on.iter = 10, max.iter = 200,
-  count.checksum = NULL, seed = 12345, z.init = NULL,
-  process.counts = TRUE, logfile = NULL, ...)
+  count.checksum = NULL, seed = 12345, z.init = c(),
+  process.counts = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -35,8 +35,6 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
 
 \item{logfile}{If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.}
-
-\item{...}{additonal parameters}
 }
 \value{
 An object of class celda_C with clustering results and Gibbs sampling statistics
