@@ -12,7 +12,6 @@ Imports:
     plyr,
     dplyr,
     foreach,
-    gtools,
     ggplot2,
     plotly,
     RColorBrewer,

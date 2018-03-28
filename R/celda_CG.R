@@ -323,13 +323,12 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param ... Additional parameters
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
-					alpha=1, beta=1, delta=1, gamma=1, 
+                    alpha=1, beta=1, delta=1, gamma=1, 
                     max.iter=200, stop.iter = 10, split.on.iter=10,
                     seed=12345, count.checksum=NULL,
-			        z.init = NULL, y.init = NULL, logfile=NULL, ...) {
+                    z.init = NULL, y.init = NULL, logfile=NULL) {
   
   ## Error checking and variable processing
   if (isTRUE(processCounts)) {
