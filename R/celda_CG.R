@@ -62,15 +62,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
     counts = processCounts(counts)
   }
     
-  if(is.null(sample.label)) {
-    s = rep(1, ncol(counts))
+  s = processSampleLabels(sample.label, ncol(counts))
+  if (is.null(sample.label)) {
     sample.label = s
-  } else if(is.factor(sample.label)) {
-    s = as.integer(sample.label)
-  } else {
-    sample.label = as.factor(sample.label)
-    s = as.integer(sample.label)
-  }  
+  }
   
   ## Randomly select z and y or set z/y to supplied initial values
   z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
