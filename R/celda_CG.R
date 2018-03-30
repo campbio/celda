@@ -510,6 +510,7 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param ... Additional parameters 
+#' @export
 calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma, ...) {
   
   ## Calculate for "Theta" component
