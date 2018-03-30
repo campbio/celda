@@ -315,6 +315,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @param ... Additional parameters
+#' @export
 calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
   
   ## Calculate for "Theta" component
