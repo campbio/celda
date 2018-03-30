@@ -376,6 +376,7 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param ... Additional parameters
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
+#' @export
 calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
   n.TS.by.C <- rowsum.y(counts, y=y, L=L)
   
