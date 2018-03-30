@@ -25,6 +25,18 @@ test_that(desc = "Checking factorize matrix dimension size",{
   expect_equal(5, nrow(factorized$proportions$sample.states))  
 })
 
+
+# Ensure calculateLoglikFromVariables calculates the expected values
+test_that(desc = "calculateLoglikFromVariables.celda_C returns correct output for various params", {
+  expect_lt(calculateLoglikFromVariables(y = celdaC.sim$y, z = celdaC.sim$z, 
+                                            delta = 1, gamma = 1,  beta = 1, 
+                                            alpha = 1, K = 5, L = 3, model="celda_C", 
+                                            s = celdaC.sim$sample.label, 
+                                            counts=celdaC.sim$counts),
+               0)
+})
+
+
 #normalizeCounts
 test_that(desc = "Checking normalizeCounts doesn't change dimensions",{
   norm.counts <- normalizeCounts(counts.matrix)

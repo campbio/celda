@@ -122,7 +122,7 @@ celdaHeatmap <- function(celda.mod, counts, ...) {
 #' @param ... extra parameters passed onto calculateLoglikFromVariables
 #' @export
 calculateLoglikFromVariables <- function(model, counts, ...) {
-  class(counts) = c(class(counts), model)
+  class(counts) = c(model, class(counts))
   UseMethod("calculateLoglikFromVariables", counts)
 }
 

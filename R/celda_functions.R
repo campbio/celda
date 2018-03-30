@@ -312,6 +312,8 @@ rowsum.z = function(counts, z, K) {
   class(mat) = "integer"
   return(mat)
 }
+
+
 rowsum.y = function(counts, y, L) {
   mat = matrix(as.integer(0), nrow=L, ncol=ncol(counts))
   rs = rowsum(counts, group=y, reorder=TRUE)
