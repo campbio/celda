@@ -426,56 +426,21 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param ... Additional parameters 
 #' @export
-calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma, ...) {
+calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
   
-  ## Calculate for "Theta" component
   z = factor(z, 1:K)
-  m = table(z, s)
-  ns = ncol(m)
+  y = factor(y, 1:L)
   
-  a = ns * lgamma(K * alpha)
-  b = sum(lgamma(m + alpha))
-  c = -ns * K * lgamma(alpha)
-  d = -sum(lgamma(colSums(m + alpha)))
+  m.CP.by.S = table(z, s)
+  nS = ncol(m.CP.by.S)
   
-  theta.ll = a + b + c + d
-  
-  
-  ## Calculate for "Phi" component
   n.TS.by.C = rowsum.y(counts, y=y, L=L)
   n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-    
-  a = K * lgamma(L * beta)
-  b = sum(lgamma(n.CP.by.TS + beta))
-  c = -K * L * lgamma(beta)
-  d = -sum(lgamma(rowSums(n.CP.by.TS + beta)))
-  
-  phi.ll = a + b + c + d
-  
-  ## Calculate for "Psi" component
   n.by.G = rowSums(counts)
   n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-
-  nG.by.TS = table(factor(y, levels=1:L))
-  nG.by.TS[nG.by.TS == 0] = 1
-  nG = sum(nG.by.TS)
-  
-  a = sum(lgamma(nG.by.TS * delta))
-  b = sum(lgamma(n.by.G + delta))
-  c = -nG * lgamma(delta)
-  d = -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
-  
-  psi.ll = a + b + c + d
-    
-  ## Calculate for "Eta" side
-  a = lgamma(L * gamma)
-  b = sum(lgamma(nG.by.TS + gamma))
-  c = -L * lgamma(gamma)
-  d = -lgamma(sum(nG.by.TS + gamma))
-
-  eta.ll = a + b + c + d
-
-  final = theta.ll + phi.ll + psi.ll + eta.ll
+  nG.by.TS = table(y)
+ 
+  final = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   return(final)
 }
 
