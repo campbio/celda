@@ -381,40 +381,14 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 #' @export
-calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma, ...) {
+calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma) {
   n.TS.by.C <- rowsum.y(counts, y=y, L=L)
-  
   nM <- ncol(n.TS.by.C)
-  
-  a <- nM * lgamma(L * beta)
-  b <- sum(lgamma(n.TS.by.C + beta))
-  c <- -nM * L * lgamma(beta)
-  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
-  
-  phi.ll <- a + b + c + d
-
   n.by.G <- rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  
+  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))  
   nG.by.TS = table(factor(y, 1:L))
-  nG.by.TS[nG.by.TS == 0] = 1
-  nG <- sum(nG.by.TS)
 
-  a <- sum(lgamma(nG.by.TS * delta))
-  b <- sum(lgamma(n.by.G + delta))
-  c <- -nG * lgamma(delta)
-  d <- -sum(lgamma(n.by.TS + (nG.by.TS * delta)))
-  
-  psi.ll <- a + b + c + d
-
-  a <- lgamma(L * gamma)
-  b <- sum(lgamma(nG.by.TS + gamma))
-  c <- -L * lgamma(gamma)
-  d <- -sum(lgamma(sum(nG.by.TS + gamma)))
-
-  eta.ll <- a + b + c + d
-
-  final <- phi.ll + psi.ll + eta.ll
+  final <- cG.calcLL(n.C.by.TS=t(n.TS.by.C), n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
   return(final)
 }
