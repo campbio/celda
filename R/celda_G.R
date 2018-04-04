@@ -177,20 +177,23 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 	  temp.n.by.TS = n.by.TS 
 	  temp.n.C.by.TS = n.C.by.TS
 	
-	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L
+	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L      
 	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
 	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
 
-	  pseudo.nG.by.TS = temp.nG.by.TS
+      pseudo.nG.by.TS = temp.nG.by.TS
 	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
-	  
-	  probs[j,i] = 	sum(lgamma(pseudo.nG.by.TS + gamma)) -					## Eta Numerator
-				  sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +				## Eta Denominator
-				  sum(lgamma(temp.n.C.by.TS + beta)) +						## Phi Numerator
-				  sum(lgamma(pseudo.nG.by.TS * delta)) -					## Psi Numerator
-				  sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))  	## Psi Denominator
-	}
-  
+	  pseudo.nG = sum(pseudo.nG.by.TS)
+
+      probs[j,i] <- 	sum(lgamma(pseudo.nG.by.TS + gamma)) -
+						sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +
+						sum(lgamma(temp.n.C.by.TS + beta)) +
+						sum(lgamma(pseudo.nG.by.TS * delta)) -
+						(pseudo.nG * lgamma(delta)) -
+						sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))
+
+    }
+
 	## Sample next state and add back counts
 	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
 	
@@ -332,7 +335,8 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
 cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
   
   nG.by.TS[nG.by.TS == 0] = 1
-
+  nG = sum(nG.by.TS)
+  
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
   b <- sum(lgamma(n.C.by.TS + beta))
@@ -394,7 +398,7 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
   
   nG.by.TS = table(factor(y, 1:L))
   nG.by.TS[nG.by.TS == 0] = 1
-  nG <- nrow(counts)
+  nG <- sum(nG.by.TS)
 
   a <- sum(lgamma(nG.by.TS * delta))
   b <- sum(lgamma(n.by.G + delta))
