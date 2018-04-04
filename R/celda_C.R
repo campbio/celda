@@ -83,7 +83,6 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   iter = 1L
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
-  logMessages(date(), "Max iter:", max.iter, logfile=logfile, append=TRUE)
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
     
     next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
@@ -316,32 +315,16 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @param ... Additional parameters
 #' @export
-calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta, ...) {
+calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta) {
   
   ## Calculate for "Theta" component
   z = factor(z, 1:K)
   m.CP.by.S = table(z, s)
   nS = length(unique(s))
-  
-  a = nS * lgamma(K*alpha)
-  b = sum(lgamma(m.CP.by.S + alpha))
-  c = -nS * K * lgamma(alpha)
-  d = -sum(lgamma(colSums(m.CP.by.S + alpha)))
-  
-  theta.ll = a + b + c + d
- 
-  ## Calculate for "Phi" component
   n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
   nG = ncol(n.CP.by.G)
   
-  a = K * lgamma(nG * beta)
-  b = sum(lgamma(n.CP.by.G + beta))
-  c = -K * nG * lgamma(beta)
-  d = -sum(lgamma(rowSums(n.CP.by.G + beta)))
-  
-  phi.ll = a + b + c + d
-
-  final = theta.ll + phi.ll
+  final = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=t(n.CP.by.G), s=s, z=z, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
   return(final)
 }
 
