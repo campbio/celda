@@ -318,8 +318,7 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   n.by.G = as.integer(rowSums(counts))
   n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
   nG.by.TS = as.integer(table(factor(y, 1:L)))
-  pseudo.nG.by.TS = nG.by.TS
-  pseudo.nG.by.TS[nG.by.TS == 0] = 1
+  nG.by.TS[nG.by.TS == 0] = 1
 
   nG = nrow(counts)
   nM = ncol(counts)
@@ -375,7 +374,7 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
     gs = n.G.by.TS
     gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
     gs = normalizeCounts(gs, scale.factor=1)
-	temp.nG.by.TS = (pseudo.nG.by.TS + gamma)/sum(pseudo.nG.by.TS + gamma)
+	temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
 	
     post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
           				   population.states = normalizeCounts(t(n.CP.by.TS + beta), scale.factor=1), 
@@ -524,13 +523,16 @@ calculatePerplexity.celda_CG = function(counts, celda.mod, precision=128) {
   phi   = factorized$posterior$population.states
   psi   = factorized$posterior$gene.states
   sl = celda.mod$sample.label
+  eta <- factorized$posterior$gene.distribution
+  nG.by.TS = factorized$counts$gene.distribution
   
+  eta.prob = log(eta) * nG.by.TS
   gene.by.pop.prob = log(psi %*% phi)
   inner.log.prob = (t(gene.by.pop.prob) %*% counts) + theta[, sl]  
   inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
   inner.log.prob.exp = exp(inner.log.prob)
   
-  log.px = 0
+  log.px = sum(eta.prob)
   for(i in 1:ncol(inner.log.prob.exp)) {
     log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
   }
