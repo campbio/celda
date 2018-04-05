@@ -289,10 +289,14 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   y = celda.mod$y
   beta = celda.mod$beta
   delta = celda.mod$delta
+  gamma = celda.mod$gamma
   
   ## Calculate counts one time up front
   n.TS.by.C = rowsum.y(counts, y=y, L=L)
   nG.by.TS = as.integer(table(factor(y, 1:L)))
+  pseudo.nG.by.TS = nG.by.TS
+  pseudo.nG.by.TS[nG.by.TS == 0] = 1
+  
   n.by.G = as.integer(rowSums(counts))
   nM = ncol(counts)
   nG = nrow(counts)
@@ -305,14 +309,15 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   rownames(n.TS.by.C) = L.names
   colnames(n.G.by.TS) = L.names
   rownames(n.G.by.TS) = celda.mod$names$row
-
+  names(nG.by.TS) = L.names
+  
   counts.list = c()
   prop.list = c()
   post.list = c()
   res = list()
   
   if(any("counts" %in% type)) {
-    counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS)
+    counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS, gene.distribution=nG.by.TS)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
@@ -320,19 +325,21 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
     unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
-
+    temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
+    
     prop.list = list(cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
-    							  gene.states = temp.n.G.by.TS)
+    							  gene.states = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
   
     gs = n.G.by.TS
-    gs[gs > 0] = gs[gs > 0] + delta
+    gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
     gs = normalizeCounts(gs, scale.factor=1)
-
+    temp.nG.by.TS = (pseudo.nG.by.TS + gamma)/sum(pseudo.nG.by.TS + gamma)
+    
     post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
-    						    gene.states = gs)
+    						    gene.states = gs, gene.distribution=temp.nG.by.TS)
     res = c(res, posterior = list(post.list))						    
   }
   
