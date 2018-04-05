@@ -7,7 +7,7 @@
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   stop.iter = 10, max.iter = 200, split.on.iter = 10,
   split.on.last = TRUE, count.checksum = NULL, seed = 12345,
-  z.init = c(), process.counts = TRUE, logfile = NULL)
+  z.init = NULL, process.counts = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
