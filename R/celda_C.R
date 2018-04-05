@@ -37,8 +37,9 @@
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
+#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
+#' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
@@ -47,7 +48,7 @@
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
-                 	 stop.iter = 10, split.on.iter=10, max.iter=200, 
+                 	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                  	 count.checksum=NULL, seed=12345,
                  	 z.init = c(), process.counts=TRUE, logfile=NULL) {
   
@@ -92,7 +93,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     z = next.z$z
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(K > 2 & (num.iter.without.improvement == stop.iter | (iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+    if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
@@ -186,6 +187,7 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 
 #' Simulate cells from the cell clustering generative model
 #' 
+#' @param model Celda model to use for simulation. One of 'available_models'. 
 #' @param S Total number of samples
 #' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution
 #' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
@@ -193,8 +195,6 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @param model Dummy parameter for S3 dispatch
-#' @param ... Unused arguments
 #' @export
 simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
                          G=500, K=5, alpha=1, beta=1, seed=12345) {
