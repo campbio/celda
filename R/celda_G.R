@@ -294,8 +294,7 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   ## Calculate counts one time up front
   n.TS.by.C = rowsum.y(counts, y=y, L=L)
   nG.by.TS = as.integer(table(factor(y, 1:L)))
-  pseudo.nG.by.TS = nG.by.TS
-  pseudo.nG.by.TS[nG.by.TS == 0] = 1
+  nG.by.TS[nG.by.TS == 0] = 1
   
   n.by.G = as.integer(rowSums(counts))
   nM = ncol(counts)
@@ -336,7 +335,7 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
     gs = n.G.by.TS
     gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
     gs = normalizeCounts(gs, scale.factor=1)
-    temp.nG.by.TS = (pseudo.nG.by.TS + gamma)/sum(pseudo.nG.by.TS + gamma)
+    temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
     
     post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
     						    gene.states = gs, gene.distribution=temp.nG.by.TS)
@@ -452,11 +451,14 @@ calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
   }
   
   factorized = factorizeMatrix(celda.mod, counts, "posterior")
-  phi   = factorized$posterior$gene.states
-  psi   = factorized$posterior$cell.states
+  phi <- factorized$posterior$gene.states
+  psi <- factorized$posterior$cell.states
+  eta <- factorized$posterior$gene.distribution
+  nG.by.TS = factorized$counts$gene.distribution
   
-  gene.by.cell.prob = log(phi %*% psi)
-  log.px = sum(gene.by.cell.prob * counts)
+  eta.prob = log(eta) * nG.by.TS
+  gene.by.cell.prob = log(phi %*% psi) 
+  log.px = sum(eta.prob) + sum(gene.by.cell.prob * counts)
   
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
