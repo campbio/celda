@@ -24,6 +24,8 @@
 \item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
 
 \item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+
+\item{seed}{starting point used for generating simulated data}
 }
 \description{
 Simulate cells from the cell clustering generative model
