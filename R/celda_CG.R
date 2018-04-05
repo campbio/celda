@@ -68,6 +68,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
     sample.label = s
   }
   
+  if(is.null(count.checksum)) {
+    count.checksum = digest::digest(counts, algo="md5")
+  }
+    
   ## Randomly select z and y or set z/y to supplied initial values
   z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
   y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
