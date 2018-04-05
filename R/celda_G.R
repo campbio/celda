@@ -42,8 +42,9 @@
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
+#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
+#' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
@@ -52,9 +53,9 @@
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
-					stop.iter=10, split.on.iter=10, max.iter=200,
-          count.checksum=NULL, seed=12345, 
-          y.init=NULL, process.counts=TRUE, logfile=NULL) {
+					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+					count.checksum=NULL, seed=12345, 
+					y.init=NULL, process.counts=TRUE, logfile=NULL) {
 
   ## Error checking and variable processing
   if (isTRUE(process.counts)) {
@@ -92,7 +93,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	y = next.y$y
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(L > 2 & (num.iter.without.improvement == stop.iter | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+    if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
       logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
@@ -211,6 +212,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' Generate a simulated count matrix, based off a generative distribution whose 
 #' parameters can be provided by the user.
 #' 
+#' @param model Celda model to use for simulation. One of 'available_models'. 
 #' @param C The number of cells
 #' @param L The number of transcriptional states
 #' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
@@ -219,8 +221,6 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param seed Parameter to set.seed() for random number generation
-#' @param model Dummy parameter for S3 dispatch
-#' @param ... Unused arguments
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
                                  L=5, beta=1, gamma=1, delta=1, seed=12345) {
