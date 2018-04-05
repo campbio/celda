@@ -72,12 +72,14 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   y.best = y  
 
   ## Calculate counts one time up front
-  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
-  n.by.G = as.integer(rowSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
-  nM = ncol(counts)
-  nG = nrow(counts)
+  p = cG.decomposeCounts(counts=counts, y=y, L=L)
+  n.C.by.TS = p$n.C.by.TS
+  n.by.G = p$n.by.G
+  n.by.TS = p$n.by.TS
+  nG.by.TS = p$nG.by.TS
+  nM = p$nM
+  nG = p$nG
+  rm(p)
 
   set.seed(seed)
   logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
@@ -295,15 +297,16 @@ factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proporti
   delta = celda.mod$delta
   gamma = celda.mod$gamma
   
-  ## Calculate counts one time up front
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
-  nG.by.TS[nG.by.TS == 0] = 1
+  p = cG.decomposeCounts(counts=counts, y=y, L=L)
+  n.TS.by.C = t(p$n.C.by.TS)
+  n.by.G = p$n.by.G
+  n.by.TS = p$n.by.TS
+  nG.by.TS = p$nG.by.TS
+  nM = p$nM
+  nG = p$nG
+  rm(p)
   
-  n.by.G = as.integer(rowSums(counts))
-  nM = ncol(counts)
-  nG = nrow(counts)
-  
+  nG.by.TS[nG.by.TS == 0] = 1  
   n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
   n.G.by.TS[cbind(1:nG,y)] = n.by.G
 
@@ -401,15 +404,25 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 #' @export
 calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma) {
-  n.TS.by.C <- rowsum.y(counts, y=y, L=L)
-  nM <- ncol(n.TS.by.C)
-  n.by.G <- rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))  
-  nG.by.TS = table(factor(y, 1:L))
 
-  final <- cG.calcLL(n.C.by.TS=t(n.TS.by.C), n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  p = cG.decomposeCounts(counts=counts, y=y, L=L)
+  final <- cG.calcLL(n.C.by.TS=p$n.C.by.TS, n.by.TS=p$n.by.TS, n.by.G=p$n.by.G, nG.by.TS=p$nG.by.TS, nM=p$nM, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
   return(final)
+}
+
+
+#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+cG.decomposeCounts = function(counts, y, L) {
+
+  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  nM = ncol(counts)
+  nG = nrow(counts)
+  
+  return(list(n.C.by.TS=n.C.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nM=nM, nG=nG))
 }
 
 
@@ -429,15 +442,8 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
   gamma = celda.mod$gamma
   
   ## Calculate counts one time up front
-  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
-  n.by.G = as.integer(rowSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
-  nM = ncol(counts)
-  nG = nrow(counts)
-  counts.t = t(counts)
-
-  next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)  
+  p = cG.decomposeCounts(counts=counts, y=y, L=L)
+  next.y = cG.calcGibbsProbY(counts.t=t(counts), n.C.by.TS=p$n.C.by.TS, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)  
   y.prob = t(next.y$probs)
   
   if(!isTRUE(log)) {
