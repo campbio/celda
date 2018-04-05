@@ -197,30 +197,42 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 #' @param ... Unused arguments
 #' @export
 simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
-                         G=500, K=5, alpha=1, beta=1, ...) {
-  
+                         G=500, K=5, alpha=1, beta=1, seed=12345) {
+ 
+  set.seed(seed) 
+    
   phi <- rdirichlet(K, rep(beta, G))
   theta <- rdirichlet(S, rep(alpha, K))
   
   ## Select the number of cells per sample
   nC <- sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)  
-  cell.sample <- rep(1:S, nC)
+  cell.sample.label <- rep(1:S, nC)
   
   ## Select state of the cells  
-  cell.state <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
-  cell.state = reorder.label.by.size(cell.state, K)$new.labels
+  z <- unlist(lapply(1:S, function(i) sample(1:K, size=nC[i], prob=theta[i,], replace=TRUE)))
     
   ## Select number of transcripts per cell
-  nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample), replace=TRUE)
+  nN <- sample(N.Range[1]:N.Range[2], size=length(cell.sample.label), replace=TRUE)
   
   ## Select transcript distribution for each cell
-  cell.counts <- sapply(1:length(cell.sample), function(i) stats::rmultinom(1, size=nN[i], prob=phi[cell.state[i],]))
+  cell.counts <- sapply(1:length(cell.sample.label), function(i) stats::rmultinom(1, size=nN[i], prob=phi[z[i],]))
   
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts)) 
-  cell.sample = paste0("Sample_", 1:S)[cell.sample]
+  cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
 
-  return(list(z=cell.state, counts=cell.counts, sample.label=cell.sample, K=K, alpha=alpha, beta=beta))
+  ## Peform reordering on final Z and Y assigments:
+  names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
+               sample=unique(cell.sample.label))
+  result = list(z=z, completeLogLik=NULL, 
+                finalLogLik=NULL, K=K, 
+                alpha=alpha, beta=beta, seed=seed, 
+                sample.label=cell.sample.label, names=names,
+                count.checksum=NULL)
+  class(result) = "celda_C" 
+  result = reorder.celda_C(counts = cell.counts, res = result)
+  
+  return(list(z=result$z, counts=cell.counts, sample.label=cell.sample.label, K=K, alpha=alpha, beta=beta, C.Range=C.Range, N.Range=N.Range, S=S))
 }
 
 

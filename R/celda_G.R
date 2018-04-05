@@ -223,7 +223,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param ... Unused arguments
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
-                                 L=5, beta=1, gamma=1, delta=1, seed=12345, ...) {
+                                 L=5, beta=1, gamma=1, delta=1, seed=12345) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
@@ -260,11 +260,20 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
     cell.counts = cell.counts[-zero.row.idx, ]
     y = y[-zero.row.idx]
   }
-    
+
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
   
-  return(list(y=y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
+  ## Peform reordering on final Z and Y assigments:
+  names = list(row=rownames(cell.counts), column=colnames(cell.counts))
+  result = list(y=y, completeLogLik=NULL, 
+                finalLogLik=NULL, L=L, 
+                beta=beta, delta=delta, gamma=gamma, seed=seed, 
+                names=names, count.checksum=NULL)
+  class(result) = "celda_G" 
+  result = reorder.celda_G(counts = cell.counts, res = result)  
+  
+  return(list(y=result$y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
