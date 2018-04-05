@@ -71,14 +71,14 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   z.best = z
   
   ## Calculate counts one time up front
-  nS = length(unique(s))
-  nG = nrow(counts)
-  nM = ncol(counts)
-
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
-  n.CP = as.integer(colSums(n.G.by.CP))
-  n.by.C = as.integer(colSums(counts))
+  p = cC.decomposeCounts(counts, s, z, K)
+  nS = p$nS
+  nG = p$nG
+  nM = p$nM
+  m.CP.by.S = p$m.CP.by.S
+  n.G.by.CP = p$n.G.by.CP
+  n.CP = p$n.CP
+  n.by.C = p$n.by.C
   
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
@@ -254,15 +254,12 @@ factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proporti
   alpha = celda.mod$alpha
   beta = celda.mod$beta
   sample.label = celda.mod$sample.label
-  s = as.integer(as.factor(sample.label))
+  s = processSampleLabels(sample.label, ncol(counts))
         
-  nS = length(unique(s))
-  nG = nrow(counts)
-  nM = ncol(counts)
-
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
-  
+  p = cC.decomposeCounts(counts, s, z, K)
+  m.CP.by.S = p$m.CP.by.S
+  n.G.by.CP = p$n.G.by.CP
+    
   K.names = paste0("K", 1:K)
   rownames(n.G.by.CP) = celda.mod$names$row
   colnames(n.G.by.CP) = K.names
@@ -325,24 +322,33 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' Calculate the celda_C log likelihood for user-provided cluster assignments
 #' 
 #' @param counts A numeric count matrix
-#' @param s A vector indicating the sample for each cell (column) in the count matrix
+#' @param sample.label A vector indicating the sample label for each cell (column) in the count matrix
 #' @param z A numeric vector of cluster assignments
 #' @param K The total number of clusters in z
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @param ... Additional parameters
 #' @export
-calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta) {
-  
-  ## Calculate for "Theta" component
-  z = factor(z, 1:K)
-  m.CP.by.S = table(z, s)
-  nS = length(unique(s))
-  n.CP.by.G = rowsum(t(counts), group=z, reorder=TRUE)
-  nG = ncol(n.CP.by.G)
-  
-  final = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=t(n.CP.by.G), s=s, z=z, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
+calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
+  s = processSampleLabels(sample.label, ncol(counts))
+  p = cC.decomposeCounts(counts, s, z, K)  
+  final = cC.calcLL(m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, s=s, z=z, K=K, nS=p$nS, nG=p$nG, alpha=alpha, beta=beta)
   return(final)
+}
+
+
+#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+cC.decomposeCounts = function(counts, s, z, K) {
+  nS = length(unique(s))
+  nG = nrow(counts)
+  nM = ncol(counts)
+
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
+  n.CP = as.integer(colSums(n.G.by.CP))
+  n.by.C = as.integer(colSums(counts))
+  
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, n.by.C=n.by.C, nS=nS, nG=nG, nM=nM))
 }
 
 
@@ -356,20 +362,16 @@ calculateLoglikFromVariables.celda_C = function(counts, s, z, K, alpha, beta) {
 clusterProbability.celda_C = function(counts, celda.mod, log=FALSE) {
 
   z = celda.mod$z
-  s = celda.mod$sample.label
+  sample.label = celda.mod$sample.label
+  s = processSampleLabels(sample.label, ncol(counts))
+  
   K = celda.mod$K
   alpha = celda.mod$alpha
   beta = celda.mod$beta
   
-  nS = length(unique(s))
-  nG = nrow(counts)
-  nM = ncol(counts)
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), nrow=K, ncol=nS)
-  n.G.by.CP = t(rowsum.z(counts, z=z, K=K))
-  n.CP = as.integer(colSums(n.G.by.CP))
-  n.by.C = as.integer(colSums(counts))
+  p = cC.decomposeCounts(counts, s, z, K)  
   
-  next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta, do.sample=FALSE)  
+  next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, n.by.C=p$n.by.C, n.CP=p$n.CP, z=z, s=s, K=K, nG=p$nG, nM=p$nM, alpha=alpha, beta=beta, do.sample=FALSE)  
   z.prob = t(next.z$probs)
   
   if(!isTRUE(log)) {
