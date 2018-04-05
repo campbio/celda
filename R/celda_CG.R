@@ -79,18 +79,19 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   y.best = y  
   
   ## Calculate counts one time up front
-  nS = length(unique(s))
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-  n.CP = as.integer(rowSums(n.CP.by.TS))
-  n.by.G = as.integer(rowSums(counts))
-  n.by.C = as.integer(colSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
-
-  nG = nrow(counts)
-  nM = ncol(counts)
+  p = cCG.decomposeCounts(counts, s, z, y, K, L)
+  m.CP.by.S = p$m.CP.by.S
+  n.TS.by.C = p$n.TS.by.C
+  n.CP.by.TS = p$n.CP.by.TS
+  n.CP = p$n.CP
+  n.by.G = p$n.by.G
+  n.by.C = p$n.by.C
+  n.by.TS = p$n.by.TS
+  nG.by.TS = p$nG.by.TS
+  nM = p$nM
+  nG = p$nG
+  nS = p$nS
+  rm(p)
   
   ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
@@ -312,23 +313,24 @@ factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proport
   delta = celda.mod$delta
   gamma = celda.mod$gamma
   sample.label = celda.mod$sample.label
-  s = as.integer(as.factor(sample.label))
+  s = processSampleLabels(sample.label, ncol(counts))
   
   ## Calculate counts one time up front
-  nS = length(unique(s))
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-  n.by.G = as.integer(rowSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  p = cCG.decomposeCounts(counts, s, z, y, K, L)
+  nS = p$nS
+  nG = p$nG
+  nM = p$nM
+  m.CP.by.S = p$m.CP.by.S
+  n.TS.by.C = p$n.TS.by.C
+  n.CP.by.TS = p$n.CP.by.TS
+  n.by.G = p$n.by.G
+  n.by.TS = p$n.by.TS
+  nG.by.TS = p$nG.by.TS
   nG.by.TS[nG.by.TS == 0] = 1
 
-  nG = nrow(counts)
-  nM = ncol(counts)
 
   n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
-  n.G.by.TS[cbind(1:nG,y)] = n.by.G
+  n.G.by.TS[cbind(1:nG,y)] = p$n.by.G
 
   L.names = paste0("L", 1:L)
   K.names = paste0("K", 1:K)
@@ -436,7 +438,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
 #' Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
 #' 
 #' @param counts A numeric count matrix
-#' @param s A numeric vector of sample labels corresponding to the samples each cell in the count matrix originates from
+#' @param sample.label A vector indicating the sample label for each cell (column) in the count matrix
 #' @param z A numeric vector of cell cluster assignments
 #' @param y A numeric vector of gene cluster assignments
 #' @param K The number of cell clusters
@@ -447,23 +449,32 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param ... Additional parameters 
 #' @export
-calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, beta, delta, gamma) {
-  
-  z = factor(z, 1:K)
-  y = factor(y, 1:L)
-  
-  m.CP.by.S = table(z, s)
-  nS = ncol(m.CP.by.S)
-  
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-  n.by.G = rowSums(counts)
-  n.by.TS = as.numeric(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = table(y)
- 
-  final = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
+  s = processSampleLabels(celda.mod$sample.label, ncol(counts))
+  p = cCG.decomposeCounts(counts, s, z, y, K, L)
+  final = cCG.calcLL(K=K, L=L, m.CP.by.S=p$m.CP.by.S, n.CP.by.TS=p$n.CP.by.TS, n.by.G=p$n.by.G, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, nS=p$nS, nG=p$nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   return(final)
 }
+
+
+#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+cCG.decomposeCounts = function(counts, s, z, y, K, L) {
+  nS = length(unique(s))
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.TS.by.C = rowsum.y(counts, y=y, L=L)
+  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+  n.CP = as.integer(rowSums(n.CP.by.TS))
+  n.by.G = as.integer(rowSums(counts))
+  n.by.C = as.integer(colSums(counts))
+  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  n.CP.by.G = rowsum.z(counts, z=z, K=K)
+  
+  nG = nrow(counts)
+  nM = ncol(counts)
+  return(list(m.CP.by.S=m.CP.by.S, n.TS.by.C=n.TS.by.C, n.CP.by.TS=n.CP.by.TS, n.CP=n.CP, n.by.G=n.by.G, n.by.C=n.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.CP.by.G=n.CP.by.G, nM=nM, nG=nG, nS=nS))
+}  
+
 
 
 #' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
@@ -475,7 +486,7 @@ calculateLoglikFromVariables.celda_CG = function(counts, s, z, y, K, L, alpha, b
 #' @export
 clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE) {
   
-  s = celda.mod$sample.label
+  s = processSampleLabels(celda.mod$sample.label, ncol(counts))
   z = celda.mod$z
   K = celda.mod$K  
   y = celda.mod$y
@@ -485,26 +496,14 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE) {
   beta = celda.mod$beta
   gamma = celda.mod$gamma
 
-  nS = length(unique(s))
-  nG = nrow(counts)
-  nM = ncol(counts)
-  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
-  n.CP = as.integer(rowSums(n.CP.by.TS))
-  n.by.G = as.integer(rowSums(counts))
-  n.by.C = as.integer(colSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
-  n.CP.by.G = rowsum.z(counts, z=z, K=K)
+  p = cCG.decomposeCounts(counts, s, z, y, K, L)
 
   ## Gibbs sampling for each cell
-  n.TS.by.CP = t(n.CP.by.TS)
-  next.z = cCG.calcGibbsProbZ(m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.TS.by.C=n.TS.by.C, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, L=L, K=K, nM=nM, alpha=alpha, beta=beta)
+  next.z = cC.calcGibbsProbZ(counts=p$n.TS.by.C, m.CP.by.S=p$m.CP.by.S, n.G.by.CP=t(p$n.CP.by.TS), n.CP=p$n.CP, n.by.C=p$n.by.C, z=z, s=s, K=K, nG=L, nM=p$nM, alpha=alpha, beta=beta, do.sample=FALSE)
   z.prob = t(next.z$probs)
 
   ## Gibbs sampling for each gene
-  next.y = cCG.calcGibbsProbY(n.CP.by.TS=n.CP.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.CP.by.G=n.CP.by.G, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  next.y = cG.calcGibbsProbY(counts.t=p$n.CP.by.G, n.C.by.TS=p$n.CP.by.TS, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)
   y.prob = t(next.y$probs)
 
   if(!isTRUE(log)) {
