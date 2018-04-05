@@ -5,9 +5,10 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, max.iter = 200, stop.iter = 10,
-  split.on.iter = 10, seed = 12345, count.checksum = NULL,
-  z.init = NULL, y.init = NULL, process.counts = TRUE, logfile = NULL)
+  delta = 1, gamma = 1, stop.iter = 10, max.iter = 200,
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
+  count.checksum = NULL, z.init = NULL, y.init = NULL,
+  process.counts = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -26,11 +27,13 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default 1.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
-
 \item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
 
+\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
+
 \item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+
+\item{split.on.last}{After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
