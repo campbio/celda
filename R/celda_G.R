@@ -414,6 +414,9 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 
 
 #' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+#' @param counts A numeric count matrix
+#' @param y A numeric vector of gene cluster assignments
+#' @param L The number of clusters being considered
 cG.decomposeCounts = function(counts, y, L) {
 
   n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
@@ -458,10 +461,7 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 
 #' @export
 calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
-  if (!compareCountMatrix(counts, celda.mod)) {
-    warning("Provided count matrix was not used to generate the provided celda model.")
-  }
-  
+ 
   factorized = factorizeMatrix(celda.mod, counts, "posterior")
   phi <- factorized$posterior$gene.states
   psi <- factorized$posterior$cell.states
