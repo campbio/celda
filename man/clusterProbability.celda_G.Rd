@@ -4,7 +4,7 @@
 \alias{clusterProbability.celda_G}
 \title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
 \usage{
-clusterProbability.celda_G(counts, celda.mod, log = FALSE)
+\method{clusterProbability}{celda_G}(counts, celda.mod, log = FALSE)
 }
 \arguments{
 \item{counts}{The original count matrix used in the model}

@@ -227,9 +227,10 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
 #' @param seed Parameter to set.seed() for random number generation
+#' @param ... Other arguments
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
-                                 L=5, beta=1, gamma=1, delta=1, seed=12345) {
+                                 L=5, beta=1, gamma=1, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   

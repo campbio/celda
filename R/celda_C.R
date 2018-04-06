@@ -200,9 +200,10 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @param seed starting point used for generating simulated data
+#' @param ... Other arguments
 #' @export
 simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
-                         G=500, K=5, alpha=1, beta=1, seed=12345) {
+                         G=500, K=5, alpha=1, beta=1, seed=12345, ...) {
  
   set.seed(seed) 
     

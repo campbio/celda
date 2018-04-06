@@ -6,7 +6,7 @@
 \usage{
 \method{simulateCells}{celda_C}(model, S = 10, C.Range = c(10, 100),
   N.Range = c(100, 5000), G = 500, K = 5, alpha = 1, beta = 1,
-  seed = 12345)
+  seed = 12345, ...)
 }
 \arguments{
 \item{model}{Celda model to use for simulation. One of 'available_models'.}
@@ -26,6 +26,8 @@
 \item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
 
 \item{seed}{starting point used for generating simulated data}
+
+\item{...}{Other arguments}
 }
 \description{
 Simulate cells from the cell clustering generative model

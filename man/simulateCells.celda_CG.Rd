@@ -6,7 +6,7 @@
 \usage{
 \method{simulateCells}{celda_CG}(model, S = 10, C.Range = c(50, 100),
   N.Range = c(500, 5000), G = 1000, K = 3, L = 10, alpha = 1,
-  beta = 1, gamma = 1, delta = 1, seed = 12345)
+  beta = 1, gamma = 1, delta = 1, seed = 12345, ...)
 }
 \arguments{
 \item{model}{Celda model to use for simulation. One of 'available_models'.}
@@ -32,6 +32,8 @@
 \item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
 
 \item{seed}{starting point used for generating simulated data}
+
+\item{...}{Other arguments}
 }
 \description{
 Simulate cells from the cell/gene clustering generative model
