@@ -86,7 +86,6 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
   if (isTRUE(bestChainsOnly)) {
     new.run.params = unique(dplyr::select(runs, -index, -chain))
     new.run.params$index = 1:nrow(new.run.params)
-    new.run.params$chain = rep(1, nrow(new.run.params))
     best.chains = apply(new.run.params, 1,
                         function(params) {
                           k = if ("K" %in% names(params)) params[["K"]] else NULL
@@ -155,8 +154,6 @@ validateArgs = function(counts, model, sample.label,
     if (!(class(sample.label) %in% c("numeric", "character", "factor"))) { 
       stop("Invalid sample.label; parameter should be either a numeric vector, character vector, or factor")
     }
-    
-    if (!is.numeric(sample.label)) stop("Invalid sample.label; parameter should be a numeric vector")
     
     if (ncol(counts) != length(sample.label)) stop("Length of sample.label does not match number of columns (cells) in counts matrix") 
   }    
