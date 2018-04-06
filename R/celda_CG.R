@@ -460,7 +460,7 @@ calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, 
 
 #' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
 #' @param counts A numeric count matrix
-#' @param sample.label A vector indicating the sample label for each cell (column) in the count matrix
+#' @param s An integer vector indicating the sample label for each cell (column) in the count matrix
 #' @param z A numeric vector of cell cluster assignments
 #' @param y A numeric vector of gene cluster assignments
 #' @param K The number of cell clusters
