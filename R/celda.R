@@ -37,14 +37,18 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
                  nchains=1, bestChainsOnly=TRUE, cores=1, 
                  seed=12345, verbose=FALSE, logfile_prefix="Celda") {
  
-  message(paste(Sys.time(), "Starting celda."))
   params.list = buildParamList(counts, model, sample.label, K, L, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                process.counts, nchains, cores, seed)
   
   
   # Redirect stderr from the worker threads if user asks for verbose
-  logfile = paste0(logfile_prefix, "_main_log.txt")
+  if(!is.null(logfile_prefix)) {
+    logfile = paste0(logfile_prefix, "_main_log.txt")
+  } else {
+    logfile = NULL
+  }  
+  if (isTRUE(verbose)) logMessages(date(), "... Starting ", model, logfile=logfile, append=FALSE)
   params.list$logfile = logfile
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
@@ -52,7 +56,6 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
   # Details for each model parameter / chain combination 
   runs = expand.grid(plyr::compact(list(chain=1:nchains, K=K, L=L)))
   runs$index = as.numeric(rownames(runs))
-  if (verbose) print(runs)
   
   # Pre-generate a set of random seeds to be used for each chain
   all.seeds = seed:(seed + nchains - 1)
@@ -97,7 +100,7 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
     celda.res$res.list = best.chains
   }
   
-  message(paste(Sys.time(), "Completed celda run."))
+  if (isTRUE(verbose)) logMessages(date(), "... Completed ", model, logfile=logfile, append=TRUE)
   return(celda.res)
 }
 
