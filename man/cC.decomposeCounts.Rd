@@ -6,6 +6,15 @@
 \usage{
 cC.decomposeCounts(counts, s, z, K)
 }
+\arguments{
+\item{counts}{A numeric count matrix}
+
+\item{z}{A numeric vector of cluster assignments}
+
+\item{K}{The total number of clusters in z}
+
+\item{sample.label}{A vector indicating the sample label for each cell (column) in the count matrix}
+}
 \description{
 Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
 }
