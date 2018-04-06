@@ -451,7 +451,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param ... Additional parameters 
 #' @export
 calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
-  s = processSampleLabels(celda.mod$sample.label, ncol(counts))
+  s = processSampleLabels(sample.label, ncol(counts))
   p = cCG.decomposeCounts(counts, s, z, y, K, L)
   final = cCG.calcLL(K=K, L=L, m.CP.by.S=p$m.CP.by.S, n.CP.by.TS=p$n.CP.by.TS, n.by.G=p$n.by.G, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, nS=p$nS, nG=p$nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   return(final)
@@ -480,9 +480,10 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 
 #' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
 #'
-#' @param counts The original count matrix used in the model
 #' @param celda.mod A model returned from the 'celda_CG' function
+#' @param counts The original count matrix used in the model
 #' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
+#' @param ... Other arguments
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
 clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {

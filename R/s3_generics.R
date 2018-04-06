@@ -70,8 +70,9 @@ finalClusterAssignment = function(celda.mod) {
 #'
 #' @param celda.mod A celda model object
 #' @param counts The count matrix used to generate the model
+#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
 #' @export
-clusterProbability = function(celda.mod, counts) {
+clusterProbability = function(celda.mod, counts, log=FALSE) {
   UseMethod("clusterProbability", celda.mod)
 }
 
