@@ -434,7 +434,7 @@ cG.decomposeCounts = function(counts, y, L) {
 #' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-clusterProbability.celda_G = function(counts, celda.mod, log=FALSE) {
+clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 
   y = celda.mod$y
   L = celda.mod$L

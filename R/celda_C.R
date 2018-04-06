@@ -360,7 +360,7 @@ cC.decomposeCounts = function(counts, s, z, K) {
 #' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-clusterProbability.celda_C = function(counts, celda.mod, log=FALSE) {
+clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
   z = celda.mod$z
   sample.label = celda.mod$sample.label
