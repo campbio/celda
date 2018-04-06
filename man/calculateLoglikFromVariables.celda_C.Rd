@@ -4,12 +4,12 @@
 \alias{calculateLoglikFromVariables.celda_C}
 \title{Calculate the celda_C log likelihood for user-provided cluster assignments}
 \usage{
-calculateLoglikFromVariables.celda_C(counts, s, z, K, alpha, beta)
+calculateLoglikFromVariables.celda_C(counts, sample.label, z, K, alpha, beta)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
 
-\item{s}{A vector indicating the sample for each cell (column) in the count matrix}
+\item{sample.label}{A vector indicating the sample label for each cell (column) in the count matrix}
 
 \item{z}{A numeric vector of cluster assignments}
 
