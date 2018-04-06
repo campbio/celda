@@ -340,7 +340,7 @@ calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alph
 
 #' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
 #' @param counts A numeric count matrix
-#' @param sample.label A vector indicating the sample label for each cell (column) in the count matrix
+#' @param s An integer vector indicating the sample label for each cell (column) in the count matrix
 #' @param z A numeric vector of cluster assignments
 #' @param K The total number of clusters in z
 cC.decomposeCounts = function(counts, s, z, K) {
