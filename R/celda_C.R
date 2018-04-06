@@ -339,6 +339,10 @@ calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alph
 
 
 #' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+#' @param counts A numeric count matrix
+#' @param sample.label A vector indicating the sample label for each cell (column) in the count matrix
+#' @param z A numeric vector of cluster assignments
+#' @param K The total number of clusters in z
 cC.decomposeCounts = function(counts, s, z, K) {
   nS = length(unique(s))
   nG = nrow(counts)
@@ -386,9 +390,6 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
 #' @export
 calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
-  if (!compareCountMatrix(counts, celda.mod)) {
-    warning("Provided count matrix was not used to generate the provided celda model.")
-  }
   
   # TODO Can try to turn into a single giant matrix multiplication by duplicating
   #     phi / theta / sl
