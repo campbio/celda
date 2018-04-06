@@ -6,6 +6,13 @@
 \usage{
 cG.decomposeCounts(counts, y, L)
 }
+\arguments{
+\item{counts}{A numeric count matrix}
+
+\item{y}{A numeric vector of gene cluster assignments}
+
+\item{L}{The number of clusters being considered}
+}
 \description{
 Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
 }
