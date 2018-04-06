@@ -66,22 +66,13 @@ finalClusterAssignment = function(celda.mod) {
 }
 
 
-#' Get the complete history of gene / cell / gene & cell cluster assignments 
-#' generated during a celda run, dependent on the model provided.
-#'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
-#' @export
-completeClusterHistory = function(celda.mod) {
-  UseMethod("completeClusterHistory", celda.mod)
-}
-
-
 #' Get the probability of the cluster assignments generated during a celda run.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod A celda model object
+#' @param counts The count matrix used to generate the model
 #' @export
-clusterProbabilities = function(celda.mod) {
-  UseMethod("clusterProbabilities", celda.mod)
+clusterProbability = function(celda.mod, counts) {
+  UseMethod("clusterProbability", celda.mod)
 }
 
 

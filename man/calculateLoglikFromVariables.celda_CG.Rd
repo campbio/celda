@@ -4,13 +4,13 @@
 \alias{calculateLoglikFromVariables.celda_CG}
 \title{Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments}
 \usage{
-calculateLoglikFromVariables.celda_CG(counts, s, z, y, K, L, alpha, beta, delta,
-  gamma)
+calculateLoglikFromVariables.celda_CG(counts, sample.label, z, y, K, L, alpha,
+  beta, delta, gamma)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
 
-\item{s}{A numeric vector of sample labels corresponding to the samples each cell in the count matrix originates from}
+\item{sample.label}{A vector indicating the sample label for each cell (column) in the count matrix}
 
 \item{z}{A numeric vector of cell cluster assignments}
 
