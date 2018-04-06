@@ -12,6 +12,8 @@
 \item{counts}{The original count matrix used in the model}
 
 \item{log}{If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.}
+
+\item{...}{Other arguments}
 }
 \value{
 A list containging a matrix for the conditional cell cluster probabilities.
