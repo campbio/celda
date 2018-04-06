@@ -57,7 +57,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, count.checksum=NULL,
                     z.init = NULL, y.init = NULL, process.counts=TRUE, logfile=NULL) {
-  
+ 
   ## Error checking and variable processing
   if (isTRUE(processCounts)) {
     counts = processCounts(counts)
