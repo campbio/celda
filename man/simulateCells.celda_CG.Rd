@@ -6,11 +6,10 @@
 \usage{
 \method{simulateCells}{celda_CG}(model, S = 10, C.Range = c(50, 100),
   N.Range = c(500, 5000), G = 1000, K = 3, L = 10, alpha = 1,
-  beta = 1, gamma = 1, delta = 1, seed = 12345, process.counts = TRUE,
-  ...)
+  beta = 1, gamma = 1, delta = 1, seed = 12345, ...)
 }
 \arguments{
-\item{model}{Dummy parameter for S3 dispatch}
+\item{model}{Celda model to use for simulation. One of 'available_models'.}
 
 \item{S}{The number of samples}
 
@@ -34,9 +33,7 @@
 
 \item{seed}{starting point used for generating simulated data}
 
-\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
-
-\item{...}{Unused arguments}
+\item{...}{Other arguments}
 }
 \description{
 Simulate cells from the cell/gene clustering generative model
