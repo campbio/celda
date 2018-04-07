@@ -5,8 +5,9 @@
 \title{celda Gene Clustering Model}
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
-  split.on.iter = 10, max.iter = 200, count.checksum = NULL,
-  seed = 12345, y.init = NULL, process.counts = TRUE, logfile = NULL)
+  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
+  count.checksum = NULL, seed = 12345, y.init = NULL,
+  process.counts = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -21,9 +22,11 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
 
+\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
+
 \item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
+\item{split.on.last}{After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
 \item{count.checksum}{An MD5 checksum for the provided counts matrix}
 
