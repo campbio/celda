@@ -9,7 +9,7 @@
   ...)
 }
 \arguments{
-\item{model}{Dummy parameter for S3 dispatch}
+\item{model}{Celda model to use for simulation. One of 'available_models'.}
 
 \item{C}{The number of cells}
 
@@ -27,7 +27,7 @@
 
 \item{seed}{Parameter to set.seed() for random number generation}
 
-\item{...}{Unused arguments}
+\item{...}{Other arguments}
 }
 \description{
 Generate a simulated count matrix, based off a generative distribution whose 
