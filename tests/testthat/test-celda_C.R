@@ -84,6 +84,6 @@ test_that(desc = "Checking diffExp",{
 
 ##celda_C.R##
 test_that(desc = "Checking celda_C to see if it runs without errors",{
-  celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K = 5, max.iter = 15)
+  celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K = c(5,10), max.iter = 15)
   expect_true(class(celdaC.res) == "celda_list")  # Only best chain is returned
 })
