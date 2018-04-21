@@ -7,7 +7,8 @@ context("Testing celda_CG")
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
   celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3, max.iter = 15)
+  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, 
+                       K = c(5,10), L = c(3, 5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })

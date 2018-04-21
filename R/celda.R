@@ -37,10 +37,10 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
                  nchains=1, bestChainsOnly=TRUE, cores=1, 
                  seed=12345, verbose=FALSE, logfile_prefix="Celda") {
  
-  params.list = buildParamList(counts, model, sample.label, K, L, alpha, beta, delta,
+  validateArgs(counts, model, sample.label, nchains, cores, seed, K=K, L=L)
+  params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                process.counts, nchains, cores, seed)
-  
   
   # Redirect stderr from the worker threads if user asks for verbose
   if(!is.null(logfile_prefix)) {
@@ -54,8 +54,8 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
   doParallel::registerDoParallel(cl)
   
   # Details for each model parameter / chain combination 
-  runs = expand.grid(plyr::compact(list(chain=1:nchains, K=K, L=L)))
-  runs$index = as.numeric(rownames(runs))
+  run.params = expand.grid(plyr::compact(list(chain=1:nchains, K=K, L=L)))
+  run.params$index = as.numeric(rownames(run.params))
   
   # Pre-generate a set of random seeds to be used for each chain
   all.seeds = seed:(seed + nchains - 1)
@@ -67,13 +67,16 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
   count.checksum = digest::digest(counts, algo="md5")
   params.list$count.checksum = count.checksum
    
-   res.list = foreach(i = 1:nrow(runs), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
-    chain.params = params.list
+   res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
+    chain.params = append(params.list,
+                          as.list(dplyr::select(run.params[i,],
+                                                dplyr::matches("K|L"))))
     chain.params$seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
     if (isTRUE(verbose)) {
       ## Generate a unique log file name based on given prefix and parameters
-      chain.params$logfile = paste0(logfile_prefix, "_",  paste(paste(colnames(runs), runs[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")
+      chain.params$logfile = paste0(logfile_prefix, "_",  
+                                    paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")
       res = do.call(model, chain.params)
     } else {
       chain.params$logfile = NULL
@@ -82,12 +85,12 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
     return(list(res))
   }
   parallel::stopCluster(cl)
-  celda.res = list(run.params=runs, res.list=res.list, 
+  celda.res = list(run.params=run.params, res.list=res.list, 
                    content.type=model, count.checksum=count.checksum)
   class(celda.res) = "celda_list"
   
   if (isTRUE(bestChainsOnly)) {
-    new.run.params = unique(dplyr::select(runs, -index, -chain))
+    new.run.params = unique(dplyr::select(run.params, -index, -chain))
     new.run.params$index = 1:nrow(new.run.params)
     best.chains = apply(new.run.params, 1,
                         function(params) {
@@ -106,11 +109,9 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
 
 # Build a list of parameters tailored to the specific celda model being run,
 # validating the provided parameters along the way
-buildParamList = function(counts, model, sample.label, K, L, alpha, beta, delta,
+buildParamList = function(counts, model, sample.label, alpha, beta, delta,
                           gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                           process.counts, nchains, cores, seed) {
-  
-  validateArgs(counts, model, sample.label, nchains, cores, seed, K=K, L=L)
   
   params.list = list(counts=counts,
                      max.iter=max.iter,
@@ -121,7 +122,6 @@ buildParamList = function(counts, model, sample.label, K, L, alpha, beta, delta,
   if (model %in% c("celda_C", "celda_CG")) {
     params.list$alpha = alpha
     params.list$beta = beta
-    params.list$K = K
     params.list$z.init=z.init
     params.list$sample.label=sample.label
   } 
@@ -129,7 +129,6 @@ buildParamList = function(counts, model, sample.label, K, L, alpha, beta, delta,
     params.list$beta = beta
     params.list$delta = delta
     params.list$gamma = gamma
-    params.list$L = L
     params.list$y.init = y.init
   }
   
