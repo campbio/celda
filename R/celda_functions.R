@@ -22,6 +22,12 @@ spearmanDist = function(x){
   return(stats::as.dist(y))
 }
 
+hellingerDist = function(x) {
+  y = dist(t(sqrt(x)), method = "euclidean") * 1/sqrt(2)
+  return(y)
+}  
+
+
 normalizeLogProbs = function(ll.probs) {
   ll.probs <- exp(sweep(ll.probs, 1, base::apply(ll.probs, 1, max), "-"))
   probs <- sweep(ll.probs, 1, rowSums(ll.probs), "/")
