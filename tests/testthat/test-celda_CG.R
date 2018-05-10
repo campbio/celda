@@ -129,4 +129,5 @@ test_that(desc = "Checking plotDrCluster to see if it runs",{
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
   expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
+  expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
