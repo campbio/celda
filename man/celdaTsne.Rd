@@ -5,7 +5,7 @@
 \title{Runs tSNE via Rtsne based on the CELDA model and specified cell states.}
 \usage{
 celdaTsne(counts, celda.mod, states = NULL, perplexity = 20,
-  max.iter = 1000)
+  max.iter = 1000, distance = "cosine")
 }
 \arguments{
 \item{counts}{Counts matrix, will have cell name for column name and gene name for row name.}
@@ -17,6 +17,8 @@ celdaTsne(counts, celda.mod, states = NULL, perplexity = 20,
 \item{perplexity}{Numeric vector; determines perplexity for tsne. Default 20.}
 
 \item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
+
+\item{distance}{Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.}
 }
 \description{
 Runs tSNE via Rtsne based on the CELDA model and specified cell states.
