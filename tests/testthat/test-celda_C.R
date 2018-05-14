@@ -1,6 +1,7 @@
 # celda_C.R
 library(celda)
 library(Rtsne)
+library(SummarizedExperiment)
 context("Testing celda_C")
 
 load("../celdaCsim.rda")
