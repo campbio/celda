@@ -1,6 +1,7 @@
 # celda_C.R
 library(celda)
 library(Rtsne)
+library(SummarizedExperiment)
 context("Testing celda_C")
 
 load("../celdaCsim.rda")
@@ -76,9 +77,9 @@ test_that(desc = "Checking topRank to see if it runs without errors",{
                c("index","names"))
 })
 
-#diffExp
-test_that(desc = "Checking diffExp",{
- expect_equal(class(diffexp_K1 <- diffExp(counts = counts.matrix, celda.mod = model_C, c1 = 1)),
+#diffExpBetweenCellStates
+test_that(desc = "Checking diffExpBetweenCellStates",{
+ expect_equal(class(diffexp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, celda.mod = model_C, c1 = 1)),
                 c("data.table","data.frame"))
 })
 
