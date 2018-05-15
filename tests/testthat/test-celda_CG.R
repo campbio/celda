@@ -116,9 +116,9 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
-#diffExp
-test_that(desc = "Checking diffExp",{
- expect_equal(class(diffexp_K1 <- diffExp(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
+#diffExpBetweenCellStates
+test_that(desc = "Checking diffExpBetweenCellStates",{
+ expect_equal(class(diffExp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
 		c("data.table","data.frame"))
 })
 
