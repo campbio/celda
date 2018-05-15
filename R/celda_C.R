@@ -154,35 +154,58 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 
   ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
-  temp.n.G.by.CP = n.G.by.CP
-  temp.n.CP = n.CP
-  
+#  temp.n.G.by.CP = n.G.by.CP
+#  temp.n.CP = n.CP
+#  n.G.by.CP_1 = n.G.by.CP
+#  n.G.by.CP_2 = n.G.by.CP
+
   ix = sample(1:nM)
   for(i in ix) {
+
+	## Subtract cell counts from current population assignment
+	n.G.by.CP_1 = n.G.by.CP
+	n.G.by.CP_1[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
+	n.G.by.CP_1 = .colSums(lgamma(n.G.by.CP_1 + beta), nrow(n.G.by.CP), ncol(n.G.by.CP))
+
+	n.CP_1 = n.CP
+	n.CP_1[z[i]] = n.CP_1[z[i]] - n.by.C[i]
+	n.CP_1 = lgamma(n.CP_1 + (nG * beta))
 	
-	## Subtract current cell counts from matrices
-	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
-	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
-	n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
-  
+	## Add cell counts to all other populations
+	n.G.by.CP_2 = n.G.by.CP
+	other.ix = (1:K)[-z[i]]
+	n.G.by.CP_2[,other.ix] = n.G.by.CP_2[,other.ix] + counts[,i]
+	n.G.by.CP_2 = .colSums(lgamma(n.G.by.CP_2 + beta), nrow(n.G.by.CP), ncol(n.G.by.CP))
+
+	n.CP_2 = n.CP
+	n.CP_2[other.ix] = n.CP_2[other.ix] + n.by.C[i]
+	n.CP_2 = lgamma(n.CP_2 + (nG * beta))
+
+
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L	
+
 	## Calculate probabilities for each state
 	for(j in 1:K) {
-	  temp.n.G.by.CP = n.G.by.CP
-	  temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
-	  temp.n.CP = n.CP
-	  temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
-
+      other.ix = (1:K)[-j]
 	  probs[j,i] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
-				  sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
-				  sum(lgamma(temp.n.CP + (nG * beta)))	## Phi Denominator
+				  sum(n.G.by.CP_1[other.ix]) +				## Phi Numerator (other cells)
+				  n.G.by.CP_2[j] -							## Phi Numerator (current cell)
+				  sum(n.CP_1[other.ix]) -					## Phi Denominator (other cells)
+  				  n.CP_2[j]									## Phi Denominator (current cell)
 	}  
 
 	## Sample next state and add back counts
+	prev.z = z[i]
 	if(isTRUE(do.sample)) z[i] = sample.ll(probs[,i])
 	
+	if(prev.z != z[i]) { 
+	    n.G.by.CP[,prev.z] = n.G.by.CP[,prev.z] - counts[,i]
+	  	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
+	  	
+	  	n.CP[prev.z] = n.CP[prev.z] - n.by.C[i]
+	  	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
+	}
 	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
-	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
-	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
   }  
 
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
