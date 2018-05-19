@@ -107,8 +107,8 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 lookupTranscriptionalStateofGene <- function(counts, model, gene){
   list <- list()
   for(x in 1:length(gene)){
-    if(gene[x] %in% rownames(pbmc_select)){
-      list[x] <- model$y[which(rownames(pbmc_select) == gene[x])]
+    if(gene[x] %in% rownames(counts)){
+      list[x] <- model$y[which(rownames(counts) == gene[x])]
     }else{
       list[x] <- c("The gene you selected does not exist within your data")
     }
