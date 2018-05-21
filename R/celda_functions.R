@@ -96,6 +96,28 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 }  
 
 
+#' Obtain the transcriptional state of a gene of interest
+#' 
+#' This function will output the transcriptional state of a specific gene(s) from a celda model
+#'  
+#' @param counts Counts matrix that the celda model was run on
+#' @param model Celda model, class of "celda_CG" or "celda_G"
+#' @param gene Genes to check the transcriptional state
+#' @export
+lookupTranscriptionalStateofGene <- function(counts, model, gene){
+  list <- list()
+  for(x in 1:length(gene)){
+    if(gene[x] %in% rownames(counts)){
+      list[x] <- model$y[which(rownames(counts) == gene[x])]
+    }else{
+      list[x] <- c("The gene you selected does not exist within your data")
+    }
+  } 
+  names(list) <- gene
+  return(list)
+}
+
+
 #' Re-code cell cluster labels by provided mapping scheme
 #' 
 #' This function will re-code _cell_ cluster labels based off of a mapping provided by the user,
