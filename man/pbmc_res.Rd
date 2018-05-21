@@ -12,7 +12,7 @@
 pbmc_res
 }
 \description{
-A celda model made from pbmc_data, run with parameters K = 10,15 and L = 15,20.
+A celda model made from pbmc_data, run with parameters K = 10:30 and L = 20,30.
 }
 \details{
 Celda model created from 3000 Peripheral Blood Mononuclear Cells (PBMC) from 10X Genomics.
