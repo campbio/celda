@@ -58,7 +58,8 @@ table(y, sim_counts$y)
 ## ---- fig.width = 7, fig.height = 7, warning = FALSE, message = FALSE------
 norm.counts <- normalizeCounts(sim_counts$counts, scale.factor = 1e6)
 renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL, 
-                   color_scheme = "divergent",cluster_gene = TRUE, cluster_cell = TRUE)
+                   color_scheme = "divergent",cluster_gene = TRUE, 
+                   cluster_cell = TRUE)
 
 ## --------------------------------------------------------------------------
 factorized <- factorizeMatrix(model, sim_counts$count)
@@ -78,7 +79,8 @@ dim(pop.states)
 pop.states
 
 ## ---- fig.width = 7, fig.height = 7----------------------------------------
-data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),scale = F, center = F)
+data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),
+                   scale = F, center = F)
 
 plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], 
               cluster = celda.res$res.list[[1]]$z)
@@ -143,7 +145,8 @@ gini
 
 ## ----message=FALSE---------------------------------------------------------
 diff.exp.clust1 <- diffExpBetweenCellStates(counts = pbmc_select, 
-                                            celda.mod = model.pbmc, c1 = 1, c2 = NULL)
+                                            celda.mod = model.pbmc, 
+                                            c1 = 1, c2 = NULL)
 
 diff.exp.clust1
 
@@ -198,8 +201,9 @@ plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(mo
 plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
 
 marker.genes <- c("ENSG00000168685_IL7R","ENSG00000198851_CD3E","ENSG00000105374_NKG7",
-                 "ENSG00000203747_FCGR3A","ENSG00000090382_LYZ","ENSG00000179639_FCER1A",
-                 "ENSG00000156738_MS4A1", "ENSG00000163736_PPBP","ENSG00000101439_CST3")
+"ENSG00000203747_FCGR3A","ENSG00000090382_LYZ","ENSG00000179639_FCER1A",
+"ENSG00000156738_MS4A1", "ENSG00000163736_PPBP","ENSG00000101439_CST3")
 gene.counts <- pbmc_select[marker.genes,]
-plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, rescale = TRUE)
+plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, 
+           rescale = TRUE)
 
