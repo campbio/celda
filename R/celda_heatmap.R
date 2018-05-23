@@ -231,3 +231,60 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
     col_label = z,
     ...)
 }
+
+
+#' Render a heatmap based on a population matrix from the factorized counts matrix.
+#' 
+#' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
+#' @param model celda model of class "celda_CG. 
+#' @param relative Boolean, converts the proportions in the population matrix to a relative probability of each transcriptional state in each cellular subpopulation. Default: TRUE 
+#' @param scale Boolean, z-scores the population matrix. default: TRUE
+#' @param trim A two element vector to specify the lower and upper cutoff for the data. Set to NULL to disable. Default c(-2,2).
+#' @import gtable
+#' @import grid
+#' @import scales
+#' @import RColorBrewer
+#' @import grDevices
+#' @import graphics
+#' @export 
+renderProbabilityHeatmap <- function(counts, model, relative = TRUE, scale = TRUE, trim = c(-2,2)){
+  factorized <- factorizeMatrix(model, counts)
+  pop <- factorized$proportions$population.states
+  z <- 1:ncol(pop)
+  y <- 1:nrow(pop)
+  
+  K = sort(unique(z))
+  K.col = distinct_colors(length(K))
+  names(K.col) = K
+  
+  annotation_color = list(cell = K.col)
+  
+  L = sort(unique(y))
+  L.col = distinct_colors(length(L))
+  names(L.col) = L
+  
+  annotation_color = c(list(gene = L.col), annotation_color) 
+  annotation_cell <- data.frame(cell = as.factor(z))
+  annotation_gene <- data.frame(gene = as.factor(y)) 
+  
+  if(relative == TRUE){
+    pop <- sweep(pop, 1, rowSums(pop), "/")
+  }
+  col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(100)
+  if(scale == TRUE){
+    pop <- t(base::apply(pop, 1, scale))
+    if(!is.null(trim)){
+      if(length(trim) != 2) {
+        stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
+      }
+      trim<-sort(trim)
+      pop[pop < trim[1]] <- trim[1]
+      pop[pop > trim[2]] <- trim[2]
+    }
+    breaks <-  seq(-max(pop), max(pop), length.out = length(col))
+  }else{
+    breaks <-  seq(0, max(pop), length.out = length(col))
+  }
+  
+  semi_pheatmap(pop, row_label = NULL, col_label = NULL, col = col, breaks = breaks, cluster_cols = FALSE, cluster_rows = FALSE, annotation_col = annotation_cell, annotation_colors = annotation_color, annotation_row = annotation_gene)
+}
