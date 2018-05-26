@@ -81,7 +81,7 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
 
 ##celda_G.R##
 test_that(desc = "Making sure celda_G runs without errors",{
-  celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = 5, max.iter = 15)
+  celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
   expect_true(class(celdaG.res) == "celda_list")  # Only best chain returned by default
 })
 
