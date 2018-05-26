@@ -22,6 +22,12 @@ spearmanDist = function(x){
   return(stats::as.dist(y))
 }
 
+hellingerDist = function(x) {
+  y = dist(t(sqrt(x)), method = "euclidean") * 1/sqrt(2)
+  return(y)
+}  
+
+
 normalizeLogProbs = function(ll.probs) {
   ll.probs <- exp(sweep(ll.probs, 1, base::apply(ll.probs, 1, max), "-"))
   probs <- sweep(ll.probs, 1, rowSums(ll.probs), "/")
@@ -88,6 +94,28 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 
   return(list(z=new.z, y=new.y, z.map=z.ta, y.map=y.order))  
 }  
+
+
+#' Obtain the transcriptional state of a gene of interest
+#' 
+#' This function will output the transcriptional state of a specific gene(s) from a celda model
+#'  
+#' @param counts Counts matrix that the celda model was run on
+#' @param model Celda model, class of "celda_CG" or "celda_G"
+#' @param gene Genes to check the transcriptional state
+#' @export
+lookupTranscriptionalStateofGene <- function(counts, model, gene){
+  list <- list()
+  for(x in 1:length(gene)){
+    if(gene[x] %in% rownames(counts)){
+      list[x] <- model$y[which(rownames(counts) == gene[x])]
+    }else{
+      list[x] <- c("The gene you selected does not exist within your data")
+    }
+  } 
+  names(list) <- gene
+  return(list)
+}
 
 
 #' Re-code cell cluster labels by provided mapping scheme
