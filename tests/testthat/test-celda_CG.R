@@ -2,12 +2,13 @@
 library(celda)
 library(testthat)
 library(Rtsne)
+library(SummarizedExperiment)
 context("Testing celda_CG")
 
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
   celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = 3, max.iter = 15)
+  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2,K = c(5,6), L = c(3,5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
@@ -115,9 +116,9 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
-#diffExp
-test_that(desc = "Checking diffExp",{
- expect_equal(class(diffexp_K1 <- diffExp(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
+#diffExpBetweenCellStates
+test_that(desc = "Checking diffExpBetweenCellStates",{
+ expect_equal(class(diffExp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
 		c("data.table","data.frame"))
 })
 
@@ -128,4 +129,5 @@ test_that(desc = "Checking plotDrCluster to see if it runs",{
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
   expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
+  expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })

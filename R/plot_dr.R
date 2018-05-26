@@ -113,8 +113,9 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 #' @param states Vector; determines which cell states to use for tsne. If not defined, all states will be used.
 #' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
 #' @export
-celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=1000) {
+celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=1000, distance="cosine") {
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
   
   states.to.use = 1:nrow(fm$counts$cell.states)
@@ -126,8 +127,16 @@ celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=100
   } 
   new.counts = fm$counts$cell.states[states.to.use,]
   norm = normalizeCounts(new.counts, scale.factor=1)
-  d = cosineDist(norm)
   
+  if(distance == "cosine"){
+    d = cosineDist(norm)  
+  }else if(distance == "hellinger"){
+    d = hellingerDist(norm)  
+  }else if(distance == "spearman"){
+    d = spearmanDist(norm)
+  }else{
+    stop("distances must be either 'cosine' or 'hellinger' or 'spearman")
+  }
   res = Rtsne::Rtsne(d, pca=FALSE, max_iter=max.iter, perplexity = perplexity, check_duplicates = FALSE, is_distance = TRUE)$Y
   colnames(res) = c("tsne_1", "tsne_2")
   return(res)

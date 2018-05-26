@@ -33,14 +33,13 @@ calculatePerplexity = function(counts, celda.mod, precision=128) {
 calculatePerplexityWithResampling <- function(celda.list, counts, resample,
                                               title="") {
   
+  countsList = list(counts)
+  for(i in 1:resample) {
+    countsList[[i]] = resampleCountMatrix(counts)
+    i = i - 1  
+  }
+  
   perplexities.per.model = lapply(celda.list$res.list, function(mod){
-    # TODO Can we re-use the same counts matrices in every model evaluation?
-    countsList = list(counts)
-    for(i in 1:resample) {
-      countsList[[i]] = resampleCountMatrix(counts)
-      i = i - 1  
-    }
-    
     perplexities = lapply(countsList, function(counts, mod){ 
       class(counts) = class(mod)
       UseMethod("calculatePerplexity", object=mod)
