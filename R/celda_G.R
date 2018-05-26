@@ -99,7 +99,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	y = next.y$y
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+    if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
       logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)

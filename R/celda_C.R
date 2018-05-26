@@ -97,7 +97,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     z = next.z$z
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+    if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
