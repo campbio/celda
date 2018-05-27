@@ -96,6 +96,10 @@ renderProbabilityHeatmap(model = model, counts = sim_counts$counts,
 renderProbabilityHeatmap(model = model, counts = sim_counts$counts, 
                          relative = TRUE, scale = TRUE)
 
+## ---- fig.width = 7, fig.height = 7----------------------------------------
+renderProbabilityHeatmap(model = model, counts = sim_counts$counts, 
+                         relative = TRUE, scale = FALSE)
+
 ## ----setup, include=FALSE--------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE,fig.align = "center")
 library(celda)
@@ -138,6 +142,24 @@ model.pbmc <- getBestModel(pbmc_res, K = 15, L = 50)
 renderProbabilityHeatmap(counts = pbmc_select, model = model.pbmc, 
                          relative = TRUE, scale = TRUE)
 
+## ---- message = FALSE------------------------------------------------------
+factorize.matrix <- factorizeMatrix(model.pbmc, counts=pbmc_select)
+norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
+set.seed(123)
+pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = "cosine")
+
+## ---- fig.width = 7, fig.height = 7----------------------------------------
+plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.pbmc$z))
+
+plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
+
+marker.genes <- c("ENSG00000168685_IL7R","ENSG00000198851_CD3E","ENSG00000105374_NKG7",
+"ENSG00000203747_FCGR3A","ENSG00000090382_LYZ","ENSG00000179639_FCER1A",
+"ENSG00000156738_MS4A1", "ENSG00000163736_PPBP","ENSG00000101439_CST3")
+gene.counts <- pbmc_select[marker.genes,]
+plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, 
+           rescale = TRUE)
+
 ## ---- fig.width = 7, fig.height = 7----------------------------------------
 gini <- GiniPlot(counts = pbmc_select, celda.mod = model.pbmc)
 
@@ -148,12 +170,18 @@ diff.exp.clust1 <- diffExpBetweenCellStates(counts = pbmc_select,
                                             celda.mod = model.pbmc, 
                                             c1 = 1, c2 = NULL)
 
-diff.exp.clust1
+head(diff.exp.clust1,10)
 
 ## ---- message=FALSE--------------------------------------------------------
 diff.exp.clust1vs2 <- diffExpBetweenCellStates(counts = pbmc_select, celda.mod = model.pbmc, c1 = 6, c2 = 7)
 
-diff.exp.clust1vs2
+diff.exp.clust1vs2 <- diff.exp.clust1vs2[diff.exp.clust1vs2$fdr < 0.25,]
+
+## --------------------------------------------------------------------------
+head(diff.exp.clust1vs2[order(diff.exp.clust1vs2$log2fc, decreasing = TRUE),],10)
+
+## --------------------------------------------------------------------------
+head(diff.exp.clust1vs2[order(diff.exp.clust1vs2$log2fc),],10)
 
 ## --------------------------------------------------------------------------
 factorize.matrix <- factorizeMatrix(model.pbmc, counts=pbmc_select)
@@ -188,22 +216,4 @@ lookupTranscriptionalStateofGene(counts = pbmc_select, model = model.pbmc,
 
 ## ---- fig.width = 7, fig.height = 7, message=FALSE-------------------------
 stateHeatmap(counts = pbmc_select, celda.mod = model.pbmc, state.use = 17)
-
-## ---- message = FALSE------------------------------------------------------
-factorize.matrix <- factorizeMatrix(model.pbmc, counts=pbmc_select)
-norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
-set.seed(123)
-pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = "cosine")
-
-## ---- fig.width = 7, fig.height = 7----------------------------------------
-plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.pbmc$z))
-
-plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
-
-marker.genes <- c("ENSG00000168685_IL7R","ENSG00000198851_CD3E","ENSG00000105374_NKG7",
-"ENSG00000203747_FCGR3A","ENSG00000090382_LYZ","ENSG00000179639_FCER1A",
-"ENSG00000156738_MS4A1", "ENSG00000163736_PPBP","ENSG00000101439_CST3")
-gene.counts <- pbmc_select[marker.genes,]
-plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, 
-           rescale = TRUE)
 
