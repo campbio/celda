@@ -283,6 +283,7 @@ renderProbabilityHeatmap <- function(counts, model, relative = TRUE, scale = TRU
     }
     breaks <-  seq(-max(pop), max(pop), length.out = length(col))
   }else{
+    col <- colorRampPalette(c("#FFFFFF", c("#08306B","#006D2C","Yellowgreen","Yellow","Orange","Red")))(100)
     breaks <-  seq(0, max(pop), length.out = length(col))
   }
   
