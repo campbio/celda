@@ -36,8 +36,9 @@
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
+#' @param algorithm Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.
+#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the inference algorithm. Default 10.
+#' @param max.iter Maximum iterations of inference algorithm to perform regardless of convergence. Default 200.
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
@@ -47,7 +48,8 @@
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
-celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
+					 algorithm = c("Gibbs", "EM"), 
                  	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                  	 count.checksum=NULL, seed=12345,
                  	 z.init = NULL, process.counts=TRUE, logfile=NULL) {
@@ -66,6 +68,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     count.checksum = digest::digest(counts, algo="md5")
   }
 
+  algorithm <- match.arg(algorithm)
+  algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
+  
   ## Randomly select z and y or set z/y to supplied initial values
   z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
   z.best = z
@@ -83,14 +88,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
   set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting", algorithm, logfile=logfile, append=FALSE)
   
   iter = 1L
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
     
-    next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+#   next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+#	next.z = cC.calcEMProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+    next.z = do.call(algorithm.fun, list(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta))
     m.CP.by.S = next.z$m.CP.by.S
     n.G.by.CP = next.z$n.G.by.CP
     n.CP = next.z$n.CP
@@ -211,6 +218,26 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
+cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
+
+  ## Expectation given current cell population labels
+  theta = log(normalizeCounts(m.CP.by.S + alpha, scale.factor=1))
+  phi = log(normalizeCounts(n.G.by.CP + beta, scale.factor=1))
+  
+  ## Maximization to find best label for each cell
+  #prob = eigenMapMatMultInt(phi, counts) + theta[, s]  
+  prob = (t(phi) %*% counts) + theta[, s]  
+  z = apply(prob, 2, which.max)
+
+  ## Recalculate counts based on new label
+  p = cC.decomposeCounts(counts, s, z, K)
+  m.CP.by.S = p$m.CP.by.S
+  n.G.by.CP = p$n.G.by.CP
+  n.CP = p$n.CP
+  n.by.C = p$n.by.C
+
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=inner.log.prob))
+}
 
 #' Simulate cells from the cell clustering generative model
 #' 
