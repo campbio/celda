@@ -32,6 +32,9 @@ calculatePerplexity = function(counts, celda.mod, precision=128) {
 #' @export
 calculatePerplexityWithResampling <- function(celda.list, counts, resample,
                                               title="") {
+  if (!isTRUE(class(celda.list) == "celda_list")) stop("celda.list parameter was not of class celda_list.")
+  if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
+  
   countsList = list(counts)
   for(i in 1:resample) {
     countsList[[i]] = resampleCountMatrix(counts)
