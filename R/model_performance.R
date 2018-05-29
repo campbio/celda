@@ -32,7 +32,6 @@ calculatePerplexity = function(counts, celda.mod, precision=128) {
 #' @export
 calculatePerplexityWithResampling <- function(celda.list, counts, resample,
                                               title="") {
-  
   countsList = list(counts)
   for(i in 1:resample) {
     countsList[[i]] = resampleCountMatrix(counts)
@@ -52,7 +51,7 @@ calculatePerplexityWithResampling <- function(celda.list, counts, resample,
   })
   
   plot.df = do.call("rbind", perplexities.per.model)
-  plot = visualizePerplexityByKL(plot.df)
+  plot = visualizePerplexity(plot.df)
   return(list(perplexity.info=plot.df, plot=plot))
 }
 
@@ -70,7 +69,7 @@ calculatePerplexityWithResampling <- function(celda.list, counts, resample,
 #' @param title A subtitle for the plot
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters
 #' @export
-visualizePerplexityByKL = function(perplexity.df, title="") {
+visualizePerplexity = function(perplexity.df, title="") {
   if (!any(c("k", "l") %in% colnames(perplexity.df)) | is.null(perplexity.df$perplexity)) {
     stop("perplexity.df argument needs a perplexity column, and at least one of k or l.")
   }
