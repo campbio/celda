@@ -351,9 +351,9 @@ rowsum.y = function(counts, y, L) {
 
 
 processCounts = function(counts) {
-  if(class(counts) != "integer") {
+  if (typeof(counts) != "integer") {
     counts = round(counts)
-    class(counts) = "integer"
+    storage.mode(counts) = "integer"
   }
   return(counts)  
 }
