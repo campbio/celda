@@ -43,19 +43,16 @@
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
-#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
                  	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                  	 count.checksum=NULL, seed=12345,
-                 	 z.init = NULL, process.counts=TRUE, logfile=NULL) {
+                 	 z.init = NULL, logfile=NULL) {
   
   ## Error checking and variable processing
-  if (isTRUE(process.counts)) {
-    counts = processCounts(counts)  
-  }
+  counts = processCounts(counts)  
     
   s = processSampleLabels(sample.label, ncol(counts))
   if (is.null(sample.label)) {
@@ -238,7 +235,7 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
   class(result) = "celda_C" 
   result = reorder.celda_C(counts = cell.counts, res = result)
   
-  return(list(z=result$z, counts=cell.counts, sample.label=cell.sample.label, K=K, alpha=alpha, beta=beta, C.Range=C.Range, N.Range=N.Range, S=S))
+  return(list(z=result$z, counts=processCounts(cell.counts), sample.label=cell.sample.label, K=K, alpha=alpha, beta=beta, C.Range=C.Range, N.Range=N.Range, S=S))
 }
 
 
