@@ -39,7 +39,7 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
   validateArgs(counts, model, sample.label, nchains, cores, seed, K=K, L=L)
   params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
-                               process.counts, nchains, cores, seed)
+                               nchains, cores, seed)
   
   # Redirect stderr from the worker threads if user asks for verbose
   if(!is.null(logfile_prefix)) {
@@ -110,13 +110,12 @@ celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta
 # validating the provided parameters along the way
 buildParamList = function(counts, model, sample.label, alpha, beta, delta,
                           gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
-                          process.counts, nchains, cores, seed) {
+                          nchains, cores, seed) {
   
   params.list = list(counts=counts,
                      max.iter=max.iter,
                      stop.iter=stop.iter,
-                     split.on.iter=split.on.iter,
-                     process.counts=process.counts)
+                     split.on.iter=split.on.iter)
   
   if (model %in% c("celda_C", "celda_CG")) {
     params.list$alpha = alpha
