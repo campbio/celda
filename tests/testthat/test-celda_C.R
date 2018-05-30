@@ -38,7 +38,7 @@ test_that(desc = "calculateLoglikFromVariables.celda_C returns correct output fo
 
 test_that(desc = "simulateCells.celda_C returns correctly typed output", {
   sim.res = simulateCells(model="celda_C")
-  expect_equal(class(sim.res$counts), "integer")
+  expect_equal(typeof(sim.res$counts), "integer")
 })
 
 #normalizeCounts
