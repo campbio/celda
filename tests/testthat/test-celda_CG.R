@@ -49,6 +49,10 @@ test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output f
                0)
 })
 
+test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
+  sim.res = simulateCells(model="celda_CG")
+  expect_equal(class(sim.res$counts), "integer")
+})
 
 #normalizeCounts
 test_that(desc = "Making sure normalizeCounts doesn't change dimensions",{

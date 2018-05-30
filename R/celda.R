@@ -21,7 +21,6 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL. (celda_G / celda_CG only)
 #' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
-#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)
 #' @param bestChainsOnly Return only the best chain (by final log-likelihood) per K/L combination.
 #' @param cores The number of cores to use for parallell Gibbs sampling. Defaults to 1.
@@ -33,9 +32,9 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @export
 celda = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta=1, 
                  delta=1, gamma=1, max.iter=200, z.init=NULL, y.init=NULL,
-                 stop.iter=10, split.on.iter=10, process.counts=FALSE, 
-                 nchains=1, bestChainsOnly=TRUE, cores=1, 
-                 seed=12345, verbose=FALSE, logfile_prefix="Celda") {
+                 stop.iter=10, split.on.iter=10, nchains=1, 
+                 bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
+                 logfile_prefix="Celda") {
  
   validateArgs(counts, model, sample.label, nchains, cores, seed, K=K, L=L)
   params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
