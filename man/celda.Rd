@@ -6,9 +6,9 @@
 \usage{
 celda(counts, model, sample.label = NULL, K = NULL, L = NULL, alpha = 1,
   beta = 1, delta = 1, gamma = 1, max.iter = 200, z.init = NULL,
-  y.init = NULL, stop.iter = 10, split.on.iter = 10,
-  process.counts = FALSE, nchains = 1, bestChainsOnly = TRUE, cores = 1,
-  seed = 12345, verbose = FALSE, logfile_prefix = "Celda")
+  y.init = NULL, stop.iter = 10, split.on.iter = 10, nchains = 1,
+  bestChainsOnly = TRUE, cores = 1, seed = 12345, verbose = FALSE,
+  logfile_prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -38,8 +38,6 @@ celda(counts, model, sample.label = NULL, K = NULL, L = NULL, alpha = 1,
 \item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
 
 \item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
-
-\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
 
 \item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)}
 
