@@ -337,7 +337,7 @@ rowsum.z = function(counts, z, K) {
   mat = matrix(as.integer(0), nrow=K, ncol=nrow(counts))
   rs = rowsum(t(counts), group=z, reorder=TRUE)
   mat[sort(unique(z)),] = rs
-  class(mat) = "integer"
+  storage.mode(mat) = "integer"
   return(mat)
 }
 
@@ -346,6 +346,7 @@ rowsum.y = function(counts, y, L) {
   mat = matrix(as.integer(0), nrow=L, ncol=ncol(counts))
   rs = rowsum(counts, group=y, reorder=TRUE)
   mat[sort(unique(y)),] = rs
+  storage.mode(mat) = "integer"
   return(mat)
 }
 
