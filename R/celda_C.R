@@ -49,7 +49,7 @@
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
-					 algorithm = c("Gibbs", "EM"), 
+					 algorithm = c("EM", "Gibbs"), 
                  	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                  	 count.checksum=NULL, seed=12345,
                  	 z.init = NULL, process.counts=TRUE, logfile=NULL) {
@@ -225,9 +225,9 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   phi = log(normalizeCounts(n.G.by.CP + beta, scale.factor=1))
   
   ## Maximization to find best label for each cell
-  #prob = eigenMapMatMultInt(phi, counts) + theta[, s]  
-  prob = (t(phi) %*% counts) + theta[, s]  
-  z = apply(prob, 2, which.max)
+  #probs = eigenMapMatMultInt(phi, counts) + theta[, s]  
+  probs = (t(phi) %*% counts) + theta[, s]  
+  z = apply(probs, 2, which.max)
 
   ## Recalculate counts based on new label
   p = cC.decomposeCounts(counts, s, z, K)
@@ -236,7 +236,7 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   n.CP = p$n.CP
   n.by.C = p$n.by.C
 
-  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=inner.log.prob))
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
 #' Simulate cells from the cell clustering generative model
