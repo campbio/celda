@@ -48,19 +48,16 @@
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param seed Parameter to set.seed() for random number generation.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
-#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
 					count.checksum=NULL, seed=12345, 
-					y.init=NULL, process.counts=TRUE, logfile=NULL) {
+					y.init=NULL, logfile=NULL) {
 
   ## Error checking and variable processing
-  if (isTRUE(process.counts)) {
-    counts = processCounts(counts)  
-  }
+  counts = processCounts(counts)  
   counts.t = t(counts)
   
   if(is.null(count.checksum)) {
@@ -280,7 +277,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   class(result) = "celda_G" 
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
-  return(list(y=result$y, counts=cell.counts, L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(y=result$y, counts=processCounts(cell.counts), L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
