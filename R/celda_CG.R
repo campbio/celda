@@ -50,7 +50,6 @@
 #' @param count.checksum An MD5 checksum for the provided counts matrix
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
-#' @param process.counts Whether to cast the counts matrix to integer and round(). Defaults to TRUE.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
@@ -58,12 +57,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, count.checksum=NULL,
-                    z.init = NULL, y.init = NULL, process.counts=TRUE, logfile=NULL) {
+                    z.init = NULL, y.init = NULL, logfile=NULL) {
  
   ## Error checking and variable processing
-  if (isTRUE(processCounts)) {
-    counts = processCounts(counts)
-  }
+  counts = processCounts(counts)
     
   s = processSampleLabels(sample.label, ncol(counts))
   if (is.null(sample.label)) {
@@ -298,7 +295,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   class(result) = "celda_CG" 
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
-  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=processCounts(cell.counts), K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
 }
 
 
