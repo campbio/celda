@@ -88,7 +88,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
   set.seed(seed)
-  logMessages(date(), "... Starting", algorithm, logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting celda_C to cluster cells.", logfile=logfile, append=FALSE)
   
   iter = 1L
   num.iter.without.improvement = 0L

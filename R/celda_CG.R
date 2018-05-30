@@ -101,7 +101,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
   set.seed(seed)
-  logMessages(date(), "... Starting", algorithm, "for cells and Gibbs sampling for genes", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting celda_CG to cluster cells and genes.", logfile=logfile, append=FALSE)
   
   iter = 1L
   num.iter.without.improvement = 0L
