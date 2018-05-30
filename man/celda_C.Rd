@@ -5,9 +5,9 @@
 \title{celda Cell Clustering Model}
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
-  stop.iter = 10, max.iter = 200, split.on.iter = 10,
-  split.on.last = TRUE, count.checksum = NULL, seed = 12345,
-  z.init = NULL, process.counts = TRUE, logfile = NULL)
+  algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
+  split.on.iter = 10, split.on.last = TRUE, count.checksum = NULL,
+  seed = 12345, z.init = NULL, process.counts = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -20,9 +20,11 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
 
-\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+\item{algorithm}{Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
+\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the inference algorithm. Default 10.}
+
+\item{max.iter}{Maximum iterations of inference algorithm to perform regardless of convergence. Default 200.}
 
 \item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
 
