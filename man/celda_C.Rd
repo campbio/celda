@@ -5,7 +5,7 @@
 \title{celda Cell Clustering Model}
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
-  algorithm = c("Gibbs", "EM"), stop.iter = 10, max.iter = 200,
+  algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
   split.on.iter = 10, split.on.last = TRUE, count.checksum = NULL,
   seed = 12345, z.init = NULL, process.counts = TRUE, logfile = NULL)
 }
