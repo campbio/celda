@@ -36,8 +36,6 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
-\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
-
 \item{logfile}{If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.}
 }
 \value{
