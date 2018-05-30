@@ -45,8 +45,6 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL.}
 
-\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
-
 \item{logfile}{The name of the logfile to redirect messages to.}
 }
 \description{
