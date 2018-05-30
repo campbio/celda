@@ -82,7 +82,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   rm(p)
 
   set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting celda_G to cluster genes.", logfile=logfile, append=FALSE)
   
   ## Calculate initial log likelihood
   ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
