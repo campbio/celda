@@ -41,6 +41,7 @@
 #' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default 1.
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default 1.
 #' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default 1.
+#' @param algorithm Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.
 #' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
@@ -54,6 +55,7 @@
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
+                    algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, count.checksum=NULL,
                     z.init = NULL, y.init = NULL, process.counts=TRUE, logfile=NULL) {
@@ -67,6 +69,9 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   if (is.null(sample.label)) {
     sample.label = s
   }
+
+  algorithm <- match.arg(algorithm)
+  algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
@@ -96,18 +101,19 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.CP.by.TS=n.CP.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
   set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting celda_CG to cluster cells and genes.", logfile=logfile, append=FALSE)
   
   iter = 1L
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
   do.gene.split = TRUE  
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
-    
+
     ## Gibbs sampling for each cell
     n.TS.by.C = rowsum.y(counts, y=y, L=L)
     n.TS.by.CP = t(n.CP.by.TS)
-	next.z = cC.calcGibbsProbZ(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta)
+	#next.z = cC.calcGibbsProbZ(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta)
+	next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
     m.CP.by.S = next.z$m.CP.by.S
     n.TS.by.CP = next.z$n.G.by.CP
     n.CP = next.z$n.CP
@@ -123,7 +129,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	y = next.y$y
     
     ## Perform split on i-th iteration defined by split.on.iter
-	if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+	if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 	  logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
 	  res = split.each.z(counts=counts, z=z, y=y, z.prob=t(next.z$probs), K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 	  logMessages(res$message, logfile=logfile, append=TRUE)
@@ -144,7 +150,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  n.CP = as.integer(rowSums(n.CP.by.TS))
 	  n.CP.by.G = rowsum.z(counts, z=z, K=K)     
 	}  
-	if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+	if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 	  logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
 	  res = split.each.y(counts=counts, z=z, y=y, y.prob=t(next.y$probs), K=K, L=L, alpha=alpha, beta=beta, delta=delta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
 	  logMessages(res$message, logfile=logfile, append=TRUE)
