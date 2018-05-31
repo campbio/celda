@@ -63,7 +63,7 @@ topRank = function(fm, n=25, margin=2, threshold=0, decreasing=TRUE) {
 #' @export
 GiniPlot <- function(counts, celda.mod, cell_clusters = NULL, label_size = 4, bar_col = NULL) {
   factorize.matrix <-
-    factorizeMatrix(celda.mod, counts)
+    factorizeMatrix(counts = counts, celda.mod = celda.mod)
   if(is.null(bar_col)){
     bar_col <- "#FF8080FF"
   }

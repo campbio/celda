@@ -62,7 +62,7 @@ renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL,
                    cluster_cell = TRUE)
 
 ## --------------------------------------------------------------------------
-factorized <- factorizeMatrix(model, sim_counts$count)
+factorized <- factorizeMatrix(counts = sim_counts$count, celda.mod = model)
 names(factorized)
 
 ## --------------------------------------------------------------------------
@@ -89,10 +89,10 @@ plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2],
             matrix = factorized$proportions$cell.states, rescale = TRUE)
 
 ## ---- fig.width = 8, fig.height = 8----------------------------------------
-absoluteProbabilityHeatmap(model = model, counts = sim_counts$counts)
+absoluteProbabilityHeatmap(counts = sim_counts$counts, celda.mod = model)
 
 ## ---- fig.width = 8, fig.height = 8----------------------------------------
-relativeProbabilityHeatmap(model = model, counts = sim_counts$counts)
+relativeProbabilityHeatmap(counts = sim_counts$counts, celda.mod = model)
 
 ## ----setup, include=FALSE--------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE,fig.align = "center")
@@ -138,13 +138,13 @@ calc.perplexity2$plot
 model.pbmc <- getBestModel(pbmc_res, K = 13, L = 50)
 
 ## ---- fig.width = 8, fig.height = 8----------------------------------------
-relativeProbabilityHeatmap(counts = pbmc_select, model = model.pbmc)
+relativeProbabilityHeatmap(counts = pbmc_select, celda.mod = model.pbmc)
 
 ## ---- message = FALSE------------------------------------------------------
-factorize.matrix <- factorizeMatrix(model.pbmc, counts=pbmc_select)
+factorize.matrix <- factorizeMatrix(counts=pbmc_select, celda.mod = model.pbmc)
 norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = "cosine")
+pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = "hellinger")
 
 ## ---- fig.width = 8, fig.height = 8----------------------------------------
 plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.pbmc$z))

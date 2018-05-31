@@ -237,7 +237,7 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 #' Renders a heatmap based on a population matrix from the factorized counts matrix.
 #' 
 #' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
-#' @param model celda model of class "celda_CG". 
+#' @param celda.mod celda model of class "celda_CG". 
 #' @param main The title of the plot; default = NA. 
 #' @import gtable
 #' @import grid
@@ -246,8 +246,8 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 #' @import grDevices
 #' @import graphics
 #' @export 
-absoluteProbabilityHeatmap <- function(counts, model, main = NA){
-  factorized <- factorizeMatrix(model, counts)
+absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
+  factorized <- factorizeMatrix(celda.mod = model, counts = counts)
   pop <- factorized$proportions$population.states
   z <- 1:ncol(pop)
   y <- 1:nrow(pop)
@@ -277,7 +277,7 @@ absoluteProbabilityHeatmap <- function(counts, model, main = NA){
 #' Renders a heatmap based on a population matrix from the factorized counts matrix. The relative probability of each transcriptional state in each cell subpopulation is visualized.
 #' 
 #' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
-#' @param model celda model of class "celda_CG". 
+#' @param celda.mod celda model of class "celda_CG". 
 #' @param main The title of the plot; default = NA. 
 #' @import gtable
 #' @import grid
@@ -286,8 +286,8 @@ absoluteProbabilityHeatmap <- function(counts, model, main = NA){
 #' @import grDevices
 #' @import graphics
 #' @export 
-relativeProbabilityHeatmap <- function(counts, model, main = NA){
-  factorized <- factorizeMatrix(model, counts)
+relativeProbabilityHeatmap <- function(counts, celda.mod, main = NA){
+  factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
   z <- 1:ncol(pop)
   y <- 1:nrow(pop)
