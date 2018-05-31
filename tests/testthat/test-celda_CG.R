@@ -17,7 +17,7 @@ test_that(desc = "Making sure celda_CG runs without crashing",{
 load("../celdaCGsim.rda")
 load("../celdaCG.rda")
 model_CG = getModel(celdaCG.res, K = 5, L = 3)[[1]]
-factorized <- factorizeMatrix(model_CG, celdaCG.sim$counts)
+factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 counts.matrix <- celdaCG.sim$counts
 
 
