@@ -34,7 +34,9 @@ Imports:
     SummarizedExperiment,
     GenomicRanges,
     ineq,
-    data.table
+    data.table,
+    Rcpp,
+    RcppEigen
 Suggests:
     testthat,
     knitr,
@@ -45,6 +47,7 @@ Suggests:
     Matrix,
     biomaRt,
     Rtsne
+LinkingTo: Rcpp, RcppEigen
 VignetteBuilder: knitr
 License: MIT
 Encoding: UTF-8
