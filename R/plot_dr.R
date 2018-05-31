@@ -115,7 +115,7 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
 #' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
 #' @export
-celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=1000, distance="cosine") {
+celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, distance="hellinger") {
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
   
   states.to.use = 1:nrow(fm$counts$cell.states)
@@ -128,6 +128,7 @@ celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=100
   new.counts = fm$counts$cell.states[states.to.use,]
   norm = normalizeCounts(new.counts, scale.factor=1)
   
+  distance = match.arg(distance, choices = c("hellinger","cosine","spearman"))
   if(distance == "cosine"){
     d = cosineDist(norm)  
   }else if(distance == "hellinger"){
