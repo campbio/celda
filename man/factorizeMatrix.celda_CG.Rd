@@ -4,13 +4,13 @@
 \alias{factorizeMatrix.celda_CG}
 \title{Generate factorized matrices showing each feature's influence on the celda_CG model clustering}
 \usage{
-\method{factorizeMatrix}{celda_CG}(celda.mod, counts, type = c("counts",
+\method{factorizeMatrix}{celda_CG}(counts, celda.mod, type = c("counts",
   "proportion", "posterior"))
 }
 \arguments{
-\item{celda.mod}{object returned from celda_CG function}
-
 \item{counts}{A numerix count matrix}
+
+\item{celda.mod}{object returned from celda_CG function}
 
 \item{type}{one of the "counts", "proportion", or "posterior".}
 }
