@@ -306,7 +306,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param type one of the "counts", "proportion", or "posterior". 
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
-factorizeMatrix.celda_CG = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
   K = celda.mod$K
   L = celda.mod$L
@@ -529,7 +529,7 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
 #' @export
 calculatePerplexity.celda_CG = function(counts, celda.mod, precision=128) {
   
-  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   theta = log(factorized$posterior$sample.states)
   phi   = factorized$posterior$population.states
   psi   = factorized$posterior$gene.states
