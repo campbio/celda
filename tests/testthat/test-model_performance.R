@@ -16,6 +16,6 @@ test_that(desc = "Testing calculatePerplexityWithResampling", {
 
 test_that(desc = "Testing visualizePerplexityByKL", {
   perplexity.results = calculatePerplexityWithResampling(celdaCG.res, celdaCG.sim$counts, resample=2)
-  plot.obj = visualizePerplexityByKL(perplexity.results$perplexity.info)
+  plot.obj = visualizePerplexity(perplexity.results$perplexity.info)
   expect_is(plot.obj, "ggplot")
 })
