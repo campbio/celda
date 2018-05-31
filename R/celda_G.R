@@ -79,7 +79,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   rm(p)
 
   set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting celda_G to cluster genes.", logfile=logfile, append=FALSE)
   
   ## Calculate initial log likelihood
   ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
@@ -96,7 +96,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	y = next.y$y
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+    if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
       logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
       logMessages(res$message, logfile=logfile, append=TRUE)
@@ -164,7 +164,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
   probs = matrix(NA, ncol=nG, nrow=L)
   temp.nG.by.TS = nG.by.TS 
   temp.n.by.TS = n.by.TS 
-  temp.n.C.by.TS = n.C.by.TS
+#  temp.n.C.by.TS = n.C.by.TS
 
   ix <- sample(1:nG)
   for(i in ix) {
@@ -172,26 +172,37 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 	## Subtract current gene counts from matrices
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
 	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] - counts.t[,i]
-
+	
+	n.C.by.TS_1 = n.C.by.TS
+	n.C.by.TS_1[,y[i]] = n.C.by.TS_1[,y[i]] - counts.t[,i]
+    n.C.by.TS_1 = .colSums(lgamma(n.C.by.TS_1 + beta), nrow(n.C.by.TS), ncol(n.C.by.TS))
+    
+	n.C.by.TS_2 = n.C.by.TS
+	other.ix = (1:L)[-y[i]]
+	n.C.by.TS_2[,other.ix] = n.C.by.TS_2[,other.ix] + counts.t[,i]
+    n.C.by.TS_2 = .colSums(lgamma(n.C.by.TS_2 + beta), nrow(n.C.by.TS), ncol(n.C.by.TS))
+    	
 	## Calculate probabilities for each state
 	for(j in 1:L) {
 	
 	  temp.nG.by.TS = nG.by.TS 
 	  temp.n.by.TS = n.by.TS 
-	  temp.n.C.by.TS = n.C.by.TS
+#	  temp.n.C.by.TS = n.C.by.TS
 	
 	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L      
 	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
+#	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
+
 
       pseudo.nG.by.TS = temp.nG.by.TS
 	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
 	  pseudo.nG = sum(pseudo.nG.by.TS)
 
+	  other.ix = (1:L)[-j]
       probs[j,i] <- 	sum(lgamma(pseudo.nG.by.TS + gamma)) -
 						sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +
-						sum(lgamma(temp.n.C.by.TS + beta)) +
+						sum(n.C.by.TS_1[other.ix]) + n.C.by.TS_2[j] +
+#						sum(lgamma(temp.n.C.by.TS + beta)) +
 						sum(lgamma(pseudo.nG.by.TS * delta)) -
 						(pseudo.nG * lgamma(delta)) -
 						sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))
@@ -199,11 +210,17 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
     }
 
 	## Sample next state and add back counts
+	prev.y = y[i]
 	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
+	
+	if(prev.y != y[i]) {
+	  n.C.by.TS[,prev.y] = n.C.by.TS[,prev.y] - counts.t[,i]
+	  n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
+	}
 	
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
 	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-	n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
+	#n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
   }
   
   return(list(n.C.by.TS=n.C.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
@@ -287,7 +304,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_G = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
   L = celda.mod$L
   y = celda.mod$y
@@ -459,7 +476,7 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 #' @export
 calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
  
-  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   phi <- factorized$posterior$gene.states
   psi <- factorized$posterior$cell.states
   eta <- factorized$posterior$gene.distribution

@@ -231,3 +231,85 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
     col_label = z,
     ...)
 }
+
+
+
+#' Renders a heatmap based on a population matrix from the factorized counts matrix.
+#' 
+#' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
+#' @param celda.mod celda model of class "celda_CG". 
+#' @param main The title of the plot; default = NA. 
+#' @import gtable
+#' @import grid
+#' @import scales
+#' @import RColorBrewer
+#' @import grDevices
+#' @import graphics
+#' @export 
+absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
+  factorized <- factorizeMatrix(celda.mod = model, counts = counts)
+  pop <- factorized$proportions$population.states
+  z <- 1:ncol(pop)
+  y <- 1:nrow(pop)
+  
+  K = sort(unique(z))
+  K.col = distinct_colors(length(K))
+  names(K.col) = K
+  
+  annotation_color = list(cell = K.col)
+  
+  L = sort(unique(y))
+  L.col = distinct_colors(length(L))
+  names(L.col) = L
+  
+  percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
+  col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
+  col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
+  col <- c(col1,col2)
+  
+  breaks <-  seq(0, 1, length.out = length(col)) 
+  
+  semi_pheatmap(pop, row_label = NULL, col_label = NULL, col = col, breaks = breaks, cluster_cols = FALSE, cluster_rows = FALSE, main = main)
+}
+
+
+
+#' Renders a heatmap based on a population matrix from the factorized counts matrix. The relative probability of each transcriptional state in each cell subpopulation is visualized.
+#' 
+#' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
+#' @param celda.mod celda model of class "celda_CG". 
+#' @param main The title of the plot; default = NA. 
+#' @import gtable
+#' @import grid
+#' @import scales
+#' @import RColorBrewer
+#' @import grDevices
+#' @import graphics
+#' @export 
+relativeProbabilityHeatmap <- function(counts, celda.mod, main = NA){
+  factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
+  pop <- factorized$proportions$population.states
+  z <- 1:ncol(pop)
+  y <- 1:nrow(pop)
+  
+  K = sort(unique(z))
+  K.col = distinct_colors(length(K))
+  names(K.col) = K
+  
+  annotation_color = list(cell = K.col)
+  
+  L = sort(unique(y))
+  L.col = distinct_colors(length(L))
+  names(L.col) = L
+  
+  pop <- sweep(pop, 1, rowSums(pop), "/")
+  
+  percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
+  col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
+  col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
+  col <- c(col1,col2)
+  
+  breaks <-  seq(0, 1, length.out = length(col)) 
+  
+  semi_pheatmap(pop, row_label = NULL, col_label = NULL, col = col, breaks = breaks, cluster_cols = FALSE, cluster_rows = FALSE, main = main)
+}
