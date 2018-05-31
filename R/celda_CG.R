@@ -107,7 +107,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
     ## Gibbs sampling for each cell
-    n.TS.by.C = rowsum.y(counts, y=y, L=L)
+    n.TS.by.C = rowSumByGroup(counts, y=y, L=L)
     n.TS.by.CP = t(n.CP.by.TS)
 	#next.z = cC.calcGibbsProbZ(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta)
 	next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
@@ -117,7 +117,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
     z = next.z$z
 
     ## Gibbs sampling for each gene
-    n.CP.by.G = rowsum.z(counts, z=z, K=K)
+    n.CP.by.G = colSumByGroup(counts, z=z, K=K)
     n.CP.by.TS = t(n.TS.by.CP) 
  	next.y = cG.calcGibbsProbY(counts.t=n.CP.by.G, n.C.by.TS=n.CP.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma)
 	n.CP.by.TS = next.y$n.C.by.TS
@@ -142,10 +142,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  ## Re-calculate variables
 	  z = res$z      
 	  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-	  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-	  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+	  n.TS.by.C = rowSumByGroup(counts, y=y, L=L)
+	  n.CP.by.TS = colSumByGroup(n.TS.by.C, z=z, K=K)
 	  n.CP = as.integer(rowSums(n.CP.by.TS))
-	  n.CP.by.G = rowsum.z(counts, z=z, K=K)     
+	  n.CP.by.G = colSumByGroup(counts, z=z, K=K)     
 	}  
 	if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 	  logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
@@ -162,10 +162,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 
 	  ## Re-calculate variables
 	  y = res$y        
-	  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-	  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+	  n.TS.by.C = rowSumByGroup(counts, y=y, L=L)
+	  n.CP.by.TS = colSumByGroup(n.TS.by.C, z=z, K=K)
 	  n.CP = as.integer(rowSums(n.CP.by.TS))
-	  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+	  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), y=y, L=L))
 	  nG.by.TS = as.integer(table(factor(y, levels=1:L)))
 	}      
 
@@ -471,14 +471,14 @@ calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, 
 cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   nS = length(unique(s))
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.TS.by.C = rowsum.y(counts, y=y, L=L)
-  n.CP.by.TS = rowsum.z(n.TS.by.C, z=z, K=K)
+  n.TS.by.C = rowSumByGroup(counts, y=y, L=L)
+  n.CP.by.TS = colSumByGroup(n.TS.by.C, z=z, K=K)
   n.CP = as.integer(rowSums(n.CP.by.TS))
   n.by.G = as.integer(rowSums(counts))
   n.by.C = as.integer(colSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), y=y, L=L))
   nG.by.TS = as.integer(table(factor(y, 1:L)))
-  n.CP.by.G = rowsum.z(counts, z=z, K=K)
+  n.CP.by.G = colSumByGroup(counts, z=z, K=K)
   
   nG = nrow(counts)
   nM = ncol(counts)
