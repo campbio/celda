@@ -4,12 +4,12 @@
 \alias{relativeProbabilityHeatmap}
 \title{Renders a heatmap based on a population matrix from the factorized counts matrix. The relative probability of each transcriptional state in each cell subpopulation is visualized.}
 \usage{
-relativeProbabilityHeatmap(counts, model, main = NA)
+relativeProbabilityHeatmap(counts, celda.mod, main = NA)
 }
 \arguments{
 \item{counts}{A count matrix where rows are genes and columns are cells, used to generate celda model.}
 
-\item{model}{celda model of class "celda_CG".}
+\item{celda.mod}{celda model of class "celda_CG".}
 
 \item{main}{The title of the plot; default = NA.}
 }

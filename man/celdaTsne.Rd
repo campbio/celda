@@ -5,7 +5,7 @@
 \title{Runs tSNE via Rtsne based on the CELDA model and specified cell states.}
 \usage{
 celdaTsne(counts, celda.mod, states = NULL, perplexity = 20,
-  max.iter = 1000, distance = "cosine")
+  max.iter = 2500, distance = "hellinger")
 }
 \arguments{
 \item{counts}{Counts matrix, will have cell name for column name and gene name for row name.}

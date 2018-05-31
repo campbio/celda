@@ -144,7 +144,7 @@ renderCeldaHeatmap(counts = norm.counts, z=z, y=y, normalize = NULL,
 Celda can also perform matrix factorization to summarize the contribution of each transcriptional state to each cellular subpopulation. Matrix factorization decomposes the counts matrix into multiple matrices, using the given Celda model. Each of these following matrices can be viewed as raw counts values, proportional values, or posterior probability values.
 
 ```{r}
-factorized <- factorizeMatrix(model, sim_counts$count)
+factorized <- factorizeMatrix(counts = sim_counts$count, celda.mod = model)
 names(factorized)
 ```
 
@@ -188,13 +188,13 @@ plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2],
 In addition to the counts matrix, the transcriptional and cell states of a Celda model can also be visualized with `absoluteProbabilityHeatmap`, which may be useful in determining which cell states highly express a particular transcriptional state. 
 
 ```{r, fig.width = 8, fig.height = 8}
-absoluteProbabilityHeatmap(model = model, counts = sim_counts$counts)
+absoluteProbabilityHeatmap(counts = sim_counts$counts, celda.mod = model)
 ```
 
 Sometimes it may be helpful to visualize the relative probability of each transcriptional state in each cellular subpopulation. We can do this by using `relativeProbabilityHeatmap`:
 
 ```{r, fig.width = 8, fig.height = 8}
-relativeProbabilityHeatmap(model = model, counts = sim_counts$counts)
+relativeProbabilityHeatmap(counts = sim_counts$counts, celda.mod = model)
 ```
 
 <br>
@@ -277,16 +277,16 @@ model.pbmc <- getBestModel(pbmc_res, K = 13, L = 50)
 `relativeProbabilityHeatmap`, as discussed above visualizes the relationship between each transcriptional state and cell subpopulation in a heatmap form.
 
 ```{r, fig.width = 8, fig.height = 8}
-relativeProbabilityHeatmap(counts = pbmc_select, model = model.pbmc)
+relativeProbabilityHeatmap(counts = pbmc_select, celda.mod = model.pbmc)
 ```
 
 Celda supports the use of tSNE (t-stochastic neighbor embedding) via the `celdaTsne` function. We can plot these tSNE results via `plotDrCluster`, `plotDrState` and `plotDrGene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectively of a specific transcriptional state and visualize each cell's expression of a set of genes. 
 
 ```{r, message = FALSE}
-factorize.matrix <- factorizeMatrix(model.pbmc, counts=pbmc_select)
+factorize.matrix <- factorizeMatrix(counts=pbmc_select, celda.mod = model.pbmc)
 norm_pbmc <- normalizeCounts(factorize.matrix$counts$cell.states)
 set.seed(123)
-pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = "cosine")
+pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = "hellinger")
 ```
 
 With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. 
