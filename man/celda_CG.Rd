@@ -5,10 +5,10 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
-  count.checksum = NULL, z.init = NULL, y.init = NULL,
-  process.counts = TRUE, logfile = NULL)
+  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
+  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
+  seed = 12345, count.checksum = NULL, z.init = NULL, y.init = NULL,
+  logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
@@ -27,6 +27,8 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default 1.}
 
+\item{algorithm}{Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.}
+
 \item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
 
 \item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
@@ -42,8 +44,6 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
 \item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL.}
-
-\item{process.counts}{Whether to cast the counts matrix to integer and round(). Defaults to TRUE.}
 
 \item{logfile}{The name of the logfile to redirect messages to.}
 }
