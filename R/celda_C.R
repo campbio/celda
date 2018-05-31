@@ -36,8 +36,9 @@
 #' @param K An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
+#' @param algorithm Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.
+#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the inference algorithm. Default 10.
+#' @param max.iter Maximum iterations of inference algorithm to perform regardless of convergence. Default 200.
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param count.checksum An MD5 checksum for the provided counts matrix
@@ -46,7 +47,8 @@
 #' @param logfile If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics
 #' @export
-celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1, 
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
+					 algorithm = c("EM", "Gibbs"), 
                  	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                  	 count.checksum=NULL, seed=12345,
                  	 z.init = NULL, logfile=NULL) {
@@ -63,6 +65,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     count.checksum = digest::digest(counts, algo="md5")
   }
 
+  algorithm <- match.arg(algorithm)
+  algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
+  
   ## Randomly select z and y or set z/y to supplied initial values
   z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
   z.best = z
@@ -80,21 +85,23 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
   set.seed(seed)
-  logMessages(date(), "... Starting Gibbs sampling", logfile=logfile, append=FALSE)
+  logMessages(date(), "... Starting celda_C to cluster cells.", logfile=logfile, append=FALSE)
   
   iter = 1L
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
     
-    next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+#   next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+#	next.z = cC.calcEMProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
+    next.z = do.call(algorithm.fun, list(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta))
     m.CP.by.S = next.z$m.CP.by.S
     n.G.by.CP = next.z$n.G.by.CP
     n.CP = next.z$n.CP
     z = next.z$z
     
     ## Perform split on i-th iteration of no improvement in log likelihood
-    if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+    if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
       res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
@@ -151,40 +158,83 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 
   ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
-  temp.n.G.by.CP = n.G.by.CP
-  temp.n.CP = n.CP
-  
+#  temp.n.G.by.CP = n.G.by.CP
+#  temp.n.CP = n.CP
+#  n.G.by.CP_1 = n.G.by.CP
+#  n.G.by.CP_2 = n.G.by.CP
+
   ix = sample(1:nM)
   for(i in ix) {
+
+	## Subtract cell counts from current population assignment
+	n.G.by.CP_1 = n.G.by.CP
+	n.G.by.CP_1[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
+	n.G.by.CP_1 = .colSums(lgamma(n.G.by.CP_1 + beta), nrow(n.G.by.CP), ncol(n.G.by.CP))
+
+	n.CP_1 = n.CP
+	n.CP_1[z[i]] = n.CP_1[z[i]] - n.by.C[i]
+	n.CP_1 = lgamma(n.CP_1 + (nG * beta))
 	
-	## Subtract current cell counts from matrices
-	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L
-	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] - counts[,i]
-	n.CP[z[i]] = n.CP[z[i]] - n.by.C[i]
-  
+	## Add cell counts to all other populations
+	n.G.by.CP_2 = n.G.by.CP
+	other.ix = (1:K)[-z[i]]
+	n.G.by.CP_2[,other.ix] = n.G.by.CP_2[,other.ix] + counts[,i]
+	n.G.by.CP_2 = .colSums(lgamma(n.G.by.CP_2 + beta), nrow(n.G.by.CP), ncol(n.G.by.CP))
+
+	n.CP_2 = n.CP
+	n.CP_2[other.ix] = n.CP_2[other.ix] + n.by.C[i]
+	n.CP_2 = lgamma(n.CP_2 + (nG * beta))
+
+
+	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] - 1L	
+
 	## Calculate probabilities for each state
 	for(j in 1:K) {
-	  temp.n.G.by.CP = n.G.by.CP
-	  temp.n.G.by.CP[,j] = temp.n.G.by.CP[,j] + counts[,i]
-	  temp.n.CP = n.CP
-	  temp.n.CP[j] = temp.n.CP[j] + n.by.C[i]
-
+      other.ix = (1:K)[-j]
 	  probs[j,i] = 	log(m.CP.by.S[j,s[i]] + alpha) +		## Theta simplified
-				  sum(lgamma(temp.n.G.by.CP + beta)) -	## Phi Numerator
-				  sum(lgamma(temp.n.CP + (nG * beta)))	## Phi Denominator
+				  sum(n.G.by.CP_1[other.ix]) +				## Phi Numerator (other cells)
+				  n.G.by.CP_2[j] -							## Phi Numerator (current cell)
+				  sum(n.CP_1[other.ix]) -					## Phi Denominator (other cells)
+  				  n.CP_2[j]									## Phi Denominator (current cell)
 	}  
 
 	## Sample next state and add back counts
+	prev.z = z[i]
 	if(isTRUE(do.sample)) z[i] = sample.ll(probs[,i])
 	
+	if(prev.z != z[i]) { 
+	    n.G.by.CP[,prev.z] = n.G.by.CP[,prev.z] - counts[,i]
+	  	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
+	  	
+	  	n.CP[prev.z] = n.CP[prev.z] - n.by.C[i]
+	  	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
+	}
 	m.CP.by.S[z[i],s[i]] = m.CP.by.S[z[i],s[i]] + 1L
-	n.G.by.CP[,z[i]] = n.G.by.CP[,z[i]] + counts[,i]
-	n.CP[z[i]] = n.CP[z[i]] + n.by.C[i]
   }  
 
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
+cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
+
+  ## Expectation given current cell population labels
+  theta = log(normalizeCounts(m.CP.by.S + alpha, scale.factor=1))
+  phi = log(normalizeCounts(n.G.by.CP + beta, scale.factor=1))
+  
+  ## Maximization to find best label for each cell
+  #probs = eigenMapMatMultInt(phi, counts) + theta[, s]  
+  probs = (t(phi) %*% counts) + theta[, s]  
+  z = apply(probs, 2, which.max)
+
+  ## Recalculate counts based on new label
+  p = cC.decomposeCounts(counts, s, z, K)
+  m.CP.by.S = p$m.CP.by.S
+  n.G.by.CP = p$n.G.by.CP
+  n.CP = p$n.CP
+  n.by.C = p$n.by.C
+
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
+}
 
 #' Simulate cells from the cell clustering generative model
 #' 
@@ -245,7 +295,7 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
-factorizeMatrix.celda_C = function(celda.mod, counts, type=c("counts", "proportion", "posterior")) {
+factorizeMatrix.celda_C = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
   K = celda.mod$K
   z = celda.mod$z
@@ -391,7 +441,7 @@ calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
   # TODO Can try to turn into a single giant matrix multiplication by duplicating
   #     phi / theta / sl
   # TODO Cast to sparse matrices?
-  factorized = factorizeMatrix(celda.mod, counts, "posterior")
+  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
   sl = celda.mod$sample.label
