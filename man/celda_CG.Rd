@@ -8,7 +8,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
   max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
   seed = 12345, count.checksum = NULL, z.init = NULL, y.init = NULL,
-  process.counts = TRUE, logfile = NULL)
+  logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix.}
