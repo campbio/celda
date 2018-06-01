@@ -333,24 +333,6 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 }
 
 
-colSumByGroup = function(counts, z, K) {
-  mat = matrix(as.integer(0), nrow=K, ncol=nrow(counts))
-  rs = rowsum(t(counts), group=z, reorder=TRUE)
-  mat[sort(unique(z)),] = rs
-  storage.mode(mat) = "integer"
-  return(mat)
-}
-
-
-rowSumByGroup = function(counts, y, L) {
-  mat = matrix(as.integer(0), nrow=L, ncol=ncol(counts))
-  rs = rowsum(counts, group=y, reorder=TRUE)
-  mat[sort(unique(y)),] = rs
-  storage.mode(mat) = "integer"
-  return(mat)
-}
-
-
 processCounts = function(counts) {
   if (typeof(counts) != "integer") {
     counts = round(counts)
