@@ -333,7 +333,7 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 }
 
 
-rowsum.z = function(counts, z, K) {
+colSumByGroup = function(counts, z, K) {
   mat = matrix(as.integer(0), nrow=K, ncol=nrow(counts))
   rs = rowsum(t(counts), group=z, reorder=TRUE)
   mat[sort(unique(z)),] = rs
@@ -342,7 +342,7 @@ rowsum.z = function(counts, z, K) {
 }
 
 
-rowsum.y = function(counts, y, L) {
+rowSumByGroup = function(counts, y, L) {
   mat = matrix(as.integer(0), nrow=L, ncol=ncol(counts))
   rs = rowsum(counts, group=y, reorder=TRUE)
   mat[sort(unique(y)),] = rs
