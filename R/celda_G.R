@@ -111,8 +111,8 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	  
       ## Re-calculate variables
       y = res$y
-      n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
-      n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+      n.C.by.TS = t(rowSumByGroup(counts, y=y, L=L))
+      n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), y=y, L=L))
       nG.by.TS = as.integer(table(factor(y, 1:L)))
     }
      
@@ -433,9 +433,9 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 #' @param L The number of clusters being considered
 cG.decomposeCounts = function(counts, y, L) {
 
-  n.C.by.TS = t(rowsum.y(counts, y=y, L=L))
+  n.C.by.TS = t(rowSumByGroup(counts, y=y, L=L))
   n.by.G = as.integer(rowSums(counts))
-  n.by.TS = as.integer(rowsum.y(matrix(n.by.G,ncol=1), y=y, L=L))
+  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), y=y, L=L))
   nG.by.TS = as.integer(table(factor(y, 1:L)))
   nM = ncol(counts)
   nG = nrow(counts)
