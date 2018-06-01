@@ -26,3 +26,5 @@ vignettes/*.pdf
 .Rproj.user
 celda.Rproj
 .DS_Store
+.o
+.dll
