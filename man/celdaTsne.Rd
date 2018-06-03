@@ -10,7 +10,7 @@ celdaTsne(counts, celda.mod, states = NULL, perplexity = 20,
 \arguments{
 \item{counts}{Counts matrix, will have cell name for column name and gene name for row name.}
 
-\item{celda.mod}{Celda model to use for tsne. class "celda_C" or "celda_CG".}
+\item{celda.mod}{Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".}
 
 \item{states}{Vector; determines which cell states to use for tsne. If not defined, all states will be used.}
 
