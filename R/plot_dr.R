@@ -109,25 +109,30 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 #' Runs tSNE via Rtsne based on the CELDA model and specified cell states.
 #' 
 #' @param counts Counts matrix, will have cell name for column name and gene name for row name.
-#' @param celda.mod Celda model to use for tsne.
+#' @param celda.mod Celda model to use for tsne. class "celda_C" or "celda_CG".
 #' @param states Vector; determines which cell states to use for tsne. If not defined, all states will be used.
 #' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
 #' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
 #' @export
 celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, distance="hellinger") {
-  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
+  celda.mod = match.arg(class(celda.mod), choices = c("celda_CG","celda_C"))
   
-  states.to.use = 1:nrow(fm$counts$cell.states)
-  if(!is.null(states)) {
-    if(!all(states %in% states.to.use)) {
-      stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
-    }
-    states.to.use = states 
-  } 
-  new.counts = fm$counts$cell.states[states.to.use,]
-  norm = normalizeCounts(new.counts, scale.factor=1)
-  
+  if(class(celda.mod) == "celda_CG"){
+    fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
+    
+    states.to.use = 1:nrow(fm$counts$cell.states)
+    if(!is.null(states)) {
+      if(!all(states %in% states.to.use)) {
+        stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+      }
+      states.to.use = states 
+    } 
+    new.counts = fm$counts$cell.states[states.to.use,]
+    norm = normalizeCounts(new.counts, scale.factor=1)
+  }else{
+    norm = normalizeCounts(counts = counts, scale.factor = 1)
+  }
   distance = match.arg(distance, choices = c("hellinger","cosine","spearman"))
   if(distance == "cosine"){
     d = cosineDist(norm)  
