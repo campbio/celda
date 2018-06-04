@@ -96,15 +96,15 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 }  
 
 
-#' Obtain the transcriptional state of a gene of interest
+#' Obtain the gene module of a gene of interest
 #' 
-#' This function will output the transcriptional state of a specific gene(s) from a celda model
+#' This function will output the gene module of a specific gene(s) from a celda model
 #'  
 #' @param counts Counts matrix that the celda model was run on
 #' @param model Celda model, class of "celda_CG" or "celda_G"
-#' @param gene Genes to check the transcriptional state
+#' @param gene Genes to check the gene module
 #' @export
-lookupTranscriptionalStateofGene <- function(counts, model, gene){
+lookupGeneModule <- function(counts, model, gene){
   list <- list()
   for(x in 1:length(gene)){
     if(gene[x] %in% rownames(counts)){

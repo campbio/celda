@@ -1,11 +1,11 @@
-#' @useDynLib celda rowSumByGroup_
+#' @useDynLib celda rowSumByGroup
 rowSumByGroup <- function(x, group, L) {
   group <- factor(group, levels=1:L)
   res <- .Call("rowSumByGroup", x, group)
   return(res)
 }
 
-#' @useDynLib celda rowSumByGroupChange_
+#' @useDynLib celda rowSumByGroupChange
 rowSumByGroupChange <- function(x, px, group, pgroup, L) {
   group <- factor(group, levels=1:L)
   pgroup <- factor(pgroup, levels=1:L)  
@@ -13,14 +13,14 @@ rowSumByGroupChange <- function(x, px, group, pgroup, L) {
   return(res)
 }
 
-#' @useDynLib celda colSumByGroup_
+#' @useDynLib celda colSumByGroup
 colSumByGroup <- function(x, group, K) {
   group <- factor(group, levels=1:K)
   res <- .Call("colSumByGroup", x, group)
   return(res)
 }
 
-#' @useDynLib celda colSumByGroupChange_
+#' @useDynLib celda colSumByGroupChange
 colSumByGroupChange <- function(x, px, group, pgroup, K) {
   group <- factor(group, levels=1:K)
   pgroup <- factor(pgroup, levels=1:K)    
