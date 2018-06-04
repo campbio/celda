@@ -29,12 +29,17 @@ stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, gen
   }
   factorize.matrix <-
     factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  genes <- celda.mod$names$row[celda.mod$y == state.use]
-  ascending_ordered_genes <-
-    names(sort(factorize.matrix$proportions$gene.states[, state.use][which(names(factorize.matrix$proportions$gene.states[, state.use]) %in% genes)]))
+  genes <- celda.mod$names$row[celda.mod$y %in% state.use]
+  ascending_ordered_matrix <-
+    factorize.matrix$proportions$gene.states[, state.use, drop = FALSE][which(rownames(factorize.matrix$proportions$gene.states[, state.use, drop = FALSE]) %in% genes),]
+  if(class(ascending_ordered_matrix) == "numeric"){
+    ascending_ordered_genes <- names(sort(ascending_ordered_matrix))
+  }else{
+    ascending_ordered_genes <- names(sort(rowMeans(ascending_ordered_matrix)))
+  }
   if (class(genes.use) == "character") {
     if (setequal(intersect(genes.use, ascending_ordered_genes), genes.use)) {
-      filtered_genes <- names(sort(factorize.matrix$proportions$gene.states[, state.use][which(names(factorize.matrix$proportions$gene.states[, state.use]) %in% genes.use)]))
+      filtered_genes <- names(sort(factorize.matrix$proportions$gene.states[, state.use][which(rownames(factorize.matrix$proportions$gene.states[, state.use, drop = FALSE]) %in% genes.use)]))
     } else {
       miss_genes <- setdiff(genes.use, intersect(genes.use, ascending_ordered_genes))
       miss_genes[-length(miss_genes)] <- paste0(miss_genes[-length(miss_genes)], ', ')
@@ -43,7 +48,7 @@ stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, gen
   }else{
     if(is.null(genes.use) || genes.use >= ceiling(length(ascending_ordered_genes) / 2)){
       filtered_genes <- ascending_ordered_genes
-      message(paste0("Use all genes in L", state.use))
+      message(paste0("Use all genes in L", state.use, " "))
     } else{
       filtered_genes <-
         c(
@@ -53,7 +58,7 @@ stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, gen
     }
   }
   ascending_ordered_cells <-
-    names(sort(factorize.matrix$proportions$cell.states[state.use,]))
+    names(sort(colMeans(factorize.matrix$proportions$cell.states[state.use,,drop = FALSE])))
   if (is.null(cells.use)) {
     filtered_cells <-
       ascending_ordered_cells
