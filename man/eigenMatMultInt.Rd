@@ -11,6 +11,9 @@ eigenMatMultInt(A, B)
 
 \item{B}{an integer matrix}
 }
+\value{
+An integer matrix representing the product of A and B
+}
 \description{
 Fast matrix multiplication for double x int
 }
