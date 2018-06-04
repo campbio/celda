@@ -22,7 +22,7 @@ library(Rtsne)
 library(reshape2)
 
 ## --------------------------------------------------------------------------
-sim_counts <- simulateCells("celda_CG", K = 6, L = 6, S = 10)
+sim_counts <- simulateCells("celda_CG", K = 5, L = 10, S = 10)
 
 ## --------------------------------------------------------------------------
 dim(sim_counts$counts)
@@ -36,12 +36,9 @@ table(sim_counts$y)
 ## --------------------------------------------------------------------------
 table(sim_counts$sample.label)
 
-## --------------------------------------------------------------------------
-table(sim_counts$z, sim_counts$sample.label)
-
 ## ---- warning = FALSE, message = FALSE-------------------------------------
 
-celda.res <- celda(counts = sim_counts$counts, model = "celda_CG", K = 6, L = 6, max.iter = 10, cores = 1, nchains = 1)
+celda.res <- celda(counts = sim_counts$counts, model = "celda_CG", K = 5, L = 10, max.iter = 10, cores = 1, nchains = 1)
 
 
 ## --------------------------------------------------------------------------
@@ -126,14 +123,6 @@ calc.perplexity$plot
 #  pbmc_res <- celda(pbmc_select, K = 10:20, L = seq(10:50,by = 5),
 #                    cores = 1, model = "celda_CG", nchains = 4, max.iter = 100)
 
-## ---- eval=FALSE-----------------------------------------------------------
-#  calc.perplexity2 <- calculatePerplexityWithResampling(pbmc_res,
-#                                                       counts = pbmc_select,
-#                                                       resample = 1)
-
-## ---- fig.width = 8, fig.height = 8----------------------------------------
-calc.perplexity2$plot
-
 ## --------------------------------------------------------------------------
 model.pbmc <- getBestModel(pbmc_res, K = 13, L = 50)
 
@@ -159,11 +148,6 @@ marker.genes <- c("ENSG00000168685_IL7R","ENSG00000132646_PCNA",
 gene.counts <- pbmc_select[marker.genes,]
 plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, 
            rescale = TRUE)
-
-## ---- fig.width = 8, fig.height = 8----------------------------------------
-gini <- GiniPlot(counts = pbmc_select, celda.mod = model.pbmc)
-
-gini
 
 ## ----message=FALSE---------------------------------------------------------
 diff.exp.clust1 <- diffExpBetweenCellStates(counts = pbmc_select, 
@@ -201,6 +185,11 @@ renderCeldaHeatmap(norm.pbmc.counts[top.genes.ix,], z = model.pbmc$z,
                    color_scheme = "divergent")
 
 ## ---- fig.width = 8, fig.height = 8----------------------------------------
+gini <- GiniPlot(counts = pbmc_select, celda.mod = model.pbmc)
+
+gini
+
+## ---- fig.width = 8, fig.height = 8----------------------------------------
 filtered.tr.states <- gini$data$Transcriptional_States[gini$data$Gini_Coefficient > 0.3]
 
 top.genes.filtered.ix <- unique(unlist(top.genes$index[as.numeric(levels(filtered.tr.states))][as.numeric(filtered.tr.states)]))
@@ -210,9 +199,9 @@ renderCeldaHeatmap(norm.pbmc.counts[top.genes.filtered.ix,], z = model.pbmc$z,
                    normalize = NULL, color_scheme = "divergent")
 
 ## --------------------------------------------------------------------------
-lookupTranscriptionalStateofGene(counts = pbmc_select, model = model.pbmc, 
-                                 gene = c("ENSG00000203747_FCGR3A",
-                                          "ENSG00000163736_PPBP"))
+lookupGeneModule(counts = pbmc_select, model = model.pbmc, 
+                          gene = c("ENSG00000203747_FCGR3A",
+                                   "ENSG00000163736_PPBP"))
 
 ## ---- fig.width = 8, fig.height = 8, message=FALSE-------------------------
 stateHeatmap(counts = pbmc_select, celda.mod = model.pbmc, state.use = 4)
@@ -228,7 +217,7 @@ tabl <- "
 |      5        | B cells           | MS4A1      |
 |      6        | Mitochondrial     |            |
 |      7        | CD4 T cells       | IL7R       |
-|      8        | ???               | PCNA/TUBB  |
+|      8        |                   | PCNA/TUBB  |
 |      9        | Dendritic cells   | CST3       |
 |      10       | NK cells          | NKG7/GNLY  |
 |      11       | FCGR3A+ monocytes | FCGR3A     |
