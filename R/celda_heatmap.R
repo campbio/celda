@@ -247,7 +247,7 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 #' @import graphics
 #' @export 
 absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
-  factorized <- factorizeMatrix(celda.mod = model, counts = counts)
+  factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
   z <- 1:ncol(pop)
   y <- 1:nrow(pop)
