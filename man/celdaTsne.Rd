@@ -8,11 +8,11 @@ celdaTsne(counts, celda.mod, states = NULL, perplexity = 20,
   max.iter = 2500, distance = "hellinger")
 }
 \arguments{
-\item{counts}{Counts matrix, will have cell name for column name and gene name for row name.}
+\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
 
 \item{celda.mod}{Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".}
 
-\item{states}{Vector; determines which cell states to use for tsne. If not defined, all states will be used.}
+\item{states}{Numeric vector; determines which cell populations to use for tsne. If none are defined, all states will be used.}
 
 \item{perplexity}{Numeric vector; determines perplexity for tsne. Default 20.}
 
