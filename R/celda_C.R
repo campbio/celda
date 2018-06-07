@@ -91,16 +91,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
-    message(paste("Iteration: ", iter))
     
 #   next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
 #	next.z = cC.calcEMProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
     next.z = do.call(algorithm.fun, list(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta))
+
     m.CP.by.S = next.z$m.CP.by.S
     n.G.by.CP = next.z$n.G.by.CP
     n.CP = next.z$n.CP
     z = next.z$z
-    
+
     ## Perform split on i-th iteration of no improvement in log likelihood
     if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
@@ -225,14 +225,16 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   ## Maximization to find best label for each cell
   probs = eigenMatMultInt(phi, counts) + theta[, s]  
   #probs = (t(phi) %*% counts) + theta[, s]  
+  
+  z.previous = z
   z = apply(probs, 2, which.max)
 
   ## Recalculate counts based on new label
-  p = cC.decomposeCounts(counts, s, z, K)
+  #p = cC.decomposeCounts(counts, s, z, K)
+  p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
   m.CP.by.S = p$m.CP.by.S
   n.G.by.CP = p$n.G.by.CP
   n.CP = p$n.CP
-  n.by.C = p$n.by.C
 
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
@@ -400,8 +402,19 @@ cC.decomposeCounts = function(counts, s, z, K) {
   n.G.by.CP = colSumByGroup(counts, group=z, K=K)
   n.CP = as.integer(colSums(n.G.by.CP))
   n.by.C = as.integer(colSums(counts))
-  
+
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, n.by.C=n.by.C, nS=nS, nG=nG, nM=nM))
+}
+
+cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
+
+  ## Recalculate counts based on new label
+  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, z, previous.z, K)
+  nS = length(unique(s))
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.CP = as.integer(colSums(n.G.by.CP))
+
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP))  
 }
 
 
