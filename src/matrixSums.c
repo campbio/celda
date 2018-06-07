@@ -187,8 +187,8 @@ SEXP colSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
   for (j = 0; j < nc; j++) {
     if(group[j] != pgroup[j]) {
       for (i = 0; i < nr; i++) {
-        px[group[j] * nr + i - 1] += x[j * nr + i];
-        px[pgroup[j] * nr + i - 1] -= x[j * nr + i];
+        px[(group[j]-1) * nr + i] += x[j * nr + i];
+        px[(pgroup[j]-1) * nr + i] -= x[j * nr + i];
       }
     }
   }
