@@ -178,11 +178,9 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
     
 	n.TS.by.C_2 = n.TS.by.C
 	other.ix = (1:L)[-y[i]]
-	n.TS.by.C_2[other.ix,] = n.TS.by.C_2[other.ix,] + counts[i,]
+	n.TS.by.C_2[other.ix,] = n.TS.by.C_2[other.ix,] + counts[rep(i, length(other.ix)),]
     n.TS.by.C_2 = .rowSums(lgamma(n.TS.by.C_2 + beta), nrow(n.TS.by.C), ncol(n.TS.by.C))
-print(n.TS.by.C_1)
-print(n.TS.by.C_2)
-
+    
 	## Calculate probabilities for each state
 	for(j in 1:L) {
 	
