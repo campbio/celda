@@ -92,7 +92,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
 
 
 # cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
-cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, , delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
+cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
 
   ## Identify clusters to split
   z.ta = tabulate(z, K)
