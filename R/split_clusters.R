@@ -1,50 +1,54 @@
-split.each.z = function(counts, z, K, LLFunction, z.prob, min.cell=3, max.clusters.to.try = 10, ...) { 
+# cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
 
-  dot.args = list(...)
-  
   ## Identify clusters to split
-  z.ta = table(factor(z, levels=1:K))
+  z.ta = tabulate(z, K)
   z.to.split = which(z.ta >= min.cell)
   z.non.empty = which(z.ta > 0)
   
+  if(length(z.to.split) == 0) {
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(z=z, m.CP.by.S, n.G.by.CP, n.CP=n.CP, message=m))  
+  }
+  
   ## Loop through each split-able Z and perform split
-  clust.split = list()
-  for(i in 1:K) { 
-    if(i %in% z.to.split) {
-      clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-      clust.split = c(clust.split, list(clustLabel$z))
-    } else {
-      clust.split = c(clust.split, list(NA))
-    }  
+  clust.split = vector("list", K)
+  for(i in z.to.split) { 
+    clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clust.split[[i]] = clustLabel$z
   }
 
   ## Find second best assignment give current assignments for each cell
   z.prob[cbind(1:nrow(z.prob), z)] = NA
   z.second = apply(z.prob, 1, which.max)
 
+  ## Set up initial variables
+  z.split = matrix(NA, nrow=length(z), ncol=length(z.to.split) * max.clusters.to.try)
+  z.split.ll = rep(NA, ncol=length(z.to.split) * max.clusters.to.try)  
+  z.split.ll[1] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+  z.split[,1] = z
+
+  ## Select worst clusters to test for reshuffling  
+  previous.z = z
   ll.shuffle = rep(NA, K)
   for(i in z.non.empty) {
     ix = z == i
     new.z = z
     new.z[ix] = z.second[ix]
-    params = c(list(counts=counts, z=new.z, K=K), dot.args)
-    ll.shuffle[i] = do.call(LLFunction, params)
-  }
+    
+    p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
+    n.G.by.CP = p$n.G.by.CP
+    m.CP.by.S = p$m.CP.by.S
+    ll.shuffle[i] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+    previous.z = new.z
+  } 
   z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
 
-  if(length(z.to.split) == 0 | length(z.to.shuffle) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(z=z,message=m))
-  }
   
-  ## Set up variables for holding results with current iteration of z
-  params = c(list(counts=counts, z=z, K=K), dot.args)
-  z.split.ll = do.call(LLFunction, params)
-  z.split = z
-
   pairs = c(NA, NA)
+  split.ix = 2
   for(i in z.to.shuffle) {
-    
+  
     other.clusters = setdiff(z.to.split, i)
    
 	for(j in other.clusters) {
@@ -59,13 +63,17 @@ split.each.z = function(counts, z, K, LLFunction, z.prob, min.cell=3, max.cluste
       ix.to.split = z == j
       new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
 
+      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
+      n.G.by.CP = p$n.G.by.CP
+      m.CP.by.S = p$m.CP.by.S
+      
 	  ## Calculate likelihood of split
-	  params = c(list(counts=counts, z=new.z, K=K), dot.args)
-	  new.ll = do.call(LLFunction, params)
-
-	  z.split.ll = c(z.split.ll, new.ll)
-	  z.split = cbind(z.split, new.z)
-   
+	  new.ll = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+	  z.split.ll[split.ix] = new.ll
+	  z.split[,split.ix] = new.z
+	  split.ix = split.ix + 1L
+      previous.z = new.z
+      
 	  pairs = rbind(pairs, c(i, j))
 	}  
   }
@@ -78,8 +86,106 @@ split.each.z = function(counts, z, K, LLFunction, z.prob, min.cell=3, max.cluste
     m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
 
-  return(list(z=z.split[,select], message=m))
+  p = cC.reDecomposeCounts(counts, s, z.split[,select], previous.z, n.G.by.CP, K)
+  return(list(z=z.split[,select], m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, n.CP=p$n.CP, message=m))
 }
+
+
+# cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
+cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, , delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
+
+  ## Identify clusters to split
+  z.ta = tabulate(z, K)
+  z.to.split = which(z.ta >= min.cell)
+  z.non.empty = which(z.ta > 0)
+  
+  if(length(z.to.split) == 0) {
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(z=z, m.CP.by.S, n.G.by.CP, n.CP=n.CP, message=m))  
+  }
+  
+  ## Loop through each split-able Z and perform split
+  clust.split = vector("list", K)
+  for(i in z.to.split) { 
+    clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clust.split[[i]] = clustLabel$z
+  }
+
+  ## Find second best assignment give current assignments for each cell
+  z.prob[cbind(1:nrow(z.prob), z)] = NA
+  z.second = apply(z.prob, 1, which.max)
+
+  ## Set up initial variables
+  z.split = matrix(NA, nrow=length(z), ncol=length(z.to.split) * max.clusters.to.try)
+  z.split.ll = rep(NA, ncol=length(z.to.split) * max.clusters.to.try)  
+  z.split.ll[1] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+  z.split[,1] = z
+
+  ## Select worst clusters to test for reshuffling  
+  previous.z = z
+  ll.shuffle = rep(NA, K)
+  for(i in z.non.empty) {
+    ix = z == i
+    new.z = z
+    new.z[ix] = z.second[ix]
+    
+    p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
+    n.G.by.CP = p$n.G.by.CP
+    m.CP.by.S = p$m.CP.by.S
+    ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
+    previous.z = new.z
+  } 
+  z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+
+  
+  pairs = c(NA, NA)
+  split.ix = 2
+  for(i in z.to.shuffle) {
+  
+    other.clusters = setdiff(z.to.split, i)
+   
+	for(j in other.clusters) {
+	  new.z = z
+	  
+      ## Assign cluster i to the next most similar cluster (excluding cluster j) 
+      ## as defined above by the correlation      
+      ix.to.move = z == i
+      new.z[ix.to.move] = z.second[ix.to.move]
+            
+      ## Split cluster j according to the clustering defined above
+      ix.to.split = z == j
+      new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
+
+      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
+      n.G.by.CP = p$n.G.by.CP
+      m.CP.by.S = p$m.CP.by.S
+      
+	  ## Calculate likelihood of split
+	  new.ll = cCG.calcLL(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
+	  z.split.ll[split.ix] = new.ll
+	  z.split[,split.ix] = new.z
+	  split.ix = split.ix + 1L
+      previous.z = new.z
+      
+	  pairs = rbind(pairs, c(i, j))
+	}  
+  }
+
+  select = which.max(z.split.ll) 
+
+  if(select == 1) {
+    m = paste0(date(), " ... No additional splitting was performed.") 
+  } else {
+    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
+  } 
+
+  p = cC.reDecomposeCounts(counts, s, z.split[,select], previous.z, n.G.by.CP, K)
+  return(list(z=z.split[,select], m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, n.CP=p$n.CP, message=m))
+}
+
+
+
+
 
 
 
