@@ -105,7 +105,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
+	  res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
       logMessages(res$message, logfile=logfile, append=TRUE)
 
 	  # Reset convergence counter if a split occured
@@ -118,9 +118,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
             
       ## Re-calculate variables
       z = res$z
-      m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-      n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-      n.CP = as.integer(colSums(n.G.by.CP))
+      #m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+      #n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+      #n.CP = as.integer(colSums(n.G.by.CP))
+      m.CP.by.S = res$m.CP.by.S
+      n.G.by.CP = res$n.G.by.CP
+      n.CP = res$n.CP
     }
 
 
