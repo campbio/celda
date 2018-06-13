@@ -107,26 +107,27 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
     ## Gibbs sampling for each cell
-    n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
+
 	#next.z = cC.calcGibbsProbZ(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta)
 	next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
     m.CP.by.S = next.z$m.CP.by.S
     n.TS.by.CP = next.z$n.G.by.CP
     n.CP = next.z$n.CP
     z = next.z$z
-
-    ## Gibbs sampling for each gene
     n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+    
+    ## Gibbs sampling for each gene
  	next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma)
 	n.TS.by.CP = next.y$n.TS.by.C
 	nG.by.TS = next.y$nG.by.TS
 	n.by.TS = next.y$n.by.TS
 	y = next.y$y
-    
+    n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
+        
     ## Perform split on i-th iteration defined by split.on.iter
 	if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 	  logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
-	  res = split.each.z(counts=counts, z=z, y=y, z.prob=t(next.z$probs), K=K, L=L, alpha=alpha, delta=delta, beta=beta, gamma=gamma, s=s, LLFunction="calculateLoglikFromVariables.celda_CG")
+	  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
 	  logMessages(res$message, logfile=logfile, append=TRUE)
 
 	  # Reset convergence counter if a split occured
@@ -139,10 +140,9 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 
 	  ## Re-calculate variables
 	  z = res$z      
-	  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-	  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
-	  n.TS.by.CP = colSumByGroup(n.TS.by.C, group=z, K=K)
-	  n.CP = as.integer(colSums(n.TS.by.CP))
+	  m.CP.by.S = res$m.CP.by.S
+	  n.TS.by.CP = res$n.TS.by.CP
+	  n.CP = res$n.CP
 	  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
 	}  
 	if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {

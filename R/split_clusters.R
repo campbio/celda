@@ -91,8 +91,8 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
 }
 
 
-# cCG.calcLL = function(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
-cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
+# cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
+cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
 
   ## Identify clusters to split
   z.ta = tabulate(z, K)
@@ -101,7 +101,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, 
   
   if(length(z.to.split) == 0) {
     m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(z=z, m.CP.by.S, n.G.by.CP, n.CP=n.CP, message=m))  
+    return(list(z=z, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.CP=n.CP, message=m))  
   }
   
   ## Loop through each split-able Z and perform split
@@ -118,7 +118,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, 
   ## Set up initial variables
   z.split = matrix(NA, nrow=length(z), ncol=length(z.to.split) * max.clusters.to.try)
   z.split.ll = rep(NA, ncol=length(z.to.split) * max.clusters.to.try)  
-  z.split.ll[1] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+  z.split.ll[1] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
   z.split[,1] = z
 
   ## Select worst clusters to test for reshuffling  
@@ -129,10 +129,10 @@ cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, 
     new.z = z
     new.z[ix] = z.second[ix]
     
-    p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
-    n.G.by.CP = p$n.G.by.CP
+    p = cC.reDecomposeCounts(n.TS.by.C, s, new.z, previous.z, n.TS.by.CP, K)
+    n.TS.by.CP = p$n.G.by.CP
     m.CP.by.S = p$m.CP.by.S
-    ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
+    ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
     previous.z = new.z
   } 
   z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
@@ -156,12 +156,12 @@ cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, 
       ix.to.split = z == j
       new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
 
-      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
-      n.G.by.CP = p$n.G.by.CP
+      p = cC.reDecomposeCounts(n.TS.by.C, s, new.z, previous.z, n.TS.by.CP, K)
+      n.TS.by.CP = p$n.G.by.CP
       m.CP.by.S = p$m.CP.by.S
       
 	  ## Calculate likelihood of split
-	  new.ll = cCG.calcLL(K, L, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
+	  new.ll = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
 	  z.split.ll[split.ix] = new.ll
 	  z.split[,split.ix] = new.z
 	  split.ix = split.ix + 1L
@@ -179,8 +179,8 @@ cCG.splitZ = function(counts, m.CP.by.S, n.CP.by.TS, n.by.G, n.by.TS, nG.by.TS, 
     m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
 
-  p = cC.reDecomposeCounts(counts, s, z.split[,select], previous.z, n.G.by.CP, K)
-  return(list(z=z.split[,select], m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, n.CP=p$n.CP, message=m))
+  p = cC.reDecomposeCounts(n.TS.by.C, s, z.split[,select], previous.z, n.TS.by.CP, K)
+  return(list(z=z.split[,select], m.CP.by.S=p$m.CP.by.S, n.TS.by.CP=p$n.G.by.CP, n.CP=p$n.CP, message=m))
 }
 
 
@@ -275,25 +275,3 @@ split.each.y = function(counts, y, L, LLFunction, y.prob, min=3, max.clusters.to
 
 
 
-clusterByHC = function(d, min=3, method="ward.D") {
-  label = cluster::pam(x = d, k=2)$clustering
-
-  ## If PAM split is too small, perform secondary hclust procedure to split into roughly equal groups
-  if(min(table(label)) < min) {
-	d.hclust = stats::hclust(d, method=method)
-
-	## Get maximum sample size of each subcluster
-	d.hclust.size = sapply(1:length(d.hclust$height), function(i) max(table(stats::cutree(d.hclust, h=d.hclust$height[i]))))
-  
-	## Find the height of the dendrogram that best splits the samples in "roughly" half
-	sample.size = round(length(d.hclust$order)/ 2)
-	d.hclust.select = which.min(abs(d.hclust.size - sample.size))
-	temp = stats::cutree(d.hclust, h=d.hclust$height[d.hclust.select])
-	
-	## Set half of the samples as the largest cluster and the other samples to the other cluster
-	label.max.cluster = which.max(table(temp))
-	label = ifelse(temp == label.max.cluster, 1, 2)
-  } 
-  
-  return(label)
-}
