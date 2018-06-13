@@ -493,7 +493,7 @@ calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
 
 
 reorder.celda_G = function(counts, res) {
-  if(res$L > 2) {
+  if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
     unique.y = sort(unique(res$y))
