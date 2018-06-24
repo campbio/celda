@@ -97,7 +97,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
     ## Perform split on i-th iteration of no improvement in log likelihood
     if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
       logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
+      res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob=t(next.y$probs), min=3, max.clusters.to.try=10)
       logMessages(res$message, logfile=logfile, append=TRUE)
       
 	  # Reset convergence counter if a split occured	    
@@ -110,9 +110,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	  
       ## Re-calculate variables
       y = res$y
-      n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
-      n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-      nG.by.TS = as.integer(table(factor(y, 1:L)))
+      n.TS.by.C = res$n.TS.by.C
+      n.by.TS = res$n.by.TS
+      nG.by.TS = res$nG.by.TS
     }
      
     ## Calculate complete likelihood
@@ -441,6 +441,16 @@ cG.decomposeCounts = function(counts, y, L) {
   nG = nrow(counts)
   
   return(list(n.TS.by.C=n.TS.by.C, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nM=nM, nG=nG))
+}
+
+
+cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
+  ## Recalculate counts based on new label
+  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, y, previous.y, L)
+  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
+  nG.by.TS = tabulate(y, L)
+
+  return(list(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS))  
 }
 
 

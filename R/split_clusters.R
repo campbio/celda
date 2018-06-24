@@ -68,8 +68,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
       m.CP.by.S = p$m.CP.by.S
       
 	  ## Calculate likelihood of split
-	  new.ll = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
-	  z.split.ll[split.ix] = new.ll
+	  z.split.ll[split.ix] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
 	  z.split[,split.ix] = new.z
 	  split.ix = split.ix + 1L
       previous.z = new.z
@@ -161,8 +160,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
       m.CP.by.S = p$m.CP.by.S
       
 	  ## Calculate likelihood of split
-	  new.ll = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
-	  z.split.ll[split.ix] = new.ll
+	  z.split.ll[split.ix] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
 	  z.split[,split.ix] = new.z
 	  split.ix = split.ix + 1L
       previous.z = new.z
@@ -188,51 +186,51 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
 
 
 
-
-split.each.y = function(counts, y, L, LLFunction, y.prob, min=3, max.clusters.to.try=10, ...) { 
-
-  dot.args = list(...)
+#cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
+cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob, min=3, max.clusters.to.try=10) { 
   
   ## Identify clusters to split
   y.ta = table(factor(y, levels=1:L))
   y.to.split = which(y.ta >= min)
   y.non.empty = which(y.ta > 0)
 
-  ## Loop through each split-able y and find best split
-  clust.split = list()
-  for(i in 1:L) {
-    if(i %in% y.to.split) {    
-      clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-      clust.split = c(clust.split, list(clustLabel$y))
-    } else {
-      clust.split = c(clust.split, list(NA))
-    }  
+  if(length(y.to.split) == 0) {
+    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    return(list(y=y, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, message=m))
   }
-  
+
+  ## Loop through each split-able y and find best split
+  clust.split = vector("list", L)
+  for(i in y.to.split) {
+    clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clust.split[[i]] = clustLabel$y
+  }
+
   ## Find second best assignment give current assignments for each cell
   y.prob[cbind(1:nrow(y.prob), y)] = NA
   y.second = apply(y.prob, 1, which.max)
+
+  ## Set up initial variables
+  y.split = matrix(NA, nrow=length(y), ncol=length(y.to.split) * max.clusters.to.try)
+  y.split.ll = rep(NA, ncol=length(y.to.split) * max.clusters.to.try)  
+  y.split.ll[1] = cG.calcLL(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma)
+  y.split[,1] = y
+
+  ## Select worst clusters to test for reshuffling  
   ll.shuffle = rep(NA, L)
+  previous.y = y
   for(i in y.non.empty) {
     ix = y == i
     new.y = y
     new.y[ix] = y.second[ix]
-    params = c(list(counts=counts, y=new.y, L=L), dot.args)
-    ll.shuffle[i] = do.call(LLFunction, params)
+    p = cG.reDecomposeCounts(counts, new.y, previous.y, n.TS.by.C, n.by.G, L)
+    ll.shuffle[i] = cG.calcLL(p$n.TS.by.C, p$n.by.TS, n.by.G, p$nG.by.TS, nM, nG, L, beta, delta, gamma)
+    previous.y = new.y
   }
   y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
   
-  if(length(y.to.split) == 0 | length(y.to.shuffle) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
-    return(list(y=y, message=m))
-  }
- 
-  ## Set up variables for holding results with current iteration of y
-  params = c(list(counts=counts, y=y, L=L), dot.args)
-  y.split.ll = do.call(LLFunction, params)
-  y.split = y
-
   pairs = c(NA, NA)
+  split.ix = 2  
   for(i in y.to.shuffle) {
 
     other.clusters = setdiff(y.to.split, i)
@@ -250,11 +248,11 @@ split.each.y = function(counts, y, L, LLFunction, y.prob, min=3, max.clusters.to
       new.y[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
       
       ## Calculate likelihood of split
-      params = c(list(counts=counts, y=new.y, L=L), dot.args)
-      new.ll = do.call(LLFunction, params)
-
-      y.split.ll = c(y.split.ll, new.ll)
-      y.split = cbind(y.split, new.y)
+      p = cG.reDecomposeCounts(counts, new.y, previous.y, n.TS.by.C, n.by.G, L)
+	  y.split.ll[split.ix] = cG.calcLL(p$n.TS.by.C, p$n.by.TS, n.by.G, p$nG.by.TS, nM, nG, L, beta, delta, gamma)
+	  y.split[,split.ix] = new.y
+	  split.ix = split.ix + 1L
+      previous.y = new.y
       
       pairs = rbind(pairs, c(i, j))
     }
@@ -268,7 +266,8 @@ split.each.y = function(counts, y, L, LLFunction, y.prob, min=3, max.clusters.to
     m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
  
-  return(list(y=y.split[,select], message=m))
+  p = cG.reDecomposeCounts(counts, y.split[,select], previous.y, n.TS.by.C, n.by.G, L)
+  return(list(y=y.split[,select], n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, message=m))
 }
 
 
