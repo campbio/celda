@@ -70,6 +70,9 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 								 treeheight_cell = ifelse(cluster_cell, 50, 0),
                                  ...) {
   
+  # Ensure counts are stored in proper format:
+  if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  
   # Check for same lengths for z and y group variables
   if (!is.null(z) & length(z) != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
   if (!is.null(y) & length(y) != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
@@ -247,6 +250,8 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 #' @import graphics
 #' @export 
 absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
+  if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
   z <- 1:ncol(pop)
@@ -287,6 +292,8 @@ absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
 #' @import graphics
 #' @export 
 relativeProbabilityHeatmap <- function(counts, celda.mod, main = NA){
+  if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
   z <- 1:ncol(pop)
