@@ -1,3 +1,13 @@
+#celda_C
+library(celda)
+context("Testing celda_C")
+
+load("../celdaCsim.rda")
+load("../celdaC.rda")
+counts.matrix <- celdaC.sim$counts
+model_C = getModel(celdaC.res, K = 5)[[1]]
+factorized = factorizeMatrix(counts=counts.matrix, celda.mod=model_C)
+
 distinct_colors
 test_that(desc = "Checking distinct_colors",{
   expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
@@ -24,7 +34,6 @@ test_that(desc = "Checking diffExpBetweenCellStates",{
 })
 
 ##celda_C.R##
-load("../celdaCsim.rda")
 test_that(desc = "Checking celda_C to see if it runs without errors",{
   celdaC.res <- celda(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K = c(5,10), max.iter = 15)
   expect_true(class(celdaC.res) == "celda_list")  # Only best chain is returned
