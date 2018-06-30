@@ -90,6 +90,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   n.by.C = p$n.by.C
   n.by.TS = p$n.by.TS
   nG.by.TS = p$nG.by.TS
+  n.G.by.CP = p$n.G.by.CP
   nM = p$nM
   nG = p$nG
   nS = p$nS
