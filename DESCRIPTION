@@ -21,7 +21,7 @@ Imports:
     gtable,
     grDevices,
     graphics,
-    Rmpfr,
+    matrixStats,
     gplots,
     doParallel,
     cluster,
