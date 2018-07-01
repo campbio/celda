@@ -538,14 +538,8 @@ calculatePerplexity.celda_CG = function(counts, celda.mod, precision=128) {
   eta.prob = log(eta) * nG.by.TS
   gene.by.pop.prob = log(psi %*% phi)
   inner.log.prob = (t(gene.by.pop.prob) %*% counts) + theta[, sl]  
-  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
-  inner.log.prob.exp = exp(inner.log.prob)
   
-  log.px = sum(eta.prob)
-  for(i in 1:ncol(inner.log.prob.exp)) {
-    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
-  }
-  
+  log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) + sum(eta.prob)
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
 }
