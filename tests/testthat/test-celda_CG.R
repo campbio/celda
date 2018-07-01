@@ -85,8 +85,8 @@ test_that(desc = "Checking CompareCountMatrix",{
 
 #distinct_colors
 test_that(desc = "Making sure distinct_colors gives expected output",{
-  expect_equal(distinct_colors(2), c("#FF9999","#99FFFF"))
-  expect_equal(distinct_colors(4), c("#FF9999","#99FFFF","#FFDB99","#9999FF"))
+  expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
+  expect_equal(distinct_colors(4), c("#FF4D4D", "#4DFFFF", "#FFC04D", "#4D4DFF"))
 })
 
 
