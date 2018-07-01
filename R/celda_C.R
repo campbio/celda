@@ -455,22 +455,13 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 #' @export
 calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
   
-  # TODO Can try to turn into a single giant matrix multiplication by duplicating
-  #     phi / theta / sl
-  # TODO Cast to sparse matrices?
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
   sl = celda.mod$sample.label
   
   inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
-  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
-  inner.log.prob.exp = exp(inner.log.prob)
-  
-  log.px = 0
-  for(i in 1:ncol(inner.log.prob.exp)) {
-    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
-  }
+  log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
   
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
