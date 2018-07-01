@@ -243,7 +243,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param ... Other arguments
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
-                                 L=5, beta=1, gamma=1, delta=1, seed=12345, ...) {
+                                 L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
@@ -484,7 +484,7 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
+calculatePerplexity.celda_G = function(counts, celda.mod) {
  
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   phi <- factorized$posterior$gene.states

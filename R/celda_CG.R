@@ -220,7 +220,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' @param ... Other arguments
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
-                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=1, 
+                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
   
   set.seed(seed)
@@ -525,7 +525,7 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_CG = function(counts, celda.mod, precision=128) {
+calculatePerplexity.celda_CG = function(counts, celda.mod) {
   
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   theta = log(factorized$posterior$sample.states)
