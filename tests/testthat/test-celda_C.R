@@ -29,8 +29,9 @@ test_that(desc = "Checking topRank to see if it runs without errors",{
 
 #diffExpBetweenCellStates
 test_that(desc = "Checking diffExpBetweenCellStates",{
- expect_equal(class(diffexp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, celda.mod = model_C, c1 = 1)),
-                c("data.table","data.frame"))
+  diffexp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, 
+                                         celda.mod = model_C, c1 = 1)
+  expect_equal(class(diffexp_K1), c("data.table","data.frame"))
 })
 
 ##celda_C.R##
