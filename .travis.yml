@@ -5,9 +5,6 @@ sudo: false
 warnings_are_errors: true
 bioc_required: true
 before_install:
-  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-  - chmod 755 ./travis-tool.sh
-  - ./travis-tool.sh bootstrap
   - Rscript -e 'update.packages(ask = FALSE)'
 r_build_args: "--no-build-vignettes"
 r_check_args: "--no-build-vignettes --as-cran"
@@ -15,8 +12,6 @@ addons:
   apt:
     packages:
     - libmpfr-dev
-after_failure:
- - ./travis-tool.sh dump_logs
 notifications:
   slack:
     secure: srjTT9zfEL5rvKPp4ynjxDPPym0TXHXun82du+/thwsJDFtEIfpk311Ta6ylTqFCklaJDz1aoei2Zu6KzVWEQ3UmzzOTaYuLayarNNACN4eqtqQJAP0fZALpvDRfUI94lcOTEp7WjArsqU/nkff5srFpphsfXfkhMryIg0yTCuokjYt7nCoN3dsKcMzrXTk5JET99YPs2Mn3y9+vTKML1nF6hbfGmJ00Utr+Crj5OHCwe5pwSwFjFsuBmgNiKIl+s8egUYdIAbDRLwsuPjXwL2gH76cc+swiDFx7RF/3J+GwDnfa4w/mkFHVoZ+zsDtfvUtW1EpKKf3X1GxXowPC5ycS4HVZAh36R292SQeNjSzqxmzHpId0Y6aLRtk/b6Ppmxdt0U6St9LEEyfQYNaQaIHus21DYlbJ6mXX1MSwNBxyCuvu1+SFqHdui8Nfbu/xorqg7yHvWrvG9jqYVTOdQiLtJVoYhbOUi9EaMo3UBZvimuhRG9QM7czKZTc/XFBGGE9vbh67BzU8BfmXEISj9pzW6OwtMOB99lZ4WG9ir15uTcaQM5uugKjWT1735yUpAb4JWTa1TC9UMZwdBoIfZgpgSK59dUrA2oTScwMACL+S5jWjuO3/a+FQ7QVp5lI1YRn9gstaOEB/53TEekSlfkcLgSz/2lMGQIhsXd75/a4=
