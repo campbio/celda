@@ -142,7 +142,7 @@ validateArgs = function(counts, model, sample.label,
   if ("K" %in% model_args) {
     if (is.null(K)) { 
       stop("Must provide a K parameter when running a celda_C or celda_CG model")
-    } else if (is.numeric(K) & K <= 1) {
+    } else if (is.numeric(K) && K <= 1) {
       stop("K parameter must be > 1")
     }
     
@@ -150,7 +150,7 @@ validateArgs = function(counts, model, sample.label,
   if ("L" %in% model_args) {
     if (is.null(L)) {
       stop("Must provide a L parameter when running a celda_G or celda_CG model")
-    } else if (is.numeric(L) & L <= 1) {
+    } else if (is.numeric(L) && L <= 1) {
       stop("L parameter must be > 1")
     }
   }
