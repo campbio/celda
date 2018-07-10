@@ -91,21 +91,21 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   num.iter.without.improvement = 0L
   do.cell.split = TRUE
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
-    message(paste("Iteration: ", iter))
     
 #   next.z = cC.calcGibbsProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
 #	next.z = cC.calcEMProbZ(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta)
     next.z = do.call(algorithm.fun, list(counts=counts, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, z=z, s=s, K=K, nG=nG, nM=nM, alpha=alpha, beta=beta))
+
     m.CP.by.S = next.z$m.CP.by.S
     n.G.by.CP = next.z$n.G.by.CP
     n.CP = next.z$n.CP
     z = next.z$z
-    
+
     ## Perform split on i-th iteration of no improvement in log likelihood
     if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
       logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
-      res = split.each.z(counts=counts, z=z, K=K, z.prob=t(next.z$probs), alpha=alpha, beta=beta, s=s, LLFunction="calculateLoglikFromVariables.celda_C")
+	  res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
       logMessages(res$message, logfile=logfile, append=TRUE)
 
 	  # Reset convergence counter if a split occured
@@ -118,9 +118,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
             
       ## Re-calculate variables
       z = res$z
-      m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-      n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-      n.CP = as.integer(colSums(n.G.by.CP))
+      #m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+      #n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+      #n.CP = as.integer(colSums(n.G.by.CP))
+      m.CP.by.S = res$m.CP.by.S
+      n.G.by.CP = res$n.G.by.CP
+      n.CP = res$n.CP
     }
 
 
@@ -225,14 +228,16 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   ## Maximization to find best label for each cell
   probs = eigenMatMultInt(phi, counts) + theta[, s]  
   #probs = (t(phi) %*% counts) + theta[, s]  
+  
+  z.previous = z
   z = apply(probs, 2, which.max)
 
   ## Recalculate counts based on new label
-  p = cC.decomposeCounts(counts, s, z, K)
+  #p = cC.decomposeCounts(counts, s, z, K)
+  p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
   m.CP.by.S = p$m.CP.by.S
   n.G.by.CP = p$n.G.by.CP
   n.CP = p$n.CP
-  n.by.C = p$n.by.C
 
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
@@ -400,8 +405,19 @@ cC.decomposeCounts = function(counts, s, z, K) {
   n.G.by.CP = colSumByGroup(counts, group=z, K=K)
   n.CP = as.integer(colSums(n.G.by.CP))
   n.by.C = as.integer(colSums(counts))
-  
+
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, n.by.C=n.by.C, nS=nS, nG=nG, nM=nM))
+}
+
+cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
+
+  ## Recalculate counts based on new label
+  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, z, previous.z, K)
+  nS = length(unique(s))
+  m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
+  n.CP = as.integer(colSums(n.G.by.CP))
+
+  return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP))  
 }
 
 
@@ -437,24 +453,15 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_C = function(counts, celda.mod, precision=128) {
+calculatePerplexity.celda_C = function(counts, celda.mod) {
   
-  # TODO Can try to turn into a single giant matrix multiplication by duplicating
-  #     phi / theta / sl
-  # TODO Cast to sparse matrices?
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
   sl = celda.mod$sample.label
   
   inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
-  inner.log.prob = Rmpfr::mpfr(inner.log.prob, precision)
-  inner.log.prob.exp = exp(inner.log.prob)
-  
-  log.px = 0
-  for(i in 1:ncol(inner.log.prob.exp)) {
-    log.px = log.px + Rmpfr::asNumeric(log(sum(inner.log.prob.exp[, i])))
-  }
+  log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
   
   perplexity = exp(-(log.px/sum(counts)))
   return(perplexity)
