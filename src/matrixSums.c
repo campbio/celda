@@ -2,7 +2,7 @@
 #include <Rinternals.h>
 #include <R_ext/RS.h>
 
-SEXP rowSumByGroup(SEXP R_x, SEXP R_group)
+SEXP _rowSumByGroup(SEXP R_x, SEXP R_group)
 {
   int i, j;
   int nr = nrows(R_x);
@@ -42,7 +42,7 @@ SEXP rowSumByGroup(SEXP R_x, SEXP R_group)
   return(R_ans);
 }
 
-SEXP colSumByGroup(SEXP R_x, SEXP R_group)
+SEXP _colSumByGroup(SEXP R_x, SEXP R_group)
 {
   int i, j;
   int nr = nrows(R_x);
@@ -88,7 +88,7 @@ SEXP colSumByGroup(SEXP R_x, SEXP R_group)
 
 
 
-SEXP rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
+SEXP _rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 {
   int i, j;
   int nr = nrows(R_x);
@@ -115,35 +115,16 @@ SEXP rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
     error("group label and previous group label must be the same length as the number of rows in x.");
   }
   
-  // Create vector containing indices where group is different than pgroup
-  // First, calculate the number of differences in group labels
-  int ndiff = 0;
-  for(i = 0; i < nr; i++) {
-    
+  int g_ix;
+  int pg_ix;
+  for (i = 0; i < nr; i++) {
     if(pgroup[i] != group[i]) {
-      ndiff++;
-    }
-  }
-  // Second, add the index of the differences to a vector
-  int group_diff_ix[ndiff-1];
-  j = 0;
-  for(i = 0; i < nr; i++) {
-    if(group[i] != pgroup[i]) {
-      group_diff_ix[j] = i;
-      j++;
-    }
-  }
-  
-  // Sum the totals for each element of the 'group' variable
-  // Note: columns are iterated over before rows because the compiler appears to store expressions like
-  //       'j * nr' in a temporary variable (as they do not change within inner loop);
-  //       swapping the order of the outer and inner loops slows down the code ~10X
-  int row_ix;
-  for (j = 0; j < nc; j++) {
-    for (i = 0; i < ndiff; i++) {
-      row_ix = group_diff_ix[i];
-      px[j * nl + (pgroup[row_ix] - 1)] -= x[j * nr + row_ix];
-      px[j * nl + (group[row_ix] - 1)] += x[j * nr + row_ix];      
+      for (j = 0; j < nc; j++) {
+        pg_ix = (j * nl) + (pgroup[i] - 1);
+        g_ix = (j * nl) + (group[i] - 1);
+        px[pg_ix] -= x[j * nr + i];
+        px[g_ix] += x[j * nr + i];      
+      }
     }
   }
 
@@ -152,7 +133,8 @@ SEXP rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 
 
 
-SEXP colSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
+
+SEXP _colSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 {
   int i, j;
   int nr = nrows(R_x);
@@ -187,8 +169,8 @@ SEXP colSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
   for (j = 0; j < nc; j++) {
     if(group[j] != pgroup[j]) {
       for (i = 0; i < nr; i++) {
-        px[group[j] * nr + i - 1] += x[j * nr + i];
-        px[pgroup[j] * nr + i - 1] -= x[j * nr + i];
+        px[(group[j]-1) * nr + i] += x[j * nr + i];
+        px[(pgroup[j]-1) * nr + i] -= x[j * nr + i];
       }
     }
   }

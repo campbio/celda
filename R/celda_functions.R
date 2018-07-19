@@ -252,8 +252,8 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE) {
 #' @export
 distinct_colors = function(n,
 						   hues = c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta"),
-                           saturation.range = c(0.4, 1),
-                           value.range = c(0.4, 1)) {
+                           saturation.range = c(0.7, 1),
+                           value.range = c(0.7, 1)) {
                            
   if(!(all(hues %in% grDevices::colors()))) {
     stop("Only color names listed in the 'color' function can be used in 'hues'")

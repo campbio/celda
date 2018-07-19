@@ -6,7 +6,7 @@
 \usage{
 \method{simulateCells}{celda_CG}(model, S = 10, C.Range = c(50, 100),
   N.Range = c(500, 5000), G = 1000, K = 3, L = 10, alpha = 1,
-  beta = 1, gamma = 1, delta = 1, seed = 12345, ...)
+  beta = 1, gamma = 5, delta = 1, seed = 12345, ...)
 }
 \arguments{
 \item{model}{Celda model to use for simulation. One of 'available_models'.}

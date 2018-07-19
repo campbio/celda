@@ -5,8 +5,8 @@
 \title{Generate a distinct palette for coloring different clusters}
 \usage{
 distinct_colors(n, hues = c("red", "cyan", "orange", "blue", "yellow",
-  "purple", "green", "magenta"), saturation.range = c(0.4, 1),
-  value.range = c(0.4, 1))
+  "purple", "green", "magenta"), saturation.range = c(0.7, 1),
+  value.range = c(0.7, 1))
 }
 \arguments{
 \item{n}{Integer; Number of colors to generate}
