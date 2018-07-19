@@ -223,8 +223,13 @@ head(colnames(pbmc_select))
 The optimal number of K and L will likely not be known a priori. Therefore multiple choices of K and L may need to tested and compared. Additionally, Celda is sensitive to initial start conditions, so it is good practice to run multiple chains for each combination of K and L to increase the chances of finding the most optimal solution. Celda is able to run multiple combinations of K and L with multiple chains for each combination in parallel. 
 
 ```{r, eval = FALSE}
-pbmc_res1 <- celda(pbmc_select, K = seq(5:50,by = 5), L = seq(10:50,by = 5), 
-                  cores = 1, model = "celda_CG", nchains = 4, max.iter = 100)
+pbmc_res1 <- celda(pbmc_select,
+                   K = seq(5, 50, by = 5),
+                   L = seq(10, 50, by = 5),
+                   cores = 1,
+                   model = "celda_CG",
+                   nchains = 4,
+                   max.iter = 100)
 ```
 
 The `calculatePerplexityWithResampling` function calculates the perplexity for every model created, which provide a distribution of perplexities which can be visualized to determine which model to use for downstream analysis. 
@@ -244,7 +249,7 @@ We advise users to conduct a "2-pass" method for the identification of the optim
 2nd pass: 
 
 ```{r, eval = FALSE}
-pbmc_res <- celda(pbmc_select, K = 10:20, L = seq(10:50,by = 5), 
+pbmc_res <- celda(pbmc_select, K = 10:20, L = seq(10, 50, by = 5), 
                   cores = 1, model = "celda_CG", nchains = 4, max.iter = 100)
 ```
 
