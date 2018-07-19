@@ -58,7 +58,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 
   ## Error checking and variable processing
   counts = processCounts(counts)  
-  counts.t = t(counts)
   
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
@@ -70,7 +69,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 
   ## Calculate counts one time up front
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  n.C.by.TS = p$n.C.by.TS
+  n.TS.by.C = p$n.TS.by.C
   n.by.G = p$n.by.G
   n.by.TS = p$n.by.TS
   nG.by.TS = p$nG.by.TS
@@ -82,15 +81,15 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   logMessages(date(), "... Starting celda_G to cluster genes.", logfile=logfile, append=FALSE)
   
   ## Calculate initial log likelihood
-  ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 
   iter <- 1L
   num.iter.without.improvement = 0L
   do.gene.split = TRUE
   while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
-	next.y = cG.calcGibbsProbY(counts.t=counts.t, n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-	n.C.by.TS = next.y$n.C.by.TS
+	next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	n.TS.by.C = next.y$n.TS.by.C
 	nG.by.TS = next.y$nG.by.TS
 	n.by.TS = next.y$n.by.TS
 	y = next.y$y
@@ -98,7 +97,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
     ## Perform split on i-th iteration of no improvement in log likelihood
     if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
       logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
-      res = split.each.y(counts=counts, y=y, L=L, y.prob=t(next.y$probs), beta=beta, delta=delta, gamma=gamma, LLFunction="calculateLoglikFromVariables.celda_G")
+      res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob=t(next.y$probs), min=3, max.clusters.to.try=10)
       logMessages(res$message, logfile=logfile, append=TRUE)
       
 	  # Reset convergence counter if a split occured	    
@@ -111,13 +110,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	  
       ## Re-calculate variables
       y = res$y
-      n.C.by.TS = t(rowSumByGroup(counts, group=y, L=L))
-      n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-      nG.by.TS = as.integer(table(factor(y, 1:L)))
+      n.TS.by.C = res$n.TS.by.C
+      n.by.TS = res$n.by.TS
+      nG.by.TS = res$nG.by.TS
     }
      
     ## Calculate complete likelihood
-    temp.ll <- cG.calcLL(n.C.by.TS=n.C.by.TS, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
     if((all(temp.ll > ll)) | iter == 1) {
       y.best = y
       ll.best = temp.ll
@@ -158,13 +157,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 # @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
 # @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
 # @keywords log likelihood
-cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
+cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
 
   ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
   temp.nG.by.TS = nG.by.TS 
   temp.n.by.TS = n.by.TS 
-#  temp.n.C.by.TS = n.C.by.TS
+#  temp.n.TS.by.C = n.TS.by.C
 
   ix <- sample(1:nG)
   for(i in ix) {
@@ -173,25 +172,25 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
 	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
 	
-	n.C.by.TS_1 = n.C.by.TS
-	n.C.by.TS_1[,y[i]] = n.C.by.TS_1[,y[i]] - counts.t[,i]
-    n.C.by.TS_1 = .colSums(lgamma(n.C.by.TS_1 + beta), nrow(n.C.by.TS), ncol(n.C.by.TS))
+	n.TS.by.C_1 = n.TS.by.C
+	n.TS.by.C_1[y[i],] = n.TS.by.C_1[y[i],] - counts[i,]
+    n.TS.by.C_1 = .rowSums(lgamma(n.TS.by.C_1 + beta), nrow(n.TS.by.C), ncol(n.TS.by.C))
     
-	n.C.by.TS_2 = n.C.by.TS
+	n.TS.by.C_2 = n.TS.by.C
 	other.ix = (1:L)[-y[i]]
-	n.C.by.TS_2[,other.ix] = n.C.by.TS_2[,other.ix] + counts.t[,i]
-    n.C.by.TS_2 = .colSums(lgamma(n.C.by.TS_2 + beta), nrow(n.C.by.TS), ncol(n.C.by.TS))
-    	
+	n.TS.by.C_2[other.ix,] = n.TS.by.C_2[other.ix,] + counts[rep(i, length(other.ix)),]
+    n.TS.by.C_2 = .rowSums(lgamma(n.TS.by.C_2 + beta), nrow(n.TS.by.C), ncol(n.TS.by.C))
+    
 	## Calculate probabilities for each state
 	for(j in 1:L) {
 	
 	  temp.nG.by.TS = nG.by.TS 
 	  temp.n.by.TS = n.by.TS 
-#	  temp.n.C.by.TS = n.C.by.TS
+#	  temp.n.TS.by.C = n.TS.by.C
 	
 	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L      
 	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-#	  temp.n.C.by.TS[,j] = temp.n.C.by.TS[,j] + counts.t[,i]
+#	  temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
 
 
       pseudo.nG.by.TS = temp.nG.by.TS
@@ -201,8 +200,8 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 	  other.ix = (1:L)[-j]
       probs[j,i] <- 	sum(lgamma(pseudo.nG.by.TS + gamma)) -
 						sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +
-						sum(n.C.by.TS_1[other.ix]) + n.C.by.TS_2[j] +
-#						sum(lgamma(temp.n.C.by.TS + beta)) +
+						sum(n.TS.by.C_1[other.ix]) + n.TS.by.C_2[j] +
+#						sum(lgamma(temp.n.TS.by.C + beta)) +
 						sum(lgamma(pseudo.nG.by.TS * delta)) -
 						(pseudo.nG * lgamma(delta)) -
 						sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))
@@ -214,16 +213,16 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
 	
 	if(prev.y != y[i]) {
-	  n.C.by.TS[,prev.y] = n.C.by.TS[,prev.y] - counts.t[,i]
-	  n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
+	  n.TS.by.C[prev.y,] = n.TS.by.C[prev.y,] - counts[i,]
+	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
 	}
 	
 	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
 	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-	#n.C.by.TS[,y[i]] = n.C.by.TS[,y[i]] + counts.t[,i]
+	#n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
   }
   
-  return(list(n.C.by.TS=n.C.by.TS, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
+  return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
 
@@ -244,7 +243,7 @@ cG.calcGibbsProbY = function(counts.t, n.C.by.TS, n.by.TS, nG.by.TS, n.by.G, y, 
 #' @param ... Other arguments
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
-                                 L=5, beta=1, gamma=1, delta=1, seed=12345, ...) {
+                                 L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
@@ -314,7 +313,7 @@ factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proporti
   gamma = celda.mod$gamma
   
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  n.TS.by.C = t(p$n.C.by.TS)
+  n.TS.by.C = p$n.TS.by.C
   n.by.G = p$n.by.G
   n.by.TS = p$n.by.TS
   nG.by.TS = p$nG.by.TS
@@ -370,16 +369,16 @@ factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proporti
 
 
 # Calculate log-likelihood of celda_CG model
-cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
+cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
   
   nG.by.TS[nG.by.TS == 0] = 1
   nG = sum(nG.by.TS)
   
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
-  b <- sum(lgamma(n.C.by.TS + beta))
+  b <- sum(lgamma(n.TS.by.C + beta))
   c <- -nM * L * lgamma(beta)
-  d <- -sum(lgamma(rowSums(n.C.by.TS + beta)))
+  d <- -sum(lgamma(colSums(n.TS.by.C + beta)))
 
   phi.ll <- a + b + c + d
 
@@ -422,7 +421,7 @@ cG.calcLL = function(n.C.by.TS, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma) {
 
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  final <- cG.calcLL(n.C.by.TS=p$n.C.by.TS, n.by.TS=p$n.by.TS, n.by.G=p$n.by.G, nG.by.TS=p$nG.by.TS, nM=p$nM, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma)
+  final <- cG.calcLL(n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, n.by.G=p$n.by.G, nG.by.TS=p$nG.by.TS, nM=p$nM, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
   return(final)
 }
@@ -434,14 +433,24 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 #' @param L The number of clusters being considered
 cG.decomposeCounts = function(counts, y, L) {
 
-  n.C.by.TS = t(rowSumByGroup(counts, group=y, L=L))
-  n.by.G = as.integer(rowSums(counts))
+  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
+  n.by.G = as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = as.integer(table(factor(y, 1:L)))
+  nG.by.TS = tabulate(y, L)
   nM = ncol(counts)
   nG = nrow(counts)
   
-  return(list(n.C.by.TS=n.C.by.TS, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nM=nM, nG=nG))
+  return(list(n.TS.by.C=n.TS.by.C, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nM=nM, nG=nG))
+}
+
+
+cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
+  ## Recalculate counts based on new label
+  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, y, previous.y, L)
+  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
+  nG.by.TS = tabulate(y, L)
+
+  return(list(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS))  
 }
 
 
@@ -463,7 +472,7 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
   
   ## Calculate counts one time up front
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  next.y = cG.calcGibbsProbY(counts.t=t(counts), n.C.by.TS=p$n.C.by.TS, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)  
+  next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)  
   y.prob = t(next.y$probs)
   
   if(!isTRUE(log)) {
@@ -475,7 +484,7 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_G = function(counts, celda.mod, precision=128) {
+calculatePerplexity.celda_G = function(counts, celda.mod) {
  
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
   phi <- factorized$posterior$gene.states
