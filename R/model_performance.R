@@ -11,10 +11,9 @@
 #' 
 #' @param counts The count matrix modeled in the celdaRun parameter
 #' @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
-#' @param precision The amount of bits of precision to pass to Rmpfr
-#' @return The perplexity for the provided chain as an mpfr number
+#' @return The perplexity for the provided data and model
 #' @export
-calculatePerplexity = function(counts, celda.mod, precision=128) {
+calculatePerplexity = function(counts, celda.mod) {
   UseMethod("calculatePerplexity", celda.mod)
 }
 

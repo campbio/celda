@@ -139,11 +139,20 @@ buildParamList = function(counts, model, sample.label, alpha, beta, delta,
 validateArgs = function(counts, model, sample.label, 
                          nchains, cores, seed, K=NULL, L=NULL) { #, ...) {
   model_args = names(formals(model))
-  if ("K" %in% model_args && is.null(K)) {
-    stop("Must provide a K parameter when running a celda_C or celda_CG model")
+  if ("K" %in% model_args) {
+    if (is.null(K)) { 
+      stop("Must provide a K parameter when running a celda_C or celda_CG model")
+    } else if (is.numeric(K) && K <= 1) {
+      stop("K parameter must be > 1")
+    }
+    
   }
-  if ("L" %in% model_args && is.null(L)) {
-    stop("Must provide a L parameter when running a celda_G or celda_CG model")
+  if ("L" %in% model_args) {
+    if (is.null(L)) {
+      stop("Must provide a L parameter when running a celda_G or celda_CG model")
+    } else if (is.numeric(L) && L <= 1) {
+      stop("L parameter must be > 1")
+    }
   }
   
   validateCounts(counts, K, L)
