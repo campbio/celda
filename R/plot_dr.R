@@ -114,8 +114,9 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 #' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
 #' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
+#' @param seed Seed for random number generation. Defaults to 12345.
 #' @export
-celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, distance="hellinger") {
+celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, distance="hellinger", seed=12345) {
   if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
     stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
   } 
@@ -148,6 +149,7 @@ celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=250
   }
   
   do.pca = class(celda.mod) == "celda_C"
+  set.seed(seed)
   res = Rtsne::Rtsne(d, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
                      check_duplicates = FALSE, is_distance = TRUE)$Y
   colnames(res) = c("tsne_1", "tsne_2")
