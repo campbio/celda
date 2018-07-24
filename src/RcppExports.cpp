@@ -19,17 +19,17 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP colSumByGroup(SEXP, SEXP);
-RcppExport SEXP colSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
-RcppExport SEXP rowSumByGroup(SEXP, SEXP);
-RcppExport SEXP rowSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
+RcppExport SEXP _colSumByGroup(SEXP, SEXP);
+RcppExport SEXP _colSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
+RcppExport SEXP _rowSumByGroup(SEXP, SEXP);
+RcppExport SEXP _rowSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_celda_eigenMatMultInt", (DL_FUNC) &_celda_eigenMatMultInt, 2},
-    {"colSumByGroup",          (DL_FUNC) &colSumByGroup,          2},
-    {"colSumByGroupChange",    (DL_FUNC) &colSumByGroupChange,    4},
-    {"rowSumByGroup",          (DL_FUNC) &rowSumByGroup,          2},
-    {"rowSumByGroupChange",    (DL_FUNC) &rowSumByGroupChange,    4},
+    {"_colSumByGroup",         (DL_FUNC) &_colSumByGroup,         2},
+    {"_colSumByGroupChange",   (DL_FUNC) &_colSumByGroupChange,   4},
+    {"_rowSumByGroup",         (DL_FUNC) &_rowSumByGroup,         2},
+    {"_rowSumByGroupChange",   (DL_FUNC) &_rowSumByGroupChange,   4},
     {NULL, NULL, 0}
 };
 
