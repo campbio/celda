@@ -5,7 +5,7 @@
 #' @param iterations Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot
 #' @export
 gettingClusters <- function(celda.list, matrix, iterations){
-  matrix <- log(normalizeCounts(matrix) + 1)
+  #matrix <- log(normalizeCounts(matrix) + 1)
   all.max.value <- matrix(ncol = length(unique(celda.list$run.params$L)) * length(unique(celda.list$run.params$K)))
   for(times in 1:iterations){
     
