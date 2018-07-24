@@ -4,17 +4,15 @@
 \alias{calculatePerplexity}
 \title{Calculate the perplexity from a single celda run}
 \usage{
-calculatePerplexity(counts, celda.mod, precision = 128)
+calculatePerplexity(counts, celda.mod)
 }
 \arguments{
 \item{counts}{The count matrix modeled in the celdaRun parameter}
 
 \item{celda.mod}{A single celda run (usually from the _res.list_ property of a celda_list)}
-
-\item{precision}{The amount of bits of precision to pass to Rmpfr}
 }
 \value{
-The perplexity for the provided chain as an mpfr number
+The perplexity for the provided data and model
 }
 \description{
 Perplexity can be seen as a measure of how well a provided set of 
