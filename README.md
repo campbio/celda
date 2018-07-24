@@ -21,6 +21,11 @@ The most up-to-date (but potentially less stable) version of celda can similarly
 install_github("compbiomed/celda")
 ```
 
+**NOTE** On OSX, devtools::install_github() requires installation of **libgit2.** This can be installed via homebrew:
+```
+brew install libgit2
+```
+
 ## Examples and vignettes
 
 Vignettes are available in the package. 
