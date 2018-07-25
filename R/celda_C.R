@@ -514,3 +514,8 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 }
 
 
+celdaTsne.celda_C = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
+                             distance="hellinger", seed=12345) {
+  norm = normalizeCounts(counts = counts, scale.factor = 1)
+  return(createCeldaTsne(norm, celda.mod, states, perplexity, max.iter, distance, seed))
+}
