@@ -146,3 +146,22 @@ factorizeMatrix = function(counts, celda.mod, type) {
   counts = processCounts(counts)  # Ensure counts are integer and have corresponding storage mode
   UseMethod("factorizeMatrix", celda.mod)
 }
+
+
+#' Runs tSNE via Rtsne based on the CELDA model and specified cell states.
+#' 
+#' @param counts Counts matrix, should have cell name for column name and gene name for row name.
+#' @param celda.mod Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".
+#' @param states Numeric vector; determines which cell populations to use for tsne. If none are defined, all states will be used.
+#' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
+#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
+#' @param seed Seed for random number generation. Defaults to 12345.
+#' @export
+celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
+                     distance="hellinger", seed=12345) {
+  if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
+    stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
+  }
+  UseMethod("celdaTsne", celda.mod)
+}
