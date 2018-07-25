@@ -14,6 +14,7 @@
 #' @return The perplexity for the provided data and model
 #' @export
 calculatePerplexity = function(counts, celda.mod) {
+  compareCountMatrix(counts, celda.mod)
   UseMethod("calculatePerplexity", celda.mod)
 }
 

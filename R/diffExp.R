@@ -28,6 +28,8 @@ diffExpBetweenCellStates <- function(counts, celda.mod, c1, c2 = NULL, only.pos 
   if (is.null(c1)) {
     stop("'c1' should be a numeric vector of cell cluster(s)")
   }
+  compareCountMatrix(counts, celda.mod)
+  
   if (is.null(c2)){
     c2 <- sort(setdiff(unique(celda.mod$z),c1))
   }
