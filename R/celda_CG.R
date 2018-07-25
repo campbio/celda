@@ -605,3 +605,20 @@ getL.celda_CG = function(celda.mod) {
 celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
   renderCeldaHeatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
 }
+
+
+celdaTsne.celda_CG = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
+                              distance="hellinger", seed=12345) {
+  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
+    
+  states.to.use = 1:nrow(fm$counts$cell.states)
+  if (!is.null(states)) {
+    if (!all(states %in% states.to.use)) {
+      stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+    }
+    states.to.use = states 
+  } 
+  new.counts = fm$counts$cell.states[states.to.use,]
+  norm = normalizeCounts(new.counts, scale.factor=1)
+  return(createCeldaTsne(norm, celda.mod, states, perplexity, max.iter, distance, seed))
+}
