@@ -459,9 +459,10 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_C = function(counts, celda.mod) {
+calculatePerplexity.celda_C = function(counts, celda.mod, validate.counts) {
   
-  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
+  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
+                               "posterior", validate.counts)
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
   sl = celda.mod$sample.label
