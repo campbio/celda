@@ -57,12 +57,11 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					y.init=NULL, logfile=NULL) {
 
   ## Error checking and variable processing
-  counts = processCounts(counts)  
-  
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-
+  counts = processCounts(counts)  
+  
   ## Randomly select z and y or set z/y to supplied initial values
   y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
   y.best = y  
