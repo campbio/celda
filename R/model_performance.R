@@ -11,9 +11,10 @@
 #' 
 #' @param counts The count matrix modeled in the celdaRun parameter
 #' @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @return The perplexity for the provided data and model
 #' @export
-calculatePerplexity = function(counts, celda.mod) {
+calculatePerplexity = function(counts, celda.mod, validate.counts=TRUE) {
   compareCountMatrix(counts, celda.mod)
   UseMethod("calculatePerplexity", celda.mod)
 }
