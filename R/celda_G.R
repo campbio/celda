@@ -490,9 +490,10 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_G = function(counts, celda.mod) {
+calculatePerplexity.celda_G = function(counts, celda.mod, validate.counts) {
  
-  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
+  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
+                               "posterior", validate.counts)
   phi <- factorized$posterior$gene.states
   psi <- factorized$posterior$cell.states
   eta <- factorized$posterior$gene.distribution
