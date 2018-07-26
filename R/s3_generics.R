@@ -141,9 +141,11 @@ simulateCells = function(model, ...) {
 #' @param counts A numeric count matrix
 #' @param celda.mod An object from a celda_list's res.list property
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @export
-factorizeMatrix = function(counts, celda.mod, type) {
+factorizeMatrix = function(counts, celda.mod, type, validate.counts=TRUE) {
   counts = processCounts(counts)  # Ensure counts are integer and have corresponding storage mode
+  
   UseMethod("factorizeMatrix", celda.mod)
 }
 
@@ -158,8 +160,9 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
 #' @param seed Seed for random number generation. Defaults to 12345.
 #' @export
-celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
+celdaTsne = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500,
                      distance="hellinger", seed=12345) {
+  compareCountMatrix(counts, celda.mod)
   if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
     stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
   }

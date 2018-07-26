@@ -5,7 +5,7 @@
 \title{Generate factorized matrices showing each feature's influence on the celda_G model clustering}
 \usage{
 \method{factorizeMatrix}{celda_G}(counts, celda.mod, type = c("counts",
-  "proportion", "posterior"))
+  "proportion", "posterior"), validate.counts = TRUE)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -13,6 +13,8 @@
 \item{celda.mod}{Object return from celda_C function}
 
 \item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
+
+\item{validate.counts}{Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.}
 }
 \description{
 Generate factorized matrices showing each feature's influence on the celda_G model clustering

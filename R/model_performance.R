@@ -11,9 +11,11 @@
 #' 
 #' @param counts The count matrix modeled in the celdaRun parameter
 #' @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @return The perplexity for the provided data and model
 #' @export
-calculatePerplexity = function(counts, celda.mod) {
+calculatePerplexity = function(counts, celda.mod, validate.counts=TRUE) {
+  compareCountMatrix(counts, celda.mod)
   UseMethod("calculatePerplexity", celda.mod)
 }
 
@@ -27,10 +29,11 @@ calculatePerplexity = function(counts, celda.mod) {
 #' @param counts The counts matrix used to generate the provided celda.list
 #' @param resample The number of times to resample the counts matrix for evaluating perplexity. Works with method="perplexity."
 #' @param title Title to be appended to the perplexity plot title. Default is "".
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @return A list with a data frame summarizing all of the calculated perplexities, and a ggplot2 object visualizing them.
 #' @export
 calculatePerplexityWithResampling <- function(celda.list, counts, resample,
-                                              title="") {
+                                              title="", validate.counts=TRUE) {
   if (!isTRUE(class(celda.list) == "celda_list")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
@@ -41,10 +44,10 @@ calculatePerplexityWithResampling <- function(celda.list, counts, resample,
   }
   
   perplexities.per.model = lapply(celda.list$res.list, function(mod){
-    perplexities = lapply(countsList, function(counts, mod){ 
+    perplexities = lapply(countsList, function(counts, mod, validate.counts){ 
       class(counts) = class(mod)
       UseMethod("calculatePerplexity", object=mod)
-    }, mod)
+    }, mod, validate.counts)
     
     perplexity.df = data.frame(perplexity=unlist(perplexities))
     if (!is.null(mod$K)) { perplexity.df$k = rep(mod$K, nrow(perplexity.df)) }
