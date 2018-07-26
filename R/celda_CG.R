@@ -302,11 +302,17 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param counts A numerix count matrix
 #' @param celda.mod object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
-factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
-
+factorizeMatrix.celda_CG = function(counts, celda.mod, 
+                                    type=c("counts", "proportion", "posterior"),
+                                    validate.counts = TRUE) {
   counts = processCounts(counts)
+  if (validate.counts) { 
+    compareCountMatrix(counts, celda.mod)
+  }
+  
   K = celda.mod$K
   L = celda.mod$L
   z = celda.mod$z
@@ -550,7 +556,8 @@ reorder.celda_CG = function(counts, res){
   # Reorder K
   if(res$K > 2 & isTRUE(length(unique(res$z)) > 1)) {
     res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
+    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior",
+                          validate.counts=FALSE)
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$population.states[,unique.z])
     h <- hclust(d, method = "complete")
@@ -561,7 +568,8 @@ reorder.celda_CG = function(counts, res){
   # Reorder L
   if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
     res$y = as.integer(as.factor(res$y))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
+    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior",
+                          validate.counts=FALSE)
     unique.y = sort(unique(res$y))
     cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
     d <- cosineDist(cs)

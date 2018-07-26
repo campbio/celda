@@ -300,10 +300,16 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param counts A numeric count matrix
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @export
-factorizeMatrix.celda_C = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
-
+factorizeMatrix.celda_C = function(counts, celda.mod, 
+                                   type=c("counts", "proportion", "posterior"),
+                                   validate.counts = TRUE) {
   counts = processCounts(counts)
+  if (validate.counts) { 
+    compareCountMatrix(counts, celda.mod)
+  }
+  
   K = celda.mod$K
   z = celda.mod$z
   alpha = celda.mod$alpha
@@ -472,7 +478,8 @@ calculatePerplexity.celda_C = function(counts, celda.mod) {
 reorder.celda_C = function(counts, res){
   if(res$K > 2 & isTRUE(length(unique(res$z)) > 1)) {
     res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res,
+                          validate.counts = FALSE)
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$gene.states[,unique.z])
     h <- hclust(d, method = "complete")
