@@ -5,7 +5,7 @@
 \title{Generate factorized matrices showing each feature's influence on the celda_CG model clustering}
 \usage{
 \method{factorizeMatrix}{celda_CG}(counts, celda.mod, type = c("counts",
-  "proportion", "posterior"))
+  "proportion", "posterior"), validate.counts = TRUE)
 }
 \arguments{
 \item{counts}{A numerix count matrix}
@@ -13,6 +13,8 @@
 \item{celda.mod}{object returned from celda_CG function}
 
 \item{type}{one of the "counts", "proportion", or "posterior".}
+
+\item{validate.counts}{Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.}
 }
 \value{
 A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).

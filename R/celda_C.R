@@ -54,6 +54,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
                  	 z.init = NULL, logfile=NULL) {
   
   ## Error checking and variable processing
+  if(is.null(count.checksum)) {
+    count.checksum = digest::digest(counts, algo="md5")
+  }
   counts = processCounts(counts)  
     
   s = processSampleLabels(sample.label, ncol(counts))
@@ -61,10 +64,6 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     sample.label = s
   }
   
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
-  }
-
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
@@ -300,10 +299,16 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param counts A numeric count matrix
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @export
-factorizeMatrix.celda_C = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
-
+factorizeMatrix.celda_C = function(counts, celda.mod, 
+                                   type=c("counts", "proportion", "posterior"),
+                                   validate.counts = TRUE) {
   counts = processCounts(counts)
+  if (validate.counts) { 
+    compareCountMatrix(counts, celda.mod)
+  }
+  
   K = celda.mod$K
   z = celda.mod$z
   alpha = celda.mod$alpha
@@ -454,9 +459,10 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_C = function(counts, celda.mod) {
+calculatePerplexity.celda_C = function(counts, celda.mod, validate.counts) {
   
-  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, "posterior")
+  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
+                               "posterior", validate.counts)
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
   sl = celda.mod$sample.label
@@ -472,7 +478,8 @@ calculatePerplexity.celda_C = function(counts, celda.mod) {
 reorder.celda_C = function(counts, res){
   if(res$K > 2 & isTRUE(length(unique(res$z)) > 1)) {
     res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res,
+                          validate.counts = FALSE)
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$gene.states[,unique.z])
     h <- hclust(d, method = "complete")

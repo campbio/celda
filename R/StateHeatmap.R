@@ -27,6 +27,8 @@ stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, gen
   if (is.null(celda.mod) || is.null(celda.mod$y)){
     stop("'celda.mod' should be an object of class celda_G or celda_CG")
   }
+  compareCountMatrix(counts, celda.mod)
+  
   factorize.matrix <-
     factorizeMatrix(celda.mod = celda.mod, counts = counts)
   genes <- celda.mod$names$row[celda.mod$y %in% state.use]
