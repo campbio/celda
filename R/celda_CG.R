@@ -59,7 +59,9 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     seed=12345, count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL) {
  
-  ## Error checking and variable processing
+  if(is.null(count.checksum)) {
+    count.checksum = digest::digest(counts, algo="md5")
+  }
   counts = processCounts(counts)
     
   s = processSampleLabels(sample.label, ncol(counts))
@@ -70,9 +72,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
-  }
+  
     
   ## Randomly select z and y or set z/y to supplied initial values
   z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
