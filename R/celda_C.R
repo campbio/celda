@@ -54,6 +54,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
                  	 z.init = NULL, logfile=NULL) {
   
   ## Error checking and variable processing
+  if(is.null(count.checksum)) {
+    count.checksum = digest::digest(counts, algo="md5")
+  }
   counts = processCounts(counts)  
     
   s = processSampleLabels(sample.label, ncol(counts))
@@ -61,10 +64,6 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     sample.label = s
   }
   
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
-  }
-
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
