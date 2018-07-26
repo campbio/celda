@@ -62,6 +62,8 @@ topRank = function(fm, n=25, margin=2, threshold=0, decreasing=TRUE) {
 #' @param bar_col The color of bars (#FF8080FF by default).
 #' @export
 GiniPlot <- function(counts, celda.mod, cell_clusters = NULL, label_size = 4, bar_col = NULL) {
+  compareCountMatrix(counts, celda.mod)
+  
   factorize.matrix <-
     factorizeMatrix(counts = counts, celda.mod = celda.mod)
   if(is.null(bar_col)){
