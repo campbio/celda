@@ -189,7 +189,7 @@ compareCountMatrix = function(count.matrix, celda.obj, error.on.mismatch=TRUE) {
   
   celda.checksum = celda.obj$count.checksum
   count.md5 = digest::digest(count.matrix, algo="md5")
-  res = count.md5 == celda.checksum
+  res = isTRUE(count.md5 == celda.checksum)
   if (res) return(TRUE)
   if (!res && error.on.mismatch) stop("There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
   else if (!res && !error.on.mismatch) return(FALSE)
