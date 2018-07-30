@@ -6,8 +6,8 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, count.checksum = NULL,
-  seed = 12345, z.init = NULL, logfile = NULL)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
+  count.checksum = NULL, z.init = NULL, logfile = NULL)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -30,9 +30,11 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{split.on.last}{After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{count.checksum}{An MD5 checksum for the provided counts matrix}
+\item{seed}{Parameter to set.seed() for random number generation. Default 12345.}
 
-\item{seed}{Parameter to set.seed() for random number generation}
+\item{nchains}{Number of random z initializations. Default 3.}
+
+\item{count.checksum}{An MD5 checksum for the provided counts matrix. Default NULL.}
 
 \item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
 
