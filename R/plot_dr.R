@@ -13,6 +13,9 @@
 #' @export
 plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
+  na.ix = is.na(dim1) | is.na(dim2)
+  df = df[!na.ix,]
+  
   m <- reshape2::melt(df, id.vars = c("dim1","dim2"))
   colnames(m) <- c(xlab,ylab,"facet",var_label)
   ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes_string(color = var_label)) + 
@@ -90,6 +93,9 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
 plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
   df <- data.frame(dim1, dim2, cluster)
   colnames(df) <- c(xlab,ylab,"Cluster")
+  na.ix = is.na(dim1) | is.na(dim2)
+  df = df[!na.ix,]
+  
   if(!is.null(specific_clusters)){
     df[3][!(df[[3]] %in% specific_clusters),] <- 0
     df <- df[order(df[[3]]),]
@@ -106,33 +112,43 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
 }
 
-# Runs tSNE via Rtsne based on the CELDA model and specified cell states.
-# 
-# @param norm Normalized counts matrix from model specific normalization
-# @param celda.mod Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".
-# @param states Numeric vector; determines which cell populations to use for tsne. If none are defined, all states will be used.
-# @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
-# @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
-# @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.
-# @param seed Seed for random number generation. Defaults to 12345.
-createCeldaTsne = function(norm, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
-                           distance="hellinger", seed=12345) {
-  distance = match.arg(distance, choices = c("hellinger","cosine","spearman"))
-  if (distance == "cosine") {
-    d = cosineDist(norm)  
-  } else if(distance == "hellinger") {
-    d = hellingerDist(norm)  
-  } else if(distance == "spearman") {
-    d = spearmanDist(norm)
-  } else {
-    stop("distances must be either 'cosine' or 'hellinger' or 'spearman")
-  }
+
+
+
+
+#' Uses Rtsne package to run tSNE.
+#' 
+#' @param norm Normalized count matrix
+#' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
+#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman or euclidean.
+#' @param seed Seed for random number generation. Defaults to 12345.
+#' @param do.pca Perform dimensionality reduction with PCA before tSNE.
+#' @param initial.dims Number of dimensions from PCA to use as input in tSNE.
+calculateTsne = function(norm, perplexity=20, max.iter=2500, distance=c("hellinger","euclidean", "cosine","spearman"), seed=12345, do.pca=FALSE, initial.dims = 20) {
+
+  distance = match.arg(distance)
   
-  do.pca = class(celda.mod) == "celda_C"
   set.seed(seed)
+
+  ## Generate distances
+  if(!isTRUE(do.pca)) {
+	if (distance == "cosine") {
+	  d = cosineDist(norm)  
+	} else if(distance == "hellinger") {
+	  d = hellingerDist(norm)  
+	} else if(distance == "spearman") {
+	  d = spearmanDist(norm)
+	} else if(distance == "euclidean") {
+	  d = dist(t(norm))
+	} else {
+	  stop("distances must be either 'cosine' or 'hellinger' or 'spearman")
+	}
+  } else {
+    d = t(norm)
+  }  
   res = Rtsne::Rtsne(d, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
-                     check_duplicates = FALSE, is_distance = TRUE)$Y
-  colnames(res) = c("tsne_1", "tsne_2")
-  return(res)
+                     check_duplicates = FALSE, is_distance = !isTRUE(do.pca), initial_dims=initial.dims)$Y
+  return(res)                     
 }
 

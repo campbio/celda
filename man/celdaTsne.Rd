@@ -4,23 +4,14 @@
 \alias{celdaTsne}
 \title{Runs tSNE via Rtsne based on the CELDA model and specified cell states.}
 \usage{
-celdaTsne(counts, celda.mod, states = NULL, perplexity = 20,
-  max.iter = 2500, distance = "hellinger", seed = 12345)
+celdaTsne(counts, celda.mod, ...)
 }
 \arguments{
 \item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
 
 \item{celda.mod}{Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".}
 
-\item{states}{Numeric vector; determines which cell populations to use for tsne. If none are defined, all states will be used.}
-
-\item{perplexity}{Numeric vector; determines perplexity for tsne. Default 20.}
-
-\item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
-
-\item{distance}{Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman.}
-
-\item{seed}{Seed for random number generation. Defaults to 12345.}
+\item{...}{Other arguments to be passed to model-specific tSNE functions. Use methods("celdaTsne") for list of 'celdaTsne' functions.}
 }
 \description{
 Runs tSNE via Rtsne based on the CELDA model and specified cell states.
