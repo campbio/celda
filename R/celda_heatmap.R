@@ -251,6 +251,7 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 #' @export 
 absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
   if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
   
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
@@ -293,6 +294,7 @@ absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
 #' @export 
 relativeProbabilityHeatmap <- function(counts, celda.mod, main = NA){
   if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
   
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
