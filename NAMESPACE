@@ -81,4 +81,6 @@ import(graphics)
 import(grid)
 import(gtable)
 import(scales)
+
+import(data.table)
 useDynLib(celda)

@@ -323,14 +323,9 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
-factorizeMatrix.celda_CG = function(counts, celda.mod, 
-                                    type=c("counts", "proportion", "posterior"),
-                                    validate.counts = TRUE) {
+factorizeMatrix.celda_CG = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
+
   counts = processCounts(counts)
-  if (validate.counts) { 
-    compareCountMatrix(counts, celda.mod)
-  }
-  
   K = celda.mod$K
   L = celda.mod$L
   z = celda.mod$z

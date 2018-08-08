@@ -143,9 +143,8 @@ simulateCells = function(model, ...) {
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @export
-factorizeMatrix = function(counts, celda.mod, type, validate.counts=TRUE) {
+factorizeMatrix = function(counts, celda.mod, type) {
   counts = processCounts(counts)  # Ensure counts are integer and have corresponding storage mode
-  
   UseMethod("factorizeMatrix", celda.mod)
 }
 
