@@ -4,15 +4,16 @@
 \alias{plotDrCluster}
 \title{Create a scatterplot based on celda cluster labels.}
 \usage{
-plotDrCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", specific_clusters = NULL)
+plotDrCluster(dim1, dim2, cluster.labels, size = 1,
+  xlab = "Dimension_1", ylab = "Dimension_2",
+  specific_clusters = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
 
 \item{dim2}{Numeric vector; second dimension from data dimensionality reduction output.}
 
-\item{cluster}{Vector; Contains cluster labels (e.g. from celda_C or celda_CG).}
+\item{cluster.labels}{Vector; Contains cluster labels (e.g. from celda_C or celda_CG).}
 
 \item{size}{Numeic vector; size of point on plot.Default 1.}
 
