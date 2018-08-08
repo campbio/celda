@@ -46,8 +46,9 @@
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param seed Parameter to set.seed() for random number generation
-#' @param count.checksum An MD5 checksum for the provided counts matrix
+#' @param seed Parameter to set.seed() for random number generation. Default 12345. 
+#' @param nchains Number of random z/y initializations. Default 3. 
+#' @param count.checksum An MD5 checksum for the provided counts matrix. Default NULL.
 #' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
@@ -56,7 +57,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, count.checksum=NULL,
+                    seed=12345, nchains=3, count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL) {
  
   if(is.null(count.checksum)) {
@@ -72,132 +73,149 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
-  
-    
-  ## Randomly select z and y or set z/y to supplied initial values
-  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=seed)
-  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
-  z.best = z
-  y.best = y  
-  
-  ## Calculate counts one time up front
-  p = cCG.decomposeCounts(counts, s, z, y, K, L)
-  m.CP.by.S = p$m.CP.by.S
-  n.TS.by.C = p$n.TS.by.C
-  n.TS.by.CP = p$n.TS.by.CP
-  n.CP = p$n.CP
-  n.by.G = p$n.by.G
-  n.by.C = p$n.by.C
-  n.by.TS = p$n.by.TS
-  nG.by.TS = p$nG.by.TS
-  n.G.by.CP = p$n.G.by.CP
-  nM = p$nM
-  nG = p$nG
-  nS = p$nS
-  rm(p)
-  
-  ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-
-  set.seed(seed)
-  logMessages(date(), "... Starting celda_CG to cluster cells and genes.", logfile=logfile, append=FALSE)
-  
-  iter = 1L
-  num.iter.without.improvement = 0L
-  do.cell.split = TRUE
-  do.gene.split = TRUE  
-  while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
-
-    ## Gibbs or EM sampling for each cell
-	next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
-    m.CP.by.S = next.z$m.CP.by.S
-    n.TS.by.CP = next.z$n.G.by.CP
-    n.CP = next.z$n.CP
-    n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
-    z = next.z$z
-        
-    ## Gibbs sampling for each gene
- 	next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma)
-	n.TS.by.CP = next.y$n.TS.by.C
-	nG.by.TS = next.y$nG.by.TS
-	n.by.TS = next.y$n.by.TS
-	n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
-	y = next.y$y
-    
-        
-    ## Perform split on i-th iteration defined by split.on.iter
-	if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
-	  logMessages(date(), " ... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
-	  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
-	  logMessages(res$message, logfile=logfile, append=TRUE)
-
-	  # Reset convergence counter if a split occured
-	  if(!isTRUE(all.equal(z, res$z))) {
-		num.iter.without.improvement = 0L
-		do.cell.split = TRUE
-	  } else {
-		do.cell.split = FALSE
-	  }
-
-	  ## Re-calculate variables
-	  z = res$z      
-	  m.CP.by.S = res$m.CP.by.S
-	  n.TS.by.CP = res$n.TS.by.CP
-	  n.CP = res$n.CP
-	  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-	}  
-	if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
-	  logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
-	  res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=10, min.cell=3)
-	  logMessages(res$message, logfile=logfile, append=TRUE)
-
-	  # Reset convergence counter if a split occured	    
-	  if(!isTRUE(all.equal(y, res$y))) {
-		num.iter.without.improvement = 1L
-		do.gene.split = TRUE
-	  } else {
-		do.gene.split = FALSE
-	  }
-
-	  ## Re-calculate variables
-	  y = res$y        
-	  n.TS.by.CP = res$n.TS.by.CP
-	  n.by.TS = res$n.by.TS
-	  nG.by.TS = res$nG.by.TS
-	  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
-	}      
-
-    ## Calculate complete likelihood
-    temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-    if((all(temp.ll > ll)) | iter == 1) {
-      z.best = z
-      y.best = y
-      ll.best = temp.ll
-      num.iter.without.improvement = 1L
-    } else {  
-      num.iter.without.improvement = num.iter.without.improvement + 1L   
-    }
-    ll = c(ll, temp.ll)
-  
-    logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
-    iter = iter + 1L
-    
+  if(is.null(count.checksum)) {
+    count.checksum = digest::digest(counts, algo="md5")
   }
-    
+  
+  all.seeds = seed:(seed + nchains - 1)
+  
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
+  logMessages("Celda_CG: Clustering cells and genes.", logfile=logfile, append=FALSE)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
+  
+  best.result = NULL  
+  for(i in seq_along(all.seeds)) { 
 
-  names = list(row=rownames(counts), column=colnames(counts), 
-               sample=levels(sample.label))
+	## Randomly select z and y or set z/y to supplied initial values
+    current.seed = all.seeds[i]	
+	z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	z.best = z
+	y.best = y  
   
-  result = list(z=z.best, y=y.best, completeLogLik=ll, 
-                finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
-                beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                sample.label=sample.label, names=names,
-                count.checksum=count.checksum)
+	## Calculate counts one time up front
+	p = cCG.decomposeCounts(counts, s, z, y, K, L)
+	m.CP.by.S = p$m.CP.by.S
+	n.TS.by.C = p$n.TS.by.C
+	n.TS.by.CP = p$n.TS.by.CP
+	n.CP = p$n.CP
+	n.by.G = p$n.by.G
+	n.by.C = p$n.by.C
+	n.by.TS = p$n.by.TS
+	nG.by.TS = p$nG.by.TS
+	n.G.by.CP = p$n.G.by.CP
+	nM = p$nM
+	nG = p$nG
+	nS = p$nS
+	rm(p)
   
-  class(result) = "celda_CG" 
-   
+	ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+
+    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+
+	set.seed(current.seed)
+	iter = 1L
+	num.iter.without.improvement = 0L
+	do.cell.split = TRUE
+	do.gene.split = TRUE  
+	while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
+
+	  ## Gibbs or EM sampling for each cell
+	  next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
+	  m.CP.by.S = next.z$m.CP.by.S
+	  n.TS.by.CP = next.z$n.G.by.CP
+	  n.CP = next.z$n.CP
+	  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
+	  z = next.z$z
+		
+	  ## Gibbs sampling for each gene
+	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma)
+	  n.TS.by.CP = next.y$n.TS.by.C
+	  nG.by.TS = next.y$nG.by.TS
+	  n.by.TS = next.y$n.by.TS
+	  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
+	  y = next.y$y
+	
+		
+	  ## Perform split on i-th iteration defined by split.on.iter
+	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
+		res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
+		logMessages(res$message, logfile=logfile, append=TRUE)
+
+		# Reset convergence counter if a split occured
+		if(!isTRUE(all.equal(z, res$z))) {
+		  num.iter.without.improvement = 0L
+		  do.cell.split = TRUE
+		} else {
+		  do.cell.split = FALSE
+		}
+
+		## Re-calculate variables
+		z = res$z      
+		m.CP.by.S = res$m.CP.by.S
+		n.TS.by.CP = res$n.TS.by.CP
+		n.CP = res$n.CP
+		n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+	  }  
+	  if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
+		res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=10, min.cell=3)
+		logMessages(res$message, logfile=logfile, append=TRUE)
+
+		# Reset convergence counter if a split occured	    
+		if(!isTRUE(all.equal(y, res$y))) {
+		  num.iter.without.improvement = 1L
+		  do.gene.split = TRUE
+		} else {
+		  do.gene.split = FALSE
+		}
+
+		## Re-calculate variables
+		y = res$y        
+		n.TS.by.CP = res$n.TS.by.CP
+		n.by.TS = res$n.by.TS
+		nG.by.TS = res$nG.by.TS
+		n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
+	  }      
+
+	  ## Calculate complete likelihood
+	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+	  if((all(temp.ll > ll)) | iter == 1) {
+		z.best = z
+		y.best = y
+		ll.best = temp.ll
+		num.iter.without.improvement = 1L
+	  } else {  
+		num.iter.without.improvement = num.iter.without.improvement + 1L   
+	  }
+	  ll = c(ll, temp.ll)
+  
+	  logMessages(date(), " .... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
+	  iter = iter + 1L
+	}
+      
+	names = list(row=rownames(counts), column=colnames(counts), 
+				 sample=levels(sample.label))
+  
+	result = list(z=z.best, y=y.best, completeLogLik=ll, 
+				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
+				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
+				  sample.label=sample.label, names=names,
+				  count.checksum=count.checksum)
+  
+	class(result) = "celda_CG" 
+
+    if(is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
+      best.result = result
+    }
+    
+    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+  } 
+  
   ## Peform reordering on final Z and Y assigments:
-  result = reorder.celda_CG(counts = counts, res = result)
-  return(result)
+  best.result = reorder.celda_CG(counts = counts, res = best.result)
+  return(best.result)
 }
 
 
@@ -616,8 +634,22 @@ celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
 }
 
 
-celdaTsne.celda_CG = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
-                              distance="hellinger", seed=12345) {
+#' Embeds cells in two dimensions using tSNE based on celda_CG results.
+#' 
+#' @param counts Counts matrix, should have cell name for column name and gene name for row name.
+#' @param celda.mod Celda model to use for tsne. 
+#' @param max.cells Integer; Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param min.cluster.size Integer; Do not subsample cell clusters below this threshold. Default 100. 
+#' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
+#' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
+#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @param distance Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.
+#' @param seed Seed for random number generation. Default 12345.
+#' @param ... Further arguments passed to or from other methods.
+#' @export
+celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, states=NULL,
+								perplexity=20, max.iter=2500, distance="hellinger", seed=12345, ...) {
+
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
     
   states.to.use = 1:nrow(fm$counts$cell.states)
@@ -626,8 +658,44 @@ celdaTsne.celda_CG = function(counts, celda.mod, states=NULL, perplexity=20, max
       stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
     }
     states.to.use = states 
+  }
+  
+  states.to.use = 1:nrow(fm$counts$cell.states)
+  if (!is.null(states)) {
+	if (!all(states %in% states.to.use)) {
+	  stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+	}
+	states.to.use = states 
   } 
-  new.counts = fm$counts$cell.states[states.to.use,]
-  norm = normalizeCounts(new.counts, scale.factor=1)
-  return(createCeldaTsne(norm, celda.mod, states, perplexity, max.iter, distance, seed))
+  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], scale.factor=1)
+
+  ## Select a subset of cells to sample if greater than 'max.cells'
+  total.cells.to.remove = ncol(norm) - max.cells
+  z.include = rep(TRUE, ncol(norm))
+  if(total.cells.to.remove > 0) {
+	z.ta = tabulate(celda.mod$z, celda.mod$K)
+	
+	## Number of cells that can be sampled from each cluster without going below the minimum threshold
+	cluster.cells.to.sample = z.ta - min.cluster.size          
+	cluster.cells.to.sample[cluster.cells.to.sample < 0] = 0
+	
+	## Number of cells to sample after exluding smaller clusters
+	## Rounding can cause number to be off by a few, so ceiling is used with a second round of subtraction
+	cluster.n.to.sample = ceiling((cluster.cells.to.sample / sum(cluster.cells.to.sample)) * total.cells.to.remove)
+	diff = sum(cluster.n.to.sample) - total.cells.to.remove 
+	cluster.n.to.sample[which.max(cluster.n.to.sample)] = cluster.n.to.sample[which.max(cluster.n.to.sample)] - diff
+
+	## Perform sampling for each cluster
+	for(i in which(cluster.n.to.sample > 0)) {
+	  z.include[sample(which(celda.mod$z == i), cluster.n.to.sample[i])] = FALSE
+	}
+  }   
+  cell.ix = which(z.include)
+
+  res = calculateTsne(norm[,cell.ix], do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, distance=distance, seed=seed)
+  final = matrix(NA, nrow=ncol(norm), ncol=2)
+  final[cell.ix,] = res
+  rownames(final) = colnames(norm)
+  colnames(final) = c("tsne_1", "tsne_2")
+  return(final)
 }
