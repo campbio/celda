@@ -45,99 +45,114 @@
 #' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
 #' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
 #' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param count.checksum An MD5 checksum for the provided counts matrix
-#' @param seed Parameter to set.seed() for random number generation.
+#' @param seed Parameter to set.seed() for random number generation. Default 12345.
+#' @param nchains Number of random y initializations. Default 3. 
+#' @param count.checksum An MD5 checksum for the provided counts matrix. Default NULL.
 #' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
 #' @param logfile The name of the logfile to redirect messages to.
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					count.checksum=NULL, seed=12345, 
+					seed=12345, nchains=3, count.checksum=NULL, 
 					y.init=NULL, logfile=NULL) {
 
   ## Error checking and variable processing
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-  counts = processCounts(counts)  
+
+  all.seeds = seed:(seed + nchains - 1)
   
-  ## Randomly select z and y or set z/y to supplied initial values
-  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
-  y.best = y  
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
+  logMessages("Celda_G: Clustering genes.", logfile=logfile, append=FALSE)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
 
-  ## Calculate counts one time up front
-  p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  n.TS.by.C = p$n.TS.by.C
-  n.by.G = p$n.by.G
-  n.by.TS = p$n.by.TS
-  nG.by.TS = p$nG.by.TS
-  nM = p$nM
-  nG = p$nG
-  rm(p)
+  best.result = NULL  
+  for(i in seq_along(all.seeds)) {   
 
-  set.seed(seed)
-  logMessages(date(), "... Starting celda_G to cluster genes.", logfile=logfile, append=FALSE)
+	## Randomly select y or y to supplied initial values
+	current.seed = all.seeds[i]	
+	y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	y.best = y  
+
+	## Calculate counts one time up front
+	p = cG.decomposeCounts(counts=counts, y=y, L=L)
+	n.TS.by.C = p$n.TS.by.C
+	n.by.G = p$n.by.G
+	n.by.TS = p$n.by.TS
+	nG.by.TS = p$nG.by.TS
+	nM = p$nM
+	nG = p$nG
+	rm(p)
+
+	set.seed(seed)
   
-  ## Calculate initial log likelihood
-  ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	## Calculate initial log likelihood
+	ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 
-  iter <- 1L
-  num.iter.without.improvement = 0L
-  do.gene.split = TRUE
-  while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
+	iter <- 1L
+	num.iter.without.improvement = 0L
+	do.gene.split = TRUE
+	while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
-	next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-	n.TS.by.C = next.y$n.TS.by.C
-	nG.by.TS = next.y$nG.by.TS
-	n.by.TS = next.y$n.by.TS
-	y = next.y$y
-    
-    ## Perform split on i-th iteration of no improvement in log likelihood
-    if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
-      logMessages(date(), " ... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
-      res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob=t(next.y$probs), min=3, max.clusters.to.try=10)
-      logMessages(res$message, logfile=logfile, append=TRUE)
-      
-	  # Reset convergence counter if a split occured	    
-	  if(!isTRUE(all.equal(y, res$y))) {
-		num.iter.without.improvement = 1L
-		do.gene.split = TRUE
-	  } else {
-		do.gene.split = FALSE
-	  }
+	  next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	  n.TS.by.C = next.y$n.TS.by.C
+	  nG.by.TS = next.y$nG.by.TS
+	  n.by.TS = next.y$n.by.TS
+	  y = next.y$y
+	
+	  ## Perform split on i-th iteration of no improvement in log likelihood
+	  if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
+		res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob=t(next.y$probs), min=3, max.clusters.to.try=10)
+		logMessages(res$message, logfile=logfile, append=TRUE)
 	  
-      ## Re-calculate variables
-      y = res$y
-      n.TS.by.C = res$n.TS.by.C
-      n.by.TS = res$n.by.TS
-      nG.by.TS = res$nG.by.TS
-    }
-     
-    ## Calculate complete likelihood
-    temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-    if((all(temp.ll > ll)) | iter == 1) {
-      y.best = y
-      ll.best = temp.ll
-      num.iter.without.improvement = 1L
-    } else {  
-      num.iter.without.improvement = num.iter.without.improvement + 1L   
-    }
-    ll <- c(ll, temp.ll)
+		# Reset convergence counter if a split occured	    
+		if(!isTRUE(all.equal(y, res$y))) {
+		  num.iter.without.improvement = 1L
+		  do.gene.split = TRUE
+		} else {
+		  do.gene.split = FALSE
+		}
+	  
+		## Re-calculate variables
+		y = res$y
+		n.TS.by.C = res$n.TS.by.C
+		n.by.TS = res$n.by.TS
+		nG.by.TS = res$nG.by.TS
+	  }
+	 
+	  ## Calculate complete likelihood
+	  temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	  if((all(temp.ll > ll)) | iter == 1) {
+		y.best = y
+		ll.best = temp.ll
+		num.iter.without.improvement = 1L
+	  } else {  
+		num.iter.without.improvement = num.iter.without.improvement + 1L   
+	  }
+	  ll <- c(ll, temp.ll)
 
-    logMessages(date(), " ... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
-
-    iter <- iter + 1L
-  }
+	  logMessages(date(), ".... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
+	  iter = iter + 1    	  
+    }
     
-  names = list(row=rownames(counts), column=colnames(counts))  
+	names = list(row=rownames(counts), column=colnames(counts))  
 
-  result = list(y=y.best, completeLogLik=ll, 
-                finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
-                count.checksum=count.checksum, seed=seed, names=names)
-  class(result) = "celda_G"
-  result = reorder.celda_G(counts = counts, res = result)
+	result = list(y=y.best, completeLogLik=ll, 
+				  finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
+				  count.checksum=count.checksum, seed=current.seed, names=names)
+	class(result) = "celda_G"
+	
+	if(is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
+      best.result = result
+    }
+    
+    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+  } 
   
+  result = reorder.celda_G(counts = counts, res = result) 
   return(result)
 }
 
@@ -555,8 +570,33 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 }
 
 
+#' Embeds cells in two dimensions using tSNE based on celda_CG results.
+#' 
+#' @param counts Counts matrix, should have cell name for column name and gene name for row name.
+#' @param celda.mod Celda model to use for tsne. 
+#' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
+#' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
+#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @param distance Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.
+#' @param seed Seed for random number generation. Default 12345.
+#' @param ... Further arguments passed to or from other methods.
+#' @export
 celdaTsne.celda_G = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
-                             distance="hellinger", seed=12345) {
-  norm = normalizeCounts(counts = counts, scale.factor = 1)
-  return(createCeldaTsne(norm, celda.mod, states, perplexity, max.iter, distance, seed))
+                             distance="hellinger", seed=12345, ...) {
+                             
+  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
+    
+  states.to.use = 1:nrow(fm$counts$cell.states)
+  if (!is.null(states)) {
+	if (!all(states %in% states.to.use)) {
+	  stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+	}
+	states.to.use = states 
+  } 
+  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], scale.factor=1)
+
+  res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, distance=distance, seed=seed)
+  rownames(res) = colnames(norm)
+  colnames(res) = c("tsne_1", "tsne_2")
+  return(res)
 }
