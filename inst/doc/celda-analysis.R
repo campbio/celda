@@ -108,8 +108,13 @@ head(rownames(pbmc_select))
 head(colnames(pbmc_select))
 
 ## ---- eval = FALSE---------------------------------------------------------
-#  pbmc_res1 <- celda(pbmc_select, K = seq(5:50,by = 5), L = seq(10:50,by = 5),
-#                    cores = 1, model = "celda_CG", nchains = 4, max.iter = 100)
+#  pbmc_res1 <- celda(pbmc_select,
+#                     K = seq(5, 50, by = 5),
+#                     L = seq(10, 50, by = 5),
+#                     cores = 1,
+#                     model = "celda_CG",
+#                     nchains = 4,
+#                     max.iter = 100)
 
 ## ---- eval=FALSE-----------------------------------------------------------
 #  calc.perplexity <- calculatePerplexityWithResampling(pbmc_res1,
@@ -120,7 +125,7 @@ head(colnames(pbmc_select))
 calc.perplexity$plot
 
 ## ---- eval = FALSE---------------------------------------------------------
-#  pbmc_res <- celda(pbmc_select, K = 10:20, L = seq(10:50,by = 5),
+#  pbmc_res <- celda(pbmc_select, K = 10:20, L = seq(10, 50, by = 5),
 #                    cores = 1, model = "celda_CG", nchains = 4, max.iter = 100)
 
 ## --------------------------------------------------------------------------
