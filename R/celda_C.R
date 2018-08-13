@@ -174,10 +174,6 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 
   ## Set variables up front outside of loop  
   probs = matrix(NA, ncol=nM, nrow=K)
-#  temp.n.G.by.CP = n.G.by.CP
-#  temp.n.CP = n.CP
-#  n.G.by.CP_1 = n.G.by.CP
-#  n.G.by.CP_2 = n.G.by.CP
 
   ix = sample(1:nM)
   for(i in ix) {
@@ -293,13 +289,14 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
   cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
 
   ## Peform reordering on final Z and Y assigments:
+  cell.counts = processCounts(cell.counts) 
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
   result = list(z=z, completeLogLik=NULL, 
                 finalLogLik=NULL, K=K, 
                 alpha=alpha, beta=beta, seed=seed, 
                 sample.label=cell.sample.label, names=names,
-                count.checksum=NULL)
+                count.checksum=digest::digest(cell.counts, algo="md5"))
   class(result) = "celda_C" 
   result = reorder.celda_C(counts = cell.counts, res = result)
   
@@ -312,15 +309,11 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' @param counts A numeric count matrix
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
-#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.mod, 
-                                   type=c("counts", "proportion", "posterior"),
-                                   validate.counts = TRUE) {
-  counts = processCounts(counts)
-  if (validate.counts) { 
-    compareCountMatrix(counts, celda.mod)
-  }
+                                   type=c("counts", "proportion", "posterior")) {
+  counts = processCounts(counts) 
+  compareCountMatrix(counts, celda.mod)
   
   K = celda.mod$K
   z = celda.mod$z
@@ -472,18 +465,27 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_C = function(counts, celda.mod, validate.counts) {
+calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
+
+  if(is.null(new.counts)) {
+    new.counts = counts
+  } else {
+    new.counts = processCounts(new.counts)
+  }
+  if(nrow(new.counts) != nrow(counts)) {
+    stop("new.counts should have the same number of rows as counts.")
+  }
   
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
-                               "posterior", validate.counts)
+                               type="posterior")
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
   sl = celda.mod$sample.label
   
-  inner.log.prob = (t(phi) %*% counts) + theta[, sl]  
+  inner.log.prob = (t(phi) %*% new.counts) + theta[, sl]  
   log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
   
-  perplexity = exp(-(log.px/sum(counts)))
+  perplexity = exp(-(log.px/sum(new.counts)))
   return(perplexity)
 }  
 
@@ -491,8 +493,7 @@ calculatePerplexity.celda_C = function(counts, celda.mod, validate.counts) {
 reorder.celda_C = function(counts, res){
   if(res$K > 2 & isTRUE(length(unique(res$z)) > 1)) {
     res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res,
-                          validate.counts = FALSE)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$gene.states[,unique.z])
     h <- hclust(d, method = "complete")

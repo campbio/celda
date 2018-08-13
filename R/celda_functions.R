@@ -202,7 +202,7 @@ compareCountMatrix = function(count.matrix, celda.obj, error.on.mismatch=TRUE) {
 #' @return TRUE if the celda.list's run.params K/L attributes are ordered similarly to the res.list models' K/L values, FALSE otherwise.
 #' @export
 validateRunParams = function(celda.list) {
-  if (class(celda.list) != "celda_list") {
+  if (class(celda.list)[1] != "celda_list") {
     stop("Provided object is not of class celda_list")
   }
   
