@@ -59,7 +59,7 @@ getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @export
 getBestModel = function(celda.list, K=c(), L=c()) {
-  if (class(celda.list) != "celda_list") {
+  if (class(celda.list)[1] != "celda_list") {
     stop("Provided object is not of class celda_list")
   }
  
@@ -73,7 +73,7 @@ getBestModel = function(celda.list, K=c(), L=c()) {
 
 
 validateGetModelParams = function(celda.list, K, L, chain) {
-  if (class(celda.list) != "celda_list") stop("First argument to getModel() should be an object of class 'celda_list'")
+  if (class(celda.list)[1] != "celda_list") stop("First argument to getModel() should be an object of class 'celda_list'")
   
   if ((is.null(K) | is.null(L)) & celda.list$content.type == "celda_CG") {
     stop("Both K and L parameters needed for subsetting celda_CG result lists")

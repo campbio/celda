@@ -300,15 +300,16 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
 
   ## Peform reordering on final Z and Y assigments:
+  cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
   result = list(z=z, y=y, completeLogLik=NULL, 
                 finalLogLik=NULL, K=K, L=L, alpha=alpha, 
                 beta=beta, delta=delta, gamma=gamma, seed=seed, 
                 sample.label=cell.sample.label, names=names,
-                count.checksum=NULL)
+                count.checksum=digest::digest(cell.counts, algo="md5"))
   class(result) = "celda_CG" 
-  cell.counts = processCounts(cell.counts)
+  
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
   return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
@@ -320,16 +321,12 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param counts A numerix count matrix
 #' @param celda.mod object returned from celda_CG function 
 #' @param type one of the "counts", "proportion", or "posterior". 
-#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
-                                    type=c("counts", "proportion", "posterior"),
-                                    validate.counts = TRUE) {
+                                    type=c("counts", "proportion", "posterior")) {                             
   counts = processCounts(counts)
-  if (validate.counts) { 
-    compareCountMatrix(counts, celda.mod)
-  }
+  compareCountMatrix(counts, celda.mod)
   
   K = celda.mod$K
   L = celda.mod$L
@@ -550,10 +547,19 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_CG = function(counts, celda.mod, validate.counts) {
+calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
+  
+  if(is.null(new.counts)) {
+    new.counts = counts
+  } else {
+    new.counts = processCounts(new.counts)
+  }
+  if(nrow(new.counts) != nrow(counts)) {
+    stop("new.counts should have the same number of rows as counts.")
+  }
   
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
-                               "posterior", validate.counts)
+                               type=c("posterior", "counts"))
   theta = log(factorized$posterior$sample.states)
   phi   = factorized$posterior$population.states
   psi   = factorized$posterior$gene.states
@@ -563,10 +569,10 @@ calculatePerplexity.celda_CG = function(counts, celda.mod, validate.counts) {
   
   eta.prob = log(eta) * nG.by.TS
   gene.by.pop.prob = log(psi %*% phi)
-  inner.log.prob = (t(gene.by.pop.prob) %*% counts) + theta[, sl]  
+  inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, sl]  
   
   log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) + sum(eta.prob)
-  perplexity = exp(-(log.px/sum(counts)))
+  perplexity = exp(-(log.px/sum(new.counts)))
   return(perplexity)
 }
 
@@ -575,8 +581,7 @@ reorder.celda_CG = function(counts, res){
   # Reorder K
   if(res$K > 2 & isTRUE(length(unique(res$z)) > 1)) {
     res$z = as.integer(as.factor(res$z))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior",
-                          validate.counts=FALSE)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$population.states[,unique.z])
     h <- hclust(d, method = "complete")
@@ -587,8 +592,7 @@ reorder.celda_CG = function(counts, res){
   # Reorder L
   if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
     res$y = as.integer(as.factor(res$y))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior",
-                          validate.counts=FALSE)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.y = sort(unique(res$y))
     cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
     d <- cosineDist(cs)

@@ -299,13 +299,13 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
   
   ## Peform reordering on final Z and Y assigments:
+  cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
   result = list(y=y, completeLogLik=NULL, 
                 finalLogLik=NULL, L=L, 
                 beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                names=names, count.checksum=NULL)
+                names=names, count.checksum=digest::digest(cell.counts, algo="md5"))
   class(result) = "celda_G" 
-  storage.mode(cell.counts) = "integer"
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
   return(list(y=result$y, counts=processCounts(cell.counts), L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
@@ -317,15 +317,11 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 #' @param counts A numeric count matrix
 #' @param celda.mod Object return from celda_C function
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
-#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
-                                   type=c("counts", "proportion", "posterior"),
-                                   validate.counts = TRUE) {
+                                   type=c("counts", "proportion", "posterior")) {
   counts = processCounts(counts)
-  if (validate.counts) { 
-    compareCountMatrix(counts, celda.mod)
-  }
+  compareCountMatrix(counts, celda.mod)
   
   L = celda.mod$L
   y = celda.mod$y
@@ -505,10 +501,19 @@ clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
 
 
 #' @export
-calculatePerplexity.celda_G = function(counts, celda.mod, validate.counts) {
+calculatePerplexity.celda_G = function(counts, celda.mod, new.counts=NULL) {
  
+  if(is.null(new.counts)) {
+    new.counts = counts
+  } else {
+    new.counts = processCounts(new.counts)
+  }
+  if(nrow(new.counts) != nrow(counts)) {
+    stop("new.counts should have the same number of rows as counts.")
+  }
+  
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
-                               "posterior", validate.counts)
+                               type=c("posterior", "counts"))
   phi <- factorized$posterior$gene.states
   psi <- factorized$posterior$cell.states
   eta <- factorized$posterior$gene.distribution
@@ -516,9 +521,9 @@ calculatePerplexity.celda_G = function(counts, celda.mod, validate.counts) {
   
   eta.prob = log(eta) * nG.by.TS
   gene.by.cell.prob = log(phi %*% psi) 
-  log.px = sum(eta.prob) + sum(gene.by.cell.prob * counts)
+  log.px = sum(eta.prob) + sum(gene.by.cell.prob * new.counts)
   
-  perplexity = exp(-(log.px/sum(counts)))
+  perplexity = exp(-(log.px/sum(new.counts)))
   return(perplexity)
 }
 
@@ -526,8 +531,7 @@ calculatePerplexity.celda_G = function(counts, celda.mod, validate.counts) {
 reorder.celda_G = function(counts, res) {
   if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
     res$y = as.integer(as.factor(res$y))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res,
-                          validate.counts = FALSE)
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
     unique.y = sort(unique(res$y))
     cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
     d <- cosineDist(cs)

@@ -87,7 +87,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alp
   parallel::stopCluster(cl)
   celda.res = list(run.params=run.params, res.list=res.list, 
                    content.type=model, count.checksum=count.checksum)
-  class(celda.res) = "celda_list"
+  class(celda.res) = c("celda_list", model)
   
   if (isTRUE(bestChainsOnly)) {
     new.run.params = unique(dplyr::select(run.params, -index, -chain))

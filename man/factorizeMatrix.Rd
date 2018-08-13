@@ -4,7 +4,7 @@
 \alias{factorizeMatrix}
 \title{Generate factorized matrices showing each feature's influence on cell / gene clustering}
 \usage{
-factorizeMatrix(counts, celda.mod, type, validate.counts = TRUE)
+factorizeMatrix(counts, celda.mod, type)
 }
 \arguments{
 \item{counts}{A numeric count matrix}
@@ -12,8 +12,6 @@ factorizeMatrix(counts, celda.mod, type, validate.counts = TRUE)
 \item{celda.mod}{An object from a celda_list's res.list property}
 
 \item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
-
-\item{validate.counts}{Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.}
 }
 \description{
 Generate factorized matrices showing each feature's influence on cell / gene clustering
