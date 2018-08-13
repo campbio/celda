@@ -4,14 +4,14 @@
 \alias{calculatePerplexity}
 \title{Calculate the perplexity from a single celda run}
 \usage{
-calculatePerplexity(counts, celda.mod, validate.counts = TRUE)
+calculatePerplexity(counts, celda.mod, new.counts = NULL)
 }
 \arguments{
 \item{counts}{The count matrix modeled in the celdaRun parameter}
 
 \item{celda.mod}{A single celda run (usually from the _res.list_ property of a celda_list)}
 
-\item{validate.counts}{Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.}
+\item{new.counts}{A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.}
 }
 \value{
 The perplexity for the provided data and model
