@@ -36,20 +36,21 @@
 #' Provides cluster assignments for all genes in a provided single-cell 
 #' sequencing count matrix, using the celda Bayesian hierarchical model.
 #' 
-#' @param counts A numeric count matrix
-#' @param L The number of clusters to generate
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
-#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
-#' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param seed Parameter to set.seed() for random number generation. Default 12345.
-#' @param nchains Number of random y initializations. Default 3. 
-#' @param count.checksum An MD5 checksum for the provided counts matrix. Default NULL.
-#' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
-#' @param logfile The name of the logfile to redirect messages to.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param L Integer. Number of feature modules.  
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
+#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
+#' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
+#' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
+#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
+
+#' @param y.init param y Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @keywords LDA gene clustering gibbs
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
@@ -167,9 +168,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 # @param n.by.TS Number of counts per Transcriptional State
 # @param nG.by.TS Number of genes in each Transcriptional State
 # @param nG.in.Y  Number of genes in each of the cell cluster
-# @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-# @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
-# @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
+# @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+# @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+# @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 # @keywords log likelihood
 cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
 
@@ -245,15 +246,15 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' Generate a simulated count matrix, based off a generative distribution whose 
 #' parameters can be provided by the user.
 #' 
-#' @param model Celda model to use for simulation. One of 'available_models'. 
+#' @param model Character. Options available in `celda::available.models`. 
 #' @param C The number of cells
-#' @param L The number of transcriptional states
-#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
-#' @param G The number of genes for which to simulate counts
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param seed Parameter to set.seed() for random number generation
+#' @param L Integer. Number of feature modules.  
+#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
+#' @param G Numeric. The total number of features to be simulated. 
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Other arguments
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
@@ -314,8 +315,8 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 
 #' Generate factorized matrices showing each feature's influence on the celda_G model clustering 
 #' 
-#' @param counts A numeric count matrix
-#' @param celda.mod Object return from celda_C function
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_G". 
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
@@ -425,12 +426,12 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' This function calculates the log likelihood of each clustering of genes generated
 #' over multiple iterations of Gibbs sampling.
 #' 
-#' @param counts A numeric count matrix
-#' @param y A numeric vector of gene cluster assignments
-#' @param L The number of clusters being considered
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param y Numeric vector. Denotes feature module labels. 
+#' @param L Integer. Number of feature modules.  
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
@@ -445,9 +446,9 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 
 
 #' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
-#' @param counts A numeric count matrix
-#' @param y A numeric vector of gene cluster assignments
-#' @param L The number of clusters being considered
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param y Numeric vector. Denotes feature module labels. 
+#' @param L Integer. Number of feature modules.  
 cG.decomposeCounts = function(counts, y, L) {
 
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
@@ -473,9 +474,9 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 
 #' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
 #'
-#' @param celda.mod A model returned from the 'celda_G' function
-#' @param counts The original count matrix used in the model
-#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
+#' @param celda.mod Celda object of class "celda_G". 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Other arguments
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
@@ -543,7 +544,7 @@ reorder.celda_G = function(counts, res) {
 
 
 #' finalClusterAssignment for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
+#' @param celda.mod Celda object of class "celda_G". 
 #' @export
 finalClusterAssignment.celda_G = function(celda.mod) {
   return(celda.mod$y)
@@ -551,13 +552,13 @@ finalClusterAssignment.celda_G = function(celda.mod) {
 
 
 #' getK for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
+#' @param celda.mod Celda object of class "celda_G". 
 #' @export
 getK.celda_G = function(celda.mod) { return(NA) }
 
 
 #' getL for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
+#' @param celda.mod Celda object of class "celda_G". 
 #' @export
 getL.celda_G = function(celda.mod) {
   return(celda.mod$L)
@@ -565,8 +566,8 @@ getL.celda_G = function(celda.mod) {
 
 
 #' celdaHeatmap for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @param counts A numeric count matrix
+#' @param celda.mod Celda object of class "celda_G". 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param ... extra parameters passed onto renderCeldaHeatmap
 #' @export
 celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
@@ -576,13 +577,13 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 
 #' Embeds cells in two dimensions using tSNE based on celda_CG results.
 #' 
-#' @param counts Counts matrix, should have cell name for column name and gene name for row name.
-#' @param celda.mod Celda model to use for tsne. 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_G".  
 #' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
 #' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
-#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
+#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
 #' @param distance Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.
-#' @param seed Seed for random number generation. Default 12345.
+#' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Further arguments passed to or from other methods.
 #' @export
 celdaTsne.celda_G = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 

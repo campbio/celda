@@ -8,25 +8,25 @@ plotDrGrid(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid,
   color_high, var_label)
 }
 \arguments{
-\item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
+\item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
 
-\item{dim2}{Numeric vector; second dimension from data dimensionality reduction output.}
+\item{dim2}{Numeric vector. Second dimension from data dimensionality reduction output.}
 
-\item{matrix}{Matrix, will contain cells/samples as columns and variable of interest as rows.}
+\item{matrix}{Numeric matrix. Each row of the matrix will be plotted as a separate facet.}
 
-\item{size}{Numeic vector; size of point on plot.}
+\item{size}{Numeric. Sets size of point on plot. Default 1.}
 
-\item{xlab}{Character vector, used as label for x axis.}
+\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
 
-\item{ylab}{Character vector, used as label for y axis.}
+\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
-\item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale.}
+\item{color_low}{Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.}
 
-\item{color_mid}{Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale.}
+\item{color_mid}{Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale.}
 
-\item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale.}
+\item{color_high}{"Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 
-\item{var_label}{Character vector, used as label for the scale.}
+\item{var_label}{Character vector. Title for the color legend.}
 }
 \description{
 Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)

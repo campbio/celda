@@ -7,17 +7,17 @@
 cCG.decomposeCounts(counts, s, z, y, K, L)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{s}{An integer vector indicating the sample label for each cell (column) in the count matrix}
+\item{s}{Integer vector. Contains the sample label for each cell (column) in the count matrix.}
 
-\item{z}{A numeric vector of cell cluster assignments}
+\item{z}{Numeric vector. Denotes cell population labels.}
 
-\item{y}{A numeric vector of gene cluster assignments}
+\item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{K}{The number of cell clusters}
+\item{K}{Integer. Number of cell populations.}
 
-\item{L}{The number of gene clusters}
+\item{L}{Integer. Number of feature modules.}
 }
 \description{
 Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation

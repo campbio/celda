@@ -9,25 +9,25 @@ plotDrState(dim1, dim2, matrix, rescale = TRUE, size = 1,
   color_mid = NULL, color_high = "blue")
 }
 \arguments{
-\item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
+\item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
 
-\item{dim2}{Numeric vector; second dimension from data dimensionality reduction output.}
+\item{dim2}{Numeric vector. Second dimension from data dimensionality reduction output.}
 
-\item{matrix}{Cell state probability matrix, will have cell name for column name and state probability for row name.}
+\item{matrix}{Numeric matrix. Matrix containting probabilities of each feature module per cell.}
 
-\item{rescale}{Boolean. If TRUE z-score normalize the matrix. Default TRUE.}
+\item{rescale}{Logical. Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.}
 
-\item{size}{Numeic vector; size of point on plot. Default = 1.}
+\item{size}{Numeric. Sets size of point on plot. Default 1.}
 
 \item{xlab}{Character vector, used as label for x axis. Default "Dimension_1".}
 
-\item{ylab}{Character vector, used as label for y axis. Default "Dimension_2".}
+\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
-\item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'}
+\item{color_low}{Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.}
 
-\item{color_mid}{Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale.}
+\item{color_mid}{Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale.}
 
-\item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'}
+\item{color_high}{"Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 }
 \description{
 Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
