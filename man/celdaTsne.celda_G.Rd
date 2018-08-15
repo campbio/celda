@@ -9,19 +9,19 @@
   seed = 12345, ...)
 }
 \arguments{
-\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda model to use for tsne.}
+\item{celda.mod}{Celda object of class "celda_G".}
 
 \item{states}{Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.}
 
 \item{perplexity}{Numeric vector; determines perplexity for tSNE. Default 20.}
 
-\item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.}
 
 \item{distance}{Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.}
 
-\item{seed}{Seed for random number generation. Default 12345.}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
 \item{...}{Further arguments passed to or from other methods.}
 }

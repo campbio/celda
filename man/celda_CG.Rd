@@ -5,49 +5,50 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
-  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
-  seed = 12345, nchains = 3, count.checksum = NULL, z.init = NULL,
-  y.init = NULL, logfile = NULL)
+  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
+  stop.iter = 10, max.iter = 200, split.on.iter = 10,
+  split.on.last = TRUE, seed = 12345, nchains = 3,
+  count.checksum = NULL, z.init = NULL, y.init = NULL,
+  logfile = NULL)
 }
 \arguments{
-\item{counts}{A numeric count matrix.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{sample.label}{A vector indicating the sample for each cell in the count matrix}
+\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{K}{The number of cell populations}
+\item{K}{Integer. Number of cell populations.}
 
-\item{L}{The number of gene clusters being considered}
+\item{L}{Integer. Number of feature modules.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell. Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state. Default 1.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{algorithm}{Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.}
 
-\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
 
-\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{split.on.last}{After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
+\item{split.on.last}{Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{seed}{Parameter to set.seed() for random number generation. Default 12345.}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{nchains}{Number of random z/y initializations. Default 3.}
+\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{count.checksum}{An MD5 checksum for the provided counts matrix. Default NULL.}
+\item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
 
-\item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL.}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
 
-\item{logfile}{The name of the logfile to redirect messages to.}
+\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 }
 \description{
 celda Cell and Gene Clustering Model

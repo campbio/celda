@@ -7,7 +7,7 @@
 \method{finalClusterAssignment}{celda_G}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_G"}
+\item{celda.mod}{Celda object of class "celda_G".}
 }
 \description{
 finalClusterAssignment for celda Gene clustering model

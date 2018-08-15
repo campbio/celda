@@ -9,8 +9,8 @@
 #' documents. These documents will not be made publicly available until 
 #' after publication of celda.
 #' 
-#' @param counts The count matrix modeled in the celdaRun parameter
-#' @param celda.mod A single celda run (usually from the _res.list_ property of a celda_list)
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return The perplexity for the provided data and model
 #' @export
@@ -26,8 +26,8 @@ calculatePerplexity = function(counts, celda.mod, new.counts=NULL) {
 #' as well as resamplings of that count matrix, provide a distribution of perplexities and a better sense of the quality of a given K/L choice. 
 #' 
 #' @param counts The counts matrix used to generate the provided celda.list
-#' @param celda.list An object returned from 'celdaGridSearch'
-#' @param resample The number of times to resample the counts matrix for evaluating perplexity. Default 5.
+#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
+#' @param resample Integer. The number of times to resample the counts matrix for evaluating perplexity. Default 5.
 #' @param seed Parameter to set.seed() for random number generation. Default 12345.
 #' @return A list with a data frame summarizing all of the calculated perplexities, and a ggplot2 object visualizing them.
 #' @export

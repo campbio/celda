@@ -7,7 +7,7 @@
 factorizeMatrix(counts, celda.mod, type)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
 \item{celda.mod}{An object from a celda_list's res.list property}
 

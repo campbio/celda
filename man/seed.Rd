@@ -7,7 +7,7 @@
 seed(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object (of class "celda_C", "celda_G" or "celda_CG")}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG"}
 }
 \description{
 Get the random seed for a given celda model.

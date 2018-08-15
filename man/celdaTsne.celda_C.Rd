@@ -9,9 +9,9 @@
   max.iter = 2500, seed = 12345, ...)
 }
 \arguments{
-\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda model to use for tsne.}
+\item{celda.mod}{Celda object of class "celda_C".}
 
 \item{max.cells}{Integer; Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
 
@@ -21,9 +21,9 @@
 
 \item{perplexity}{Numeric vector; determines perplexity for tSNE. Default 20.}
 
-\item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.}
 
-\item{seed}{Seed for random number generation. Default 12345.}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
 \item{...}{Further arguments passed to or from other methods.}
 }
