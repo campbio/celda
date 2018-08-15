@@ -10,8 +10,8 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param counts A count matrix
 #' @param model Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)
 #' @param sample.label A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.
-#' @param K Number of desired cell subpopulation clusters. Required for celda_C and celda_CG models.
-#' @param L Number of desired gene clusters. Required for celda_G and celda_CG models.
+#' @param K.to.test Integer vector. List of K's to evaluate, where each K is the number of cell populations. 
+#' @param L Integer vector. List of L's to evaluate, where each L is the number of cell populations. 
 #' @param alpha Non-zero concentration parameter for sample Dirichlet distribution (celda_C / celda_CG only)
 #' @param beta Non-zero concentration parameter for gene Dirichlet distribution
 #' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state (celda_G / celda_CG only)
@@ -30,13 +30,13 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celdaGridSearch = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alpha=1, beta=1, 
+celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
                  delta=1, gamma=1, max.iter=200, z.init=NULL, y.init=NULL,
                  stop.iter=10, split.on.iter=10, nchains=1, 
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
                  logfile_prefix="Celda") {
  
-  validateArgs(counts, model, sample.label, nchains, cores, seed, K=K, L=L)
+  validateArgs(counts, model, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L)
   params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
@@ -53,7 +53,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alp
   doParallel::registerDoParallel(cl)
   
   # Details for each model parameter / chain combination 
-  run.params = expand.grid(plyr::compact(list(chain=1:nchains, K=K, L=L)))
+  run.params = expand.grid(plyr::compact(list(chain=1:nchains, K.to.test=K.to.test, L=L)))
   run.params$index = as.numeric(rownames(run.params))
   
   # Pre-generate a set of random seeds to be used for each chain
@@ -70,7 +70,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alp
   res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     chain.params = append(params.list,
                           as.list(dplyr::select(run.params[i,],
-                                                dplyr::matches("K|L"))))
+                                                dplyr::matches("K.to.test|L"))))
     chain.params$seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
     if (isTRUE(verbose)) {
@@ -94,7 +94,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K=NULL, L=NULL, alp
     new.run.params$index = 1:nrow(new.run.params)
     best.chains = apply(new.run.params, 1,
                         function(params) {
-                          k = if ("K" %in% names(params)) params[["K"]] else NULL
+                          k = if ("K" %in% names(params)) params[["K.to.test"]] else NULL
                           l = if ("L" %in% names(params)) params[["L"]] else NULL
                           getBestModel(celda.res, k, l)
                         })

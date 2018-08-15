@@ -10,33 +10,33 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
   logfile = NULL)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{L}{The number of clusters to generate}
+\item{L}{Integer. Number of feature modules.}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
-\item{max.iter}{Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
 
-\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{split.on.last}{After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
+\item{split.on.last}{Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{seed}{Parameter to set.seed() for random number generation. Default 12345.}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{nchains}{Number of random y initializations. Default 3.}
+\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{count.checksum}{An MD5 checksum for the provided counts matrix. Default NULL.}
+\item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL.}
+\item{y.init}{param y Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
 
-\item{logfile}{The name of the logfile to redirect messages to.}
+\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 }
 \description{
 Provides cluster assignments for all genes in a provided single-cell 

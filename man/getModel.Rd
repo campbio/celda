@@ -7,7 +7,7 @@
 getModel(celda.list, K = c(), L = c(), chain = c(), index = NULL)
 }
 \arguments{
-\item{celda.list}{A celda_list object returned from celda()}
+\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 
 \item{K}{The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.}
 
