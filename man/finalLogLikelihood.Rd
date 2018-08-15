@@ -8,7 +8,7 @@ for a given celda model.}
 finalLogLikelihood(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object (of class "celda_C", "celda_G" or "celda_CG")}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 }
 \description{
 Get the log likelihood from the final iteration of Gibbs sampling

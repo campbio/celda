@@ -7,9 +7,9 @@
 calculatePerplexity(counts, celda.mod, new.counts = NULL)
 }
 \arguments{
-\item{counts}{The count matrix modeled in the celdaRun parameter}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{A single celda run (usually from the _res.list_ property of a celda_list)}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G" or "celda_CG".}
 
 \item{new.counts}{A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.}
 }
