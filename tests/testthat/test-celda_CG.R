@@ -101,8 +101,8 @@ test_that(desc = "Checking renderCeldaHeatmap",{
 test_that(desc = "Checking topRank",{
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
   # TODO: find a better way to validate lengths of topRank names
-  #expect_equal(nrow(counts.matrix),
-  #             sum(sapply(top.rank$names,FUN = length)))
+  expect_equal(nrow(counts.matrix),
+               sum(sapply(top.rank$names,length)))
   expect_equal(names(top.rank),
                c("index","names"))
 })
