@@ -4,12 +4,12 @@
 \alias{gettingClusters}
 \title{Assists in selection of K/L parameter for downstream analysis.}
 \usage{
-gettingClusters(celda.list, matrix, iterations)
+gettingClusters(celda.list, counts, iterations)
 }
 \arguments{
-\item{celda.list}{celda.list object. Ouput of celda function.}
+\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 
-\item{matrix}{matrix. Counts matrix that was inputted to celda function. Do not normalize prior to using function.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{iterations}{Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot}
 }

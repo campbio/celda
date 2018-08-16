@@ -9,7 +9,7 @@
 #' Models can be selected by various parameters, most importantly the K/L parameters (number of cell
 #'  clusters / number of gene clusters). 
 #' 
-#' @param celda.list A celda_list object returned from celda()
+#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @param K The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.
 #' @param L The L parameter for the desired model in the results list. Matches all L by default. Accepts ranges.
 #' @param chain The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.
@@ -53,7 +53,7 @@ getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 #' with the maxiumim final log-likelihood. If a K or L (or combination) parameter is provided,
 #' the model with these K/L and the highest log-likelihood is returned.
 #' 
-#' @param celda.list A celda_list object returned from celda()
+#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @param K Limit search for best model to models with this number of cell clusters.
 #' @param L Limit search for best model to models with this number of gene clusters.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided

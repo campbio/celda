@@ -1,15 +1,16 @@
 #' Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)
 #' 
-#' @param dim1 Numeric vector; first dimension from data dimensionality reduction output.
-#' @param dim2 Numeric vector; second dimension from data dimensionality reduction output.
-#' @param matrix Matrix, will contain cells/samples as columns and variable of interest as rows.
-#' @param size Numeic vector; size of point on plot. 
-#' @param xlab Character vector, used as label for x axis. 
-#' @param ylab Character vector, used as label for y axis. 
-#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. 
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. 
-#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. 
-#' @param var_label Character vector, used as label for the scale.
+#' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
+#' @param matrix Numeric matrix. Each row of the matrix will be plotted as a separate facet. 
+#' @param size Numeric. Sets size of point on plot. Default 1. 
+#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1". 
+#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2". 
+#' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'. 
+#' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
+#' @param color_high "Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+ 
+#' @param var_label Character vector. Title for the color legend. 
 #' @export
 plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
@@ -26,17 +27,18 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 
 #' Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.  
 #' 
-#' @param dim1 Numeric vector; first dimension from data dimensionality reduction output.
-#' @param dim2 Numeric vector; second dimension from data dimensionality reduction output.
+#' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param matrix Counts matrix, will have cell name for column name and gene name for row name.
-#' @param trim A two element vector to specify the lower and upper cutoff for the data. Occurs after row scaling. Set to NULL to disable. Default c(-2,2).A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).
-#' @param rescale Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default TRUE.
-#' @param size Numeic vector; size of point on plot. Default = 1.
+#' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
+#' @param rescale Logical. Whether rows of the matrix should be z-score normalized. Default TRUE.
+#' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
-#' @param ylab Character vector, used as label for y axis. Default "Dimension_2".
-#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. 
-#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'
+#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
+#' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
+#' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
+#' @param color_high "Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+
 #' @export 
 plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
@@ -56,16 +58,17 @@ plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = TRUE, size 
 
 #' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
 #' 
-#' @param dim1 Numeric vector; first dimension from data dimensionality reduction output.
-#' @param dim2 Numeric vector; second dimension from data dimensionality reduction output.
-#' @param matrix Cell state probability matrix, will have cell name for column name and state probability for row name.
-#' @param rescale Boolean. If TRUE z-score normalize the matrix. Default TRUE.
-#' @param size Numeic vector; size of point on plot. Default = 1.
+#' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
+#' @param matrix Numeric matrix. Matrix containting probabilities of each feature module per cell. 
+#' @param rescale Logical. Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.
+#' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
-#' @param ylab Character vector, used as label for y axis. Default "Dimension_2".
-#' @param color_low Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'
-#' @param color_mid Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale. 
-#' @param color_high Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'
+#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
+#' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
+#' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
+#' @param color_high "Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+
 #' @export 
 plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
@@ -82,13 +85,13 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
 
 #' Create a scatterplot based on celda cluster labels.
 #' 
-#' @param dim1 Numeric vector; first dimension from data dimensionality reduction output.
-#' @param dim2 Numeric vector; second dimension from data dimensionality reduction output.
-#' @param cluster Vector; Contains cluster labels (e.g. from celda_C or celda_CG).
-#' @param size Numeic vector; size of point on plot.Default 1.
-#' @param xlab Character vector, used as label for rows. Default "Dimension_1".
-#' @param ylab Character vector, used as label for columns. Default "Dimension_2".
-#' @param specific_clusters Numeic vector; Contains specific cluster labels.
+#' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
+#' @param cluster Integer vector. Contains cluster labels for each cell. 
+#' @param size Numeric. Sets size of point on plot. Default 1.
+#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
+#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
+#' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
 #' @export 
 plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
   df <- data.frame(dim1, dim2, cluster)

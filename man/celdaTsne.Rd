@@ -7,9 +7,9 @@
 celdaTsne(counts, celda.mod, ...)
 }
 \arguments{
-\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".}
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
 \item{...}{Other arguments to be passed to model-specific tSNE functions. Use methods("celdaTsne") for list of 'celdaTsne' functions.}
 }

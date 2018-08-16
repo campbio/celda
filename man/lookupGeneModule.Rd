@@ -4,14 +4,14 @@
 \alias{lookupGeneModule}
 \title{Obtain the gene module of a gene of interest}
 \usage{
-lookupGeneModule(counts, model, gene)
+lookupGeneModule(counts, celda.mod, gene)
 }
 \arguments{
-\item{counts}{Counts matrix that the celda model was run on}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{model}{Celda model, class of "celda_CG" or "celda_G"}
+\item{celda.mod}{Model of class "celda_G" or "celda_CG".}
 
-\item{gene}{Genes to check the gene module}
+\item{gene}{Character vector. Identify feature modules for the specified feature names.}
 }
 \description{
 This function will output the gene module of a specific gene(s) from a celda model
