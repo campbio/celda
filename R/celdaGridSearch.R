@@ -138,12 +138,12 @@ buildParamList = function(counts, model, sample.label, alpha, beta, delta,
 # Sanity check arguments to celda() to ensure a smooth run.
 # See parameter descriptions from celda() documentation.
 validateArgs = function(counts, model, sample.label, 
-                         nchains, cores, seed, K=NULL, L=NULL) { #, ...) {
+                         nchains, cores, seed, K.to.test=NULL, L=NULL) { #, ...) {
   model_args = names(formals(model))
   if ("K" %in% model_args) {
-    if (is.null(K)) { 
+    if (is.null(K.to.test)) { 
       stop("Must provide a K parameter when running a celda_C or celda_CG model")
-    } else if (is.numeric(K) && K <= 1) {
+    } else if (is.numeric(K) && K.to.test <= 1) {
       stop("K parameter must be > 1")
     }
     
@@ -156,7 +156,7 @@ validateArgs = function(counts, model, sample.label,
     }
   }
   
-  validateCounts(counts, K, L)
+  validateCounts(counts, K.to.test, L)
   
   if (!(model %in% available_models)) stop("Unavailable model specified")
       
@@ -177,7 +177,7 @@ validateArgs = function(counts, model, sample.label,
     
 # Perform some simple checks on the counts matrix, to ensure celda won't choke.
 # See parameter descriptions from celda() documentation.
-validateCounts = function(counts, K, L) {
+validateCounts = function(counts, K.to.test, L) {
   # counts has to be a matrix...
   if (class(counts) != "matrix") stop("counts argument must be of class 'matrix'")
   
@@ -194,7 +194,7 @@ validateCounts = function(counts, K, L) {
   if (!is.null(L) && nrow(counts) < L) {
     stop("Number of genes (rows) in count matrix must be >= L")
   }
-  if (!is.null(K) && nrow(counts) < K) {
+  if (!is.null(K.to.test) && nrow(counts) < K.to.test) {
     stop("Number of cells (counts) in count matrix must be >= K")
   }
 }
