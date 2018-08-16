@@ -4,7 +4,7 @@
 \alias{celda_C}
 \title{celda Cell Clustering Model}
 \usage{
-celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
+celda_C(counts, sample.label = NULL, K.to.test, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
   split.on.iter = 10, split.on.last = TRUE, seed = 12345,
   nchains = 3, count.checksum = NULL, z.init = NULL,
@@ -15,7 +15,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{K}{Integer. Number of cell populations.}
+\item{K.to.test}{Integer. Number of cell populations.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
