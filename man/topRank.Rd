@@ -4,7 +4,7 @@
 \alias{topRank}
 \title{Identify features with the highest influence on clustering}
 \usage{
-topRank(matrix, n = 25, margin = 2, threshold = 0,
+topRank(matrix, n = 25, margin = 1, threshold = 0,
   decreasing = TRUE)
 }
 \arguments{
