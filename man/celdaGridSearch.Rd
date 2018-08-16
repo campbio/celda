@@ -4,11 +4,12 @@
 \alias{celdaGridSearch}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celdaGridSearch(counts, model, sample.label = NULL, K = NULL, L = NULL,
-  alpha = 1, beta = 1, delta = 1, gamma = 1, max.iter = 200,
-  z.init = NULL, y.init = NULL, stop.iter = 10, split.on.iter = 10,
-  nchains = 1, bestChainsOnly = TRUE, cores = 1, seed = 12345,
-  verbose = FALSE, logfile_prefix = "Celda")
+celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
+  L = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
+  max.iter = 200, z.init = NULL, y.init = NULL, stop.iter = 10,
+  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE,
+  cores = 1, seed = 12345, verbose = FALSE,
+  logfile_prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -17,9 +18,9 @@ celdaGridSearch(counts, model, sample.label = NULL, K = NULL, L = NULL,
 
 \item{sample.label}{A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
 
-\item{K}{Number of desired cell subpopulation clusters. Required for celda_C and celda_CG models.}
+\item{K.to.test}{Integer vector. List of K's to evaluate, where each K is the number of cell populations.}
 
-\item{L}{Number of desired gene clusters. Required for celda_G and celda_CG models.}
+\item{L}{Integer vector. List of L's to evaluate, where each L is the number of cell populations.}
 
 \item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution (celda_C / celda_CG only)}
 

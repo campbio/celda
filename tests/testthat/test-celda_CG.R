@@ -7,8 +7,8 @@ context("Testing celda_CG")
 
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
-  celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2,K = c(5,6), L = c(3,5), max.iter = 15)
+  celdacg <- simulateCells(K.to.test = 5, L = 3, model = "celda_CG")
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2,K.to.test = c(5,6), L = c(3,5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
@@ -80,7 +80,7 @@ test_that(desc = "Checking to see if recodeClusterZ gives/doesn't give error",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.obj = model_CG))
+  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.mod = model_CG))
 })
 
 #distinct_colors
@@ -99,9 +99,10 @@ test_that(desc = "Checking renderCeldaHeatmap",{
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank",{
-  top.rank <- topRank(fm = factorized$proportions$gene.states, n = 1000)
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
+  # TODO: find a better way to validate lengths of topRank names
   expect_equal(nrow(counts.matrix),
-               sum(sapply(top.rank$names,FUN = length)))
+               sum(sapply(top.rank$names,length)))
   expect_equal(names(top.rank),
                c("index","names"))
 })

@@ -4,26 +4,23 @@
 \alias{diffExpBetweenCellStates}
 \title{Gene expression markers for cell clusters using MAST}
 \usage{
-diffExpBetweenCellStates(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE,
-  log2fc.threshold = NULL, fdr.threshold = 1)
+diffExpBetweenCellStates(counts, celda.mod, c1, c2 = NULL,
+  only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1)
 }
 \arguments{
-\item{counts}{A numeric count matrix.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{An object of class celda_C or celda_CG.}
+\item{celda.mod}{Celda model. Options are "celda_C" or "celda_CG".}
 
-\item{c1}{Numeric. Cell cluster(s) to define markers for.}
+\item{c1}{Integer vector. Cell populations to include in group 1 for the differential expression analysis.}
 
-\item{c2}{Numeric. Second cell cluster(s) for comparison. If NULL (default) - use all
-other cells for comparison.}
+\item{c2}{Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, everything in c1 is compared to all other clusters. Default NULL.}
 
-\item{only.pos}{Logical. Only return markers with positive log2fc (FALSE by default).}
+\item{only.pos}{"Logical. Whether to only return markers with positive log2fc. Default FALSE.}
 
-\item{log2fc.threshold}{Numeric. Only return markers whose the absolute values of log2fc
-are greater than this threshold (NULL by default).}
+\item{log2fc.threshold}{Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned.}
 
-\item{fdr.threshold}{Numeric. Only return markers whose false discovery rates (FDRs) are less
-than this threshold (1 by default).}
+\item{fdr.threshold}{Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned.}
 }
 \value{
 Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,

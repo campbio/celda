@@ -3,8 +3,8 @@
 
 #' Fast matrix multiplication for double x int
 #' 
-#' @param A a double matrix
-#' @param B an integer matrix
+#' @param A Numeric matrix. Dimension G x K matrix of genes by cell population probabilities. 
+#' @param B Integer matrix. Dimensions G x M. Matrix of gene counts by cell. 
 #' @return An integer matrix representing the product of A and B
 eigenMatMultInt <- function(A, B) {
     .Call('_celda_eigenMatMultInt', PACKAGE = 'celda', A, B)

@@ -10,9 +10,9 @@ calculatePerplexityWithResampling(counts, celda.list, resample = 5,
 \arguments{
 \item{counts}{The counts matrix used to generate the provided celda.list}
 
-\item{celda.list}{An object returned from 'celdaGridSearch'}
+\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 
-\item{resample}{The number of times to resample the counts matrix for evaluating perplexity. Default 5.}
+\item{resample}{Integer. The number of times to resample the counts matrix for evaluating perplexity. Default 5.}
 
 \item{seed}{Parameter to set.seed() for random number generation. Default 12345.}
 }
