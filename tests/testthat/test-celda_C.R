@@ -22,7 +22,7 @@ test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors",
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank to see if it runs without errors",{
-  top.rank <- topRank(fm = factorized$proportions$gene.states, n = 1000)
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
   expect_equal(names(top.rank),
                c("index","names"))
 })
@@ -36,6 +36,6 @@ test_that(desc = "Checking diffExpBetweenCellStates",{
 
 ##celda_C.R##
 test_that(desc = "Checking celda_C to see if it runs without errors",{
-  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K = c(5,10), max.iter = 15)
+  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K.to.test = c(5,10), max.iter = 15)
   expect_true(class(celdaC.res)[1] == "celda_list")  # Only best chain is returned
 })
