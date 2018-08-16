@@ -7,7 +7,7 @@
 \method{getL}{celda_C}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_C"}
+\item{celda.mod}{Celda object of class "celda_C".}
 }
 \description{
 getL for celda Cell clustering function

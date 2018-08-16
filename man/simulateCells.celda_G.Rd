@@ -5,27 +5,27 @@
 \title{Simulate cells from the gene clustering generative model}
 \usage{
 \method{simulateCells}{celda_G}(model, C = 100, N.Range = c(500, 5000),
-  G = 1000, L = 5, beta = 1, gamma = 5, delta = 1, seed = 12345,
-  ...)
+  G = 1000, L = 5, beta = 1, gamma = 5, delta = 1,
+  seed = 12345, ...)
 }
 \arguments{
-\item{model}{Celda model to use for simulation. One of 'available_models'.}
+\item{model}{Character. Options available in `celda::available.models`.}
 
 \item{C}{The number of cells}
 
-\item{N.Range}{Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution}
+\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
 
-\item{G}{The number of genes for which to simulate counts}
+\item{G}{Numeric. The total number of features to be simulated.}
 
-\item{L}{The number of transcriptional states}
+\item{L}{Integer. Number of feature modules.}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{seed}{Parameter to set.seed() for random number generation}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
 \item{...}{Other arguments}
 }

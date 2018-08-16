@@ -7,9 +7,9 @@
 \method{celdaHeatmap}{celda_G}(celda.mod, counts, ...)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_G"}
+\item{celda.mod}{Celda object of class "celda_G".}
 
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
 \item{...}{extra parameters passed onto renderCeldaHeatmap}
 }

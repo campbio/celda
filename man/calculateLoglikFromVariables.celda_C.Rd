@@ -4,20 +4,21 @@
 \alias{calculateLoglikFromVariables.celda_C}
 \title{Calculate the celda_C log likelihood for user-provided cluster assignments}
 \usage{
-calculateLoglikFromVariables.celda_C(counts, sample.label, z, K, alpha, beta)
+calculateLoglikFromVariables.celda_C(counts, sample.label, z, K, alpha,
+  beta)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{sample.label}{A vector indicating the sample label for each cell (column) in the count matrix}
+\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{z}{A numeric vector of cluster assignments}
+\item{z}{Numeric vector. Denotes cell population labels.}
 
-\item{K}{The total number of clusters in z}
+\item{K}{Integer. Number of cell populations.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
-\item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
 \item{...}{Additional parameters}
 }

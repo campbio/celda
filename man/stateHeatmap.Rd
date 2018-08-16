@@ -4,16 +4,16 @@
 \alias{stateHeatmap}
 \title{Transcriptional state heatmap}
 \usage{
-stateHeatmap(counts, celda.mod, state.use = 1, cells.use = NULL,
+stateHeatmap(counts, celda.mod, feature.module = 1, cells.use = NULL,
   genes.use = NULL, normalize = TRUE, scale_row = scale,
-  show_genenames = TRUE)
+  show_featurenames = TRUE)
 }
 \arguments{
-\item{counts}{A numeric count matrix.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{An object of class celda_G or celda_CG.}
+\item{celda.mod}{Celda object of class "celda_G" or "celda_CG".}
 
-\item{state.use}{Numeric. A transcriptional state to plot.}
+\item{feature.module}{Integer. The feature module to display.}
 
 \item{cells.use}{Numeric or character. If a number, plot only this number of cells with respectively 
 highest and lowest proportions of counts in the transcriptional state. If a list of cell names, 
@@ -25,13 +25,12 @@ highest and lowest proportions of counts in the transcriptional state. If a list
 plot only these genes orderd by their proportions of counts in the transcriptional state from 
 the bottom up. If NULL, plot all genes in the transcriptional state (NULL by default).}
 
-\item{normalize}{Logical. Should the columns be normmalized? Set to FALSE to disable. 'normalizeCounts' 
-normalizes to counts per million (CPM) (default by TRUE).}
+\item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
 
 \item{scale_row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs 
 after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
 
-\item{show_genenames}{Logical; specifying if gene names should be shown. Default to be TRUE.}
+\item{show_featurenames}{Logical. Specifies if feature names should be shown. Default TRUE.}
 }
 \description{
 Draws a heatmap focusing on a transcriptional state. Both cells and genes are sorted by 

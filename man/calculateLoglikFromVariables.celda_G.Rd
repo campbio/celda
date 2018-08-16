@@ -7,17 +7,17 @@
 calculateLoglikFromVariables.celda_G(counts, y, L, beta, delta, gamma)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{y}{A numeric vector of gene cluster assignments}
+\item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{L}{The number of clusters being considered}
+\item{L}{Integer. Number of feature modules.}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
 \item{...}{Additional parameters}
 }

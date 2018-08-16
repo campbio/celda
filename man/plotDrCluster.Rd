@@ -8,19 +8,19 @@ plotDrCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
   ylab = "Dimension_2", specific_clusters = NULL)
 }
 \arguments{
-\item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
+\item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
 
-\item{dim2}{Numeric vector; second dimension from data dimensionality reduction output.}
+\item{dim2}{Numeric vector. Second dimension from data dimensionality reduction output.}
 
-\item{cluster}{Vector; Contains cluster labels (e.g. from celda_C or celda_CG).}
+\item{cluster}{Integer vector. Contains cluster labels for each cell.}
 
-\item{size}{Numeic vector; size of point on plot.Default 1.}
+\item{size}{Numeric. Sets size of point on plot. Default 1.}
 
-\item{xlab}{Character vector, used as label for rows. Default "Dimension_1".}
+\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
 
-\item{ylab}{Character vector, used as label for columns. Default "Dimension_2".}
+\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
-\item{specific_clusters}{Numeic vector; Contains specific cluster labels.}
+\item{specific_clusters}{Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL.}
 }
 \description{
 Create a scatterplot based on celda cluster labels.
