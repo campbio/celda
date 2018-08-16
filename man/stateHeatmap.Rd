@@ -25,12 +25,12 @@ highest and lowest proportions of counts in the transcriptional state. If a list
 plot only these genes orderd by their proportions of counts in the transcriptional state from 
 the bottom up. If NULL, plot all genes in the transcriptional state (NULL by default).}
 
+\item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
+
 \item{scale_row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs 
 after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
 
 \item{show_featurenames}{Logical. Specifies if feature names should be shown. Default TRUE.}
-
-\item{Logical.}{Whether to normalize the columns of `counts`. Default TRUE.}
 }
 \description{
 Draws a heatmap focusing on a transcriptional state. Both cells and genes are sorted by 
