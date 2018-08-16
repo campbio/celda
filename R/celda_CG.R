@@ -35,7 +35,7 @@
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
-#' @param K Integer. Number of cell populations. 
+#' @param K.to.test Integer. Number of cell populations. 
 #' @param L Integer. Number of feature modules.  
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
@@ -54,13 +54,13 @@
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @export
-celda_CG = function(counts, sample.label=NULL, K, L,
+celda_CG = function(counts, sample.label=NULL, K.to.test, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, nchains=3, count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL) {
- 
+  K = K.to.test
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }

@@ -94,7 +94,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
     new.run.params$index = 1:nrow(new.run.params)
     best.chains = apply(new.run.params, 1,
                         function(params) {
-                          k = if ("K" %in% names(params)) params[["K.to.test"]] else NULL
+                          k = if ("K.to.test" %in% names(params)) params[["K.to.test"]] else NULL
                           l = if ("L" %in% names(params)) params[["L"]] else NULL
                           getBestModel(celda.res, k, l)
                         })
@@ -140,11 +140,11 @@ buildParamList = function(counts, model, sample.label, alpha, beta, delta,
 validateArgs = function(counts, model, sample.label, 
                          nchains, cores, seed, K.to.test=NULL, L=NULL) { #, ...) {
   model_args = names(formals(model))
-  if ("K" %in% model_args) {
+  if ("K.to.test" %in% model_args) {
     if (is.null(K.to.test)) { 
-      stop("Must provide a K parameter when running a celda_C or celda_CG model")
-    } else if (is.numeric(K) && K.to.test <= 1) {
-      stop("K parameter must be > 1")
+      stop("Must provide a K.to.test parameter when running a celda_C or celda_CG model")
+    } else if (is.numeric(K.to.test) && K.to.test <= 1) {
+      stop("K.to.test parameter must be > 1")
     }
     
   }

@@ -58,7 +58,7 @@ test_that(desc = "Checking recodeClusterY gives/doesn't give error",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.obj = model_G))
+  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.mod = model_G))
 })
 
 #distinct_colors
@@ -76,7 +76,7 @@ test_that(desc = "Checking renderCeldaHeatmap output",{
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank function",{
-  expect_equal(names(topRank(fm = factorized$proportions$gene.states)),
+  expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
                c("index","names"))
 })
 
