@@ -2,7 +2,7 @@
 #' @description Draws a heatmap focusing on a transcriptional state. Both cells and genes are sorted by 
 #'    their proportions of counts in a given transcriptional state. Allows for nice visualization of 
 #'    co-expression of those genes grouped into transcriptional states by Celda.
-#'    
+#' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE.     
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_G" or "celda_CG". 
 #' @param feature.module Integer. The feature module to display.
