@@ -7,11 +7,11 @@
 \method{clusterProbability}{celda_G}(celda.mod, counts, log = FALSE, ...)
 }
 \arguments{
-\item{celda.mod}{A model returned from the 'celda_G' function}
+\item{celda.mod}{Celda object of class "celda_G".}
 
-\item{counts}{The original count matrix used in the model}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{log}{If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.}
+\item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 
 \item{...}{Other arguments}
 }

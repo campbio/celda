@@ -7,7 +7,7 @@
 getBestModel(celda.list, K = c(), L = c())
 }
 \arguments{
-\item{celda.list}{A celda_list object returned from celda()}
+\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 
 \item{K}{Limit search for best model to models with this number of cell clusters.}
 

@@ -7,11 +7,11 @@
 recodeClusterY(celda.mod, from, to)
 }
 \arguments{
-\item{celda.mod}{An object of class celda_G or celda_CG}
+\item{celda.mod}{Celda object of class "celda_G" or "celda_CG".}
 
-\item{from}{A numeric vector of the "keys", corresponding to the "values" in the to parameter}
+\item{from}{Numeric vector. Unique values in the range of 1:L that correspond to the original cluster labels in `celda.mod`.}
 
-\item{to}{A numeric vector of the "values"; what each corresponding number in "from" should be mapped to}
+\item{to}{Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels.}
 }
 \description{
 This function will re-code _gene_ cluster labels based off of a mapping provided by the user,

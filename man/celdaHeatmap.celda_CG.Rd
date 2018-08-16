@@ -7,7 +7,7 @@
 \method{celdaHeatmap}{celda_CG}(celda.mod, counts, ...)
 }
 \arguments{
-\item{celda.mod}{A celda model object of "Celda_CG"}
+\item{celda.mod}{Celda object of class "celda_CG".}
 
 \item{counts}{A count matrix}
 

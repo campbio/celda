@@ -8,9 +8,9 @@
   "proportion", "posterior"))
 }
 \arguments{
-\item{counts}{A numerix count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{object returned from celda_CG function}
+\item{celda.mod}{Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".}
 
 \item{type}{one of the "counts", "proportion", or "posterior".}
 }
