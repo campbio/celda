@@ -5,7 +5,7 @@
 \title{Transcriptional state heatmap}
 \usage{
 stateHeatmap(counts, celda.mod, feature.module = 1, cells.use = NULL,
-  genes.use = NULL, normalize = TRUE, scale_row = scale,
+  genes.use = NULL, normalize = TRUE, scale.row = scale,
   show_featurenames = TRUE)
 }
 \arguments{
@@ -27,8 +27,7 @@ the bottom up. If NULL, plot all genes in the transcriptional state (NULL by def
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
 
-\item{scale_row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs 
-after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
+\item{scale.row}{Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. 'scale' will Z-score transform each row. Default 'scale'.}
 
 \item{show_featurenames}{Logical. Specifies if feature names should be shown. Default TRUE.}
 }

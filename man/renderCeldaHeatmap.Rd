@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_heatmap.R
 \name{renderCeldaHeatmap}
 \alias{renderCeldaHeatmap}
-\title{Render a heatmap based on a matrix of counts where rows are genes and columns are cells.}
+\title{Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.}
 \usage{
 renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
@@ -81,10 +81,10 @@ breaks are calculated automatically.}
 
 \item{treeheight_gene}{Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.gene == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.}
 
-\item{treeheight_cell}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
+\item{treeheight_cell}{Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.}
 
-\item{...}{Other arguments to be passed to underlying pheatmap function}
+\item{...}{Other arguments to be passed to underlying pheatmap function.}
 }
 \description{
-Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
+Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.
 }

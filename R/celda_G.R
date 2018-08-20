@@ -47,9 +47,9 @@
 #' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
-#' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
+#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 
-#' @param y.init param y Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @keywords LDA gene clustering gibbs
 #' @export
@@ -164,10 +164,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 # represented in the provided count matrix.
 # 
 # 
-# @param n.TS.by.C Number of counts in each Transcriptional State per Cell 
-# @param n.by.TS Number of counts per Transcriptional State
-# @param nG.by.TS Number of genes in each Transcriptional State
-# @param nG.in.Y  Number of genes in each of the cell cluster
+# @param n.TS.by.C Number of counts in each Transcriptional State per Cell.
+# @param n.by.TS Number of counts per Transcriptional State.
+# @param nG.by.TS Number of genes in each Transcriptional State.
+# @param nG.in.Y  Number of genes in each of the cell cluster.
 # @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 # @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 # @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
@@ -247,7 +247,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' parameters can be provided by the user.
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
-#' @param C The number of cells
+#' @param C Integer. Number of cells to simulate. Default 100. 
 #' @param L Integer. Number of feature modules.  
 #' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
 #' @param G Numeric. The total number of features to be simulated. 
@@ -255,7 +255,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Other arguments
+#' @param ... Other arguments.
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
                                  L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
@@ -432,7 +432,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
-#' @param ... Additional parameters
+#' @param ... Additional parameters.
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 #' @export
@@ -477,7 +477,7 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 #' @param celda.mod Celda object of class "celda_G". 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
-#' @param ... Other arguments
+#' @param ... Other arguments.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
 clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
@@ -568,7 +568,7 @@ getL.celda_G = function(celda.mod) {
 #' celdaHeatmap for celda Gene clustering model
 #' @param celda.mod Celda object of class "celda_G". 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param ... extra parameters passed onto renderCeldaHeatmap
+#' @param ... extra parameters passed onto renderCeldaHeatmap.
 #' @export
 celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
   renderCeldaHeatmap(counts, y=celda.mod$y, ...)
@@ -582,7 +582,7 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 #' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
 #' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
-#' @param distance Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.
+#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman'. Default 'hellinger'. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Further arguments passed to or from other methods.
 #' @export

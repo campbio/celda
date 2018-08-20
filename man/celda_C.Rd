@@ -42,7 +42,7 @@ celda_C(counts, sample.label = NULL, K.to.test, alpha = 1, beta = 1,
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 }
 \value{
-An object of class celda_C with clustering results and Gibbs sampling statistics
+An object of class celda_C with clustering results and Gibbs sampling statistics.
 }
 \description{
 celda Cell Clustering Model

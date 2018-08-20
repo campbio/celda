@@ -11,7 +11,7 @@
 
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{...}{extra parameters passed onto renderCeldaHeatmap}
+\item{...}{extra parameters passed onto renderCeldaHeatmap.}
 }
 \description{
 celdaHeatmap for celda Gene clustering model

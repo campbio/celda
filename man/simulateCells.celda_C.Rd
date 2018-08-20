@@ -13,7 +13,7 @@
 
 \item{S}{Integer. Number of samples to simulate.}
 
-\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution}
+\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution.}
 
 \item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
 
@@ -27,7 +27,7 @@
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Other arguments}
+\item{...}{Unused parameters.}
 }
 \description{
 Simulate cells from the cell clustering generative model
