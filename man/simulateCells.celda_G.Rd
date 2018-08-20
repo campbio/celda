@@ -11,7 +11,7 @@
 \arguments{
 \item{model}{Character. Options available in `celda::available.models`.}
 
-\item{C}{The number of cells}
+\item{C}{Integer. Number of cells to simulate. Default 100.}
 
 \item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
 
@@ -27,7 +27,7 @@
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Other arguments}
+\item{...}{Other arguments.}
 }
 \description{
 Generate a simulated count matrix, based off a generative distribution whose 

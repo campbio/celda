@@ -7,9 +7,9 @@
 eigenMatMultInt(A, B)
 }
 \arguments{
-\item{A}{a double matrix}
+\item{A}{Numeric matrix. Dimension G x K matrix of genes by cell population probabilities.}
 
-\item{B}{an integer matrix}
+\item{B}{Integer matrix. Dimensions G x M. Matrix of gene counts by cell.}
 }
 \value{
 An integer matrix representing the product of A and B

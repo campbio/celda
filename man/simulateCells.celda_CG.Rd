@@ -33,7 +33,7 @@
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Other arguments}
+\item{...}{Other arguments.}
 }
 \description{
 Simulate cells from the cell/gene clustering generative model

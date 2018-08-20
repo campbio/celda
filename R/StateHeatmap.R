@@ -14,11 +14,10 @@
 #'    plot only these genes orderd by their proportions of counts in the transcriptional state from 
 #'    the bottom up. If NULL, plot all genes in the transcriptional state (NULL by default).
 #' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
-#' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs 
-#'    after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.
+#' @param scale.row Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. 'scale' will Z-score transform each row. Default 'scale'.
 #' @param show_featurenames Logical. Specifies if feature names should be shown. Default TRUE. 
 #' @export 
-stateHeatmap <- function(counts, celda.mod, feature.module = 1, cells.use = NULL, genes.use = NULL, normalize = TRUE, scale_row = scale, show_featurenames = TRUE){
+stateHeatmap <- function(counts, celda.mod, feature.module = 1, cells.use = NULL, genes.use = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
@@ -99,7 +98,7 @@ stateHeatmap <- function(counts, celda.mod, feature.module = 1, cells.use = NULL
     z = celda.mod$z[cell_ix],
     y = celda.mod$y[gene_ix],
     normalize = NULL,
-    scale_row = scale_row,
+    scale.row = scale.row,
     color_scheme = "divergent",
     show_featurenames = show_featurenames,
     cluster_gene = FALSE,

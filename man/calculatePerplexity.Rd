@@ -14,7 +14,7 @@ calculatePerplexity(counts, celda.mod, new.counts = NULL)
 \item{new.counts}{A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.}
 }
 \value{
-The perplexity for the provided data and model
+The perplexity for the provided data and model.
 }
 \description{
 Perplexity can be seen as a measure of how well a provided set of 

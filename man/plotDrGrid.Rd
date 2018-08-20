@@ -24,7 +24,7 @@ plotDrGrid(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid,
 
 \item{color_mid}{Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale.}
 
-\item{color_high}{"Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
+\item{color_high}{Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 
 \item{var_label}{Character vector. Title for the color legend.}
 }
