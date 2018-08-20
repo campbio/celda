@@ -9,48 +9,48 @@ celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
   max.iter = 200, z.init = NULL, y.init = NULL, stop.iter = 10,
   split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE,
   cores = 1, seed = 12345, verbose = FALSE,
-  logfile_prefix = "Celda")
+  logfile.prefix = "Celda")
 }
 \arguments{
-\item{counts}{A count matrix}
+\item{counts}{A count matrix.}
 
-\item{model}{Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)}
-
-\item{sample.label}{A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
+\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
 \item{K.to.test}{Integer vector. List of K's to evaluate, where each K is the number of cell populations.}
 
 \item{L}{Integer vector. List of L's to evaluate, where each L is the number of cell populations.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution (celda_C / celda_CG only)}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
-\item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state (celda_G / celda_CG only)}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G / celda_CG only)}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{max.iter}{The maximum number of iterations}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
 
-\item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL. (celda_C / celda_CG only)}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
 
-\item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL. (celda_G / celda_CG only)}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
 
-\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
+\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
-\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)}
+\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{bestChainsOnly}{Return only the best chain (by final log-likelihood) per K/L combination.}
+\item{bestChainsOnly}{Logical. Whether to return only the best chain (by final log-likelihood) per K/L combination. Default TRUE.}
 
-\item{cores}{The number of cores to use for parallell Gibbs sampling. Defaults to 1.}
+\item{cores}{Integer. The number of cores to use for parallell Gibbs sampling. Default 1.}
 
 \item{seed}{The base seed for random number generation}
 
-\item{verbose}{Print log messages during celda chain execution}
+\item{verbose}{Logical. Whether to print log messages during celda chain execution. Default FALSE.}
 
-\item{logfile_prefix}{Prefix for log files from worker threads and main process.}
+\item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
+
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters

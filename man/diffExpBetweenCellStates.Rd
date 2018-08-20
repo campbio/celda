@@ -16,7 +16,7 @@ diffExpBetweenCellStates(counts, celda.mod, c1, c2 = NULL,
 
 \item{c2}{Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, everything in c1 is compared to all other clusters. Default NULL.}
 
-\item{only.pos}{"Logical. Whether to only return markers with positive log2fc. Default FALSE.}
+\item{only.pos}{Logical. Whether to only return markers with positive log2fc. Default FALSE.}
 
 \item{log2fc.threshold}{Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned.}
 

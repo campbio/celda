@@ -11,7 +11,7 @@ gettingClusters(celda.list, counts, iterations)
 
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{iterations}{Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot}
+\item{iterations}{Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot.}
 }
 \description{
 Assists in selection of K/L parameter for downstream analysis.
