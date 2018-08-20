@@ -2,17 +2,17 @@
 % Please edit documentation in R/celda_CG.R
 \name{celdaHeatmap.celda_CG}
 \alias{celdaHeatmap.celda_CG}
-\title{celdaHeatmap for celda Cell and Gene clustering model}
+\title{celdaHeatmap for celda Cell and Gene clustering model.}
 \usage{
 \method{celdaHeatmap}{celda_CG}(celda.mod, counts, ...)
 }
 \arguments{
 \item{celda.mod}{Celda object of class "celda_CG".}
 
-\item{counts}{A count matrix}
+\item{counts}{A count matrix.}
 
-\item{...}{extra parameters passed onto renderCeldaHeatmap}
+\item{...}{extra parameters passed onto renderCeldaHeatmap.}
 }
 \description{
-celdaHeatmap for celda Cell and Gene clustering model
+celdaHeatmap for celda Cell and Gene clustering model.
 }

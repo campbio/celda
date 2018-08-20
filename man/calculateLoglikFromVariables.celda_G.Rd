@@ -19,7 +19,7 @@ calculateLoglikFromVariables.celda_G(counts, y, L, beta, delta, gamma)
 
 \item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters.}
 }
 \value{
 The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function

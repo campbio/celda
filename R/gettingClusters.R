@@ -2,7 +2,7 @@
 #' 
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param iterations Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot
+#' @param iterations Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot.
 #' @export
 gettingClusters <- function(celda.list, counts, iterations){
   #matrix <- log(normalizeCounts(counts) + 1)

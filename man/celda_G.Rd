@@ -32,9 +32,9 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
+\item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{y.init}{param y Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 }

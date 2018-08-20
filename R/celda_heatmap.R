@@ -1,4 +1,4 @@
-#' Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
+#' Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param z Numeric vector. Denotes cell population labels.  
@@ -33,8 +33,8 @@
 #' @param show_cellnames Logical. Specifies if cell names should be shown. Default FALSE. 
 #' @param hclust_method Character. Specifies the method to use for the 'hclust' function. See `?hclust` for possible values. Default "ward.D2".  
 #' @param treeheight_gene Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.gene == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.  
-#' @param treeheight_cell Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram. 
-#' @param ... Other arguments to be passed to underlying pheatmap function
+#' @param treeheight_cell Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.  
+#' @param ... Other arguments to be passed to underlying pheatmap function.
 #' @import gtable
 #' @import grid
 #' @import scales

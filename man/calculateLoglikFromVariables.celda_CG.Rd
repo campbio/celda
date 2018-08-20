@@ -28,7 +28,7 @@ calculateLoglikFromVariables.celda_CG(counts, sample.label, z, y, K, L,
 
 \item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters.}
 }
 \description{
 Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments

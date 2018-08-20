@@ -8,7 +8,7 @@
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2". 
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'. 
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
-#' @param color_high "Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
  
 #' @param var_label Character vector. Title for the color legend. 
 #' @export
@@ -29,31 +29,31 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
-#' @param matrix Counts matrix, will have cell name for column name and gene name for row name.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
 #' @param rescale Logical. Whether rows of the matrix should be z-score normalized. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
-#' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
+#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
-#' @param color_high "Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 
 #' @export 
 plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
-    matrix <- t(scale(t(matrix)))
+    counts <- t(scale(t(counts)))
     if(!is.null(trim)){
       if(length(trim) != 2) {
         stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
       }
       trim<-sort(trim)
-      matrix[matrix < trim[1]] <- trim[1]
-      matrix[matrix > trim[2]] <- trim[2]
+      counts[counts < trim[1]] <- trim[1]
+      counts[counts > trim[2]] <- trim[2]
     }
   }
   var_label = "Expression"
-  plotDrGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
+  plotDrGrid(dim1,dim2,counts,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
 #' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
@@ -63,11 +63,11 @@ plotDrGene <- function(dim1, dim2, matrix, trim = c(-2,2), rescale = TRUE, size 
 #' @param matrix Numeric matrix. Matrix containting probabilities of each feature module per cell. 
 #' @param rescale Logical. Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
-#' @param xlab Character vector, used as label for x axis. Default "Dimension_1".
+#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
-#' @param color_high "Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 
 #' @export 
 plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
@@ -121,7 +121,7 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 
 #' Uses Rtsne package to run tSNE.
 #' 
-#' @param norm Normalized count matrix
+#' @param norm Normalized count matrix.
 #' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
 #' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman or euclidean.
