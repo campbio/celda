@@ -19,7 +19,7 @@ gettingClusters <- function(celda.list, counts, resample){
       
       for(x in unique(celda.list$run.params$K)){
         #Best model via log-likelihood has been shown to get closest to "true" labels
-        model <- getBestModel(celda.list,K = x,L = states)
+        model <- selectBestModel(celda.list,K = x,L = states)
         
         #Allocate memory for all.min, which will contain all p-values for pairwise MAST comparisons
         #The maximum value of all.min after running all pairwise comparisons will be stored into max.value
