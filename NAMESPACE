@@ -76,6 +76,6 @@ import(graphics)
 import(grid)
 import(gtable)
 import(scales)
-
-useDynLib(celda)
 import(data.table)
+useDynLib(celda)
+
