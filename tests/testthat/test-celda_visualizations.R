@@ -5,7 +5,7 @@ context("Testing celda Visualization Experiments")
 
 load("../celdaCGsim.rda")
 load("../celdaCG.rda")
-model_CG = getModel(celdaCG.res, K = 5, L=3)[[1]]
+model_CG = selectBestModel(celdaCG.res, K = 5, L=3)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 counts.matrix <- celdaCG.sim$counts
 

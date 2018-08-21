@@ -13,9 +13,9 @@ test_that(desc = "Checking distinct_colors",{
   expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
 })
 
-###plotHeatmap###
-test_that(desc = "Checking plotHeatmap to see if it runs without errors",{
-  expect_equal(names(plotHeatmap(counts = celdaC.sim$counts, z = model_C$z, y = model_C$y)),
+###renderCeldaHeatmap###
+test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors",{
+  expect_equal(names(renderCeldaHeatmap(counts = celdaC.sim$counts, z = model_C$z, y = model_C$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
