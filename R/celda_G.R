@@ -306,6 +306,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
 
+  counts = processCounts(counts)
   L = celda.mod$L
   y = celda.mod$y
   beta = celda.mod$beta
