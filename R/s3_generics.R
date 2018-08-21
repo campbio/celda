@@ -99,7 +99,7 @@ getL = function(celda.mod) {
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export 
 celdaHeatmap <- function(celda.mod, counts, ...) {
   UseMethod("celdaHeatmap", celda.mod)
@@ -111,7 +111,7 @@ celdaHeatmap <- function(celda.mod, counts, ...) {
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param counts The counts matrix used to generate the provided cluster assignments.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 calculateLoglikFromVariables <- function(celda.mod, counts, ...) {
   class(counts) = c(celda.mod, class(counts))
@@ -128,7 +128,7 @@ calculateLoglikFromVariables <- function(celda.mod, counts, ...) {
 #' functions as detailed below.
 #' 
 #' @param model Character. Options available in `celda::available.models`.
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
@@ -152,7 +152,7 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 celdaTsne = function(counts, celda.mod, ...) {
   compareCountMatrix(counts, celda.mod)

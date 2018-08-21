@@ -36,17 +36,17 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL,
 
 \item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
 
-\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
+\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 20.}
 
-\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
+\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 20.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
 \item{bestChainsOnly}{Logical. Whether to return only the best chain (by final log-likelihood) per K/L combination. Default TRUE.}
 
-\item{cores}{Integer. The number of cores to use for parallell Gibbs sampling. Default 1.}
+\item{cores}{Integer. The number of cores to use for parallel Gibbs sampling. Default 1.}
 
-\item{seed}{The base seed for random number generation}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default FALSE.}
 

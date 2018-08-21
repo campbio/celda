@@ -104,7 +104,7 @@ reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param gene Character vector. Identify feature modules for the specified feature names. 
 #' @export
-lookupGeneModule <- function(counts, celda.mod, gene){
+featureModuleLookup <- function(counts, celda.mod, gene){
   list <- list()
   for(x in 1:length(gene)){
     if(gene[x] %in% rownames(counts)){

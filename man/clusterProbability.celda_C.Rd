@@ -13,7 +13,7 @@
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 
-\item{...}{Unused parameters.}
+\item{...}{Additional parameters.}
 }
 \value{
 A list containging a matrix for the conditional cell cluster probabilities.

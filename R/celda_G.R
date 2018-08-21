@@ -255,7 +255,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Other arguments.
+#' @param ... Additional parameters.
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
                                  L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
@@ -317,7 +317,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_G". 
-#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {
@@ -477,7 +477,7 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 #' @param celda.mod Celda object of class "celda_G". 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
-#' @param ... Other arguments.
+#' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
 clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
@@ -568,7 +568,7 @@ getL.celda_G = function(celda.mod) {
 #' celdaHeatmap for celda Gene clustering model
 #' @param celda.mod Celda object of class "celda_G". 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param ... extra parameters passed onto renderCeldaHeatmap.
+#' @param ... Additional parameters.
 #' @export
 celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
   renderCeldaHeatmap(counts, y=celda.mod$y, ...)
@@ -582,9 +582,9 @@ celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
 #' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
 #' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
-#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman'. Default 'hellinger'. 
+#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.  
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Further arguments passed to or from other methods.
+#' @param ... Additional parameters.
 #' @export
 celdaTsne.celda_G = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
                              distance="hellinger", seed=12345, ...) {

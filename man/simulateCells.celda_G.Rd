@@ -27,7 +27,7 @@
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Other arguments.}
+\item{...}{Additional parameters.}
 }
 \description{
 Generate a simulated count matrix, based off a generative distribution whose 

@@ -16,7 +16,7 @@
 #' @param index The index of the desired model in the run.parameters in the provided celda_list. Overrides all other parameters if provided. Defaults to NULL.
 #' @return A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
-getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
+filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
   validateGetModelParams(celda.list, K, L, chain) 
   
   # If user provides index / range of indices to select, override all else
@@ -58,7 +58,7 @@ getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 #' @param L Limit search for best model to models with this number of gene clusters.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @export
-getBestModel = function(celda.list, K=c(), L=c()) {
+selectBestModel = function(celda.list, K=c(), L=c()) {
   if (class(celda.list)[1] != "celda_list") {
     stop("Provided object is not of class celda_list")
   }
