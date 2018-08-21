@@ -63,7 +63,7 @@ selectBestModel = function(celda.list, K=c(), L=c()) {
     stop("Provided object is not of class celda_list")
   }
  
-  matching.models = getModel(celda.list, K=K, L=L)
+  matching.models = filterCeldaList(celda.list, K=K, L=L)
   
   logliks = unlist(sapply(matching.models, function(mod) { mod[["finalLogLik"]] }))
   max.idx = which(logliks == max(logliks, na.rm=T))

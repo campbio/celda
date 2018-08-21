@@ -96,7 +96,7 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
                         function(params) {
                           k = if ("K.to.test" %in% names(params)) params[["K.to.test"]] else NULL
                           l = if ("L" %in% names(params)) params[["L"]] else NULL
-                          getBestModel(celda.res, k, l)
+                          selectBestModel(celda.res, k, l)
                         })
     celda.res$run.params = new.run.params
     celda.res$res.list = best.chains
