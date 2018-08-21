@@ -27,7 +27,7 @@ test_that(desc = "Checking factorize matrix dimension size",{
 
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_G returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables(counts = celdaG.sim$counts, y = celdaG.sim$y,
+  expect_lt(calculateLoglikFromVariables.celda_G(counts = celdaG.sim$counts, y = celdaG.sim$y,
                                          L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1, 
                                          model="celda_G"),
                0)
@@ -58,7 +58,7 @@ test_that(desc = "Checking recodeClusterY gives/doesn't give error",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.mod = model_G))
+  expect_true(compareCountMatrix(counts = celdaG.sim$counts, celda.mod = model_G))
 })
 
 #distinct_colors
@@ -88,7 +88,7 @@ test_that(desc = "Checking stateHeatmap to see if it runs",{
 
 ##celda_G.R##
 test_that(desc = "Making sure celda_G runs without errors",{
-  celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
+  celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, celda.mod = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))  # Only best chain returned by default
 })
 
