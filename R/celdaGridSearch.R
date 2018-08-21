@@ -30,14 +30,14 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
+celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
                  delta=1, gamma=1, max.iter=200, z.init=NULL, y.init=NULL,
                  stop.iter=10, split.on.iter=10, nchains=1, 
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
                  logfile.prefix="Celda") {
  
-  validateArgs(counts, model, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L)
-  params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
+  validateArgs(counts, celda.mod, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L)
+  params.list = buildParamList(counts, celda.mod, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
   
@@ -47,7 +47,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
   } else {
     logfile = NULL
   }  
-  if (isTRUE(verbose)) logMessages(date(), "... Starting ", model, logfile=logfile, append=FALSE)
+  if (isTRUE(verbose)) logMessages(date(), "... Starting ", celda.mod, logfile=logfile, append=FALSE)
   params.list$logfile = logfile
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
@@ -67,7 +67,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
   params.list$count.checksum = count.checksum
   params.list$nchains = 1
    
-  res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
+  res.list = foreach(i = 1:nrow(run.params), .export=celda.mod, .combine = c, .multicombine=TRUE) %dopar% {
     chain.params = append(params.list,
                           as.list(dplyr::select(run.params[i,],
                                                 dplyr::matches("K.to.test|L"))))
@@ -86,8 +86,8 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
   }
   parallel::stopCluster(cl)
   celda.res = list(run.params=run.params, res.list=res.list, 
-                   content.type=model, count.checksum=count.checksum)
-  class(celda.res) = c("celda_list", model)
+                   content.type=celda.mod, count.checksum=count.checksum)
+  class(celda.res) = c("celda_list", celda.mod)
   
   if (isTRUE(bestChainsOnly)) {
     new.run.params = unique(dplyr::select(run.params, -index, -chain))
@@ -102,7 +102,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
     celda.res$res.list = best.chains
   }
   
-  if (isTRUE(verbose)) logMessages(date(), "... Completed ", model, logfile=logfile, append=TRUE)
+  if (isTRUE(verbose)) logMessages(date(), "... Completed ", celda.mod, logfile=logfile, append=TRUE)
   return(celda.res)
 }
 

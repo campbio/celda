@@ -8,7 +8,7 @@ context("Testing celda_CG")
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
   celdacg <- simulateCells(K.to.test = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2,K.to.test = c(5,6), L = c(3,5), max.iter = 15)
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, celda.mod = "celda_CG", nchains = 2,K.to.test = c(5,6), L = c(3,5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
@@ -41,7 +41,7 @@ test_that(desc = "Checking factorize matrix dimension size",{
 
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables(y = celdaCG.sim$y, z = celdaCG.sim$z, 
+  expect_lt(calculateLoglikFromVariables.celda_CG(y = celdaCG.sim$y, z = celdaCG.sim$z, 
                                             delta = 1, gamma = 1,  beta = 1, 
                                             alpha = 1, K = 5, L = 3, model="celda_CG", 
                                             s = celdaCG.sim$sample.label, 
@@ -80,7 +80,7 @@ test_that(desc = "Checking to see if recodeClusterZ gives/doesn't give error",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.mod = model_CG))
+  expect_true(compareCountMatrix(counts = celdaCG.sim$counts, celda.mod = model_CG))
 })
 
 #distinct_colors
