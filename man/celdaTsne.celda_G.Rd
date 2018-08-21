@@ -19,11 +19,11 @@
 
 \item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.}
 
-\item{distance}{Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman'. Default 'hellinger'.}
+\item{distance}{Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.}
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Further arguments passed to or from other methods.}
+\item{...}{Additional parameters.}
 }
 \description{
 Embeds cells in two dimensions using tSNE based on celda_CG results.

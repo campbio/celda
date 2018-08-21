@@ -12,7 +12,7 @@
 
 \item{celda.mod}{Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".}
 
-\item{type}{one of the "counts", "proportion", or "posterior".}
+\item{type}{Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.}
 }
 \value{
 A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).

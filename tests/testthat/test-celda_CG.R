@@ -16,13 +16,13 @@ test_that(desc = "Making sure celda_CG runs without crashing",{
 #Loading pre-made simulatedcells/celda objects
 load("../celdaCGsim.rda")
 load("../celdaCG.rda")
-model_CG = getModel(celdaCG.res, K = 5, L = 3)[[1]]
+model_CG = filterCeldaList(celdaCG.res, K = 5, L = 3)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 counts.matrix <- celdaCG.sim$counts
 
 
-#Making sure getModel if functioning correctly
-test_that(desc = "Sanity checking getModel",{
+#Making sure filterCeldaList if functioning correctly
+test_that(desc = "Sanity checking filterCeldaList",{
   expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
@@ -43,7 +43,7 @@ test_that(desc = "Checking factorize matrix dimension size",{
 test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output for various params", {
   expect_lt(calculateLoglikFromVariables.celda_CG(y = celdaCG.sim$y, z = celdaCG.sim$z, 
                                             delta = 1, gamma = 1,  beta = 1, 
-                                            alpha = 1, K = 5, L = 3, model="celda_CG", 
+                                            alpha = 1, K = 5, L = 3, 
                                             s = celdaCG.sim$sample.label, 
                                             counts=celdaCG.sim$counts),
                0)
@@ -90,9 +90,9 @@ test_that(desc = "Making sure distinct_colors gives expected output",{
 })
 
 
-###renderCeldaHeatmap###
-test_that(desc = "Checking renderCeldaHeatmap",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y)),
+###plotHeatmap###
+test_that(desc = "Checking plotHeatmap",{
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
@@ -115,15 +115,15 @@ test_that(desc = "Checking GiniPlot to see if it runs",{
 })
 
 
-#stateHeatmap
-test_that(desc = "Checking stateHeatmap to see if it runs",{
-  expect_equal(names(stateHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
+#moduleHeatmap
+test_that(desc = "Checking moduleHeatmap to see if it runs",{
+  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
-#diffExpBetweenCellStates
-test_that(desc = "Checking diffExpBetweenCellStates",{
- expect_equal(class(diffExp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
+#differentialExpression
+test_that(desc = "Checking differentialExpression",{
+ expect_equal(class(diffExp_K1 <- differentialExpression(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
 		c("data.table","data.frame"))
 })
 

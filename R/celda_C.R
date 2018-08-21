@@ -262,7 +262,7 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
                          G=500, K=5, alpha=1, beta=1, seed=12345, ...) {
@@ -309,7 +309,7 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C".
-#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {
@@ -394,7 +394,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param K Integer. Number of cell populations. 
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
   s = processSampleLabels(sample.label, ncol(counts))
@@ -439,7 +439,7 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 #' @param celda.mod Celda object of class "celda_C".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
 clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
@@ -529,7 +529,7 @@ getL.celda_C = function(celda.mod) { return(NA) }
 #' celdaHeatmap for celda Cell clustering function 
 #' @param celda.mod Celda object of class "celda_C".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
   renderCeldaHeatmap(counts, z=celda.mod$z, ...)
@@ -546,7 +546,7 @@ celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
 #' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Unused parameters.
+#' @param ... Additional parameters.
 #' @export
 celdaTsne.celda_C = function(counts, celda.mod,  
 							 max.cells=10000, min.cluster.size=100, initial.dims=20,

@@ -27,7 +27,7 @@
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Unused parameters.}
+\item{...}{Additional parameters.}
 }
 \description{
 Simulate cells from the cell clustering generative model

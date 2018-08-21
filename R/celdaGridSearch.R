@@ -19,12 +19,12 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200. 
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
-#' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
-#' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
+#' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 20.
+#' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 20.
 #' @param nchains Integer. Number of random cluster initializations. Default 1. 
 #' @param bestChainsOnly Logical. Whether to return only the best chain (by final log-likelihood) per K/L combination. Default TRUE. 
-#' @param cores Integer. The number of cores to use for parallell Gibbs sampling. Default 1.
-#' @param seed The base seed for random number generation
+#' @param cores Integer. The number of cores to use for parallel Gibbs sampling. Default 1.
+#' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param verbose Logical. Whether to print log messages during celda chain execution. Default FALSE. 
 #' @param logfile.prefix Character. Prefix for log files from worker threads and main process. Default "Celda". 
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
@@ -77,10 +77,10 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
       ## Generate a unique log file name based on given prefix and parameters
       chain.params$logfile = paste0(logfile.prefix, "_",  
                                     paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")
-      res = do.call(model, chain.params)
+      res = do.call(celda.mod, chain.params)
     } else {
       chain.params$logfile = NULL
-      res = suppressMessages(do.call(model, chain.params))
+      res = suppressMessages(do.call(celda.mod, chain.params))
     }
     return(list(res))
   }
@@ -109,7 +109,7 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
 
 # Build a list of parameters tailored to the specific celda model being run,
 # validating the provided parameters along the way
-buildParamList = function(counts, model, sample.label, alpha, beta, delta,
+buildParamList = function(counts, celda.mod, sample.label, alpha, beta, delta,
                           gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                           nchains, cores, seed) {
   
@@ -137,9 +137,9 @@ buildParamList = function(counts, model, sample.label, alpha, beta, delta,
 
 # Sanity check arguments to celda() to ensure a smooth run.
 # See parameter descriptions from celda() documentation.
-validateArgs = function(counts, model, sample.label, 
+validateArgs = function(counts, celda.mod, sample.label, 
                          nchains, cores, seed, K.to.test=NULL, L=NULL) { #, ...) {
-  model_args = names(formals(model))
+  model_args = names(formals(celda.mod))
   if ("K.to.test" %in% model_args) {
     if (is.null(K.to.test)) { 
       stop("Must provide a K.to.test parameter when running a celda_C or celda_CG model")
