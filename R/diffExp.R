@@ -16,7 +16,7 @@
 #'    and associated statistics (p-value, log2fc and FDR).
 #' @export
 #' @import data.table
-diffExpBetweenCellStates <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
+differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }

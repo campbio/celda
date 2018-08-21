@@ -11,7 +11,7 @@ celdaTsne(counts, celda.mod, ...)
 
 \item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
-\item{...}{Unused parameters.}
+\item{...}{Additional parameters.}
 }
 \description{
 Runs tSNE via Rtsne based on the CELDA model and specified cell states.

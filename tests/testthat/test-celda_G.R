@@ -4,12 +4,12 @@ context("Testing celda_G")
 
 load("../celdaGsim.rda")
 load("../celdaG.rda")
-model_G = getModel(celdaG.res, L = 5)[[1]]
+model_G = filterCeldaList(celdaG.res, L = 5)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_G, counts = celdaG.sim$counts)
 counts.matrix <- celdaG.sim$counts
 
-#Making sure getModel if functioning correctly
-test_that(desc = "Sanity checking getModel",{
+#Making sure filterCeldaList if functioning correctly
+test_that(desc = "Sanity checking filterCeldaList",{
   expect_equal(celdaG.res$content.type, class(model_G))
 })
 
@@ -28,8 +28,8 @@ test_that(desc = "Checking factorize matrix dimension size",{
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_G returns correct output for various params", {
   expect_lt(calculateLoglikFromVariables.celda_G(counts = celdaG.sim$counts, y = celdaG.sim$y,
-                                         L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1, 
-                                         model="celda_G"),
+                                         L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1 
+                                         ),
                0)
 })
 
@@ -67,9 +67,9 @@ test_that(desc = "Checking distinct_colors",{
 })
 
 
-###renderCeldaHeatmap###
-test_that(desc = "Checking renderCeldaHeatmap output",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
+###plotHeatmap###
+test_that(desc = "Checking plotHeatmap output",{
+  expect_equal(names(plotHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
@@ -80,9 +80,9 @@ test_that(desc = "Checking topRank function",{
                c("index","names"))
 })
 
-#stateHeatmap
-test_that(desc = "Checking stateHeatmap to see if it runs",{
-  expect_equal(names(stateHeatmap(celdaG.sim$counts, celda.mod = model_G)),
+#moduleHeatmap
+test_that(desc = "Checking moduleHeatmap to see if it runs",{
+  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 

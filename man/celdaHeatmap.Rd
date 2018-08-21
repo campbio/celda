@@ -11,7 +11,7 @@ celdaHeatmap(celda.mod, counts, ...)
 
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{...}{Unused parameters.}
+\item{...}{Additional parameters.}
 }
 \description{
 Render a stylable heatmap of count data based on celda clustering results.
