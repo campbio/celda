@@ -5,7 +5,7 @@ context("Testing celda_C")
 load("../celdaCsim.rda")
 load("../celdaC.rda")
 counts.matrix <- celdaC.sim$counts
-model_C = getModel(celdaC.res, K = 5)[[1]]
+model_C = filterCeldaList(celdaC.res, K = 5)[[1]]
 factorized = factorizeMatrix(counts=counts.matrix, celda.mod=model_C)
 
 distinct_colors
@@ -13,9 +13,9 @@ test_that(desc = "Checking distinct_colors",{
   expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
 })
 
-###renderCeldaHeatmap###
-test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaC.sim$counts, z = model_C$z, y = model_C$y)),
+###plotHeatmap###
+test_that(desc = "Checking plotHeatmap to see if it runs without errors",{
+  expect_equal(names(plotHeatmap(counts = celdaC.sim$counts, z = model_C$z, y = model_C$y)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
@@ -27,9 +27,9 @@ test_that(desc = "Checking topRank to see if it runs without errors",{
                c("index","names"))
 })
 
-#diffExpBetweenCellStates
-test_that(desc = "Checking diffExpBetweenCellStates",{
-  diffexp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, 
+#differentialExpression
+test_that(desc = "Checking differentialExpression",{
+  diffexp_K1 <- differentialExpression(counts = counts.matrix, 
                                          celda.mod = model_C, c1 = 1)
   expect_equal(class(diffexp_K1), c("data.table","data.frame"))
 })

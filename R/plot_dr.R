@@ -124,7 +124,7 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 #' @param norm Normalized count matrix.
 #' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
-#' @param distance Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman or euclidean.
+#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'. 
 #' @param seed Seed for random number generation. Defaults to 12345.
 #' @param do.pca Perform dimensionality reduction with PCA before tSNE.
 #' @param initial.dims Number of dimensions from PCA to use as input in tSNE.

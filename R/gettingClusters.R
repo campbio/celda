@@ -2,12 +2,12 @@
 #' 
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param iterations Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot.
+#' @param resample Integer. Number of times to resample the cell population matrix. Default 10. 
 #' @export
-gettingClusters <- function(celda.list, counts, iterations){
+gettingClusters <- function(celda.list, counts, resample){
   #matrix <- log(normalizeCounts(counts) + 1)
   all.max.value <- matrix(ncol = length(unique(celda.list$run.params$L)) * length(unique(celda.list$run.params$K)))
-  for(times in 1:iterations){
+  for(times in 1:resample){
     
     #max.value will contain the "worst" p-value upon pairwise MAST.
     max.value <- double(length = length(unique(celda.list$run.params$L)) * length(unique(celda.list$run.params$K)))
@@ -114,7 +114,7 @@ gettingClusters <- function(celda.list, counts, iterations){
   Ks = rep(unique(celda.list$run.params$K), times = length(unique(celda.list$run.params$L)))
   L = rep(unique(celda.list$run.params$L), each = length(unique(celda.list$run.params$K)))
   
-  if(iterations > 1){
+  if(resample > 1){
     logmaxp <- -log(colMeans(as.matrix(all.max.value)))
   }else{
     logmaxp <- -log(all.max.value)
