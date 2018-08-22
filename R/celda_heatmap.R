@@ -1,40 +1,36 @@
-#' Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
+#' Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.
 #' 
-#' @param counts A count matrix where rows are genes and columns are cells. 
-#' @param z A numeric vector of cluster assignments for cell. 
-#' @param y A numeric vector of cluster assignments for gene.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param z Numeric vector. Denotes cell population labels.  
+#' @param y Numeric vector. Denotes feature module labels. 
 #' @param scale_log Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.
 #' @param pseudocount_log Numeric; A pseudocount to add to data before log transforming. Default  0. 
 #' @param pseudocount_normalize Numeric; A pseudocount to add to data before normalization. Default  1. 
-#' @param gene.ix Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.
-#' @param cell.ix Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.
+#' @param feature.ix Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.
+#' @param cell.ix Integer vector. Select cells for display in heatmap. If NULL, no subsetting will be performed. Default NULL.
 #' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
-#' @param trim A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).
-#' @param normalize A function to normalize the columns. Set to NULL to disable. Default is 'normalizeCounts', which normalizes to counts per million (CPM). 
-#' @param cluster_gene Logical; determining if rows should be clustered.
-#' @param cluster_cell Logical; determining if columns should be clustered.
-#' @param annotation_cell A data frame for the cell annotations (columns).
+#' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
+#' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
+#' @param cluster.gene Logical. Determines whether rows should be clustered. Default TRUE. 
+#' @param cluster.cell Logical. Determines whether columns should be clustered. Default TRUE. 
+#' @param annotation_cell Data frame. Additional annotations for each cell will be shown in the column color bars. The format of the data frame should be one row for each cell and one column for each annotation. Numeric variables will be displayed as continuous color bars and factors will be displayed as discrete color bars. Default NULL. 
 #' @param annotation_gene A data frame for the gene annotations (rows).
-#' @param annotation_color A list containing color scheme for cell and/or gene annotation. See '?pheatmap' for more details.
-#' @param color_scheme One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
-#' A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.
-#' @param color_scheme_symmetric Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.
+#' @param annotation_color List. Contains color scheme for all annotations. See `?pheatmap` for more details. 
+#' @param color_scheme "Character. One of ""divergent"" or ""sequential"". A ""divergent"" scheme is best for highlighting relative data (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. A ""sequential"" scheme is best for highlighting data that are ordered low to high such as raw counts or probabilities. Default "divergent".
+#' @param color_scheme_symmetric Logical. When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric from [-max(abs(data)),max(abs(data))]. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the color scheme to range from -2 to 2. Default TRUE.
 #' @param color_scheme_center Numeric. Indicates the center of a "divergent" color_scheme. Default 0.
-#' @param col color for the heatmap. 
-#' @param breaks a sequence of numbers that covers the range of values in mat and is one 
-#' element longer than color vector. Used for mapping values to colors. Useful, if needed 
-#' to map certain values to certain colors, to certain values. If value is NA then the 
-#' breaks are calculated automatically.
-#' @param legend logical; determining if legend should be drawn or not. Default to be TRUE.
-#' @param annotation_legend Logical; showing if the legend for annotation tracks should be drawn.
-#' @param annotation_names_gene Logical; showing if the names for gene annotation tracks should be drawn. Default to be TRUE.
-#' @param annotation_names_cell Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE. 
-#' @param show_genenames Logical; specifying if gene names should be shown. Default to be FALSE. 
-#' @param show_cellnames Logical; specifying if cell names should be shown. Default to be FALSE. 
-#' @param hclust_method Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values. 
-#' @param treeheight_gene Numeric; Width of the gene dedrogram. Set to 0 to disable plotting of this dendrogram. 
-#' @param treeheight_cell Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram. 
-#' @param ... Other arguments to be passed to underlying pheatmap function
+#' @param col Color for the heatmap. 
+#' @param breaks Numeric vector. A sequence of numbers that covers the range of values in the normalized `counts`. Values in the normalized `matrix` are assigned to each bin in `breaks`. Each break is assigned to a unique color from `col`. If NULL, then breaks are calculated automatically. Default NULL. 
+#' @param legend Logical. Determines whether legend should be drawn. Default TRUE.
+#' @param annotation_legend Logical. Whether legend for all annotations should be drawn. Default TRUE. 
+#' @param annotation_names_gene Logical. Whether the names for features should be shown. Default TRUE.
+#' @param annotation_names_cell Logical. Whether the names for cells should be shown. Default TRUE. 
+#' @param show_genenames Logical. Specifies if feature names should be shown. Default TRUE.  
+#' @param show_cellnames Logical. Specifies if cell names should be shown. Default FALSE. 
+#' @param hclust_method Character. Specifies the method to use for the 'hclust' function. See `?hclust` for possible values. Default "ward.D2".  
+#' @param treeheight_gene Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.gene == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.  
+#' @param treeheight_cell Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.  
+#' @param ... Other arguments to be passed to underlying pheatmap function.
 #' @import gtable
 #' @import grid
 #' @import scales
@@ -49,9 +45,9 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
                                  trim=c(-2,2), 
                                  pseudocount_normalize=0,
                                  pseudocount_log=0,
-                                 gene.ix = NULL,
+                                 feature.ix = NULL,
                                  cell.ix = NULL,
-                                 cluster_gene = TRUE, cluster_cell = TRUE,
+                                 cluster.gene = TRUE, cluster.cell = TRUE,
                                  color_scheme = c("divergent", "sequential"),
                                  color_scheme_symmetric = TRUE,
                                  color_scheme_center = 0,
@@ -66,8 +62,8 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
                                  show_genenames = FALSE, 
                                  show_cellnames = FALSE,
                                  hclust_method = "ward.D2",
-                                 treeheight_gene = ifelse(cluster_gene, 50, 0), 
-								 treeheight_cell = ifelse(cluster_cell, 50, 0),
+                                 treeheight_gene = ifelse(cluster.gene, 50, 0), 
+								 treeheight_cell = ifelse(cluster.cell, 50, 0),
                                  ...) {
   
   # Ensure counts are stored in proper format:
@@ -167,13 +163,13 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 
 
   ## Select subsets of genes/cells
-  if(!is.null(gene.ix)) {
-    counts = counts[gene.ix,,drop=FALSE]
+  if(!is.null(feature.ix)) {
+    counts = counts[feature.ix,,drop=FALSE]
     if(length(annotation_gene) > 1 || (length(annotation_gene) == 1 & !is.na(annotation_gene))) {
-      annotation_gene = annotation_gene[gene.ix,,drop=FALSE]
+      annotation_gene = annotation_gene[feature.ix,,drop=FALSE]
     }
     if(!is.null(y)) {
-      y = y[gene.ix]
+      y = y[feature.ix]
     }
   }
   if(!is.null(cell.ix)) {
@@ -216,8 +212,8 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
   semi_pheatmap(mat = counts,
   	color = col,
     breaks = breaks, 
-    cluster_cols = cluster_cell,
-    cluster_rows = cluster_gene,
+    cluster_cols = cluster.cell,
+    cluster_rows = cluster.gene,
     annotation_row = annotation_gene,
     annotation_col = annotation_cell,
     annotation_colors = annotation_color,
@@ -239,9 +235,9 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 
 #' Renders a heatmap based on a population matrix from the factorized counts matrix.
 #' 
-#' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
-#' @param celda.mod celda model of class "celda_CG". 
-#' @param main The title of the plot; default = NA. 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param celda.mod Celda object of class "celda_CG".   
+#' @param main The title of the plot. Default NULL.  
 #' @import gtable
 #' @import grid
 #' @import scales
@@ -251,6 +247,7 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 #' @export 
 absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
   if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
   
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states
@@ -281,9 +278,9 @@ absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
 
 #' Renders a heatmap based on a population matrix from the factorized counts matrix. The relative probability of each transcriptional state in each cell subpopulation is visualized.
 #' 
-#' @param counts A count matrix where rows are genes and columns are cells, used to generate celda model. 
-#' @param celda.mod celda model of class "celda_CG". 
-#' @param main The title of the plot; default = NA. 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param celda.mod Celda object of class "celda_CG".  
+#' @param main The title of the plot. Default NULL.  
 #' @import gtable
 #' @import grid
 #' @import scales
@@ -293,6 +290,7 @@ absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
 #' @export 
 relativeProbabilityHeatmap <- function(counts, celda.mod, main = NA){
   if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
   
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   pop <- factorized$proportions$population.states

@@ -7,7 +7,7 @@
 runParams(celda.list)
 }
 \arguments{
-\item{celda.list}{A celda_list object, as returned from celda()}
+\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 }
 \description{
 Get run parameters for a celda run.
