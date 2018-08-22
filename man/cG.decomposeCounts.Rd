@@ -7,11 +7,11 @@
 cG.decomposeCounts(counts, y, L)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{y}{A numeric vector of gene cluster assignments}
+\item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{L}{The number of clusters being considered}
+\item{L}{Integer. Number of feature modules.}
 }
 \description{
 Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation

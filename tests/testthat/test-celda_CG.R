@@ -7,8 +7,8 @@ context("Testing celda_CG")
 
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
-  celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celda(counts = celdacg$counts, model = "celda_CG", nchains = 2,K = c(5,6), L = c(3,5), max.iter = 15)
+  celdacg <- simulateCells(K.to.test = 5, L = 3, model = "celda_CG")
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, celda.mod = "celda_CG", nchains = 2,K.to.test = c(5,6), L = c(3,5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
@@ -16,13 +16,13 @@ test_that(desc = "Making sure celda_CG runs without crashing",{
 #Loading pre-made simulatedcells/celda objects
 load("../celdaCGsim.rda")
 load("../celdaCG.rda")
-model_CG = getModel(celdaCG.res, K = 5, L = 3)[[1]]
+model_CG = filterCeldaList(celdaCG.res, K = 5, L = 3)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 counts.matrix <- celdaCG.sim$counts
 
 
-#Making sure getModel if functioning correctly
-test_that(desc = "Sanity checking getModel",{
+#Making sure filterCeldaList if functioning correctly
+test_that(desc = "Sanity checking filterCeldaList",{
   expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
@@ -41,9 +41,9 @@ test_that(desc = "Checking factorize matrix dimension size",{
 
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables(y = celdaCG.sim$y, z = celdaCG.sim$z, 
+  expect_lt(calculateLoglikFromVariables.celda_CG(y = celdaCG.sim$y, z = celdaCG.sim$z, 
                                             delta = 1, gamma = 1,  beta = 1, 
-                                            alpha = 1, K = 5, L = 3, model="celda_CG", 
+                                            alpha = 1, K = 5, L = 3, 
                                             s = celdaCG.sim$sample.label, 
                                             counts=celdaCG.sim$counts),
                0)
@@ -80,7 +80,7 @@ test_that(desc = "Checking to see if recodeClusterZ gives/doesn't give error",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaCG.sim$counts, celda.obj = model_CG))
+  expect_true(compareCountMatrix(counts = celdaCG.sim$counts, celda.mod = model_CG))
 })
 
 #distinct_colors
@@ -99,9 +99,10 @@ test_that(desc = "Checking renderCeldaHeatmap",{
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank",{
-  top.rank <- topRank(fm = factorized$proportions$gene.states, n = 1000)
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
+  # TODO: find a better way to validate lengths of topRank names
   expect_equal(nrow(counts.matrix),
-               sum(sapply(top.rank$names,FUN = length)))
+               sum(sapply(top.rank$names,length)))
   expect_equal(names(top.rank),
                c("index","names"))
 })
@@ -114,15 +115,15 @@ test_that(desc = "Checking GiniPlot to see if it runs",{
 })
 
 
-#stateHeatmap
-test_that(desc = "Checking stateHeatmap to see if it runs",{
-  expect_equal(names(stateHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
+#moduleHeatmap
+test_that(desc = "Checking moduleHeatmap to see if it runs",{
+  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
-#diffExpBetweenCellStates
-test_that(desc = "Checking diffExpBetweenCellStates",{
- expect_equal(class(diffExp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
+#differentialExpression
+test_that(desc = "Checking differentialExpression",{
+ expect_equal(class(diffExp_K1 <- differentialExpression(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
 		c("data.table","data.frame"))
 })
 

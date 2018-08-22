@@ -21,7 +21,7 @@
 
 #' Get run parameters for a celda run.
 #'
-#' @param celda.list A celda_list object, as returned from celda()
+#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @export
 runParams = function(celda.list) {
   return(celda.list$run.params)
@@ -30,7 +30,7 @@ runParams = function(celda.list) {
 
 #' Get the random seed for a given celda model.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
 seed = function(celda.mod) {
   return(celda.mod$seed)
@@ -39,7 +39,7 @@ seed = function(celda.mod) {
 
 #' Get the complete log likelihood for a given celda model.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
 completeLogLikelihood = function(celda.mod) {
   return(celda.mod$completeLogLik)
@@ -49,7 +49,7 @@ completeLogLikelihood = function(celda.mod) {
 #' Get the log likelihood from the final iteration of Gibbs sampling
 #' for a given celda model.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
 finalLogLikelihood = function(celda.mod) {
   return(celda.mod$finalLogLik)
@@ -59,7 +59,7 @@ finalLogLikelihood = function(celda.mod) {
 #' Get the final gene / cell / gene & cell cluster assignments generated during
 #' a celda run, dependent on the model provided.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
 finalClusterAssignment = function(celda.mod) {
   UseMethod("finalClusterAssignment", celda.mod)
@@ -68,9 +68,9 @@ finalClusterAssignment = function(celda.mod) {
 
 #' Get the probability of the cluster assignments generated during a celda run.
 #'
-#' @param celda.mod A celda model object
-#' @param counts The count matrix used to generate the model
-#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @export
 clusterProbability = function(celda.mod, counts, log=FALSE) {
   UseMethod("clusterProbability", celda.mod)
@@ -79,7 +79,7 @@ clusterProbability = function(celda.mod, counts, log=FALSE) {
 
 #' Get the K value used for each chain in a celda run.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
 getK = function(celda.mod) {
   UseMethod("getK", celda.mod)
@@ -88,7 +88,7 @@ getK = function(celda.mod) {
 
 #' Get the L value used for each chain in a celda run.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
 getL = function(celda.mod) {
   UseMethod("getL", celda.mod)
@@ -97,9 +97,9 @@ getL = function(celda.mod) {
 
 #' Render a stylable heatmap of count data based on celda clustering results.
 #'
-#' @param celda.mod A celda model object (of class "celda_C", "celda_G" or "celda_CG")
-#' @param counts the counts matrix 
-#' @param ... extra parameters passed onto celda_heatmap
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param ... Additional parameters.
 #' @export 
 celdaHeatmap <- function(celda.mod, counts, ...) {
   UseMethod("celdaHeatmap", celda.mod)
@@ -108,14 +108,14 @@ celdaHeatmap <- function(celda.mod, counts, ...) {
 
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
-#' @param model Model to use for calculating log-likelihood of assignments; one of ("celda_C", "celda_CG", "celda_G")
-#' @param counts The counts matrix used to generate the provided cluster assignments
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param counts The counts matrix used to generate the provided cluster assignments.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
-#' @param ... extra parameters passed onto calculateLoglikFromVariables
+#' @param ... Additional parameters.
 #' @export
-calculateLoglikFromVariables <- function(model, counts, ...) {
-  class(counts) = c(model, class(counts))
-  do.call(paste("calculateLoglikFromVariables.", model, sep=""),
+calculateLoglikFromVariables <- function(celda.mod, counts, ...) {
+  class(counts) = c(celda.mod, class(counts))
+  do.call(paste("calculateLoglikFromVariables.", celda.mod, sep=""),
           list(counts, ...))
 }
 
@@ -127,8 +127,8 @@ calculateLoglikFromVariables <- function(model, counts, ...) {
 #' (one of celda_C, celda_G, celda_CG) as well as any desired tuning parameters for those model's simulation
 #' functions as detailed below.
 #' 
-#' @param model The celda generative model to use (one of celda_C, celda_G, celda_CG)
-#' @param ... Parameters to pass to underlying generative model simulation
+#' @param model Character. Options available in `celda::available.models`.
+#' @param ... Additional parameters.
 #' @export
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
@@ -138,11 +138,26 @@ simulateCells = function(model, ...) {
 
 #' Generate factorized matrices showing each feature's influence on cell / gene clustering
 #' 
-#' @param counts A numeric count matrix
-#' @param celda.mod An object from a celda_list's res.list property
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
 factorizeMatrix = function(counts, celda.mod, type) {
-  counts = processCounts(counts)  # Ensure counts are integer and have corresponding storage mode
+  
   UseMethod("factorizeMatrix", celda.mod)
+}
+
+
+#' Runs tSNE via Rtsne based on the CELDA model and specified cell states.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param ... Additional parameters.
+#' @export
+celdaTsne = function(counts, celda.mod, ...) {
+  compareCountMatrix(counts, celda.mod)
+  if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
+    stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
+  }
+  UseMethod("celdaTsne", celda.mod)
 }
