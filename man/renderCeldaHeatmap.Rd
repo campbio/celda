@@ -10,12 +10,11 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   cell.ix = NULL, cluster.gene = TRUE, cluster.cell = TRUE,
   color_scheme = c("divergent", "sequential"),
   color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
-  annotation_cell = NULL, annotation_gene = NULL,
-  annotation_color = NULL, breaks = NULL, legend = TRUE,
-  annotation_legend = TRUE, annotation_names_gene = TRUE,
-  annotation_names_cell = TRUE, show_genenames = FALSE,
-  show_cellnames = FALSE, hclust_method = "ward.D2",
-  treeheight_gene = ifelse(cluster.gene, 50, 0),
+  annotation_cell = NULL, annotation_gene = NULL, annotation_color = NULL,
+  breaks = NULL, legend = TRUE, annotation_legend = TRUE,
+  annotation_names_gene = TRUE, annotation_names_cell = TRUE,
+  show_genenames = FALSE, show_cellnames = FALSE,
+  hclust_method = "ward.D2", treeheight_gene = ifelse(cluster.gene, 50, 0),
   treeheight_cell = ifelse(cluster.cell, 50, 0), ...)
 }
 \arguments{
