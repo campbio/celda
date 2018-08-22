@@ -4,14 +4,16 @@
 \alias{plotDrGene}
 \title{Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.}
 \usage{
-plotDrGene(dim1, dim2, matrix, trim = c(-2, 2), rescale = TRUE,
-  size = 1, xlab = "Dimension_1", ylab = "Dimension_2",
-  color_low = "grey", color_mid = NULL, color_high = "blue")
+plotDrGene(dim1, dim2, counts, trim = c(-2, 2), rescale = TRUE, size = 1,
+  xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
+  color_mid = NULL, color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimensionality reduction output.}
+
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2).}
 
@@ -28,8 +30,6 @@ plotDrGene(dim1, dim2, matrix, trim = c(-2, 2), rescale = TRUE,
 \item{color_mid}{Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale.}
 
 \item{color_high}{Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
-
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 }
 \description{
 Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
