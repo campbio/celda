@@ -4,18 +4,18 @@
 \alias{topRank}
 \title{Identify features with the highest influence on clustering}
 \usage{
-topRank(fm, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
+topRank(matrix, n = 25, margin = 1, threshold = 0, decreasing = TRUE)
 }
 \arguments{
-\item{fm}{factorized matrix.}
+\item{matrix}{Numeric matrix.}
 
-\item{n}{Maximum number of items returned for each entry.}
+\item{n}{Integer. Maximum number of items above `threshold` returned for each ranked row or column.}
 
-\item{margin}{1 for rows, 2 for columns.}
+\item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 1.}
 
-\item{threshold}{only include entries in the matrix that is greader than the threshold.}
+\item{threshold}{Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0.}
 
-\item{decreasing}{Logical; specifying if rank should be decreasing. Default to be TRUE.}
+\item{decreasing}{Logical. Specifies if the rank should be decreasing. Default TRUE.}
 }
 \description{
 Identify features with the highest influence on clustering
