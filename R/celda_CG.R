@@ -48,7 +48,7 @@
 #' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to set.seed(). Default 12345.   
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
-#' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
+#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
@@ -236,7 +236,7 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Other arguments
+#' @param ... Additional parameters.
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
@@ -321,7 +321,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".  
-#' @param type one of the "counts", "proportion", or "posterior". 
+#' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.  
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
@@ -472,7 +472,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
-#' @param ... Additional parameters 
+#' @param ... Additional parameters.
 #' @export
 calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
   s = processSampleLabels(sample.label, ncol(counts))
@@ -513,7 +513,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @param celda.mod Celda object of class "celda_CG".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
-#' @param ... Other arguments
+#' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
 clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
@@ -621,7 +621,7 @@ getK.celda_CG = function(celda.mod) {
 }
 
 
-#' getL for the celda Cell and Gene clustering model
+#' getL for the celda Cell and Gene clustering model.
 #' @param celda.mod Celda object of class "celda_CG". 
 #' @export
 getL.celda_CG = function(celda.mod) {
@@ -629,10 +629,10 @@ getL.celda_CG = function(celda.mod) {
 }
 
 
-#' celdaHeatmap for celda Cell and Gene clustering model
+#' celdaHeatmap for celda Cell and Gene clustering model.
 #' @param celda.mod Celda object of class "celda_CG". 
-#' @param counts A count matrix
-#' @param ... extra parameters passed onto renderCeldaHeatmap
+#' @param counts A count matrix.
+#' @param ... Additional parameters.
 #' @export
 celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
   renderCeldaHeatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
@@ -648,9 +648,9 @@ celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
 #' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
 #' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
-#' @param distance Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.
+#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.  
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param ... Further arguments passed to or from other methods.
+#' @param ... Additional parameters.
 #' @export
 celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, states=NULL,
 								perplexity=20, max.iter=2500, distance="hellinger", seed=12345, ...) {

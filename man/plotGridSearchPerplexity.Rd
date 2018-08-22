@@ -7,7 +7,7 @@
 plotGridSearchPerplexity(celda.list)
 }
 \arguments{
-\item{celda.list}{An object returned from 'celdaGridSearch'}
+\item{celda.list}{Object of class 'celda_list'.}
 }
 \description{
 Generate factorized matrices showing each feature's influence on cell / gene clustering

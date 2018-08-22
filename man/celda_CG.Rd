@@ -42,7 +42,7 @@ celda_CG(counts, sample.label = NULL, K.to.test, L, alpha = 1,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
+\item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
 \item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
 

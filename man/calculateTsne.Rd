@@ -9,13 +9,13 @@ calculateTsne(norm, perplexity = 20, max.iter = 2500,
   seed = 12345, do.pca = FALSE, initial.dims = 20)
 }
 \arguments{
-\item{norm}{Normalized count matrix}
+\item{norm}{Normalized count matrix.}
 
 \item{perplexity}{Numeric vector; determines perplexity for tsne. Default 20.}
 
 \item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
 
-\item{distance}{Character vector; determines which distance metric to use for tsne. Options: cosine, hellinger, spearman or euclidean.}
+\item{distance}{Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.}
 
 \item{seed}{Seed for random number generation. Defaults to 12345.}
 
