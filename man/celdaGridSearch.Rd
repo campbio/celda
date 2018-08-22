@@ -4,12 +4,11 @@
 \alias{celdaGridSearch}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celdaGridSearch(counts, celda.mod, sample.label = NULL,
-  K.to.test = NULL, L = NULL, alpha = 1, beta = 1, delta = 1,
-  gamma = 1, max.iter = 200, z.init = NULL, y.init = NULL,
-  stop.iter = 10, split.on.iter = 10, nchains = 1,
-  bestChainsOnly = TRUE, cores = 1, seed = 12345, verbose = FALSE,
-  logfile.prefix = "Celda")
+celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
+  L = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
+  max.iter = 200, z.init = NULL, y.init = NULL, stop.iter = 10,
+  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
+  seed = 12345, verbose = FALSE, logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix.}
