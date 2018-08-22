@@ -8,7 +8,7 @@
 #' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". 
 #' @param c1 Integer vector. Cell populations to include in group 1 for the differential expression analysis. 
 #' @param c2 Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, everything in c1 is compared to all other clusters. Default NULL. 
-#' @param only.pos "Logical. Whether to only return markers with positive log2fc. Default FALSE.
+#' @param only.pos Logical. Whether to only return markers with positive log2fc. Default FALSE.
 
 #' @param log2fc.threshold Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned.
 #' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned.
@@ -16,7 +16,7 @@
 #'    and associated statistics (p-value, log2fc and FDR).
 #' @export
 #' @import data.table
-diffExpBetweenCellStates <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
+differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }

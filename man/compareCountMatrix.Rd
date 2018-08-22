@@ -4,10 +4,10 @@
 \alias{compareCountMatrix}
 \title{Check whether a count matrix was the one used in a given celda run}
 \usage{
-compareCountMatrix(count.matrix, celda.mod, error.on.mismatch = TRUE)
+compareCountMatrix(counts, celda.mod, error.on.mismatch = TRUE)
 }
 \arguments{
-\item{count.matrix}{A numeric matrix of counts}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 

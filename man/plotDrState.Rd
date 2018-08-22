@@ -19,7 +19,7 @@ plotDrState(dim1, dim2, matrix, rescale = TRUE, size = 1,
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
-\item{xlab}{Character vector, used as label for x axis. Default "Dimension_1".}
+\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
 
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
@@ -27,7 +27,7 @@ plotDrState(dim1, dim2, matrix, rescale = TRUE, size = 1,
 
 \item{color_mid}{Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale.}
 
-\item{color_high}{"Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
+\item{color_high}{Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 }
 \description{
 Create a scatterplot based off of a matrix containing the celda state probabilities per cell.

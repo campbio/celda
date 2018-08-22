@@ -7,47 +7,47 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' 
 #' Yields assigments of genes/cells to clusters, depending on the provided model type.
 #' 
-#' @param counts A count matrix
-#' @param model Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)
-#' @param sample.label A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.
+#' @param counts A count matrix.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param K.to.test Integer vector. List of K's to evaluate, where each K is the number of cell populations. 
 #' @param L Integer vector. List of L's to evaluate, where each L is the number of cell populations. 
-#' @param alpha Non-zero concentration parameter for sample Dirichlet distribution (celda_C / celda_CG only)
-#' @param beta Non-zero concentration parameter for gene Dirichlet distribution
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state (celda_G / celda_CG only)
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G / celda_CG only)
-#' @param max.iter The maximum number of iterations 
-#' @param z.init Initial values of z. If NULL, z will be randomly sampled. Default NULL. (celda_C / celda_CG only)
-#' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL. (celda_G / celda_CG only)
-#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
-#' @param nchains The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)
-#' @param bestChainsOnly Return only the best chain (by final log-likelihood) per K/L combination.
-#' @param cores The number of cores to use for parallell Gibbs sampling. Defaults to 1.
-#' @param seed The base seed for random number generation
-#' @param verbose Print log messages during celda chain execution
-#' @param logfile_prefix Prefix for log files from worker threads and main process. 
+#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200. 
+#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 20.
+#' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 20.
+#' @param nchains Integer. Number of random cluster initializations. Default 1. 
+#' @param bestChainsOnly Logical. Whether to return only the best chain (by final log-likelihood) per K/L combination. Default TRUE. 
+#' @param cores Integer. The number of cores to use for parallel Gibbs sampling. Default 1.
+#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param verbose Logical. Whether to print log messages during celda chain execution. Default FALSE. 
+#' @param logfile.prefix Character. Prefix for log files from worker threads and main process. Default "Celda". 
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
+celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
                  delta=1, gamma=1, max.iter=200, z.init=NULL, y.init=NULL,
                  stop.iter=10, split.on.iter=10, nchains=1, 
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
-                 logfile_prefix="Celda") {
+                 logfile.prefix="Celda") {
  
-  validateArgs(counts, model, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L)
-  params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
+  validateArgs(counts, celda.mod, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L)
+  params.list = buildParamList(counts, celda.mod, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
   
   # Redirect stderr from the worker threads if user asks for verbose
-  if(!is.null(logfile_prefix)) {
-    logfile = paste0(logfile_prefix, "_main_log.txt")
+  if(!is.null(logfile.prefix)) {
+    logfile = paste0(logfile.prefix, "_main_log.txt")
   } else {
     logfile = NULL
   }  
-  if (isTRUE(verbose)) logMessages(date(), "... Starting ", model, logfile=logfile, append=FALSE)
+  if (isTRUE(verbose)) logMessages(date(), "... Starting ", celda.mod, logfile=logfile, append=FALSE)
   params.list$logfile = logfile
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
@@ -67,7 +67,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
   params.list$count.checksum = count.checksum
   params.list$nchains = 1
    
-  res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
+  res.list = foreach(i = 1:nrow(run.params), .export=celda.mod, .combine = c, .multicombine=TRUE) %dopar% {
     chain.params = append(params.list,
                           as.list(dplyr::select(run.params[i,],
                                                 dplyr::matches("K.to.test|L"))))
@@ -75,19 +75,19 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
     
     if (isTRUE(verbose)) {
       ## Generate a unique log file name based on given prefix and parameters
-      chain.params$logfile = paste0(logfile_prefix, "_",  
+      chain.params$logfile = paste0(logfile.prefix, "_",  
                                     paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")
-      res = do.call(model, chain.params)
+      res = do.call(celda.mod, chain.params)
     } else {
       chain.params$logfile = NULL
-      res = suppressMessages(do.call(model, chain.params))
+      res = suppressMessages(do.call(celda.mod, chain.params))
     }
     return(list(res))
   }
   parallel::stopCluster(cl)
   celda.res = list(run.params=run.params, res.list=res.list, 
-                   content.type=model, count.checksum=count.checksum)
-  class(celda.res) = c("celda_list", model)
+                   content.type=celda.mod, count.checksum=count.checksum)
+  class(celda.res) = c("celda_list", celda.mod)
   
   if (isTRUE(bestChainsOnly)) {
     new.run.params = unique(dplyr::select(run.params, -index, -chain))
@@ -96,20 +96,20 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L=N
                         function(params) {
                           k = if ("K.to.test" %in% names(params)) params[["K.to.test"]] else NULL
                           l = if ("L" %in% names(params)) params[["L"]] else NULL
-                          getBestModel(celda.res, k, l)
+                          selectBestModel(celda.res, k, l)
                         })
     celda.res$run.params = new.run.params
     celda.res$res.list = best.chains
   }
   
-  if (isTRUE(verbose)) logMessages(date(), "... Completed ", model, logfile=logfile, append=TRUE)
+  if (isTRUE(verbose)) logMessages(date(), "... Completed ", celda.mod, logfile=logfile, append=TRUE)
   return(celda.res)
 }
 
 
 # Build a list of parameters tailored to the specific celda model being run,
 # validating the provided parameters along the way
-buildParamList = function(counts, model, sample.label, alpha, beta, delta,
+buildParamList = function(counts, celda.mod, sample.label, alpha, beta, delta,
                           gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                           nchains, cores, seed) {
   
@@ -118,13 +118,13 @@ buildParamList = function(counts, model, sample.label, alpha, beta, delta,
                      stop.iter=stop.iter,
                      split.on.iter=split.on.iter)
   
-  if (model %in% c("celda_C", "celda_CG")) {
+  if (celda.mod %in% c("celda_C", "celda_CG")) {
     params.list$alpha = alpha
     params.list$beta = beta
     params.list$z.init=z.init
     params.list$sample.label=sample.label
   } 
-  if (model %in% c("celda_G", "celda_CG")) {
+  if (celda.mod %in% c("celda_G", "celda_CG")) {
     params.list$beta = beta
     params.list$delta = delta
     params.list$gamma = gamma
@@ -137,9 +137,9 @@ buildParamList = function(counts, model, sample.label, alpha, beta, delta,
 
 # Sanity check arguments to celda() to ensure a smooth run.
 # See parameter descriptions from celda() documentation.
-validateArgs = function(counts, model, sample.label, 
+validateArgs = function(counts, celda.mod, sample.label, 
                          nchains, cores, seed, K.to.test=NULL, L=NULL) { #, ...) {
-  model_args = names(formals(model))
+  model_args = names(formals(celda.mod))
   if ("K.to.test" %in% model_args) {
     if (is.null(K.to.test)) { 
       stop("Must provide a K.to.test parameter when running a celda_C or celda_CG model")
@@ -158,7 +158,7 @@ validateArgs = function(counts, model, sample.label,
   
   validateCounts(counts, K.to.test, L)
   
-  if (!(model %in% available_models)) stop("Unavailable model specified")
+  if (!(celda.mod %in% available_models)) stop("Unavailable model specified")
       
   if (!is.null(sample.label)) {
     if (!(class(sample.label) %in% c("numeric", "character", "factor"))) { 

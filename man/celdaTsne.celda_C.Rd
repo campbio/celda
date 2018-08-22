@@ -25,7 +25,7 @@
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Further arguments passed to or from other methods.}
+\item{...}{Additional parameters.}
 }
 \description{
 Embeds cells in two dimensions using tSNE based on celda_C results.
