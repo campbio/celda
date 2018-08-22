@@ -4,14 +4,14 @@
 \alias{gettingClusters}
 \title{Assists in selection of K/L parameter for downstream analysis.}
 \usage{
-gettingClusters(celda.list, counts, iterations)
+gettingClusters(celda.list, counts, resample)
 }
 \arguments{
 \item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{iterations}{Numeric. Number of iterations to run the function. A higher number will generally output a smoother plot}
+\item{resample}{Integer. Number of times to resample the cell population matrix. Default 10.}
 }
 \description{
 Assists in selection of K/L parameter for downstream analysis.

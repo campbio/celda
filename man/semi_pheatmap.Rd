@@ -34,10 +34,7 @@ semi_pheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
 \item{kmeans_k}{the number of kmeans clusters to make, if we want to agggregate the 
 rows before drawing heatmap. If NA then the rows are not aggregated.}
 
-\item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
-element longer than color vector. Used for mapping values to colors. Useful, if needed 
-to map certain values to certain colors, to certain values. If value is NA then the 
-breaks are calculated automatically.}
+\item{breaks}{Numeric vector. A sequence of numbers that covers the range of values in the normalized `counts`. Values in the normalized `matrix` are assigned to each bin in `breaks`. Each break is assigned to a unique color from `col`. If NULL, then breaks are calculated automatically. Default NULL.}
 
 \item{border_color}{color of cell borders on heatmap, use NA if no border should be 
 drawn.}

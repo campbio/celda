@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_heatmap.R
 \name{renderCeldaHeatmap}
 \alias{renderCeldaHeatmap}
-\title{Render a heatmap based on a matrix of counts where rows are genes and columns are cells.}
+\title{Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.}
 \usage{
 renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
   scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
@@ -45,10 +45,9 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
 
 \item{cluster.cell}{Logical. Determines whether columns should be clustered. Default TRUE.}
 
-\item{color_scheme}{One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
-A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.}
+\item{color_scheme}{"Character. One of ""divergent"" or ""sequential"". A ""divergent"" scheme is best for highlighting relative data (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. A ""sequential"" scheme is best for highlighting data that are ordered low to high such as raw counts or probabilities. Default "divergent".}
 
-\item{color_scheme_symmetric}{Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.}
+\item{color_scheme_symmetric}{Logical. When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric from [-max(abs(data)),max(abs(data))]. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the color scheme to range from -2 to 2. Default TRUE.}
 
 \item{color_scheme_center}{Numeric. Indicates the center of a "divergent" color_scheme. Default 0.}
 
@@ -60,10 +59,7 @@ A "sequential" scheme is best for data that are ordered low to high such as raw 
 
 \item{annotation_color}{List. Contains color scheme for all annotations. See `?pheatmap` for more details.}
 
-\item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
-element longer than color vector. Used for mapping values to colors. Useful, if needed 
-to map certain values to certain colors, to certain values. If value is NA then the 
-breaks are calculated automatically.}
+\item{breaks}{Numeric vector. A sequence of numbers that covers the range of values in the normalized `counts`. Values in the normalized `matrix` are assigned to each bin in `breaks`. Each break is assigned to a unique color from `col`. If NULL, then breaks are calculated automatically. Default NULL.}
 
 \item{legend}{Logical. Determines whether legend should be drawn. Default TRUE.}
 
@@ -81,10 +77,10 @@ breaks are calculated automatically.}
 
 \item{treeheight_gene}{Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.gene == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.}
 
-\item{treeheight_cell}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
+\item{treeheight_cell}{Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.}
 
-\item{...}{Other arguments to be passed to underlying pheatmap function}
+\item{...}{Other arguments to be passed to underlying pheatmap function.}
 }
 \description{
-Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
+Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.
 }
