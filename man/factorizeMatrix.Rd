@@ -9,7 +9,7 @@ factorizeMatrix(counts, celda.mod, type)
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{An object from a celda_list's res.list property}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 
 \item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
 }

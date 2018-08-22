@@ -20,7 +20,7 @@ calculateLoglikFromVariables.celda_C(counts, sample.label, z, K, alpha,
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters.}
 }
 \description{
 Calculate the celda_C log likelihood for user-provided cluster assignments

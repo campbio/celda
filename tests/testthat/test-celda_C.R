@@ -5,7 +5,7 @@ context("Testing celda_C")
 load("../celdaCsim.rda")
 load("../celdaC.rda")
 counts.matrix <- celdaC.sim$counts
-model_C = getModel(celdaC.res, K = 5)[[1]]
+model_C = filterCeldaList(celdaC.res, K = 5)[[1]]
 factorized = factorizeMatrix(counts=counts.matrix, celda.mod=model_C)
 
 distinct_colors
@@ -27,15 +27,15 @@ test_that(desc = "Checking topRank to see if it runs without errors",{
                c("index","names"))
 })
 
-#diffExpBetweenCellStates
-test_that(desc = "Checking diffExpBetweenCellStates",{
-  diffexp_K1 <- diffExpBetweenCellStates(counts = counts.matrix, 
+#differentialExpression
+test_that(desc = "Checking differentialExpression",{
+  diffexp_K1 <- differentialExpression(counts = counts.matrix, 
                                          celda.mod = model_C, c1 = 1)
   expect_equal(class(diffexp_K1), c("data.table","data.frame"))
 })
 
 ##celda_C.R##
 test_that(desc = "Checking celda_C to see if it runs without errors",{
-  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, K.to.test = c(5,10), max.iter = 15)
+  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, celda.mod = "celda_C",  nchains = 2, K.to.test = c(5,10), max.iter = 15)
   expect_true(class(celdaC.res)[1] == "celda_list")  # Only best chain is returned
 })

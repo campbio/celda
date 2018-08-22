@@ -11,7 +11,7 @@ cC.decomposeCounts(counts, s, z, K)
 
 \item{s}{Integer vector. Contains the sample label for each cell (column) in the count matrix.}
 
-\item{z}{A numeric vector of cluster assignments}
+\item{z}{Numeric vector. Denotes cell population labels.}
 
 \item{K}{Integer. Number of cell populations.}
 }
