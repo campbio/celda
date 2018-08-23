@@ -16,7 +16,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
-#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200. 
+#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 20. 
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
 #' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 20.
@@ -31,7 +31,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @import foreach
 #' @export
 celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
-                 delta=1, gamma=1, max.iter=200, z.init=NULL, y.init=NULL,
+                 delta=1, gamma=1, max.iter=20, z.init=NULL, y.init=NULL,
                  stop.iter=10, split.on.iter=10, nchains=1, 
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
                  logfile.prefix="Celda") {

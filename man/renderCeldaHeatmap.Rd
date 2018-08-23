@@ -4,13 +4,11 @@
 \alias{renderCeldaHeatmap}
 \title{Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.}
 \usage{
-renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
-  scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
-  pseudocount_normalize = 0, pseudocount_log = 0, feature.ix = NULL,
-  cell.ix = NULL, cluster.gene = TRUE, cluster.cell = TRUE,
-  color_scheme = c("divergent", "sequential"),
-  color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
-  annotation_cell = NULL, annotation_gene = NULL,
+renderCeldaHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
+  trim = c(-2, 2), feature.ix = NULL, cell.ix = NULL,
+  cluster.gene = TRUE, cluster.cell = TRUE, color_scheme = c("divergent",
+  "sequential"), color_scheme_symmetric = TRUE, color_scheme_center = 0,
+  col = NULL, annotation_cell = NULL, annotation_gene = NULL,
   annotation_color = NULL, breaks = NULL, legend = TRUE,
   annotation_legend = TRUE, annotation_names_gene = TRUE,
   annotation_names_cell = TRUE, show_genenames = FALSE,
@@ -25,17 +23,9 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
 
 \item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{scale_log}{Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.}
-
-\item{scale_row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
-
-\item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
+\item{scale.row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2).}
-
-\item{pseudocount_normalize}{Numeric; A pseudocount to add to data before normalization. Default  1.}
-
-\item{pseudocount_log}{Numeric; A pseudocount to add to data before log transforming. Default  0.}
 
 \item{feature.ix}{Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.}
 
