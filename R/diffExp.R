@@ -48,7 +48,7 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
       celda.mod$names$column[which(celda.mod$z == c2)]
   }
   mat <- counts[,c(cells1,cells2)]
-  log_normalized_mat <- log2(normalizeCounts(mat) + 1)
+  log_normalized_mat <- normalizeCounts(mat, normalize="cpm", transformation.fun=log1p)
   cdat <-
     data.frame(
       wellKey = c(cells1, cells2),
