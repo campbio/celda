@@ -4,16 +4,17 @@
 \alias{calculatePerplexityWithResampling}
 \title{Calculate and visualize perplexity of all models in a celda_list, with resampling}
 \usage{
-calculatePerplexityWithResampling(celda.list, counts, resample, title = "")
+calculatePerplexityWithResampling(counts, celda.list, resample = 5,
+  seed = 12345)
 }
 \arguments{
-\item{celda.list}{A celda_list object as returned from *celda()*}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{counts}{The counts matrix used to generate the provided celda.list}
+\item{celda.list}{Object of class 'celda_list'.}
 
-\item{resample}{The number of times to resample the counts matrix for evaluating perplexity. Works with method="perplexity."}
+\item{resample}{Integer. The number of times to resample the counts matrix for evaluating perplexity. Default 5.}
 
-\item{title}{Title to be appended to the perplexity plot title. Default is "".}
+\item{seed}{Parameter to set.seed() for random number generation. Default 12345.}
 }
 \value{
 A list with a data frame summarizing all of the calculated perplexities, and a ggplot2 object visualizing them.

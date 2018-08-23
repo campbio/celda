@@ -7,9 +7,9 @@
 simulateCells(model, ...)
 }
 \arguments{
-\item{model}{The celda generative model to use (one of celda_C, celda_G, celda_CG)}
+\item{model}{Character. Options available in `celda::available.models`.}
 
-\item{...}{Parameters to pass to underlying generative model simulation}
+\item{...}{Additional parameters.}
 }
 \description{
 This function generates a list containing a simulated counts matrix, as well as various parameters
