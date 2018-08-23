@@ -3,14 +3,10 @@
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param z Numeric vector. Denotes cell population labels.  
 #' @param y Numeric vector. Denotes feature module labels. 
-#' @param scale_log Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.
-#' @param pseudocount_log Numeric; A pseudocount to add to data before log transforming. Default  0. 
-#' @param pseudocount_normalize Numeric; A pseudocount to add to data before normalization. Default  1. 
 #' @param feature.ix Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.
 #' @param cell.ix Integer vector. Select cells for display in heatmap. If NULL, no subsetting will be performed. Default NULL.
-#' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
+#' @param scale.row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
-#' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
 #' @param cluster.gene Logical. Determines whether rows should be clustered. Default TRUE. 
 #' @param cluster.cell Logical. Determines whether columns should be clustered. Default TRUE. 
 #' @param annotation_cell Data frame. Additional annotations for each cell will be shown in the column color bars. The format of the data frame should be one row for each cell and one column for each annotation. Numeric variables will be displayed as continuous color bars and factors will be displayed as discrete color bars. Default NULL. 
@@ -39,12 +35,8 @@
 #' @import graphics
 #' @export 
 renderCeldaHeatmap <- function(counts, z = NULL, y = NULL, 
-                                 scale_log = NULL,
-                                 scale_row = scale,
-                                 normalize = normalizeCounts,
+                                 scale.row = scale,
                                  trim=c(-2,2), 
-                                 pseudocount_normalize=0,
-                                 pseudocount_log=0,
                                  feature.ix = NULL,
                                  cell.ix = NULL,
                                  cluster.gene = TRUE, cluster.cell = TRUE,
@@ -66,23 +58,18 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 								 treeheight_cell = ifelse(cluster.cell, 50, 0),
                                  ...) {
   
-  # Ensure counts are stored in proper format:
-  if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
   
   # Check for same lengths for z and y group variables
   if (!is.null(z) & length(z) != ncol(counts)) stop("Length of z must match number of columns in counts matrix")
   if (!is.null(y) & length(y) != nrow(counts)) stop("Length of y must match number of rows in counts matrix")
   color_scheme = match.arg(color_scheme)
 
-  ## Normalize, transform, row scale, and then trim data
-  if(!is.null(normalize)) {  
-    counts <- do.call(normalize, list(counts + pseudocount_normalize))
-  }
-  if(!is.null(scale_log)){
-    counts <- do.call(scale_log, list(counts + pseudocount_log))
-  }
-  if(!is.null(scale_row)) {
-    counts <- t(base::apply(counts, 1, scale_row))
+  if(!is.null(scale.row)) {
+    if(is.function(scale.row)) {
+      counts <- t(base::apply(counts, 1, scale.row))
+    } else {
+      stop("'scale.row' needs to be of class 'function'")
+    }  
   }  
   if(!is.null(trim)){
     if(length(trim) != 2) {

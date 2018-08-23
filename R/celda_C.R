@@ -231,8 +231,8 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
 
   ## Expectation given current cell population labels
-  theta = log(normalizeCounts(m.CP.by.S + alpha, scale.factor=1))
-  phi = log(normalizeCounts(n.G.by.CP + beta, scale.factor=1))
+  theta = log(normalizeCounts(m.CP.by.S + alpha, normalize="proportion"))
+  phi = log(normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
   
   ## Maximization to find best label for each cell
   probs = eigenMatMultInt(phi, counts) + theta[, s]  
@@ -264,7 +264,7 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @export
-simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
+simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(500,5000), 
                          G=500, K=5, alpha=1, beta=1, seed=12345, ...) {
  
   set.seed(seed) 
@@ -346,15 +346,15 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
     ## Need to avoid normalizing cell/gene states with zero cells/genes
     unique.z = sort(unique(z))
     temp.n.G.by.CP = n.G.by.CP
-    temp.n.G.by.CP[,unique.z] = normalizeCounts(temp.n.G.by.CP[,unique.z], scale.factor=1)
+    temp.n.G.by.CP[,unique.z] = normalizeCounts(temp.n.G.by.CP[,unique.z], normalize="proportion")
 
-    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, scale.factor=1),
+    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, normalize="proportion"),
                      gene.states = temp.n.G.by.CP)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
-    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
-                     gene.states = normalizeCounts(n.G.by.CP + beta, scale.factor=1))
+    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
+                     gene.states = normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
     res = c(res, posterior = list(post.list))                           
   }
 
@@ -552,7 +552,7 @@ celdaTsne.celda_C = function(counts, celda.mod,
 							 max.cells=10000, min.cluster.size=100, initial.dims=20,
 							 perplexity=20, max.iter=2500, seed=12345, ...) {
 
-  norm = sqrt(normalizeCounts(counts, scale.factor=1))
+  norm = normalizeCounts(counts, normalize="proportion")
 
   ## Select a subset of cells to sample if greater than 'max.cells'
   total.cells.to.remove = ncol(norm) - max.cells
