@@ -72,7 +72,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
       names(sort(factorize.matrix$proportions$cell.states[feature.module, top.cells]))
   }
   if(normalize){
-    norm.counts <- normalizeCounts(counts, normalize="proportion", transformation_fun=sqrt)
+    norm.counts <- normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   } else{
     norm.counts <- counts
   }
