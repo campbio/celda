@@ -107,14 +107,6 @@ test_that(desc = "Checking topRank",{
                c("index","names"))
 })
 
-#GiniPlot
-test_that(desc = "Checking GiniPlot to see if it runs",{
-  gini.plot <- GiniPlot(counts = celdaCG.sim$counts, celda.mod = model_CG)
-  expect_equal(class(gini.plot),
-               c("gg","ggplot"))
-})
-
-
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs",{
   expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
