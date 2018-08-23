@@ -7,7 +7,6 @@
 #' @param cell.ix Integer vector. Select cells for display in heatmap. If NULL, no subsetting will be performed. Default NULL.
 #' @param scale.row Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row. 
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
-#' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
 #' @param cluster.gene Logical. Determines whether rows should be clustered. Default TRUE. 
 #' @param cluster.cell Logical. Determines whether columns should be clustered. Default TRUE. 
 #' @param annotation_cell Data frame. Additional annotations for each cell will be shown in the column color bars. The format of the data frame should be one row for each cell and one column for each annotation. Numeric variables will be displayed as continuous color bars and factors will be displayed as discrete color bars. Default NULL. 
