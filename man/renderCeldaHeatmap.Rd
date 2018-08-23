@@ -70,8 +70,6 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
 \item{treeheight_cell}{Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.}
 
 \item{...}{Other arguments to be passed to underlying pheatmap function.}
-
-\item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
 }
 \description{
 Renders a heatmap based on a matrix of counts where rows are genes and columns are cells.

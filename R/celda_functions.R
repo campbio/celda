@@ -39,25 +39,25 @@ normalizeLogProbs = function(ll.probs) {
 #' 
 #' @param counts A count matrix 
 #' @param normalize Character. Divides counts by the library sizes for each cell. One of "proportion", "cpm", "median", or "mean". "proportion" uses the total counts for each cell as the library size. "cpm" divides the library size of each cell by one million to produce counts per million. "median" divides the library size of each cell by the median library size across all cells.  "mean" divides the library size of each cell by the mean library size across all cells.
-#' @param transformation_fun Applys a transformation such as `sqrt`, `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be applied. Occurs after normalization. Default NULL.
-#' @param scale_fun. Scales the rows of the normalized and transformed count matrix. Default NULL.
-#' @param pseudocount_normalize Numeric. Add a pseudocount to counts before normalization. Default  0. 
-#' @param pseudocount_transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
+#' @param transformation.fun Function. Applys a transformation such as `sqrt`, `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be applied. Occurs after normalization. Default NULL.
+#' @param scale.fun Function. Scales the rows of the normalized and transformed count matrix. Default NULL.
+#' @param pseudocount.normalize Numeric. Add a pseudocount to counts before normalization. Default  0. 
+#' @param pseudocount.transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
-							transformation_fun=NULL, scale_fun=NULL,
-							pseudocount_normalize=0, pseudocount_transform=0) {
+							transformation.fun=NULL, scale.fun=NULL,
+							pseudocount.normalize=0, pseudocount.transform=0) {
 
   normalize = match.arg(normalize)
-  if(!is.null(transformation_fun) && !is.function(transformation_fun)) {
-    stop("'transformation_fun' needs to be of class 'function'")
+  if(!is.null(transformation.fun) && !is.function(transformation.fun)) {
+    stop("'transformation.fun' needs to be of class 'function'")
   }
-  if(!is.null(scale_fun) && !is.function(scale_fun)) {
-    stop("'scale_fun' needs to be of class 'function'")
+  if(!is.null(scale.fun) && !is.function(scale.fun)) {
+    stop("'scale.fun' needs to be of class 'function'")
   }
 
   # Perform normalization  
-  counts = counts + pseudocount_normalize
+  counts = counts + pseudocount.normalize
   cs = .colSums(counts, nrow(counts), ncol(counts))
   norm = switch(normalize,
     "proportion" = sweep(counts, 2, cs, "/"),
@@ -66,11 +66,11 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
     "mean" = sweep(counts, 2, cs / mean(cs), "/")
   )  
   
-  if(!is.null(transformation_fun)){
-    norm <- do.call(transformation_fun, list(norm + pseudocount_transform))
+  if(!is.null(transformation.fun)){
+    norm <- do.call(transformation.fun, list(norm + pseudocount.transform))
   }
-  if(!is.null(scale_fun)) {
-    norm <- t(base::apply(norm, 1, scale_fun))
+  if(!is.null(scale.fun)) {
+    norm <- t(base::apply(norm, 1, scale.fun))
   }  
 
   return(norm)
