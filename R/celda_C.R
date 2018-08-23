@@ -264,7 +264,7 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @export
-simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(100,5000), 
+simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(500,5000), 
                          G=500, K=5, alpha=1, beta=1, seed=12345, ...) {
  
   set.seed(seed) 
