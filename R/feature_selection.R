@@ -2,11 +2,11 @@
 #' 
 #' @param matrix Numeric matrix. 
 #' @param n Integer. Maximum number of items above `threshold` returned for each ranked row or column.  
-#' @param margin Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 1. 
+#' @param margin Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2. 
 #' @param threshold Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0. 
 #' @param decreasing Logical. Specifies if the rank should be decreasing. Default TRUE.  
 #' @export
-topRank = function(matrix, n=25, margin=1, threshold=0, decreasing=TRUE) {
+topRank = function(matrix, n=25, margin=2, threshold=0, decreasing=TRUE) {
   if(is.null(threshold) | is.na(threshold)) {
     threshold = min(matrix) - 1 
   }
