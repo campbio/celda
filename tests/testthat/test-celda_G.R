@@ -4,12 +4,12 @@ context("Testing celda_G")
 
 load("../celdaGsim.rda")
 load("../celdaG.rda")
-model_G = getModel(celdaG.res, L = 5)[[1]]
+model_G = filterCeldaList(celdaG.res, L = 5)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_G, counts = celdaG.sim$counts)
 counts.matrix <- celdaG.sim$counts
 
-#Making sure getModel if functioning correctly
-test_that(desc = "Sanity checking getModel",{
+#Making sure filterCeldaList if functioning correctly
+test_that(desc = "Sanity checking filterCeldaList",{
   expect_equal(celdaG.res$content.type, class(model_G))
 })
 
@@ -27,9 +27,9 @@ test_that(desc = "Checking factorize matrix dimension size",{
 
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_G returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables(counts = celdaG.sim$counts, y = celdaG.sim$y,
-                                         L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1, 
-                                         model="celda_G"),
+  expect_lt(calculateLoglikFromVariables.celda_G(counts = celdaG.sim$counts, y = celdaG.sim$y,
+                                         L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1 
+                                         ),
                0)
 })
 
@@ -58,7 +58,7 @@ test_that(desc = "Checking recodeClusterY gives/doesn't give error",{
 
 #compareCountMatrix
 test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(count.matrix = celdaG.sim$counts, celda.obj = model_G))
+  expect_true(compareCountMatrix(counts = celdaG.sim$counts, celda.mod = model_G))
 })
 
 #distinct_colors
@@ -76,20 +76,20 @@ test_that(desc = "Checking renderCeldaHeatmap output",{
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank function",{
-  expect_equal(names(topRank(fm = factorized$proportions$gene.states)),
+  expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
                c("index","names"))
 })
 
-#stateHeatmap
-test_that(desc = "Checking stateHeatmap to see if it runs",{
-  expect_equal(names(stateHeatmap(celdaG.sim$counts, celda.mod = model_G)),
+#moduleHeatmap
+test_that(desc = "Checking moduleHeatmap to see if it runs",{
+  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
 ##celda_G.R##
 test_that(desc = "Making sure celda_G runs without errors",{
-  celdaG.res <- celda(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
-  expect_true(class(celdaG.res) == "celda_list")  # Only best chain returned by default
+  celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, celda.mod = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
+  expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))  # Only best chain returned by default
 })
 
 #plotDrState

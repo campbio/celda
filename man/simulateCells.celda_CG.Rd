@@ -9,31 +9,31 @@
   beta = 1, gamma = 5, delta = 1, seed = 12345, ...)
 }
 \arguments{
-\item{model}{Celda model to use for simulation. One of 'available_models'.}
+\item{model}{Character. Options available in `celda::available.models`.}
 
-\item{S}{The number of samples}
+\item{S}{Integer. Number of samples to simulate.}
 
-\item{C.Range}{two element vector to specify the lower and upper bound of the counts of cells for each sample}
+\item{C.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of cells to be generated in each sample. Default c(50, 100).}
 
-\item{N.Range}{two element vector to specify the lower and upper bound of the counts of the transcripts}
+\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
 
-\item{G}{The number of genes}
+\item{G}{Numeric. The total number of features to be simulated.}
 
-\item{K}{The number of cell populations}
+\item{K}{Integer. Number of cell populations.}
 
-\item{L}{The number of gene clusters being considered}
+\item{L}{Integer. Number of feature modules.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{seed}{starting point used for generating simulated data}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Other arguments}
+\item{...}{Additional parameters.}
 }
 \description{
 Simulate cells from the cell/gene clustering generative model
