@@ -2,15 +2,25 @@
 % Please edit documentation in R/celda_functions.R
 \name{normalizeCounts}
 \alias{normalizeCounts}
-\title{Normalize a counts matrix by a scalar factor}
+\title{Performs normalization, transformation, and/or scaling on a counts matrix}
 \usage{
-normalizeCounts(counts, scale.factor = 1e+06)
+normalizeCounts(counts, normalize = c("proportion", "cpm", "median", "mean"),
+  transformation_fun = NULL, scale_fun = NULL, pseudocount_normalize = 0,
+  pseudocount_transform = 0)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
+\item{counts}{A count matrix}
 
-\item{scale.factor}{the scalar for the normalization}
+\item{normalize}{Character. Divides counts by the library sizes for each cell. One of "proportion", "cpm", "median", or "mean". "proportion" uses the total counts for each cell as the library size. "cpm" divides the library size of each cell by one million to produce counts per million. "median" divides the library size of each cell by the median library size across all cells.  "mean" divides the library size of each cell by the mean library size across all cells.}
+
+\item{transformation_fun}{Applys a transformation such as `sqrt`, `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be applied. Occurs after normalization. Default NULL.}
+
+\item{pseudocount_normalize}{Numeric. Add a pseudocount to counts before normalization. Default  0.}
+
+\item{pseudocount_transform}{Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0.}
+
+\item{scale_fun.}{Scales the rows of the normalized and transformed count matrix. Default NULL.}
 }
 \description{
-Normalize a counts matrix by a scalar factor
+Performs normalization, transformation, and/or scaling on a counts matrix
 }
