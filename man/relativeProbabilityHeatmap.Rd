@@ -7,11 +7,11 @@
 relativeProbabilityHeatmap(counts, celda.mod, main = NA)
 }
 \arguments{
-\item{counts}{A count matrix where rows are genes and columns are cells, used to generate celda model.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{celda model of class "celda_CG".}
+\item{celda.mod}{Celda object of class "celda_CG".}
 
-\item{main}{The title of the plot; default = NA.}
+\item{main}{The title of the plot. Default NULL.}
 }
 \description{
 Renders a heatmap based on a population matrix from the factorized counts matrix. The relative probability of each transcriptional state in each cell subpopulation is visualized.

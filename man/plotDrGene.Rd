@@ -4,32 +4,32 @@
 \alias{plotDrGene}
 \title{Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.}
 \usage{
-plotDrGene(dim1, dim2, matrix, trim = c(-2, 2), rescale = TRUE, size = 1,
+plotDrGene(dim1, dim2, counts, trim = c(-2, 2), rescale = TRUE, size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
   color_mid = NULL, color_high = "blue")
 }
 \arguments{
-\item{dim1}{Numeric vector; first dimension from data dimensionality reduction output.}
+\item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
 
-\item{dim2}{Numeric vector; second dimension from data dimensionality reduction output.}
+\item{dim2}{Numeric vector. Second dimension from data dimensionality reduction output.}
 
-\item{matrix}{Counts matrix, will have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{trim}{A two element vector to specify the lower and upper cutoff for the data. Occurs after row scaling. Set to NULL to disable. Default c(-2,2).A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).}
+\item{trim}{Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2).}
 
-\item{rescale}{Boolean. If TRUE, will rescale counts matrix on a 0~1 scale. Default TRUE.}
+\item{rescale}{Logical. Whether rows of the matrix should be z-score normalized. Default TRUE.}
 
-\item{size}{Numeic vector; size of point on plot. Default = 1.}
+\item{size}{Numeric. Sets size of point on plot. Default 1.}
 
-\item{xlab}{Character vector, used as label for x axis. Default "Dimension_1".}
+\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
 
-\item{ylab}{Character vector, used as label for y axis. Default "Dimension_2".}
+\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
-\item{color_low}{Character vector of R colors available from the colors() function. The color will be used to signify the lowest values on the scale. Default: 'grey'}
+\item{color_low}{Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.}
 
-\item{color_mid}{Character vector of R colors available from the colors() function. The color will be used to signify the midpoint on the scale.}
+\item{color_mid}{Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale.}
 
-\item{color_high}{Character vector of R colors available from the colors() function. The color will be used to signify the highest values on the scale. Default: 'blue'}
+\item{color_high}{Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 }
 \description{
 Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
