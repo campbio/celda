@@ -386,16 +386,16 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
     ## Need to avoid normalizing cell/gene states with zero cells/genes
     unique.z = sort(unique(z))
     temp.n.TS.by.CP = n.TS.by.CP
-    temp.n.TS.by.CP[,unique.z] = normalizeCounts(temp.n.TS.by.CP[,unique.z], scale.factor=1)
+    temp.n.TS.by.CP[,unique.z] = normalizeCounts(temp.n.TS.by.CP[,unique.z], normalize="proportion")
 
     unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
-    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
+    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], normalize="proportion")
     temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
     
-    prop.list = list(sample.states =  normalizeCounts(m.CP.by.S, scale.factor=1),
+    prop.list = list(sample.states =  normalizeCounts(m.CP.by.S, normalize="proportion"),
     				   population.states = temp.n.TS.by.CP, 
-    				   cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
+    				   cell.states = normalizeCounts(n.TS.by.C, normalize="proportion"),
     				   gene.states = temp.n.G.by.TS, 
     				   gene.distribution = temp.nG.by.TS)
     res = c(res, list(proportions=prop.list))
@@ -404,11 +404,11 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
 
     gs = n.G.by.TS
     gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
-    gs = normalizeCounts(gs, scale.factor=1)
+    gs = normalizeCounts(gs, normalize="proportion")
 	temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
 	
-    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, scale.factor=1),
-          				   population.states = normalizeCounts(n.TS.by.CP + beta, scale.factor=1), 
+    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
+          				   population.states = normalizeCounts(n.TS.by.CP + beta, normalize="proportion"), 
           				   gene.states = gs,
           				   gene.distribution = temp.nG.by.TS)
     res = c(res, posterior = list(post.list))						    
@@ -672,7 +672,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
 	}
 	states.to.use = states 
   } 
-  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], scale.factor=1)
+  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], normalize="proportion")
 
   ## Select a subset of cells to sample if greater than 'max.cells'
   total.cells.to.remove = ncol(norm) - max.cells

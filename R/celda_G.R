@@ -363,10 +363,10 @@ factorizeMatrix.celda_G = function(counts, celda.mod,
     ## Need to avoid normalizing cell/gene states with zero cells/genes
     unique.y = sort(unique(y))
     temp.n.G.by.TS = n.G.by.TS
-    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
+    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], normalize="proportion")
     temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
     
-    prop.list = list(cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
+    prop.list = list(cell.states = normalizeCounts(n.TS.by.C, normalize="proportion"),
     							  gene.states = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
     res = c(res, list(proportions=prop.list))
   }
@@ -374,10 +374,10 @@ factorizeMatrix.celda_G = function(counts, celda.mod,
   
     gs = n.G.by.TS
     gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
-    gs = normalizeCounts(gs, scale.factor=1)
+    gs = normalizeCounts(gs, normalize="proportion")
     temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
     
-    post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
+    post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, normalize="proportion"),
     						    gene.states = gs, gene.distribution=temp.nG.by.TS)
     res = c(res, posterior = list(post.list))						    
   }
@@ -598,7 +598,7 @@ celdaTsne.celda_G = function(counts, celda.mod, states=NULL, perplexity=20, max.
 	}
 	states.to.use = states 
   } 
-  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], scale.factor=1)
+  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], normalize="proportion")
 
   res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, distance=distance, seed=seed)
   rownames(res) = colnames(norm)
