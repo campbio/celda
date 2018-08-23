@@ -7,7 +7,7 @@
 normalizeCounts(counts, scale.factor = 1e+06)
 }
 \arguments{
-\item{counts}{A count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{scale.factor}{the scalar for the normalization}
 }
