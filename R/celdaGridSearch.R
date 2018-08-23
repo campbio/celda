@@ -205,5 +205,5 @@ validateCounts = function(counts, K.to.test, L) {
 #' @param ... Additional parameters.
 #' @export
 celda = function(...) {
-  warn("Warning: The celda() wrapper function has been deprecated. Please see celdaGridSearch().")
+  warning("Warning: The celda() wrapper function has been deprecated. Please see celdaGridSearch().")
 }
