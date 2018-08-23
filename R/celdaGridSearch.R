@@ -198,3 +198,9 @@ validateCounts = function(counts, K.to.test, L) {
     stop("Number of cells (counts) in count matrix must be >= K")
   }
 }
+
+
+#' @export
+celda = function(...) {
+  warn("Warning: The celda() wrapper function has been deprecated. Please see celdaGridSearch().")
+}
