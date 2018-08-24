@@ -1,6 +1,6 @@
 #' Renders a heatmap based on a matrix of counts where rows are features and columns are cells.
 #' 
-#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param counts Numeric matrix. Normalized counts matrix where rows represent features and columns represent cells. . 
 #' @param z Numeric vector. Denotes cell population labels.  
 #' @param y Numeric vector. Denotes feature module labels. 
 #' @param feature.ix Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.

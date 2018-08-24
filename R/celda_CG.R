@@ -630,12 +630,17 @@ getL.celda_CG = function(celda.mod) {
 
 
 #' celdaHeatmap for celda Cell and Gene clustering model.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_CG". 
-#' @param counts A count matrix.
+#' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
 #' @export
-celdaHeatmap.celda_CG = function(celda.mod, counts, ...) {
-  renderCeldaHeatmap(counts, z=celda.mod$z, y=celda.mod$y, ...)
+celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
+  fm = factorizeMatrix(counts, celda.mod, type="proportion")
+  top = topRank(fm$proportions$gene.states, n=nfeatures)
+  ix = unlist(top$index)
+  norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
+  renderCeldaHeatmap(norm[ix,], z=celda.mod$z, y=celda.mod$y[ix], ...)
 }
 
 
