@@ -70,7 +70,7 @@ test_that(desc = "Checking distinct_colors",{
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap output",{
   expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 ##feature_selection.R##
@@ -83,7 +83,7 @@ test_that(desc = "Checking topRank function",{
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs",{
   expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 ##celda_G.R##
