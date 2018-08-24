@@ -66,11 +66,9 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
   }
   counts = processCounts(counts)
     
-  s = processSampleLabels(sample.label, ncol(counts))
-  if (is.null(sample.label)) {
-    sample.label = s
-  }
-
+  sample.label = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
+  
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
@@ -338,7 +336,7 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
   delta = celda.mod$delta
   gamma = celda.mod$gamma
   sample.label = celda.mod$sample.label
-  s = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
   
   ## Calculate counts one time up front
   p = cCG.decomposeCounts(counts, s, z, y, K, L)
@@ -475,7 +473,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param ... Additional parameters.
 #' @export
 calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
-  s = processSampleLabels(sample.label, ncol(counts))
+  sample.label = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
   p = cCG.decomposeCounts(counts, s, z, y, K, L)
   final = cCG.calcLL(K=K, L=L, m.CP.by.S=p$m.CP.by.S, n.TS.by.CP=p$n.TS.by.CP, n.by.G=p$n.by.G, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, nS=p$nS, nG=p$nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
   return(final)
@@ -518,7 +517,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @export
 clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
   
-  s = processSampleLabels(celda.mod$sample.label, ncol(counts))
+  s = as.integer(celda.mod$sample.label)
   z = celda.mod$z
   K = celda.mod$K  
   y = celda.mod$y
@@ -564,13 +563,13 @@ calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
   theta = log(factorized$posterior$sample.states)
   phi   = factorized$posterior$population.states
   psi   = factorized$posterior$gene.states
-  sl = celda.mod$sample.label
+  s = as.integer(celda.mod$sample.label)
   eta <- factorized$posterior$gene.distribution
   nG.by.TS = factorized$counts$gene.distribution
   
   eta.prob = log(eta) * nG.by.TS
   gene.by.pop.prob = log(psi %*% phi)
-  inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, sl]  
+  inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, s]  
   
   log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) + sum(eta.prob)
   perplexity = exp(-(log.px/sum(new.counts)))

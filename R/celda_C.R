@@ -61,10 +61,8 @@ celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
   }
   counts = processCounts(counts)  
     
-  s = processSampleLabels(sample.label, ncol(counts))
-  if (is.null(sample.label)) {
-    sample.label = s
-  }
+  sample.label = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
   
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
@@ -321,7 +319,7 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
   alpha = celda.mod$alpha
   beta = celda.mod$beta
   sample.label = celda.mod$sample.label
-  s = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
         
   p = cC.decomposeCounts(counts, s, z, K)
   m.CP.by.S = p$m.CP.by.S
@@ -397,7 +395,8 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param ... Additional parameters.
 #' @export
 calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
-  s = processSampleLabels(sample.label, ncol(counts))
+  sample.label = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
   p = cC.decomposeCounts(counts, s, z, K)  
   final = cC.calcLL(m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, s=s, z=z, K=K, nS=p$nS, nG=p$nG, alpha=alpha, beta=beta)
   return(final)
@@ -446,7 +445,7 @@ clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
 
   z = celda.mod$z
   sample.label = celda.mod$sample.label
-  s = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
   
   K = celda.mod$K
   alpha = celda.mod$alpha
@@ -481,9 +480,9 @@ calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
                                type="posterior")
   theta = log(factorized$posterior$sample.states)
   phi = log(factorized$posterior$gene.states)
-  sl = celda.mod$sample.label
+  s = as.integer(celda.mod$sample.label)
   
-  inner.log.prob = (t(phi) %*% new.counts) + theta[, sl]  
+  inner.log.prob = (t(phi) %*% new.counts) + theta[, s]  
   log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
   
   perplexity = exp(-(log.px/sum(new.counts)))
