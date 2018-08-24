@@ -68,7 +68,9 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 
   if(!is.null(scale.row)) {
     if(is.function(scale.row)) {
+      cn = colnames(counts)
       counts <- t(base::apply(counts, 1, scale.row))
+      colnames(counts) = cn
     } else {
       stop("'scale.row' needs to be of class 'function'")
     }  
