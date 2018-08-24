@@ -10,6 +10,8 @@ celdaProbabilityMap(counts, celda.mod, ...)
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
 \item{celda.mod}{Celda object of class "celda_C" or "celda_CG".}
+
+\item{...}{Additional parameters.}
 }
 \description{
 Generate factorized matrices showing each feature's influence on cell / gene clustering
