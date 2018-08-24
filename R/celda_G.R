@@ -266,7 +266,6 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   if(length(table(y)) < L) {
     stop("Some states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
   }
-  y = reorder.label.by.size(y, L)$new.labels
   
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
