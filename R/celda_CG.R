@@ -712,12 +712,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_CG".   
-#' @import gtable
-#' @import grid
-#' @import scales
-#' @import RColorBrewer
-#' @import grDevices
-#' @import graphics
+#' @param level Character. One of "cell.population" or "sample". "cell.population" will display the absolute probabilities and relative normalized expression of each module in each cell population. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "cell.population".
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample")){
   counts = processCounts(counts)
@@ -725,11 +720,12 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
   
   level = match.arg(level)
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  
+  z.include = which(tabulate(celda.mod$z, celda.mod$K) > 0)
+  y.include = which(tabulate(celda.mod$y, celda.mod$L) > 0)    
 
   if(level == "cell.population") {
-    pop <- factorized$proportions$population.states
-    pop.norm = normalizeCounts(factorized$counts$population.states, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
+    pop <- factorized$proportions$population.states[y.include,z.include,drop=FALSE]
+    pop.norm = normalizeCounts(pop, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
   
     percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
     col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
