@@ -350,14 +350,14 @@ rdirichlet <- function(n, alpha) {
 ## Make sure provided sample labels are the right type, or generate some if none were provided
 processSampleLabels = function(sample.label, num.cells) {
   if(is.null(sample.label)) {
-    s = rep(1, num.cells)
-    sample.label = s 
-  } else if(is.factor(sample.label)) {
-    s = as.numeric(sample.label)
+    sample.label = as.factor(rep("Sample_1", num.cells))
   } else {
-    sample.label = as.factor(sample.label)
-    s = as.integer(sample.label)
+    if(length(sample.label) != num.cells) {
+      stop("'sample.label' must be the same length as the number of columns in the 'counts' matrix.")
+    }
   }
-  
-  return(s)
+  if(!is.factor(sample.label)) {
+    sample.label = as.factor(sample.label)
+  }
+  return(sample.label)
 }
