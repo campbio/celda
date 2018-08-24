@@ -4,7 +4,8 @@
 \alias{celdaProbabilityMap.celda_C}
 \title{Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.}
 \usage{
-\method{celdaProbabilityMap}{celda_C}(counts, celda.mod, level = c("sample"))
+\method{celdaProbabilityMap}{celda_C}(counts, celda.mod, level = c("sample"),
+  ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -12,6 +13,8 @@
 \item{celda.mod}{Celda object of class "celda_CG".}
 
 \item{level}{Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".}
+
+\item{...}{Additional parameters.}
 }
 \description{
 Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
