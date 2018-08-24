@@ -13,13 +13,9 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 \arguments{
 \item{counts}{A count matrix.}
 
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
-
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
 \item{K.to.test}{Integer vector. List of K's to evaluate, where each K is the number of cell populations.}
-
-\item{L}{Integer vector. List of L's to evaluate, where each L is the number of cell populations.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
@@ -50,6 +46,10 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default FALSE.}
 
 \item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
+
+\item{model}{Celda model. Options available in `celda::available.models`.}
+
+\item{L.to.test}{Integer vector. List of L's to evaluate, where each L is the number of feature modules.}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
