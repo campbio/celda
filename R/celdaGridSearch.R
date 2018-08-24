@@ -36,7 +36,7 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
                  logfile.prefix="Celda") {
  
-  validateArgs(counts, celda.mod, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L)
+  validateArgs(counts, celda.mod, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L.to.test)
   params.list = buildParamList(counts, celda.mod, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
@@ -53,7 +53,7 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
   doParallel::registerDoParallel(cl)
   
   # Details for each model parameter / chain combination 
-  run.params = expand.grid(plyr::compact(list(chain=1:nchains, K.to.test=K.to.test, L=L)))
+  run.params = expand.grid(plyr::compact(list(chain=1:nchains, K=K.to.test, L=L.to.test)))
   run.params$index = as.numeric(rownames(run.params))
   
   # Pre-generate a set of random seeds to be used for each chain
@@ -70,7 +70,7 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
   res.list = foreach(i = 1:nrow(run.params), .export=celda.mod, .combine = c, .multicombine=TRUE) %dopar% {
     chain.params = append(params.list,
                           as.list(dplyr::select(run.params[i,],
-                                                dplyr::matches("K.to.test|L"))))
+                                                dplyr::matches("K|L"))))
     chain.params$seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
     if (isTRUE(verbose)) {
@@ -94,7 +94,7 @@ celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL,
     new.run.params$index = 1:nrow(new.run.params)
     best.chains = apply(new.run.params, 1,
                         function(params) {
-                          k = if ("K.to.test" %in% names(params)) params[["K.to.test"]] else NULL
+                          k = if ("K" %in% names(params)) params[["K"]] else NULL
                           l = if ("L" %in% names(params)) params[["L"]] else NULL
                           selectBestModel(celda.res, k, l)
                         })
