@@ -704,3 +704,53 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
   colnames(final) = c("tsne_1", "tsne_2")
   return(final)
 }
+
+
+
+
+#' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param celda.mod Celda object of class "celda_CG".   
+#' @import gtable
+#' @import grid
+#' @import scales
+#' @import RColorBrewer
+#' @import grDevices
+#' @import graphics
+#' @export 
+celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample")){
+  counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
+  
+  level = match.arg(level)
+  factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
+  
+  if(level == "cell.population") {
+    pop <- factorized$proportions$population.states
+    pop.norm = normalizeCounts(factorized$counts$population.states, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
+  
+    percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
+    col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
+    col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
+    col <- c(col1,col2)
+  
+    breaks <-  seq(0, 1, length.out = length(col))   
+    g1 = renderCeldaHeatmap(pop, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
+    g2 = renderCeldaHeatmap(pop.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Expression", silent=TRUE) 
+    
+  } else {
+    samp <- factorized$proportions$sample.states
+    if(ncol(samp) > 1) {
+      samp.norm = normalizeCounts(factorized$counts$sample.states, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
+      g1 = renderCeldaHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
+      g2 = renderCeldaHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
+    } else {
+      stop("Must have more than one sample to generate plots.")
+    } 
+  }
+  gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol=2)
+}
+
+
+
