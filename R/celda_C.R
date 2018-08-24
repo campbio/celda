@@ -593,8 +593,9 @@ celdaTsne.celda_C = function(counts, celda.mod,
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_CG".   
 #' @param level Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".
+#' @param ... Additional parameters.
 #' @export 
-celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample")){
+celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ...){
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
   
