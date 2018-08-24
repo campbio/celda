@@ -30,7 +30,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
 #' @export
-celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL, L=NULL, alpha=1, beta=1, 
+celdaGridSearch = function(counts, celda.mod, sample.label=NULL, K.to.test=NULL, L.to.test=NULL, alpha=1, beta=1, 
                  delta=1, gamma=1, max.iter=20, z.init=NULL, y.init=NULL,
                  stop.iter=10, split.on.iter=10, nchains=1, 
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 

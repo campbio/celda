@@ -253,11 +253,11 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param G Numeric. The total number of features to be simulated. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
-#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @export
-simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
+simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000), G=1000, 
                                  L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))

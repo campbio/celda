@@ -27,7 +27,7 @@
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
 
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5.}
 
 \item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
