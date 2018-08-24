@@ -73,6 +73,8 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
     norm <- t(base::apply(norm, 1, scale.fun))
   }  
 
+  colnames(norm) = colnames(counts)
+  rownames(norm) = rownames(counts)
   return(norm)
 }
   
