@@ -8,10 +8,10 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' Yields assigments of genes/cells to clusters, depending on the provided model type.
 #' 
 #' @param counts A count matrix.
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param model Celda model. Options available in `celda::available.models`.
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param K.to.test Integer vector. List of K's to evaluate, where each K is the number of cell populations. 
-#' @param L Integer vector. List of L's to evaluate, where each L is the number of cell populations. 
+#' @param L.to.test Integer vector. List of L's to evaluate, where each L is the number of feature modules. 
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
