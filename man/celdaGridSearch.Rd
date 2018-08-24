@@ -5,7 +5,7 @@
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
 celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
-  L = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
+  L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
   max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
   split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
   seed = 12345, verbose = FALSE, logfile.prefix = "Celda")
@@ -16,6 +16,8 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
 \item{K.to.test}{Integer vector. List of K's to evaluate, where each K is the number of cell populations.}
+
+\item{L.to.test}{Integer vector. List of L's to evaluate, where each L is the number of feature modules.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
@@ -48,8 +50,6 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 \item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
 
 \item{model}{Celda model. Options available in `celda::available.models`.}
-
-\item{L.to.test}{Integer vector. List of L's to evaluate, where each L is the number of feature modules.}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
