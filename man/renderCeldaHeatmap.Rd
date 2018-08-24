@@ -15,7 +15,7 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
   annotation.names.cell = TRUE, show.names.feature = FALSE,
   show.names.cell = FALSE, hclust.method = "ward.D2",
   treeheight.feature = ifelse(cluster.feature, 50, 0),
-  treeheight.cell = ifelse(cluster.cell, 50, 0), ...)
+  treeheight.cell = ifelse(cluster.cell, 50, 0), silent = FALSE, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -69,6 +69,8 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
 \item{treeheight.feature}{Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.feature == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.}
 
 \item{treeheight.cell}{Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.}
+
+\item{silent}{Logical. Whether to plot the heatmap.}
 
 \item{...}{Other arguments to be passed to underlying pheatmap function.}
 }

@@ -26,6 +26,7 @@
 #' @param hclust.method Character. Specifies the method to use for the 'hclust' function. See `?hclust` for possible values. Default "ward.D2".  
 #' @param treeheight.feature Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.feature == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.  
 #' @param treeheight.cell Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.  
+#' @param silent Logical. Whether to plot the heatmap.
 #' @param ... Other arguments to be passed to underlying pheatmap function.
 #' @import gtable
 #' @import grid
@@ -56,6 +57,7 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
                                  hclust.method = "ward.D2",
                                  treeheight.feature = ifelse(cluster.feature, 50, 0), 
 								 treeheight.cell = ifelse(cluster.cell, 50, 0),
+								 silent = FALSE,
                                  ...) {
   
   
@@ -189,14 +191,14 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
   } else {  # Sequential color scheme
     if(is.null(col)){
       col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(100)
-      col.len = length(col)
     }
+    col.len = length(col)
     if(is.null(breaks)){
         breaks <- seq(lbound.range, ubound.range, length.out = col.len)
     }
   }
 
-  semi_pheatmap(mat = counts,
+  sp = semi_pheatmap(mat = counts,
   	color = col,
     breaks = breaks, 
     cluster_cols = cluster.cell,
@@ -215,93 +217,15 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
     treeheight_col = treeheight.cell,
     row_label = y,
     col_label = z,
+    silent = TRUE,
     ...)
+  
+  if(!isTRUE(silent)) {
+    grid::grid.newpage() 
+    grid::grid.draw(sp$gtable)  
+  }  
+  
+  invisible(sp)  
 }
 
 
-
-#' Renders a heatmap based on a population matrix from the factorized counts matrix.
-#' 
-#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_CG".   
-#' @param main The title of the plot. Default NULL.  
-#' @import gtable
-#' @import grid
-#' @import scales
-#' @import RColorBrewer
-#' @import grDevices
-#' @import graphics
-#' @export 
-absoluteProbabilityHeatmap <- function(counts, celda.mod, main = NA){
-  if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
-  compareCountMatrix(counts, celda.mod)
-  
-  factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  pop <- factorized$proportions$population.states
-  z <- 1:ncol(pop)
-  y <- 1:nrow(pop)
-  
-  K = sort(unique(z))
-  K.col = distinct_colors(length(K))
-  names(K.col) = K
-  
-  annotation_color = list(cell = K.col)
-  
-  L = sort(unique(y))
-  L.col = distinct_colors(length(L))
-  names(L.col) = L
-  
-  percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
-  col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
-  col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
-  col <- c(col1,col2)
-  
-  breaks <-  seq(0, 1, length.out = length(col)) 
-  
-  semi_pheatmap(pop, row_label = NULL, col_label = NULL, col = col, breaks = breaks, cluster_cols = FALSE, cluster_rows = FALSE, main = main)
-}
-
-
-
-#' Renders a heatmap based on a population matrix from the factorized counts matrix. The relative probability of each transcriptional state in each cell subpopulation is visualized.
-#' 
-#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_CG".  
-#' @param main The title of the plot. Default NULL.  
-#' @import gtable
-#' @import grid
-#' @import scales
-#' @import RColorBrewer
-#' @import grDevices
-#' @import graphics
-#' @export 
-relativeProbabilityHeatmap <- function(counts, celda.mod, main = NA){
-  if (isTRUE(typeof(counts) != "integer")) counts = processCounts(counts)
-  compareCountMatrix(counts, celda.mod)
-  
-  factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  pop <- factorized$proportions$population.states
-  z <- 1:ncol(pop)
-  y <- 1:nrow(pop)
-  
-  K = sort(unique(z))
-  K.col = distinct_colors(length(K))
-  names(K.col) = K
-  
-  annotation_color = list(cell = K.col)
-  
-  L = sort(unique(y))
-  L.col = distinct_colors(length(L))
-  names(L.col) = L
-  
-  pop <- sweep(pop, 1, rowSums(pop), "/")
-  
-  percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
-  col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
-  col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
-  col <- c(col1,col2)
-  
-  breaks <-  seq(0, 1, length.out = length(col)) 
-  
-  semi_pheatmap(pop, row_label = NULL, col_label = NULL, col = col, breaks = breaks, cluster_cols = FALSE, cluster_rows = FALSE, main = main)
-}
