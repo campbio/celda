@@ -36,8 +36,8 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
                  bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
                  logfile.prefix="Celda") {
  
-  validateArgs(counts, celda.mod, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L.to.test)
-  params.list = buildParamList(counts, celda.mod, sample.label, alpha, beta, delta,
+  validateArgs(counts, model, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L.to.test)
+  params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
   
@@ -47,7 +47,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
   } else {
     logfile = NULL
   }  
-  if (isTRUE(verbose)) logMessages(date(), "... Starting ", celda.mod, logfile=logfile, append=FALSE)
+  if (isTRUE(verbose)) logMessages(date(), "... Starting ", model, logfile=logfile, append=FALSE)
   params.list$logfile = logfile
   cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
@@ -67,7 +67,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
   params.list$count.checksum = count.checksum
   params.list$nchains = 1
    
-  res.list = foreach(i = 1:nrow(run.params), .export=celda.mod, .combine = c, .multicombine=TRUE) %dopar% {
+  res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     chain.params = append(params.list,
                           as.list(dplyr::select(run.params[i,],
                                                 dplyr::matches("K|L"))))
@@ -77,17 +77,17 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
       ## Generate a unique log file name based on given prefix and parameters
       chain.params$logfile = paste0(logfile.prefix, "_",  
                                     paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")
-      res = do.call(celda.mod, chain.params)
+      res = do.call(model, chain.params)
     } else {
       chain.params$logfile = NULL
-      res = suppressMessages(do.call(celda.mod, chain.params))
+      res = suppressMessages(do.call(model, chain.params))
     }
     return(list(res))
   }
   parallel::stopCluster(cl)
   celda.res = list(run.params=run.params, res.list=res.list, 
-                   content.type=celda.mod, count.checksum=count.checksum)
-  class(celda.res) = c("celda_list", celda.mod)
+                   content.type=model, count.checksum=count.checksum)
+  class(celda.res) = c("celda_list", model)
   
   if (isTRUE(bestChainsOnly)) {
     new.run.params = unique(dplyr::select(run.params, -index, -chain))
@@ -102,7 +102,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
     celda.res$res.list = best.chains
   }
   
-  if (isTRUE(verbose)) logMessages(date(), "... Completed ", celda.mod, logfile=logfile, append=TRUE)
+  if (isTRUE(verbose)) logMessages(date(), "... Completed ", model, logfile=logfile, append=TRUE)
   return(celda.res)
 }
 
@@ -138,25 +138,25 @@ buildParamList = function(counts, celda.mod, sample.label, alpha, beta, delta,
 # Sanity check arguments to celda() to ensure a smooth run.
 # See parameter descriptions from celda() documentation.
 validateArgs = function(counts, celda.mod, sample.label, 
-                         nchains, cores, seed, K.to.test=NULL, L=NULL) { #, ...) {
+                         nchains, cores, seed, K.to.test=NULL, L.to.test=NULL) { 
   model_args = names(formals(celda.mod))
   if ("K.to.test" %in% model_args) {
     if (is.null(K.to.test)) { 
       stop("Must provide a K.to.test parameter when running a celda_C or celda_CG model")
     } else if (is.numeric(K.to.test) && K.to.test <= 1) {
-      stop("K.to.test parameter must be > 1")
+      stop("Length of 'K.to.test' must be greater than 1")
     }
     
   }
-  if ("L" %in% model_args) {
+  if ("L.to.test" %in% model_args) {
     if (is.null(L)) {
-      stop("Must provide a L parameter when running a celda_G or celda_CG model")
+      stop("Must provide a L.to.test parameter when running a celda_G or celda_CG model")
     } else if (is.numeric(L) && L <= 1) {
-      stop("L parameter must be > 1")
+      stop("Length of 'L.to.test' must be greater than 1")
     }
   }
   
-  validateCounts(counts, K.to.test, L)
+  validateCounts(counts, K.to.test, L.to.test)
   
   if (!(celda.mod %in% available_models)) stop("Unavailable model specified")
       
@@ -177,9 +177,9 @@ validateArgs = function(counts, celda.mod, sample.label,
     
 # Perform some simple checks on the counts matrix, to ensure celda won't choke.
 # See parameter descriptions from celda() documentation.
-validateCounts = function(counts, K.to.test, L) {
+validateCounts = function(counts, K.to.test, L.to.test) {
   # counts has to be a matrix...
-  if (class(counts) != "matrix") stop("counts argument must be of class 'matrix'")
+  if (class(counts) != "matrix") stop("'counts' must be of class 'matrix'")
   
   # And each row/column of the count matrix must have at least one count
   count.row.sum = rowSums(counts)
@@ -191,11 +191,11 @@ validateCounts = function(counts, K.to.test, L) {
   
   # Ensure that number of genes / cells is never more than
   # the number of requested clusters for each
-  if (!is.null(L) && nrow(counts) < L) {
+  if (!is.null(L.to.test) && any(nrow(counts) < L.to.test)) {
     stop("Number of genes (rows) in count matrix must be >= L")
   }
-  if (!is.null(K.to.test) && nrow(counts) < K.to.test) {
-    stop("Number of cells (counts) in count matrix must be >= K")
+  if (!is.null(K.to.test) && any(ncol(counts) < K.to.test)) {
+    stop("Number of cells (columns) in count matrix must be >= K")
   }
 }
 
