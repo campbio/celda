@@ -152,6 +152,7 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C" or "celda_CG".
+#' @param ... Additional parameters.
 #' @export
 celdaProbabilityMap = function(counts, celda.mod, ...) {
   
