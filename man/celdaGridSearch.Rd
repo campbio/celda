@@ -4,7 +4,7 @@
 \alias{celdaGridSearch}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
+celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
   L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
   max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
   split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
@@ -12,6 +12,8 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 }
 \arguments{
 \item{counts}{A count matrix.}
+
+\item{model}{Celda model. Options available in `celda::available.models`.}
 
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
@@ -48,8 +50,6 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default FALSE.}
 
 \item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
-
-\item{model}{Celda model. Options available in `celda::available.models`.}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
