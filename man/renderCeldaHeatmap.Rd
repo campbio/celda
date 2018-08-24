@@ -18,7 +18,7 @@ renderCeldaHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
   treeheight.cell = ifelse(cluster.cell, 50, 0), silent = FALSE, ...)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Numeric matrix. Normalized counts matrix where rows represent features and columns represent cells. .}
 
 \item{z}{Numeric vector. Denotes cell population labels.}
 
