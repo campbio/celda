@@ -93,7 +93,7 @@ test_that(desc = "Making sure distinct_colors gives expected output",{
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap",{
   expect_equal(names(renderCeldaHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 ##feature_selection.R##
@@ -110,7 +110,7 @@ test_that(desc = "Checking topRank",{
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs",{
   expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 #differentialExpression
@@ -128,3 +128,15 @@ test_that(desc = "Checking plotDrCluster to see if it runs",{
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
   expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
+
+#celdaProbabilityMap
+test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
+  expect_true(!is.null(plot.obj))
+})
+
+test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="cell.population")
+  expect_true(!is.null(plot.obj))
+})
+

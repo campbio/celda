@@ -16,7 +16,7 @@ test_that(desc = "Checking distinct_colors",{
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors",{
   expect_equal(names(renderCeldaHeatmap(counts = celdaC.sim$counts, z = model_C$z, y = model_C$y)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 ##feature_selection.R##
@@ -38,4 +38,10 @@ test_that(desc = "Checking differentialExpression",{
 test_that(desc = "Checking celda_C to see if it runs without errors",{
   celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, celda.mod = "celda_C",  nchains = 2, K.to.test = c(5,10), max.iter = 15)
   expect_true(class(celdaC.res)[1] == "celda_list")  # Only best chain is returned
+})
+
+# celdaProbabilityMap
+test_that(desc = "Testing celdaProbabiltyMap.celda_C for sample",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_C, level="sample")
+  expect_true(!is.null(plot.obj))
 })
