@@ -297,7 +297,8 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   rownames(cell.counts) = paste0("Gene_", 1:nrow(cell.counts))
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
   cell.sample.label = paste0("Sample_", 1:S)[cell.sample.label]
-
+  cell.sample.label = factor(cell.sample.label, levels=paste0("Sample_", 1:S))
+  
   ## Peform reordering on final Z and Y assigments:
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
