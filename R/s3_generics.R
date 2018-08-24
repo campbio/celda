@@ -97,11 +97,11 @@ getL = function(celda.mod) {
 
 #' Render a stylable heatmap of count data based on celda clustering results.
 #'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param ... Additional parameters.
 #' @export 
-celdaHeatmap <- function(celda.mod, counts, ...) {
+celdaHeatmap <- function(counts, celda.mod, ...) {
   UseMethod("celdaHeatmap", celda.mod)
 }
 

@@ -527,12 +527,14 @@ getL.celda_C = function(celda.mod) { return(NA) }
 
 
 #' celdaHeatmap for celda Cell clustering function 
-#' @param celda.mod Celda object of class "celda_C".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C".
+#' @param feature.ix Integer vector. Indices of features to plot, such the top features from a differential expression analysis. 
 #' @param ... Additional parameters.
 #' @export
-celdaHeatmap.celda_C = function(celda.mod, counts, ...) {
-  renderCeldaHeatmap(counts, z=celda.mod$z, ...)
+celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
+  norm = normalizeCounts(counts, normalize="proportion", transformation_fun=sqrt)
+  renderCeldaHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
 }
 
 
