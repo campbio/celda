@@ -25,7 +25,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param bestChainsOnly Logical. Whether to return only the best chain (by final log-likelihood) per K/L combination. Default TRUE. 
 #' @param cores Integer. The number of cores to use for parallel Gibbs sampling. Default 1.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param verbose Logical. Whether to print log messages during celda chain execution. Default FALSE. 
+#' @param verbose Logical. Whether to print log messages during celda chain execution. Default TRUE. 
 #' @param logfile.prefix Character. Prefix for log files from worker threads and main process. Default "Celda". 
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @import foreach
@@ -33,7 +33,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.to.test=NULL, alpha=1, beta=1, 
                  delta=1, gamma=1, max.iter=20, z.init=NULL, y.init=NULL,
                  stop.iter=10, split.on.iter=10, nchains=1, 
-                 bestChainsOnly=TRUE, cores=1, seed=12345, verbose=FALSE, 
+                 bestChainsOnly=TRUE, cores=1, seed=12345, verbose=TRUE, 
                  logfile.prefix="Celda") {
  
   validateArgs(counts, model, sample.label, nchains, cores, seed, K.to.test=K.to.test, L=L.to.test)
@@ -41,15 +41,9 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
   
-  # Redirect stderr from the worker threads if user asks for verbose
-  if(!is.null(logfile.prefix)) {
-    logfile = paste0(logfile.prefix, "_main_log.txt")
-  } else {
-    logfile = NULL
-  }  
-  if (isTRUE(verbose)) logMessages(date(), "... Starting ", model, logfile=logfile, append=FALSE)
-  params.list$logfile = logfile
-  cl = if (verbose) parallel::makeCluster(cores, outfile=logfile) else parallel::makeCluster(cores)
+  logMessages(date(), "... Starting ", model, logfile=NULL, append=FALSE, verbose=verbose)
+
+  cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
   
   # Details for each model parameter / chain combination 
@@ -73,15 +67,10 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
                                                 dplyr::matches("K|L"))))
     chain.params$seed = all.seeds[ifelse(i %% nchains == 0, nchains, i %% nchains)]
     
-    if (isTRUE(verbose)) {
-      ## Generate a unique log file name based on given prefix and parameters
-      chain.params$logfile = paste0(logfile.prefix, "_",  
-                                    paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")
-      res = do.call(model, chain.params)
-    } else {
-      chain.params$logfile = NULL
-      res = suppressMessages(do.call(model, chain.params))
-    }
+    ## Generate a unique log file name based on given prefix and parameters
+    chain.params$verbose = verbose
+    chain.params$logfile = paste0(logfile.prefix, "_", paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")                                
+    res = do.call(model, chain.params)
     return(list(res))
   }
   parallel::stopCluster(cl)
@@ -102,7 +91,7 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
     celda.res$res.list = best.chains
   }
   
-  if (isTRUE(verbose)) logMessages(date(), "... Completed ", model, logfile=logfile, append=TRUE)
+  logMessages(date(), "... Completed ", model, logfile=NULL, append=TRUE, verbose=verbose)
   return(celda.res)
 }
 
