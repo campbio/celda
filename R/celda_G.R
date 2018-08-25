@@ -574,7 +574,7 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
   top = topRank(fm$proportions$gene.states, n=nfeatures)
   ix = unlist(top$index)
-  norm = normalizeCounts(counts, normalize="proportion", transformation_fun=sqrt)
+  norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   renderCeldaHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
 }
 
