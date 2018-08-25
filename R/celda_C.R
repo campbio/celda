@@ -533,7 +533,7 @@ getL.celda_C = function(celda.mod) { return(NA) }
 #' @param ... Additional parameters.
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
-  norm = normalizeCounts(counts, normalize="proportion", transformation_fun=sqrt)
+  norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   renderCeldaHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
 }
 
