@@ -8,7 +8,7 @@ celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
   L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
   max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
   split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
-  seed = 12345, verbose = FALSE, logfile.prefix = "Celda")
+  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix.}
@@ -47,7 +47,7 @@ celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{verbose}{Logical. Whether to print log messages during celda chain execution. Default FALSE.}
+\item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 
 \item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
 }

@@ -33,7 +33,7 @@
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
-#' @param K.to.test Integer. Number of cell populations. 
+#' @param K Integer. Number of cell populations. 
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.
@@ -44,17 +44,17 @@
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
 #' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
-
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_C with clustering results and Gibbs sampling statistics.
 #' @export
-celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
+celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 					 algorithm = c("EM", "Gibbs"), 
                  	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                  	 seed=12345, nchains=3, count.checksum=NULL, 
-                 	 z.init = NULL, logfile=NULL) {
-  K = K.to.test
+                 	 z.init = NULL, logfile=NULL, verbose=TRUE) {
+                 	 
   ## Error checking and variable processing
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
@@ -69,9 +69,9 @@ celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
 
   all.seeds = seed:(seed + nchains - 1)
   
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
-  logMessages("Celda_C: Clustering cells.", logfile=logfile, append=FALSE)
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
 
   best.result = NULL  
   for(i in seq_along(all.seeds)) { 
@@ -93,7 +93,7 @@ celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
   
 	ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
-    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
 
 	set.seed(seed)
 	iter = 1L
@@ -111,9 +111,9 @@ celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
 	  ## Perform split on i-th iteration of no improvement in log likelihood
 	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
-		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
+		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
-		logMessages(res$message, logfile=logfile, append=TRUE)
+		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		# Reset convergence counter if a split occured
 		if(!isTRUE(all.equal(z, res$z))) {
@@ -142,7 +142,7 @@ celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
 	  }
 	  ll = c(ll, temp.ll)
 	
-	  logMessages(date(), ".... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
+	  logMessages(date(), ".... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE, verbose=verbose)
 	  iter = iter + 1    
 	}
 	
@@ -160,7 +160,7 @@ celda_C = function(counts, sample.label=NULL, K.to.test, alpha=1, beta=1,
       best.result = result
     }
     
-    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
   }  
   
   best.result = reorder.celda_C(counts = counts, res = best.result)

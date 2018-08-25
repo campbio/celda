@@ -49,17 +49,17 @@
 #' @param seed Integer. Passed to set.seed(). Default 12345.   
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
-
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @export
 celda_CG = function(counts, sample.label=NULL, K.to.test, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, nchains=3, count.checksum=NULL,
-                    z.init = NULL, y.init = NULL, logfile=NULL) {
+                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
   K = K.to.test
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
@@ -78,9 +78,9 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
   
   all.seeds = seed:(seed + nchains - 1)
   
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
-  logMessages("Celda_CG: Clustering cells and genes.", logfile=logfile, append=FALSE)
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   
   best.result = NULL  
   for(i in seq_along(all.seeds)) { 
@@ -110,7 +110,7 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
   
 	ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
-    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=FALSE, verbose=verbose)
 
 	set.seed(current.seed)
 	iter = 1L
@@ -138,9 +138,9 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 		
 	  ## Perform split on i-th iteration defined by split.on.iter
 	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
-		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="")
+		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
-		logMessages(res$message, logfile=logfile, append=TRUE)
+		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		# Reset convergence counter if a split occured
 		if(!isTRUE(all.equal(z, res$z))) {
@@ -158,9 +158,9 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 		n.G.by.CP = colSumByGroup(counts, group=z, K=K)
 	  }  
 	  if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
-		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
+		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=10, min.cell=3)
-		logMessages(res$message, logfile=logfile, append=TRUE)
+		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		# Reset convergence counter if a split occured	    
 		if(!isTRUE(all.equal(y, res$y))) {
@@ -190,7 +190,7 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 	  }
 	  ll = c(ll, temp.ll)
   
-	  logMessages(date(), " .... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="")
+	  logMessages(date(), " .... Completed iteration: ", iter, " | logLik: ", temp.ll, logfile=logfile, append=TRUE, sep="", verbose=verbose)
 	  iter = iter + 1L
 	}
       
@@ -209,7 +209,7 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
       best.result = result
     }
     
-    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
   } 
   
   ## Peform reordering on final Z and Y assigments:
