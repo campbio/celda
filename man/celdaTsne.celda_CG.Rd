@@ -6,7 +6,7 @@
 \usage{
 \method{celdaTsne}{celda_CG}(counts, celda.mod, max.cells = 10000,
   min.cluster.size = 100, modules = NULL, perplexity = 20,
-  max.iter = 2500, distance = "hellinger", seed = 12345, ...)
+  max.iter = 2500, seed = 12345, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}

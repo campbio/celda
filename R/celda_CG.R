@@ -657,7 +657,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param ... Additional parameters.
 #' @export
 celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, modules=NULL,
-								perplexity=20, max.iter=2500, distance="hellinger", seed=12345, ...) {
+								perplexity=20, max.iter=2500, seed=12345, ...) {
 
   ## Checking if max.cells and min.cluster.size will work
   if(max.cells / min.cluster.size < celda.mod$K) {
