@@ -98,3 +98,19 @@ test_that(desc = "Checking plotDrState",{
   expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))
 })
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_G with all cells",{
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=ncol(counts.matrix))
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], rep(1,ncol(counts.matrix)))
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix))
+  expect_true(!is.null(plot.obj))
+})
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_G with subset of cells",{
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=100)
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], rep(1, ncol(counts.matrix)))
+    expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix) && sum(!is.na(tsne[,1])) == 100)
+  expect_true(!is.null(plot.obj))
+})
