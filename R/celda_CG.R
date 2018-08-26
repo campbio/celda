@@ -646,42 +646,37 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 
 #' Embeds cells in two dimensions using tSNE based on celda_CG results.
 #' 
-#' @param counts Counts matrix, should have cell name for column name and gene name for row name.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`. 
-#' @param max.cells Integer; Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
-#' @param min.cluster.size Integer; Do not subsample cell clusters below this threshold. Default 100. 
-#' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
-#' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
-#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
-#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.  
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @export
-celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, states=NULL,
+celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, modules=NULL,
 								perplexity=20, max.iter=2500, distance="hellinger", seed=12345, ...) {
 
-  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
-    
-  states.to.use = 1:nrow(fm$counts$cell.states)
-  if (!is.null(states)) {
-    if (!all(states %in% states.to.use)) {
-      stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+  ## Checking if max.cells and min.cluster.size will work
+  if(max.cells / min.cluster.size < celda.mod$K) {
+    stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
+  }
+
+  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")    
+  modules.to.use = 1:nrow(fm$counts$cell.states)
+  if (!is.null(modules)) {
+    if (!all(modules %in% modules.to.use)) {
+      stop("'modules' must be a vector of numbers between 1 and ", states.to.use, ".")
     }
-    states.to.use = states 
+    modules.to.use = modules 
   }
   
-  states.to.use = 1:nrow(fm$counts$cell.states)
-  if (!is.null(states)) {
-	if (!all(states %in% states.to.use)) {
-	  stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
-	}
-	states.to.use = states 
-  } 
-  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], normalize="proportion")
 
   ## Select a subset of cells to sample if greater than 'max.cells'
-  total.cells.to.remove = ncol(norm) - max.cells
-  z.include = rep(TRUE, ncol(norm))
+  total.cells.to.remove = ncol(counts) - max.cells
+  z.include = rep(TRUE, ncol(counts))
   if(total.cells.to.remove > 0) {
 	z.ta = tabulate(celda.mod$z, celda.mod$K)
 	
@@ -702,10 +697,12 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
   }   
   cell.ix = which(z.include)
 
-  res = calculateTsne(norm[,cell.ix], do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, distance=distance, seed=seed)
-  final = matrix(NA, nrow=ncol(norm), ncol=2)
+  norm = t(normalizeCounts(fm$counts$cell.states[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
+  
+  res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, seed=seed)
+  final = matrix(NA, nrow=ncol(counts), ncol=2)
   final[cell.ix,] = res
-  rownames(final) = colnames(norm)
+  rownames(final) = colnames(counts)
   colnames(final) = c("tsne_1", "tsne_2")
   return(final)
 }

@@ -583,29 +583,35 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_G".  
-#' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
-#' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
-#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
-#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.  
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param modules Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @export
-celdaTsne.celda_G = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
+celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, perplexity=20, max.iter=2500, 
                              distance="hellinger", seed=12345, ...) {
-                             
+  
+  if(max.cells > ncol(counts)) {
+    max.cells = ncol(counts)
+  }
+  
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
     
-  states.to.use = 1:nrow(fm$counts$cell.states)
-  if (!is.null(states)) {
-	if (!all(states %in% states.to.use)) {
-	  stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
+  modules.to.use = 1:nrow(fm$counts$cell.states)
+  if (!is.null(modules)) {
+	if (!all(modules %in% modules.to.use)) {
+	  stop("'modules' must be a vector of numbers between 1 and ", modules.to.use, ".")
 	}
-	states.to.use = states 
-  } 
-  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], normalize="proportion")
+	modules.to.use = modules 
+  }
+   
+  cell.ix = sample(1:ncol(counts), max.cells)
+  norm = t(normalizeCounts(fm$counts$cell.states[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
 
-  res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, distance=distance, seed=seed)
-  rownames(res) = colnames(norm)
+  res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, seed=seed)
+  rownames(res) = colnames(counts)
   colnames(res) = c("tsne_1", "tsne_2")
   return(res)
 }

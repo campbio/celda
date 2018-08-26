@@ -542,11 +542,11 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C". 
-#' @param max.cells Integer; Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
-#' @param min.cluster.size Integer; Do not subsample cell clusters below this threshold. Default 100. 
-#' @param initial.dims PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE.
-#' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
-#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @export
@@ -554,11 +554,14 @@ celdaTsne.celda_C = function(counts, celda.mod,
 							 max.cells=10000, min.cluster.size=100, initial.dims=20,
 							 perplexity=20, max.iter=2500, seed=12345, ...) {
 
-  norm = normalizeCounts(counts, normalize="proportion")
-
+  ## Checking if max.cells and min.cluster.size will work
+  if(max.cells / min.cluster.size < celda.mod$K) {
+    stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
+  }
+  
   ## Select a subset of cells to sample if greater than 'max.cells'
-  total.cells.to.remove = ncol(norm) - max.cells
-  z.include = rep(TRUE, ncol(norm))
+  total.cells.to.remove = ncol(counts) - max.cells
+  z.include = rep(TRUE, ncol(counts))
   if(total.cells.to.remove > 0) {
 	z.ta = tabulate(celda.mod$z, celda.mod$K)
 	
@@ -579,10 +582,11 @@ celdaTsne.celda_C = function(counts, celda.mod,
   }   
   cell.ix = which(z.include)
 
-  res = calculateTsne(norm[,cell.ix], perplexity=perplexity, max.iter=max.iter, distance="euclidean", seed=seed, do.pca=TRUE, initial.dims = initial.dims)
-  final = matrix(NA, nrow=ncol(norm), ncol=2)
+  norm = t(normalizeCounts(counts[,cell.ix], normalize="proportion", transformation.fun=sqrt))
+  res = calculateTsne(norm, perplexity=perplexity, max.iter=max.iter, seed=seed, do.pca=TRUE, initial.dims = initial.dims)
+  final = matrix(NA, nrow=ncol(counts), ncol=2)
   final[cell.ix,] = res
-  rownames(final) = colnames(norm)
+  rownames(final) = colnames(counts)
   colnames(final) = c("tsne_1", "tsne_2")
   return(final)
 }
