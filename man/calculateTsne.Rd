@@ -4,9 +4,8 @@
 \alias{calculateTsne}
 \title{Uses Rtsne package to run tSNE.}
 \usage{
-calculateTsne(norm, perplexity = 20, max.iter = 2500,
-  distance = c("hellinger", "euclidean", "cosine", "spearman"),
-  seed = 12345, do.pca = FALSE, initial.dims = 20)
+calculateTsne(norm, perplexity = 20, max.iter = 2500, seed = 12345,
+  do.pca = FALSE, initial.dims = 20)
 }
 \arguments{
 \item{norm}{Normalized count matrix.}
@@ -14,8 +13,6 @@ calculateTsne(norm, perplexity = 20, max.iter = 2500,
 \item{perplexity}{Numeric vector; determines perplexity for tsne. Default 20.}
 
 \item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
-
-\item{distance}{Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.}
 
 \item{seed}{Seed for random number generation. Defaults to 12345.}
 

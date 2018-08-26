@@ -4,12 +4,14 @@
 \alias{celdaHeatmap.celda_C}
 \title{celdaHeatmap for celda Cell clustering function}
 \usage{
-\method{celdaHeatmap}{celda_C}(celda.mod, counts, ...)
+\method{celdaHeatmap}{celda_C}(counts, celda.mod, feature.ix, ...)
 }
 \arguments{
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+
 \item{celda.mod}{Celda object of class "celda_C".}
 
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{feature.ix}{Integer vector. Indices of features to plot, such the top features from a differential expression analysis.}
 
 \item{...}{Additional parameters.}
 }
