@@ -5,25 +5,23 @@
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
 \method{celdaTsne}{celda_CG}(counts, celda.mod, max.cells = 10000,
-  min.cluster.size = 100, states = NULL, perplexity = 20,
+  min.cluster.size = 100, modules = NULL, perplexity = 20,
   max.iter = 2500, distance = "hellinger", seed = 12345, ...)
 }
 \arguments{
-\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
 \item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
-\item{max.cells}{Integer; Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
 
-\item{min.cluster.size}{Integer; Do not subsample cell clusters below this threshold. Default 100.}
+\item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
-\item{states}{Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.}
+\item{modules}{Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
 
-\item{perplexity}{Numeric vector; determines perplexity for tSNE. Default 20.}
+\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.}
-
-\item{distance}{Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.}
+\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
