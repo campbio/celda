@@ -7,7 +7,7 @@
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
   max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
   seed = 12345, nchains = 3, count.checksum = NULL, y.init = NULL,
-  logfile = NULL)
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -37,6 +37,8 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 \item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+
+\item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \description{
 Provides cluster assignments for all genes in a provided single-cell 
