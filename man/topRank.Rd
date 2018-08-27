@@ -4,14 +4,14 @@
 \alias{topRank}
 \title{Identify features with the highest influence on clustering}
 \usage{
-topRank(matrix, n = 25, margin = 1, threshold = 0, decreasing = TRUE)
+topRank(matrix, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
 }
 \arguments{
 \item{matrix}{Numeric matrix.}
 
 \item{n}{Integer. Maximum number of items above `threshold` returned for each ranked row or column.}
 
-\item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 1.}
+\item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2.}
 
 \item{threshold}{Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0.}
 
