@@ -97,7 +97,7 @@ test_that(desc = "Making sure distinct_colors gives expected output",{
 
 ###celdaHeatmap###
 test_that(desc = "Checking celdaHeatmap",{
-  expect_equal(names(celdaHeatmap(celda.mod = model_C, counts = celdaC.sim$counts)),
+  expect_equal(names(celdaHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 

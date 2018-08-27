@@ -32,7 +32,6 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 #' @param features Character vector. Uses these genes for plotting.
 #' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
-#' @param rescale Logical. Whether rows of the matrix should be z-score normalized. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
