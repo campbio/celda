@@ -37,7 +37,7 @@ test_that(desc = "Checking getK", {
 test_that(desc = "simulateCells.celda_C returns correctly typed output", {
   sim.res = simulateCells(model = "celda_C")
   expect_equal(typeof(sim.res$counts), "integer")
-}
+})
 
 #celda_C.R#
 #celdaGridSearch
@@ -67,6 +67,7 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
   expect_equal(names(top.rank),
                c("index","names"))
 })
+
 
 #celdaHeatmap#
 test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors", {
