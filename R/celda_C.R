@@ -534,7 +534,7 @@ getL.celda_C = function(celda.mod) { return(NA) }
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-  renderCeldaHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
+  plotHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
 }
 
 
@@ -613,11 +613,11 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
   samp <- factorized$proportions$sample.states[z.include,,drop=FALSE]
   col <- colorRampPalette(c("white","blue","#08306B","#006D2C","yellowgreen","yellow","orange","red"))(100)
   breaks <-  seq(0, 1, length.out = length(col))     
-  g1 = renderCeldaHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
+  g1 = plotHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
 
   if(ncol(samp) > 1) {
 	samp.norm = normalizeCounts(samp, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
-	g2 = renderCeldaHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
+	g2 = plotHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
 	gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol=2)
   } else {
 	gridExtra::grid.arrange(g1$gtable)
