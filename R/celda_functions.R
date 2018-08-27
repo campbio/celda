@@ -57,14 +57,18 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
   }
 
   # Perform normalization  
-  counts = counts + pseudocount.normalize
-  cs = .colSums(counts, nrow(counts), ncol(counts))
-  norm = switch(normalize,
-    "proportion" = sweep(counts, 2, cs, "/"),
-    "cpm" = sweep(counts, 2, cs / 1e6, "/"),
-    "median" = sweep(counts, 2, cs / median(cs), "/"),
-    "mean" = sweep(counts, 2, cs / mean(cs), "/")
-  )  
+  if(normalize == "proportion") {
+    norm = fastNormProp(counts, pseudocount.normalize)
+  } else {
+    counts = counts + pseudocount.normalize
+    cs = .colSums(counts, nrow(counts), ncol(counts))
+    norm = switch(normalize,
+      "proportion" = sweep(counts, 2, cs, "/"),
+      "cpm" = sweep(counts, 2, cs / 1e6, "/"),
+      "median" = sweep(counts, 2, cs / median(cs), "/"),
+      "mean" = sweep(counts, 2, cs / mean(cs), "/"))
+  }  
+ 
   
   if(!is.null(transformation.fun)){
     norm <- do.call(transformation.fun, list(norm + pseudocount.transform))
