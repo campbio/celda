@@ -4,12 +4,12 @@
 \alias{calculateLoglikFromVariables}
 \title{Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model.}
 \usage{
-calculateLoglikFromVariables(celda.mod, counts, ...)
+calculateLoglikFromVariables(counts, celda.mod, ...)
 }
 \arguments{
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
-
 \item{counts}{The counts matrix used to generate the provided cluster assignments.}
+
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
 \item{...}{Additional parameters.}
 }
