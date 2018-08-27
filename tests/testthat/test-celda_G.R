@@ -121,3 +121,4 @@ test_that(desc = "Testing featureModuleLookup() roundtrip", {
   res = featureModuleLookup(counts.matrix, model_G, "Gene_1")
   expect_true(res == 5)
 })
+

@@ -100,3 +100,4 @@ test_that(desc = "Testing celdaTsne.celda_C with subset of cells",{
 test_that(desc = "Testing featureModuleLookup() fails for celda_C models", {
   expect_error(featureModuleLookup(counts.matrix, model_C, "test_feat"))
 })
+
