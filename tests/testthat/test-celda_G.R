@@ -46,7 +46,7 @@ test_that(desc = "simulateCells.celda_G returns correctly typed output", {
 
 #celda_G.R#
 test_that(desc = "Making sure celda_G runs without errors", {
-  celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, celda.mod = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
+  celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, L = c(5,10), max.iter = 15, verbose = F)
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))  # Only best chain returned by default
 })
 
