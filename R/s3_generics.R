@@ -172,3 +172,16 @@ celdaTsne = function(counts, celda.mod, ...) {
   }
   UseMethod("celdaTsne", celda.mod)
 }
+
+#' Obtain the gene module of a gene of interest
+#' 
+#' This function will output the corresponding feature module for a specified list of genes from a celda model.
+#'  
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Model of class "celda_G" or "celda_CG".
+#' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @export
+featureModuleLookup = function(counts, celda.mod, feature){
+  class(celda.mod) = c(class(celda.mod), celda.mod)
+  UseMethod("featureModuleLookup", celda.mod)
+}
