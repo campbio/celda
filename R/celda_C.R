@@ -70,9 +70,10 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   all.seeds = seed:(seed + nchains - 1)
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
-  logMessages("Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("Starting Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-
+  start.time = Sys.time()
+  
   best.result = NULL  
   for(i in seq_along(all.seeds)) { 
   
@@ -112,7 +113,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
 		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
+		res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
 		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		# Reset convergence counter if a split occured
@@ -164,6 +165,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   }  
   
   best.result = reorder.celda_C(counts = counts, res = best.result)
+  
+  end.time = Sys.time()
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  logMessages("Completed Celda_C. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+
   return(best.result)
 }
 
