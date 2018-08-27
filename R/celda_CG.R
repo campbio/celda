@@ -604,15 +604,6 @@ reorder.celda_CG = function(counts, res){
   return(res)
 }
 
-
-#' finalClusterAssignment for the celda Cell and Gene clustering model
-#' @param celda.mod Celda object of class "celda_CG". 
-#' @export
-finalClusterAssignment.celda_CG = function(celda.mod) {
-  return(list(z=celda.mod$z, y=celda.mod$y))
-}
-
-
 #' getK for the celda Cell and Gene clustering model
 #' @param celda.mod Celda object of class "celda_CG". 
 #' @export

@@ -28,11 +28,6 @@ test_that(desc = "Checking factorize matrix dimension size", {
   expect_equal(3, nrow(factorized$proportions$population.states))
 })
 
-#Convenience functions#
-test_that(desc = "Checking finalClusterAssignment, celdaCG", {
-  expect_true(all(finalClusterAssignment(celda.mod = model_CG)[[1]] <= 5))
-})
-
 test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
   sim.res = simulateCells(model="celda_CG")
   expect_equal(typeof(sim.res$counts), "integer")
