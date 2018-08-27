@@ -113,7 +113,7 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @param ... Additional parameters.
 #' @export
-calculateLoglikFromVariables <- function(celda.mod, counts, ...) {
+calculateLoglikFromVariables <- function(counts, celda.mod, ...) {
   class(counts) = c(celda.mod, class(counts))
   do.call(paste("calculateLoglikFromVariables.", celda.mod, sep=""),
           list(counts, ...))
@@ -140,13 +140,12 @@ simulateCells = function(model, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @param type Character. Character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @export
 factorizeMatrix = function(counts, celda.mod, type) {
   
   UseMethod("factorizeMatrix", celda.mod)
 }
-
 
 #' Generate factorized matrices showing each feature's influence on cell / gene clustering
 #' 
@@ -158,7 +157,6 @@ celdaProbabilityMap = function(counts, celda.mod, ...) {
   
   UseMethod("celdaProbabilityMap", celda.mod)
 }
-
 #' Runs tSNE via Rtsne based on the CELDA model and specified cell states.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
@@ -166,6 +164,7 @@ celdaProbabilityMap = function(counts, celda.mod, ...) {
 #' @param ... Additional parameters.
 #' @export
 celdaTsne = function(counts, celda.mod, ...) {
+  counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
   if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
     stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
