@@ -125,22 +125,22 @@ test_that(desc = "Checking differentialExpression", {
 		c("data.table", "data.frame"))
 })
 
-#plotDrCluster,State,Gene
-test_that(desc = "Checking plotDrCluster to see if it runs", {
+#plotDimReduceCluster,State,Gene
+test_that(desc = "Checking plotDimReduceCluster to see if it runs", {
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
-  expect_equal(names(plotDrCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))),
+  expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
-  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
+  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_equal(names(plotDrGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
+  expect_equal(names(plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
+  expect_error(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
 
 # celdaTsne
 test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=length(model_CG$z))
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
   expect_true(!is.null(plot.obj))
 })
@@ -149,7 +149,7 @@ test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
 test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })

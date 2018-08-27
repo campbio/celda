@@ -11,7 +11,7 @@
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @param var_label Character vector. Title for the color legend. 
 #' @export
-plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
+plotDimReduceGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
   na.ix = is.na(dim1) | is.na(dim2)
   df = df[!na.ix,]
@@ -39,7 +39,7 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @export 
-plotDrGene <- function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDimReduceGene <- function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   counts <- normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
   
   if(!is.null(trim)){
@@ -62,7 +62,7 @@ plotDrGene <- function(dim1, dim2, counts, features, exact.match = TRUE, trim = 
     counts <- counts[rownames(counts) %in% features, , drop = FALSE]
   }
   counts <- counts[match(rownames(counts), features), ]
-  plotDrGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
+  plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
 #' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
@@ -78,7 +78,7 @@ plotDrGene <- function(dim1, dim2, counts, features, exact.match = TRUE, trim = 
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @export 
-plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDimReduceState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
     for(x in 1:nrow(matrix)){ 
       matrix[x,] <- matrix[x,]-min(matrix[x,])
@@ -88,7 +88,7 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
   }else{
     var_label = "Probability"
   }
-  plotDrGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
+  plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
 #' Create a scatterplot based on celda cluster labels.
@@ -101,7 +101,7 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
 #' @export 
-plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
+plotDimReduceCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
   df <- data.frame(dim1, dim2, cluster)
   colnames(df) <- c(xlab, ylab, "Cluster")
   na.ix = is.na(dim1) | is.na(dim2)
