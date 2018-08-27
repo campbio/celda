@@ -127,34 +127,14 @@ plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", y
 #' @param norm Normalized count matrix.
 #' @param perplexity Numeric vector; determines perplexity for tsne. Default 20.
 #' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
-#' @param distance Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'. 
 #' @param seed Seed for random number generation. Defaults to 12345.
 #' @param do.pca Perform dimensionality reduction with PCA before tSNE.
 #' @param initial.dims Number of dimensions from PCA to use as input in tSNE.
-calculateTsne = function(norm, perplexity=20, max.iter=2500, distance=c("hellinger","euclidean", "cosine","spearman"), seed=12345, do.pca=FALSE, initial.dims = 20) {
+calculateTsne = function(norm, perplexity=20, max.iter=2500, seed=12345, do.pca=FALSE, initial.dims = 20) {
 
-  distance = match.arg(distance)
-  
   set.seed(seed)
-
-  ## Generate distances
-  if(!isTRUE(do.pca)) {
-	if (distance == "cosine") {
-	  d = cosineDist(norm)  
-	} else if(distance == "hellinger") {
-	  d = hellingerDist(norm)  
-	} else if(distance == "spearman") {
-	  d = spearmanDist(norm)
-	} else if(distance == "euclidean") {
-	  d = dist(t(norm))
-	} else {
-	  stop("distances must be either 'cosine' or 'hellinger' or 'spearman")
-	}
-  } else {
-    d = t(norm)
-  }  
-  res = Rtsne::Rtsne(d, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
-                     check_duplicates = FALSE, is_distance = !isTRUE(do.pca), initial_dims=initial.dims)$Y
+  res = Rtsne::Rtsne(norm, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
+                     check_duplicates = FALSE, is_distance = FALSE, initial_dims=initial.dims)$Y
   return(res)                     
 }
 
