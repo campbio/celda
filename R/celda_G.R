@@ -606,3 +606,25 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
   colnames(res) = c("tsne_1", "tsne_2")
   return(res)
 }
+
+
+#' Obtain the gene module of a gene of interest
+#' 
+#' This function will output the gene module of a specific gene(s) from a celda model
+#'  
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Model of class "celda_G" or "celda_CG".
+#' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @export
+featureModuleLookup.celda_G = function(counts, celda.mod, feature){
+  list <- list()
+  for(x in 1:length(feature)){
+    if(feature[x] %in% rownames(counts)){
+      list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
+    }else{
+      list[x] <- c("The feature you specified does not exist within your data")
+    }
+  } 
+  names(list) <- feature
+  return(list)
+}
