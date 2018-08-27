@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_list.R
 \name{selectBestModel}
 \alias{selectBestModel}
-\title{Select the best model from a celda_list, as determined by final log-likelihood.}
+\title{Select the best model from a celda_list by final log-likelihood.}
 \usage{
 selectBestModel(celda.list, K = c(), L = c())
 }
@@ -11,13 +11,14 @@ selectBestModel(celda.list, K = c(), L = c())
 
 \item{K}{Limit search for best model to models with this number of cell clusters.}
 
-\item{L}{Limit search for best model to models with this number of gene clusters.}
+\item{L}{Limit search for best model to models with this number of feature clusters.}
 }
 \value{
 The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 }
 \description{
-This function returns the celda model (celda_C, celda_G, celda_CG) from a celda_list
-with the maxiumim final log-likelihood. If a K or L (or combination) parameter is provided,
-the model with these K/L and the highest log-likelihood is returned.
+This function returns the celda model from a celda_list object containing
+the maxiumim final log-likelihood. K, L, or combination of K and L must be 
+provided for celda_list objects containing celda_C, celda_G, and celda_CG 
+models, respectively.
 }
