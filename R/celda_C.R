@@ -229,8 +229,10 @@ cC.calcGibbsProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K
 cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, nG, nM, alpha, beta, do.sample=TRUE) {
 
   ## Expectation given current cell population labels
-  theta = log(normalizeCounts(m.CP.by.S + alpha, normalize="proportion"))
-  phi = log(normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
+  theta = fastNormPropLog(m.CP.by.S, alpha)
+  phi = fastNormPropLog(n.G.by.CP, beta)
+  #theta = log(normalizeCounts(m.CP.by.S + alpha, normalize="proportion"))
+  #phi = log(normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
   
   ## Maximization to find best label for each cell
   probs = eigenMatMultInt(phi, counts) + theta[, s]  
