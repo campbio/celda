@@ -4,17 +4,17 @@
 \alias{celda_C}
 \title{celda Cell Clustering Model}
 \usage{
-celda_C(counts, sample.label = NULL, K.to.test, alpha = 1, beta = 1,
+celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
   split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
-  count.checksum = NULL, z.init = NULL, logfile = NULL)
+  count.checksum = NULL, z.init = NULL, logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{K.to.test}{Integer. Number of cell populations.}
+\item{K}{Integer. Number of cell populations.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
@@ -39,6 +39,8 @@ celda_C(counts, sample.label = NULL, K.to.test, alpha = 1, beta = 1,
 \item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+
+\item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
 An object of class celda_C with clustering results and Gibbs sampling statistics.
