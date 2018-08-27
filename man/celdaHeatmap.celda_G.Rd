@@ -4,12 +4,14 @@
 \alias{celdaHeatmap.celda_G}
 \title{celdaHeatmap for celda Gene clustering model}
 \usage{
-\method{celdaHeatmap}{celda_G}(celda.mod, counts, ...)
+\method{celdaHeatmap}{celda_G}(counts, celda.mod, nfeatures = 25, ...)
 }
 \arguments{
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+
 \item{celda.mod}{Celda object of class "celda_G".}
 
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{nfeatures}{Integer. Maximum number of features to select for each module. Default 25.}
 
 \item{...}{Additional parameters.}
 }

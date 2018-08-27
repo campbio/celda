@@ -13,15 +13,15 @@
 
 \item{celda.mod}{Celda object of class "celda_C".}
 
-\item{max.cells}{Integer; Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
 
-\item{min.cluster.size}{Integer; Do not subsample cell clusters below this threshold. Default 100.}
+\item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
-\item{initial.dims}{PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE.}
+\item{initial.dims}{Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.}
 
-\item{perplexity}{Numeric vector; determines perplexity for tSNE. Default 20.}
+\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.}
+\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 

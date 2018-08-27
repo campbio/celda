@@ -2,11 +2,11 @@
 #' 
 #' @param matrix Numeric matrix. 
 #' @param n Integer. Maximum number of items above `threshold` returned for each ranked row or column.  
-#' @param margin Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 1. 
+#' @param margin Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2. 
 #' @param threshold Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0. 
 #' @param decreasing Logical. Specifies if the rank should be decreasing. Default TRUE.  
 #' @export
-topRank = function(matrix, n=25, margin=1, threshold=0, decreasing=TRUE) {
+topRank = function(matrix, n=25, margin=2, threshold=0, decreasing=TRUE) {
   if(is.null(threshold) | is.na(threshold)) {
     threshold = min(matrix) - 1 
   }
@@ -48,48 +48,4 @@ topRank = function(matrix, n=25, margin=1, threshold=0, decreasing=TRUE) {
   }
   
   return(list(index=top.ix, names=top.names))
-}
-
-#' @title Create a bar chart based on Gini coefficients of transcriptional states
-#' @description A bar plot shows the ordered Gini coefficients of transcriptional states. The transcriptional states with high Gini coefficients (i.e. close to 1) 
-#'    indicates that only a few cell clusters highly express the genes in these transcriptional states. It is easier for users to define cell types based on these
-#'    genes in these significant states.
-#'    
-#' @param counts A numeric count matrix.
-#' @param celda.mod An object of class celda_CG.
-#' @param cell_clusters A list of cell clusters. Calculate Gini coefficients using cells from specific cell clusters. If NULL, uses all cells (NULL by default).
-#' @param label_size Numeric. The size of labels of transcrptional states on top of bars (4 by default).
-#' @param bar_col The color of bars (#FF8080FF by default).
-#' @export
-GiniPlot <- function(counts, celda.mod, cell_clusters = NULL, label_size = 4, bar_col = NULL) {
-  compareCountMatrix(counts, celda.mod)
-  
-  factorize.matrix <-
-    factorizeMatrix(counts = counts, celda.mod = celda.mod)
-  if(is.null(bar_col)){
-    bar_col <- "#FF8080FF"
-  }
-  if (is.null(cell_clusters)) {
-    cell_clusters <- sort(unique(celda.mod$z))
-  }
-  gini <-
-    apply(factorize.matrix$proportions$population.states[, cell_clusters],
-          1,
-          ineq::Gini)
-  sorted_gini <- sort(gini, decreasing = TRUE)
-  sorted_gini_states <- as.numeric(substring(names(sorted_gini), 2))
-  df <-
-    data.frame(
-      Gini_Coefficient = sorted_gini,
-      Transcriptional_States = factor(sorted_gini_states, levels = sorted_gini_states)
-    )
-  ggplot2::ggplot(df, ggplot2::aes(Transcriptional_States, Gini_Coefficient)) +
-    ggplot2::geom_col(fill = bar_col) + ggplot2::geom_text(ggplot2::aes(label = Transcriptional_States), position = ggplot2::position_dodge(0.9),
-                                                           vjust = 0, size = label_size) +
-    ggplot2::theme(
-      panel.grid.major = ggplot2::element_blank(),
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.background = ggplot2::element_blank(),
-      axis.line = ggplot2::element_line(color = "black")
-    )
 }

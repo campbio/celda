@@ -72,7 +72,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
       names(sort(factorize.matrix$proportions$cell.states[feature.module, top.cells]))
   }
   if(normalize){
-    norm.counts <- normalizeCounts(counts)
+    norm.counts <- normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   } else{
     norm.counts <- counts
   }
@@ -91,7 +91,6 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
     filtered_norm.counts,
     z = celda.mod$z[cell_ix],
     y = celda.mod$y[gene_ix],
-    normalize = NULL,
     scale.row = scale.row,
     color_scheme = "divergent",
     show_featurenames = show_featurenames,
