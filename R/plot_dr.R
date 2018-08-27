@@ -9,7 +9,6 @@
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'. 
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
- 
 #' @param var_label Character vector. Title for the color legend. 
 #' @export
 plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
@@ -30,30 +29,40 @@ plotDrGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mi
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param features Character vector. Uses these genes for plotting.
+#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
-#' @param rescale Logical. Whether rows of the matrix should be z-score normalized. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
-
 #' @export 
-plotDrGene <- function(dim1, dim2, counts, trim = c(-2,2), rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
-  if(rescale == TRUE){
-    counts <- t(scale(t(counts)))
-    if(!is.null(trim)){
-      if(length(trim) != 2) {
-        stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
-      }
-      trim<-sort(trim)
-      counts[counts < trim[1]] <- trim[1]
-      counts[counts > trim[2]] <- trim[2]
+plotDrGene <- function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+  counts <- normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
+  
+  if(!is.null(trim)){
+    if(length(trim) != 2) {
+      stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
     }
-  }
+    trim <- sort(trim)
+    counts[counts < trim[1]] <- trim[1]
+    counts[counts > trim[2]] <- trim[2]
+  }  
   var_label = "Expression"
-  plotDrGrid(dim1,dim2,counts,size,xlab,ylab,color_low,color_mid,color_high, var_label)
+  
+  if(!isTRUE(exact.match)){
+    features.indices <- c()  
+    for(gene in features){
+      features.indices <- c(features.indices, grep(gene, rownames(counts)))
+    }
+    counts <- counts[features.indices, , drop = FALSE]
+  }else{
+    counts <- counts[rownames(counts) %in% features, , drop = FALSE]
+  }
+  counts <- counts[match(rownames(counts), features), ]
+  plotDrGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
 #' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
@@ -68,7 +77,6 @@ plotDrGene <- function(dim1, dim2, counts, trim = c(-2,2), rescale = TRUE, size 
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
-
 #' @export 
 plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(rescale == TRUE){
@@ -95,18 +103,13 @@ plotDrState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Di
 #' @export 
 plotDrCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
   df <- data.frame(dim1, dim2, cluster)
-  colnames(df) <- c(xlab,ylab,"Cluster")
+  colnames(df) <- c(xlab, ylab, "Cluster")
   na.ix = is.na(dim1) | is.na(dim2)
   df = df[!na.ix,]
-  
+  df[3] <- as.factor(df[[3]])
+  cluster_colors <- distinct_colors(nlevels(as.factor(cluster)))
   if(!is.null(specific_clusters)){
-    df[3][!(df[[3]] %in% specific_clusters),] <- 0
-    df <- df[order(df[[3]]),]
-    df[3] <- as.factor(df[[3]])
-    cluster_colors <- c('grey',distinct_colors(nlevels(as.factor(cluster)))[sort(specific_clusters)])
-  } else{
-    cluster_colors <- distinct_colors(nlevels(as.factor(cluster)))
-    df[3] <- as.factor(df[[3]])
+    cluster_colors[!levels(df[[3]]) %in% specific_clusters] <- "gray92"
   }
   ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
     ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = Cluster)) +
