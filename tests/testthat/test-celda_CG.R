@@ -155,3 +155,8 @@ test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
 })
 
 
+# featureModuleLookup
+test_that(desc = "Testing featureModuleLookup() roundtrip", {
+  res = featureModuleLookup(counts.matrix, model_CG, "Gene_1")
+  expect_true(res == 1)
+})
