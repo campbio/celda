@@ -23,5 +23,5 @@ A celda model object matching the provided parameters, or a list of celda model 
 \description{
 Convenience function for picking out specific models from a celda_list, returned from celda().
 Models can be selected by various parameters, most importantly the K/L parameters (number of cell
- clusters / number of gene clusters).
+ clusters / number of feature clusters).
 }
