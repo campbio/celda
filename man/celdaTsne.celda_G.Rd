@@ -4,22 +4,21 @@
 \alias{celdaTsne.celda_G}
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
-\method{celdaTsne}{celda_G}(counts, celda.mod, states = NULL,
-  perplexity = 20, max.iter = 2500, distance = "hellinger",
-  seed = 12345, ...)
+\method{celdaTsne}{celda_G}(counts, celda.mod, max.cells = 10000,
+  modules = NULL, perplexity = 20, max.iter = 2500, seed = 12345, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
 \item{celda.mod}{Celda object of class "celda_G".}
 
-\item{states}{Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
 
-\item{perplexity}{Numeric vector; determines perplexity for tSNE. Default 20.}
+\item{modules}{Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 1000.}
+\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
 
-\item{distance}{Character. Determines which distance metric to use for tSNE. Options are 'hellinger', 'cosine', 'spearman', and 'euclidean'. Default 'hellinger'.}
+\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 

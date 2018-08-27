@@ -7,8 +7,8 @@ context("Testing celda_CG")
 
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
-  celdacg <- simulateCells(K.to.test = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, celda.mod = "celda_CG", nchains = 2,K.to.test = c(5,6), L = c(3,5), max.iter = 15)
+  celdacg <- simulateCells(K = 5, L = 3, model = "celda_CG")
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2,K.to.test = c(5,6), L.to.test = c(3,5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
@@ -93,7 +93,7 @@ test_that(desc = "Making sure distinct_colors gives expected output",{
 ###renderCeldaHeatmap###
 test_that(desc = "Checking renderCeldaHeatmap",{
   expect_equal(names(renderCeldaHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 ##feature_selection.R##
@@ -110,7 +110,7 @@ test_that(desc = "Checking topRank",{
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs",{
   expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
-               c("tree_row","tree_col","kmeans","gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 #differentialExpression
@@ -128,3 +128,34 @@ test_that(desc = "Checking plotDrCluster to see if it runs",{
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
   expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
+
+#celdaProbabilityMap
+test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
+  expect_true(!is.null(plot.obj))
+})
+
+test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="cell.population")
+  expect_true(!is.null(plot.obj))
+})
+
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=length(model_CG$z))
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
+  expect_true(!is.null(plot.obj))
+})
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
+  expect_success(expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z) && sum(!is.na(tsne[,1])) == 100)
+  expect_true(!is.null(plot.obj))
+})
+
+
