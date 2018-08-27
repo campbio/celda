@@ -116,3 +116,8 @@ test_that(desc = "Testing celdaTsne.celda_G with subset of cells",{
   expect_true(!is.null(plot.obj))
 })
 
+# featureModuleLookup
+test_that(desc = "Testing featureModuleLookup() roundtrip", {
+  res = featureModuleLookup(counts.matrix, model_G, "Gene_1")
+  expect_true(res == 5)
+})
