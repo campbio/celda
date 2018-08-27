@@ -62,3 +62,8 @@ test_that(desc = "Testing celdaTsne.celda_C with subset of cells",{
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C$z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
+
+# featureModuleLookup
+test_that(desc = "Testing featureModuleLookup() fails for celda_C models", {
+  expect_error(featureModuleLookup(counts.matrix, model_C, "test_feat"))
+})
