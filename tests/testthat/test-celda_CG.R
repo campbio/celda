@@ -7,8 +7,8 @@ context("Testing celda_CG")
 
 ##celda_CG.R##
 test_that(desc = "Making sure celda_CG runs without crashing",{
-  celdacg <- simulateCells(K.to.test = 5, L = 3, model = "celda_CG")
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, celda.mod = "celda_CG", nchains = 2,K.to.test = c(5,6), L = c(3,5), max.iter = 15)
+  celdacg <- simulateCells(K.to.test = 5, L = 4, model = "celda_CG", S = 3)
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, celda.mod = "celda_CG", nchains = 2,K.to.test = 5, L = c(3,5), max.iter = 15)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
@@ -20,6 +20,11 @@ model_CG = filterCeldaList(celdaCG.res, K = 5, L = 3)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 counts.matrix <- celdaCG.sim$counts
 
+###Convenience functions###
+
+test_that(desc = "Checking finalClusterAssignment, celdaCG",{
+  expect_true(all(finalClusterAssignment(celda.mod = model_CG)[[1]] <= 5))
+})
 
 #Making sure filterCeldaList if functioning correctly
 test_that(desc = "Sanity checking filterCeldaList",{
@@ -90,9 +95,9 @@ test_that(desc = "Making sure distinct_colors gives expected output",{
 })
 
 
-###renderCeldaHeatmap###
-test_that(desc = "Checking renderCeldaHeatmap",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y)),
+###celdaHeatmap###
+test_that(desc = "Checking celdaHeatmap",{
+  expect_equal(names(celdaHeatmap(celda.mod = model_C, counts = celdaC.sim$counts)),
                c("tree_row","tree_col","kmeans","gtable"))
 })
 
@@ -119,12 +124,17 @@ test_that(desc = "Checking differentialExpression",{
 		c("data.table","data.frame"))
 })
 
-#plotDrCluster,State
+#plotDrCluster,State,Gene
 test_that(desc = "Checking plotDrCluster to see if it runs",{
-  celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50,celda.mod = model_CG)
-  expect_equal(names(plotDrCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z))),
+  celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
+  expect_equal(names(plotDrCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels","guides"))
   expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
                c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
+  expect_equal(names(plotDrGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"),exact.match = TRUE)),
+               c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))  
   expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
+
+
+
