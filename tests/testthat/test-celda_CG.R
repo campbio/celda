@@ -41,7 +41,7 @@ test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
 #celda_CG.R#
 test_that(desc = "Making sure celda_CG runs without crashing", {
   celdacg <- simulateCells(K.to.test = 5, L = 4, model = "celda_CG", S = 3)
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, celda.mod = "celda_CG", nchains = 2, K.to.test = 5, L = c(3,5), max.iter = 15)
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2, K.to.test = 5, L = c(3,5), max.iter = 15, verbose = FALSE)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
 })
