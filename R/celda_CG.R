@@ -756,4 +756,23 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 }
 
 
-
+#' Obtain the feature module of a feature of interest
+#' 
+#' This function will output the gene module of a specific gene(s) from a celda model
+#'  
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Model of class "celda_G" or "celda_CG".
+#' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @export
+featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
+  list <- list()
+  for(x in 1:length(feature)){
+    if(feature[x] %in% rownames(counts)){
+      list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
+    }else{
+      list[x] <- c("The feature you specified does not exist within your data")
+    }
+  } 
+  names(list) <- feature
+  return(list)
+}
