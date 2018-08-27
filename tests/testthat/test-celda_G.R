@@ -8,93 +8,97 @@ model_G = filterCeldaList(celdaG.res, L = 5)[[1]]
 factorized <- factorizeMatrix(celda.mod = model_G, counts = celdaG.sim$counts)
 counts.matrix <- celdaG.sim$counts
 
+#Checking pre-loaded data
 #Making sure filterCeldaList if functioning correctly
-test_that(desc = "Sanity checking filterCeldaList",{
+test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaG.res$content.type, class(model_G))
 })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
-test_that(desc = "Checking factorize matrix, counts vs proportions",{
+test_that(desc = "Checking factorize matrix, counts vs proportions", {
   expect_equal(TRUE,all(factorized$counts$sample.states/sum(factorized$counts$sample.states) 
                         == factorized$proportions$sample.states))
 })
 
 #Checking dimension of factorize matrix
-test_that(desc = "Checking factorize matrix dimension size",{
+test_that(desc = "Checking factorize matrix dimension size", {
   expect_equal(5, ncol(factorized$proportions$gene.states))  
 })
 
+#Convenience functions#
+test_that(desc = "Checking finalClusterAssignment, celdaG", {
+  expect_true(all(finalClusterAssignment(celda.mod = model_G) <= 5))
+})
 
-# Ensure calculateLoglikFromVariables calculates the expected values
-test_that(desc = "calculateLoglikFromVariables.celda_G returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables.celda_G(counts = celdaG.sim$counts, y = celdaG.sim$y,
-                                         L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1 
-                                         ),
-               0)
+test_that(desc = "Checking clusterProbability, celdaG", {
+  expect_true(ncol(clusterProbability(model_G, counts = counts.matrix)[[1]]) == 5)
 })
 
 
+test_that(desc = "Checking getL", {
+  expect_equal(5, getL(celda.mod = model_G))
+})
+
 test_that(desc = "simulateCells.celda_G returns correctly typed output", {
-  sim.res = simulateCells(model="celda_G")
+  sim.res = simulateCells(model = "celda_G")
   expect_equal(typeof(sim.res$counts), "integer")
 })
 
-
-#normalizeCounts
-test_that(desc = "Making sure normalizeCounts doesn't change dimensions of counts matrix",{
-  norm.counts <- normalizeCounts(counts.matrix)
-  expect_equal(dim(norm.counts),dim(counts.matrix))
-  expect_equal(rownames(norm.counts),rownames(counts.matrix))
-  expect_equal(colnames(norm.counts),colnames(counts.matrix))
-})
-
-#recodeClusterY
-test_that(desc = "Checking recodeClusterY gives/doesn't give error",{
-  expect_error(recodeClusterY(celda.mod = model_G, from = NULL, to = ))
-  expect_error(recodeClusterY(celda.mod = model_G, from=c(1,2,3,4,5), to = c(1,2,3,4,6)))
-  new.recoded = recodeClusterY(celda.mod = model_G, from=c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_G$y == 1, new.recoded$y == 5)
-})
-
-#compareCountMatrix
-test_that(desc = "Checking CompareCountMatrix",{
-  expect_true(compareCountMatrix(counts = celdaG.sim$counts, celda.mod = model_G))
-})
-
-#distinct_colors
-test_that(desc = "Checking distinct_colors",{
-  expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
-})
-
-
-###renderCeldaHeatmap###
-test_that(desc = "Checking renderCeldaHeatmap output",{
-  expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
-               c("tree_row","tree_col","kmeans","gtable"))
-})
-
-##feature_selection.R##
-#topRank
-test_that(desc = "Checking topRank function",{
-  expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
-               c("index","names"))
-})
-
-#moduleHeatmap
-test_that(desc = "Checking moduleHeatmap to see if it runs",{
-  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
-               c("tree_row","tree_col","kmeans","gtable"))
-})
-
-##celda_G.R##
-test_that(desc = "Making sure celda_G runs without errors",{
+#celda_G.R#
+test_that(desc = "Making sure celda_G runs without errors", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, celda.mod = "celda_G", nchains = 2, L = c(5,10), max.iter = 15)
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))  # Only best chain returned by default
 })
 
+# Ensure calculateLoglikFromVariables calculates the expected values
+test_that(desc = "calculateLoglikFromVariables.celda_G returns correct output for various params", {
+  expect_lt(calculateLoglikFromVariables.celda_G(counts = celdaG.sim$counts, y = celdaG.sim$y,
+                                                 L = celdaG.sim$L, delta = 1, gamma = 1, beta = 1),0)
+})
+
+#normalizeCounts
+test_that(desc = "Making sure normalizeCounts doesn't change dimensions of counts matrix", {
+  norm.counts <- normalizeCounts(counts.matrix)
+  expect_equal(dim(norm.counts), dim(counts.matrix))
+  expect_equal(rownames(norm.counts), rownames(counts.matrix))
+  expect_equal(colnames(norm.counts), colnames(counts.matrix))
+})
+
+#recodeClusterY
+test_that(desc = "Checking recodeClusterY gives/doesn't give error", {
+  expect_error(recodeClusterY(celda.mod = model_G, from = NULL, to = ))
+  expect_error(recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
+  new.recoded = recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
+  expect_equal(model_G$y == 1, new.recoded$y == 5)
+})
+
+#compareCountMatrix
+test_that(desc = "Checking CompareCountMatrix", {
+  expect_true(compareCountMatrix(counts = celdaG.sim$counts, celda.mod = model_G))
+})
+
+#feature_selection.R#
+#topRank
+test_that(desc = "Checking topRank function", {
+  expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
+               c("index","names"))
+})
+
+#renderCeldaHeatmap#
+test_that(desc = "Checking renderCeldaHeatmap output", {
+  expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
+               c("tree_row", "tree_col", "kmeans"," gtable"))
+})
+
+#moduleHeatmap
+test_that(desc = "Checking moduleHeatmap to see if it runs", {
+  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
+               c("tree_row", "tree_col", "kmeans", "gtable"))
+})
+
 #plotDrState
-test_that(desc = "Checking plotDrState",{
-  celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod=model_G)
-  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
-               c("data","layers","scales","mapping","theme","coordinates","facet","plot_env","labels"))
+test_that(desc = "Checking plotDrState", {
+  celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
+  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states)),
+               c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))
 })
