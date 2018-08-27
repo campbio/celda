@@ -78,28 +78,6 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
   return(norm)
 }
   
- 
-#' Obtain the gene module of a gene of interest
-#' 
-#' This function will output the gene module of a specific gene(s) from a celda model
-#'  
-#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Model of class "celda_G" or "celda_CG".
-#' @param gene Character vector. Identify feature modules for the specified feature names. 
-#' @export
-featureModuleLookup <- function(counts, celda.mod, gene){
-  list <- list()
-  for(x in 1:length(gene)){
-    if(gene[x] %in% rownames(counts)){
-      list[x] <- model$y[which(rownames(counts) == gene[x])]
-    }else{
-      list[x] <- c("The gene you selected does not exist within your data")
-    }
-  } 
-  names(list) <- gene
-  return(list)
-}
-
 
 #' Re-code cell cluster labels by provided mapping scheme
 #' 
@@ -224,9 +202,6 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose =
 	}
   }	
 }
-
-
-
 
 
 #' Generate a distinct palette for coloring different clusters
