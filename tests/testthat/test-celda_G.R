@@ -93,17 +93,17 @@ test_that(desc = "Checking moduleHeatmap to see if it runs",{
                c("tree_row","tree_col","gtable"))
 })
 
-#plotDrState
-test_that(desc = "Checking plotDrState", {
+#plotDimReduceState
+test_that(desc = "Checking plotDimReduceState", {
   celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
-  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states)),
+  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))
 })
 
 # celdaTsne
 test_that(desc = "Testing celdaTsne.celda_G with all cells",{
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=ncol(counts.matrix))
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], rep(1,ncol(counts.matrix)))
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], rep(1,ncol(counts.matrix)))
   expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix))
   expect_true(!is.null(plot.obj))
 })
@@ -111,7 +111,7 @@ test_that(desc = "Testing celdaTsne.celda_G with all cells",{
 # celdaTsne
 test_that(desc = "Testing celdaTsne.celda_G with subset of cells",{
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=100)
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], rep(1, ncol(counts.matrix)))
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], rep(1, ncol(counts.matrix)))
     expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
