@@ -170,7 +170,7 @@ Celda contains several plotting tools for data dimensionality reduction tool out
 
 ```{r, fig.width = 8, fig.height = 8}
 data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),
-                   scale = F, center = F)
+                   scale = FALSE, center = FALSE)
 
 plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], 
               cluster = celda.res$res.list[[1]]$z)
