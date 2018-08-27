@@ -30,7 +30,7 @@ test_that(desc = "Checking clusterProbability, celdaC", {
 
 
 test_that(desc = "Checking getK", {
-  expect_equal(5,getK(celda.mod = model_C))
+  expect_equal(5, getK(celda.mod = model_C))
 })
 
 #simulateCells
