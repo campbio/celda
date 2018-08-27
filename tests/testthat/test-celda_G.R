@@ -25,11 +25,6 @@ test_that(desc = "Checking factorize matrix dimension size", {
   expect_equal(5, ncol(factorized$proportions$gene.states))  
 })
 
-#Convenience functions#
-test_that(desc = "Checking finalClusterAssignment, celdaG", {
-  expect_true(all(finalClusterAssignment(celda.mod = model_G) <= 5))
-})
-
 test_that(desc = "Checking clusterProbability, celdaG", {
   expect_true(ncol(clusterProbability(model_G, counts = counts.matrix)[[1]]) == 5)
 })
@@ -120,3 +115,4 @@ test_that(desc = "Testing celdaTsne.celda_G with subset of cells",{
     expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
+

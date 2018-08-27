@@ -19,19 +19,10 @@ test_that(desc = "Checking distinct_colors", {
   expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
 })
 
-#Convenience functions#
-test_that(desc = "Checking finalClusterAssignment, celdaC", {
-  expect_true(all(finalClusterAssignment(celda.mod = model_C) <= 5))
-})
-
 test_that(desc = "Checking clusterProbability, celdaC", {
   expect_true(all(rowSums(clusterProbability(model_C, counts = counts.matrix)[[1]]) == 1))
 })
 
-
-test_that(desc = "Checking getK", {
-  expect_equal(5, getK(celda.mod = model_C))
-})
 
 #simulateCells
 test_that(desc = "simulateCells.celda_C returns correctly typed output", {
