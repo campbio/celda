@@ -4,22 +4,22 @@
 \alias{celdaGridSearch}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
-  L = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
-  max.iter = 200, z.init = NULL, y.init = NULL, stop.iter = 10,
+celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
+  L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
+  max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
   split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
-  seed = 12345, verbose = FALSE, logfile.prefix = "Celda")
+  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix.}
 
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{model}{Celda model. Options available in `celda::available.models`.}
 
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
 \item{K.to.test}{Integer vector. List of K's to evaluate, where each K is the number of cell populations.}
 
-\item{L}{Integer vector. List of L's to evaluate, where each L is the number of cell populations.}
+\item{L.to.test}{Integer vector. List of L's to evaluate, where each L is the number of feature modules.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
@@ -29,7 +29,7 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 
 \item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 20.}
 
 \item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
 
@@ -47,7 +47,7 @@ celdaGridSearch(counts, celda.mod, sample.label = NULL, K.to.test = NULL,
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{verbose}{Logical. Whether to print log messages during celda chain execution. Default FALSE.}
+\item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 
 \item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
 }
