@@ -503,15 +503,6 @@ reorder.celda_C = function(counts, res){
   return(res)
 }
 
-
-#' finalClusterAssignment for celda Cell clustering funciton 
-#' @param celda.mod Celda object of class "celda_C".
-#' @export
-finalClusterAssignment.celda_C = function(celda.mod) {
-  return(celda.mod$z)
-}
-
-
 #' getK for celda Cell clustering function 
 #' @param celda.mod Celda object of class "celda_C".
 #' @export
