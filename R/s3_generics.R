@@ -155,6 +155,7 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' @param ... Additional parameters.
 #' @export
 celdaTsne = function(counts, celda.mod, ...) {
+  counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
   if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
     stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
