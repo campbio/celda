@@ -77,23 +77,25 @@ test_that(desc = "Checking CompareCountMatrix", {
   expect_true(compareCountMatrix(counts = celdaG.sim$counts, celda.mod = model_G))
 })
 
-#feature_selection.R#
+##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank function", {
   expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
                c("index","names"))
 })
 
-#renderCeldaHeatmap#
-test_that(desc = "Checking renderCeldaHeatmap output", {
-  expect_equal(names(renderCeldaHeatmap(counts = celdaG.sim$counts, z = model_G$z, y = model_G$y)),
-               c("tree_row", "tree_col", "kmeans"," gtable"))
+#feature_selection.R#
+
+###celdaHeatmap###
+test_that(desc = "Checking celdaHeatmap output",{
+  expect_equal(names(celdaHeatmap(celda.mod = model_G, counts = celdaG.sim$counts)),
+               c("tree_row","tree_col","gtable"))
 })
 
 #moduleHeatmap
-test_that(desc = "Checking moduleHeatmap to see if it runs", {
+test_that(desc = "Checking moduleHeatmap to see if it runs",{
   expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
-               c("tree_row", "tree_col", "kmeans", "gtable"))
+               c("tree_row","tree_col","gtable"))
 })
 
 #plotDrState
@@ -101,4 +103,20 @@ test_that(desc = "Checking plotDrState", {
   celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
   expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))
+})
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_G with all cells",{
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=ncol(counts.matrix))
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], rep(1,ncol(counts.matrix)))
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix))
+  expect_true(!is.null(plot.obj))
+})
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_G with subset of cells",{
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=100)
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], rep(1, ncol(counts.matrix)))
+    expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix) && sum(!is.na(tsne[,1])) == 100)
+  expect_true(!is.null(plot.obj))
 })

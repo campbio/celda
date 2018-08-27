@@ -73,60 +73,12 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
     norm <- t(base::apply(norm, 1, scale.fun))
   }  
 
+  colnames(norm) = colnames(counts)
+  rownames(norm) = rownames(counts)
   return(norm)
 }
   
-  
-reorder.label.by.size = function(z, K) {
-  z.ta = as.numeric(names(sort(table(factor(z, levels=1:K)), decreasing=TRUE)))
-  
-  new.z = z
-  for(i in 1:length(z.ta)) {
-    new.z[z == z.ta[i]] = i
-  }
-  return(list(new.labels=new.z, map=z.ta))
-}  
-
-reorder.labels.by.size.then.counts = function(counts, z, y, K, L) {
-  z.ta = as.numeric(names(sort(table(factor(z, levels=1:K)), decreasing=TRUE)))
-  
-  new.z = rep(NA, length(z))
-  for(i in 1:length(z.ta)) {
-    new.z[z == z.ta[i]] = i
-  }
-
-  n.TS.by.C = rowsum(counts, group=y, reorder=TRUE)
-  n.CP.by.TS = rowsum(t(n.TS.by.C), group=new.z, reorder=TRUE)
-  TS.order = lapply(1:K, function(i) order(n.CP.by.TS[i,], decreasing=TRUE))  
-  
-  ## Determine the number of transcriptional states to order by in each cell population
-  if(K > L) {
-    num.L.per.K = rep(1:0, c(K, K-L))
-  } else { 
-    #num.L.per.K = rep(c(ceiling(L/K), floor(L/K)), c(ceiling(K/2),floor(K/2)))
-    temp = rep(floor(L/K), K)
-    num.L.per.K = temp + rep(1:0, c(L-sum(temp), K-L+sum(temp)))
-  }
-
-  ## Cycle through each K and assign the state(s) with the highest counts
-  y.to.choose.from = 1:L  
-  cp.with.ts = which(num.L.per.K > 0)  
-  y.order = c()
-  for(i in cp.with.ts) {
-    ix = setdiff(TS.order[[i]], y.order)[1:num.L.per.K[i]]
-    y.order = c(y.order, ix)
-    y.to.choose.from = setdiff(y.to.choose.from, ix)
-  }
-  
-  new.y = rep(NA, length(y))
-  for(i in 1:length(y.order)) {
-    new.y[y == y.order[i]] = i
-  }
-
-  return(list(z=new.z, y=new.y, z.map=z.ta, y.map=y.order))  
-}  
-
-
+ 
 #' Obtain the gene module of a gene of interest
 #' 
 #' This function will output the gene module of a specific gene(s) from a celda model
@@ -260,16 +212,17 @@ newRunParamsFromResList = function(celda.list) {
 }
 
 
-logMessages = function(..., sep = " ", logfile = NULL, append = FALSE) {
-  if(!is.null(logfile)) {
-    if(!is.character(logfile) || length(logfile) > 1) {
-      stop("The log file parameter needs to be a single character string.")
-    }    
-    cat(paste(..., "\n", sep=sep), file=logfile, append=append)
-    
-  } else {
-    message(paste(..., sep=sep))
-  }
+logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose = TRUE) {
+  if(isTRUE(verbose)) {
+	if(!is.null(logfile)) {
+	  if(!is.character(logfile) || length(logfile) > 1) {
+		stop("The log file parameter needs to be a single character string.")
+	  }    
+	  cat(paste(..., "\n", sep=sep), file=logfile, append=append)
+	} else {
+	  message(paste(..., sep=sep))
+	}
+  }	
 }
 
 
@@ -398,14 +351,14 @@ rdirichlet <- function(n, alpha) {
 ## Make sure provided sample labels are the right type, or generate some if none were provided
 processSampleLabels = function(sample.label, num.cells) {
   if(is.null(sample.label)) {
-    s = rep(1, num.cells)
-    sample.label = s 
-  } else if(is.factor(sample.label)) {
-    s = as.numeric(sample.label)
+    sample.label = as.factor(rep("Sample_1", num.cells))
   } else {
-    sample.label = as.factor(sample.label)
-    s = as.integer(sample.label)
+    if(length(sample.label) != num.cells) {
+      stop("'sample.label' must be the same length as the number of columns in the 'counts' matrix.")
+    }
   }
-  
-  return(s)
+  if(!is.factor(sample.label)) {
+    sample.label = as.factor(sample.label)
+  }
+  return(sample.label)
 }
