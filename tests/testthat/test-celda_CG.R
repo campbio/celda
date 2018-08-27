@@ -85,7 +85,7 @@ test_that(desc = "Checking CompareCountMatrix", {
   expect_true(compareCountMatrix(counts = celdaCG.sim$counts, celda.mod = model_CG))
 })
 
-#feature_selection.R#
+##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank", {
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
@@ -99,13 +99,24 @@ test_that(desc = "Checking topRank", {
 #celdaHeatmap#
 test_that(desc = "Checking celdaHeatmap", {
   expect_equal(names(celdaHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts)),
-               c("tree_row", "tree_col", "kmeans", "gtable"))
+               c("tree_row", "tree_col", "gtable"))
 })
 
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs", {
   expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
-               c("tree_row", "tree_col", "kmeans", "gtable"))
+               c("tree_row","tree_col","gtable"))
+})
+
+#celdaProbabilityMap
+test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
+  expect_true(!is.null(plot.obj))
+})
+
+test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="cell.population")
+  expect_true(!is.null(plot.obj))
 })
 
 #differentialExpression
@@ -126,5 +137,21 @@ test_that(desc = "Checking plotDrCluster to see if it runs", {
   expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
 
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=length(model_CG$z))
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
+  expect_true(!is.null(plot.obj))
+})
+
+# celdaTsne
+test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
+  expect_success(expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
+  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z) && sum(!is.na(tsne[,1])) == 100)
+  expect_true(!is.null(plot.obj))
+})
 
 

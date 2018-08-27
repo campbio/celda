@@ -1177,7 +1177,7 @@ semi_pheatmap = function(mat,
         grid.draw(gt)
     }
     
-    invisible(list(tree_row = tree_row, tree_col = tree_col, kmeans = km, gtable = gt))
+    invisible(list(tree_row = tree_row, tree_col = tree_col, gtable = gt))
 }
 
 
