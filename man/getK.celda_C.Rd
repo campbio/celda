@@ -2,13 +2,20 @@
 % Please edit documentation in R/celda_C.R
 \name{getK.celda_C}
 \alias{getK.celda_C}
-\title{getK for celda Cell clustering function}
+\title{Get the K (number of clusters) parameter provided to a celda model.}
 \usage{
 \method{getK}{celda_C}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{Celda object of class "celda_C".}
+\item{celda.mod}{Celda object of class "celda_C"}
+}
+\value{
+Integer. The K provided to the model during initialization.
 }
 \description{
-getK for celda Cell clustering function
+Get the K (number of clusters) parameter provided to a celda model.
+}
+\examples{
+celda.mod = celda_C(celda::pbmc_select, K=10)
+mod.k.value = getK(celda.mod)
 }
