@@ -1,21 +1,4 @@
 ################################################################################
-# S3 Methods                                                                   #
-################################################################################
-# Below are getters for the various types of celda models.                     #
-# Concrete implementations of these functions are in their corresponding model #
-# files (e.g. getZ.celda_C is in celda_C.R).                                   #
-#                                                                              #
-# TODO:                                                                        #
-#        * Collapse ROxygen documentation into single page for these functions #
-#        * Consider moving model specific implementations to their             #
-#          corresponding files                                                 #
-#        * Can reduce redundancy for celda_C / celda_G getters by renaming the #
-#          fields on their respective return objects to match.                 #  
-################################################################################
-
-
-
-################################################################################
 # Generics
 ################################################################################
 
@@ -136,11 +119,18 @@ simulateCells = function(model, ...) {
 }
 
 
-#' Generate factorized matrices showing each feature's influence on cell / gene clustering
+#' Generate factorized matrices showing each feature's influence on cell / feature clustering
+#' 
+#' It can be useful to look at 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
+#' @return For every type specified, a list containing: sample.states (showing each
+#' )
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' factorized.matrix = factorizeMatrix(celda::pbmc_select, celda.mod, "proportions")
 #' @export
 factorizeMatrix = function(counts, celda.mod, type) {
   
@@ -174,11 +164,16 @@ celdaTsne = function(counts, celda.mod, ...) {
 
 #' Obtain the gene module of a gene of interest
 #' 
-#' This function will output the corresponding feature module for a specified list of genes from a celda model.
+#' This function will output the corresponding feature module for a specified list of features, as
+#' specified by the provided celda model.
 #'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
 featureModuleLookup = function(counts, celda.mod, feature){
   class(celda.mod) = c(class(celda.mod), celda.mod)
