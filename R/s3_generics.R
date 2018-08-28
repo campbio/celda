@@ -28,15 +28,6 @@ runParams = function(celda.list) {
 }
 
 
-#' Get the random seed for a given celda model.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
-seed = function(celda.mod) {
-  return(celda.mod$seed)
-}
-
-
 #' Get the complete log likelihood for a given celda model.
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
@@ -53,16 +44,6 @@ completeLogLikelihood = function(celda.mod) {
 #' @export
 finalLogLikelihood = function(celda.mod) {
   return(celda.mod$finalLogLik)
-}
-
-
-#' Get the final gene / cell / gene & cell cluster assignments generated during
-#' a celda run, dependent on the model provided.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
-finalClusterAssignment = function(celda.mod) {
-  UseMethod("finalClusterAssignment", celda.mod)
 }
 
 
@@ -108,8 +89,8 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param counts The counts matrix used to generate the provided cluster assignments.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @param ... Additional parameters.
 #' @export
