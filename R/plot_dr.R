@@ -71,6 +71,7 @@ plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, t
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_G" or "celda_CG".
+#' @param modules Character vector. Module(s) from celda model to be plotted.
 #' @param rescale Logical. Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
