@@ -29,6 +29,14 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+}
 \description{
-Simulate cells from the cell clustering generative model
+This function generates a list containing a simulated counts matrix, as well as various parameters
+used in the simulation which can be useful for running celda.
+}
+\examples{
+celda.c.sim = simulateCells(model="celda_C", K=10)
+sim.counts = celda.c.sim$counts
 }
