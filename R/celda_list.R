@@ -61,6 +61,9 @@ filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 #' @param K Limit search for best model to models with this number of cell clusters.
 #' @param L Limit search for best model to models with this number of feature clusters.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
+#' @examples
+#' celda.mods = celda_CG(celda::pbmc_select, K=c(5,10), L=c(10,20,30))
+#' best.mod.k5.l20 = selectBestModel(celda.mods, K=5, L=20)
 #' @export
 selectBestModel = function(celda.list, K=c(), L=c()) {
   if (class(celda.list)[1] != "celda_list") {

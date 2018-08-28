@@ -15,14 +15,6 @@ runParams = function(celda.list) {
 }
 
 
-#' Get the random seed for a given celda model.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
-seed = function(celda.mod) {
-  return(celda.mod$seed)
-}
-
 
 #' Get the complete log likelihood for a given celda model.
 #'
