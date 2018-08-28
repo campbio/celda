@@ -19,19 +19,10 @@ test_that(desc = "Checking distinct_colors", {
   expect_equal(distinct_colors(2), c("#FF4D4D", "#4DFFFF"))
 })
 
-#Convenience functions#
-test_that(desc = "Checking finalClusterAssignment, celdaC", {
-  expect_true(all(finalClusterAssignment(celda.mod = model_C) <= 5))
-})
-
 test_that(desc = "Checking clusterProbability, celdaC", {
   expect_true(all(rowSums(clusterProbability(model_C, counts = counts.matrix)[[1]]) == 1))
 })
 
-
-test_that(desc = "Checking getK", {
-  expect_equal(5, getK(celda.mod = model_C))
-})
 
 #simulateCells
 test_that(desc = "simulateCells.celda_C returns correctly typed output", {
@@ -91,7 +82,7 @@ test_that(desc = "Checking differentialExpression", {
 # celdaTsne
 test_that(desc = "Testing celdaTsne.celda_C with all cells",{
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_C, max.cells=length(model_C$z), min.cluster.size=50)
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_C$z)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C$z))
   expect_true(!is.null(plot.obj))
 })
@@ -100,13 +91,13 @@ test_that(desc = "Testing celdaTsne.celda_C with all cells",{
 test_that(desc = "Testing celdaTsne.celda_C with subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_C, max.cells=50, min.cluster.size=50)))
   tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_C, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_C$z)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C$z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
-
 
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup() fails for celda_C models", {
   expect_error(featureModuleLookup(counts.matrix, model_C, "test_feat"))
 })
+
