@@ -87,7 +87,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   }else{
     anno_cell_colors <- NULL
   }
-  renderCeldaHeatmap(
+  plotHeatmap(
     filtered_norm.counts,
     z = celda.mod$z[cell_ix],
     y = celda.mod$y[gene_ix],
