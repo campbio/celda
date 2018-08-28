@@ -2,13 +2,20 @@
 % Please edit documentation in R/celda_C.R
 \name{finalClusterAssignment.celda_C}
 \alias{finalClusterAssignment.celda_C}
-\title{finalClusterAssignment for celda Cell clustering funciton}
+\title{Get the final cell cluster assignments determined by a celda_C model.}
 \usage{
 \method{finalClusterAssignment}{celda_C}(celda.mod)
 }
 \arguments{
 \item{celda.mod}{Celda object of class "celda_C".}
 }
+\value{
+Integer vector. The final cell cluster assignments determined by the celda_C model.
+}
 \description{
-finalClusterAssignment for celda Cell clustering funciton
+Get the final cell cluster assignments determined by a celda_C model.
+}
+\examples{
+celda.mod = celda_C(celda::pbmc_select, K=10)
+final.clustering = finalClusterAssignment(celda.mod)
 }

@@ -549,8 +549,12 @@ reorder.celda_G = function(counts, res) {
 }
 
 
-#' finalClusterAssignment for celda Gene clustering model
+#' Get the final feature cluster assignments determined by a celda_G model.
 #' @param celda.mod Celda object of class "celda_G". 
+#' @return Integer vector. The final feature cluster assignments determined by the celda_G model.
+#' @examples
+#' celda.mod = celda_G(celda::pbmc_select, L=50)
+#' final.clustering = finalClusterAssignment(celda.mod)
 #' @export
 finalClusterAssignment.celda_G = function(celda.mod) {
   return(celda.mod$y)
