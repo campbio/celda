@@ -1,10 +1,17 @@
-#' Identify features with the highest influence on clustering
+#' Identify features with the highest influence on clustering.
+#' 
+#' topRank() can quickly identify the top `n` rows for each column of a matrix.
+#' For example, this can be useful for identifying the top `n` features per cell.
 #' 
 #' @param matrix Numeric matrix. 
 #' @param n Integer. Maximum number of items above `threshold` returned for each ranked row or column.  
 #' @param margin Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2. 
 #' @param threshold Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0. 
 #' @param decreasing Logical. Specifies if the rank should be decreasing. Default TRUE.  
+#' @return List. The `index` variable provides the top `n` row (feature) indices contributing the most to each column (cell). The `names` variable provides the rownames corresponding to these indexes.
+#' @examples
+#' top.ranks.per.cell = topRank(celda::pbmc_select, n=10)
+#' top.feature.names.for.cell = top.ranks.per.cell$names[1]
 #' @export
 topRank = function(matrix, n=25, margin=2, threshold=0, decreasing=TRUE) {
   if(is.null(threshold) | is.na(threshold)) {
