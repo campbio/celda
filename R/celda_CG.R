@@ -227,7 +227,10 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 
 
 
-#' Simulate cells from the cell/gene clustering generative model
+#' Simulate cells from the cell/feature bi-clustering generative model
+#' 
+#' This function generates a list containing a simulated counts matrix, as well as various parameters
+#' used in the simulation which can be useful for running celda. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param S Integer. Number of samples to simulate. 
@@ -242,6 +245,11 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @examples
+#' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
+#' sim.counts = celda.cg.sim$res.listcounts
+#' sim.clusters = finalClusterAssignment(celda.cg.sim)
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
