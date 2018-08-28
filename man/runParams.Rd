@@ -2,20 +2,13 @@
 % Please edit documentation in R/s3_generics.R
 \name{runParams}
 \alias{runParams}
-\title{Get run parameters provided to a celda model}
+\title{Get run parameters for a celda run.}
 \usage{
 runParams(celda.list)
 }
 \arguments{
 \item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 }
-\value{
-Data frame. Contains the run parameters used to generate the `celda.list`
-}
 \description{
-Get run parameters provided to a celda model
-}
-\examples{
-celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
-original.run.params = runParams(celda.mod)
+Get run parameters for a celda run.
 }
