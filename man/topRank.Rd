@@ -2,7 +2,7 @@
 % Please edit documentation in R/feature_selection.R
 \name{topRank}
 \alias{topRank}
-\title{Identify features with the highest influence on clustering}
+\title{Identify features with the highest influence on clustering.}
 \usage{
 topRank(matrix, n = 25, margin = 2, threshold = 0,
   decreasing = TRUE)
@@ -18,6 +18,14 @@ topRank(matrix, n = 25, margin = 2, threshold = 0,
 
 \item{decreasing}{Logical. Specifies if the rank should be decreasing. Default TRUE.}
 }
+\value{
+List. The `index` variable provides the top `n` row (feature) indices contributing the most to each column (cell). The `names` variable provides the rownames corresponding to these indexes.
+}
 \description{
-Identify features with the highest influence on clustering
+topRank() can quickly identify the top `n` rows for each column of a matrix.
+For example, this can be useful for identifying the top `n` features per cell.
+}
+\examples{
+top.ranks.per.cell = topRank(celda::pbmc_select, n=10)
+top.feature.names.for.cell = top.ranks.per.cell$names[1]
 }
