@@ -11,16 +11,9 @@ simulateCells(model, ...)
 
 \item{...}{Additional parameters.}
 }
-\value{
-List. Contains the simulated counts matrix, derived cell / feature cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
-}
 \description{
 This function generates a list containing a simulated counts matrix, as well as various parameters
 used in the simulation which can be useful for running celda. The user must provide the desired model
 (one of celda_C, celda_G, celda_CG) as well as any desired tuning parameters for those model's simulation
 functions as detailed below.
-}
-\examples{
-celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
-sim.counts = celda.cg.sim$counts
 }

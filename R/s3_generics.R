@@ -47,6 +47,16 @@ finalLogLikelihood = function(celda.mod) {
 }
 
 
+#' Get the final feature / cell / feature & cell cluster assignments generated during
+#' a celda run, dependent on the model provided.
+#'
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @export
+finalClusterAssignment = function(celda.mod) {
+  UseMethod("finalClusterAssignment", celda.mod)
+}
+
+
 #' Get the probability of the cluster assignments generated during a celda run.
 #'
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
