@@ -29,5 +29,4 @@ celda.Rproj
 src/*.o
 src/*.dll
 src/*.so
-
 etc/*
