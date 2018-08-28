@@ -96,7 +96,7 @@ test_that(desc = "Checking moduleHeatmap to see if it runs",{
 #plotDimReduceState
 test_that(desc = "Checking plotDimReduceState", {
   celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
-  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states)),
+  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))
 })
 
