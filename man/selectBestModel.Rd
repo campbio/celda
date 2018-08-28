@@ -22,3 +22,7 @@ the maxiumim final log-likelihood. K, L, or combination of K and L must be
 provided for celda_list objects containing celda_C, celda_G, and celda_CG 
 models, respectively.
 }
+\examples{
+celda.mods = celda_CG(celda::pbmc_select, K=c(5,10), L=c(10,20,30))
+best.mod.k5.l20 = selectBestModel(celda.mods, K=5, L=20)
+}

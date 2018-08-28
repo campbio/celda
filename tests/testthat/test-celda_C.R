@@ -39,8 +39,10 @@ test_that(desc = "Checking celda_C to see if it runs without errors", {
 
 #Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_C returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables.celda_C(counts = celdaC.sim$counts,z = celdaC.sim$z,
-                                                 K = celdaC.sim$K, alpha = 1, beta = 1,sample.label = celdaC.sim$sample.label), 0)
+  expect_lt(calculateLoglikFromVariables(model="celda_C", 
+                                         counts = celdaC.sim$counts,z = celdaC.sim$z,
+                                         K = celdaC.sim$K, alpha = 1, beta = 1,
+                                         sample.label = celdaC.sim$sample.label), 0)
 })
 
 #normalizeCounts
