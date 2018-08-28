@@ -66,9 +66,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   all.seeds = seed:(seed + nchains - 1)
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
-  logMessages("Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-
+  start.time = Sys.time()
+  
   best.result = NULL  
   for(i in seq_along(all.seeds)) {   
 
@@ -154,6 +155,12 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   } 
   
   result = reorder.celda_G(counts = counts, res = result) 
+  
+  end.time = Sys.time()
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  logMessages("Completed Celda_G. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+
   return(result)
 }
 
