@@ -29,10 +29,12 @@ completeLogLikelihood = function(celda.mod) {
 }
 
 
-#' Get the log likelihood from the final iteration of Gibbs sampling
-#' for a given celda model.
-#'
+#' Get the final log likelihood for the cell/feature clustering determined by a celda model.
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @return Double. The final log likelihood associated with the clustering determined by the provided celda model.
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' final.loglik = finalLogLikelihood(celda.mod)
 #' @export
 finalLogLikelihood = function(celda.mod) {
   return(celda.mod$finalLogLik)
