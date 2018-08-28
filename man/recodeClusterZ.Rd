@@ -13,10 +13,17 @@ recodeClusterZ(celda.mod, from, to)
 
 \item{to}{Numeric vector. Unique values in the range of 1:K that correspond to the new cluster labels.}
 }
+\value{
+Celda object with cell feature clusters, with class corresponding to that of `celda.mod`.
+}
 \description{
 This function will re-code _cell_ cluster labels based off of a mapping provided by the user,
 for all fields on a celda object involving cluster labels.
 e.g. if Z (cell cluster) values range from 1-4 and the user would like all 3's switched to 1's and
 vice versa, this function can be useful. NOTE: it is recommended that this function's results
 aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
+}
+\examples{
+celda.mod = celda_CG(pbmc_select, K=10, L=50)
+celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
 }

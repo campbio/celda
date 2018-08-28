@@ -13,6 +13,9 @@
 
 \item{feature}{Character vector. Identify feature modules for the specified feature names.}
 }
+\value{
+List. Each entry corresponds to the feature module determined for the provided features
+}
 \description{
 This function will output the gene module of a specific gene(s) from a celda model
 }
