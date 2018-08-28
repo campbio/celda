@@ -17,6 +17,8 @@ plotDimReduceState(dim1, dim2, counts, celda.mod, modules = NULL,
 
 \item{celda.mod}{Celda object of class "celda_G" or "celda_CG".}
 
+\item{modules}{Character vector. Module(s) from celda model to be plotted.}
+
 \item{rescale}{Logical. Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
