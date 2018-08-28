@@ -39,10 +39,16 @@ finalLogLikelihood = function(celda.mod) {
 }
 
 
-#' Get the final gene / cell / gene & cell cluster assignments generated during
-#' a celda run, dependent on the model provided.
+#' Get the final feature and/or cell cluster assignments determined by a
+#' celda model.
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @return If celda.mod is of class "celda_C" or "celda_G", the cell / feature cluster assignments, respectively. If celda.mod is of class "celda_CG", a list containing both the cell and feature cluster assignments.
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' final.clustering = finalClusterAssignment(celda.mod)
+#' cell.clusters = final.clustering$z
+#' feature.clusters = final.clustering$y
 #' @export
 finalClusterAssignment = function(celda.mod) {
   UseMethod("finalClusterAssignment", celda.mod)
