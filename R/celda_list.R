@@ -5,7 +5,7 @@
 
 #' Select models from a list of results generated in a celda run.
 #' 
-#' Convenience function for picking out specific models from a celda_list, returned from celda().
+#' Convenience function for picking out specific models from a celda_list object.
 #' Models can be selected by various parameters, most importantly the K/L parameters (number of cell
 #'  clusters / number of feature clusters). 
 #' 
@@ -15,6 +15,9 @@
 #' @param chain The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.
 #' @param index The index of the desired model in the run.parameters in the provided celda_list. Overrides all other parameters if provided. Defaults to NULL.
 #' @return A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
+#' @examples
+#' celda.mods = celda_CG(celda::pbmc_select, K=c(10,15), L=c(50, 100))
+#' desired.mod = filterCeldaList(celda.mods, K=10, L=100)
 #' @export
 filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
   validateGetModelParams(celda.list, K, L, chain) 

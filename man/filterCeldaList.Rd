@@ -4,7 +4,8 @@
 \alias{filterCeldaList}
 \title{Select models from a list of results generated in a celda run.}
 \usage{
-filterCeldaList(celda.list, K = c(), L = c(), chain = c(), index = NULL)
+filterCeldaList(celda.list, K = c(), L = c(), chain = c(),
+  index = NULL)
 }
 \arguments{
 \item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
@@ -21,7 +22,11 @@ filterCeldaList(celda.list, K = c(), L = c(), chain = c(), index = NULL)
 A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 }
 \description{
-Convenience function for picking out specific models from a celda_list, returned from celda().
+Convenience function for picking out specific models from a celda_list object.
 Models can be selected by various parameters, most importantly the K/L parameters (number of cell
- clusters / number of gene clusters).
+ clusters / number of feature clusters).
+}
+\examples{
+celda.mods = celda_CG(celda::pbmc_select, K=c(10,15), L=c(50, 100))
+desired.mod = filterCeldaList(celda.mods, K=10, L=100)
 }
