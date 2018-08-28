@@ -2,7 +2,7 @@
 % Please edit documentation in R/s3_generics.R
 \name{getK}
 \alias{getK}
-\title{Get the K (number of clusters) parameter provided to a celda model.}
+\title{Get the K (number of cell clusters) parameter provided to a celda model.}
 \usage{
 getK(celda.mod)
 }
@@ -13,7 +13,7 @@ getK(celda.mod)
 Integer. The K provided to the model during initialization.
 }
 \description{
-Get the K (number of clusters) parameter provided to a celda model.
+Get the K (number of cell clusters) parameter provided to a celda model.
 }
 \examples{
 celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)

@@ -561,15 +561,19 @@ finalClusterAssignment.celda_G = function(celda.mod) {
 }
 
 
-#' getK for celda Gene clustering model
+#' Get the K (number of cell clusters) parameter provided to a celda model.
 #' @param celda.mod Celda object of class "celda_G". 
 #' @return NA. celda_G models do not utilize the K parameter.
 #' @export
 getK.celda_G = function(celda.mod) { return(NA) }
 
 
-#' getL for celda Gene clustering model
-#' @param celda.mod Celda object of class "celda_G". 
+#' Get the L (number of feature clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_G".
+#' @return Integer. The L provided to the model during initialization.
+#' @examples
+#' celda.mod = celda_G(celda::pbmc_select, L=50)
+#' mod.l.value = getL(celda.mod)
 #' @export
 getL.celda_G = function(celda.mod) {
   return(celda.mod$L)
