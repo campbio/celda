@@ -770,6 +770,10 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
   list <- list()
