@@ -13,14 +13,6 @@ featureModuleLookup(counts, celda.mod, feature)
 
 \item{feature}{Character vector. Identify feature modules for the specified feature names.}
 }
-\value{
-List. Each entry corresponds to the feature module determined for the provided features
-}
 \description{
-This function will output the corresponding feature module for a specified list of features, as
-specified by the provided celda model.
-}
-\examples{
-celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
-corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+This function will output the corresponding feature module for a specified list of genes from a celda model.
 }
