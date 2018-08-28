@@ -21,6 +21,12 @@ normalizeCounts(counts, normalize = c("proportion", "cpm", "median",
 
 \item{pseudocount.transform}{Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0.}
 }
+\value{
+Matrix, the normalized counts matrix.
+}
 \description{
 Performs normalization, transformation, and/or scaling on a counts matrix
+}
+\examples{
+normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
 }
