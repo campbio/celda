@@ -68,9 +68,12 @@ clusterProbability = function(celda.mod, counts, log=FALSE) {
 }
 
 
-#' Get the K value used for each chain in a celda run.
-#'
+#' Get the K (number of clusters) parameter provided to a celda model.
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @return Integer. The K provided to the model during initialization.
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' mod.k.value = getK(celda.mod)
 #' @export
 getK = function(celda.mod) {
   UseMethod("getK", celda.mod)
