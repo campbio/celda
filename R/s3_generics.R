@@ -2,9 +2,13 @@
 # Generics
 ################################################################################
 
-#' Get run parameters for a celda run.
+#' Get run parameters provided to a celda model
 #'
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
+#' @return Data frame. Contains the run parameters used to generate the `celda.list`
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' original.run.params = runParams(celda.mod)
 #' @export
 runParams = function(celda.list) {
   return(celda.list$run.params)
