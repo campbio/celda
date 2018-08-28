@@ -563,6 +563,7 @@ finalClusterAssignment.celda_G = function(celda.mod) {
 
 #' getK for celda Gene clustering model
 #' @param celda.mod Celda object of class "celda_G". 
+#' @return NA. celda_G models do not utilize the K parameter.
 #' @export
 getK.celda_G = function(celda.mod) { return(NA) }
 
