@@ -2,13 +2,20 @@
 % Please edit documentation in R/celda_CG.R
 \name{getK.celda_CG}
 \alias{getK.celda_CG}
-\title{getK for the celda Cell and Gene clustering model}
+\title{Get the K (number of cell clusters) parameter provided to a celda model.}
 \usage{
 \method{getK}{celda_CG}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{Celda object of class "celda_CG".}
+\item{celda.mod}{Celda object of class "celda_CG"}
+}
+\value{
+Integer. The K provided to the model during initialization.
 }
 \description{
-getK for the celda Cell and Gene clustering model
+Get the K (number of cell clusters) parameter provided to a celda model.
+}
+\examples{
+celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+mod.k.value = getK(celda.mod)
 }
