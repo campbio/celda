@@ -11,13 +11,13 @@
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @param var_label Character vector. Title for the color legend. 
 #' @export
-plotDimReduceGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
-  df <- data.frame(dim1,dim2,t(as.data.frame(matrix)))
+plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
+  df = data.frame(dim1,dim2,t(as.data.frame(matrix)))
   na.ix = is.na(dim1) | is.na(dim2)
   df = df[!na.ix,]
   
-  m <- reshape2::melt(df, id.vars = c("dim1","dim2"))
-  colnames(m) <- c(xlab,ylab,"facet",var_label)
+  m = reshape2::melt(df, id.vars = c("dim1","dim2"))
+  colnames(m) = c(xlab,ylab,"facet",var_label)
   ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes_string(color = var_label)) + 
     ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, high = color_high, mid = color_mid, midpoint = (max(m[,4])-min(m[,4]))/2 ,name = gsub("_"," ",var_label)) + 
     ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = unit(0,"lines"),
@@ -39,29 +39,29 @@ plotDimReduceGrid <- function(dim1, dim2, matrix, size, xlab, ylab, color_low, c
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @export 
-plotDimReduceGene <- function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
-  counts <- normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
+plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+  counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
   
   if(!is.null(trim)){
     if(length(trim) != 2) {
       stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
     }
-    trim <- sort(trim)
-    counts[counts < trim[1]] <- trim[1]
-    counts[counts > trim[2]] <- trim[2]
+    trim = sort(trim)
+    counts[counts < trim[1]] = trim[1]
+    counts[counts > trim[2]] = trim[2]
   }  
   var_label = "Expression"
   
   if(!isTRUE(exact.match)){
-    features.indices <- c()  
+    features.indices = c()  
     for(gene in features){
-      features.indices <- c(features.indices, grep(gene, rownames(counts)))
+      features.indices = c(features.indices, grep(gene, rownames(counts)))
     }
-    counts <- counts[features.indices, , drop = FALSE]
+    counts = counts[features.indices, , drop = FALSE]
   }else{
-    counts <- counts[rownames(counts) %in% features, , drop = FALSE]
+    counts = counts[rownames(counts) %in% features, , drop = FALSE]
   }
-  counts <- counts[match(rownames(counts), features), ]
+  counts = counts[match(rownames(counts), features), ]
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
@@ -69,7 +69,8 @@ plotDimReduceGene <- function(dim1, dim2, counts, features, exact.match = TRUE, 
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
-#' @param matrix Numeric matrix. Matrix containting probabilities of each feature module per cell. 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
+#' @param celda.mod Celda object of class "celda_G" or "celda_CG".
 #' @param rescale Logical. Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
@@ -78,15 +79,26 @@ plotDimReduceGene <- function(dim1, dim2, counts, features, exact.match = TRUE, 
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @export 
-plotDimReduceState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+  
+  factorized = factorizeMatrix(celda.mod = celda.mod, counts = counts)
+  matrix = factorized$proportions$cell.states
   if(rescale == TRUE){
     for(x in 1:nrow(matrix)){ 
-      matrix[x,] <- matrix[x,]-min(matrix[x,])
-      matrix[x,] <- matrix[x,]/max(matrix[x,])
+      matrix[x,] = matrix[x,]-min(matrix[x,])
+      matrix[x,] = matrix[x,]/max(matrix[x,])
       var_label = "Scaled_Probability"
     }
   }else{
     var_label = "Probability"
+  }
+  
+  if(!is.null(modules)){
+    if(length(rownames(matrix)[rownames(matrix) %in% modules]) < 1){
+      stop("The module selected does not exist in the model.")
+    }
+    matrix = matrix[which(rownames(matrix) %in% modules),]
+    matrix = matrix[match(rownames(matrix), modules),]
   }
   plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
@@ -101,15 +113,15 @@ plotDimReduceState <- function(dim1, dim2, matrix, rescale = TRUE, size = 1, xla
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
 #' @export 
-plotDimReduceCluster <- function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
-  df <- data.frame(dim1, dim2, cluster)
-  colnames(df) <- c(xlab, ylab, "Cluster")
+plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
+  df = data.frame(dim1, dim2, cluster)
+  colnames(df) = c(xlab, ylab, "Cluster")
   na.ix = is.na(dim1) | is.na(dim2)
   df = df[!na.ix,]
-  df[3] <- as.factor(df[[3]])
-  cluster_colors <- distinct_colors(nlevels(as.factor(cluster)))
+  df[3] = as.factor(df[[3]])
+  cluster_colors = distinct_colors(nlevels(as.factor(cluster)))
   if(!is.null(specific_clusters)){
-    cluster_colors[!levels(df[[3]]) %in% specific_clusters] <- "gray92"
+    cluster_colors[!levels(df[[3]]) %in% specific_clusters] = "gray92"
   }
   ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
     ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = Cluster)) +
