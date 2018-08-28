@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_C.R
 \name{getK.celda_C}
 \alias{getK.celda_C}
-\title{Get the K (number of clusters) parameter provided to a celda model.}
+\title{Get the K (number of cell clusters) parameter provided to a celda model.}
 \usage{
 \method{getK}{celda_C}(celda.mod)
 }
@@ -13,7 +13,7 @@
 Integer. The K provided to the model during initialization.
 }
 \description{
-Get the K (number of clusters) parameter provided to a celda model.
+Get the K (number of cell clusters) parameter provided to a celda model.
 }
 \examples{
 celda.mod = celda_C(celda::pbmc_select, K=10)
