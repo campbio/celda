@@ -260,6 +260,9 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 
 #' Simulate cells from the cell clustering generative model
 #' 
+#' This function generates a list containing a simulated counts matrix, as well as various parameters
+#' used in the simulation which can be useful for running celda. 
+#' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param S Integer. Number of samples to simulate. 
 #' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution.
@@ -270,6 +273,10 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @examples
+#' celda.c.sim = simulateCells(model="celda_C", K=10)
+#' sim.counts = celda.c.sim$counts
 #' @export
 simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(500,5000), 
                          G=500, K=5, alpha=1, beta=1, seed=12345, ...) {
@@ -512,16 +519,34 @@ reorder.celda_C = function(counts, res){
   return(res)
 }
 
-#' getK for celda Cell clustering function 
+
+#' Get the final cell cluster assignments determined by a celda_C model.
 #' @param celda.mod Celda object of class "celda_C".
+#' @return Integer vector. The final cell cluster assignments determined by the celda_C model.
+#' @examples
+#' celda.mod = celda_C(celda::pbmc_select, K=10)
+#' final.clustering = finalClusterAssignment(celda.mod)
+#' @export
+finalClusterAssignment.celda_C = function(celda.mod) {
+  return(celda.mod$z)
+}
+
+
+#' Get the K (number of cell clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_C"
+#' @return Integer. The K provided to the model during initialization.
+#' @examples
+#' celda.mod = celda_C(celda::pbmc_select, K=10)
+#' mod.k.value = getK(celda.mod)
 #' @export
 getK.celda_C = function(celda.mod) {
   return(celda.mod$K)
 }
 
 
-#' getL for celda Cell clustering function 
-#' @param celda.mod Celda object of class "celda_C".
+#' Get the L (number of feature clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @return NA. celda_C models do not utilize the L parameter.
 #' @export
 getL.celda_C = function(celda.mod) { return(NA) }
 
@@ -534,7 +559,7 @@ getL.celda_C = function(celda.mod) { return(NA) }
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-  renderCeldaHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
+  plotHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
 }
 
 
@@ -613,11 +638,11 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
   samp <- factorized$proportions$sample.states[z.include,,drop=FALSE]
   col <- colorRampPalette(c("white","blue","#08306B","#006D2C","yellowgreen","yellow","orange","red"))(100)
   breaks <-  seq(0, 1, length.out = length(col))     
-  g1 = renderCeldaHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
+  g1 = plotHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
 
   if(ncol(samp) > 1) {
 	samp.norm = normalizeCounts(samp, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
-	g2 = renderCeldaHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
+	g2 = plotHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
 	gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol=2)
   } else {
 	gridExtra::grid.arrange(g1$gtable)
@@ -633,6 +658,7 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @export
 featureModuleLookup.celda_C = function(counts, celda.mod, feature){
   stop("Provided model does not contain feature modules.")
