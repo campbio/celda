@@ -9,6 +9,9 @@
 \arguments{
 \item{celda.mod}{Celda object of class "celda_G".}
 }
+\value{
+NA. celda_G models do not utilize the K parameter.
+}
 \description{
 getK for celda Gene clustering model
 }

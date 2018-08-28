@@ -525,8 +525,12 @@ finalClusterAssignment.celda_C = function(celda.mod) {
 }
 
 
-#' getK for celda Cell clustering function 
-#' @param celda.mod Celda object of class "celda_C".
+#' Get the K (number of clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_C"
+#' @return Integer. The K provided to the model during initialization.
+#' @examples
+#' celda.mod = celda_C(celda::pbmc_select, K=10)
+#' mod.k.value = getK(celda.mod)
 #' @export
 getK.celda_C = function(celda.mod) {
   return(celda.mod$K)
