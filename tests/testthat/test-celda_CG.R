@@ -121,8 +121,14 @@ test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
 
 #differentialExpression
 test_that(desc = "Checking differentialExpression", {
- expect_equal(class(diffExp_K1 <- differentialExpression(counts = counts.matrix, celda.mod = model_CG, c1 = 1)),
+ expect_equal(class(diffExp_K1 <- differentialExpression(counts = counts.matrix, celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5)),
 		c("data.table", "data.frame"))
+})
+
+#differentialExpression, compare cluster1 and cluster2
+test_that(desc = "Checking differentialExpression", {
+  expect_equal(class(diffExp_K1 <- differentialExpression(counts = counts.matrix, celda.mod = model_CG, c1 = 3, c2 = 4, log2fc.threshold = 0.5)),
+               c("data.table", "data.frame"))
 })
 
 #plotDimReduceCluster,State,Gene
@@ -133,6 +139,8 @@ test_that(desc = "Checking plotDimReduceCluster to see if it runs", {
   expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
   expect_equal(names(plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
+               c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
+  expect_equal(names(plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
   expect_error(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
