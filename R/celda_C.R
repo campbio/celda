@@ -513,8 +513,12 @@ reorder.celda_C = function(counts, res){
 }
 
 
-#' finalClusterAssignment for celda Cell clustering funciton 
+#' Get the final cell cluster assignments determined by a celda_C model.
 #' @param celda.mod Celda object of class "celda_C".
+#' @return Integer vector. The final cell cluster assignments determined by the celda_C model.
+#' @examples
+#' celda.mod = celda_C(celda::pbmc_select, K=10)
+#' final.clustering = finalClusterAssignment(celda.mod)
 #' @export
 finalClusterAssignment.celda_C = function(celda.mod) {
   return(celda.mod$z)
