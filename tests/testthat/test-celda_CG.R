@@ -48,11 +48,12 @@ test_that(desc = "Making sure celda_CG runs without crashing", {
 
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output for various params", {
-  expect_lt(calculateLoglikFromVariables.celda_CG(y = celdaCG.sim$y, z = celdaCG.sim$z, 
-                                                  delta = 1, gamma = 1,  beta = 1, 
-                                                  alpha = 1, K = 5, L = 3, 
-                                                  s = celdaCG.sim$sample.label, 
-                                                  counts=celdaCG.sim$counts),0)
+  expect_lt(calculateLoglikFromVariables(model="celda_CG",
+                                         y = celdaCG.sim$y, z = celdaCG.sim$z, 
+                                         delta = 1, gamma = 1,  beta = 1, 
+                                         alpha = 1, K = 5, L = 3, 
+                                         s = celdaCG.sim$sample.label, 
+                                         counts=celdaCG.sim$counts),0)
 })
 
 #normalizeCounts
