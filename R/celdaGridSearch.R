@@ -40,8 +40,13 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
   params.list = buildParamList(counts, model, sample.label, alpha, beta, delta,
                                gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
                                nchains, cores, seed)
-  
-  logMessages(date(), "... Starting ", model, logfile=NULL, append=FALSE, verbose=verbose)
+
+  logMessages("--------------------------------------------------------------------", logfile=NULL, append=FALSE, verbose=verbose)  
+  logMessages("Starting celdaGridSearch with", model, logfile=NULL, append=TRUE, verbose=verbose)
+  logMessages("Number of cores:", cores, logfile=NULL, append=TRUE, verbose=verbose)  
+  logMessages("--------------------------------------------------------------------", logfile=NULL, append=TRUE, verbose=verbose)  
+  start.time = Sys.time()
+
 
   cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)
@@ -91,7 +96,11 @@ celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.t
     celda.res$res.list = best.chains
   }
   
-  logMessages(date(), "... Completed ", model, logfile=NULL, append=TRUE, verbose=verbose)
+  end.time = Sys.time()
+  logMessages("--------------------------------------------------------------------", logfile=NULL, append=TRUE, verbose=verbose)  
+  logMessages("Completed celdaGridSearch. Total time:", format(difftime(end.time, start.time)), logfile=NULL, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=NULL, append=TRUE, verbose=verbose)  
+
   return(celda.res)
 }
 
