@@ -626,7 +626,7 @@ finalClusterAssignment.celda_CG = function(celda.mod) {
 }
 
 
-#' Get the K (number of clusters) parameter provided to a celda model.
+#' Get the K (number of cell clusters) parameter provided to a celda model.
 #' @param celda.mod Celda object of class "celda_CG"
 #' @return Integer. The K provided to the model during initialization.
 #' @examples
@@ -637,9 +637,12 @@ getK.celda_CG = function(celda.mod) {
   return(celda.mod$K)
 }
 
-
-#' getL for the celda Cell and Gene clustering model.
-#' @param celda.mod Celda object of class "celda_CG". 
+#' Get the L (number of feature clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_CG".
+#' @return Integer. The L provided to the model during initialization.
+#' @examples
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' mod.l.value = getL(celda.mod)
 #' @export
 getL.celda_CG = function(celda.mod) {
   return(celda.mod$L)
