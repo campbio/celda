@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{simulateCells.celda_CG}
 \alias{simulateCells.celda_CG}
-\title{Simulate cells from the cell/gene clustering generative model}
+\title{Simulate cells from the cell/feature bi-clustering generative model}
 \usage{
 \method{simulateCells}{celda_CG}(model, S = 10, C.Range = c(50, 100),
   N.Range = c(500, 5000), G = 1000, K = 3, L = 10, alpha = 1,
@@ -35,6 +35,15 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+}
 \description{
-Simulate cells from the cell/gene clustering generative model
+This function generates a list containing a simulated counts matrix, as well as various parameters
+used in the simulation which can be useful for running celda.
+}
+\examples{
+celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
+sim.counts = celda.cg.sim$res.listcounts
+sim.clusters = finalClusterAssignment(celda.cg.sim)
 }
