@@ -2,21 +2,30 @@
 % Please edit documentation in R/feature_selection.R
 \name{topRank}
 \alias{topRank}
-\title{Identify features with the highest influence on clustering}
+\title{Identify features with the highest influence on clustering.}
 \usage{
-topRank(fm, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
+topRank(matrix, n = 25, margin = 2, threshold = 0,
+  decreasing = TRUE)
 }
 \arguments{
-\item{fm}{factorized matrix.}
+\item{matrix}{Numeric matrix.}
 
-\item{n}{Maximum number of items returned for each entry.}
+\item{n}{Integer. Maximum number of items above `threshold` returned for each ranked row or column.}
 
-\item{margin}{1 for rows, 2 for columns.}
+\item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2.}
 
-\item{threshold}{only include entries in the matrix that is greader than the threshold.}
+\item{threshold}{Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0.}
 
-\item{decreasing}{Logical; specifying if rank should be decreasing. Default to be TRUE.}
+\item{decreasing}{Logical. Specifies if the rank should be decreasing. Default TRUE.}
+}
+\value{
+List. The `index` variable provides the top `n` row (feature) indices contributing the most to each column (cell). The `names` variable provides the rownames corresponding to these indexes.
 }
 \description{
-Identify features with the highest influence on clustering
+topRank() can quickly identify the top `n` rows for each column of a matrix.
+For example, this can be useful for identifying the top `n` features per cell.
+}
+\examples{
+top.ranks.per.cell = topRank(celda::pbmc_select, n=10)
+top.feature.names.for.cell = top.ranks.per.cell$names[1]
 }

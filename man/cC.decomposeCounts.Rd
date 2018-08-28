@@ -7,13 +7,13 @@
 cC.decomposeCounts(counts, s, z, K)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{s}{An integer vector indicating the sample label for each cell (column) in the count matrix}
+\item{s}{Integer vector. Contains the sample label for each cell (column) in the count matrix.}
 
-\item{z}{A numeric vector of cluster assignments}
+\item{z}{Numeric vector. Denotes cell population labels.}
 
-\item{K}{The total number of clusters in z}
+\item{K}{Integer. Number of cell populations.}
 }
 \description{
 Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation

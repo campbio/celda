@@ -7,7 +7,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
   z.non.empty = which(z.ta > 0)
   
   if(length(z.to.split) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    m = paste0(date(), " .... Cluster sizes too small. No additional splitting was performed.") 
     return(list(z=z, m.CP.by.S, n.G.by.CP, n.CP=n.CP, message=m))  
   }
   
@@ -80,9 +80,9 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
   select = which.max(z.split.ll) 
 
   if(select == 1) {
-    m = paste0(date(), " ... No additional splitting was performed.") 
+    m = paste0(date(), " .... No additional splitting was performed.") 
   } else {
-    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " .... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
 
   p = cC.reDecomposeCounts(counts, s, z.split[,select], previous.z, n.G.by.CP, K)
@@ -99,7 +99,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
   z.non.empty = which(z.ta > 0)
   
   if(length(z.to.split) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    m = paste0(date(), " .... Cluster sizes too small. No additional splitting was performed.") 
     return(list(z=z, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.CP=n.CP, message=m))  
   }
   
@@ -172,9 +172,9 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
   select = which.max(z.split.ll) 
 
   if(select == 1) {
-    m = paste0(date(), " ... No additional splitting was performed.") 
+    m = paste0(date(), " .... No additional splitting was performed.") 
   } else {
-    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " .... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
 
   p = cC.reDecomposeCounts(n.TS.by.C, s, z.split[,select], previous.z, n.TS.by.CP, K)
@@ -183,22 +183,49 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
 
 
 
-cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob, max.clusters.to.try=10, min.cell=3) {
+cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob, max.clusters.to.try=10, K.subclusters=10, min.cell=3) {
 
+  #########################
+  ## First, the cell dimension of the original matrix will be reduced by splitting each z cluster into 'K.subclusters'.
+  #########################
+  
+  ## This will not be as big as the original matrix (which can take a lot of time to process with large number of cells), but not as small as the 'n.G.by.CP' with current z assignments
+  z.ta = tabulate(z, K)
+  z.non.empty = which(z.ta > 0)
+  temp.z = rep(0, length(z))
+  current.top.z = 0
+  for(i in z.non.empty) { 
+    ix = z == i
+    if(z.ta[i] <= K.subclusters) {
+      temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
+    } else {
+      clustLabel = suppressMessages(celda_C(counts[,z == i], K=K.subclusters, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+      temp.z[ix] = clustLabel$z + current.top.z 
+    }
+    current.top.z = max(temp.z, na.rm=TRUE)
+  }
+  
+  ## Decompose counts according to new/temp z labels
+  temp.n.G.by.CP = colSumByGroup(counts, group=temp.z, K=current.top.z)
+
+  #########################
+  ## Second, different y splits will be estimated and tested
+  #########################
+  
   ## Identify clusters to split
   y.ta = tabulate(y, L)
   y.to.split = which(y.ta >= min.cell)
   y.non.empty = which(y.ta > 0)
   
   if(length(y.to.split) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    m = paste0(date(), " .... Cluster sizes too small. No additional splitting was performed.") 
     return(list(y=y, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.CP=n.CP, message=m))  
   }
-  
+
   ## Loop through each split-able Z and perform split
   clust.split = vector("list", L)
   for(i in y.to.split) { 
-    clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(celda_G(temp.n.G.by.CP[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$y
   }
 
@@ -229,7 +256,6 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
     previous.y = new.y
   } 
   y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
-
   
   pairs = c(NA, NA)
   split.ix = 2
@@ -267,9 +293,9 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
   select = which.max(y.split.ll) 
 
   if(select == 1) {
-    m = paste0(date(), " ... No additional splitting was performed.") 
+    m = paste0(date(), " .... No additional splitting was performed.") 
   } else {
-    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " .... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
 
   p = cG.reDecomposeCounts(n.G.by.CP, y.split[,select], previous.y, n.TS.by.CP, n.by.G, L)
@@ -289,7 +315,7 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   y.non.empty = which(y.ta > 0)
 
   if(length(y.to.split) == 0) {
-    m = paste0(date(), " ... Cluster sizes too small. No additional splitting was performed.") 
+    m = paste0(date(), " .... Cluster sizes too small. No additional splitting was performed.") 
     return(list(y=y, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, message=m))
   }
 
@@ -355,9 +381,9 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   select = which.max(y.split.ll) 
   
   if(select == 1) {
-    m = paste0(date(), " ... No additional splitting was performed.") 
+    m = paste0(date(), " .... No additional splitting was performed.") 
   } else {
-    m = paste0(date(), " ... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
+    m = paste0(date(), " .... Cluster ", pairs[select,1], " was reassigned and cluster ", pairs[select,2], " was split in two.")
   } 
  
   p = cG.reDecomposeCounts(counts, y.split[,select], previous.y, n.TS.by.C, n.by.G, L)

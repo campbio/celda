@@ -2,13 +2,20 @@
 % Please edit documentation in R/celda_G.R
 \name{getL.celda_G}
 \alias{getL.celda_G}
-\title{getL for celda Gene clustering model}
+\title{Get the L (number of feature clusters) parameter provided to a celda model.}
 \usage{
 \method{getL}{celda_G}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_G"}
+\item{celda.mod}{Celda object of class "celda_G".}
+}
+\value{
+Integer. The L provided to the model during initialization.
 }
 \description{
-getL for celda Gene clustering model
+Get the L (number of feature clusters) parameter provided to a celda model.
+}
+\examples{
+celda.mod = celda_G(celda::pbmc_select, L=50)
+mod.l.value = getL(celda.mod)
 }

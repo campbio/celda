@@ -7,11 +7,11 @@
 clusterProbability(celda.mod, counts, log = FALSE)
 }
 \arguments{
-\item{celda.mod}{A celda model object}
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
-\item{counts}{The count matrix used to generate the model}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{log}{If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.}
+\item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 }
 \description{
 Get the probability of the cluster assignments generated during a celda run.

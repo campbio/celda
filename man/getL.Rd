@@ -2,13 +2,20 @@
 % Please edit documentation in R/s3_generics.R
 \name{getL}
 \alias{getL}
-\title{Get the L value used for each chain in a celda run.}
+\title{Get the L (number of feature clusters) parameter provided to a celda model.}
 \usage{
 getL(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object (of class "celda_C", "celda_G" or "celda_CG")}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+}
+\value{
+Integer. The L provided to the model during initialization.
 }
 \description{
-Get the L value used for each chain in a celda run.
+Get the L (number of feature clusters) parameter provided to a celda model.
+}
+\examples{
+celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+mod.l.value = getL(celda.mod)
 }

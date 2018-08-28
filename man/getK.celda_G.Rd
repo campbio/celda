@@ -2,13 +2,16 @@
 % Please edit documentation in R/celda_G.R
 \name{getK.celda_G}
 \alias{getK.celda_G}
-\title{getK for celda Gene clustering model}
+\title{Get the K (number of cell clusters) parameter provided to a celda model.}
 \usage{
 \method{getK}{celda_G}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_G"}
+\item{celda.mod}{Celda object of class "celda_G".}
+}
+\value{
+NA. celda_G models do not utilize the K parameter.
 }
 \description{
-getK for celda Gene clustering model
+Get the K (number of cell clusters) parameter provided to a celda model.
 }
