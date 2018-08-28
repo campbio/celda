@@ -8,11 +8,11 @@
   "proportion", "posterior"))
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Object return from celda_C function}
+\item{celda.mod}{Celda object of class "celda_C".}
 
-\item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
+\item{type}{Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.}
 }
 \description{
 Generate factorized matrices showing each feature's influence on the celda_C model clustering

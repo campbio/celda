@@ -4,31 +4,31 @@
 \alias{calculateLoglikFromVariables.celda_CG}
 \title{Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments}
 \usage{
-calculateLoglikFromVariables.celda_CG(counts, sample.label, z, y, K, L, alpha,
-  beta, delta, gamma)
+calculateLoglikFromVariables.celda_CG(counts, sample.label, z, y, K, L,
+  alpha, beta, delta, gamma)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{sample.label}{A vector indicating the sample label for each cell (column) in the count matrix}
+\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{z}{A numeric vector of cell cluster assignments}
+\item{z}{Numeric vector. Denotes cell population labels.}
 
-\item{y}{A numeric vector of gene cluster assignments}
+\item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{K}{The number of cell clusters}
+\item{K}{Integer. Number of cell populations.}
 
-\item{L}{The number of gene clusters}
+\item{L}{Integer. Number of feature modules.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution.}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
-\item{beta}{The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters.}
 }
 \description{
 Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments

@@ -6,40 +6,45 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, count.checksum = NULL,
-  seed = 12345, z.init = NULL, logfile = NULL)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
+  nchains = 3, count.checksum = NULL, z.init = NULL,
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{sample.label}{A vector indicating the sample for each cell (column) in the count matrix}
+\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{K}{An integer or range of integers indicating the desired number of cell clusters (for celda_C / celda_CG models)}
+\item{K}{Integer. Number of cell populations.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
-\item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{algorithm}{Use 'EM' or 'Gibbs' sampling for clustering of cells into subpopulations. EM is much faster for larger datasets. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.}
 
-\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the inference algorithm. Default 10.}
+\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
-\item{max.iter}{Maximum iterations of inference algorithm to perform regardless of convergence. Default 200.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
 
-\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
+\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{split.on.last}{After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
+\item{split.on.last}{Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{count.checksum}{An MD5 checksum for the provided counts matrix}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{seed}{Parameter to set.seed() for random number generation}
+\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL.}
+\item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{logfile}{If NULL, messages will be displayed as normal. If set to a file name, messages will be redirected messages to the file. Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
+
+\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+
+\item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_C with clustering results and Gibbs sampling statistics
+An object of class celda_C with clustering results and Gibbs sampling statistics.
 }
 \description{
 celda Cell Clustering Model

@@ -2,13 +2,16 @@
 % Please edit documentation in R/celda_C.R
 \name{getL.celda_C}
 \alias{getL.celda_C}
-\title{getL for celda Cell clustering function}
+\title{Get the L (number of feature clusters) parameter provided to a celda model.}
 \usage{
 \method{getL}{celda_C}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_C"}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+}
+\value{
+NA. celda_C models do not utilize the L parameter.
 }
 \description{
-getL for celda Cell clustering function
+Get the L (number of feature clusters) parameter provided to a celda model.
 }
