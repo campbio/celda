@@ -43,6 +43,9 @@ normalizeLogProbs = function(ll.probs) {
 #' @param scale.fun Function. Scales the rows of the normalized and transformed count matrix. Default NULL.
 #' @param pseudocount.normalize Numeric. Add a pseudocount to counts before normalization. Default  0. 
 #' @param pseudocount.transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
+#' @return Matrix, the normalized counts matrix.
+#' @examples
+#' normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
 							transformation.fun=NULL, scale.fun=NULL,
