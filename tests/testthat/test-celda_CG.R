@@ -16,6 +16,11 @@ test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
+test_that(desc = "Checking clusterProbability, celdaCG", {
+  clust.prob = clusterProbability(model_CG, counts = counts.matrix)
+  expect_true(length(clust.prob) == 2 && ncol(clust.prob[[1]]) == 5)
+})
+
 #Making sure relationship of counts vs proportions is correct in factorize matrix
 test_that(desc = "Checking factorize matrix, counts vs proportions", {
   expect_equal(TRUE, all(factorized$counts$sample.states/sum(factorized$counts$sample.states) 
@@ -26,11 +31,6 @@ test_that(desc = "Checking factorize matrix, counts vs proportions", {
 test_that(desc = "Checking factorize matrix dimension size", {
   expect_equal(5, ncol(factorized$proportions$population.states))
   expect_equal(3, nrow(factorized$proportions$population.states))
-})
-
-#Convenience functions#
-test_that(desc = "Checking finalClusterAssignment, celdaCG", {
-  expect_true(all(finalClusterAssignment(celda.mod = model_CG)[[1]] <= 5))
 })
 
 test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
@@ -125,22 +125,22 @@ test_that(desc = "Checking differentialExpression", {
 		c("data.table", "data.frame"))
 })
 
-#plotDrCluster,State,Gene
-test_that(desc = "Checking plotDrCluster to see if it runs", {
+#plotDimReduceCluster,State,Gene
+test_that(desc = "Checking plotDimReduceCluster to see if it runs", {
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
-  expect_equal(names(plotDrCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))),
+  expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
-  expect_equal(names(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],matrix = factorized$proportions$cell.states)),
+  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_equal(names(plotDrGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
+  expect_equal(names(plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_error(plotDrState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
+  expect_error(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
 })
 
 # celdaTsne
 test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=length(model_CG$z))
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
   expect_true(!is.null(plot.obj))
 })
@@ -149,7 +149,7 @@ test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
 test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
   tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDrCluster(tsne[,1], tsne[,2], model_CG$z)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
