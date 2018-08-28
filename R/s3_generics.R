@@ -126,6 +126,10 @@ calculateLoglikFromVariables <- function(counts, celda.mod, ...) {
 #' 
 #' @param model Character. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
+#' @return List. Contains the simulated counts matrix, derived cell / feature cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @examples
+#' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
+#' sim.counts = celda.cg.sim$counts
 #' @export
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)

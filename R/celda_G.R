@@ -247,11 +247,11 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
-
-#' Simulate cells from the gene clustering generative model
-#'
-#' Generate a simulated count matrix, based off a generative distribution whose 
-#' parameters can be provided by the user.
+#' Simulate cells from the feature clustering generative model
+#' 
+#' This function generates a list containing a simulated counts matrix, as well as various parameters
+#' used in the simulation which can be useful for running celda. 
+#' 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param C Integer. Number of cells to simulate. Default 100. 
@@ -263,6 +263,10 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @examples
+#' celda.g.sim = simulateCells(model="celda_G", L=50)
+#' sim.counts = celda.g.sim$counts
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000), G=1000, 
                                  L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
