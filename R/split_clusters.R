@@ -1,5 +1,5 @@
 # cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
-cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
+cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
 
   ## Identify clusters to split
   z.ta = tabulate(z, K)
@@ -91,7 +91,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
 
 
 # cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
-cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
+cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
 
   ## Identify clusters to split
   z.ta = tabulate(z, K)
@@ -307,11 +307,11 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
 
 
 #cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
-cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob, min=3, max.clusters.to.try=10) { 
+cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob, min.feature=3, max.clusters.to.try=10) { 
   
   ## Identify clusters to split
   y.ta = table(factor(y, levels=1:L))
-  y.to.split = which(y.ta >= min)
+  y.to.split = which(y.ta >= min.feature)
   y.non.empty = which(y.ta > 0)
 
   if(length(y.to.split) == 0) {

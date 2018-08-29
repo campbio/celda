@@ -90,6 +90,9 @@ test_that(desc = "Checking CompareCountMatrix", {
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank", {
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000, threshold = NULL)
+  expect_equal(names(top.rank),
+               c("index","names"))
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
   # TODO: find a better way to validate lengths of topRank names
   expect_equal(nrow(counts.matrix),
@@ -170,3 +173,15 @@ test_that(desc = "Testing featureModuleLookup() roundtrip", {
   res = featureModuleLookup(counts.matrix, model_CG, "Gene_1")
   expect_true(res == 1)
 })
+
+
+# cCG.splitZ/cCG.splitZ
+test_that(desc = "Testing cCG.splitZ and cCG.splitY", {
+  r = simulateCells("celda_CG", S=1, G=100, C.Range=c(50,100), K=2, L=2)
+  dc = cCG.decomposeCounts(r$counts, r$sample.label, r$z, r$y, r$K, r$L)
+  res = cCG.splitZ(r$counts, dc$m.CP.by.S, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1,z.prob=NULL, min.cell=1000)
+  expect_true(grepl("Cluster sizes too small", res$message))
+  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=NULL, min.cell=1000)
+  expect_true(grepl("Cluster sizes too small", res$message))
+})
+
