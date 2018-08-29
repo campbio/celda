@@ -76,16 +76,15 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   }else{
     anno_cell_colors <- NULL
   }
-  renderCeldaHeatmap(
+  plotHeatmap(
     filtered_norm.counts,
     z = celda.mod$z[cell.indices],
     y = celda.mod$y[feature.indices],
     scale.row = scale.row,
     color_scheme = "divergent",
     show_featurenames = show_featurenames,
-    cluster.feature = FALSE,
-    cluster.cell = FALSE,
+    cluster_gene = FALSE,
+    cluster_cell = FALSE,
     annotation_color = anno_cell_colors
   )
 }
-
