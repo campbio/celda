@@ -524,7 +524,7 @@ reorder.celda_C = function(counts, res){
 #' @param celda.mod Celda object of class "celda_C".
 #' @return Integer vector. The final cell cluster assignments determined by the celda_C model.
 #' @examples
-#' celda.mod = celda_C(celda::pbmc_select, K=10)
+#' celda.mod = celda_C(celda::pbmc_select, K=10, max.iter=2, nchains=1)
 #' final.clustering = finalClusterAssignment(celda.mod)
 #' @export
 finalClusterAssignment.celda_C = function(celda.mod) {
@@ -536,7 +536,7 @@ finalClusterAssignment.celda_C = function(celda.mod) {
 #' @param celda.mod Celda object of class "celda_C"
 #' @return Integer. The K provided to the model during initialization.
 #' @examples
-#' celda.mod = celda_C(celda::pbmc_select, K=10)
+#' celda.mod = celda_C(celda::pbmc_select, K=10, max.iter=2, nchains=1)
 #' mod.k.value = getK(celda.mod)
 #' @export
 getK.celda_C = function(celda.mod) {
