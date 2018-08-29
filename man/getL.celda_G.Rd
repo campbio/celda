@@ -16,6 +16,6 @@ Integer. The L provided to the model during initialization.
 Get the L (number of feature clusters) parameter provided to a celda model.
 }
 \examples{
-celda.mod = celda_G(celda::pbmc_select, L=50)
+celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
 mod.l.value = getL(celda.mod)
 }
