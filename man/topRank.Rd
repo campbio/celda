@@ -13,7 +13,7 @@ topRank(matrix, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
 
 \item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2.}
 
-\item{threshold}{Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0.}
+\item{threshold}{Numeric. Only return ranked rows or columns in the matrix that are above this threshold. If NULL, then no threshold will be applied. Default 0.}
 
 \item{decreasing}{Logical. Specifies if the rank should be decreasing. Default TRUE.}
 }
