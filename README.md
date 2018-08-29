@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/compbiomed/celda.svg?branch=master)](https://travis-ci.org/compbiomed/celda)
+[![Coverage Status](https://coveralls.io/repos/github/compbiomed/celda/badge.svg?branch=devel)](https://coveralls.io/github/compbiomed/celda?branch=devel)
 
 # celda: CEllular Latent Dirichlet Allocation
 
