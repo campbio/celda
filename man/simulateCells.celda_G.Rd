@@ -5,8 +5,8 @@
 \title{Simulate cells from the feature clustering generative model}
 \usage{
 \method{simulateCells}{celda_G}(model, C = 100, N.Range = c(500, 5000),
-  G = 1000, L = 5, beta = 1, gamma = 5, delta = 1,
-  seed = 12345, ...)
+  G = 1000, L = 5, beta = 1, gamma = 5, delta = 1, seed = 12345,
+  ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::available.models`.}
