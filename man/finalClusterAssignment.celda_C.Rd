@@ -16,6 +16,6 @@ Integer vector. The final cell cluster assignments determined by the celda_C mod
 Get the final cell cluster assignments determined by a celda_C model.
 }
 \examples{
-celda.mod = celda_C(celda::pbmc_select, K=10)
+celda.mod = celda_C(celda::pbmc_select, K=10, max.iter=2, nchains=1)
 final.clustering = finalClusterAssignment(celda.mod)
 }
