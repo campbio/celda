@@ -56,6 +56,9 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
 #feature_selection.R#
 #topRank
 test_that(desc = "Checking topRank to see if it runs without errors", {
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, threshold = NULL)
+  expect_equal(names(top.rank),
+               c("index","names"))
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
   expect_equal(names(top.rank),
                c("index","names"))
@@ -103,3 +106,10 @@ test_that(desc = "Testing featureModuleLookup() fails for celda_C models", {
   expect_error(featureModuleLookup(counts.matrix, model_C, "test_feat"))
 })
 
+# cC.splitZ
+test_that(desc = "Testing cC.splitZ", {
+  r = simulateCells("celda_C", S=1, C.Range=c(50,100), K=2)
+  dc = cC.decomposeCounts(r$counts, r$sample.label, r$z, r$K)
+  res = cC.splitZ(r$counts, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, z.prob=NULL, min.cell=1000)
+  expect_true(grepl("Cluster sizes too small", res$message))
+})

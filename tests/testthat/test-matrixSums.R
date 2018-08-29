@@ -24,6 +24,7 @@ test_that(desc = "Testing rowSumByGroupChange",{
   expect_error(.Call("_rowSumByGroupChange", mat, res, label4, label1))
   expect_error(.Call("_rowSumByGroupChange", mat, res, label4, label2))
   expect_error(.Call("_rowSumByGroupChange", mat[-1,], res, label4, label3))
+  expect_error(.Call("_rowSumByGroupChange", mat[,-1], res, label4, label3))
   expect_error(.Call("_rowSumByGroupChange", mat, res, label4, label5))
   res2 <- .Call("_rowSumByGroupChange", mat, res, label4, label3)
   expect_true(all(res2 == rowsum(mat, label4)))
