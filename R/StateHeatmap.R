@@ -13,10 +13,10 @@
 #' @export 
 moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NULL, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
   #input checks
-  if (is.null(counts)) {
+  if (!is.matrix(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
-  if (is.null(celda.mod) || is.null(celda.mod$y)){
+  if (!class(celda.mod) %in% c("celda_G", "celda_CG")|| is.null(celda.mod$y)){
     stop("'celda.mod' should be an object of class celda_G or celda_CG")
   }
   compareCountMatrix(counts, celda.mod)
