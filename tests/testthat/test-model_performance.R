@@ -66,9 +66,9 @@ test_that(desc = "Testing calculatePerplexityWithResampling for celda_G", {
 
   model_G <- filterCeldaList(celdaG.res, L = 5)[[1]]
   res <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G)
-  res2 <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts[,-1] + 1)
+  res2 <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts + 1)
   
-  expect_error(res <- calculatePerplexity.celda_G(celdaG.sim$counts[-1,], model_G))
+  expect_error(res <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts[-1,]))
 })
 
 

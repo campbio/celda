@@ -564,6 +564,9 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
 #' @export
 calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
   
+  counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
+
   if(is.null(new.counts)) {
     new.counts = counts
   } else {
