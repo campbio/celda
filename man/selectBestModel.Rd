@@ -24,6 +24,6 @@ models, respectively.
 }
 \examples{
 celda.mods = celda_CG(celda::pbmc_select, K.to.test=c(5,10), 
-                      L.to.test=c(10,20,30), max.iter=2, nchains=1)
+                      L=c(10,20,30), max.iter=2, nchains=1)
 best.mod.k5.l20 = selectBestModel(celda.mods, K=5, L=20)
 }

@@ -100,7 +100,7 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
 #' @return Celda object with cell feature clusters, with class corresponding to that of `celda.mod`.
 #' @examples
 #' celda.mod = celda_CG(pbmc_select, K.to.test=10, 
-#'                      L.to.test=50, max.iter=2, nchains=1)
+#'                      L=50, max.iter=2, nchains=1)
 #' celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
 #' @export
 #' @export
@@ -130,7 +130,7 @@ recodeClusterZ = function(celda.mod, from, to) {
 #' @return Celda object with recoded feature clusters, with class corresponding to that of `celda.mod`.
 #' @examples
 #' celda.mod = celda_CG(pbmc_select, K.to.test=10, 
-#'                       L.to.test=50, max.iter=2, nchains=1)
+#'                       L=50, max.iter=2, nchains=1)
 #' celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY = function(celda.mod, from, to) {
