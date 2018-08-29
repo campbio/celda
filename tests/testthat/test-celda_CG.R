@@ -113,6 +113,12 @@ test_that(desc = "Checking moduleHeatmap to see if it runs", {
                c("tree_row","tree_col","gtable"))
 })
 
+#moduleHeatmap, expect error
+test_that(desc = "Checking moduleHeatmap to see if it runs into an error", {
+  expect_error(moduleHeatmap(counts = "counts", celda.mod = model_CG, feature.module = c(2,3)),"'counts' should be a numeric count matrix")
+  expect_error(moduleHeatmap(counts = celdaCG.sim$counts, celda.mod = "model", feature.module = c(2,3)), "'celda.mod' should be an object of class celda_G or celda_CG")
+})
+
 #celdaProbabilityMap
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
   plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
