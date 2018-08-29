@@ -37,6 +37,7 @@ test_that(desc = "Checking factorize matrix dimension size", {
 test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
   sim.res = simulateCells(model="celda_CG")
   expect_equal(typeof(sim.res$counts), "integer")
+  expect_error(simulateCells(model = "celda_CG", gamma=0.000001))
 })
 
 #celda_CG.R#
