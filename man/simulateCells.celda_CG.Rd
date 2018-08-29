@@ -45,5 +45,4 @@ used in the simulation which can be useful for running celda.
 \examples{
 celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
 sim.counts = celda.cg.sim$res.listcounts
-sim.clusters = finalClusterAssignment(celda.cg.sim)
 }
