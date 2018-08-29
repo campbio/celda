@@ -247,11 +247,11 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
-
-#' Simulate cells from the gene clustering generative model
-#'
-#' Generate a simulated count matrix, based off a generative distribution whose 
-#' parameters can be provided by the user.
+#' Simulate cells from the feature clustering generative model
+#' 
+#' This function generates a list containing a simulated counts matrix, as well as various parameters
+#' used in the simulation which can be useful for running celda. 
+#' 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param C Integer. Number of cells to simulate. Default 100. 
@@ -263,6 +263,10 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @examples
+#' celda.g.sim = simulateCells(model="celda_G", L=50)
+#' sim.counts = celda.g.sim$counts
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000), G=1000, 
                                  L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
@@ -549,14 +553,31 @@ reorder.celda_G = function(counts, res) {
 }
 
 
-#' getK for celda Gene clustering model
+#' Get the final feature cluster assignments determined by a celda_G model.
 #' @param celda.mod Celda object of class "celda_G". 
+#' @return Integer vector. The final feature cluster assignments determined by the celda_G model.
+#' @examples
+#' celda.mod = celda_G(celda::pbmc_select, L=50)
+#' final.clustering = finalClusterAssignment(celda.mod)
+#' @export
+finalClusterAssignment.celda_G = function(celda.mod) {
+  return(celda.mod$y)
+}
+
+
+#' Get the K (number of cell clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_G". 
+#' @return NA. celda_G models do not utilize the K parameter.
 #' @export
 getK.celda_G = function(celda.mod) { return(NA) }
 
 
-#' getL for celda Gene clustering model
-#' @param celda.mod Celda object of class "celda_G". 
+#' Get the L (number of feature clusters) parameter provided to a celda model.
+#' @param celda.mod Celda object of class "celda_G".
+#' @return Integer. The L provided to the model during initialization.
+#' @examples
+#' celda.mod = celda_G(celda::pbmc_select, L=50)
+#' mod.l.value = getL(celda.mod)
 #' @export
 getL.celda_G = function(celda.mod) {
   return(celda.mod$L)
@@ -574,7 +595,7 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
   top = topRank(fm$proportions$gene.states, n=nfeatures)
   ix = unlist(top$index)
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-  renderCeldaHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
+  plotHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
 }
 
 
@@ -622,6 +643,10 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @examples
+#' celda.mod = celda_G(celda::pbmc_select, L=50)
+#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
 featureModuleLookup.celda_G = function(counts, celda.mod, feature){
   list <- list()
