@@ -77,6 +77,9 @@ test_that(desc = "Checking CompareCountMatrix", {
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank function", {
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000, threshold = NULL)
+  expect_equal(names(top.rank),
+               c("index","names"))
   expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
                c("index","names"))
 })
