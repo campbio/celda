@@ -625,7 +625,7 @@ reorder.celda_CG = function(counts, res){
 #' @return List of integer vectors. The final cell and feature cluster assignments determined by the celda_CG model.
 #' @examples
 #' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
-#'                      L.to.test=50, max.iter=2, nchains=1)
+#'                      L=50, max.iter=2, nchains=1)
 #' final.clustering = finalClusterAssignment(celda.mod)
 #' cell.clusters = final.clustering$z
 #' feature.clusters = final.clustering$y
@@ -640,7 +640,7 @@ finalClusterAssignment.celda_CG = function(celda.mod) {
 #' @return Integer. The K provided to the model during initialization.
 #' @examples
 #' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
-#'                      L.to.test=50, max.iter=2, nchains=1)
+#'                      L=50, max.iter=2, nchains=1)
 #' mod.k.value = getK(celda.mod)
 #' @export
 getK.celda_CG = function(celda.mod) {
@@ -652,7 +652,7 @@ getK.celda_CG = function(celda.mod) {
 #' @return Integer. The L provided to the model during initialization.
 #' @examples
 #' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
-#'                      L.to.test=50, max.iter=2, nchains=1)
+#'                      L=50, max.iter=2, nchains=1)
 #' mod.l.value = getL(celda.mod)
 #' @export
 getL.celda_CG = function(celda.mod) {
@@ -797,7 +797,7 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
 #' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
-#'                      L.to.test=50, max.iter=2, nchains=1)
+#'                      L=50, max.iter=2, nchains=1)
 #' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature){

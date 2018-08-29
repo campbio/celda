@@ -28,6 +28,6 @@ Models can be selected by various parameters, most importantly the K/L parameter
 }
 \examples{
 celda.mods = celda_CG(celda::pbmc_select, K.to.test=c(10,15), 
-                      L.to.test=c(50, 100), max.iter=2, nchains=1)
+                      L=c(50, 100), max.iter=2, nchains=1)
 desired.mod = filterCeldaList(celda.mods, K=10, L=100)
 }

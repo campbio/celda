@@ -21,6 +21,6 @@ This function will output the gene module of a specific gene(s) from a celda mod
 }
 \examples{
 celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
-                     L.to.test=50, max.iter=2, nchains=1)
+                     L=50, max.iter=2, nchains=1)
 corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 }
