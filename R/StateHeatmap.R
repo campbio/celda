@@ -70,8 +70,8 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0, ]
   
   if(!is.null(celda.mod$z)){
-    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell_ix]))]
-    names(cell) <- sort(unique(celda.mod$z[cell_ix]))
+    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell.indices]))]
+    names(cell) <- sort(unique(celda.mod$z[cell.indices]))
     anno_cell_colors <- list(cell = cell)
   }else{
     anno_cell_colors <- NULL
