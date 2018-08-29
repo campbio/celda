@@ -2,20 +2,13 @@
 % Please edit documentation in R/s3_generics.R
 \name{getK}
 \alias{getK}
-\title{Get the K (number of cell clusters) parameter provided to a celda model.}
+\title{Get the K value used for each chain in a celda run.}
 \usage{
 getK(celda.mod)
 }
 \arguments{
 \item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 }
-\value{
-Integer. The K provided to the model during initialization.
-}
 \description{
-Get the K (number of cell clusters) parameter provided to a celda model.
-}
-\examples{
-celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
-mod.k.value = getK(celda.mod)
+Get the K value used for each chain in a celda run.
 }
