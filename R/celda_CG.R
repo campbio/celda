@@ -249,7 +249,6 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 #' @examples
 #' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
 #' sim.counts = celda.cg.sim$res.listcounts
-#' sim.clusters = finalClusterAssignment(celda.cg.sim)
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
