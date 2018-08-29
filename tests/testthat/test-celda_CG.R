@@ -114,6 +114,12 @@ test_that(desc = "Checking moduleHeatmap to see if it runs", {
                c("tree_row","tree_col","gtable"))
 })
 
+#moduleHeatmap, expect error
+test_that(desc = "Checking moduleHeatmap to see if it runs into an error", {
+  expect_error(moduleHeatmap(counts = "counts", celda.mod = model_CG, feature.module = c(2,3)),"'counts' should be a numeric count matrix")
+  expect_error(moduleHeatmap(counts = celdaCG.sim$counts, celda.mod = "model", feature.module = c(2,3)), "'celda.mod' should be an object of class celda_G or celda_CG")
+})
+
 #celdaProbabilityMap
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
   plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
@@ -135,6 +141,12 @@ test_that(desc = "Checking differentialExpression", {
 test_that(desc = "Checking differentialExpression", {
   expect_equal(class(diffExp_K1 <- differentialExpression(counts = counts.matrix, celda.mod = model_CG, c1 = 3, c2 = 4, log2fc.threshold = 0.5)),
                c("data.table", "data.frame"))
+})
+
+#differentialExpression, expecting error
+test_that(desc = "Checking differentialExpression, expecting error", {
+  expect_error(differentialExpression(counts = "counts", celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5),"'counts' should be a numeric count matrix")
+  expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = NULL, c1 = 3), "'celda.mod' should be an object of class celda_C or celda_CG")  
 })
 
 #plotDimReduceCluster,State,Gene
