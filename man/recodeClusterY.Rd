@@ -24,6 +24,7 @@ vice versa, this function can be useful. NOTE: it is recommended that this funct
 aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
 }
 \examples{
-celda.mod = celda_CG(pbmc_select, K=10, L=50, max.iter=2, nchains=1)
+celda.mod = celda_CG(pbmc_select, K.to.test=10, 
+                      L.to.test=50, max.iter=2, nchains=1)
 celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
 }

@@ -16,7 +16,8 @@ List of integer vectors. The final cell and feature cluster assignments determin
 Get the final cell cluster assignments determined by a celda_CG model.
 }
 \examples{
-celda.mod = celda_CG(celda::pbmc_select, K=10, L=50, max.iter=2, nchains=1)
+celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
+                     L.to.test=50, max.iter=2, nchains=1)
 final.clustering = finalClusterAssignment(celda.mod)
 cell.clusters = final.clustering$z
 feature.clusters = final.clustering$y
