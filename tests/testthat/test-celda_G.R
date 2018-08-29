@@ -94,6 +94,12 @@ test_that(desc = "Checking moduleHeatmap to see if it runs",{
                c("tree_row","tree_col","gtable"))
 })
 
+#moduleHeatmap, check for error
+test_that(desc = "Checking moduleHeatmap to see if it runs into an error",{
+  expect_error(moduleHeatmap("counts", celda.mod = model_G), "'counts' should be a numeric count matrix")
+  expect_error(moduleHeatmap(celdaG.sim$counts, celda.mod = "model_G"), "'celda.mod' should be an object of class celda_G or celda_CG")
+})
+
 #plotDimReduceState
 test_that(desc = "Checking plotDimReduceState", {
   celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
