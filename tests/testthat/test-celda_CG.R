@@ -90,6 +90,9 @@ test_that(desc = "Checking CompareCountMatrix", {
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank", {
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000, threshold = NULL)
+  expect_equal(names(top.rank),
+               c("index","names"))
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
   # TODO: find a better way to validate lengths of topRank names
   expect_equal(nrow(counts.matrix),
