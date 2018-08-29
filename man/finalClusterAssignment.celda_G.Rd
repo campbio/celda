@@ -16,6 +16,6 @@ Integer vector. The final feature cluster assignments determined by the celda_G 
 Get the final feature cluster assignments determined by a celda_G model.
 }
 \examples{
-celda.mod = celda_G(celda::pbmc_select, L=50)
+celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
 final.clustering = finalClusterAssignment(celda.mod)
 }
