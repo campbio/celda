@@ -249,7 +249,6 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 #' @examples
 #' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
 #' sim.counts = celda.cg.sim$res.listcounts
-#' sim.clusters = finalClusterAssignment(celda.cg.sim)
 #' @export
 simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
                                   G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
@@ -624,7 +623,8 @@ reorder.celda_CG = function(counts, res){
 #' @param celda.mod Celda object of class "celda_CG".
 #' @return List of integer vectors. The final cell and feature cluster assignments determined by the celda_CG model.
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
+#'                      L=50, max.iter=2, nchains=1)
 #' final.clustering = finalClusterAssignment(celda.mod)
 #' cell.clusters = final.clustering$z
 #' feature.clusters = final.clustering$y
@@ -638,7 +638,8 @@ finalClusterAssignment.celda_CG = function(celda.mod) {
 #' @param celda.mod Celda object of class "celda_CG"
 #' @return Integer. The K provided to the model during initialization.
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
+#'                      L=50, max.iter=2, nchains=1)
 #' mod.k.value = getK(celda.mod)
 #' @export
 getK.celda_CG = function(celda.mod) {
@@ -649,7 +650,8 @@ getK.celda_CG = function(celda.mod) {
 #' @param celda.mod Celda object of class "celda_CG".
 #' @return Integer. The L provided to the model during initialization.
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
+#'                      L=50, max.iter=2, nchains=1)
 #' mod.l.value = getL(celda.mod)
 #' @export
 getL.celda_CG = function(celda.mod) {
@@ -793,7 +795,8 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K=10, L=50)
+#' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
+#'                      L=50, max.iter=2, nchains=1)
 #' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
