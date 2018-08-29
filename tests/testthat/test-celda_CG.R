@@ -54,7 +54,7 @@ test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output f
                                          delta = 1, gamma = 1,  beta = 1, 
                                          alpha = 1, K = 5, L = 3, 
                                          s = celdaCG.sim$sample.label, 
-                                         counts=celdaCG.sim$counts),0)
+                                         counts=celdaCG.sim$counts, celda.mod = model_CG),0)
 })
 
 #normalizeCounts
@@ -106,7 +106,7 @@ test_that(desc = "Checking celdaHeatmap", {
 
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs", {
-  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
+  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG, feature.module = c(2,3))),
                c("tree_row","tree_col","gtable"))
 })
 
