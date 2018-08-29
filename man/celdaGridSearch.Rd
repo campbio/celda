@@ -7,9 +7,8 @@
 celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
   L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
   max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
-  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE,
-  cores = 1, seed = 12345, verbose = TRUE,
-  logfile.prefix = "Celda")
+  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
+  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix.}
