@@ -17,7 +17,7 @@
 #' @return A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @examples
 #' celda.mods = celda_CG(celda::pbmc_select, K.to.test=c(10,15), 
-#'                       L.to.test=c(50, 100), max.iter=2, nchains=1)
+#'                       L=c(50, 100), max.iter=2, nchains=1)
 #' desired.mod = filterCeldaList(celda.mods, K=10, L=100)
 #' @export
 filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
@@ -64,7 +64,7 @@ filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @examples
 #' celda.mods = celda_CG(celda::pbmc_select, K.to.test=c(5,10), 
-#'                       L.to.test=c(10,20,30), max.iter=2, nchains=1)
+#'                       L=c(10,20,30), max.iter=2, nchains=1)
 #' best.mod.k5.l20 = selectBestModel(celda.mods, K=5, L=20)
 #' @export
 selectBestModel = function(celda.list, K=c(), L=c()) {

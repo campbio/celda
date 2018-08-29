@@ -576,7 +576,7 @@ getK.celda_G = function(celda.mod) { return(NA) }
 #' @param celda.mod Celda object of class "celda_G".
 #' @return Integer. The L provided to the model during initialization.
 #' @examples
-#' celda.mod = celda_G(celda::pbmc_select, L.to.test=50, max.iter=2, nchains=1)
+#' celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
 #' mod.l.value = getL(celda.mod)
 #' @export
 getL.celda_G = function(celda.mod) {
@@ -645,7 +645,7 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_G(celda::pbmc_select, L.to.test=50, max.iter=2, nchains=1)
+#' celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
 #' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
 featureModuleLookup.celda_G = function(counts, celda.mod, feature){
