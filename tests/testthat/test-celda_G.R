@@ -77,6 +77,9 @@ test_that(desc = "Checking CompareCountMatrix", {
 ##feature_selection.R##
 #topRank
 test_that(desc = "Checking topRank function", {
+  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000, threshold = NULL)
+  expect_equal(names(top.rank),
+               c("index","names"))
   expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
                c("index","names"))
 })
@@ -123,4 +126,13 @@ test_that(desc = "Testing featureModuleLookup() roundtrip", {
   res = featureModuleLookup(counts.matrix, model_G, "Gene_1")
   expect_true(res == 5)
 })
+
+# cG.splitY
+test_that(desc = "Testing cG.splitY", {
+  r = simulateCells("celda_G", C=100, G=100, L=2)
+  dc = cG.decomposeCounts(r$counts, r$y, r$L)
+  res = cG.splitY(r$counts, r$y, dc$n.TS.by.C, dc$n.by.TS, dc$n.by.G, dc$nG.by.TS, dc$nM, dc$nG, r$L, beta=1, delta=1, gamma=1, y.prob=NULL, min.feature=1000)
+  expect_true(grepl("Cluster sizes too small", res$message))
+})
+
 
