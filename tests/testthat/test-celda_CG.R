@@ -145,9 +145,8 @@ test_that(desc = "Checking differentialExpression", {
 #differentialExpression, expecting error
 test_that(desc = "Checking differentialExpression, expecting error", {
   expect_error(differentialExpression(counts = "counts", celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5),"'counts' should be a numeric count matrix")
-  expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = NULL), "'c1' should be a numeric vector of cell cluster(s)")
   expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = NULL, c1 = 3), "'celda.mod' should be an object of class celda_C or celda_CG")  
-}
+})
 
 #plotDimReduceCluster,State,Gene
 test_that(desc = "Checking plotDimReduceCluster to see if it runs", {
