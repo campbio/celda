@@ -30,13 +30,10 @@ test_that(desc = "Checking clusterProbability, celdaG", {
 })
 
 
-test_that(desc = "Checking getL", {
-  expect_equal(5, getL(celda.mod = model_G))
-})
-
 test_that(desc = "simulateCells.celda_G returns correctly typed output", {
   sim.res = simulateCells(model = "celda_G")
   expect_equal(typeof(sim.res$counts), "integer")
+  expect_error(simulateCells(model = "celda_G", gamma=0.000001))
 })
 
 #celda_G.R#
@@ -84,7 +81,6 @@ test_that(desc = "Checking topRank function", {
                c("index","names"))
 })
 
-#feature_selection.R#
 
 ###celdaHeatmap###
 test_that(desc = "Checking celdaHeatmap output",{
@@ -111,6 +107,9 @@ test_that(desc = "Testing celdaTsne.celda_G with all cells",{
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], rep(1,ncol(counts.matrix)))
   expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(counts.matrix))
   expect_true(!is.null(plot.obj))
+  
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=ncol(counts.matrix), modules=1:2)
+  expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_G, max.cells=ncol(counts.matrix), modules=1000:1005))
 })
 
 # celdaTsne
