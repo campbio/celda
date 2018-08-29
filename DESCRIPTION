@@ -46,7 +46,8 @@ Suggests:
     corrplot,
     Matrix,
     biomaRt,
-    Rtsne
+    Rtsne,
+    covr
 LinkingTo: Rcpp, RcppEigen
 VignetteBuilder: knitr
 License: MIT
