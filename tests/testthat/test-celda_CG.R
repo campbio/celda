@@ -50,7 +50,7 @@ test_that(desc = "Making sure celda_CG runs without crashing", {
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "calculateLoglikFromVariables.celda_CG returns correct output for various params", {
   expect_lt(calculateLoglikFromVariables(celda.mod="celda_CG",
-                                         y = celdaCG.sim$y, z = celdaCG.sim$z, 
+                                         y = celdaCG.sim$y, z = celdaCG.sim$z,
                                          delta = 1, gamma = 1,  beta = 1, 
                                          alpha = 1, K = 5, L = 3, 
                                          s = celdaCG.sim$sample.label, 
@@ -109,7 +109,7 @@ test_that(desc = "Checking celdaHeatmap", {
 
 #moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs", {
-  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG)),
+  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG, feature.module = c(2,3))),
                c("tree_row","tree_col","gtable"))
 })
 

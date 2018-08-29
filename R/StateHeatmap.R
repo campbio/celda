@@ -12,6 +12,7 @@
 #' @param show_featurenames Logical. Specifies if feature names should be shown. Default TRUE. 
 #' @export 
 moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NULL, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
+  #input checks
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
@@ -20,77 +21,65 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   }
   compareCountMatrix(counts, celda.mod)
   
+  #factorize counts matrix
   factorize.matrix <-
     factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  genes <- celda.mod$names$row[celda.mod$y %in% feature.module]
-  ascending_ordered_matrix <-
-    factorize.matrix$proportions$gene.states[, feature.module, drop = FALSE][which(rownames(factorize.matrix$proportions$gene.states[, feature.module, drop = FALSE]) %in% genes),]
-  if(class(ascending_ordered_matrix) == "numeric"){
-    ascending_ordered_genes <- names(sort(ascending_ordered_matrix))
+  
+  #take topRank
+  if(!is.null(top.features) && (is.numeric(top.features))|is.integer(top.features)){
+    top.rank <- topRank(matrix = factorize.matrix$proportions$gene.states, 
+                        n = top.features)
   }else{
-    ascending_ordered_genes <- names(sort(rowMeans(ascending_ordered_matrix)))
+    top.rank <- topRank(matrix = factorize.matrix$proportions$gene.states, 
+                        n = nrow(factorize.matrix$proportions$gene.states))  
   }
-  if (class(top.features) == "character") {
-    if (setequal(intersect(top.features, ascending_ordered_genes), top.features)) {
-      filtered_genes <- names(sort(factorize.matrix$proportions$gene.states[, feature.module][which(rownames(factorize.matrix$proportions$gene.states[, feature.module, drop = FALSE]) %in% top.features)]))
-    } else {
-      miss_genes <- setdiff(top.features, intersect(top.features, ascending_ordered_genes))
-      miss_genes[-length(miss_genes)] <- paste0(miss_genes[-length(miss_genes)], ', ')
-      stop("'top.features': gene(s) (", miss_genes, ") is/are not in L", feature.module)
-    }
-  }else{
-    if(is.null(top.features) || top.features >= ceiling(length(ascending_ordered_genes) / 2)){
-      filtered_genes <- ascending_ordered_genes
-      message(paste0("Use all genes in L", feature.module, " "))
-    } else{
-      filtered_genes <-
-        c(
-          head(ascending_ordered_genes, top.features),
-          tail(ascending_ordered_genes, top.features)
-        )
-    }
+  
+  #filter topRank using feature.module into feature.indices
+  feature.indices <- c()
+  for(module in feature.module){
+    feature.indices <- c(feature.indices, top.rank$index[[module]])
   }
-  ascending_ordered_cells <-
-    names(sort(colMeans(factorize.matrix$proportions$cell.states[feature.module,,drop = FALSE])))
-  if (is.null(top.cells)) {
-    filtered_cells <-
-      ascending_ordered_cells
-    message("Use all cells")
-  } else if (is.numeric(top.cells)){
-    if (top.cells >= ceiling(length(ascending_ordered_cells) / 2)) {
-      filtered_cells <- ascending_ordered_cells
-      message("Use all cells")
-    } else{
-      filtered_cells <-
-        c(
-          head(ascending_ordered_cells, top.cells),
-          tail(ascending_ordered_cells, top.cells)
-        )
-    }
-  }else{
-    filtered_cells <-
-      names(sort(factorize.matrix$proportions$cell.states[feature.module, top.cells]))
+  
+  
+  #Determine cell order from factorize.matrix$proportions$cell.states
+  cell.states <- factorize.matrix$proportions$cell.states 
+  cell.states <- cell.states[feature.module, , drop = FALSE]
+  
+  if(is.null(top.cells)){
+    top.cells <- ncol(cell.states)
   }
+  cell.indices <- c()
+  for(modules in 1:nrow(cell.states)){
+    single.module <- cell.states[modules, ]
+    single.module.ordered <- order(single.module, decreasing = TRUE)
+    cell.indices <- c(cell.indices, head(single.module.ordered, n = top.cells), tail(single.module.ordered, n = top.cells))
+  }
+  cell.indices <- cell.indices[!duplicated(cell.indices)] 
+  
+  
+  #normalize counts matrix
   if(normalize){
     norm.counts <- normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   } else{
     norm.counts <- counts
   }
-  filtered_norm.counts <- norm.counts[rev(filtered_genes), filtered_cells]
-  filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0,]
-  gene_ix = match(rownames(filtered_norm.counts), celda.mod$names$row)
-  cell_ix = match(colnames(filtered_norm.counts), celda.mod$names$column)
+  
+  #filter counts based on feature.indices 
+  filtered_norm.counts <- norm.counts[feature.indices, cell.indices]
+  
+  filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0, ]
+  
   if(!is.null(celda.mod$z)){
-    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell_ix]))]
-    names(cell) <- sort(unique(celda.mod$z[cell_ix]))
+    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell.indices]))]
+    names(cell) <- sort(unique(celda.mod$z[cell.indices]))
     anno_cell_colors <- list(cell = cell)
   }else{
     anno_cell_colors <- NULL
   }
   plotHeatmap(
     filtered_norm.counts,
-    z = celda.mod$z[cell_ix],
-    y = celda.mod$y[gene_ix],
+    z = celda.mod$z[cell.indices],
+    y = celda.mod$y[feature.indices],
     scale.row = scale.row,
     color_scheme = "divergent",
     show_featurenames = show_featurenames,
