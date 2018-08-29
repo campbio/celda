@@ -23,6 +23,7 @@ provided for celda_list objects containing celda_C, celda_G, and celda_CG
 models, respectively.
 }
 \examples{
-celda.mods = celda_CG(celda::pbmc_select, K=c(5,10), L=c(10,20,30))
+celda.mods = celdaGridSearch(celda::pbmc_select, model="celda_CG", K.to.test=c(5,10), 
+                      L=c(10,20,30), max.iter=2, nchains=1)
 best.mod.k5.l20 = selectBestModel(celda.mods, K=5, L=20)
 }
