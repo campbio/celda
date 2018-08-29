@@ -4,8 +4,7 @@
 \alias{clusterProbability.celda_CG}
 \title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
 \usage{
-\method{clusterProbability}{celda_CG}(celda.mod, counts, log = FALSE,
-  ...)
+\method{clusterProbability}{celda_CG}(celda.mod, counts, log = FALSE, ...)
 }
 \arguments{
 \item{celda.mod}{Celda object of class "celda_CG".}
