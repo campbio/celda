@@ -17,6 +17,6 @@ Get the K (number of cell clusters) parameter provided to a celda model.
 }
 \examples{
 celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
-                     L.to.test=50, max.iter=2, nchains=1)
+                     L=50, max.iter=2, nchains=1)
 mod.k.value = getK(celda.mod)
 }
