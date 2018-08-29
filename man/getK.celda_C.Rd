@@ -16,6 +16,6 @@ Integer. The K provided to the model during initialization.
 Get the K (number of cell clusters) parameter provided to a celda model.
 }
 \examples{
-celda.mod = celda_C(celda::pbmc_select, K=10)
+celda.mod = celda_C(celda::pbmc_select, K=10, max.iter=2, nchains=1)
 mod.k.value = getK(celda.mod)
 }
