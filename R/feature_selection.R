@@ -6,7 +6,7 @@
 #' @param matrix Numeric matrix. 
 #' @param n Integer. Maximum number of items above `threshold` returned for each ranked row or column.  
 #' @param margin Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2. 
-#' @param threshold Numeric. Only return ranked rows or columns in the matrix that are above this threshold. Default 0. 
+#' @param threshold Numeric. Only return ranked rows or columns in the matrix that are above this threshold. If NULL, then no threshold will be applied. Default 0. 
 #' @param decreasing Logical. Specifies if the rank should be decreasing. Default TRUE.  
 #' @return List. The `index` variable provides the top `n` row (feature) indices contributing the most to each column (cell). The `names` variable provides the rownames corresponding to these indexes.
 #' @examples
@@ -14,7 +14,7 @@
 #' top.feature.names.for.cell = top.ranks.per.cell$names[1]
 #' @export
 topRank = function(matrix, n=25, margin=2, threshold=0, decreasing=TRUE) {
-  if(is.null(threshold) | is.na(threshold)) {
+  if(is.null(threshold) || is.na(threshold)) {
     threshold = min(matrix) - 1 
   }
   
