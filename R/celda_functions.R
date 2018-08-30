@@ -199,10 +199,10 @@ validateRunParams = function(celda.list) {
 
 newRunParamsFromResList = function(celda.list) {
   new.res.list = switch(celda.list$content.type,
-                        "celda_CG" = data.frame(K=sapply(celda.list$res.list, getK), 
-                                                L=sapply(celda.list$res.list, getL)),
-                        "celda_C" = data.frame(K=sapply(celda.list$res.list, getK)), 
-                        "celda_G" = data.frame(L=sapply(celda.list$res.list, getL))) 
+                        "celda_CG" = data.frame(K=lapply(1:length(celda.list$res.list), celda.list$res.list[[i]]$K), 
+                                                L=lapply(1:length(celda.list$res.list), celda.list$res.list[[i]]$L)),
+                        "celda_C" = data.frame(K=lapply(1:length(celda.list$res.list), celda.list$res.list[[i]]$K)), 
+                        "celda_G" = data.frame(L=lapply(1:length(celda.list$res.list), celda.list$res.list[[i]]$L))) 
   new.res.list$index = 1:nrow(new.res.list)
   return(new.res.list)
 }
