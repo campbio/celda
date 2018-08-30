@@ -47,16 +47,6 @@ finalLogLikelihood = function(celda.mod) {
 }
 
 
-#' Get the final feature / cell / feature & cell cluster assignments generated during
-#' a celda run, dependent on the model provided.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
-finalClusterAssignment = function(celda.mod) {
-  UseMethod("finalClusterAssignment", celda.mod)
-}
-
-
 #' Get the probability of the cluster assignments generated during a celda run.
 #'
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
@@ -65,24 +55,6 @@ finalClusterAssignment = function(celda.mod) {
 #' @export
 clusterProbability = function(celda.mod, counts, log=FALSE) {
   UseMethod("clusterProbability", celda.mod)
-}
-
-
-#' Get the K value used for each chain in a celda run.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
-getK = function(celda.mod) {
-  UseMethod("getK", celda.mod)
-}
-
-
-#' Get the L value used for each chain in a celda run.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
-getL = function(celda.mod) {
-  UseMethod("getL", celda.mod)
 }
 
 
