@@ -16,11 +16,17 @@ test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
-# TODO:
-# test_that(desc = "Checking clusterProbability, celdaCG", {
-#   clust.prob = clusterProbability(model_CG, counts = counts.matrix)
-#   expect_true(length(clust.prob) == 2 && ncol(clust.prob[[1]]) == 5)
-# })
+# Cluster probabilities
+ test_that(desc = "Checking clusterProbability, celdaCG", {
+   clust.prob = clusterProbability(counts = counts.matrix, model_CG)
+   expect_true(all(round(rowSums(clust.prob$z.probability), 10) == 1) & nrow(clust.prob$z.probability) == ncol(counts.matrix))
+   expect_true(all(round(rowSums(clust.prob$y.probability), 10) == 1) & nrow(clust.prob$y.probability) == nrow(counts.matrix))
+   
+   clust.prob = clusterProbability(counts = counts.matrix, model_CG, log=TRUE)
+   expect_true(all(round(rowSums(normalizeLogProbs(clust.prob$z.probability)), 10) == 1) & nrow(clust.prob$z.probability) == ncol(counts.matrix))
+   expect_true(all(round(rowSums(normalizeLogProbs(clust.prob$y.probability)), 10) == 1) & nrow(clust.prob$y.probability) == nrow(counts.matrix))
+   
+ })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
 test_that(desc = "Checking factorize matrix, counts vs proportions", {
