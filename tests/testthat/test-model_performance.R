@@ -31,6 +31,11 @@ test_that(desc = "Testing calculatePerplexityWithResampling for celda_CG", {
 
   celdaC.res = calculatePerplexityWithResampling(celdaC.sim$counts, celdaC.res, resample=2)
   expect_error(plotGridSearchPerplexity.celda_CG(celdaC.res))
+  
+  res <- calculatePerplexity.celda_CG(celdaCG.sim$counts, model_CG)
+  res2 <- calculatePerplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
+  
+  expect_error(res <- calculatePerplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))  
 })
 
 
@@ -50,6 +55,12 @@ test_that(desc = "Testing calculatePerplexityWithResampling for celda_C", {
 
   celdaG.res = calculatePerplexityWithResampling(celdaG.sim$counts, celdaG.res, resample=2)
   expect_error(plotGridSearchPerplexity.celda_C(celdaG.res))
+  
+  model_C <- filterCeldaList(celdaC.res, K = 5)[[1]]
+  res <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C)
+  res2 <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts + 1)
+  
+  expect_error(res <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts[-1,]))
 })
 
 
