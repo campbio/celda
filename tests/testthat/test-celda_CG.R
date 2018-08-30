@@ -16,11 +16,10 @@ test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
-# TODO:
-# test_that(desc = "Checking clusterProbability, celdaCG", {
-#   clust.prob = clusterProbability(model_CG, counts = counts.matrix)
-#   expect_true(length(clust.prob) == 2 && ncol(clust.prob[[1]]) == 5)
-# })
+test_that(desc = "Checking clusterProbability, celdaCG", {
+  clust.prob = clusterProbability(model_CG, counts = counts.matrix)
+  expect_true(length(clust.prob) == 2 && ncol(clust.prob[[1]]) == 5)
+})
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
 test_that(desc = "Checking factorize matrix, counts vs proportions", {
@@ -100,6 +99,27 @@ test_that(desc = "Checking topRank", {
                sum(sapply(top.rank$names,length)))
   expect_equal(names(top.rank),
                c("index","names"))
+})
+
+#plotHeatmap, testing for errors
+test_that(desc = "plotHeatmap, testing for errors", {
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$y, y = model_CG$y), "Length of z must match number of columns in counts matrix")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$z), "Length of y must match number of rows in counts matrix")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+})
+
+
+#plotHeatmap, without z or y
+test_that(desc = "Checking plotHeatmap", {
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, cell.ix = 1:10)),
+               c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG$y, cell.ix = 1:10)),
+               c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, feature.ix = 1:10)),
+               c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = NULL, feature.ix = 1:10)),
+               c("tree_row", "tree_col", "gtable"))
 })
 
 #celdaHeatmap#
