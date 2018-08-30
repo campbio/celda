@@ -523,37 +523,6 @@ reorder.celda_C = function(counts, res){
 }
 
 
-#' Get the final cell cluster assignments determined by a celda_C model.
-#' @param celda.mod Celda object of class "celda_C".
-#' @return Integer vector. The final cell cluster assignments determined by the celda_C model.
-#' @examples
-#' celda.mod = celda_C(celda::pbmc_select, K=10, max.iter=2, nchains=1)
-#' final.clustering = finalClusterAssignment(celda.mod)
-#' @export
-finalClusterAssignment.celda_C = function(celda.mod) {
-  return(celda.mod$z)
-}
-
-
-#' Get the K (number of cell clusters) parameter provided to a celda model.
-#' @param celda.mod Celda object of class "celda_C"
-#' @return Integer. The K provided to the model during initialization.
-#' @examples
-#' celda.mod = celda_C(celda::pbmc_select, K=10, max.iter=2, nchains=1)
-#' mod.k.value = getK(celda.mod)
-#' @export
-getK.celda_C = function(celda.mod) {
-  return(celda.mod$K)
-}
-
-
-#' Get the L (number of feature clusters) parameter provided to a celda model.
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @return NA. celda_C models do not utilize the L parameter.
-#' @export
-getL.celda_C = function(celda.mod) { return(NA) }
-
-
 #' celdaHeatmap for celda Cell clustering function 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C".
