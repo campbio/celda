@@ -35,7 +35,7 @@
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
-#' @param K.to.test Integer. Number of cell populations. 
+#' @param K Integer. Number of cell populations. 
 #' @param L Integer. Number of feature modules.  
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
@@ -54,13 +54,13 @@
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @export
-celda_CG = function(counts, sample.label=NULL, K.to.test, L,
+celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, nchains=3, count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
-  K = K.to.test
+
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
@@ -528,9 +528,9 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
 #' @export
-clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
+clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
   
   s = as.integer(celda.mod$sample.label)
   z = celda.mod$z
@@ -549,7 +549,7 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
   z.prob = t(next.z$probs)
 
   ## Gibbs sampling for each gene
-  next.y = cG.calcGibbsProbY(counts=p$n.CP.by.G, n.TS.by.C=p$n.TS.by.CP, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)
+  next.y = cG.calcGibbsProbY(counts=p$n.G.by.CP, n.TS.by.C=p$n.TS.by.CP, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, L=L, nG=p$nG, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)
   y.prob = t(next.y$probs)
 
   if(!isTRUE(log)) {
