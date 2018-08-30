@@ -626,7 +626,7 @@ featureModuleLookup.celda_G = function(counts, celda.mod, feature){
     if(feature[x] %in% rownames(counts)){
       list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
     }else{
-      list[x] <- c("The feature you specified does not exist within your data")
+      list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
     }
   } 
   names(list) <- feature
