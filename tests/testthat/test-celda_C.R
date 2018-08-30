@@ -45,6 +45,14 @@ test_that(desc = "calculateLoglikFromVariables.celda_C returns correct output fo
                                          sample.label = celdaC.sim$sample.label), 0)
 })
 
+
+# Gibbs sampling
+test_that(desc = "Test Gibbs sampling for celda_C", {
+  res <- celda_C(celdaC.sim$counts, sample.label=celdaC.sim$sample.label, K=celdaC.sim$K, algorithm="Gibbs", max.iter=5, nchain=1)
+  expect_is(res, "celda_C")
+})
+
+
 #normalizeCounts
 test_that(desc = "Making sure normalizeCounts doesn't change dimensions of counts matrix", {
   norm.counts <- normalizeCounts(counts.matrix)
@@ -75,6 +83,10 @@ test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors",
 test_that(desc = "Testing celdaProbabiltyMap.celda_C for sample",{
   plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_C, level="sample")
   expect_true(!is.null(plot.obj))
+  
+  model_C = celda_C(celdaC.sim$counts, sample.label=celdaC.sim$sample.label, K=celdaC.sim$K, max.iter=5, nchain=1)
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_C, level="sample")
+  expect_true(!is.null(plot.obj))  
 })
 
 #differentialExpression#
