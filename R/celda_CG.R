@@ -549,7 +549,7 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
   z.prob = t(next.z$probs)
 
   ## Gibbs sampling for each gene
-  next.y = cG.calcGibbsProbY(counts=p$n.CP.by.G, n.TS.by.C=p$n.TS.by.CP, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)
+  next.y = cG.calcGibbsProbY(counts=p$n.G.by.CP, n.TS.by.C=p$n.TS.by.CP, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, L=L, nG=p$nG, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)
   y.prob = t(next.y$probs)
 
   if(!isTRUE(log)) {
