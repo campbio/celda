@@ -480,7 +480,19 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
   return(list(z.probability=z.prob))
 }
 
-
+#' Calculate the perplexity from a single celda model
+#' 
+#' Perplexity can be seen as a measure of how well a provided set of 
+#' cluster assignments fit the data being clustered.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C"
+#' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
+#' @return Numeric. The perplexity for the provided count data and model.
+#' @examples
+#' celda.sim = simulateCells(model="celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, max.iter=2, nchains=1)
+#' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
 
