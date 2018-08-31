@@ -44,8 +44,13 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_C with clustering results and Gibbs sampling statistics.
+An object of class celda_C with clustering results and various sampling statistics.
 }
 \description{
 celda Cell Clustering Model
+}
+\examples{
+celda.sim = simulateCells(model="celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label,
+                    max.iter=2, nchains=1)
 }

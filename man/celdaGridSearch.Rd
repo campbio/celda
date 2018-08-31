@@ -58,3 +58,9 @@ Object of class "celda_list", which contains results for all model parameter com
 \description{
 Yields assigments of genes/cells to clusters, depending on the provided model type.
 }
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.mods = celdaGridSearch(celda.sim$counts, model="celda_CG", 
+                             sample.label=celda.sim$sample.label,
+                             K.to.test=2:4, L.to.test=9:11, max.iter=2, nchains=1)
+}
