@@ -754,7 +754,7 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K.to.test=10, 
+#' celda.mod = celda_CG(celda::pbmc_select, K=10, 
 #'                      L=50, max.iter=2, nchains=1)
 #' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
