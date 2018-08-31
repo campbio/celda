@@ -17,7 +17,7 @@
 #' @return A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @examples
 #' celda.mods = celdaGridSearch(celda::pbmc_select, model="celda_CG", K.to.test=c(10,15), 
-#'                       L=c(50, 100), max.iter=2, nchains=1)
+#'                       L.to.test=c(50, 100), max.iter=2, nchains=1)
 #' desired.mod = filterCeldaList(celda.mods, K=10, L=100)
 #' @export
 filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
