@@ -16,10 +16,17 @@ test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaCG.res$content.type, class(model_CG))
 })
 
-test_that(desc = "Checking clusterProbability, celdaCG", {
-  clust.prob = clusterProbability(model_CG, counts = counts.matrix)
-  expect_true(length(clust.prob) == 2 && ncol(clust.prob[[1]]) == 5)
-})
+# Cluster probabilities
+ test_that(desc = "Checking clusterProbability, celdaCG", {
+   clust.prob = clusterProbability(counts = counts.matrix, model_CG)
+   expect_true(all(round(rowSums(clust.prob$z.probability), 10) == 1) & nrow(clust.prob$z.probability) == ncol(counts.matrix))
+   expect_true(all(round(rowSums(clust.prob$y.probability), 10) == 1) & nrow(clust.prob$y.probability) == nrow(counts.matrix))
+   
+   clust.prob = clusterProbability(counts = counts.matrix, model_CG, log=TRUE)
+   expect_true(all(round(rowSums(normalizeLogProbs(clust.prob$z.probability)), 10) == 1) & nrow(clust.prob$z.probability) == ncol(counts.matrix))
+   expect_true(all(round(rowSums(normalizeLogProbs(clust.prob$y.probability)), 10) == 1) & nrow(clust.prob$y.probability) == nrow(counts.matrix))
+   
+ })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
 test_that(desc = "Checking factorize matrix, counts vs proportions", {
@@ -40,11 +47,15 @@ test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
 })
 
 #celda_CG.R#
-test_that(desc = "Making sure celda_CG runs without crashing", {
-  celdacg <- simulateCells(K.to.test = 5, L = 4, model = "celda_CG", S = 3)
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2, K.to.test = 5, L = c(3,5), max.iter = 15, verbose = FALSE)
+test_that(desc = "Testing celda_CG in celdaGridSearch and by individual model", {
+  celdacg <- simulateCells(K = 5, L = 5, model = "celda_CG", S = 3)
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = c(3,5), max.iter = 5, verbose = FALSE)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
+  
+  celdaCG.res <- celda_CG(counts <- celdacg$counts, celdacg$sample.label, nchains = 2, K = 5, L = 5, max.iter = 10, verbose = FALSE)
+  expect_equal(length(celdaCG.res$z), length(celdacg$z))
+  expect_equal(length(celdaCG.res$y), length(celdacg$y))  
 })
 
 # Ensure calculateLoglikFromVariables calculates the expected values
@@ -144,6 +155,10 @@ test_that(desc = "Checking moduleHeatmap to see if it runs into an error", {
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
   plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
   expect_true(!is.null(plot.obj))
+  
+  model_CG = celda_CG(celdaCG.sim$counts, sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, L=celdaCG.sim$L, max.iter=5, nchain=1)
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
+  expect_true(!is.null(plot.obj))  
 })
 
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
@@ -189,6 +204,9 @@ test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
   expect_true(!is.null(plot.obj))
+  
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=ncol(counts.matrix), modules=1:2)
+  expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=ncol(counts.matrix), modules=1000:1005))
 })
 
 # celdaTsne
@@ -205,16 +223,26 @@ test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
 test_that(desc = "Testing featureModuleLookup() roundtrip", {
   res = featureModuleLookup(counts.matrix, model_CG, "Gene_1")
   expect_true(res == 1)
+  
+  res = featureModuleLookup(counts.matrix, model_CG, "XXXXXXX")
+  expect_true(grepl("No feature", res))
 })
 
 
 # cCG.splitZ/cCG.splitZ
 test_that(desc = "Testing cCG.splitZ and cCG.splitY", {
   r = simulateCells("celda_CG", S=1, G=100, C.Range=c(50,100), K=2, L=2)
+  model_CG = celda_CG(r$counts, K=r$K, L=r$L, max.iter=5, nchain=1)
+  probs = clusterProbability(r$counts, model_CG, log=TRUE)
+    
   dc = cCG.decomposeCounts(r$counts, r$sample.label, r$z, r$y, r$K, r$L)
-  res = cCG.splitZ(r$counts, dc$m.CP.by.S, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1,z.prob=NULL, min.cell=1000)
+  res = cCG.splitZ(r$counts, dc$m.CP.by.S, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1,z.prob=probs$z.probability, min.cell=1000)
   expect_true(grepl("Cluster sizes too small", res$message))
-  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=NULL, min.cell=1000)
+  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=probs$y.probability, min.cell=1000)
   expect_true(grepl("Cluster sizes too small", res$message))
+  
+  ## Testing K.subclusters parameter
+  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=probs$y.probability, K.subclusters=1000)
+  expect_true(length(res$y) == nrow(r$counts))  
 })
 

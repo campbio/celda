@@ -64,6 +64,7 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
 #feature_selection.R#
 #topRank
 test_that(desc = "Checking topRank to see if it runs without errors", {
+  factorized = factorizeMatrix(counts=counts.matrix, celda.mod = model_C)
   top.rank <- topRank(matrix = factorized$proportions$gene.states, threshold = NULL)
   expect_equal(names(top.rank),
                c("index","names"))
