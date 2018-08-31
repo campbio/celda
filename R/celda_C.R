@@ -452,13 +452,13 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 
 #' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
 #'
-#' @param celda.mod Celda object of class "celda_C".
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C".
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @export
-clusterProbability.celda_C = function(celda.mod, counts, log=FALSE, ...) {
+clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 
   z = celda.mod$z
   sample.label = celda.mod$sample.label
