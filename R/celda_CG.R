@@ -72,10 +72,6 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
-  }
-  
   all.seeds = seed:(seed + nchains - 1)
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
@@ -768,7 +764,7 @@ featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
     if(feature[x] %in% rownames(counts)){
       list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
     }else{
-      list[x] <- c("The feature you specified does not exist within your data")
+      list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
     }
   } 
   names(list) <- feature
