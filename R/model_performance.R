@@ -1,18 +1,16 @@
-#' Calculate the perplexity from a single celda run
+#' Calculate the perplexity from a single celda model
 #' 
 #' Perplexity can be seen as a measure of how well a provided set of 
-#' cluster assignments fit the count data being modeled.
-#' 
-#' Perplexity is defined in LDA as the exp of the log likelihood of the model
-#' divided by the total amount of word tokens. The corresponding perplexity
-#' for the celda models are derived in their respective model description 
-#' documents. These documents will not be made publicly available until 
-#' after publication of celda.
+#' cluster assignments fit the data being clustered.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
-#' @return The perplexity for the provided data and model.
+#' @return Numeric. The perplexity for the provided count data and model.
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L, max.iter=2, nchains=1)
+#' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity = function(counts, celda.mod, new.counts=NULL) {
   compareCountMatrix(counts, celda.mod)
