@@ -33,3 +33,13 @@ calculateLoglikFromVariables.celda_CG(counts, sample.label, z, y, K, L,
 \description{
 Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
 }
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.mod = "celda_CG"
+loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+                                      sample.label=celda.sim$sample.label,
+                                      z=celda.sim$z, y=celda.sim$y,
+                                      K=celda.sim$K, L=celda.sim$L,
+                                      alpha=celda.sim$alpha, beta=celda.sim$beta,
+                                      gamma=celda.sim$gamma, delta=celda.sim$delta)
+}
