@@ -7,8 +7,9 @@
 celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
   L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
   max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
-  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE, cores = 1,
-  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
+  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE,
+  cores = 1, seed = 12345, verbose = TRUE,
+  logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix.}
@@ -56,4 +57,10 @@ Object of class "celda_list", which contains results for all model parameter com
 }
 \description{
 Yields assigments of genes/cells to clusters, depending on the provided model type.
+}
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.mods = celdaGridSearch(celda.sim$counts, model="celda_CG", 
+                             sample.label=celda.sim$sample.label,
+                             K.to.test=2:4, L.to.test=9:11, max.iter=2, nchains=1)
 }
