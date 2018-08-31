@@ -211,10 +211,17 @@ test_that(desc = "Testing featureModuleLookup() roundtrip", {
 # cCG.splitZ/cCG.splitZ
 test_that(desc = "Testing cCG.splitZ and cCG.splitY", {
   r = simulateCells("celda_CG", S=1, G=100, C.Range=c(50,100), K=2, L=2)
+  model_CG = celda_CG(r$counts, K=r$K, L=r$L, max.iter=5, nchain=1)
+  probs = clusterProbability(r$counts, model_CG, log=TRUE)
+    
   dc = cCG.decomposeCounts(r$counts, r$sample.label, r$z, r$y, r$K, r$L)
-  res = cCG.splitZ(r$counts, dc$m.CP.by.S, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1,z.prob=NULL, min.cell=1000)
+  res = cCG.splitZ(r$counts, dc$m.CP.by.S, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1,z.prob=probs$z.probability, min.cell=1000)
   expect_true(grepl("Cluster sizes too small", res$message))
-  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=NULL, min.cell=1000)
+  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=probs$y.probability, min.cell=1000)
   expect_true(grepl("Cluster sizes too small", res$message))
+  
+  ## Testing K.subclusters parameter
+  res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=probs$y.probability, K.subclusters=1000)
+  expect_true(length(res$y) == nrow(r$counts))  
 })
 
