@@ -4,12 +4,12 @@
 \alias{clusterProbability.celda_C}
 \title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
 \usage{
-\method{clusterProbability}{celda_C}(celda.mod, counts, log = FALSE, ...)
+\method{clusterProbability}{celda_C}(counts, celda.mod, log = FALSE, ...)
 }
 \arguments{
-\item{celda.mod}{Celda object of class "celda_C".}
-
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+
+\item{celda.mod}{Celda object of class "celda_C".}
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 
