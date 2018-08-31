@@ -6,8 +6,9 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
-  count.checksum = NULL, z.init = NULL, logfile = NULL, verbose = TRUE)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
+  nchains = 3, count.checksum = NULL, z.init = NULL,
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -43,8 +44,13 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_C with clustering results and Gibbs sampling statistics.
+An object of class celda_C with clustering results and various sampling statistics.
 }
 \description{
 celda Cell Clustering Model
+}
+\examples{
+celda.sim = simulateCells(model="celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label,
+                    max.iter=2, nchains=1)
 }
