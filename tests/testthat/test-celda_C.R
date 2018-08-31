@@ -73,9 +73,29 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
                c("index","names"))
 })
 
+#plotHeatmap, testing for errors
+test_that(desc = "plotHeatmap, testing for errors", {
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C$K), "Length of z must match number of columns in counts matrix")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C$z, scale.row = model_C), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C$z, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+})
+
+
+#plotHeatmap, annotation.cell
+test_that(desc = "plotHeatmap, testing for annotation.cell",{
+  annot <- as.data.frame(c(rep(x = 1, times = ncol(celdaC.sim$counts) - 100),rep(x = 2, 100)))
+  rownames(annot) <- colnames(celdaC.sim$counts)
+  
+  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C$z)),
+               c("tree_row", "tree_col", "gtable"))
+  
+  rownames(annot) <- rev(colnames(celdaC.sim$counts))
+  expect_error(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C$z),
+               "Row names of 'annotation.cell' are different than the column names of 'counts'")
+})
 
 #celdaHeatmap#
-test_that(desc = "Checking renderCeldaHeatmap to see if it runs without errors", {
+test_that(desc = "Checking celdaHeatmap to see if it runs without errors", {
   expect_equal(names(celdaHeatmap(celda.mod = model_C, counts = celdaC.sim$counts)),
                c("tree_row", "tree_col", "gtable"))
 })
