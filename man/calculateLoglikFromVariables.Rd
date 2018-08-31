@@ -19,3 +19,13 @@ The log-likelihood of the provided cluster assignment for the provided counts ma
 \description{
 Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model.
 }
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.mod = "celda_CG"
+loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+                                      sample.label=celda.sim$sample.label,
+                                      z=celda.sim$z, y=celda.sim$y,
+                                      K=celda.sim$K, L=celda.sim$L,
+                                      alpha=celda.sim$alpha, beta=celda.sim$beta,
+                                      gamma=celda.sim$gamma, delta=celda.sim$delta)
+}

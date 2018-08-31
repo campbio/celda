@@ -416,6 +416,13 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param ... Additional parameters.
 #' @keywords log likelihood
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
+#' @examples
+#' celda.sim = simulateCells(model="celda_G")
+#' celda.mod = "celda_G"
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#'                                       y=celda.sim$y, L=celda.sim$L,
+#'                                       beta=celda.sim$beta, delta=celda.sim$delta,
+#'                                       gamma=celda.sim$gamma)
 #' @export
 calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma) {
 
