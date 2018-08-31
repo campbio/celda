@@ -383,6 +383,13 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells(model="celda_C")
+#' celda.mod = "celda_C"
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#'                                       sample.label=celda.sim$sample.label,
+#'                                       z=celda.sim$z, K=celda.sim$K,
+#'                                       alpha=celda.sim$alpha, beta=celda.sim$beta)
 #' @export
 calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
   sample.label = processSampleLabels(sample.label, ncol(counts))
