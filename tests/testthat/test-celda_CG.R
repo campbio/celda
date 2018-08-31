@@ -47,11 +47,15 @@ test_that(desc = "simulateCells.celda_CG returns correctly typed output", {
 })
 
 #celda_CG.R#
-test_that(desc = "Making sure celda_CG runs without crashing", {
-  celdacg <- simulateCells(K.to.test = 5, L = 4, model = "celda_CG", S = 3)
-  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2, K.to.test = 5, L = c(3,5), max.iter = 15, verbose = FALSE)
+test_that(desc = "Testing celda_CG in celdaGridSearch and by individual model", {
+  celdacg <- simulateCells(K = 5, L = 5, model = "celda_CG", S = 3)
+  celdaCG.res <- celdaGridSearch(counts = celdacg$counts, model = "celda_CG", nchains = 2, K = 5, L = c(3,5), max.iter = 5, verbose = FALSE)
   expect_equal(length(celdaCG.res$res.list[[1]]$z), ncol(celdacg$counts))
   expect_equal(length(celdaCG.res$res.list[[1]]$y), nrow(celdacg$counts)) 
+  
+  celdaCG.res <- celda_CG(counts <- celdacg$counts, celdacg$sample.label, nchains = 2, K = 5, L = 5, max.iter = 10, verbose = FALSE)
+  expect_equal(length(celdaCG.res$z), length(celdacg$z))
+  expect_equal(length(celdaCG.res$y), length(celdacg$y))  
 })
 
 # Ensure calculateLoglikFromVariables calculates the expected values
@@ -130,6 +134,10 @@ test_that(desc = "Checking moduleHeatmap to see if it runs into an error", {
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample",{
   plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
   expect_true(!is.null(plot.obj))
+  
+  model_CG = celda_CG(celdaCG.sim$counts, sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, L=celdaCG.sim$L, max.iter=5, nchain=1)
+  plot.obj = celdaProbabilityMap(counts=counts.matrix, celda.mod=model_CG, level="sample")
+  expect_true(!is.null(plot.obj))  
 })
 
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
@@ -175,6 +183,9 @@ test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
   expect_true(!is.null(plot.obj))
+  
+  tsne = celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=ncol(counts.matrix), modules=1:2)
+  expect_error(tsne <- celdaTsne(counts=counts.matrix, celda.mod=model_CG, max.cells=ncol(counts.matrix), modules=1000:1005))
 })
 
 # celdaTsne
@@ -191,6 +202,9 @@ test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
 test_that(desc = "Testing featureModuleLookup() roundtrip", {
   res = featureModuleLookup(counts.matrix, model_CG, "Gene_1")
   expect_true(res == 1)
+  
+  res = featureModuleLookup(counts.matrix, model_G, "XXXXXXX")
+  expect_true(grepl("No feature", res))
 })
 
 
