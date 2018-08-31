@@ -1,36 +1,3 @@
-# -----------------------------------
-# Variable description
-# -----------------------------------
-# C = Cell
-# S or s = Sample
-# G = Gene
-# TS = Transcriptional State
-# CP = Cell population
-# n = counts of transcripts
-# m = counts of cells
-# K = Total number of cell populations
-# L = Total number of transcriptional states
-# nM = Number of cells
-# nG = Number of genes
-# nS = Number of samples
-
-# -----------------------------------
-# Count matrices descriptions
-# -----------------------------------
-
-# All n.* variables contain counts of transcripts
-# n.CP.by.TS = Number of counts in each Cellular Population per Transcriptional State
-# n.TS.by.C = Number of counts in each Transcriptional State per Cell 
-# n.CP.by.G = Number of counts in each Cellular Population per Gene
-# n.by.G = Number of counts per gene (i.e. rowSums)
-# n.by.TS = Number of counts per Transcriptional State
-
-## All m.* variables contain counts of cells
-# m.CP.by.S = Number of cells in each Cellular Population per Sample
-
-# nG.by.TS = Number of genes in each Transcriptional State
-
-
 #' celda Gene Clustering Model
 #'
 #' Provides cluster assignments for all genes in a provided single-cell 
@@ -51,7 +18,11 @@
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
-#' @keywords LDA gene clustering gibbs
+#' @return An object of class celda_G with clustering results and various sampling statistics.
+#' @examples
+#' celda.sim = simulateCells(model="celda_G")
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L,
+#'                      max.iter=2, nchains=1)
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
@@ -511,6 +482,19 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
 }
 
 
+#' Calculate the perplexity from a single celda model
+#' 
+#' Perplexity can be seen as a measure of how well a provided set of 
+#' cluster assignments fit the data being clustered.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C"
+#' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
+#' @return Numeric. The perplexity for the provided count data and model.
+#' @examples
+#' celda.sim = simulateCells(model="celda_G")
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, max.iter=2, nchains=1)
+#' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_G = function(counts, celda.mod, new.counts=NULL) {
  

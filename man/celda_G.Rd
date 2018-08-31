@@ -40,11 +40,15 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
+\value{
+An object of class celda_G with clustering results and various sampling statistics.
+}
 \description{
 Provides cluster assignments for all genes in a provided single-cell 
 sequencing count matrix, using the celda Bayesian hierarchical model.
 }
-\keyword{LDA}
-\keyword{clustering}
-\keyword{gene}
-\keyword{gibbs}
+\examples{
+celda.sim = simulateCells(model="celda_G")
+celda.mod = celda_G(celda.sim$counts, L=celda.sim$L,
+                     max.iter=2, nchains=1)
+}

@@ -28,6 +28,11 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param verbose Logical. Whether to print log messages during celda chain execution. Default TRUE. 
 #' @param logfile.prefix Character. Prefix for log files from worker threads and main process. Default "Celda". 
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mods = celdaGridSearch(celda.sim$counts, model="celda_CG", 
+#'                              sample.label=celda.sim$sample.label,
+#'                              K.to.test=2:4, L.to.test=9:11, max.iter=2, nchains=1)
 #' @import foreach
 #' @export
 celdaGridSearch = function(counts, model, sample.label=NULL, K.to.test=NULL, L.to.test=NULL, alpha=1, beta=1, 
