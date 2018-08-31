@@ -203,7 +203,7 @@ test_that(desc = "Testing featureModuleLookup() roundtrip", {
   res = featureModuleLookup(counts.matrix, model_CG, "Gene_1")
   expect_true(res == 1)
   
-  res = featureModuleLookup(counts.matrix, model_G, "XXXXXXX")
+  res = featureModuleLookup(counts.matrix, model_CG, "XXXXXXX")
   expect_true(grepl("No feature", res))
 })
 
