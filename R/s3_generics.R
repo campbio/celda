@@ -49,11 +49,11 @@ finalLogLikelihood = function(celda.mod) {
 
 #' Get the probability of the cluster assignments generated during a celda run.
 #'
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @export
-clusterProbability = function(celda.mod, counts, log=FALSE) {
+clusterProbability = function(counts, celda.mod, log=FALSE) {
   UseMethod("clusterProbability", celda.mod)
 }
 
