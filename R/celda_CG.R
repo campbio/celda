@@ -455,6 +455,15 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mod = "celda_CG"
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#'                                       sample.label=celda.sim$sample.label,
+#'                                       z=celda.sim$z, y=celda.sim$y,
+#'                                       K=celda.sim$K, L=celda.sim$L,
+#'                                       alpha=celda.sim$alpha, beta=celda.sim$beta,
+#'                                       gamma=celda.sim$gamma, delta=celda.sim$delta)
 #' @export
 calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
   sample.label = processSampleLabels(sample.label, ncol(counts))
