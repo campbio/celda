@@ -17,6 +17,10 @@
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_C with clustering results and various sampling statistics.
+#' @examples
+#' celda.sim = simulateCells(model="celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label,
+#'                     max.iter=2, nchains=1)
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 					 algorithm = c("EM", "Gibbs"), 

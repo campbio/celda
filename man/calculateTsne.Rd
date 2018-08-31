@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_dr.R
 \name{calculateTsne}
 \alias{calculateTsne}
-\title{Uses Rtsne package to run tSNE.}
+\title{Run the t-SNE algorithm for dimensionality reduction}
 \usage{
 calculateTsne(norm, perplexity = 20, max.iter = 2500, seed = 12345,
   do.pca = FALSE, initial.dims = 20)
@@ -10,16 +10,16 @@ calculateTsne(norm, perplexity = 20, max.iter = 2500, seed = 12345,
 \arguments{
 \item{norm}{Normalized count matrix.}
 
-\item{perplexity}{Numeric vector; determines perplexity for tsne. Default 20.}
+\item{perplexity}{Numeric vector. Determines perplexity for tsne. Default 20.}
 
-\item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
+\item{max.iter}{Numeric vector. Determines iterations for tsne. Default 1000.}
 
-\item{seed}{Seed for random number generation. Defaults to 12345.}
+\item{seed}{Integer. Seed for random number generation. Defaults to 12345.}
 
-\item{do.pca}{Perform dimensionality reduction with PCA before tSNE.}
+\item{do.pca}{Logical. Whether to perform dimensionality reduction with PCA before tSNE.}
 
-\item{initial.dims}{Number of dimensions from PCA to use as input in tSNE.}
+\item{initial.dims}{Integer. Number of dimensions from PCA to use as input in tSNE.}
 }
 \description{
-Uses Rtsne package to run tSNE.
+Run the t-SNE algorithm for dimensionality reduction
 }
