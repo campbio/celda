@@ -22,3 +22,9 @@ A list containging a matrix for the conditional cell and feature cluster probabi
 \description{
 Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+}
