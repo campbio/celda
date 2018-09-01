@@ -28,6 +28,12 @@
 #' @param treeheight.cell Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.  
 #' @param silent Logical. Whether to plot the heatmap.
 #' @param ... Other arguments to be passed to underlying pheatmap function.
+#' @examples 
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      sample.label=celda.sim$sample.label,
+#'                      max.iter=2, nchains=1)
+#' plotHeatmap(celda.sim$counts, z=celda.mod$z, y=celda.mod$y)
 #' @import gtable
 #' @import grid
 #' @import scales
