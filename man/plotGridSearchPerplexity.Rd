@@ -10,7 +10,7 @@ plotGridSearchPerplexity(celda.list)
 \item{celda.list}{Object of class 'celda_list'.}
 }
 \value{
-A ggplot2 object containing the plot.
+A ggplot plot object showing perplexity as a function of clustering parameters.
 }
 \description{
 Visualize perplexity of every model in a celda_list, by unique K/L combinations
