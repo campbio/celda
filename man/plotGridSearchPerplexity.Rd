@@ -2,13 +2,24 @@
 % Please edit documentation in R/model_performance.R
 \name{plotGridSearchPerplexity}
 \alias{plotGridSearchPerplexity}
-\title{Generate factorized matrices showing each feature's influence on cell / gene clustering}
+\title{Visualize perplexity of every model in a celda_list, by unique K/L combinations}
 \usage{
 plotGridSearchPerplexity(celda.list)
 }
 \arguments{
 \item{celda.list}{Object of class 'celda_list'.}
 }
+\value{
+A ggplot2 object containing the plot.
+}
 \description{
-Generate factorized matrices showing each feature's influence on cell / gene clustering
+Visualize perplexity of every model in a celda_list, by unique K/L combinations
+}
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.list = celdaGridSearch(celda.sim$counts, model="celda_CG", 
+                             K.to.test=3:5, L.to.test=9:11, 
+                             max.iter=2, nchains=1)
+celda.list = calculatePerplexityWithResampling(celda.sim$counts, celda.list)
+plotGridSearchPerplexity(celda.list)
 }
