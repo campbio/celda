@@ -143,11 +143,18 @@ celdaProbabilityMap = function(counts, celda.mod, ...) {
   
   UseMethod("celdaProbabilityMap", celda.mod)
 }
-#' Runs tSNE via Rtsne based on the CELDA model and specified cell states.
+
+#' Embeds cells in two dimensions using tSNE based on celda_CG results.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
+#' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne = function(counts, celda.mod, ...) {
   counts = processCounts(counts)
