@@ -156,6 +156,11 @@ recodeClusterY = function(celda.mod, from, to) {
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param error.on.mismatch Logical. Whether to stop execution in the event of a count matrix mismatch. Default TRUE.
 #' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise. Error on FALSE if error.on.mismatch is TRUE.
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#'  compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
