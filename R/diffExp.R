@@ -14,6 +14,12 @@
 #' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned.
 #' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
 #'    and associated statistics (p-value, log2fc and FDR).
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)   
+#' cluster.diffexp.res = differentialExpression(celda.sim$counts, celda.mod, 
+#'                                              c1=c(1,2))
 #' @export
 #' @import data.table
 differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
