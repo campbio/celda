@@ -520,6 +520,10 @@ reorder.celda_C = function(counts, res){
 #' @param celda.mod Celda object of class "celda_C".
 #' @param feature.ix Integer vector. Indices of features to plot, such the top features from a differential expression analysis. 
 #' @param ... Additional parameters.
+#' @examples 
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celdaHeatmap(celda.sim$counts, celda.mod)
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
