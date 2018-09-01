@@ -32,3 +32,10 @@ Finds markers (differentially expressed genes) for cell clusters
    changes and characterizing heterogeneity in single-cell RNA sequencing data
    (Finak et al, Genome Biology, 2015)
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)   
+cluster.diffexp.res = differentialExpression(celda.sim$counts, celda.mod, 
+                                             c1=c(1,2))
+}
