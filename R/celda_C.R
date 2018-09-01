@@ -437,6 +437,10 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @examples
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 
