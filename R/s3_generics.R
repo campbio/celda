@@ -1,21 +1,4 @@
 ################################################################################
-# S3 Methods                                                                   #
-################################################################################
-# Below are getters for the various types of celda models.                     #
-# Concrete implementations of these functions are in their corresponding model #
-# files (e.g. getZ.celda_C is in celda_C.R).                                   #
-#                                                                              #
-# TODO:                                                                        #
-#        * Collapse ROxygen documentation into single page for these functions #
-#        * Consider moving model specific implementations to their             #
-#          corresponding files                                                 #
-#        * Can reduce redundancy for celda_C / celda_G getters by renaming the #
-#          fields on their respective return objects to match.                 #  
-################################################################################
-
-
-
-################################################################################
 # Generics
 ################################################################################
 
@@ -31,6 +14,12 @@ runParams = function(celda.list) {
 #' Get the complete log likelihood for a given celda model.
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @return Numeric Vector. The log-likelihood of the model's cluster assignments during each iteration.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' complete.loglik = completeLogLikelihood(celda.mod)
 #' @export
 completeLogLikelihood = function(celda.mod) {
   return(celda.mod$completeLogLik)
