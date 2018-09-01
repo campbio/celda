@@ -298,6 +298,10 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(500,
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C".
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
+#' @examples 
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {

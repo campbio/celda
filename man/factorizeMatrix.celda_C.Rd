@@ -17,3 +17,8 @@
 \description{
 Generate factorized matrices showing each feature's influence on the celda_C model clustering
 }
+\examples{
+celda.sim = simulateCells("celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+}
