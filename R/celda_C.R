@@ -589,10 +589,18 @@ celdaTsne.celda_C = function(counts, celda.mod,
 
 #' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
 #' 
+#' It is often useful to visualize to what degree each feature influences each 
+#' cell cluster. This can also be useful for identifying features which may
+#' be redundant or unassociated with cell clustering.
+#' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_CG".   
 #' @param level Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celdaProbabilityMap(celda.sim$counts, celda.mod)
 #' @export 
 celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ...){
   counts = processCounts(counts)
