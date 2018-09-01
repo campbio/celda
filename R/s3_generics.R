@@ -52,6 +52,11 @@ finalLogLikelihood = function(celda.mod) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability = function(counts, celda.mod, log=FALSE) {
   UseMethod("clusterProbability", celda.mod)
