@@ -63,6 +63,11 @@ clusterProbability = function(counts, celda.mod, log=FALSE) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param ... Additional parameters.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' celdaHeatmap(celda.sim$counts, celda.mod)
 #' @export 
 celdaHeatmap <- function(counts, celda.mod, ...) {
   UseMethod("celdaHeatmap", celda.mod)
