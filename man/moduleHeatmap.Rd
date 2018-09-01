@@ -30,3 +30,9 @@ Draws a heatmap focusing on a transcriptional state. Both cells and genes are so
    their proportions of counts in a given transcriptional state. Allows for nice visualization of 
    co-expression of those genes grouped into transcriptional states by Celda.
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+moduleHeatmap(celda.sim$counts, celda.mod)
+}
