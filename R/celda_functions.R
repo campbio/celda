@@ -234,6 +234,8 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose =
 #' @param saturation.range Numeric vector. A vector of length 2 denoting the saturation for HSV. Values must be in [0,1]. Default: c(0.25, 1).
 #' @param value.range Numeric vector. A vector of length 2 denoting the range of values for HSV. Values must be in [0,1]. Default: `c(0.5, 1)`.
 #' @return A vector of distinct colors that have been converted to  HEX from HSV.
+#' @examples
+#' color.pal = distinct_colors(6)  # can be used in plotting functions
 #' @export
 distinct_colors = function(n,
 						   hues = c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta"),

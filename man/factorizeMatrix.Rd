@@ -16,3 +16,9 @@ factorizeMatrix(counts, celda.mod, type)
 \description{
 Generate factorized matrices showing each feature's influence on cell / gene clustering
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+}
