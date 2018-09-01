@@ -60,9 +60,17 @@ calculatePerplexityWithResampling <- function(counts, celda.list, resample=5, se
 }
 
 
-#' Generate factorized matrices showing each feature's influence on cell / gene clustering
+#' Visualize perplexity of every model in a celda_list, by unique K/L combinations
 #' 
 #' @param celda.list Object of class 'celda_list'. 
+#' @return A ggplot2 object containing the plot.
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.list = celdaGridSearch(celda.sim$counts, model="celda_CG", 
+#'                              K.to.test=3:5, L.to.test=9:11, 
+#'                              max.iter=2, nchains=1)
+#' celda.list = calculatePerplexityWithResampling(celda.sim$counts, celda.list)
+#' plotGridSearchPerplexity(celda.list)
 #' @export
 plotGridSearchPerplexity = function(celda.list) {
   UseMethod("plotGridSearchPerplexity", celda.list)
