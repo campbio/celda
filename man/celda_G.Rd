@@ -6,8 +6,8 @@
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
   max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
-  seed = 12345, nchains = 3, count.checksum = NULL, y.init = NULL,
-  logfile = NULL, verbose = TRUE)
+  seed = 12345, nchains = 3, initialize = c("random", "split"),
+  count.checksum = NULL, y.init = NULL, logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -32,9 +32,11 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
+\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G` until the specified L is reached. Default 'random'.}
+
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
