@@ -49,7 +49,7 @@
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G` until the specified L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @keywords LDA gene clustering gibbs
