@@ -20,3 +20,9 @@ A list of factorized matrices, of the types requested by the user. NOTE: "popula
 \description{
 Generate factorized matrices showing each feature's influence on the celda_CG model clustering
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+}
