@@ -76,3 +76,10 @@ plotHeatmap(counts, z = NULL, y = NULL, scale.row = scale, trim = c(-2,
 \description{
 Renders a heatmap based on a matrix of counts where rows are features and columns are cells.
 }
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     sample.label=celda.sim$sample.label,
+                     max.iter=2, nchains=1)
+plotHeatmap(celda.sim$counts, z=celda.mod$z, y=celda.mod$y)
+}
