@@ -50,8 +50,8 @@
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
-#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @export

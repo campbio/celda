@@ -63,7 +63,7 @@ recursive.splitZ = function(counts, s, K, alpha, beta, min.cell = 3, seed=12345)
     for(i in z.to.split) {
       if(isTRUE(cluster.split.flag[i])) {
         ix = which(overall.z == i)
-        res = suppressMessages(celda_C(counts[,ix], K=2, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchain=1, seed=seed, verbose=FALSE))
+        res = suppressMessages(celda_C(counts[,ix], K=2, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchain=1, seed=seed, verbose=FALSE, initialize="random"))
         cluster.splits[cbind(ix, i)] = res$z
         cluster.split.flag[i] = FALSE
       }
@@ -93,7 +93,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
 
   ## Decrease number cells into cell populations to save time
   ## If z and K are supplied from previous cell clustering, then each cluster will be split into K.subclusters
-  if(!is.null(z) & !is.null(K)) {
+  if(!is.null(z) & !is.null(K) & !is.null(K.subclusters)) {
     if(K * K.subclusters > max.cells) {
       K.subclusters = round(max.cells / K)
     }
@@ -107,7 +107,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
 	  if(z.ta[i] <= K.subclusters) {
 		temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
 	  } else {
-		clustLabel = suppressMessages(celda_C(counts[,z == i], K=K.subclusters, max.iter=5, stop.iter=1, algorithm="EM", nchains=1, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE))
+		clustLabel = suppressMessages(celda_C(counts[,z == i], K=K.subclusters, max.iter=5, stop.iter=1, algorithm="EM", nchains=1, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, initialize="random"))
 		temp.z[ix] = clustLabel$z + current.top.z 
 	  }
 	  current.top.z = max(temp.z, na.rm=TRUE)
@@ -134,13 +134,13 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
   while(current.L <= L) {
 
     y.ta = tabulate(overall.y, L)
-    y.to.split = which(y.ta > min.cell)
+    y.to.split = which(y.ta > min.feature)
 
     ## Split each cluster <= current.L and number of features > min.feature
     for(i in y.to.split) {
       if(isTRUE(cluster.split.flag[i])) {
         ix = which(overall.y == i)
-        res = suppressMessages(celda_G(counts[ix,], L=2, max.iter = 5, split.on.iter=-1, split.on.last=FALSE, nchain=1, seed=seed, verbose=FALSE))
+        res = suppressMessages(celda_G(counts[ix,], L=2, max.iter = 5, split.on.iter=-1, split.on.last=FALSE, nchain=1, seed=seed, verbose=FALSE, initialize="random"))
         cluster.splits[cbind(ix, i)] = res$y
         cluster.split.flag[i] = FALSE
       }

@@ -46,9 +46,9 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.}
 
-\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
