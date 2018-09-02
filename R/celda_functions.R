@@ -156,6 +156,11 @@ recodeClusterY = function(celda.mod, from, to) {
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param error.on.mismatch Logical. Whether to stop execution in the event of a count matrix mismatch. Default TRUE.
 #' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise. Error on FALSE if error.on.mismatch is TRUE.
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#'  compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
@@ -229,6 +234,8 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose =
 #' @param saturation.range Numeric vector. A vector of length 2 denoting the saturation for HSV. Values must be in [0,1]. Default: c(0.25, 1).
 #' @param value.range Numeric vector. A vector of length 2 denoting the range of values for HSV. Values must be in [0,1]. Default: `c(0.5, 1)`.
 #' @return A vector of distinct colors that have been converted to  HEX from HSV.
+#' @examples
+#' color.pal = distinct_colors(6)  # can be used in plotting functions
 #' @export
 distinct_colors = function(n,
 						   hues = c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta"),

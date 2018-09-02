@@ -304,6 +304,10 @@ simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(500,
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C".
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
+#' @examples 
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {
@@ -389,6 +393,13 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells(model="celda_C")
+#' celda.mod = "celda_C"
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#'                                       sample.label=celda.sim$sample.label,
+#'                                       z=celda.sim$z, K=celda.sim$K,
+#'                                       alpha=celda.sim$alpha, beta=celda.sim$beta)
 #' @export
 calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
   sample.label = processSampleLabels(sample.label, ncol(counts))
@@ -436,6 +447,10 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @examples
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 
@@ -519,6 +534,10 @@ reorder.celda_C = function(counts, res){
 #' @param celda.mod Celda object of class "celda_C".
 #' @param feature.ix Integer vector. Indices of features to plot, such the top features from a differential expression analysis. 
 #' @param ... Additional parameters.
+#' @examples 
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celdaHeatmap(celda.sim$counts, celda.mod)
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
@@ -537,6 +556,10 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne.celda_C = function(counts, celda.mod,  
 							 max.cells=10000, min.cluster.size=100, initial.dims=20,
@@ -584,10 +607,18 @@ celdaTsne.celda_C = function(counts, celda.mod,
 
 #' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
 #' 
+#' It is often useful to visualize to what degree each feature influences each 
+#' cell cluster. This can also be useful for identifying features which may
+#' be redundant or unassociated with cell clustering.
+#' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_CG".   
 #' @param level Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells("celda_C")
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celdaProbabilityMap(celda.sim$counts, celda.mod)
 #' @export 
 celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ...){
   counts = processCounts(counts)

@@ -17,5 +17,12 @@
 \item{...}{Additional parameters.}
 }
 \description{
-Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
+It is often useful to visualize to what degree each feature influences each 
+cell cluster. This can also be useful for identifying features which may
+be redundant or unassociated with cell clustering.
+}
+\examples{
+celda.sim = simulateCells("celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+celdaProbabilityMap(celda.sim$counts, celda.mod)
 }
