@@ -12,8 +12,9 @@
 #' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells are randomly assigned to a clusters. With 'split' cell clusters will be recurssively split into two clusters using `celda_C` until the specified K is reached. Default 'random'.
 #' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
+#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_C with clustering results and various sampling statistics.
@@ -25,8 +26,13 @@
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 					 algorithm = c("EM", "Gibbs"), 
                  	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                 	 seed=12345, nchains=3, count.checksum=NULL, 
+                 	 seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
                  	 z.init = NULL, logfile=NULL, verbose=TRUE) {
+
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Starting Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  start.time = Sys.time()
                  	 
   ## Error checking and variable processing
   if(is.null(count.checksum)) {
@@ -39,20 +45,22 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
-
+  initialize = match.arg(initialize)
+  
   all.seeds = seed:(seed + nchains - 1)
-  
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
-  logMessages("Starting Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-  start.time = Sys.time()
-  
+    
   best.result = NULL  
   for(i in seq_along(all.seeds)) { 
   
-	## Randomly select z or set z to supplied initial values
+	## Initialize cluster labels
 	current.seed = all.seeds[i]	
-	z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	logMessages(date(), ".. Initializing chain", i, "with", paste0("'", initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=FALSE, verbose=verbose)
+	
+    if(initialize == "random") {
+  	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	} else {
+	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
+	}  
 	z.best = z
   
 	## Calculate counts one time up front
@@ -67,9 +75,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
 	ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
-    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
-
-	set.seed(seed)
+    set.seed(seed)
 	iter = 1L
 	num.iter.without.improvement = 0L
 	do.cell.split = TRUE
