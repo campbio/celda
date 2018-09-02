@@ -28,5 +28,13 @@ The log likelihood of the provided cluster assignment, as calculated by the celd
 This function calculates the log likelihood of each clustering of genes generated
 over multiple iterations of Gibbs sampling.
 }
+\examples{
+celda.sim = simulateCells(model="celda_G")
+celda.mod = "celda_G"
+loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+                                      y=celda.sim$y, L=celda.sim$L,
+                                      beta=celda.sim$beta, delta=celda.sim$delta,
+                                      gamma=celda.sim$gamma)
+}
 \keyword{likelihood}
 \keyword{log}
