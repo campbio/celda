@@ -4,8 +4,7 @@
 \alias{filterCeldaList}
 \title{Select models from a list of results generated in a celda run.}
 \usage{
-filterCeldaList(celda.list, K = c(), L = c(), chain = c(),
-  index = NULL)
+filterCeldaList(celda.list, K = c(), L = c(), chain = c(), index = NULL)
 }
 \arguments{
 \item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
