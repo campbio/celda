@@ -17,7 +17,7 @@ This function plots perplexity as a function of the cell/gene (K/L) clusters as 
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params=list(K=3:5, L=9:11))
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=3:5, L=9:11))
 cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 plotGridSearchPerplexity(celda.list)
 }

@@ -20,8 +20,8 @@ models, respectively.
 }
 \examples{
 ## Run various combinations of parameters with 'celdaGridSearch'
-celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label), best.only=FALSE)
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label), best.only=FALSE)
 
 ## Returns same result as running celdaGridSearch with "best.only = TRUE"
-celda.gs.best = selectBestModel(celda.gs)  
+celda.gs.best = selectBestModel(cgs)  
 }
