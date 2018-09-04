@@ -39,5 +39,5 @@ Create a scatterplot for each row of a normalized gene expression matrix where x
 \examples{
 celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
 plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
-                  counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE))
+                  counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)
 }

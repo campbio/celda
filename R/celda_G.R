@@ -636,8 +636,15 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
 #' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
 #' @export
-featureModuleLookup.celda_G = function(counts, celda.mod, feature){
+featureModuleLookup.celda_G = function(counts, celda.mod, feature, exact.match = TRUE){
   list <- list()
+  if(!isTRUE(exact.match)){
+    feature.grep <- c()
+    for(x in 1:length(feature)){
+      feature.grep <- c(feature.grep, rownames(counts)[grep(feature[x],rownames(counts))]) 
+    }
+    feature <- feature.grep
+  }
   for(x in 1:length(feature)){
     if(feature[x] %in% rownames(counts)){
       list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]

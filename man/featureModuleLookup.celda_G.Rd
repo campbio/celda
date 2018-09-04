@@ -4,7 +4,8 @@
 \alias{featureModuleLookup.celda_G}
 \title{Obtain the gene module of a gene of interest}
 \usage{
-\method{featureModuleLookup}{celda_G}(counts, celda.mod, feature)
+\method{featureModuleLookup}{celda_G}(counts, celda.mod, feature,
+  exact.match = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
