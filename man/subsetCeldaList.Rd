@@ -6,9 +6,6 @@
 \usage{
 subsetCeldaList(celda.list, params)
 }
-\arguments{
-\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
-}
 \value{
 A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 }
@@ -19,8 +16,6 @@ Models can be selected by various parameters, most importantly the K/L parameter
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", 
-                             params.test=list(K=4:6, L=9:11),
-							params.fixed=list(sample.label=celda.sim$sample.label))
-res.K5.L10 = subsetCeldaList(celda.gs, params=list(K=5, L=10))
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label))
+res.K5.L10 = subsetCeldaList(cgs, params=list(K=5, L=10))
 }
