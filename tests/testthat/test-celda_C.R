@@ -18,10 +18,33 @@ test_that(desc = "Testing clusterProbability with celda_C", {
   expect_true(all(rowSums(clusterProbability(model_C, counts = celdaC.sim$counts)[[1]]) == 1))
 })
 
-# celdaGridSearch
+# celdaGridSearch and perplexity calculations
 test_that(desc = "Testing celdaGridSearch with celda_C", {
   celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, params.test=list(K=c(5,10)), params.fixed=list(sample.label=celdaC.sim$sample.label), max.iter = 15, verbose = FALSE, best.only=FALSE)
   expect_true(class(celdaC.res)[1] == "celda_list")
+
+  expect_equal(is.null(celdaC.res$perplexity), TRUE)
+  expect_error(plotGridSearchPerplexity(celdaC.res))
+
+  celdaC.res = calculatePerplexityWithResampling(celdaC.sim$counts, celdaC.res, resample=2)
+  expect_equal(is.null(celdaC.res$perplexity), FALSE)
+  expect_is(celdaC.res, "celda_list")
+  expect_is(celdaC.res, "celda_C")
+  expect_error(calculatePerplexityWithResampling(celdaC.sim$counts, celdaC.res, resample="2"))
+  expect_error(calculatePerplexityWithResampling(celdaC.sim$counts, "celdaC.res", resample=2))
+  
+  plot.obj = plotGridSearchPerplexity(celdaC.res)
+  expect_is(plot.obj, "ggplot")
+
+  celdaG.res = celdaGridSearch(counts = celdaC.sim$counts, model = "celda_G", nchains = 1, params.test=list(L=c(5,10)), max.iter = 5, verbose = FALSE, best.only=TRUE)
+  expect_error(plotGridSearchPerplexity.celda_C(celdaG.res))
+  
+  celdaC.res.K5 <- subsetCeldaList(celdaC.res, params=list(K = 5))
+  model_C_2 = selectBestModel(celdaC.res.K5)
+  res <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C)
+  res2 <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts + 1)
+  
+  expect_error(res <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts[-1,]))
 })
 
 # calculateLoglikFromVariables
@@ -49,11 +72,11 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
 
 # recodeClusterZ
 test_that(desc = "Testing recodeClusterZ with celda_C", {
-  expect_error(recodeClusterZ(celda.mod = model_CG, from = NULL, to = ))
-  expect_error(recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
-  expect_error(recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))    
-  new.recoded <- recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_CG$z == 1, new.recoded$z == 5)
+  expect_error(recodeClusterZ(celda.mod = model_C, from = NULL, to = ))
+  expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
+  expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))    
+  new.recoded <- recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
+  expect_equal(model_C$z == 1, new.recoded$z == 5)
 })
 
 # topRank
