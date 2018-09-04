@@ -172,7 +172,7 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @export
-featureModuleLookup = function(counts, celda.mod, feature){
+featureModuleLookup = function(counts, celda.mod, feature, exact.match){
   class(celda.mod) = c(class(celda.mod), celda.mod)
   UseMethod("featureModuleLookup", celda.mod)
 }
