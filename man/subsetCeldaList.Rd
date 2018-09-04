@@ -6,6 +6,11 @@
 \usage{
 subsetCeldaList(celda.list, params)
 }
+\arguments{
+\item{@celda.list}{celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
+
+\item{@params}{List. List of parameters used to subset celda.list.}
+}
 \value{
 A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 }

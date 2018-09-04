@@ -26,7 +26,7 @@ quality of a given K/L choice.
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-cgs = celdaGridSearch(model="celda_CG", counts=celda.sim$counts, params=list(K=3:5, L=9:11))
+cgs = celdaGridSearch(model="celda_CG", counts=celda.sim$counts, params.test=list(K=3:5, L=9:11))
 cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 plotGridSearchPerplexity(cgs)
 }

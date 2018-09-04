@@ -17,7 +17,7 @@ Visualize perplexity of every model in a celda_list, by unique K/L combinations
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params=list(K=3:5, L=9:11))
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=3:5, L=9:11))
 cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 plotGridSearchPerplexity(cgs)
 }
