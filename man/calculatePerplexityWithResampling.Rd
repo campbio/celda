@@ -25,11 +25,8 @@ as well as resamplings of that count matrix, providing a distribution of perplex
 quality of a given K/L choice.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-celda.mods = celdaGridSearch(model="celda_CG",
-                             counts=celda.sim$counts, 
-                             K.to.test=2:4, 
-                             L.to.test=celda.sim$L, 
-                             max.iter=2, nchains=2)
-perp.with.resampling = calculatePerplexityWithResampling(celda.sim$counts, celda.mods)
+celda.sim = simulateCells(model="celda_CG", K=5, L=10)
+cgs = celdaGridSearch(model="celda_CG", counts=celda.sim$counts, params=list(K=3:5, L=9:11))
+cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
+plotGridSearchPerplexity(cgs)
 }
