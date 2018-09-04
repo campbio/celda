@@ -49,7 +49,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	## Randomly select y or y to supplied initial values
 	## Initialize cluster labels
     current.seed = all.seeds[i]	
-    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=FALSE, verbose=verbose)
+    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 
     if(initialize == "random") {
 	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)

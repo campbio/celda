@@ -54,7 +54,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
 	## Initialize cluster labels
 	current.seed = all.seeds[i]	
-	logMessages(date(), ".. Initializing chain", i, "with", paste0("'", initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=FALSE, verbose=verbose)
+	logMessages(date(), ".. Initializing chain", i, "with", paste0("'", initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 	
     if(initialize == "random") {
   	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
