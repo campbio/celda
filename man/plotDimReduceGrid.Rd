@@ -31,3 +31,7 @@ plotDimReduceGrid(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid,
 \description{
 Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)
 }
+\examples{
+celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+
+}

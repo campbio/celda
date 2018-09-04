@@ -25,3 +25,7 @@ plotDimReduceCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
 \description{
 Create a scatterplot based on celda cluster labels.
 }
+\examples{
+celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))
+}
