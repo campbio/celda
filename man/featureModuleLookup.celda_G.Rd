@@ -13,6 +13,8 @@
 \item{celda.mod}{Model of class "celda_G" or "celda_CG".}
 
 \item{feature}{Character vector. Identify feature modules for the specified feature names.}
+
+\item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
 }
 \value{
 List. Each entry corresponds to the feature module determined for the provided features
