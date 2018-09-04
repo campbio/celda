@@ -9,18 +9,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' 
 #' @param counts A count matrix.
 #' @param model Celda model. Options available in `celda::available.models`.
-#' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
-#' @param K.to.test Integer vector. List of K's to evaluate, where each K is the number of cell populations. 
-#' @param L.to.test Integer vector. List of L's to evaluate, where each L is the number of feature modules. 
-#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
-#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
-#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200. 
-#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
-#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
-#' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 20.
-#' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 20.
 #' @param nchains Integer. Number of random cluster initializations. Default 1. 
 #' @param best.only Logical. Whether to return only the chain with the highest log likelihood per combination of parameters. Default TRUE. 
 #' @param cores Integer. The number of cores to use for parallel Gibbs sampling. Default 1.
@@ -44,16 +33,16 @@ celdaGridSearch = function(counts, model, params,
   model.params = as.list(formals(model))
   if(!all(names(params) %in% names(model.params))) {
     bad.params = setdiff(names(params), names(model.params))
-    stop(paste0("The following elements in 'params' are not arguments of '", model, "': ", paste(bad.params, collapse=","), "."))
+    stop(paste0("The following elements in 'params' are not arguments of '", model, "': ", paste(bad.params, collapse=",")))
   }
   
   model.params.required = setdiff(names(model.params[model.params == ""]), "counts")
   if(!all(model.params.required %in% names(params))) {
     missing.params = setdiff(model.params.required, names(params))
-    stop(paste0("The following arguments are not in 'params' but are required for '", model, "': ", paste(missing.params, collapse=","), "."))
+    stop(paste0("The following arguments are not in 'params' but are required for '", model, "': ", paste(missing.params, collapse=",")))
   }
   if(any(c("z.init", "y.init") %in% names(params))) {
-    stop("Setting 'z.init' and 'y.init' in 'params' is not currently supported.")
+    stop("Setting initialization parameters such as 'z.init' and 'y.init' in 'params' is not currently supported.")
   }
   
   # Set up parameter combinations for each individual chain
@@ -119,99 +108,7 @@ celdaGridSearch = function(counts, model, params,
   return(celda.res)
 }
 
-
-# Build a list of parameters tailored to the specific celda model being run,
-# validating the provided parameters along the way
-buildParamList = function(counts, celda.mod, sample.label, alpha, beta, delta,
-                          gamma, max.iter, z.init, y.init, stop.iter, split.on.iter,
-                          nchains, cores, seed) {
-  
-  params.list = list(counts=counts,
-                     max.iter=max.iter,
-                     stop.iter=stop.iter,
-                     split.on.iter=split.on.iter)
-  
-  if (celda.mod %in% c("celda_C", "celda_CG")) {
-    params.list$alpha = alpha
-    params.list$beta = beta
-    params.list$z.init=z.init
-    params.list$sample.label=sample.label
-  } 
-  if (celda.mod %in% c("celda_G", "celda_CG")) {
-    params.list$beta = beta
-    params.list$delta = delta
-    params.list$gamma = gamma
-    params.list$y.init = y.init
-  }
-  
-  return(params.list)
-}
-
-
-# Sanity check arguments to celda() to ensure a smooth run.
-# See parameter descriptions from celda() documentation.
-validateArgs = function(counts, celda.mod, sample.label, 
-                         nchains, cores, seed, K.to.test=NULL, L.to.test=NULL) { 
-  model_args = names(formals(celda.mod))
-  if ("K.to.test" %in% model_args) {
-    if (is.null(K.to.test)) { 
-      stop("Must provide a K.to.test parameter when running a celda_C or celda_CG model")
-    } else if (is.numeric(K.to.test) && K.to.test <= 1) {
-      stop("Length of 'K.to.test' must be greater than 1")
-    }
     
-  }
-  if ("L.to.test" %in% model_args) {
-    if (is.null(L)) {
-      stop("Must provide a L.to.test parameter when running a celda_G or celda_CG model")
-    } else if (is.numeric(L) && L <= 1) {
-      stop("Length of 'L.to.test' must be greater than 1")
-    }
-  }
-  
-  validateCounts(counts, K.to.test, L.to.test)
-  
-  if (!(celda.mod %in% available_models)) stop("Unavailable model specified")
-      
-  if (!is.null(sample.label)) {
-    if (!(class(sample.label) %in% c("numeric", "character", "factor"))) { 
-      stop("Invalid sample.label; parameter should be either a numeric vector, character vector, or factor")
-    }
-    
-    if (ncol(counts) != length(sample.label)) stop("Length of sample.label does not match number of columns (cells) in counts matrix") 
-  }    
-  
-  if (!is.numeric(nchains) | length(nchains) > 1 | nchains == 0) stop("Invalid nchains specified")
-  
-  if (!is.numeric(cores) | length(cores) > 1 | cores == 0) stop("Invalid cores specified")
-  if (!is.numeric(seed) | length(seed) > 1) stop("Invalid seed specified")
-}
-    
-    
-# Perform some simple checks on the counts matrix, to ensure celda won't choke.
-# See parameter descriptions from celda() documentation.
-validateCounts = function(counts, K.to.test, L.to.test) {
-  # counts has to be a matrix...
-  if (class(counts) != "matrix") stop("'counts' must be of class 'matrix'")
-  
-  # And each row/column of the count matrix must have at least one count
-  count.row.sum = rowSums(counts)
-  count.col.sum = colSums(counts)
-  
-  if (sum(count.row.sum == 0) > 1 | sum(count.col.sum == 0) > 1) {
-    stop("Each row and column of the count matrix must have at least one count")
-  }
-  
-  # Ensure that number of genes / cells is never more than
-  # the number of requested clusters for each
-  if (!is.null(L.to.test) && any(nrow(counts) < L.to.test)) {
-    stop("Number of genes (rows) in count matrix must be >= L")
-  }
-  if (!is.null(K.to.test) && any(ncol(counts) < K.to.test)) {
-    stop("Number of cells (columns) in count matrix must be >= K")
-  }
-}
-
 
 #' Deprecation warning for old grid search function
 #' 
