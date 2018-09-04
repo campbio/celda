@@ -20,33 +20,50 @@
 #'                       L.to.test=c(50, 100), max.iter=2, nchains=1)
 #' desired.mod = filterCeldaList(celda.mods, K=10, L=100)
 #' @export
-filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
-  validateGetModelParams(celda.list, K, L, chain) 
-  
+filterCeldaList = function(celda.list, params=NULL, index=NULL) {
+  if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
+
   # If user provides index / range of indices to select, override all else
   if (!is.null(index)) {
-    return(celda.list$res.list[index])
+    if(!is.numeric(index) | length(index) != 1) stop("'index' needs to be an integer of length 1.") 
+    ix = which(celda.list$run.params$index == index)
+    if(length(ix) == 0) {
+      stop(paste0("The index '", index, "' was not found in the 'run.params' within the given 'celda.list'."))
+    }
+    
+    return(celda.list$res.list[[ix]])
+    
+  } else if(!is.null(params)) {
+  
+    ## Check for bad parameter names
+    if(!all(names(params) %in% colnames(celda.list$run.params))) {
+      bad.params = setdiff(names(params), colnames(celda.list$run.params))
+      stop(paste0("The following elements in 'params' are not columns in celda.list$run.params: ", paste(bad.params, collapse=","), "."))
+    }
+    
+    ## Subset 'run.params' based on items in 'params'
+    new.run.params = celda.list$run.params
+    for(i in names(params)) {
+      new.run.params = subset(new.run.params, new.run.params[,i] %in% params[[i]])
+      
+      if(nrow(new.run.params) == 0) {
+        stop("No runs matched the criteria given in 'params'. Check 'celda.list$run.params' for complete list of parameters used to generate 'celda.list'.")
+      }
+    }
+    
+    ## Get index of selected models, subset celda.list, and return
+    ix = match(new.run.params$index, celda.list$run.params$index)
+    if(length(ix) == 1) {
+      return(celda.list$res.list[[ix]])
+    } else {
+      celda.list$run.params = as.data.frame(new.run.params)
+      celda.list$res.list = celda.list$res.list[ix]
+      return(celda.list)
+    }
+  } else {
+    stop("One of 'params' or 'index' must be given.")
   }
    
-  # Ensure we have accurate run.params, in case the res.list or run.params
-  # was modified
-  if (isTRUE(validateRunParams(celda.list))) {
-    filtered.run.params = celda.list$run.params
-  } else {
-    filtered.run.params = newRunParamsFromResList(celda.list)
-  }
-  
-  # Filter the run params to find matching indices.
-  # Is there a more concise way to do this ..?
-  if (length(K) > 0) {
-    filtered.run.params = filtered.run.params[filtered.run.params$K %in% K, ]
-  }
-  if (length(L) > 0) {
-    filtered.run.params = filtered.run.params[filtered.run.params$L %in% L, ]
-  }
-  if (length(chain) > 0) {
-    filtered.run.params = filtered.run.params[filtered.run.params$chain %in% chain, ]
-  }
   return(celda.list$res.list[filtered.run.params$index])
 }
 
@@ -59,25 +76,26 @@ filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 #' models, respectively.
 #' 
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
-#' @param K Limit search for best model to models with this number of cell clusters.
-#' @param L Limit search for best model to models with this number of feature clusters.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @examples
 #' celda.mods = celdaGridSearch(celda::pbmc_select, model="celda_CG", K.to.test=c(5,10), 
 #'                       L=c(10,20,30), max.iter=2, nchains=1)
 #' best.mod.k5.l20 = selectBestModel(celda.mods, K=5, L=20)
 #' @export
-selectBestModel = function(celda.list, K=c(), L=c()) {
-  if (class(celda.list)[1] != "celda_list") {
-    stop("Provided object is not of class celda_list")
-  }
+selectBestModel = function(celda.list) {
+  if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
  
-  matching.models = filterCeldaList(celda.list, K=K, L=L)
+  group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
+  new.run.params = celda.list$run.params %>% group_by(.dots=group) %>% slice(which.max(log_likelihood))
   
-  logliks = unlist(sapply(matching.models, function(mod) { mod[["finalLogLik"]] }))
-  max.idx = which(logliks == max(logliks, na.rm=TRUE))
-  
-  return(matching.models[[max.idx[1]]])
+  ix = match(new.run.params$index, celda.list$run.params$index)
+  if(nrow(new.run.params) == 1) {
+    return(celda.list$res.list[[ix]])
+  } else {
+    celda.list$run.params = as.data.frame(new.run.params)
+    celda.list$res.list = celda.list$res.list[ix]
+    return(celda.list)
+  }
 }
 
 
