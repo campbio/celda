@@ -181,6 +181,7 @@ subsetCeldaList = function(celda.list, params) {
 #'
 #' ## Returns same result as running celdaGridSearch with "best.only = TRUE"
 #' celda.gs.best = selectBestModel(cgs)  
+#' @import dplyr
 #' @export
 selectBestModel = function(celda.list) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
