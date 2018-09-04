@@ -51,11 +51,11 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     stop(paste0("The following arguments are not in 'params.test' or 'params.fixed' but are required for '", model, "': ", paste(missing.params, collapse=",")))
   }
   if(any(c("z.init", "y.init", "sample.label") %in% names(params.test))) {
-    stop("Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params' is not currently supported.")
+    stop("Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
   }
   
   # Set up parameter combinations for each individual chain
-  run.params = expand.grid(c(chain=list(1:nchains), params))
+  run.params = expand.grid(c(chain=list(1:nchains), params.test))
   run.params = cbind(index = 1:nrow(run.params), run.params)
 
   # Pre-generate a set of random seeds to be used for each chain
@@ -81,7 +81,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     ## Set up chain parameter list
     current.run = c(run.params[i,])
     chain.params = list()
-    for(j in names(params)) {
+    for(j in names(params.test)) {
       chain.params[[j]] = current.run[[j]]
     }
     chain.params$counts = counts
@@ -93,7 +93,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     chain.params$logfile = paste0(logfile.prefix, "_", paste(paste(colnames(run.params), run.params[i,], sep="-"), collapse="_"),  "_Seed-", chain.params$seed, "_log.txt")                                
     
     ## Run model
-    res = do.call(model, chain.params)
+    res = do.call(model, c(chain.params, params.fixed))
     return(list(res))
   }
   parallel::stopCluster(cl)  
@@ -131,9 +131,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' @return A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-#' celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", 
-#'                              params.test=list(K=4:6, L=9:11),
-#'								params.fixed=list(sample.label=celda.sim$sample.label))
+#' celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label))
 #' res.K5.L10 = subsetCeldaList(celda.gs, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
@@ -187,7 +185,7 @@ selectBestModel = function(celda.list) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
  
   group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
-  new.run.params = celda.list$run.params %>% group_by(.dots=group) %>% slice(which.max(log_likelihood))
+  new.run.params = celda.list$run.params %>% dplyr::group_by(.dots=group) %>% dplyr::slice(which.max(log_likelihood))
   
   ix = match(new.run.params$index, celda.list$run.params$index)
   if(nrow(new.run.params) == 1) {
