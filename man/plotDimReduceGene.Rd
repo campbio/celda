@@ -36,3 +36,8 @@ plotDimReduceGene(dim1, dim2, counts, features, exact.match = TRUE,
 \description{
 Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
 }
+\examples{
+celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
+                  counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE))
+}

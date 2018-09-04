@@ -10,6 +10,9 @@
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @param var_label Character vector. Title for the color legend. 
+#' @examples
+#' celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+#' 
 #' @export
 plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df = data.frame(dim1,dim2,t(as.data.frame(matrix)))
@@ -18,7 +21,7 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
   
   m = reshape2::melt(df, id.vars = c("dim1","dim2"))
   colnames(m) = c(xlab,ylab,"facet",var_label)
-  ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes_string(color = var_label)) + 
+  ggplot2::ggplot(m, ggplot2::aes(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = var_label)) + 
     ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, high = color_high, mid = color_mid, midpoint = (max(m[,4])-min(m[,4]))/2 ,name = gsub("_"," ",var_label)) + 
     ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = unit(0,"lines"),
                    panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black"))
@@ -38,6 +41,10 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @examples
+#' celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+#' plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
+#'                   counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE))
 #' @export 
 plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
@@ -60,8 +67,8 @@ plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, t
     counts = counts[features.indices, , drop = FALSE]
   }else{
     counts = counts[rownames(counts) %in% features, , drop = FALSE]
+    counts = counts[match(rownames(counts), features), , drop = FALSE]
   }
-  counts = counts[match(rownames(counts), features), ]
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
@@ -79,6 +86,9 @@ plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, t
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @examples
+#' celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+#' plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"))
 #' @export 
 plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   
@@ -113,6 +123,9 @@ plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, res
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
+#' @examples
+#' celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, celda.mod = model_CG)
+#' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))
 #' @export 
 plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
   df = data.frame(dim1, dim2, cluster)
@@ -124,7 +137,7 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
   if(!is.null(specific_clusters)){
     cluster_colors[!levels(df[[3]]) %in% specific_clusters] = "gray92"
   }
-  ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
+  ggplot2::ggplot(df, ggplot2::aes(x = xlab, y = ylab)) +
     ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = Cluster)) +
     ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(color = "black")) +
     ggplot2::scale_color_manual(values = cluster_colors) +
