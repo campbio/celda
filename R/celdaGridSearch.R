@@ -127,8 +127,8 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' Models can be selected by various parameters, most importantly the K/L parameters (number of cell
 #'  clusters / number of feature clusters). 
 #' 
-#' @param @celda.list celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
-#' @param @params List. List of parameters used to subset celda.list.
+#' @param celda.list celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
+#' @param params List. List of parameters used to subset celda.list.
 #' @return A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
