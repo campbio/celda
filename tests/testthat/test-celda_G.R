@@ -12,6 +12,19 @@ counts.matrix <- celdaG.sim$counts
 #Making sure filterCeldaList if functioning correctly
 test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaG.res$content.type, class(model_G))
+  expect_equal(celdaG.res$content.type, 
+               class(filterCeldaList(celdaG.res, L = 5, index = 1)[[1]]))
+})
+
+#selectBestModel
+test_that(desc = "Checking selectBestModel", {
+  expect_error(selectBestModel(model_G, L = 5), "Provided object is not of class celda_list")
+})
+
+#ValidateGetModelParams
+test_that(desc = "Checking validateGetModelParams",{
+  expect_error(validateGetModelParams(celda.list = celdaG.res, K = NULL, L = NULL), "L parameter needed when subsetting celda_G result lists")
+  expect_error(validateGetModelParams(celda.list = celdaG.res, K = NULL, L = 10), "Provided L was not profiled in the provided celda_list object")  
 })
 
 #Making sure relationship of counts vs proportions is correct in factorize matrix
