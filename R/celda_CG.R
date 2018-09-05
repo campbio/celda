@@ -23,10 +23,9 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_CG with clustering results and various sampling statistics.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      sample.label=celda.sim$sample.label,
-#'                      max.iter=2, nchains=1)
+#'                      sample.label=celda.sim$sample.label, nchains=1)
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
@@ -210,12 +209,12 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' used in the simulation which can be useful for running celda. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
-#' @param S Integer. Number of samples to simulate. 
+#' @param S Integer. Number of samples to simulate. Default 5.  
 #' @param C.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of cells to be generated in each sample. Default c(50, 100). 
-#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
-#' @param G Numeric. The total number of features to be simulated. 
-#' @param K Integer. Number of cell populations. 
-#' @param L Integer. Number of feature modules.  
+#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000). 
+#' @param G Integer. The total number of features to be simulated. Default 100.
+#' @param K Integer. Number of cell populations. Default 5. 
+#' @param L Integer. Number of feature modules. Default 10.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
@@ -227,8 +226,8 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
 #' sim.counts = celda.cg.sim$res.listcounts
 #' @export
-simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
-                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
+simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1000), 
+                                  G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
   
   set.seed(seed)

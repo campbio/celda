@@ -243,11 +243,11 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' used in the simulation which can be useful for running celda. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
-#' @param S Integer. Number of samples to simulate. 
-#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution.
-#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
-#' @param G Numeric. The total number of features to be simulated. 
-#' @param K Integer. Number of cell populations. 
+#' @param S Integer. Number of samples to simulate. Default 5.
+#' @param C.Range Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution. Default c(50, 100).
+#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000). 
+#' @param G Integer. The total number of features to be simulated. Default 100.
+#' @param K Integer. Number of cell populations. Default 5.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
@@ -257,8 +257,8 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' celda.c.sim = simulateCells(model="celda_C", K=10)
 #' sim.counts = celda.c.sim$counts
 #' @export
-simulateCells.celda_C = function(model, S=10, C.Range=c(10, 100), N.Range=c(500,5000), 
-                         G=500, K=5, alpha=1, beta=1, seed=12345, ...) {
+simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1000), 
+                         G=100, K=5, alpha=1, beta=1, seed=12345, ...) {
  
   set.seed(seed) 
     
