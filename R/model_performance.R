@@ -97,7 +97,7 @@ plotGridSearchPerplexity = function(celda.list) {
 #'                       params.fixed=list(sample.label=celda.sim$sample.label),
 #'                       best.only=TRUE, nchains=1)
 #' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
-#' plotGridSearchPerplexity(celda.list)
+#' plotGridSearchPerplexity(cgs)
 #' @export
 plotGridSearchPerplexity.celda_CG = function(celda.list) {
   if (!all(c("K", "L") %in% colnames(celda.list$run.params))) {
