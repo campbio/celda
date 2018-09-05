@@ -8,8 +8,9 @@
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+#' celda.mod = celda_CG(celda.sim$counts, sample.label=celda.sim$sample.label,
+#'                      K=celda.sim$K, L=celda.sim$L, nchain=1)
 #' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity = function(counts, celda.mod, new.counts=NULL) {
@@ -30,8 +31,13 @@ calculatePerplexity = function(counts, celda.mod, new.counts=NULL) {
 #' @param seed Parameter to set.seed() for random number generation. Default 12345.
 #' @return celda_list. Returns the provided `celda.list` with a `perplexity` property, detailing the perplexity of all K/L combinations that appeared in the celda_list's models.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-#' cgs = celdaGridSearch(model="celda_CG", counts=celda.sim$counts, params.test=list(K=3:5, L=9:11))
+#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+#'
+#' ## Run various combinations of parameters with 'celdaGridSearch'
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#'                       params.fixed=list(sample.label=celda.sim$sample.label),
+#'                       best.only=TRUE, nchains=1)
 #' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
@@ -62,8 +68,13 @@ calculatePerplexityWithResampling <- function(counts, celda.list, resample=5, se
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=3:5, L=9:11))
+#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+#'
+#' ## Run various combinations of parameters with 'celdaGridSearch'
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#'                       params.fixed=list(sample.label=celda.sim$sample.label),
+#'                       best.only=TRUE, nchains=1)
 #' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
@@ -78,8 +89,13 @@ plotGridSearchPerplexity = function(celda.list) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=3:5, L=9:11))
+#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+#'
+#' ## Run various combinations of parameters with 'celdaGridSearch'
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#'                       params.fixed=list(sample.label=celda.sim$sample.label),
+#'                       best.only=TRUE, nchains=1)
 #' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(celda.list)
 #' @export
@@ -121,7 +137,9 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' celda.sim = simulateCells(model="celda_C", K=5)
+#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
+#' celda.sim = simulateCells(model="celda_C", K=5, G=100)
+#' ## Run various combinations of parameters with 'celdaGridSearch'
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_C", params.test=list(K=3:5))
 #' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
@@ -162,8 +180,10 @@ plotGridSearchPerplexity.celda_C = function(celda.list) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' celda.sim = simulateCells(model="celda_G")
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_G", params.test=list(L=3:5))
+#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
+#' celda.sim = simulateCells(model="celda_G", L=10, G=100, C=100)
+#' ## Run various combinations of parameters with 'celdaGridSearch'
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_G", params.test=list(L=9:11))
 #' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
