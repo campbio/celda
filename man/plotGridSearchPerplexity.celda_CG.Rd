@@ -24,5 +24,5 @@ cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6
                       params.fixed=list(sample.label=celda.sim$sample.label),
                       best.only=TRUE, nchains=1)
 cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
-plotGridSearchPerplexity(celda.list)
+plotGridSearchPerplexity(cgs)
 }
