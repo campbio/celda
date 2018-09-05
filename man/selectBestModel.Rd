@@ -19,9 +19,12 @@ provided for celda_list objects containing celda_C, celda_G, and celda_CG
 models, respectively.
 }
 \examples{
+celda.sim = simulateCells(model="celda_CG", K=5, L=10)
 ## Run various combinations of parameters with 'celdaGridSearch'
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label), best.only=FALSE)
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+                      params.fixed=list(sample.label=celda.sim$sample.label),
+                      best.only=FALSE, nchains=1)
 
 ## Returns same result as running celdaGridSearch with "best.only = TRUE"
-celda.gs.best = selectBestModel(cgs)  
+cgs.best = selectBestModel(cgs)
 }

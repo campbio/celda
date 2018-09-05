@@ -24,9 +24,8 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
 #'
 #' ## Run various combinations of parameters with 'celdaGridSearch'
-#' celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", 
-#'                              params.test=list(K=4:6, L=9:11),
-#'								params.fixed=list(sample.label=celda.sim$sample.label))                              
+#' celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11),
+#'							  params.fixed=list(sample.label=celda.sim$sample.label), nchains=1)                              
 #' @import foreach
 #' @export
 celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
@@ -132,7 +131,8 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' @return A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label))
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11),
+#'                       params.fixed=list(sample.label=celda.sim$sample.label), nchains=1)
 #' res.K5.L10 = subsetCeldaList(cgs, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
@@ -176,18 +176,21 @@ subsetCeldaList = function(celda.list, params) {
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @examples
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label), best.only=FALSE)
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#'                       params.fixed=list(sample.label=celda.sim$sample.label),
+#'                       best.only=FALSE, nchains=1)
 #'
 #' ## Returns same result as running celdaGridSearch with "best.only = TRUE"
-#' celda.gs.best = selectBestModel(cgs)  
+#' cgs.best = selectBestModel(cgs)
 #' @import dplyr
 #' @export
 selectBestModel = function(celda.list) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
  
   group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
-  new.run.params = celda.list$run.params %>% dplyr::group_by(.dots=group) %>% dplyr::slice(which.max(log_likelihood))
+  new.run.params = celda.list$run.params %>% group_by(.dots=group) %>% slice(which.max(log_likelihood))
   
   ix = match(new.run.params$index, celda.list$run.params$index)
   if(nrow(new.run.params) == 1) {
