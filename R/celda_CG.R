@@ -653,7 +653,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`. 
-#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
@@ -666,14 +666,14 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #'                      nchains=1, max.iter=1)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
-celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, modules=NULL,
+celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
 								perplexity=20, max.iter=2500, seed=12345, ...) {
 
   ## Checking if max.cells and min.cluster.size will work
-  if(max.cells / min.cluster.size < celda.mod$K) {
+  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod$K)) {
     stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
   }
-
+  
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")    
   modules.to.use = 1:nrow(fm$counts$cell.states)
   if (!is.null(modules)) {
