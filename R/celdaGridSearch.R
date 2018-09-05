@@ -21,11 +21,12 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @return Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 #' @examples
 #' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
 #'
 #' ## Run various combinations of parameters with 'celdaGridSearch'
-#' celda.gs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11),
-#'							  params.fixed=list(sample.label=celda.sim$sample.label), nchains=1)                              
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#'                       params.fixed=list(sample.label=celda.sim$sample.label),
+#'                       best.only=TRUE, nchains=1)
 #' @import foreach
 #' @export
 celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
@@ -130,9 +131,10 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' @param params List. List of parameters used to subset celda.list.
 #' @return A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11),
-#'                       params.fixed=list(sample.label=celda.sim$sample.label), nchains=1)
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#'                       params.fixed=list(sample.label=celda.sim$sample.label),
+#'                       best.only=TRUE, nchains=1)
 #' res.K5.L10 = subsetCeldaList(cgs, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
@@ -176,7 +178,7 @@ subsetCeldaList = function(celda.list, params) {
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10)
+#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
 #'                       params.fixed=list(sample.label=celda.sim$sample.label),

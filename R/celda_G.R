@@ -235,9 +235,9 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param C Integer. Number of cells to simulate. Default 100. 
-#' @param L Integer. Number of feature modules.  
+#' @param L Integer. Number of feature modules. Default 10.
 #' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
-#' @param G Numeric. The total number of features to be simulated. 
+#' @param G Integer. The total number of features to be simulated. Default 100. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
@@ -248,8 +248,8 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' celda.g.sim = simulateCells(model="celda_G", L=50)
 #' sim.counts = celda.g.sim$counts
 #' @export
-simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000), G=1000, 
-                                 L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
+simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
+                                 L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
