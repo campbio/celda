@@ -180,19 +180,21 @@ subsetCeldaList = function(celda.list, params) {
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:5, L=9:10), 
 #'                       params.fixed=list(sample.label=celda.sim$sample.label),
-#'                       best.only=FALSE, nchains=1)
+#'                       best.only=FALSE, nchains=3)
 #'
 #' ## Returns same result as running celdaGridSearch with "best.only = TRUE"
 #' cgs.best = selectBestModel(cgs)
-#' @import dplyr
+#' @import data.table
 #' @export
 selectBestModel = function(celda.list) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
  
   group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
-  new.run.params = celda.list$run.params %>% group_by(.dots=group) %>% slice(which.max(log_likelihood))
+  dt = data.table::as.data.table(celda.list$run.params)
+  new.run.params = as.data.frame(dt[,.SD[which.max(log_likelihood)], by=group])
+  new.run.params = new.run.params[,colnames(celda.list$run.params)]
   
   ix = match(new.run.params$index, celda.list$run.params$index)
   if(nrow(new.run.params) == 1) {
