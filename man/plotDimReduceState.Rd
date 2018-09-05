@@ -37,7 +37,7 @@ plotDimReduceState(dim1, dim2, counts, celda.mod, modules = NULL,
 Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
 }
 \examples{
-\dontrun{
+\donttest{
 sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
 celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
 celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
