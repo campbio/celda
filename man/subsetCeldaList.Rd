@@ -21,6 +21,7 @@ Models can be selected by various parameters, most importantly the K/L parameter
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), params.fixed=list(sample.label=celda.sim$sample.label))
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11),
+                      params.fixed=list(sample.label=celda.sim$sample.label), nchains=1)
 res.K5.L10 = subsetCeldaList(cgs, params=list(K=5, L=10))
 }
