@@ -549,7 +549,7 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C". 
-#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
@@ -562,11 +562,11 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne.celda_C = function(counts, celda.mod,  
-							 max.cells=10000, min.cluster.size=100, initial.dims=20,
+							 max.cells=25000, min.cluster.size=100, initial.dims=20,
 							 perplexity=20, max.iter=2500, seed=12345, ...) {
 
   ## Checking if max.cells and min.cluster.size will work
-  if(max.cells / min.cluster.size < celda.mod$K) {
+  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod$K)) {
     stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
   }
   
