@@ -223,8 +223,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
-#' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
-#' sim.counts = celda.cg.sim$res.listcounts
+#' celda.sim = simulateCells(model="celda_CG")
 #' @export
 simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1000), 
                                   G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
