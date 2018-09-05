@@ -245,8 +245,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
-#' celda.g.sim = simulateCells(model="celda_G", L=50)
-#' sim.counts = celda.g.sim$counts
+#' celda.g.sim = simulateCells(model="celda_G")
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
                                  L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {

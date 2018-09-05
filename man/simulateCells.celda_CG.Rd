@@ -43,6 +43,5 @@ This function generates a list containing a simulated counts matrix, as well as 
 used in the simulation which can be useful for running celda.
 }
 \examples{
-celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
-sim.counts = celda.cg.sim$res.listcounts
+celda.sim = simulateCells(model="celda_CG")
 }
