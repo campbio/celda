@@ -14,6 +14,13 @@ counts.matrix <- celdaCG.sim$counts
 #Making sure filterCeldaList if functioning correctly
 test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaCG.res$content.type, class(model_CG))
+  expect_equal(celdaCG.res$content.type, 
+               class(filterCeldaList(celdaCG.res, K = 5, L = 3, index = 1)[[1]]))
+})
+
+#selectBestModel
+test_that(desc = "Checking selectBestModel", {
+  expect_error(selectBestModel(model_CG, K = 5, L = 3), "Provided object is not of class celda_list")
 })
 
 # Cluster probabilities

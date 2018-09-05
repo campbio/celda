@@ -5,13 +5,20 @@ context("Testing celda_C")
 load("../celdaCsim.rda")
 load("../celdaC.rda")
 counts.matrix <- celdaC.sim$counts
-model_C = filterCeldaList(celdaC.res, K = 5)[[1]]
+model_C = filterCeldaList(celdaC.res, K = 5, chain = 1)[[1]]
 factorized = factorizeMatrix(counts=counts.matrix, celda.mod = model_C)
 
 #Checking pre-loaded data
 #Making sure filterCeldaList if functioning correctly
 test_that(desc = "Sanity checking filterCeldaList", {
   expect_equal(celdaC.res$content.type, class(model_C))
+  expect_equal(celdaC.res$content.type, 
+               class(filterCeldaList(celdaC.res, K = 5, index = 2)[[1]]))
+})
+
+#selectBestModel
+test_that(desc = "Checking selectBestModel", {
+  expect_error(selectBestModel(model_C, K = 5), "Provided object is not of class celda_list")
 })
 
 #distinct_colors#
