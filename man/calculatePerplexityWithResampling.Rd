@@ -25,8 +25,13 @@ as well as resamplings of that count matrix, providing a distribution of perplex
 quality of a given K/L choice.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG", K=5, L=10)
-cgs = celdaGridSearch(model="celda_CG", counts=celda.sim$counts, params.test=list(K=3:5, L=9:11))
+## Simulate a small dataset with 5 cell clusters and 10 feature modules
+celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+
+## Run various combinations of parameters with 'celdaGridSearch'
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+                      params.fixed=list(sample.label=celda.sim$sample.label),
+                      best.only=TRUE, nchains=1)
 cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
 plotGridSearchPerplexity(cgs)
 }
