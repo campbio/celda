@@ -19,6 +19,6 @@ Generate factorized matrices showing each feature's influence on the celda_G mod
 }
 \examples{
 celda.sim = simulateCells("celda_G")
-celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 }

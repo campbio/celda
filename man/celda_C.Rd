@@ -53,6 +53,5 @@ celda Cell Clustering Model
 }
 \examples{
 celda.sim = simulateCells(model="celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label,
-                    max.iter=2, nchains=1)
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
 }
