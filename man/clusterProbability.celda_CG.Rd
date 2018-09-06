@@ -23,7 +23,6 @@ Calculates the conditional probability of each cell belong to each cluster given
 }
 \examples{
 celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 }
