@@ -17,9 +17,6 @@ test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", 
 test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, params.test=list(L=c(5,10)), max.iter = 10, verbose = FALSE, best.only=FALSE)
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
-  expect_error(validateGetModelParams(celda.list = celdaG.res, K = NULL, L = NULL), "L parameter needed when subsetting celda_G result lists") 
-  expect_error(validateGetModelParams(celda.list = celdaG.res, K = NULL, L = 10), "Provided L was not profiled in the provided celda_list object")
-
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
 
