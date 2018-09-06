@@ -71,7 +71,7 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
 #' @param counts The counts matrix used to generate the provided cluster assignments.
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param model Celda model. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @examples
