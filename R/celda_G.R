@@ -628,14 +628,22 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
 #' celda.sim = simulateCells("celda_G")
 #' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 #' @export
-featureModuleLookup.celda_G = function(counts, celda.mod, feature){
+featureModuleLookup.celda_G = function(counts, celda.mod, feature, exact.match = TRUE){
   list <- list()
+  if(!isTRUE(exact.match)){
+    feature.grep <- c()
+    for(x in 1:length(feature)){
+      feature.grep <- c(feature.grep, rownames(counts)[grep(feature[x],rownames(counts))]) 
+    }
+    feature <- feature.grep
+  }
   for(x in 1:length(feature)){
     if(feature[x] %in% rownames(counts)){
       list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
