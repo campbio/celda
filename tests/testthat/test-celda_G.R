@@ -61,6 +61,10 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
   expect_equal(dim(norm.counts), dim(celdaG.sim$counts))
   expect_equal(rownames(norm.counts), rownames(celdaG.sim$counts))
   expect_equal(colnames(norm.counts), colnames(celdaG.sim$counts))
+  expect_error(normalizeCounts(celdaG.sim$counts, transformation.fun = "scale"), 
+               "'transformation.fun' needs to be of class 'function'")
+  expect_error(normalizeCounts(celdaG.sim$counts, scale.fun = "scale"), 
+               "'scale.fun' needs to be of class 'function'")
 })
 
 # recodeClusterY
