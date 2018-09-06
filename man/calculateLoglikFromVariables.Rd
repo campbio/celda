@@ -21,8 +21,7 @@ Calculate a log-likelihood for a user-provided cluster assignment and count matr
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG")
-celda.mod = "celda_CG"
-loglik = calculateLoglikFromVariables(celda.sim$counts, model, 
+loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_CG", 
                                       sample.label=celda.sim$sample.label,
                                       z=celda.sim$z, y=celda.sim$y,
                                       K=celda.sim$K, L=celda.sim$L,
