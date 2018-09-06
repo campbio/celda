@@ -6,13 +6,6 @@ celdaG.sim = simulateCells("celda_G", L=5, G=100)
 model_G = celda_G(counts=celdaG.sim$counts, L=celdaG.sim$L, max.iter=10, verbose=FALSE)
 factorized = factorizeMatrix(counts=celdaG.sim$counts, celda.mod = model_G)  
 
-# celda_G
-test_that(desc = "Testing simulation and celda_G model", {
-  expect_equal(typeof(celdaG.sim$counts), "integer")
-  expect_true(all(sweep(factorized$counts$cell.states, 2, colSums(celdaG.sim$counts), "/") == factorized$proportions$cell.states))  
-  expect_true(ncol(factorized$proportions$gene.states) == model_G$L)  
-})
-
 test_that(desc = "Testing clusterProbability with celda_G", {
   expect_true(ncol(clusterProbability(celdaG.sim$counts, model_G)$y.probability) == celdaG.sim$L)
 })
@@ -24,7 +17,6 @@ test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", 
 test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, params.test=list(L=c(5,10)), max.iter = 10, verbose = FALSE, best.only=FALSE)
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
-  
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
 
