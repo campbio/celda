@@ -468,8 +468,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = "celda_CG"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_CG", 
 #'                                       sample.label=celda.sim$sample.label,
 #'                                       z=celda.sim$z, y=celda.sim$y,
 #'                                       K=celda.sim$K, L=celda.sim$L,
@@ -520,8 +519,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
@@ -566,7 +564,7 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L, max.iter=2, nchains=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
@@ -636,8 +634,7 @@ reorder.celda_CG = function(counts, res){
 #' @param ... Additional parameters.
 #' @examples 
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' celdaHeatmap(celda.sim$counts, celda.mod)
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
@@ -662,8 +659,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
@@ -731,8 +727,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' celdaProbabilityMap(celda.sim$counts, celda.mod)
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
@@ -783,9 +778,9 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K=10, 
-#'                      L=50, max.iter=2, nchains=1)
-#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
   list <- list()
