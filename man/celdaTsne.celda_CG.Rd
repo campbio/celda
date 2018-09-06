@@ -32,7 +32,6 @@ Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
 celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 }
