@@ -11,7 +11,9 @@ test_that(desc = "Testing simulation and celda_CG model", {
   expect_equal(typeof(celdaCG.sim$counts), "integer")
   expect_true(all(sweep(factorized$counts$cell.states, 2, colSums(celdaCG.sim$counts), "/") == factorized$proportions$cell.states))
   expect_equal(celdaCG.sim$K, ncol(factorized$proportions$population.states))
-  expect_equal(celdaCG.sim$L, nrow(factorized$proportions$population.states))                        
+  expect_equal(celdaCG.sim$L, nrow(factorized$proportions$population.states))   
+  expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_CG))))
+  expect_equal(max(completeLogLikelihood(celda.mod = model_CG)), finalLogLikelihood(model_CG))
 })
 
 # Cluster probabilities
@@ -32,10 +34,10 @@ test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", 
 test_that(desc = "Testing celdaGridSearch with celda_CG", {
   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=FALSE)
   expect_true(all(class(celdaCG.res) == c("celda_list", "celda_CG")))
-
   expect_equal(is.null(celdaCG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaCG.res))
-
+  expect_equal(names(runParams(celda.list = celdaCG.res)), c("index","chain","K","L","log_likelihood"))
+  
   celdaCG.res = calculatePerplexityWithResampling(celdaCG.sim$counts, celdaCG.res, resample=2)
   expect_equal(is.null(celdaCG.res$perplexity), FALSE)
   expect_is(celdaCG.res, "celda_list")
