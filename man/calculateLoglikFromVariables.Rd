@@ -9,9 +9,9 @@ calculateLoglikFromVariables(counts, model, ...)
 \arguments{
 \item{counts}{The counts matrix used to generate the provided cluster assignments.}
 
-\item{...}{Additional parameters.}
+\item{model}{Celda model. Options available in `celda::available.models`.}
 
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{...}{Additional parameters.}
 }
 \value{
 The log-likelihood of the provided cluster assignment for the provided counts matrix.
