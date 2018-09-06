@@ -170,8 +170,9 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @export
-featureModuleLookup = function(counts, celda.mod, feature){
+featureModuleLookup = function(counts, celda.mod, feature, exact.match = TRUE){
   class(celda.mod) = c(class(celda.mod), celda.mod)
   UseMethod("featureModuleLookup", celda.mod)
 }
