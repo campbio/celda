@@ -18,10 +18,10 @@
 #' @export 
 moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NULL, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
   #input checks
-  if (!is.matrix(counts)) {
+  if (is.null(counts)){
     stop("'counts' should be a numeric count matrix")
   }
-  if (!class(celda.mod) %in% c("celda_G", "celda_CG")|| is.null(celda.mod$y)){
+  if (is.null(celda.mod)){
     stop("'celda.mod' should be an object of class celda_G or celda_CG")
   }
   compareCountMatrix(counts, celda.mod)
@@ -48,21 +48,23 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   
   #Determine cell order from factorize.matrix$proportions$cell.states
   cell.states <- factorize.matrix$proportions$cell.states 
-  cell.states <- cell.states[feature.module, , drop = FALSE]
+  cell.states <- cell.states[feature.module, ,drop = FALSE]
   
-  if(is.null(top.cells)){
-    top.cells <- ncol(cell.states)
+  single.module <- cell.states[1, ]
+  single.module.ordered <- order(single.module, decreasing = TRUE)
+  
+  if(!is.null(top.cells)){
+    if(top.cells * 2 < ncol(cell.states)){
+      cell.indices <- c(head(single.module.ordered, n = top.cells), 
+                        tail(single.module.ordered, n = top.cells))
+    }else{
+      cell.indices <- single.module.ordered 
+    }
+  }else{
+    cell.indices <- single.module.ordered
   }
-  cell.indices <- c()
-  for(modules in 1:nrow(cell.states)){
-    single.module <- cell.states[modules, ]
-    single.module.ordered <- order(single.module, decreasing = TRUE)
-    cell.indices <- c(cell.indices, head(single.module.ordered, n = top.cells), tail(single.module.ordered, n = top.cells))
-  }
-  cell.indices <- cell.indices[!duplicated(cell.indices)] 
   
-  
-  #normalize counts matrix
+  cell.indices <- rev(cell.indices)
   if(normalize){
     norm.counts <- normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   } else{
@@ -72,11 +74,13 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   #filter counts based on feature.indices 
   filtered_norm.counts <- norm.counts[feature.indices, cell.indices]
   
-  filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0, ]
+  filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0,]
   
+  gene_ix = match(rownames(filtered_norm.counts), celda.mod$names$row)
+  cell_ix = match(colnames(filtered_norm.counts), celda.mod$names$column)
   if(!is.null(celda.mod$z)){
-    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell.indices]))]
-    names(cell) <- sort(unique(celda.mod$z[cell.indices]))
+    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell_ix]))]
+    names(cell) <- sort(unique(celda.mod$z[cell_ix]))
     anno_cell_colors <- list(cell = cell)
   }else{
     anno_cell_colors <- NULL
@@ -84,12 +88,13 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   plotHeatmap(
     filtered_norm.counts,
     z = celda.mod$z[cell.indices],
-    y = celda.mod$y[feature.indices],
+    y = celda.mod$y[gene_ix],
     scale.row = scale.row,
-    color_scheme = "divergent",
-    show_featurenames = show_featurenames,
-    cluster_gene = FALSE,
-    cluster_cell = FALSE,
-    annotation_color = anno_cell_colors
+    color.scheme = "divergent",
+    show.featurenames = show_featurenames,
+    cluster.feature = FALSE,
+    cluster.cell = FALSE,
+    annotation.color = anno_cell_colors
   )
 }
+
