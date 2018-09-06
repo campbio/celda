@@ -594,7 +594,7 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, perplexity=20, max.iter=2500, seed=12345, ...) {
@@ -632,8 +632,9 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
-#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+#' celda.sim = simulateCells("celda_G")
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
+#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 #' @export
 featureModuleLookup.celda_G = function(counts, celda.mod, feature){
   list <- list()
