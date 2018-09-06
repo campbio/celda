@@ -126,7 +126,7 @@ plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, res
   
   if(!is.null(modules)){
     if(length(rownames(matrix)[rownames(matrix) %in% modules]) < 1){
-      stop("The module selected does not exist in the model.")
+      stop("All modules selected do not exist in the model.")
     }
     matrix = matrix[which(rownames(matrix) %in% modules),]
     matrix = matrix[match(rownames(matrix), modules),]
