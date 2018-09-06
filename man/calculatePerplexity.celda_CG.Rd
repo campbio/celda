@@ -22,6 +22,6 @@ cluster assignments fit the data being clustered.
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L, max.iter=2, nchains=1)
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 }

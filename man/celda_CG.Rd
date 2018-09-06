@@ -63,6 +63,5 @@ celda Cell and Gene Clustering Model
 \examples{
 celda.sim = simulateCells(model="celda_CG")
 celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     sample.label=celda.sim$sample.label,
-                     max.iter=2, nchains=1)
+                     sample.label=celda.sim$sample.label, nchains=1)
 }
