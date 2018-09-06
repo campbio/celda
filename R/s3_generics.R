@@ -71,22 +71,21 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
 #' @param counts The counts matrix used to generate the provided cluster assignments.
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param model Celda model. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = "celda_CG"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_CG", 
 #'                                       sample.label=celda.sim$sample.label,
 #'                                       z=celda.sim$z, y=celda.sim$y,
 #'                                       K=celda.sim$K, L=celda.sim$L,
 #'                                       alpha=celda.sim$alpha, beta=celda.sim$beta,
 #'                                       gamma=celda.sim$gamma, delta=celda.sim$delta)
 #' @export
-calculateLoglikFromVariables = function(counts, celda.mod, ...) {
-  class(counts) = c(celda.mod)
-  do.call(paste("calculateLoglikFromVariables.", celda.mod, sep=""),
+calculateLoglikFromVariables = function(counts, model, ...) {
+  class(counts) = c(model)
+  do.call(paste("calculateLoglikFromVariables.", model, sep=""),
           list(counts, ...))
 }
 

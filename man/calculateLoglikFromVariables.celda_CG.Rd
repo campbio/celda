@@ -35,8 +35,7 @@ Calculate log lileklihood for the celda Cell and Gene clustering model, given a 
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG")
-celda.mod = "celda_CG"
-loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_CG", 
                                       sample.label=celda.sim$sample.label,
                                       z=celda.sim$z, y=celda.sim$y,
                                       K=celda.sim$K, L=celda.sim$L,
