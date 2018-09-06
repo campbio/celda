@@ -14,12 +14,18 @@ test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", 
   expect_error(simulateCells(model = "celda_G", gamma=0.000001))
 })
 
+test_that(desc = "Testing LogLikelihood functions", {
+  expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_G))))
+  expect_equal(max(completeLogLikelihood(celda.mod = model_G)), finalLogLikelihood(model_G))
+})
+
 test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, params.test=list(L=c(5,10)), max.iter = 10, verbose = FALSE, best.only=FALSE)
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
-
+  expect_equal(names(runParams(celda.list = celdaG.res)), c("index","chain","L","log_likelihood"))
+  
   celdaG.res = calculatePerplexityWithResampling(celdaG.sim$counts, celdaG.res, resample=2)
   expect_equal(is.null(celdaG.res$perplexity), FALSE)
   expect_is(celdaG.res, "celda_list")
