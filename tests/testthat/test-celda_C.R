@@ -49,7 +49,7 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 
 # calculateLoglikFromVariables
 test_that(desc = "Testing calculateLoglikFromVariables.celda_C", {
-  expect_lt(calculateLoglikFromVariables(celda.mod="celda_C", 
+  expect_lt(calculateLoglikFromVariables(model="celda_C", 
                                          counts = celdaC.sim$counts,z = celdaC.sim$z,
                                          K = celdaC.sim$K, alpha = 1, beta = 1,
                                          sample.label = celdaC.sim$sample.label), 0)
