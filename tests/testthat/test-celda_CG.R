@@ -62,7 +62,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
 
 # Ensure calculateLoglikFromVariables calculates the expected values
 test_that(desc = "Testing calculateLoglikFromVariables.celda_CG", {
-  expect_lt(calculateLoglikFromVariables(celda.mod="celda_CG",
+  expect_lt(calculateLoglikFromVariables(model="celda_CG",
                                          y = celdaCG.sim$y, z = celdaCG.sim$z,
                                          delta = 1, gamma = 1,  beta = 1, 
                                          alpha = 1, K = celdaCG.sim$K, L = celdaCG.sim$L, 
