@@ -93,7 +93,6 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
                c("index","names"))
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
   expect_equal(names(top.rank),
-               c("index","names"))
 })
 
 # plotHeatmap
@@ -138,6 +137,12 @@ test_that(desc = "Testing celdaProbabiltyMap.celda_C for sample level",{
 test_that(desc = "Testing differentialExpression with celda_C", {
   diffexp_K1 <- differentialExpression(counts = celdaC.sim$counts, celda.mod = model_C, c1 = 1)
   expect_equal(class(diffexp_K1), c("data.table", "data.frame"))
+  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaC.sim$counts, celda.mod = model_C, c1 = 2:3, c2 = 4, log2fc.threshold = 0.5)),
+               c("data.table", "data.frame"))  	
+  expect_error(differentialExpression(counts = "counts", celda.mod = model_C, c1 = 3, log2fc.threshold = 0.5),"'counts' should be a numeric count matrix")
+  expect_error(differentialExpression(counts = celdaC.sim$counts, celda.mod = NULL, c1 = 3), "'celda.mod' should be an object of class celda_C or celda_CG")               
+  expect_error(differentialExpression(counts = celdaC.sim$counts, celda.mod = model_C, c1 = NULL, log2fc.threshold = 0.5, only.pos = TRUE))
+  
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
