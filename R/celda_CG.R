@@ -23,7 +23,7 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_CG with clustering results and various sampling statistics.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+#' celda.sim = simulateCells(model="celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      sample.label=celda.sim$sample.label, nchains=1)
 #' @export
@@ -313,8 +313,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @examples 
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
