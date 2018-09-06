@@ -78,6 +78,10 @@ test_that(desc = "Testing normalizeCounts with celda_CG", {
   expect_equal(dim(norm.counts), dim(celdaCG.sim$counts))
   expect_equal(rownames(norm.counts), rownames(celdaCG.sim$counts))
   expect_equal(colnames(norm.counts), colnames(celdaCG.sim$counts))
+  expect_error(normalizeCounts(celdaCG.sim$counts, transformation.fun = "scale"), 
+               "'transformation.fun' needs to be of class 'function'")
+  expect_error(normalizeCounts(celdaCG.sim$counts, scale.fun = "scale"), 
+               "'scale.fun' needs to be of class 'function'")
 })
 
 
@@ -225,3 +229,9 @@ test_that(desc = "Testing cCG.splitZ and cCG.splitY", {
   expect_true(length(res$y) == nrow(r$counts))  
 })
 
+#miscellaneous distance fxns
+test_that(desc = "miscellaneous distance fxns that are not directly used within celda, but will be tested", {
+  x = data.frame(x = 2:4, y=  1:3)
+  expect_equal(class(hellingerDist(x)), "dist")
+  expect_equal(class(spearmanDist(x)), "dist")
+})

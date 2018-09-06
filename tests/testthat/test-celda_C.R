@@ -70,6 +70,10 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
   expect_equal(dim(norm.counts),dim(celdaC.sim$counts))
   expect_equal(rownames(norm.counts),rownames(celdaC.sim$counts))
   expect_equal(colnames(norm.counts),colnames(celdaC.sim$counts))
+  expect_error(normalizeCounts(celdaC.sim$counts, transformation.fun = "scale"), 
+               "'transformation.fun' needs to be of class 'function'")
+  expect_error(normalizeCounts(celdaC.sim$counts, scale.fun = "scale"), 
+               "'scale.fun' needs to be of class 'function'")
 })
 
 # recodeClusterZ
