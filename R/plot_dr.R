@@ -56,9 +56,13 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #'                   counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
 #'}
 #' @export 
-plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
-  counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
-  
+plotDimReduceGene = function(dim1, dim2, counts, features, normalize = TRUE, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+  if(isTRUE(normalize)){
+    counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale) 
+  }
+  if(is.null(features)){
+    stop("at least one feature is required to create a plot")
+  }
   if(!is.null(trim)){
     if(length(trim) != 2) {
       stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
