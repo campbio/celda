@@ -10,7 +10,9 @@ factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)
 test_that(desc = "Testing simulation and celda_C model", {
   expect_equal(typeof(celdaC.sim$counts), "integer")
   expect_true(all(sweep(factorized$counts$sample.states, 2, colSums(factorized$counts$sample.states), "/") == factorized$proportions$sample.states))  
-  expect_true(ncol(factorized$proportions$gene.states) == model_C$K)  
+  expect_true(ncol(factorized$proportions$gene.states) == model_C$K)
+  expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_C))))
+  expect_equal(max(completeLogLikelihood(celda.mod = model_C)), finalLogLikelihood(model_C))
 })
 
 # clusterProbability
@@ -22,7 +24,7 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 test_that(desc = "Testing celdaGridSearch with celda_C", {
   celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, params.test=list(K=c(5,10)), params.fixed=list(sample.label=celdaC.sim$sample.label), max.iter = 15, verbose = FALSE, best.only=FALSE)
   expect_true(class(celdaC.res)[1] == "celda_list")
-
+  expect_equal(names(runParams(celda.list = celdaC.res)), c("index","chain","K","log_likelihood"))
   expect_equal(is.null(celdaC.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaC.res))
 
@@ -134,7 +136,6 @@ test_that(desc = "Testing differentialExpression with celda_C", {
   expect_equal(class(diffexp_K1), c("data.table", "data.frame"))
 })
 
-# celdaTsne
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
   tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C$z), min.cluster.size=10)
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C$z)
