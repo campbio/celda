@@ -160,12 +160,13 @@ test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
 
 # differentialExpression
 test_that(desc = "Testing differentialExpression for celda_CG", {
-  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5)),
+  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5, only.pos = TRUE)),
 		c("data.table", "data.frame"))
-  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 3, c2 = 4, log2fc.threshold = 0.5)),
+  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 2:3, c2 = 4, log2fc.threshold = 0.5)),
                c("data.table", "data.frame"))		
   expect_error(differentialExpression(counts = "counts", celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5),"'counts' should be a numeric count matrix")
   expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = NULL, c1 = 3), "'celda.mod' should be an object of class celda_C or celda_CG")               
+  expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = NULL, log2fc.threshold = 0.5, only.pos = TRUE))
 })
 
 # plotDimReduce
