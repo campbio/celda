@@ -92,7 +92,6 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
   expect_equal(names(top.rank),
                c("index","names"))
   top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
-  expect_equal(names(top.rank),
 })
 
 # plotHeatmap
