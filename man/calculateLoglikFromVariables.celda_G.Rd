@@ -30,8 +30,7 @@ over multiple iterations of Gibbs sampling.
 }
 \examples{
 celda.sim = simulateCells(model="celda_G")
-celda.mod = "celda_G"
-loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_G", 
                                       y=celda.sim$y, L=celda.sim$L,
                                       beta=celda.sim$beta, delta=celda.sim$delta,
                                       gamma=celda.sim$gamma)
