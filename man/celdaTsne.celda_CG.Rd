@@ -4,7 +4,7 @@
 \alias{celdaTsne.celda_CG}
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
-\method{celdaTsne}{celda_CG}(counts, celda.mod, max.cells = 10000,
+\method{celdaTsne}{celda_CG}(counts, celda.mod, max.cells = 25000,
   min.cluster.size = 100, modules = NULL, perplexity = 20,
   max.iter = 2500, seed = 12345, ...)
 }
@@ -13,7 +13,7 @@
 
 \item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
 
 \item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
@@ -32,7 +32,6 @@ Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
 celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 }

@@ -51,6 +51,5 @@ sequencing count matrix, using the celda Bayesian hierarchical model.
 }
 \examples{
 celda.sim = simulateCells(model="celda_G")
-celda.mod = celda_G(celda.sim$counts, L=celda.sim$L,
-                     max.iter=2, nchains=1)
+celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 }
