@@ -25,8 +25,7 @@
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      sample.label=celda.sim$sample.label,
-#'                      max.iter=2, nchains=1)
+#'                      sample.label=celda.sim$sample.label, nchains=1)
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
@@ -59,7 +58,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   
 	## Initialize cluster labels
     current.seed = all.seeds[i]	
-    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=FALSE, verbose=verbose)
+    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 
     if(initialize == "random") {
   	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
@@ -210,12 +209,12 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' used in the simulation which can be useful for running celda. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
-#' @param S Integer. Number of samples to simulate. 
+#' @param S Integer. Number of samples to simulate. Default 5.  
 #' @param C.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of cells to be generated in each sample. Default c(50, 100). 
-#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
-#' @param G Numeric. The total number of features to be simulated. 
-#' @param K Integer. Number of cell populations. 
-#' @param L Integer. Number of feature modules.  
+#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000). 
+#' @param G Integer. The total number of features to be simulated. Default 100.
+#' @param K Integer. Number of cell populations. Default 5. 
+#' @param L Integer. Number of feature modules. Default 10.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
@@ -224,11 +223,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
-#' celda.cg.sim = simulateCells(model="celda_CG", K=10, L=50)
-#' sim.counts = celda.cg.sim$res.listcounts
+#' celda.sim = simulateCells(model="celda_CG")
 #' @export
-simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
-                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
+simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1000), 
+                                  G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
   
   set.seed(seed)
@@ -315,8 +313,7 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
 #' @examples 
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
@@ -470,8 +467,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = "celda_CG"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_CG", 
 #'                                       sample.label=celda.sim$sample.label,
 #'                                       z=celda.sim$z, y=celda.sim$y,
 #'                                       K=celda.sim$K, L=celda.sim$L,
@@ -522,8 +518,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
@@ -568,7 +563,7 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L, max.iter=2, nchains=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
@@ -638,8 +633,7 @@ reorder.celda_CG = function(counts, res){
 #' @param ... Additional parameters.
 #' @examples 
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' celdaHeatmap(celda.sim$counts, celda.mod)
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
@@ -655,7 +649,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`. 
-#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
@@ -664,18 +658,17 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
-celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, modules=NULL,
+celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
 								perplexity=20, max.iter=2500, seed=12345, ...) {
 
   ## Checking if max.cells and min.cluster.size will work
-  if(max.cells / min.cluster.size < celda.mod$K) {
+  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod$K)) {
     stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
   }
-
+  
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")    
   modules.to.use = 1:nrow(fm$counts$cell.states)
   if (!is.null(modules)) {
@@ -733,8 +726,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' celdaProbabilityMap(celda.sim$counts, celda.mod)
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
@@ -785,9 +777,9 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_CG(celda::pbmc_select, K=10, 
-#'                      L=50, max.iter=2, nchains=1)
-#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
   list <- list()
