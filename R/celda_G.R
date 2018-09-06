@@ -22,8 +22,7 @@
 #' @return An object of class celda_G with clustering results and various sampling statistics.
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L,
-#'                      max.iter=2, nchains=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
@@ -309,7 +308,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
 #' @examples 
 #' celda.sim = simulateCells("celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
@@ -430,8 +429,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' celda.mod = "celda_G"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_G", 
 #'                                       y=celda.sim$y, L=celda.sim$L,
 #'                                       beta=celda.sim$beta, delta=celda.sim$delta,
 #'                                       gamma=celda.sim$gamma)
@@ -481,7 +479,7 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @examples
 #' celda.sim = simulateCells("celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
@@ -516,7 +514,7 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, max.iter=2, nchains=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_G = function(counts, celda.mod, new.counts=NULL) {

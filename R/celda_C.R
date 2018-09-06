@@ -20,8 +20,7 @@
 #' @return An object of class celda_C with clustering results and various sampling statistics.
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label,
-#'                     max.iter=2, nchains=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 					 algorithm = c("EM", "Gibbs"), 
@@ -306,7 +305,7 @@ simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
 #' @examples 
 #' celda.sim = simulateCells("celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.mod, 
@@ -395,8 +394,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
-#' celda.mod = "celda_C"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_C", 
 #'                                       sample.label=celda.sim$sample.label,
 #'                                       z=celda.sim$z, K=celda.sim$K,
 #'                                       alpha=celda.sim$alpha, beta=celda.sim$beta)
@@ -449,7 +447,7 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @examples
 #' celda.sim = simulateCells("celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 #' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
@@ -485,7 +483,7 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, max.iter=2, nchains=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 #' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
@@ -536,7 +534,7 @@ reorder.celda_C = function(counts, res){
 #' @param ... Additional parameters.
 #' @examples 
 #' celda.sim = simulateCells("celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 #' celdaHeatmap(celda.sim$counts, celda.mod)
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
@@ -558,7 +556,7 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne.celda_C = function(counts, celda.mod,  
@@ -617,7 +615,7 @@ celdaTsne.celda_C = function(counts, celda.mod,
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_C")
-#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+#' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 #' celdaProbabilityMap(celda.sim$counts, celda.mod)
 #' @export 
 celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ...){

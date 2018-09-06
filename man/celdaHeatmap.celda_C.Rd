@@ -20,6 +20,6 @@ celdaHeatmap for celda Cell clustering function
 }
 \examples{
 celda.sim = simulateCells("celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 celdaHeatmap(celda.sim$counts, celda.mod)
 }
