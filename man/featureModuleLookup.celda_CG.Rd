@@ -20,7 +20,7 @@ List. Each entry corresponds to the feature module determined for the provided f
 This function will output the gene module of a specific gene(s) from a celda model
 }
 \examples{
-celda.mod = celda_CG(celda::pbmc_select, K=10, 
-                     L=50, max.iter=2, nchains=1)
-corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 }

@@ -61,7 +61,7 @@ An object of class celda_CG with clustering results and various sampling statist
 celda Cell and Gene Clustering Model
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+celda.sim = simulateCells(model="celda_CG")
 celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
                      sample.label=celda.sim$sample.label, nchains=1)
 }
