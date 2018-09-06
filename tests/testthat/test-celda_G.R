@@ -19,7 +19,7 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
   expect_error(validateGetModelParams(celda.list = celdaG.res, K = NULL, L = NULL), "L parameter needed when subsetting celda_G result lists") 
   expect_error(validateGetModelParams(celda.list = celdaG.res, K = NULL, L = 10), "Provided L was not profiled in the provided celda_list object")
-})
+
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
 
