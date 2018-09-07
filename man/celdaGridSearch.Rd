@@ -4,47 +4,26 @@
 \alias{celdaGridSearch}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celdaGridSearch(counts, model, sample.label = NULL, K.to.test = NULL,
-  L.to.test = NULL, alpha = 1, beta = 1, delta = 1, gamma = 1,
-  max.iter = 20, z.init = NULL, y.init = NULL, stop.iter = 10,
-  split.on.iter = 10, nchains = 1, bestChainsOnly = TRUE,
-  cores = 1, seed = 12345, verbose = TRUE,
-  logfile.prefix = "Celda")
+celdaGridSearch(counts, model, params.test, params.fixed = NULL,
+  max.iter = 200, nchains = 3, cores = 1, best.only = TRUE,
+  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{A count matrix.}
 
 \item{model}{Celda model. Options available in `celda::available.models`.}
 
-\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
+\item{params.test}{List. A list denoting the combinations of parameters to run in a celda model. For example, "list(K=5:10, L=15:20)" will run all combinations of K from 5 to 10 and L from 15 to 20 in model 'celda_CG'.}
 
-\item{K.to.test}{Integer vector. List of K's to evaluate, where each K is the number of cell populations.}
+\item{params.fixed}{List. A list denoting additional parameters to use in each celda model. Default NULL.}
 
-\item{L.to.test}{Integer vector. List of L's to evaluate, where each L is the number of feature modules.}
-
-\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
-
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
-
-\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
-
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
-
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 20.}
-
-\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
-
-\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
-
-\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 20.}
-
-\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 20.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{bestChainsOnly}{Logical. Whether to return only the best chain (by final log-likelihood) per K/L combination. Default TRUE.}
-
 \item{cores}{Integer. The number of cores to use for parallel Gibbs sampling. Default 1.}
+
+\item{best.only}{Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE.}
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
@@ -59,8 +38,11 @@ Object of class "celda_list", which contains results for all model parameter com
 Yields assigments of genes/cells to clusters, depending on the provided model type.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-celda.mods = celdaGridSearch(celda.sim$counts, model="celda_CG", 
-                             sample.label=celda.sim$sample.label,
-                             K.to.test=2:4, L.to.test=9:11, max.iter=2, nchains=1)
+## Simulate a small dataset with 5 cell clusters and 10 feature modules
+celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+
+## Run various combinations of parameters with 'celdaGridSearch'
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+                      params.fixed=list(sample.label=celda.sim$sample.label),
+                      best.only=TRUE, nchains=1)
 }

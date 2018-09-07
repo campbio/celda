@@ -14,39 +14,47 @@
 #' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G` until the specified L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_G with clustering results and various sampling statistics.
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L,
-#'                      max.iter=2, nchains=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, count.checksum=NULL, 
+					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE) {
+
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  start.time = Sys.time()
 
   ## Error checking and variable processing
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-
+  initialize = match.arg(initialize)
+   
   all.seeds = seed:(seed + nchains - 1)
-  
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
-  logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-  start.time = Sys.time()
-  
+    
   best.result = NULL  
   for(i in seq_along(all.seeds)) {   
 
 	## Randomly select y or y to supplied initial values
-	current.seed = all.seeds[i]	
-	y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	## Initialize cluster labels
+    current.seed = all.seeds[i]	
+    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+
+    if(initialize == "random") {
+	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	} else {
+	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=100, seed=seed)
+	}  
 	y.best = y  
 
 	## Calculate counts one time up front
@@ -226,9 +234,9 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param C Integer. Number of cells to simulate. Default 100. 
-#' @param L Integer. Number of feature modules.  
+#' @param L Integer. Number of feature modules. Default 10.
 #' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
-#' @param G Numeric. The total number of features to be simulated. 
+#' @param G Integer. The total number of features to be simulated. Default 100. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
@@ -236,11 +244,10 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
-#' celda.g.sim = simulateCells(model="celda_G", L=50)
-#' sim.counts = celda.g.sim$counts
+#' celda.g.sim = simulateCells(model="celda_G")
 #' @export
-simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000), G=1000, 
-                                 L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
+simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
+                                 L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
@@ -301,7 +308,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000), G=1000,
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
 #' @examples 
 #' celda.sim = simulateCells("celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
@@ -422,8 +429,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' celda.mod = "celda_G"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_G", 
 #'                                       y=celda.sim$y, L=celda.sim$L,
 #'                                       beta=celda.sim$beta, delta=celda.sim$delta,
 #'                                       gamma=celda.sim$gamma)
@@ -473,7 +479,7 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
 #' @examples
 #' celda.sim = simulateCells("celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
 clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
@@ -508,7 +514,7 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, max.iter=2, nchains=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 #' @export
 calculatePerplexity.celda_G = function(counts, celda.mod, new.counts=NULL) {
@@ -586,7 +592,7 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells("celda_G")
-#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 #' @export
 celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, perplexity=20, max.iter=2500, seed=12345, ...) {
@@ -622,13 +628,22 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.mod = celda_G(celda::pbmc_select, L=50, max.iter=2, nchains=1)
-#' corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+#' celda.sim = simulateCells("celda_G")
+#' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
+#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 #' @export
-featureModuleLookup.celda_G = function(counts, celda.mod, feature){
+featureModuleLookup.celda_G = function(counts, celda.mod, feature, exact.match = TRUE){
   list <- list()
+  if(!isTRUE(exact.match)){
+    feature.grep <- c()
+    for(x in 1:length(feature)){
+      feature.grep <- c(feature.grep, rownames(counts)[grep(feature[x],rownames(counts))]) 
+    }
+    feature <- feature.grep
+  }
   for(x in 1:length(feature)){
     if(feature[x] %in% rownames(counts)){
       list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]

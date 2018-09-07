@@ -4,9 +4,9 @@
 \alias{simulateCells.celda_G}
 \title{Simulate cells from the feature clustering generative model}
 \usage{
-\method{simulateCells}{celda_G}(model, C = 100, N.Range = c(500, 5000),
-  G = 1000, L = 5, beta = 1, gamma = 5, delta = 1,
-  seed = 12345, ...)
+\method{simulateCells}{celda_G}(model, C = 100, N.Range = c(500, 1000),
+  G = 100, L = 10, beta = 1, gamma = 5, delta = 1, seed = 12345,
+  ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::available.models`.}
@@ -15,9 +15,9 @@
 
 \item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
 
-\item{G}{Numeric. The total number of features to be simulated.}
+\item{G}{Integer. The total number of features to be simulated. Default 100.}
 
-\item{L}{Integer. Number of feature modules.}
+\item{L}{Integer. Number of feature modules. Default 10.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
 
@@ -37,6 +37,5 @@ This function generates a list containing a simulated counts matrix, as well as 
 used in the simulation which can be useful for running celda.
 }
 \examples{
-celda.g.sim = simulateCells(model="celda_G", L=50)
-sim.counts = celda.g.sim$counts
+celda.g.sim = simulateCells(model="celda_G")
 }
