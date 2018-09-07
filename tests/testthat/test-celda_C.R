@@ -144,6 +144,13 @@ test_that(desc = "Testing differentialExpression with celda_C", {
   
 })
 
+test_that(desc = "Testing celdaTsne with celda_C when model class is changed, should error",{
+  model_X <- model_C
+  class(model_X) <- "celda_X"
+  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C$z), min.cluster.size=10),
+               "celda.mod argument is not of class celda_C, celda_G or celda_CG")
+})
+
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
   tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C$z), min.cluster.size=10)
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C$z)
