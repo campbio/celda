@@ -50,6 +50,9 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
   celdaG.res = celdaGridSearch(counts = celdaC.sim$counts, model = "celda_G", nchains = 1, params.test=list(L=c(5,10)), max.iter = 5, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_C(celdaG.res))
   
+  celdaC.res.index1 = subsetCeldaList(celdaC.res, params=list(index = 1))
+  expect_true(all(class(celdaC.res.index1) == "celda_C" && class(celdaC.res.index1) != "celda_list"))
+  
   expect_error(subsetCeldaList(celdaC.res, params = list(K = 11)))
   expect_error(subsetCeldaList(celdaC.res, params = list(K = 5, M = 10)))
   
