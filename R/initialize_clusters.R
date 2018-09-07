@@ -74,7 +74,7 @@ recursive.splitZ = function(counts, s, K, alpha, beta, min.cell = 3, seed=12345)
 	ll = rep(NA, ncol(temp.z))    
 	for(i in 1:ncol(temp.z)) {
 	  temp.z[cluster.splits[,i] == 2,i] = current.K 
-	  ll[i] = calculateLoglikFromVariables.celda_C(counts, s, temp.z[,i], current.K, alpha, beta)	  
+	  ll[i] = logLikelihood.celda_C(counts, s, temp.z[,i], current.K, alpha, beta)	  
 	}  
 
     ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
@@ -151,7 +151,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
 	ll = rep(NA, ncol(temp.y))    
 	for(i in 1:ncol(temp.y)) {
 	  temp.y[cluster.splits[,i] == 2,i] = current.L
-	  ll[i] = calculateLoglikFromVariables.celda_G(counts=counts, y=temp.y[,i], L=current.L, beta=beta, delta=delta, gamma=gamma)
+	  ll[i] = logLikelihood.celda_G(counts=counts, y=temp.y[,i], L=current.L, beta=beta, delta=delta, gamma=gamma)
 	}  
 
     ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
