@@ -399,9 +399,9 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
     gs = normalizeCounts(gs, normalize="proportion")
 	temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
 	
-    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
-          				   population.states = normalizeCounts(n.TS.by.CP + beta, normalize="proportion"), 
-          				   gene.states = gs,
+    post.list = list(sample = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
+          				   cell.population = normalizeCounts(n.TS.by.CP + beta, normalize="proportion"), 
+          				   module = gs,
           				   gene.distribution = temp.nG.by.TS)
     res = c(res, posterior = list(post.list))						    
   }
