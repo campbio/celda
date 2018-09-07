@@ -113,7 +113,7 @@ plotDimReduceGene = function(dim1, dim2, counts, features, normalize = TRUE, exa
 plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   
   factorized = factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  matrix = factorized$proportions$cell.states
+  matrix = factorized$proportions$cell
   if(rescale == TRUE){
     for(x in 1:nrow(matrix)){ 
       matrix[x,] = matrix[x,]-min(matrix[x,])

@@ -32,11 +32,11 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   
   #take topRank
   if(!is.null(top.features) && (is.numeric(top.features))|is.integer(top.features)){
-    top.rank <- topRank(matrix = factorize.matrix$proportions$gene.states, 
+    top.rank <- topRank(matrix = factorize.matrix$proportions$module, 
                         n = top.features)
   }else{
-    top.rank <- topRank(matrix = factorize.matrix$proportions$gene.states, 
-                        n = nrow(factorize.matrix$proportions$gene.states))  
+    top.rank <- topRank(matrix = factorize.matrix$proportions$module, 
+                        n = nrow(factorize.matrix$proportions$module))  
   }
   
   #filter topRank using feature.module into feature.indices
@@ -46,8 +46,8 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   }
   
   
-  #Determine cell order from factorize.matrix$proportions$cell.states
-  cell.states <- factorize.matrix$proportions$cell.states 
+  #Determine cell order from factorize.matrix$proportions$cell
+  cell.states <- factorize.matrix$proportions$cell
   cell.states <- cell.states[feature.module, ,drop = FALSE]
   
   single.module <- cell.states[1, ]

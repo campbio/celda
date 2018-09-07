@@ -4,7 +4,8 @@
 \alias{clusterProbability.celda_CG}
 \title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
 \usage{
-\method{clusterProbability}{celda_CG}(counts, celda.mod, log = FALSE, ...)
+\method{clusterProbability}{celda_CG}(counts, celda.mod, log = FALSE,
+  ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
