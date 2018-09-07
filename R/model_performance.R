@@ -11,11 +11,11 @@
 #' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
 #' celda.mod = celda_CG(celda.sim$counts, sample.label=celda.sim$sample.label,
 #'                      K=celda.sim$K, L=celda.sim$L, nchain=1)
-#' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
-calculatePerplexity = function(counts, celda.mod, new.counts=NULL) {
+perplexity = function(counts, celda.mod, new.counts=NULL) {
   compareCountMatrix(counts, celda.mod)
-  UseMethod("calculatePerplexity", celda.mod)
+  UseMethod("perplexity", celda.mod)
 }
 
 
@@ -54,7 +54,7 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   perp.res = matrix(NA, nrow=length(celda.list$res.list), ncol=resample)
   for(i in 1:length(celda.list$res.list)) {
     for(j in 1:resample) {
-      perp.res[i,j] = calculatePerplexity(counts, celda.list$res.list[[i]], countsList[[j]])
+      perp.res[i,j] = perplexity(counts, celda.list$res.list[[i]], countsList[[j]])
     }
   }
   celda.list$perplexity = perp.res
