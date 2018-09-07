@@ -9,8 +9,8 @@ factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)
 # celda_C
 test_that(desc = "Testing simulation and celda_C model", {
   expect_equal(typeof(celdaC.sim$counts), "integer")
-  expect_true(all(sweep(factorized$counts$sample.states, 2, colSums(factorized$counts$sample.states), "/") == factorized$proportions$sample.states))  
-  expect_true(ncol(factorized$proportions$gene.states) == model_C$K)  
+  expect_true(all(sweep(factorized$counts$sample.states, 2, colSums(factorized$counts$sample), "/") == factorized$proportions$sample.states))  
+  expect_true(ncol(factorized$proportions$module) == model_C$K)  
 })
 
 # clusterProbability
@@ -82,10 +82,10 @@ test_that(desc = "Testing recodeClusterZ with celda_C", {
 # topRank
 test_that(desc = "Checking topRank to see if it runs without errors", {
 
-  top.rank <- topRank(matrix = factorized$proportions$gene.states, threshold = NULL)
+  top.rank <- topRank(matrix = factorized$proportions$module, threshold = NULL)
   expect_equal(names(top.rank),
                c("index","names"))
-  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
+  top.rank <- topRank(matrix = factorized$proportions$module, n = 1000)
   expect_equal(names(top.rank),
                c("index","names"))
 })
