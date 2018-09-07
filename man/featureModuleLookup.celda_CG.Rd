@@ -4,7 +4,8 @@
 \alias{featureModuleLookup.celda_CG}
 \title{Obtain the feature module of a feature of interest}
 \usage{
-\method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature)
+\method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature,
+  exact.match = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -12,6 +13,8 @@
 \item{celda.mod}{Model of class "celda_G" or "celda_CG".}
 
 \item{feature}{Character vector. Identify feature modules for the specified feature names.}
+
+\item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
 }
 \value{
 List. Each entry corresponds to the feature module determined for the provided features
@@ -20,7 +23,7 @@ List. Each entry corresponds to the feature module determined for the provided f
 This function will output the gene module of a specific gene(s) from a celda model
 }
 \examples{
-celda.mod = celda_CG(celda::pbmc_select, K=10, 
-                     L=50, max.iter=2, nchains=1)
-corresponding.module = featureModuleLookup(celda::pbmc_select, celda.mod, c("ENSG00000000938_FGR", "ENSG00000004059_ARF5"))
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 }

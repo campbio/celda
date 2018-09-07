@@ -5,9 +5,8 @@
 \title{Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.}
 \usage{
 plotDimReduceGene(dim1, dim2, counts, features, exact.match = TRUE,
-  trim = c(-2, 2), size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", color_low = "grey", color_mid = NULL,
-  color_high = "blue")
+  trim = c(-2, 2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2",
+  color_low = "grey", color_mid = NULL, color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -36,4 +35,13 @@ plotDimReduceGene(dim1, dim2, counts, features, exact.match = TRUE,
 }
 \description{
 Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
+}
+\examples{
+\donttest{
+sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
+celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
+celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
+                  counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
+}
 }

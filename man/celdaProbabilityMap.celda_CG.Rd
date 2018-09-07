@@ -23,7 +23,6 @@ be redundant or unassociated with cell clustering.
 }
 \examples{
 celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 celdaProbabilityMap(celda.sim$counts, celda.mod)
 }
