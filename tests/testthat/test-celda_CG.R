@@ -69,11 +69,15 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                  
   celdaCG.res.K5.L10 = subsetCeldaList(celdaCG.res, params=list(K = 5, L = 10))
   model_CG = selectBestModel(celdaCG.res.K5.L10)
+  
   expect_error(selectBestModel("celda_list"),
                "celda.list parameter was not of class celda_list.")
   expect_error(celdaCG.res <- calculatePerplexityWithResampling(celdaCG.sim$counts, model_CG, resample=2))
   expect_error(celdaCG.res <- calculatePerplexityWithResampling(celdaCG.sim$counts, celdaCG.res, resample='a'))
-
+  
+  celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
+  expect_true(all(class(celdaCG.res.index1) == "celda_CG" && class(celdaCG.res.index1) != "celda_list"))
+  
   celdaC.res = celdaGridSearch(counts=celdaCG.sim$counts, model="celda_C", nchains = 1, params.test=list(K=4:5), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_CG(celdaC.res))
   
