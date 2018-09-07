@@ -20,12 +20,12 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
 
-  celdaG.res = calculatePerplexityWithResampling(celdaG.sim$counts, celdaG.res, resample=2)
+  celdaG.res = resamplePerplexity(celdaG.sim$counts, celdaG.res, resample=2)
   expect_equal(is.null(celdaG.res$perplexity), FALSE)
   expect_is(celdaG.res, "celda_list")
   expect_is(celdaG.res, "celda_G")
-  expect_error(calculatePerplexityWithResampling(celdaG.sim$counts, celdaG.res, resample="2"))
-  expect_error(calculatePerplexityWithResampling(celdaG.sim$counts, "celdaG.res", resample=2))
+  expect_error(resamplePerplexity(celdaG.sim$counts, celdaG.res, resample="2"))
+  expect_error(resamplePerplexity(celdaG.sim$counts, "celdaG.res", resample=2))
   
   plot.obj = plotGridSearchPerplexity(celdaG.res)
   expect_is(plot.obj, "ggplot")
@@ -35,10 +35,10 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
 
   celdaG.res.L5 <- subsetCeldaList(celdaG.res, params=list(L = 5))
   model_G = selectBestModel(celdaG.res.L5)
-  res <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G)
-  res2 <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts + 1)
+  res <- perplexity.celda_G(celdaG.sim$counts, model_G)
+  res2 <- perplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts + 1)
   
-  expect_error(res <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts[-1,]))
+  expect_error(res <- perplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts[-1,]))
 })
 
 # logLikelihood

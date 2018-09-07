@@ -484,9 +484,9 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
 #' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
-#' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
-calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
+perplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
 
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)

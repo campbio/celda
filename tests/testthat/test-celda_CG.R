@@ -54,10 +54,10 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   celdaC.res = celdaGridSearch(counts=celdaCG.sim$counts, model="celda_C", nchains = 1, params.test=list(K=4:5), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_CG(celdaC.res))
   
-  res <- calculatePerplexity.celda_CG(celdaCG.sim$counts, model_CG)
-  res2 <- calculatePerplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
+  res <- perplexity.celda_CG(celdaCG.sim$counts, model_CG)
+  res2 <- perplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
   
-  expect_error(res <- calculatePerplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))    
+  expect_error(res <- perplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))    
 })
 
 # Ensure logLikelihood calculates the expected values
