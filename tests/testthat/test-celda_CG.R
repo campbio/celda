@@ -111,6 +111,17 @@ test_that(desc = "Testing recodeClusterZ with celda_CG", {
 # compareCountMatrix
 test_that(desc = "Testing CompareCountMatrix with celda_CG", {
   expect_true(compareCountMatrix(counts = celdaCG.sim$counts, celda.mod = model_CG))
+  
+  less.features <- celdaCG.sim$counts[1:50,]
+  expect_error(compareCountMatrix(counts = less.features, celda.mod = model_CG),
+               "The provided celda object was generated from a counts matrix with a different number of genes than the one provided.")
+  less.cells <- celdaCG.sim$counts[,1:100]
+  expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_CG),
+               "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
+  
+  counts.matrix.error <- matrix(x = 1, nrow = nrow(celdaCG.sim$counts), ncol = ncol(celdaCG.sim$counts))
+  expect_false(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_CG, error.on.mismatch = FALSE))
+  expect_error(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_CG, error.on.mismatch = TRUE))
 })
 
 # topRank
@@ -270,9 +281,24 @@ test_that(desc = "Testing cCG.splitZ and cCG.splitY", {
   expect_true(length(res$y) == nrow(r$counts))  
 })
 
-#miscellaneous distance fxns
+#miscellaneous fxns
+
+#functions used internally
+test_that(desc = "Invoking error from distinct_colors function",{
+  expect_error(distinct_colors(n = 3, hues = "xx"), "Only color names listed in the 'color' function can be used in 'hues'")
+})
+
+test_that(desc = "Invoking error from distinct_colors function",{
+  expect_error(processSampleLabels("Sample_1", ncol(celdaCG.sim$counts)), "'sample.label' must be the same length as the number of columns in the 'counts' matrix.")
+})
+
+test_that(desc = "Invoking error from logMessages function", {
+  expect_error(logMessages(date(), logfile = 5))
+})
+
 test_that(desc = "miscellaneous distance fxns that are not directly used within celda, but will be tested", {
   x = data.frame(x = 2:4, y=  1:3)
   expect_equal(class(hellingerDist(x)), "dist")
   expect_equal(class(spearmanDist(x)), "dist")
 })
+
