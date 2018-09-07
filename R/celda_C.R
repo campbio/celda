@@ -394,12 +394,12 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_C", 
-#'                                       sample.label=celda.sim$sample.label,
-#'                                       z=celda.sim$z, K=celda.sim$K,
-#'                                       alpha=celda.sim$alpha, beta=celda.sim$beta)
+#' loglik = logLikelihood(celda.sim$counts, model="celda_C", 
+#'                        sample.label=celda.sim$sample.label,
+#'                        z=celda.sim$z, K=celda.sim$K,
+#'                        alpha=celda.sim$alpha, beta=celda.sim$beta)
 #' @export
-calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
+logLikelihood.celda_C = function(counts, sample.label, z, K, alpha, beta) {
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   p = cC.decomposeCounts(counts, s, z, K)  

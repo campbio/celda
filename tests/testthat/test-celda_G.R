@@ -41,9 +41,9 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   expect_error(res <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G, new.counts = celdaG.sim$counts[-1,]))
 })
 
-# calculateLoglikFromVariables
-test_that(desc = "Testing calculateLoglikFromVariables.celda_G", {
-  expect_lt(calculateLoglikFromVariables(model = "celda_G", 
+# logLikelihood
+test_that(desc = "Testing logLikelihood.celda_G", {
+  expect_lt(logLikelihood(model = "celda_G", 
                                          counts = celdaG.sim$counts, 
                                          y = celdaG.sim$y, L = celdaG.sim$L, delta = 1, 
                                          gamma = 1, beta = 1),0)
