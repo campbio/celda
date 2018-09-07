@@ -124,9 +124,29 @@ test_that(desc = "Testing plotHeatmap with celda_CG", {
   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG$y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
+})
+
+#plotHeatmap with annotations
+test_that(desc = "Testing plotHeatmap with annotations", {
+  annot.cell <- as.data.frame(c(rep(x = 1, times = ncol(celdaCG.sim$counts) - 100),rep(x = 2, 100)))
+  annot.feature <- as.data.frame(c(rep(x = 1, times = nrow(celdaCG.sim$counts) - 100),rep(x = 2, 100)))
+  
+  rownames(annot.cell) <- colnames(celdaCG.sim$counts)
+  colnames(annot.cell) <- "cell"
+  rownames(annot.feature) <- rownames(celdaCG.sim$counts)
+  colnames(annot.feature) <- "feature"
+  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG$z, y = model_CG$y)),
+               c("tree_row", "tree_col", "gtable"))
+  
+  rownames(annot.cell) <- NULL
+  rownames(annot.feature) <- NULL
+  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG$z, y = model_CG$y)),
+               c("tree_row", "tree_col", "gtable"))
+  
 })
 
 # celdaHeatmap
@@ -139,6 +159,7 @@ test_that(desc = "Testing celdaHeatmap with celda_CG", {
 test_that(desc = "Checking moduleHeatmap to see if it runs", {
   expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG, feature.module = c(2,3), top.cells = 500)), c("tree_row","tree_col","gtable"))
   expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG, top.features = 15, top.cells = 15, normalize = FALSE)), c("tree_row","tree_col","gtable"))
+  expect_equal(names(moduleHeatmap(celdaCG.sim$counts, celda.mod = model_CG, top.features = 15, top.cells = NULL, normalize = FALSE)), c("tree_row","tree_col","gtable"))
   expect_error(moduleHeatmap(counts = "counts", celda.mod = model_CG, feature.module = c(2,3)),"'counts' should be a numeric count matrix")
   expect_error(moduleHeatmap(counts = celdaCG.sim$counts, celda.mod = "model", feature.module = c(2,3)), "'celda.mod' should be an object of class celda_G or celda_CG")               
 })

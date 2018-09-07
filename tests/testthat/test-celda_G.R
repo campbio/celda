@@ -100,10 +100,15 @@ test_that(desc = "Testing plotHeatmap with celda_G", {
 test_that(desc = "Testing plotHeatmap with celda_G, including annotations",{
   annot <- as.data.frame(c(rep(x = 1, times = nrow(celdaG.sim$counts) - 100),rep(x = 2, 100)))
   rownames(annot) <- rownames(celdaG.sim$counts)
+  colnames(annot) <- "label"
   
   expect_equal(names(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = annot, y = model_G$y)),
                c("tree_row", "tree_col", "gtable"))
   
+  rownames(annot) <- NULL
+  expect_equal(names(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = as.matrix(annot), y = model_G$y)),
+               c("tree_row", "tree_col", "gtable"))
+
   rownames(annot) <- rev(rownames(celdaG.sim$counts))
   expect_error(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = annot, y = model_G$y),
                "Row names of 'annotation.feature' are different than the row names of 'counts'")
