@@ -36,7 +36,16 @@ test_that(desc = "Testing simulateCells.celda_CG, make sure all genes expressed"
   expect_true(all(rowSums(sim.cells.low$counts) > 0))
 })
 
-test_that(desc = "Testing celdaGridSearch with celda_CG", {
+test_that(desc = "Testing celdaGridSearch with celda_CG", {  
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", params.test=list(K=4:5, L=10:11, M = 3:4), params.fixed=list(sample.label=celdaCG.sim$sample.label), best.only=FALSE),
+               "The following elements in 'params.test' are not arguments of 'celda_CG': M")
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10, sample.label = "Sample"), params.fixed=list(sample.label=celdaCG.sim$sample.label)),
+               "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(), params.fixed=list(sample.label=celdaCG.sim$sample.label)),
+               "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_CG': K,L")
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10), params.fixed=list(sample.label=celdaCG.sim$sample.label, xxx = "xxx")),
+               "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
+  
   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=FALSE)
   expect_true(all(class(celdaCG.res) == c("celda_list", "celda_CG")))
   expect_equal(is.null(celdaCG.res$perplexity), TRUE)
@@ -52,9 +61,16 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   
   plot.obj = plotGridSearchPerplexity(celdaCG.res)
   expect_is(plot.obj, "ggplot")
-
+  
+  expect_error(subsetCeldaList(celda.list = "celda_list"),
+               "celda.list parameter was not of class celda_list.")
+  expect_error(subsetCeldaList(celdaCG.res, params = list(K = 7, L = 11)))
+  expect_error(subsetCeldaList(celdaCG.res, params = list(K = 5, M = 10)))
+                 
   celdaCG.res.K5.L10 = subsetCeldaList(celdaCG.res, params=list(K = 5, L = 10))
   model_CG = selectBestModel(celdaCG.res.K5.L10)
+  expect_error(selectBestModel("celda_list"),
+               "celda.list parameter was not of class celda_list.")
   expect_error(celdaCG.res <- calculatePerplexityWithResampling(celdaCG.sim$counts, model_CG, resample=2))
   expect_error(celdaCG.res <- calculatePerplexityWithResampling(celdaCG.sim$counts, celdaCG.res, resample='a'))
 
@@ -302,3 +318,6 @@ test_that(desc = "miscellaneous distance fxns that are not directly used within 
   expect_equal(class(spearmanDist(x)), "dist")
 })
 
+test_that(desc = "celda wrapper fxn should return warning", {
+  expect_warning(celda())
+})

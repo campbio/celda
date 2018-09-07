@@ -23,6 +23,15 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 # celdaGridSearch and perplexity calculations
 test_that(desc = "Testing celdaGridSearch with celda_C", {
   celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, params.test=list(K=c(5,10)), params.fixed=list(sample.label=celdaC.sim$sample.label), max.iter = 15, verbose = FALSE, best.only=FALSE)
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", params.test=list(K=4:5, M = 3:4), params.fixed=list(sample.label=celdaC.sim$sample.label), best.only=FALSE),
+               "The following elements in 'params.test' are not arguments of 'celda_C': M")
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=4:5, sample.label = "Sample"), params.fixed=list(sample.label=celdaC.sim$sample.label)),
+               "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(), params.fixed=list(sample.label=celdaC.sim$sample.label)),
+               "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_C': K")
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=9:10), params.fixed=list(sample.label=celdaC.sim$sample.label, xxx = "xxx")),
+               "The following elements in 'params.fixed' are not arguments of 'celda_C': xxx")
+  
   expect_true(class(celdaC.res)[1] == "celda_list")
   expect_equal(names(runParams(celda.list = celdaC.res)), c("index","chain","K","log_likelihood"))
   expect_equal(is.null(celdaC.res$perplexity), TRUE)
@@ -40,6 +49,9 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 
   celdaG.res = celdaGridSearch(counts = celdaC.sim$counts, model = "celda_G", nchains = 1, params.test=list(L=c(5,10)), max.iter = 5, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_C(celdaG.res))
+  
+  expect_error(subsetCeldaList(celdaC.res, params = list(K = 11)))
+  expect_error(subsetCeldaList(celdaC.res, params = list(K = 5, M = 10)))
   
   celdaC.res.K5 <- subsetCeldaList(celdaC.res, params=list(K = 5))
   model_C_2 = selectBestModel(celdaC.res.K5)

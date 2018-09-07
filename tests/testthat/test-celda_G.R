@@ -26,6 +26,16 @@ test_that(desc = "Testing LogLikelihood functions", {
 
 test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, model = "celda_G", nchains = 2, params.test=list(L=c(5,10)), max.iter = 10, verbose = FALSE, best.only=FALSE)
+  
+  expect_error(celdaGridSearch(counts=celdaG.sim$counts, model="celda_G", params.test=list(L=10:11, M = 3:4), best.only=FALSE),
+               "The following elements in 'params.test' are not arguments of 'celda_G': M")
+  expect_error(celdaGridSearch(counts=celdaG.sim$counts, model="celda_G", nchains = 2, params.test=list(L=4:5, y.init = 10)),
+               "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
+  expect_error(celdaGridSearch(counts=celdaG.sim$counts, model="celda_G", nchains = 2, params.test=list()),
+               "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_G': L")
+  expect_error(celdaGridSearch(counts=celdaG.sim$counts, model="celda_G", nchains = 2, params.test=list(L=9:10), params.fixed=list(xxx = "xxx")),
+               "The following elements in 'params.fixed' are not arguments of 'celda_G': xxx")
+  
   expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
@@ -44,6 +54,9 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaC.res = celdaGridSearch(counts = celdaG.sim$counts, model = "celda_C", nchains = 1, params.test=list(K=c(5,10)), max.iter = 10, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_G(celdaC.res))
 
+  expect_error(subsetCeldaList(celdaG.res, params = list(L = 11)))
+  expect_error(subsetCeldaList(celdaG.res, params = list(L = 5, M = 10)))
+  
   celdaG.res.L5 <- subsetCeldaList(celdaG.res, params=list(L = 5))
   model_G = selectBestModel(celdaG.res.L5)
   res <- calculatePerplexity.celda_G(celdaG.sim$counts, model_G)
