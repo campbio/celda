@@ -348,7 +348,7 @@ factorizeMatrix.celda_G = function(counts, celda.mod,
   res = list()
   
   if(any("counts" %in% type)) {
-    counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS, gene.distribution=nG.by.TS)
+    counts.list = list(cell=n.TS.by.C, module=n.G.by.TS, gene.distribution=nG.by.TS)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
@@ -358,8 +358,8 @@ factorizeMatrix.celda_G = function(counts, celda.mod,
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], normalize="proportion")
     temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
     
-    prop.list = list(cell.states = normalizeCounts(n.TS.by.C, normalize="proportion"),
-    							  gene.states = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
+    prop.list = list(cell = normalizeCounts(n.TS.by.C, normalize="proportion"),
+    							  module = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
@@ -532,8 +532,8 @@ perplexity.celda_G = function(counts, celda.mod, new.counts=NULL) {
   
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
                                type=c("posterior", "counts"))
-  phi <- factorized$posterior$gene.states
-  psi <- factorized$posterior$cell.states
+  phi <- factorized$posterior$module
+  psi <- factorized$posterior$cell
   eta <- factorized$posterior$gene.distribution
   nG.by.TS = factorized$counts$gene.distribution
   
@@ -551,7 +551,7 @@ reorder.celda_G = function(counts, res) {
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
     unique.y = sort(unique(res$y))
-    cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
+    cs = prop.table(t(fm$posterior$cell[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- hclust(d, method = "complete")
     res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
@@ -572,7 +572,7 @@ reorder.celda_G = function(counts, res) {
 #' @export
 celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
-  top = topRank(fm$proportions$gene.states, n=nfeatures)
+  top = topRank(fm$proportions$module, n=nfeatures)
   ix = unlist(top$index)
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   plotHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
@@ -602,7 +602,7 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
   
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
     
-  modules.to.use = 1:nrow(fm$counts$cell.states)
+  modules.to.use = 1:nrow(fm$counts$cell)
   if (!is.null(modules)) {
 	if (!all(modules %in% modules.to.use)) {
 	  stop("'modules' must be a vector of numbers between 1 and ", modules.to.use, ".")
@@ -611,7 +611,7 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
   }
    
   cell.ix = sample(1:ncol(counts), max.cells)
-  norm = t(normalizeCounts(fm$counts$cell.states[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
+  norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
 
   res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, seed=seed)
   rownames(res) = colnames(counts)
