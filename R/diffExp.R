@@ -22,6 +22,7 @@
 #'                                              c1=c(1,2))
 #' @export
 #' @import data.table
+#' @import plyr
 differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
   if (!is.matrix(counts)) {
     stop("'counts' should be a numeric count matrix")
