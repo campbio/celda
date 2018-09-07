@@ -74,7 +74,7 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
 
 # recodeClusterY
 test_that(desc = "Testing recodeClusterY with celda_G", {
-  expect_error(recodeClusterZ(celda.mod = model_G, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
+  expect_error(recodeClusterZ(celda.mod = model_G, from = c(1,2,3,4,5), to = c(5,4,3,2,1)))
   expect_error(recodeClusterY(celda.mod = model_G, from = NULL, to = ))
   expect_error(recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))  
