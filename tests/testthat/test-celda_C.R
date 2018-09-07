@@ -78,11 +78,28 @@ test_that(desc = "Making sure normalizeCounts doesn't change dimensions of count
 
 # recodeClusterZ
 test_that(desc = "Testing recodeClusterZ with celda_C", {
+  expect_error(recodeClusterY(celda.mod = model_C, from = c(1,2,3,4,5), to = c(5,4,3,2,1)))
   expect_error(recodeClusterZ(celda.mod = model_C, from = NULL, to = ))
   expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))    
   new.recoded <- recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
   expect_equal(model_C$z == 1, new.recoded$z == 5)
+})
+
+# compareCountMatrix
+test_that(desc = "Testing CompareCountMatrix with celda_C", {
+  expect_true(compareCountMatrix(counts = celdaC.sim$counts, celda.mod = model_C))
+  less.features <- celdaC.sim$counts[1:50,]
+  expect_error(compareCountMatrix(counts = less.features, celda.mod = model_C),
+               "The provided celda object was generated from a counts matrix with a different number of genes than the one provided.")
+  less.cells <- celdaC.sim$counts[,1:100]
+  expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_C),
+               "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
+  
+  counts.matrix.error <- matrix(x = 1, nrow = nrow(celdaC.sim$counts), ncol = ncol(celdaC.sim$counts))
+  expect_false(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_C, error.on.mismatch = FALSE))
+  expect_error(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_C, error.on.mismatch = TRUE))
+  
 })
 
 # topRank
