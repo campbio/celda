@@ -10,6 +10,15 @@
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @param var_label Character vector. Title for the color legend. 
+#' @examples
+#' \donttest{
+#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
+#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
+#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = sim.res$counts, 
+#'                   xlab = "Dimension1", ylab = "Dimension 2", var_label = "tsne", 
+#'                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")
+#'}
 #' @export
 plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df = data.frame(dim1,dim2,t(as.data.frame(matrix)))
@@ -38,6 +47,14 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @examples
+#' \donttest{
+#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
+#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
+#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
+#'                   counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
+#'}
 #' @export 
 plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
@@ -60,8 +77,8 @@ plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, t
     counts = counts[features.indices, , drop = FALSE]
   }else{
     counts = counts[rownames(counts) %in% features, , drop = FALSE]
+    counts = counts[match(rownames(counts), features), , drop = FALSE]
   }
-  counts = counts[match(rownames(counts), features), ]
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
@@ -79,6 +96,14 @@ plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, t
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @examples
+#' \donttest{
+#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
+#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
+#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], 
+#'                    counts = sim.res$counts, celda.mod = celda_cg, modules = c("L1","L2"))
+#'}
 #' @export 
 plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   
@@ -113,6 +138,13 @@ plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, res
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
+#' @examples
+#' \donttest{
+#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
+#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
+#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(celda_cg$z),specific_clusters = c(1,2,3))
+#' }
 #' @export 
 plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
   df = data.frame(dim1, dim2, cluster)

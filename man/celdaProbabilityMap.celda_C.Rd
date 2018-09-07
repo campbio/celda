@@ -4,8 +4,8 @@
 \alias{celdaProbabilityMap.celda_C}
 \title{Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.}
 \usage{
-\method{celdaProbabilityMap}{celda_C}(counts, celda.mod,
-  level = c("sample"), ...)
+\method{celdaProbabilityMap}{celda_C}(counts, celda.mod, level = c("sample"),
+  ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -23,6 +23,6 @@ be redundant or unassociated with cell clustering.
 }
 \examples{
 celda.sim = simulateCells("celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, nchains=1, max.iter=1)
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
 celdaProbabilityMap(celda.sim$counts, celda.mod)
 }

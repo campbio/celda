@@ -71,22 +71,21 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
 #' @param counts The counts matrix used to generate the provided cluster assignments.
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param model Celda model. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = "celda_CG"
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, celda.mod, 
+#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_CG", 
 #'                                       sample.label=celda.sim$sample.label,
 #'                                       z=celda.sim$z, y=celda.sim$y,
 #'                                       K=celda.sim$K, L=celda.sim$L,
 #'                                       alpha=celda.sim$alpha, beta=celda.sim$beta,
 #'                                       gamma=celda.sim$gamma, delta=celda.sim$delta)
 #' @export
-calculateLoglikFromVariables = function(counts, celda.mod, ...) {
-  class(counts) = c(celda.mod)
-  do.call(paste("calculateLoglikFromVariables.", celda.mod, sep=""),
+calculateLoglikFromVariables = function(counts, model, ...) {
+  class(counts) = c(model)
+  do.call(paste("calculateLoglikFromVariables.", model, sep=""),
           list(counts, ...))
 }
 
@@ -171,8 +170,9 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @export
-featureModuleLookup = function(counts, celda.mod, feature){
+featureModuleLookup = function(counts, celda.mod, feature, exact.match = TRUE){
   class(celda.mod) = c(class(celda.mod), celda.mod)
   UseMethod("featureModuleLookup", celda.mod)
 }

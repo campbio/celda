@@ -4,8 +4,7 @@
 \alias{calculatePerplexity.celda_CG}
 \title{Calculate the perplexity from a single celda model}
 \usage{
-\method{calculatePerplexity}{celda_CG}(counts, celda.mod,
-  new.counts = NULL)
+\method{calculatePerplexity}{celda_CG}(counts, celda.mod, new.counts = NULL)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -23,6 +22,6 @@ cluster assignments fit the data being clustered.
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L, max.iter=2, nchains=1)
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
 }
