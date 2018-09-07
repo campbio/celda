@@ -9,7 +9,7 @@ factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)
 # celda_C
 test_that(desc = "Testing simulation and celda_C model", {
   expect_equal(typeof(celdaC.sim$counts), "integer")
-  expect_true(all(sweep(factorized$counts$sample.states, 2, colSums(factorized$counts$sample), "/") == factorized$proportions$sample.states))  
+  expect_true(all(sweep(factorized$counts$sample, 2, colSums(factorized$counts$sample), "/") == factorized$proportions$sample))  
   expect_true(ncol(factorized$proportions$module) == model_C$K)  
 })
 
