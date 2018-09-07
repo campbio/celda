@@ -14,6 +14,11 @@ test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", 
   expect_error(simulateCells(model = "celda_G", gamma=0.000001))
 })
 
+test_that(desc = "Testing simulateCells.celda_G, make sure all genes expressed", {
+  sim.cells.low <- simulateCells(model = "celda_G", G = 1000, C = 300, N.Range = c(0,10))
+  expect_true(all(rowSums(sim.cells.low$counts) > 0))
+})
+
 test_that(desc = "Testing LogLikelihood functions", {
   expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_G))))
   expect_equal(max(completeLogLikelihood(celda.mod = model_G)), finalLogLikelihood(model_G))
@@ -170,6 +175,8 @@ test_that(desc = "Testing celdaTsne with celda_G including a subset of cells",{
 test_that(desc = "Testing featureModuleLookup with celda_G", {
   res = featureModuleLookup(celdaG.sim$counts, model_G, "Gene_1")
   expect_true(res == model_G$y[1])
+  res = featureModuleLookup(celdaG.sim$counts, model_G, "Gene_2", exact.match = FALSE)
+  expect_true(length(res) == 11)
   res = featureModuleLookup(celdaG.sim$counts, model_G, "XXXXXXX")
   expect_true(grepl("No feature", res))
 })
