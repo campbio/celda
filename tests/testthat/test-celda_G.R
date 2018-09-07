@@ -73,10 +73,10 @@ test_that(desc = "Testing CompareCountMatrix with celda_G", {
 
 # topRank
 test_that(desc = "Testing topRank function with celda_G", {
-  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000, threshold = NULL)
+  top.rank <- topRank(matrix = factorized$proportions$module, n = 1000, threshold = NULL)
   expect_equal(names(top.rank),
                c("index","names"))
-  expect_equal(names(topRank(matrix = factorized$proportions$gene.states)),
+  expect_equal(names(topRank(matrix = factorized$proportions$module)),
                c("index","names"))
 })
 

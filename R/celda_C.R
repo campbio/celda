@@ -350,8 +350,8 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
-    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
-                     gene.states = normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
+    post.list = list(sample = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
+                     module = normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
     res = c(res, posterior = list(post.list))                           
   }
 

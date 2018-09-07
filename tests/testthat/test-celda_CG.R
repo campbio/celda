@@ -9,9 +9,9 @@ factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 # celda_CG
 test_that(desc = "Testing simulation and celda_CG model", {
   expect_equal(typeof(celdaCG.sim$counts), "integer")
-  expect_true(all(sweep(factorized$counts$cell.states, 2, colSums(celdaCG.sim$counts), "/") == factorized$proportions$cell.states))
-  expect_equal(celdaCG.sim$K, ncol(factorized$proportions$population.states))
-  expect_equal(celdaCG.sim$L, nrow(factorized$proportions$population.states))                        
+  expect_true(all(sweep(factorized$counts$cell, 2, colSums(celdaCG.sim$counts), "/") == factorized$proportions$cell))
+  expect_equal(celdaCG.sim$K, ncol(factorized$proportions$cell.population))
+  expect_equal(celdaCG.sim$L, nrow(factorized$proportions$cell.population))                        
 })
 
 # Cluster probabilities
@@ -104,9 +104,9 @@ test_that(desc = "Testing CompareCountMatrix with celda_CG", {
 
 # topRank
 test_that(desc = "Testing topRank with celda_CG", {
-  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000, threshold = NULL)
+  top.rank <- topRank(matrix = factorized$proportions$module, n = 1000, threshold = NULL)
   expect_equal(names(top.rank), c("index","names"))
-  top.rank <- topRank(matrix = factorized$proportions$gene.states, n = 1000)
+  top.rank <- topRank(matrix = factorized$proportions$module, n = 1000)
   expect_equal(nrow(celdaCG.sim$counts), sum(sapply(top.rank$names,length)))
   expect_equal(names(top.rank), c("index","names"))
 })
@@ -173,7 +173,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
   expect_equal(names(plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_error(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell.states, distance = "char"))
+  expect_error(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], matrix = factorized$proportions$cell, distance = "char"))
 })
 
 # celdaTsne
