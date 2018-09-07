@@ -105,9 +105,13 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 # plotHeatmap with annotation.cell
 test_that(desc = "Testing plotHeatmap with celda_C, including annotations",{
   annot <- as.data.frame(c(rep(x = 1, times = ncol(celdaC.sim$counts) - 100),rep(x = 2, 100)))
-  rownames(annot) <- colnames(celdaC.sim$counts)
   
+  rownames(annot) <- colnames(celdaC.sim$counts)
   expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C$z)),
+               c("tree_row", "tree_col", "gtable"))
+  
+  rownames(annot) <- NULL
+  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.feature = as.matrix(annot), z = model_C$z)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot) <- rev(colnames(celdaC.sim$counts))
