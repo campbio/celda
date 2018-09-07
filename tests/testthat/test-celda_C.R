@@ -26,12 +26,12 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
   expect_equal(is.null(celdaC.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaC.res))
 
-  celdaC.res = calculatePerplexityWithResampling(celdaC.sim$counts, celdaC.res, resample=2)
+  celdaC.res = resamplePerplexity(celdaC.sim$counts, celdaC.res, resample=2)
   expect_equal(is.null(celdaC.res$perplexity), FALSE)
   expect_is(celdaC.res, "celda_list")
   expect_is(celdaC.res, "celda_C")
-  expect_error(calculatePerplexityWithResampling(celdaC.sim$counts, celdaC.res, resample="2"))
-  expect_error(calculatePerplexityWithResampling(celdaC.sim$counts, "celdaC.res", resample=2))
+  expect_error(resamplePerplexity(celdaC.sim$counts, celdaC.res, resample="2"))
+  expect_error(resamplePerplexity(celdaC.sim$counts, "celdaC.res", resample=2))
   
   plot.obj = plotGridSearchPerplexity(celdaC.res)
   expect_is(plot.obj, "ggplot")
