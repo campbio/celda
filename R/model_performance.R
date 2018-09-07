@@ -38,10 +38,10 @@ calculatePerplexity = function(counts, celda.mod, new.counts=NULL) {
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
 #'                       params.fixed=list(sample.label=celda.sim$sample.label),
 #'                       best.only=TRUE, nchains=1)
-#' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
+#' cgs = resamplePerplexity(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
-calculatePerplexityWithResampling <- function(counts, celda.list, resample=5, seed=12345) {
+resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
@@ -75,7 +75,7 @@ calculatePerplexityWithResampling <- function(counts, celda.list, resample=5, se
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
 #'                       params.fixed=list(sample.label=celda.sim$sample.label),
 #'                       best.only=TRUE, nchains=1)
-#' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
+#' cgs = resamplePerplexity(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
 plotGridSearchPerplexity = function(celda.list) {
@@ -96,7 +96,7 @@ plotGridSearchPerplexity = function(celda.list) {
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
 #'                       params.fixed=list(sample.label=celda.sim$sample.label),
 #'                       best.only=TRUE, nchains=1)
-#' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
+#' cgs = resamplePerplexity(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
 plotGridSearchPerplexity.celda_CG = function(celda.list) {
@@ -104,7 +104,7 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
     stop("celda.list$run.params needs K and L columns.")
   }
   if (is.null(celda.list$perplexity)) {
-    stop("No perplexity measurements available. First run 'calculatePerplexityWithResampling' with celda.list object.")
+    stop("No perplexity measurements available. First run 'resamplePerplexity' with celda.list object.")
   }
 
   ix1 = rep(1:nrow(celda.list$perplexity), each=ncol(celda.list$perplexity))
@@ -141,7 +141,7 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
 #' celda.sim = simulateCells(model="celda_C", K=5, G=100)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_C", params.test=list(K=3:5))
-#' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
+#' cgs = resamplePerplexity(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
 plotGridSearchPerplexity.celda_C = function(celda.list) {
@@ -149,7 +149,7 @@ plotGridSearchPerplexity.celda_C = function(celda.list) {
     stop("celda.list$run.params needs the column K.")
   }
   if (is.null(celda.list$perplexity)) {
-    stop("No perplexity measurements available. First run 'calculatePerplexityWithResampling' with celda.list object.")
+    stop("No perplexity measurements available. First run 'resamplePerplexity' with celda.list object.")
   }
 
   ix1 = rep(1:nrow(celda.list$perplexity), each=ncol(celda.list$perplexity))
@@ -184,7 +184,7 @@ plotGridSearchPerplexity.celda_C = function(celda.list) {
 #' celda.sim = simulateCells(model="celda_G", L=10, G=100, C=100)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' cgs = celdaGridSearch(celda.sim$counts, model="celda_G", params.test=list(L=9:11))
-#' cgs = calculatePerplexityWithResampling(celda.sim$counts, cgs)
+#' cgs = resamplePerplexity(celda.sim$counts, cgs)
 #' plotGridSearchPerplexity(cgs)
 #' @export
 plotGridSearchPerplexity.celda_G = function(celda.list) {
@@ -192,7 +192,7 @@ plotGridSearchPerplexity.celda_G = function(celda.list) {
     stop("celda.list$run.params needs the column L.")
   }
   if (is.null(celda.list$perplexity)) {
-    stop("No perplexity measurements available. First run 'calculatePerplexityWithResampling' with celda.list object.")
+    stop("No perplexity measurements available. First run 'resamplePerplexity' with celda.list object.")
   }
 
   ix1 = rep(1:nrow(celda.list$perplexity), each=ncol(celda.list$perplexity))
