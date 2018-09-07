@@ -117,8 +117,11 @@ test_that(desc = "Testing celdaHeatmap with celda_G",{
 
 # moduleHeatmap
 test_that(desc = "Testing moduleHeatmap with celda_G",{
-  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G)),
+  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G, top.cells = 300, feature.module = c(1,2))),
                c("tree_row","tree_col","gtable"))
+  expect_equal(names(moduleHeatmap(celdaG.sim$counts, celda.mod = model_G, top.features = 15, top.cells = 15, normalize = FALSE)),
+               c("tree_row","tree_col","gtable"))
+
   expect_error(moduleHeatmap("counts", celda.mod = model_G), "'counts' should be a numeric count matrix")
   expect_error(moduleHeatmap(celdaG.sim$counts, celda.mod = "model_G"), "'celda.mod' should be an object of class celda_G or celda_CG")
 })
@@ -134,6 +137,13 @@ test_that(desc = "Testing plotDimReduceState with celda_G", {
 })
 
 # celdaTsne
+test_that(desc = "Testing celdaTsne with celda_G when model class is changed, should error",{
+  model_X <- model_G
+  class(model_X) <- "celda_X"
+  expect_error(celdaTsne(counts=celdaG.sim$counts, celda.mod=model_X),
+               "celda.mod argument is not of class celda_C, celda_G or celda_CG")
+})
+
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
   tsne = celdaTsne(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts))
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], rep(1,ncol(celdaG.sim$counts)))
