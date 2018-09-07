@@ -27,8 +27,13 @@ test_that(desc = "Testing clusterProbability with celda_CG", {
   expect_true(all(round(rowSums(normalizeLogProbs(clust.prob$y.probability)), 10) == 1) & nrow(clust.prob$y.probability) == nrow(celdaCG.sim$counts))
 })
 
-test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", {
+test_that(desc = "Testing simulateCells.celda_CG error checking with low gamma", {
   expect_error(simulateCells(model = "celda_CG", gamma=0.000001))
+})
+
+test_that(desc = "Testing simulateCells.celda_CG, make sure all genes expressed", {
+  sim.cells.low <- simulateCells(model = "celda_CG", G = 1000, C = 300,C.Range= c(0,100), N.Range = c(0,100))
+  expect_true(all(rowSums(sim.cells.low$counts) > 0))
 })
 
 test_that(desc = "Testing celdaGridSearch with celda_CG", {
@@ -239,6 +244,9 @@ test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
 test_that(desc = "Testing featureModuleLookup with celda_CG", {
   res = featureModuleLookup(celdaCG.sim$counts, model_CG, "Gene_1")
   expect_true(res == model_CG$y[1])
+
+  res = featureModuleLookup(celdaCG.sim$counts, model_CG, "Gene_2", exact.match = FALSE)
+  expect_true(length(res) == 11)
   
   res = featureModuleLookup(celdaCG.sim$counts, model_CG, "XXXXXXX")
   expect_true(grepl("No feature", res))
