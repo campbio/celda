@@ -429,13 +429,12 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_G", 
-#'                                       y=celda.sim$y, L=celda.sim$L,
-#'                                       beta=celda.sim$beta, delta=celda.sim$delta,
-#'                                       gamma=celda.sim$gamma)
+#' loglik = logLikelihood(celda.sim$counts, model="celda_G", 
+#'                        y=celda.sim$y, L=celda.sim$L,
+#'                        beta=celda.sim$beta, delta=celda.sim$delta,
+#'                        gamma=celda.sim$gamma)
 #' @export
-calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma) {
-
+logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
   final <- cG.calcLL(n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, n.by.G=p$n.by.G, nG.by.TS=p$nG.by.TS, nM=p$nM, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
