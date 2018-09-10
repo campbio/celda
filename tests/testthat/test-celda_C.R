@@ -58,10 +58,10 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
   
   celdaC.res.K5 <- subsetCeldaList(celdaC.res, params=list(K = 5))
   model_C_2 = selectBestModel(celdaC.res.K5)
-  res <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C)
-  res2 <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts + 1)
+  res <- perplexity.celda_C(celdaC.sim$counts, model_C)
+  res2 <- perplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts + 1)
   
-  expect_error(res <- calculatePerplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts[-1,]))
+  expect_error(res <- perplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts[-1,]))
 })
 
 # logLikelihood
