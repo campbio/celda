@@ -31,6 +31,7 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
                "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_C': K")
   expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=9:10), params.fixed=list(sample.label=celdaC.sim$sample.label, xxx = "xxx")),
                "The following elements in 'params.fixed' are not arguments of 'celda_C': xxx")
+  expect_warning(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C",params.test=list(K=9:10, nchains = 2)),"Parameter 'nchains' should not be used within the params.test list")
   
   expect_true(class(celdaC.res)[1] == "celda_list")
   expect_equal(names(runParams(celda.list = celdaC.res)), c("index","chain","K","log_likelihood"))
