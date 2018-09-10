@@ -57,11 +57,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     warning("Parameter 'nchains' should not be used within the params.test list")
     params.test[["nchains"]] <- NULL
   }
-  if(any(c("cores") %in% names(params.test))){
-    warning("Parameter 'cores' should not be used within the params.test list")
-    params.test[["cores"]] <- NULL
-  }
-  
+   
   # Set up parameter combinations for each individual chain
   run.params = expand.grid(c(chain=list(1:nchains), params.test))
   run.params = cbind(index = 1:nrow(run.params), run.params)
