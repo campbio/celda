@@ -3,7 +3,8 @@ library(celda)
 context("Testing celda_C")
 
 celdaC.sim = simulateCells("celda_C", K=10)
-model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
+model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, 
+                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
 factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)  
 
 # celda_C
