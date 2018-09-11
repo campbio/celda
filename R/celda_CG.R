@@ -248,11 +248,11 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   ## Generate transcriptional state distribution for each cell subpopulation
   phi = rdirichlet(K, rep(beta, L))
 
-  ## Assign genes to transcriptional states 
+  ## Assign genes to gene modules 
   eta = rdirichlet(1, rep(gamma, L))
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
   if(length(table(y)) < L) {
-    warning("Some transcriptional states did not receive any genes after sampling. Try increasing G and/or making gamma larger.")
+    warning("Some gene modules did not receive any genes after sampling. Try increasing G and/or making gamma larger.")
     L = length(table(y))
     y = as.integer(as.factor(y))
   }
@@ -310,7 +310,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".  
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.  
-#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
+#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x gene modules (cols).
 #' @examples 
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
