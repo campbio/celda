@@ -223,3 +223,10 @@ test_that(desc = "Testing error checking for cG.splitY", {
 })
 
 
+test_that(desc = "Testing perplexity.celda_G", {
+  expect_true(is.numeric(perplexity(celdaG.sim$counts, model_G)))
+  
+  class(model_G) = c("celda_C")
+  expect_error(perplexity.celda_G(celdaG.sim$counts, model_G),
+               "The celda.mod provided was not of class celda_G.")
+})
