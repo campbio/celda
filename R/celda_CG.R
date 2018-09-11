@@ -569,6 +569,7 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 #' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
 perplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
+  if (!("celda_CG" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_CG.")
   
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
