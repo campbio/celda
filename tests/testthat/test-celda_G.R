@@ -75,6 +75,13 @@ test_that(desc = "Testing logLikelihood.celda_G", {
                                          counts = celdaG.sim$counts, 
                                          y = celdaG.sim$y, L = celdaG.sim$L, delta = 1, 
                                          gamma = 1, beta = 1),0)
+  
+  fake.y = celdaG.sim$y
+  fake.y[1] = celdaG.sim$L + 1
+  expect_error(logLikelihood(model="celda_G", counts=celdaG.sim$counts,
+                             y = fake.y, L = celdaG.sim$L, delta = 1, 
+                             gamma = 1, beta = 1),
+                             "An entry in y contains a value greater than the provided L.")
 })
 
 # normalizeCounts
