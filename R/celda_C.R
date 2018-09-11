@@ -400,6 +400,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #'                        alpha=celda.sim$alpha, beta=celda.sim$beta)
 #' @export
 logLikelihood.celda_C = function(counts, sample.label, z, K, alpha, beta) {
+  if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   p = cC.decomposeCounts(counts, s, z, K)  
