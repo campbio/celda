@@ -93,11 +93,31 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
 # Ensure logLikelihood calculates the expected values
 test_that(desc = "Testing logLikelihood.celda_CG", {
   expect_lt(logLikelihood(model="celda_CG",
-            y = celdaCG.sim$y, z = celdaCG.sim$z,
-            delta = 1, gamma = 1,  beta = 1, 
-            alpha = 1, K = celdaCG.sim$K, L = celdaCG.sim$L, 
-            s = celdaCG.sim$sample.label, 
-            counts=celdaCG.sim$counts),0)
+                          y = celdaCG.sim$y, z = celdaCG.sim$z,
+                          delta = 1, gamma = 1,  beta = 1, 
+                          alpha = 1, K = celdaCG.sim$K, L = celdaCG.sim$L, 
+                          s = celdaCG.sim$sample.label, 
+                          counts=celdaCG.sim$counts),0)
+  
+  fake.z = celdaCG.sim$z
+  fake.z[1] = celdaCG.sim$K + 1
+  expect_error(logLikelihood(model="celda_CG",
+                             y = celdaCG.sim$y, z = fake.z,
+                             delta = 1, gamma = 1,  beta = 1, 
+                             alpha = 1, K = celdaCG.sim$K, L = celdaCG.sim$L, 
+                             s = celdaCG.sim$sample.label, 
+                             counts=celdaCG.sim$counts),
+                             "An entry in z contains a value greater than the provided K.")
+  
+  fake.y = celdaCG.sim$y
+  fake.y[1] = celdaCG.sim$L + 1
+  expect_error(logLikelihood(model="celda_CG",
+                             y = fake.y, z = celdaCG.sim$z,
+                             delta = 1, gamma = 1,  beta = 1, 
+                             alpha = 1, K = celdaCG.sim$K, L = celdaCG.sim$L, 
+                             s = celdaCG.sim$sample.label, 
+                             counts=celdaCG.sim$counts),
+                             "An entry in y contains a value greater than the provided L.")
 })
 
 # normalizeCounts

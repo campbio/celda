@@ -475,6 +475,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #'                        gamma=celda.sim$gamma, delta=celda.sim$delta)
 #' @export
 logLikelihood.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
+  if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
+  if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   p = cCG.decomposeCounts(counts, s, z, y, K, L)
