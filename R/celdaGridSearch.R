@@ -53,7 +53,11 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   if(any(c("z.init", "y.init", "sample.label") %in% names(params.test))) {
     stop("Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
   }
-  
+  if(any(c("nchains") %in% names(params.test))){
+    warning("Parameter 'nchains' should not be used within the params.test list")
+    params.test[["nchains"]] <- NULL
+  }
+   
   # Set up parameter combinations for each individual chain
   run.params = expand.grid(c(chain=list(1:nchains), params.test))
   run.params = cbind(index = 1:nrow(run.params), run.params)
