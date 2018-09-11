@@ -68,9 +68,17 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 # logLikelihood
 test_that(desc = "Testing logLikelihood.celda_C", {
   expect_lt(logLikelihood(model="celda_C", 
-            counts = celdaC.sim$counts,z = celdaC.sim$z,
-            K = celdaC.sim$K, alpha = 1, beta = 1,
-            sample.label = celdaC.sim$sample.label), 0)
+                          counts = celdaC.sim$counts,z = celdaC.sim$z,
+                          K = celdaC.sim$K, alpha = 1, beta = 1,
+                          sample.label = celdaC.sim$sample.label), 0)
+  
+  fake.z = celdaC.sim$z
+  fake.z[1] = celdaC.sim$K + 1
+  expect_error(logLikelihood(model="celda_C",
+                             z = fake.z, counts = celdaC.sim$counts,
+                             K = celdaC.sim$K, alpha = 1, beta = 1,
+                             sample.label = celdaC.sim$sample.label),
+                             "An entry in z contains a value greater than the provided K.")
 })
 
 # Gibbs sampling
