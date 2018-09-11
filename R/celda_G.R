@@ -435,6 +435,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #'                        gamma=celda.sim$gamma)
 #' @export
 logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
+  if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
   final <- cG.calcLL(n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, n.by.G=p$n.by.G, nG.by.TS=p$nG.by.TS, nM=p$nM, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
