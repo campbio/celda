@@ -330,6 +330,7 @@ test_that(desc = "Testing perplexity.celda_CG", {
   class(model_CG) = c("celda_C")
   expect_error(perplexity.celda_CG(celdaCG.sim$counts, model_CG),
                "The celda.mod provided was not of class celda_CG.")
+})
 
 #miscellaneous fxns
 
