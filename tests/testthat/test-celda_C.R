@@ -3,7 +3,8 @@ library(celda)
 context("Testing celda_C")
 
 celdaC.sim = simulateCells("celda_C", K=10)
-model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
+model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, 
+                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
 factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)  
 
 # celda_C
@@ -222,3 +223,10 @@ test_that(desc = "Testing error checking for cC.splitZ", {
   expect_true(grepl("Cluster sizes too small", res$message))
 })
 
+test_that(desc = "Testing perplexity.celda_C", {
+  expect_true(is.numeric(perplexity(celdaC.sim$counts, model_C)))
+  
+  class(model_C) = c("celda_CG")
+  expect_error(perplexity.celda_C(celdaC.sim$counts, model_C),
+               "The celda.mod provided was not of class celda_C.")
+})
