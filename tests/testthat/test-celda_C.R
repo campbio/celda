@@ -170,3 +170,11 @@ test_that(desc = "Testing error checking for cC.splitZ", {
   res = cC.splitZ(r$counts, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, z.prob=NULL, min.cell=1000)
   expect_true(grepl("Cluster sizes too small", res$message))
 })
+
+test_that(desc = "Testing perplexity.celda_C", {
+  expect_true(is.numeric(perplexity(celdaC.sim$counts, model_C)))
+  
+  class(model_C) = c("celda_CG")
+  expect_error(perplexity.celda_C(celdaC.sim$counts, model_C),
+               "The celda.mod provided was not of class celda_C.")
+})
