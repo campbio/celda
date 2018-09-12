@@ -6,6 +6,15 @@ celdaG.sim = simulateCells("celda_G", L=5, G=100)
 model_G = celda_G(counts=celdaG.sim$counts, L=celdaG.sim$L, max.iter=10, verbose=FALSE)
 factorized = factorizeMatrix(counts=celdaG.sim$counts, celda.mod = model_G)  
 
+test_that(desc = "Testing celda_G model with numeric input matrix", {
+  # Github Issue #347
+  numeric.counts = celdaG.sim$counts
+  storage.mode(numeric.counts) = "numeric"
+  expect_equal(class(celda_G(counts=numeric.counts, L=celdaG.sim$L, 
+                             max.iter=10, verbose=FALSE)),
+               "celda_G")
+})
+
 test_that(desc = "Testing clusterProbability with celda_G", {
   expect_true(ncol(clusterProbability(celdaG.sim$counts, model_G)$y.probability) == celdaG.sim$L)
 })
