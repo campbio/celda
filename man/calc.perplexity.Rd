@@ -12,7 +12,7 @@
 calc.perplexity
 }
 \description{
-The result of running the calculatePerplexityWithResamplingfunction on the pbmc_res model
+The result of running the resamplePerplexity function on the pbmc_res model
 }
 \details{
 Perplexity plot created with the pbmc_res model.
