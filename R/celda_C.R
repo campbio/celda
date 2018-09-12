@@ -336,7 +336,7 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
   res = list()
                 
   if(any("counts" %in% type)) {
-    counts.list = list(sample.states=m.CP.by.S, gene.states=n.G.by.CP)
+    counts.list = list(sample=m.CP.by.S, module=n.G.by.CP)
     res = c(res, list(counts=counts.list))
   }
   if(any("proportion" %in% type)) {
@@ -345,13 +345,13 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
     temp.n.G.by.CP = n.G.by.CP
     temp.n.G.by.CP[,unique.z] = normalizeCounts(temp.n.G.by.CP[,unique.z], normalize="proportion")
 
-    prop.list = list(sample.states = normalizeCounts(m.CP.by.S, normalize="proportion"),
-                     gene.states = temp.n.G.by.CP)
+    prop.list = list(sample = normalizeCounts(m.CP.by.S, normalize="proportion"),
+                     module = temp.n.G.by.CP)
     res = c(res, list(proportions=prop.list))
   }
   if(any("posterior" %in% type)) {
-    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
-                     gene.states = normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
+    post.list = list(sample = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
+                     module = normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
     res = c(res, posterior = list(post.list))                           
   }
 
@@ -394,12 +394,13 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param ... Additional parameters.
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
-#' loglik = calculateLoglikFromVariables(celda.sim$counts, model="celda_C", 
-#'                                       sample.label=celda.sim$sample.label,
-#'                                       z=celda.sim$z, K=celda.sim$K,
-#'                                       alpha=celda.sim$alpha, beta=celda.sim$beta)
+#' loglik = logLikelihood(celda.sim$counts, model="celda_C", 
+#'                        sample.label=celda.sim$sample.label,
+#'                        z=celda.sim$z, K=celda.sim$K,
+#'                        alpha=celda.sim$alpha, beta=celda.sim$beta)
 #' @export
-calculateLoglikFromVariables.celda_C = function(counts, sample.label, z, K, alpha, beta) {
+logLikelihood.celda_C = function(counts, sample.label, z, K, alpha, beta) {
+  if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   p = cC.decomposeCounts(counts, s, z, K)  
@@ -484,9 +485,10 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 #' @examples
 #' celda.sim = simulateCells(model="celda_C")
 #' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
-#' perplexity = calculatePerplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
-calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
+perplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
+  if (!("celda_C" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_C.")
 
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
@@ -502,8 +504,8 @@ calculatePerplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
   
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
                                type="posterior")
-  theta = log(factorized$posterior$sample.states)
-  phi = log(factorized$posterior$gene.states)
+  theta = log(factorized$posterior$sample)
+  phi = log(factorized$posterior$module)
   s = as.integer(celda.mod$sample.label)
   
   inner.log.prob = (t(phi) %*% new.counts) + theta[, s]  
@@ -519,7 +521,7 @@ reorder.celda_C = function(counts, res){
     res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
     unique.z = sort(unique(res$z))
-    d <- cosineDist(fm$posterior$gene.states[,unique.z])
+    d <- cosineDist(fm$posterior$module[,unique.z])
     h <- hclust(d, method = "complete")
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
   }  
@@ -627,7 +629,7 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
   level = match.arg(level)
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
   
-  samp <- factorized$proportions$sample.states[z.include,,drop=FALSE]
+  samp <- factorized$proportions$sample[z.include,,drop=FALSE]
   col <- colorRampPalette(c("white","blue","#08306B","#006D2C","yellowgreen","yellow","orange","red"))(100)
   breaks <-  seq(0, 1, length.out = length(col))     
   g1 = plotHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
