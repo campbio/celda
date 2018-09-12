@@ -28,7 +28,7 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
   m = reshape2::melt(df, id.vars = c("dim1","dim2"))
   colnames(m) = c(xlab,ylab,"facet",var_label)
   ggplot2::ggplot(m, ggplot2::aes_string(x=xlab, y=ylab)) + ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes_string(color = var_label)) + 
-    ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, high = color_high, mid = color_mid, midpoint = (max(m[,4])-min(m[,4]))/2 ,name = gsub("_"," ",var_label)) + 
+    ggplot2::facet_wrap(~facet) + ggplot2::theme_bw() + ggplot2::scale_colour_gradient2(low = color_low, high = color_high, mid = color_mid, midpoint = (max(m[,4])+min(m[,4]))/2 ,name = gsub("_"," ",var_label)) + 
     ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = unit(0,"lines"),
                    panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black"))
 }
@@ -39,6 +39,7 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param features Character vector. Uses these genes for plotting.
+#' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE.
 #' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
 #' @param size Numeric. Sets size of point on plot. Default 1.
@@ -56,9 +57,13 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #'                   counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
 #'}
 #' @export 
-plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
-  counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale)
-  
+plotDimReduceGene = function(dim1, dim2, counts, features, normalize = TRUE, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+  if(isTRUE(normalize)){
+    counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale) 
+  }
+  if(is.null(features)){
+    stop("at least one feature is required to create a plot")
+  }
   if(!is.null(trim)){
     if(length(trim) != 2) {
       stop("'trim' should be a 2 element vector specifying the lower and upper boundaries")
@@ -108,7 +113,7 @@ plotDimReduceGene = function(dim1, dim2, counts, features, exact.match = TRUE, t
 plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   
   factorized = factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  matrix = factorized$proportions$cell.states
+  matrix = factorized$proportions$cell
   if(rescale == TRUE){
     for(x in 1:nrow(matrix)){ 
       matrix[x,] = matrix[x,]-min(matrix[x,])
@@ -121,7 +126,7 @@ plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, res
   
   if(!is.null(modules)){
     if(length(rownames(matrix)[rownames(matrix) %in% modules]) < 1){
-      stop("The module selected does not exist in the model.")
+      stop("All modules selected do not exist in the model.")
     }
     matrix = matrix[which(rownames(matrix) %in% modules),]
     matrix = matrix[match(rownames(matrix), modules),]

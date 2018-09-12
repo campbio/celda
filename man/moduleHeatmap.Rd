@@ -2,7 +2,7 @@
 % Please edit documentation in R/StateHeatmap.R
 \name{moduleHeatmap}
 \alias{moduleHeatmap}
-\title{Transcriptional state heatmap}
+\title{Gene module heatmap}
 \usage{
 moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = NULL,
   top.features = NULL, normalize = TRUE, scale.row = scale,
@@ -26,9 +26,9 @@ moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = NULL,
 \item{show_featurenames}{Logical. Specifies if feature names should be shown. Default TRUE.}
 }
 \description{
-Draws a heatmap focusing on a transcriptional state. Both cells and genes are sorted by 
-   their proportions of counts in a given transcriptional state. Allows for nice visualization of 
-   co-expression of those genes grouped into transcriptional states by Celda.
+Draws a heatmap focusing on a gene module. Both cells and genes are sorted by 
+   their proportions of counts in a given gene module. Allows for nice visualization of 
+   co-expression of those genes grouped into gene modules by Celda.
 }
 \examples{
 celda.sim = simulateCells("celda_CG")
