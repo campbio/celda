@@ -225,7 +225,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
   ## Loop through each split-able Z and perform split
   clust.split = vector("list", L)
   for(i in y.to.split) { 
-    clustLabel = suppressMessages(celda_G(temp.n.G.by.CP[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(.celda_G(temp.n.G.by.CP[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$y
   }
 
@@ -322,7 +322,7 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   ## Loop through each split-able y and find best split
   clust.split = vector("list", L)
   for(i in y.to.split) {
-    clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(.celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$y
   }
 
