@@ -172,6 +172,7 @@ compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   }
   
   celda.checksum = celda.mod$count.checksum
+  counts = processCounts(counts)  # Checksums are generated in celdaGridSearch and model functions after processing
   count.md5 = digest::digest(counts, algo="md5")
   res = isTRUE(count.md5 == celda.checksum)
   if (res) return(TRUE)
@@ -245,6 +246,19 @@ processCounts = function(counts) {
     storage.mode(counts) = "integer"
   }
   return(counts)  
+}
+
+
+# Perform some simple checks on the counts matrix, to ensure celda modeling
+# expectations are met
+validateCounts = function(counts) {
+  # And each row/column of the count matrix must have at least one count
+  count.row.sum = rowSums(counts)
+  count.col.sum = colSums(counts)
+  
+  if (sum(count.row.sum == 0) > 1 | sum(count.col.sum == 0) > 1) {
+    stop("Each row and column of the count matrix must have at least one count")
+  }
 }
 
 
