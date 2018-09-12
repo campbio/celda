@@ -28,6 +28,17 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
 					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE) {
+  
+  validateCounts(counts)
+  return(.celda_G(counts, L, beta, delta, gamma, stop.iter, max.iter, split.on.iter,
+                  split.on.last, seed, nchains, initialize, count.checksum,
+                  y.init, logfile, verbose))
+}
+
+.celda_G = function(counts, L, beta=1, delta=1, gamma=1,
+					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+					y.init=NULL, logfile=NULL, verbose=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -35,6 +46,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   start.time = Sys.time()
 
   ## Error checking and variable processing
+  counts = processCounts(counts)
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
@@ -126,7 +138,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 				  count.checksum=count.checksum, seed=current.seed, names=names)
 	class(result) = "celda_G"
 	
-	if(is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
+	if (is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
       best.result = result
     }
     

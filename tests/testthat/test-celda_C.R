@@ -14,6 +14,14 @@ test_that(desc = "Testing simulation and celda_C model", {
   expect_true(ncol(factorized$proportions$module) == model_C$K)
   expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_C))))
   expect_equal(max(completeLogLikelihood(celda.mod = model_C)), finalLogLikelihood(model_C))
+  
+  # GitHub #347
+  numeric.counts = celdaC.sim$counts
+  storage.mode(numeric.counts) = "numeric"
+  expect_equal(class(celda_C(counts=celdaC.sim$counts, 
+                             sample.label=celdaC.sim$sample.label, 
+                             K=celdaC.sim$K, algorithm="EM", verbose=FALSE)),
+               "celda_C")
 })
 
 # clusterProbability
