@@ -91,7 +91,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
     y = celda.mod$y[gene_ix],
     scale.row = scale.row,
     color.scheme = "divergent",
-    show.featurenames = show_featurenames,
+    show.names.feature = show_featurenames,
     cluster.feature = FALSE,
     cluster.cell = FALSE,
     annotation.color = anno_cell_colors
