@@ -53,11 +53,11 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
 #' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
 #' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceGene(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
+#' plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
 #'                   counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
 #'}
 #' @export 
-plotDimReduceGene = function(dim1, dim2, counts, features, normalize = TRUE, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   if(isTRUE(normalize)){
     counts = normalizeCounts(counts, transformation.fun = sqrt, scale.fun = base::scale) 
   }
@@ -106,11 +106,11 @@ plotDimReduceGene = function(dim1, dim2, counts, features, normalize = TRUE, exa
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
 #' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
 #' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], 
+#' plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], 
 #'                    counts = sim.res$counts, celda.mod = celda_cg, modules = c("L1","L2"))
 #'}
 #' @export 
-plotDimReduceState = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
+plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
   
   factorized = factorizeMatrix(celda.mod = celda.mod, counts = counts)
   matrix = factorized$proportions$cell
