@@ -178,14 +178,14 @@ test_that(desc = "Testing moduleHeatmap with celda_G",{
   expect_error(moduleHeatmap(celdaG.sim$counts, celda.mod = "model_G"), "'celda.mod' should be an object of class celda_G or celda_CG")
 })
 
-# plotDimReduceState
-test_that(desc = "Testing plotDimReduceState with celda_G", {
+# plotDimReduceModule
+test_that(desc = "Testing plotDimReduceModule with celda_G", {
   celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
-  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))
-  expect_equal(names(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L1","L2"), rescale = F)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L1","L2"), rescale = F)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
-  expect_error(plotDimReduceState(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L11","L12")))
+  expect_error(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L11","L12")))
 })
 
 # celdaTsne
