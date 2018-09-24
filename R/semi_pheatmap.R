@@ -1161,6 +1161,9 @@ semi_pheatmap = function(mat,
         annotation_colors = NA
     }
     
+    labels_row = rownames(mat)
+    labels_col = colnames(mat)
+    
     if(!show_rownames){
         labels_row = NULL
     }
