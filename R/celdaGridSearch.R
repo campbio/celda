@@ -30,11 +30,13 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @import foreach
 #' @export
 celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
-				    max.iter=200, nchains=3, cores=1,
-				    best.only=TRUE, seed=12345, verbose=TRUE, 
-                    logfile.prefix="Celda") {
+                				   max.iter=200, nchains=3, cores=1,
+                				   best.only=TRUE, seed=12345, verbose=TRUE, 
+                           logfile.prefix="Celda") {
  
   ## Check parameters
+  validateCounts(counts)
+  
   model.params = as.list(formals(model))
   if(!all(names(params.test) %in% names(model.params))) {
     bad.params = setdiff(names(params.test), names(model.params))
