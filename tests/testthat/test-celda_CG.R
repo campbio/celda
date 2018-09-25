@@ -14,6 +14,14 @@ test_that(desc = "Testing simulation and celda_CG model", {
   expect_equal(celdaCG.sim$L, nrow(factorized$proportions$cell.population))   
   expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_CG))))
   expect_equal(max(completeLogLikelihood(celda.mod = model_CG)), finalLogLikelihood(model_CG))
+  
+  # GitHub #347
+  numeric.counts = celdaCG.sim$counts
+  storage.mode(numeric.counts) = "numeric"
+  expect_equal(class(celda_CG(counts=celdaCG.sim$counts, 
+                              sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, 
+                              L=celdaCG.sim$L, algorithm="EM", verbose=FALSE)),
+               "celda_CG")
 })
 
 # Cluster probabilities
@@ -322,6 +330,14 @@ test_that(desc = "Testing cCG.splitZ and cCG.splitY", {
   ## Testing K.subclusters parameter
   res = cCG.splitY(r$counts, r$y, dc$m.CP.by.S, dc$n.G.by.CP, dc$n.TS.by.C, dc$n.TS.by.CP, dc$n.by.G, dc$n.by.TS, dc$nG.by.TS, dc$n.CP, s=as.integer(r$sample.label), z=r$z, K=r$K, L=r$L, nS=dc$nS, nG=dc$nG, alpha=1, beta=1, delta=1, gamma=1, y.prob=probs$y.probability, K.subclusters=1000)
   expect_true(length(res$y) == nrow(r$counts))  
+})
+
+test_that(desc = "Testing perplexity.celda_CG", {
+  expect_true(is.numeric(perplexity(celdaCG.sim$counts, model_CG)))
+  
+  class(model_CG) = c("celda_C")
+  expect_error(perplexity.celda_CG(celdaCG.sim$counts, model_CG),
+               "The celda.mod provided was not of class celda_CG.")
 })
 
 #miscellaneous fxns
