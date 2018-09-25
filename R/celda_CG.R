@@ -33,16 +33,29 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                     seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
+  validateCounts(counts)
+  return(.celda_CG(counts, sample.label, K, L, alpha, beta, delta, gamma,
+                   algorithm, stop.iter, max.iter, split.on.iter, split.on.last,
+                   seed, nchains, initialize, count.checksum, z.init, y.init,
+                   logfile, verbose))
+}
+
+.celda_CG = function(counts, sample.label=NULL, K, L,
+                    alpha=1, beta=1, delta=1, gamma=1, 
+                    algorithm = c("EM", "Gibbs"), 
+                    stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
+                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   start.time = Sys.time()
 
+  counts = processCounts(counts)
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-  counts = processCounts(counts)
     
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
@@ -175,10 +188,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 				 sample=levels(sample.label))
   
 	result = list(z=z.best, y=y.best, completeLogLik=ll, 
-				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
-				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
-				  sample.label=sample.label, names=names,
-				  count.checksum=count.checksum)
+      				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
+      				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
+      				  sample.label=sample.label, names=names,
+      				  count.checksum=count.checksum)
   
 	class(result) = "celda_CG" 
 
@@ -569,6 +582,7 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 #' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
 perplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
+  if (!("celda_CG" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_CG.")
   
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)

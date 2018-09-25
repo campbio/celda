@@ -23,22 +23,33 @@
 #' celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
-					 algorithm = c("EM", "Gibbs"), 
-                 	 stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                 	 seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
-                 	 z.init = NULL, logfile=NULL, verbose=TRUE) {
+  					        algorithm = c("EM", "Gibbs"), 
+                   	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+                   	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+                   	z.init = NULL, logfile=NULL, verbose=TRUE) {
+  validateCounts(counts)
+  return(.celda_C(counts, sample.label, K, alpha, beta, algorithm, stop.iter,
+                  max.iter, split.on.iter, split.on.last, seed, nchains,
+                  initialize, count.checksum, z.init, logfile, verbose))
+}
 
+.celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
+  					        algorithm = c("EM", "Gibbs"), 
+                   	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+                   	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+                   	z.init = NULL, logfile=NULL, verbose=TRUE) {
+  
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   start.time = Sys.time()
                  	 
   ## Error checking and variable processing
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
-  }
   counts = processCounts(counts)  
-    
+   if(is.null(count.checksum)) {
+    count.checksum = digest::digest(counts, algo="md5")
+   }   
+  
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   
@@ -488,6 +499,7 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 #' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
 perplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
+  if (!("celda_C" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_C.")
 
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
