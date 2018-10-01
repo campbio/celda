@@ -129,7 +129,6 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
       stop("All modules selected do not exist in the model.")
     }
     matrix = matrix[which(rownames(matrix) %in% modules),]
-    matrix = matrix[match(rownames(matrix), modules),]
   }
   plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
