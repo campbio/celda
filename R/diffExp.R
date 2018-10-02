@@ -67,18 +67,19 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
   SummarizedExperiment::colData(sca)$cngeneson <- scale(cdr2)
   cond <- factor(SummarizedExperiment::colData(sca)$condition)
-  cond <- relevel(cond, "c2")
+  cond <- stats::relevel(cond, "c2")
   SummarizedExperiment::colData(sca)$condition <- cond
   zlmCond <- MAST::zlm( ~ condition + cngeneson, sca)
   summaryCond <- MAST::summary(zlmCond, doLRT = 'conditionc1')
   summaryDt <- summaryCond$datatable
+  contrast <- component <- primerid <- coef <- ci.hi <- ci.lo <- `Pr(>Chisq)` <- fdr <- NULL # Avoid NSE notes in check
   fcHurdle <-
     merge(summaryDt[contrast == 'conditionc1' &
                       component == 'H', .(primerid, `Pr(>Chisq)`)],
           summaryDt[contrast == 'conditionc1' &
                       component == 'logFC', .(primerid, coef, ci.hi, ci.lo)], by = 'primerid')
   
-  fcHurdle[, fdr := p.adjust(`Pr(>Chisq)`, 'fdr')]
+  fcHurdle[, fdr := stats::p.adjust(`Pr(>Chisq)`, 'fdr')]
   ###Some genes aren't outputted because log2FC gets NaN if one or both clusters have 0 counts for a gene
   ###and then they're discarded because NaN !> 0
   if(is.null(log2fc.threshold)){
