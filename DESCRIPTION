@@ -8,7 +8,6 @@ Description: celda leverages Bayesian hierarchical modeling to cluster genes,
     cells, or both simultaneously from single cell sequencing data.
 Depends:
     R (>= 3.4),
-    SummarizedExperiment
 Imports:
     plyr,
     dplyr,
@@ -36,7 +35,8 @@ Imports:
     ineq,
     data.table,
     Rcpp,
-    RcppEigen
+    RcppEigen,
+    SummarizedExperiment
 Suggests:
     testthat,
     knitr,
@@ -55,4 +55,4 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
 BugReports: https://github.com/definitelysean/celda/issues
-biocViews: SingleCell, GeneExpression, Clustering
+biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian
