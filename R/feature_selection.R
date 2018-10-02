@@ -27,7 +27,7 @@ topRank = function(matrix, n=25, margin=2, threshold=0, decreasing=TRUE) {
     
     h = NA
     if(n.to.select > 0) {
-      h = head(order(v, decreasing=decreasing), n.to.select)
+      h = utils::head(order(v, decreasing=decreasing), n.to.select)
     }  
     return(h)
   }
