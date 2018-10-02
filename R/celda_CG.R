@@ -622,7 +622,7 @@ reorder.celda_CG = function(counts, res){
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$cell.population[,unique.z])
-    h <- hclust(d, method = "complete")
+    h <- stats::hclust(d, method = "complete")
     
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
   }  
@@ -634,7 +634,7 @@ reorder.celda_CG = function(counts, res){
     unique.y = sort(unique(res$y))
     cs <- prop.table(t(fm$posterior$cell.population[unique.y,]), 2)
     d <- cosineDist(cs)
-    h <- hclust(d, method = "complete")
+    h <- stats::hclust(d, method = "complete")
     
     res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
   }
@@ -654,7 +654,7 @@ reorder.celda_CG = function(counts, res){
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
-  top = topRank(fm$proportions$module, n=nfeatures)
+  top = celda::topRank(fm$proportions$module, n=nfeatures)
   ix = unlist(top$index)
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   plotHeatmap(norm[ix,], z=celda.mod$z, y=celda.mod$y[ix], ...)
@@ -689,7 +689,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
   modules.to.use = 1:nrow(fm$counts$cell)
   if (!is.null(modules)) {
     if (!all(modules %in% modules.to.use)) {
-      stop("'modules' must be a vector of numbers between 1 and ", states.to.use, ".")
+      stop("'modules' must be a vector of numbers between 1 and ", modules.to.use, ".")
     }
     modules.to.use = modules 
   }
@@ -758,7 +758,7 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
     pop <- factorized$proportions$cell.population[y.include,z.include,drop=FALSE]
     pop.norm = normalizeCounts(pop, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
   
-    percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
+    percentile.9 <- round(stats::quantile(pop,.9), digits = 2) * 100
     col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
     col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
     col <- c(col1,col2)
