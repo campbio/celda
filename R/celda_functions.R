@@ -23,7 +23,7 @@ spearmanDist = function(x){
 }
 
 hellingerDist = function(x) {
-  y = dist(t(sqrt(x)), method = "euclidean") * 1/sqrt(2)
+  y = stats::dist(t(sqrt(x)), method = "euclidean") * 1/sqrt(2)
   return(y)
 }  
 
@@ -48,8 +48,8 @@ normalizeLogProbs = function(ll.probs) {
 #' normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
-							transformation.fun=NULL, scale.fun=NULL,
-							pseudocount.normalize=0, pseudocount.transform=0) {
+            							 transformation.fun=NULL, scale.fun=NULL,
+            							 pseudocount.normalize=0, pseudocount.transform=0) {
 
   normalize = match.arg(normalize)
   if(!is.null(transformation.fun) && !is.function(transformation.fun)) {
@@ -68,7 +68,7 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
     norm = switch(normalize,
       "proportion" = sweep(counts, 2, cs, "/"),
       "cpm" = sweep(counts, 2, cs / 1e6, "/"),
-      "median" = sweep(counts, 2, cs / median(cs), "/"),
+      "median" = sweep(counts, 2, cs / stats::median(cs), "/"),
       "mean" = sweep(counts, 2, cs / mean(cs), "/"))
   }  
  
@@ -266,7 +266,7 @@ validateCounts = function(counts) {
 ## Adapted from gtools v3.5
 rdirichlet <- function(n, alpha) {
     l <- length(alpha);
-    x <- matrix(rgamma(l * n, alpha), ncol = l, byrow=TRUE);
+    x <- matrix(stats::rgamma(l * n, alpha), ncol = l, byrow=TRUE);
     
     ## Check for case where all sampled entries are zero due to round off
     ## One entry will be randomly chosen to be one
