@@ -12,3 +12,9 @@ runParams(celda.list)
 \description{
 Get run parameters for a celda run.
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+runParams(celda.mod)
+}

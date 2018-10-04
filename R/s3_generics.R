@@ -5,6 +5,11 @@
 #' Get run parameters for a celda run.
 #'
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' runParams(celda.mod)
 #' @export
 runParams = function(celda.list) {
   return(celda.list$run.params)
