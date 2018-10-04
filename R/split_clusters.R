@@ -42,7 +42,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
     ll.shuffle[i] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
     previous.z = new.z
   } 
-  z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  z.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
 
   
   pairs = c(NA, NA)
@@ -134,7 +134,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
     ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
     previous.z = new.z
   } 
-  z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  z.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
 
   
   pairs = c(NA, NA)
@@ -255,7 +255,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
     ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
     previous.y = new.y
   } 
-  y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  y.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
   
   pairs = c(NA, NA)
   split.ix = 2
@@ -347,7 +347,7 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
     ll.shuffle[i] = cG.calcLL(p$n.TS.by.C, p$n.by.TS, n.by.G, p$nG.by.TS, nM, nG, L, beta, delta, gamma)
     previous.y = new.y
   }
-  y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  y.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
   
   pairs = c(NA, NA)
   split.ix = 2  

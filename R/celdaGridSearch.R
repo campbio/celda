@@ -82,6 +82,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   ## Use DoParallel to loop through each combination of parameters
   cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)   
+  i = NULL  # Setting visible binding for R CMD CHECK
   res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     
     ## Set up chain parameter list
@@ -197,6 +198,7 @@ subsetCeldaList = function(celda.list, params) {
 selectBestModel = function(celda.list) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
  
+  log_likelihood = NULL
   group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
   dt = data.table::as.data.table(celda.list$run.params)
   new.run.params = as.data.frame(dt[,.SD[which.max(log_likelihood)], by=group])

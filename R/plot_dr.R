@@ -149,7 +149,9 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
 #' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
 #' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(celda_cg$z),specific_clusters = c(1,2,3))
+#' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
+#'                      cluster = as.factor(celda_cg$z),
+#'                      specific_clusters = c(1,2,3))
 #' }
 #' @export 
 plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
@@ -163,7 +165,8 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     cluster_colors[!levels(df[[3]]) %in% specific_clusters] = "gray92"
   }
   ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
-    ggplot2::geom_point(stat = "identity", size = size, ggplot2::aes(color = Cluster)) +
+    ggplot2::geom_point(stat = "identity", size = size, 
+                        ggplot2::aes_string(color = "Cluster")) +
     ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(color = "black")) +
     ggplot2::scale_color_manual(values = cluster_colors) +
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
