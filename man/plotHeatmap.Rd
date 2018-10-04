@@ -74,6 +74,9 @@ plotHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
 
 \item{...}{Other arguments to be passed to underlying pheatmap function.}
 }
+\value{
+list A list containing dendrogram information and the heatmap grob
+}
 \description{
 Renders a heatmap based on a matrix of counts where rows are features and columns are cells.
 }

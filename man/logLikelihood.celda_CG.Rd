@@ -30,6 +30,9 @@ logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta,
 
 \item{...}{Additional parameters.}
 }
+\value{
+The log-likelihood for the given cluster assignments
+}
 \description{
 Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
 }
