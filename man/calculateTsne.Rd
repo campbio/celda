@@ -23,10 +23,3 @@ calculateTsne(norm, perplexity = 20, max.iter = 2500, seed = 12345,
 \description{
 Run the t-SNE algorithm for dimensionality reduction
 }
-\examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-norm = normalizeCounts(celda.sim$counts, normalize="proportion", transformation.fun=sqrt)
-tsne = calculateTsne(norm = norm, max.iter = 10)
-}
