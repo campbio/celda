@@ -567,7 +567,7 @@ reorder.celda_G = function(counts, res) {
     unique.y = sort(unique(res$y))
     cs = prop.table(t(fm$posterior$cell[unique.y,]), 2)
     d <- cosineDist(cs)
-    h <- hclust(d, method = "complete")
+    h <- stats::hclust(d, method = "complete")
     res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
   }  
   return(res)
