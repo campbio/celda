@@ -17,3 +17,7 @@ used in the simulation which can be useful for running celda. The user must prov
 (one of celda_C, celda_G, celda_CG) as well as any desired tuning parameters for those model's simulation
 functions as detailed below.
 }
+\examples{
+celda.sim = simulateCells(model = "celda_CG")
+dim(celda.sim$counts)
+}
