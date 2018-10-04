@@ -113,15 +113,16 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
   df$K = as.factor(df$K)
   df$L = as.factor(df$L)  
 
-  l.means.by.k = aggregate(df$perplexity, by=list(df$K, df$L), FUN=mean)
+  l.means.by.k = stats::aggregate(df$perplexity, by=list(df$K, df$L), FUN=mean)
   colnames(l.means.by.k) = c("K", "L", "mean_perplexity")
   l.means.by.k$K = as.factor(l.means.by.k$K)
   l.means.by.k$L = as.factor(l.means.by.k$L)
   
-  plot = ggplot2::ggplot(df, ggplot2::aes(x=K, y=perplexity)) +
-  		ggplot2::geom_jitter(height=0, width=0.1, ggplot2::aes(color=L)) +
+  plot = ggplot2::ggplot(df, ggplot2::aes_string(x="K", y="perplexity")) +
+  		ggplot2::geom_jitter(height=0, width=0.1, ggplot2::aes_string(color="L")) +
         ggplot2::scale_color_discrete(name="L") +
-        ggplot2::geom_path(data=l.means.by.k, ggplot2::aes(x=K, y=mean_perplexity, group=L, color=L)) +
+        ggplot2::geom_path(data=l.means.by.k, 
+                           ggplot2::aes_string(x="K", y="mean_perplexity", group="L", color="L")) +
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("K") +
         ggplot2::theme_bw()
@@ -158,13 +159,14 @@ plotGridSearchPerplexity.celda_C = function(celda.list) {
   df$K = as.factor(df$K)
 
 
-  means.by.k = aggregate(df$perplexity, by=list(df$K), FUN=mean)
+  means.by.k = stats::aggregate(df$perplexity, by=list(df$K), FUN=mean)
   colnames(means.by.k) = c("K", "mean_perplexity")
   means.by.k$K = as.factor(means.by.k$K)
   
-  plot = ggplot2::ggplot(df, ggplot2::aes(x=K, y=perplexity)) +
+  plot = ggplot2::ggplot(df, ggplot2::aes_string(x="K", y="perplexity")) +
   		ggplot2::geom_jitter(height=0, width=0.1) +
-        ggplot2::geom_path(data=means.by.k, ggplot2::aes(x=K, y=mean_perplexity, group=1)) +  
+        ggplot2::geom_path(data=means.by.k, 
+                           ggplot2::aes_string(x="K", y="mean_perplexity", group=1)) +  
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("K") +
         ggplot2::theme_bw()
@@ -201,13 +203,14 @@ plotGridSearchPerplexity.celda_G = function(celda.list) {
   df$L = as.factor(df$L)
 
 
-  means.by.l = aggregate(df$perplexity, by=list(df$L), FUN=mean)
+  means.by.l = stats::aggregate(df$perplexity, by=list(df$L), FUN=mean)
   colnames(means.by.l) = c("L", "mean_perplexity")
   means.by.l$L = as.factor(means.by.l$L)
   
-  plot = ggplot2::ggplot(df, ggplot2::aes(x=L, y=perplexity)) +
+  plot = ggplot2::ggplot(df, ggplot2::aes_string(x="L", y="perplexity")) +
   		ggplot2::geom_jitter(height=0, width=0.1) +
-        ggplot2::geom_path(data=means.by.l, ggplot2::aes(x=L, y=mean_perplexity, group=1)) +  
+        ggplot2::geom_path(data=means.by.l, 
+                           ggplot2::aes_string(x="L", y="mean_perplexity", group=1)) +  
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("L") +
         ggplot2::theme_bw()
@@ -230,7 +233,7 @@ resampleCountMatrix = function(count.matrix) {
   colsums  = colSums(count.matrix)
   prob     = t(t(count.matrix) / colsums)
   resample = sapply(1:ncol(count.matrix), function(idx){
-                      rmultinom(n=1, size=colsums[idx], prob=prob[, idx])
+                      stats::rmultinom(n=1, size=colsums[idx], prob=prob[, idx])
                    })
   return(resample)
 }

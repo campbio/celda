@@ -55,8 +55,8 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   
   if(!is.null(top.cells)){
     if(top.cells * 2 < ncol(cell.states)){
-      cell.indices <- c(head(single.module.ordered, n = top.cells), 
-                        tail(single.module.ordered, n = top.cells))
+      cell.indices <- c(utils::head(single.module.ordered, n = top.cells), 
+                        utils::tail(single.module.ordered, n = top.cells))
     }else{
       cell.indices <- single.module.ordered 
     }
