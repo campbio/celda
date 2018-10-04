@@ -63,7 +63,7 @@ recursive.splitZ = function(counts, s, K, alpha, beta, min.cell = 3, seed=12345)
     for(i in z.to.split) {
       if(isTRUE(cluster.split.flag[i])) {
         ix = which(overall.z == i)
-        res = suppressMessages(.celda_C(counts[,ix], K=2, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchain=1, seed=seed, verbose=FALSE, initialize="random"))
+        res = suppressMessages(.celda_C(counts[,ix], K=2, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchains=1, seed=seed, verbose=FALSE, initialize="random"))
         cluster.splits[cbind(ix, i)] = res$z
         cluster.split.flag[i] = FALSE
       }
@@ -115,7 +115,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
   ## If z or K are not supplied from previous cell clustering, then each cluster will be split into 'max.cells' subclusters
   } else {
 	if(ncol(counts) > max.cells) {
-	  res = .celda_C(counts, K=max.cells, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchain=3, seed=seed, verbose=FALSE)
+	  res = .celda_C(counts, K=max.cells, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchains=3, seed=seed, verbose=FALSE)
 	  temp.z = res$z
 	} else {
 	  temp.z = 1:ncol(counts)
@@ -140,7 +140,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
     for(i in y.to.split) {
       if(isTRUE(cluster.split.flag[i])) {
         ix = which(overall.y == i)
-        res = suppressMessages(.celda_G(counts[ix,], L=2, max.iter = 5, split.on.iter=-1, split.on.last=FALSE, nchain=1, seed=seed, verbose=FALSE, initialize="random"))
+        res = suppressMessages(.celda_G(counts[ix,], L=2, max.iter = 5, split.on.iter=-1, split.on.last=FALSE, nchains=1, seed=seed, verbose=FALSE, initialize="random"))
         cluster.splits[cbind(ix, i)] = res$y
         cluster.split.flag[i] = FALSE
       }

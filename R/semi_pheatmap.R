@@ -658,7 +658,7 @@ cluster_mat <- function(mat, labels, distance, method){
 
 scale_rows = function(x){
     m = base::apply(x, 1, mean, na.rm = TRUE)
-    s = base::apply(x, 1, sd, na.rm = TRUE)
+    s = base::apply(x, 1, stats::sd, na.rm = TRUE)
     return((x - m) / s)
 }
 
@@ -722,13 +722,13 @@ generate_annotation_colours = function(annotation, annotation_colors, drop){
 kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
     # Filter data
     if(!is.na(sd_limit)){
-        s = base::apply(mat, 1, sd)
+        s = base::apply(mat, 1, stats::sd)
         mat = mat[s > sd_limit, ]    
     }
     
     # Cluster data
     set.seed(1245678)
-    km = kmeans(mat, k, iter.max = 100)
+    km = stats::kmeans(mat, k, iter.max = 100)
     mat2 = km$centers
     
     # Compose rownames
@@ -1021,7 +1021,7 @@ semi_pheatmap = function(mat,
     # Kmeans
     if(!is.na(kmeans_k)){
         # Cluster data
-        km = kmeans(mat, kmeans_k, iter.max = 100)
+        km = stats::kmeans(mat, kmeans_k, iter.max = 100)
         mat = km$centers
         
         # Compose rownames
