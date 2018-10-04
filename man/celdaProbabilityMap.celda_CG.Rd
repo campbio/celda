@@ -16,6 +16,9 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+A grob containing the specified plots
+}
 \description{
 It is often useful to visualize to what degree each feature influences each 
 cell cluster. This can also be useful for identifying features which may

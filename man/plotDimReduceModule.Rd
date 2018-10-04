@@ -34,6 +34,9 @@ plotDimReduceModule(dim1, dim2, counts, celda.mod, modules = NULL,
 
 \item{color_high}{Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 }
+\value{
+The plot as a ggplot object
+}
 \description{
 Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
 }

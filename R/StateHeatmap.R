@@ -10,6 +10,7 @@
 #' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
 #' @param scale.row Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. 'scale' will Z-score transform each row. Default 'scale'.
 #' @param show_featurenames Logical. Specifies if feature names should be shown. Default TRUE. 
+#' @return A list containing row and column dendrogram information, as well as a gtable for grob plotting
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,

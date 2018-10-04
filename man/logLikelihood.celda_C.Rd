@@ -21,6 +21,9 @@ logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 
 \item{...}{Additional parameters.}
 }
+\value{
+The log-likelihood for the given cluster assignments
+}
 \description{
 Calculate the celda_C log likelihood for user-provided cluster assignments
 }

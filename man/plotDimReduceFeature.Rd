@@ -36,6 +36,9 @@ plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
 
 \item{color_high}{Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.}
 }
+\value{
+The plot as a ggplot object
+}
 \description{
 Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
 }

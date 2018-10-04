@@ -13,6 +13,9 @@ clusterProbability(counts, celda.mod, log = FALSE)
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 }
+\value{
+A numeric vector of the cluster assignment probabilties
+}
 \description{
 Get the probability of the cluster assignments generated during a celda run.
 }
