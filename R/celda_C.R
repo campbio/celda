@@ -533,7 +533,7 @@ reorder.celda_C = function(counts, res){
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
     unique.z = sort(unique(res$z))
     d <- cosineDist(fm$posterior$module[,unique.z])
-    h <- hclust(d, method = "complete")
+    h <- stats::hclust(d, method = "complete")
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
   }  
   return(res)
