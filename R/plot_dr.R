@@ -181,6 +181,12 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
 #' @param seed Integer. Seed for random number generation. Defaults to 12345.
 #' @param do.pca Logical. Whether to perform dimensionality reduction with PCA before tSNE.
 #' @param initial.dims Integer. Number of dimensions from PCA to use as input in tSNE.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' norm = normalizeCounts(celda.sim$counts, normalize="proportion", transformation.fun=sqrt)
+#' tsne = calculateTsne(norm = norm, max.iter = 10)
 calculateTsne = function(norm, perplexity=20, max.iter=2500, seed=12345, do.pca=FALSE, initial.dims = 20) {
 
   set.seed(seed)

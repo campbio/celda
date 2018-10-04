@@ -31,6 +31,11 @@ completeLogLikelihood = function(celda.mod) {
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @export
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' finalLogLikelihood(celda.mod = celda.mod)
 finalLogLikelihood = function(celda.mod) {
   return(celda.mod$finalLogLik)
 }
@@ -100,6 +105,9 @@ logLikelihood = function(counts, model, ...) {
 #' @param model Character. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
 #' @export
+#' @examples
+#' celda.sim = simulateCells(model = "celda_CG")
+#' dim(celda.sim$counts)
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
   UseMethod("simulateCells", model)
@@ -172,6 +180,11 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @export
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' featureModuleLookup(counts = celda.sim$counts, celda.mod = celda.mod, "Gene_1")
 featureModuleLookup = function(counts, celda.mod, feature, exact.match = TRUE){
   class(celda.mod) = c(class(celda.mod), celda.mod)
   UseMethod("featureModuleLookup", celda.mod)
