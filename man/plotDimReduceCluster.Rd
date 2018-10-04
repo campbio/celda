@@ -4,8 +4,9 @@
 \alias{plotDimReduceCluster}
 \title{Create a scatterplot based on celda cluster labels.}
 \usage{
-plotDimReduceCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", specific_clusters = NULL)
+plotDimReduceCluster(dim1, dim2, cluster, size = 1,
+  xlab = "Dimension_1", ylab = "Dimension_2",
+  specific_clusters = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -30,6 +31,8 @@ Create a scatterplot based on celda cluster labels.
 sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
 celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
 celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(celda_cg$z),specific_clusters = c(1,2,3))
+plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
+                     cluster = as.factor(celda_cg$z),
+                     specific_clusters = c(1,2,3))
 }
 }
