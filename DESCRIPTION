@@ -7,7 +7,7 @@ Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu", role = c("aut",
 Description: celda leverages Bayesian hierarchical modeling to cluster genes,
     cells, or both simultaneously from single cell sequencing data.
 Depends:
-    R (>= 3.4),
+    R (>= 3.5),
     SummarizedExperiment
 Imports:
     plyr,
