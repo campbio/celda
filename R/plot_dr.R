@@ -10,6 +10,7 @@
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
 #' @param var_label Character vector. Title for the color legend. 
+#' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
@@ -48,6 +49,7 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
@@ -101,6 +103,7 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'.
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
+#' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
@@ -144,6 +147,7 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
+#' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
 #' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)

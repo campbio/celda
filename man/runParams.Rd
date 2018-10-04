@@ -9,6 +9,9 @@ runParams(celda.list)
 \arguments{
 \item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 }
+\value{
+A data.frame containing the run parameters used to generate the provided celda_list.
+}
 \description{
 Get run parameters for a celda run.
 }

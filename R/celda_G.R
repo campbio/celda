@@ -322,6 +322,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
 #' celda.sim = simulateCells("celda_G")
 #' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' @return A list of lists of the types of factorized matrices specified
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {
@@ -438,7 +439,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters.
 #' @keywords log likelihood
-#' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
+#' @return The log-likelihood for the given cluster assignments
 #' @examples
 #' celda.sim = simulateCells(model="celda_G")
 #' loglik = logLikelihood(celda.sim$counts, model="celda_G", 
@@ -455,10 +456,10 @@ logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
 }
 
 
-#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
-#' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param y Numeric vector. Denotes feature module labels. 
-#' @param L Integer. Number of feature modules.  
+# Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+# @param counts Integer matrix. Rows represent features and columns represent cells. 
+# @param y Numeric vector. Denotes feature module labels. 
+# @param L Integer. Number of feature modules.  
 cG.decomposeCounts = function(counts, y, L) {
 
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
@@ -583,6 +584,7 @@ reorder.celda_G = function(counts, res) {
 #' celda.sim = simulateCells("celda_G")
 #' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
 #' celdaHeatmap(celda.sim$counts, celda.mod)
+#' @return list A list containing dendrogram information and the heatmap grob
 #' @export
 celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
@@ -607,6 +609,7 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
 #' celda.sim = simulateCells("celda_G")
 #' celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+#' @return A two column matrix of t-SNE coordinates
 #' @export
 celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, perplexity=20, max.iter=2500, seed=12345, ...) {
   
