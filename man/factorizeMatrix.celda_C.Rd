@@ -14,6 +14,9 @@
 
 \item{type}{Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.}
 }
+\value{
+A list of lists of the types of factorized matrices specified
+}
 \description{
 Generate factorized matrices showing each feature's influence on the celda_C model clustering
 }

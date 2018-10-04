@@ -28,6 +28,9 @@ plotDimReduceGrid(dim1, dim2, matrix, size, xlab, ylab, color_low,
 
 \item{var_label}{Character vector. Title for the color legend.}
 }
+\value{
+The plot as a ggplot object
+}
 \description{
 Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)
 }

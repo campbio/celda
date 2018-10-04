@@ -13,6 +13,9 @@ celdaHeatmap(counts, celda.mod, ...)
 
 \item{...}{Additional parameters.}
 }
+\value{
+list A list containing dendrogram information and the heatmap grob
+}
 \description{
 Render a stylable heatmap of count data based on celda clustering results.
 }
