@@ -16,6 +16,8 @@
 }
 \value{
 A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x gene modules (cols).
+
+A list of lists of the types of factorized matrices specified
 }
 \description{
 Generate factorized matrices showing each feature's influence on the celda_CG model clustering

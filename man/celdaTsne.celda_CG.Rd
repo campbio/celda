@@ -27,6 +27,9 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+A two column matrix of t-SNE coordinates
+}
 \description{
 Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
