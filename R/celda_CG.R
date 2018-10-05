@@ -1,41 +1,8 @@
-# -----------------------------------
-# Variable description
-# -----------------------------------
-# C = Cell
-# S or s = Sample
-# G = Gene
-# TS = Transcriptional State
-# CP = Cell population
-# n = counts of transcripts
-# m = counts of cells
-# K = Total number of cell populations
-# L = Total number of transcriptional states
-# nM = Number of cells
-# nG = Number of genes
-# nS = Number of samples
-
-# -----------------------------------
-# Count matrices descriptions
-# -----------------------------------
-
-# All n.* variables contain counts of transcripts
-# n.CP.by.TS = Number of counts in each Cellular Population per Transcriptional State
-# n.TS.by.C = Number of counts in each Transcriptional State per Cell 
-# n.CP.by.G = Number of counts in each Cellular Population per Gene
-# n.by.G = Number of counts per gene (i.e. rowSums)
-# n.by.TS = Number of counts per Transcriptional State
-
-## All m.* variables contain counts of cells
-# m.CP.by.S = Number of cells in each Cellular Population per Sample
-
-# nG.by.TS = Number of genes in each Transcriptional State
-
-
 #' celda Cell and Gene Clustering Model
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
-#' @param K.to.test Integer. Number of cell populations. 
+#' @param K Integer. Number of cell populations. 
 #' @param L Integer. Number of feature modules.  
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
@@ -48,47 +15,71 @@
 #' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to set.seed(). Default 12345.   
 #' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.
-#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.
+#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
+#' @return An object of class celda_CG with clustering results and various sampling statistics.
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      sample.label=celda.sim$sample.label, nchains=1)
 #' @export
-celda_CG = function(counts, sample.label=NULL, K.to.test, L,
+celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, count.checksum=NULL,
+                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
-  K = K.to.test
+  validateCounts(counts)
+  return(.celda_CG(counts, sample.label, K, L, alpha, beta, delta, gamma,
+                   algorithm, stop.iter, max.iter, split.on.iter, split.on.last,
+                   seed, nchains, initialize, count.checksum, z.init, y.init,
+                   logfile, verbose))
+}
+
+.celda_CG = function(counts, sample.label=NULL, K, L,
+                    alpha=1, beta=1, delta=1, gamma=1, 
+                    algorithm = c("EM", "Gibbs"), 
+                    stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
+                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
+
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Starting Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  start.time = Sys.time()
+
+  counts = processCounts(counts)
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-  counts = processCounts(counts)
     
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
-  
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
-  }
+  initialize = match.arg(initialize)
   
   all.seeds = seed:(seed + nchains - 1)
   
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
-  logMessages("Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-  
   best.result = NULL  
   for(i in seq_along(all.seeds)) { 
-
-	## Randomly select z and y or set z/y to supplied initial values
+  
+	## Initialize cluster labels
     current.seed = all.seeds[i]	
-	z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
-	y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+
+    if(initialize == "random") {
+  	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	} else {
+	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
+	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=z, K=K, K.subclusters=10, min.feature=3, max.cells=100, seed=seed)
+	}  
 	z.best = z
 	y.best = y  
   
@@ -110,7 +101,6 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
   
 	ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
-    logMessages(date(), ".. Starting chain", i, "with seed", current.seed, logfile=logfile, append=FALSE, verbose=verbose)
 
 	set.seed(current.seed)
 	iter = 1L
@@ -139,7 +129,7 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 	  ## Perform split on i-th iteration defined by split.on.iter
 	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=10, min.cell=3)
+		res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
 		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		# Reset convergence counter if a split occured
@@ -159,7 +149,7 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 	  }  
 	  if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=10, min.cell=3)
+		res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=max(L/2, 10), min.cell=3)
 		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		# Reset convergence counter if a split occured	    
@@ -198,10 +188,10 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
 				 sample=levels(sample.label))
   
 	result = list(z=z.best, y=y.best, completeLogLik=ll, 
-				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
-				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
-				  sample.label=sample.label, names=names,
-				  count.checksum=count.checksum)
+      				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
+      				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
+      				  sample.label=sample.label, names=names,
+      				  count.checksum=count.checksum)
   
 	class(result) = "celda_CG" 
 
@@ -214,30 +204,42 @@ celda_CG = function(counts, sample.label=NULL, K.to.test, L,
   
   ## Peform reordering on final Z and Y assigments:
   best.result = reorder.celda_CG(counts = counts, res = best.result)
+  
+  end.time = Sys.time()
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  logMessages("Completed Celda_CG. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+
   return(best.result)
 }
 
 
 
 
-#' Simulate cells from the cell/gene clustering generative model
+#' Simulate cells from the cell/feature bi-clustering generative model
+#' 
+#' This function generates a list containing a simulated counts matrix, as well as various parameters
+#' used in the simulation which can be useful for running celda. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
-#' @param S Integer. Number of samples to simulate. 
+#' @param S Integer. Number of samples to simulate. Default 5.  
 #' @param C.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of cells to be generated in each sample. Default c(50, 100). 
-#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
-#' @param G Numeric. The total number of features to be simulated. 
-#' @param K Integer. Number of cell populations. 
-#' @param L Integer. Number of feature modules.  
+#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000). 
+#' @param G Integer. The total number of features to be simulated. Default 100.
+#' @param K Integer. Number of cell populations. Default 5. 
+#' @param L Integer. Number of feature modules. Default 10.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
 #' @export
-simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,5000), 
-                                  G=1000, K=3, L=10, alpha=1, beta=1, gamma=5, 
+simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1000), 
+                                  G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
   
   set.seed(seed)
@@ -259,11 +261,11 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
   ## Generate transcriptional state distribution for each cell subpopulation
   phi = rdirichlet(K, rep(beta, L))
 
-  ## Assign genes to transcriptional states 
+  ## Assign genes to gene modules 
   eta = rdirichlet(1, rep(gamma, L))
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
   if(length(table(y)) < L) {
-    warning("Some transcriptional states did not receive any genes after sampling. Try increasing G and/or making gamma larger.")
+    warning("Some gene modules did not receive any genes after sampling. Try increasing G and/or making gamma larger.")
     L = length(table(y))
     y = as.integer(as.factor(y))
   }
@@ -321,7 +323,12 @@ simulateCells.celda_CG = function(model, S=10, C.Range=c(50,100), N.Range=c(500,
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".  
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.  
-#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x transcriptional states (cols).
+#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x gene modules (cols).
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' @return A list of lists of the types of factorized matrices specified
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
                                     type=c("counts", "proportion", "posterior")) {                             
@@ -373,10 +380,10 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
   res = list()
     
   if(any("counts" %in% type)) {
-    counts.list = list(sample.states = m.CP.by.S,
-            				   population.states = n.TS.by.CP, 
-            				   cell.states = n.TS.by.C,
-            				   gene.states = n.G.by.TS,
+    counts.list = list(sample = m.CP.by.S,
+            				   cell.population = n.TS.by.CP, 
+            				   cell = n.TS.by.C,
+            				   module = n.G.by.TS,
             				   gene.distribution = nG.by.TS)
     res = c(res, list(counts=counts.list))
   }
@@ -392,10 +399,10 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
     temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], normalize="proportion")
     temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
     
-    prop.list = list(sample.states =  normalizeCounts(m.CP.by.S, normalize="proportion"),
-    				   population.states = temp.n.TS.by.CP, 
-    				   cell.states = normalizeCounts(n.TS.by.C, normalize="proportion"),
-    				   gene.states = temp.n.G.by.TS, 
+    prop.list = list(sample =  normalizeCounts(m.CP.by.S, normalize="proportion"),
+    				   cell.population = temp.n.TS.by.CP, 
+    				   cell = normalizeCounts(n.TS.by.C, normalize="proportion"),
+    				   module = temp.n.G.by.TS, 
     				   gene.distribution = temp.nG.by.TS)
     res = c(res, list(proportions=prop.list))
   }
@@ -406,9 +413,9 @@ factorizeMatrix.celda_CG = function(counts, celda.mod,
     gs = normalizeCounts(gs, normalize="proportion")
 	temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
 	
-    post.list = list(sample.states = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
-          				   population.states = normalizeCounts(n.TS.by.CP + beta, normalize="proportion"), 
-          				   gene.states = gs,
+    post.list = list(sample = normalizeCounts(m.CP.by.S + alpha, normalize="proportion"),
+          				   cell.population = normalizeCounts(n.TS.by.CP + beta, normalize="proportion"), 
+          				   module = gs,
           				   gene.distribution = temp.nG.by.TS)
     res = c(res, posterior = list(post.list))						    
   }
@@ -472,8 +479,19 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters.
+#' @return The log-likelihood for the given cluster assignments
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' loglik = logLikelihood(celda.sim$counts, model="celda_CG", 
+#'                        sample.label=celda.sim$sample.label,
+#'                        z=celda.sim$z, y=celda.sim$y,
+#'                        K=celda.sim$K, L=celda.sim$L,
+#'                        alpha=celda.sim$alpha, beta=celda.sim$beta,
+#'                        gamma=celda.sim$gamma, delta=celda.sim$delta)
 #' @export
-calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
+logLikelihood.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
+  if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
+  if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
   p = cCG.decomposeCounts(counts, s, z, y, K, L)
@@ -482,13 +500,13 @@ calculateLoglikFromVariables.celda_CG = function(counts, sample.label, z, y, K, 
 }
 
 
-#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
-#' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param s Integer vector. Contains the sample label for each cell (column) in the count matrix. 
-#' @param z Numeric vector. Denotes cell population labels. 
-#' @param y Numeric vector. Denotes feature module labels. 
-#' @param K Integer. Number of cell populations. 
-#' @param L Integer. Number of feature modules.  
+# Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+# @param counts Integer matrix. Rows represent features and columns represent cells. 
+# @param s Integer vector. Contains the sample label for each cell (column) in the count matrix. 
+# @param z Numeric vector. Denotes cell population labels. 
+# @param y Numeric vector. Denotes feature module labels. 
+# @param K Integer. Number of cell populations. 
+# @param L Integer. Number of feature modules.  
 cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   nS = length(unique(s))
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
@@ -514,9 +532,13 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 #' @export
-clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
+clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
   
   s = as.integer(celda.mod$sample.label)
   z = celda.mod$z
@@ -547,9 +569,26 @@ clusterProbability.celda_CG = function(celda.mod, counts, log=FALSE, ...) {
 }
 
 
+#' Calculate the perplexity from a single celda model
+#' 
+#' Perplexity can be seen as a measure of how well a provided set of 
+#' cluster assignments fit the data being clustered.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
+#' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
+#' @return Numeric. The perplexity for the provided count data and model.
+#' @examples
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' perplexity = perplexity(celda.sim$counts, celda.mod)
 #' @export
-calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
+perplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
+  if (!("celda_CG" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_CG.")
   
+  counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
+
   if(is.null(new.counts)) {
     new.counts = counts
   } else {
@@ -561,9 +600,9 @@ calculatePerplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
   
   factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
                                type=c("posterior", "counts"))
-  theta = log(factorized$posterior$sample.states)
-  phi   = factorized$posterior$population.states
-  psi   = factorized$posterior$gene.states
+  theta = log(factorized$posterior$sample)
+  phi   = factorized$posterior$cell.population
+  psi   = factorized$posterior$module
   s = as.integer(celda.mod$sample.label)
   eta <- factorized$posterior$gene.distribution
   nG.by.TS = factorized$counts$gene.distribution
@@ -584,8 +623,8 @@ reorder.celda_CG = function(counts, res){
     res$z = as.integer(as.factor(res$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.z = sort(unique(res$z))
-    d <- cosineDist(fm$posterior$population.states[,unique.z])
-    h <- hclust(d, method = "complete")
+    d <- cosineDist(fm$posterior$cell.population[,unique.z])
+    h <- stats::hclust(d, method = "complete")
     
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
   }  
@@ -595,28 +634,13 @@ reorder.celda_CG = function(counts, res){
     res$y = as.integer(as.factor(res$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
     unique.y = sort(unique(res$y))
-    cs <- prop.table(t(fm$posterior$population.states[unique.y,]), 2)
+    cs <- prop.table(t(fm$posterior$cell.population[unique.y,]), 2)
     d <- cosineDist(cs)
-    h <- hclust(d, method = "complete")
+    h <- stats::hclust(d, method = "complete")
     
     res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
   }
   return(res)
-}
-
-#' getK for the celda Cell and Gene clustering model
-#' @param celda.mod Celda object of class "celda_CG". 
-#' @export
-getK.celda_CG = function(celda.mod) {
-  return(celda.mod$K)
-}
-
-
-#' getL for the celda Cell and Gene clustering model.
-#' @param celda.mod Celda object of class "celda_CG". 
-#' @export
-getL.celda_CG = function(celda.mod) {
-  return(celda.mod$L)
 }
 
 
@@ -625,13 +649,18 @@ getL.celda_CG = function(celda.mod) {
 #' @param celda.mod Celda object of class "celda_CG". 
 #' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' celdaHeatmap(celda.sim$counts, celda.mod)
+#' @return A list containing dendrogram information and the heatmap grob
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
-  top = topRank(fm$proportions$gene.states, n=nfeatures)
+  top = celda::topRank(fm$proportions$module, n=nfeatures)
   ix = unlist(top$index)
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-  renderCeldaHeatmap(norm[ix,], z=celda.mod$z, y=celda.mod$y[ix], ...)
+  plotHeatmap(norm[ix,], z=celda.mod$z, y=celda.mod$y[ix], ...)
 }
 
 
@@ -639,27 +668,32 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`. 
-#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+#' @return A two column matrix of t-SNE coordinates
 #' @export
-celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.size=100, modules=NULL,
+celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
 								perplexity=20, max.iter=2500, seed=12345, ...) {
 
   ## Checking if max.cells and min.cluster.size will work
-  if(max.cells / min.cluster.size < celda.mod$K) {
+  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod$K)) {
     stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
   }
-
+  
   fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")    
-  modules.to.use = 1:nrow(fm$counts$cell.states)
+  modules.to.use = 1:nrow(fm$counts$cell)
   if (!is.null(modules)) {
     if (!all(modules %in% modules.to.use)) {
-      stop("'modules' must be a vector of numbers between 1 and ", states.to.use, ".")
+      stop("'modules' must be a vector of numbers between 1 and ", modules.to.use, ".")
     }
     modules.to.use = modules 
   }
@@ -688,7 +722,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
   }   
   cell.ix = which(z.include)
 
-  norm = t(normalizeCounts(fm$counts$cell.states[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
+  norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
   
   res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, seed=seed)
   final = matrix(NA, nrow=ncol(counts), ncol=2)
@@ -700,13 +734,21 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=10000, min.cluster.si
 
 
 
-
 #' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
+#' 
+#' It is often useful to visualize to what degree each feature influences each 
+#' cell cluster. This can also be useful for identifying features which may
+#' be redundant or unassociated with cell clustering.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
 #' @param celda.mod Celda object of class "celda_CG".   
 #' @param level Character. One of "cell.population" or "sample". "cell.population" will display the absolute probabilities and relative normalized expression of each module in each cell population. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "cell.population".
 #' @param ... Additional parameters.
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' celdaProbabilityMap(celda.sim$counts, celda.mod)
+#' @return A grob containing the specified plots
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
   counts = processCounts(counts)
@@ -718,27 +760,27 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
   y.include = which(tabulate(celda.mod$y, celda.mod$L) > 0)    
 
   if(level == "cell.population") {
-    pop <- factorized$proportions$population.states[y.include,z.include,drop=FALSE]
+    pop <- factorized$proportions$cell.population[y.include,z.include,drop=FALSE]
     pop.norm = normalizeCounts(pop, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
   
-    percentile.9 <- round(quantile(pop,.9), digits = 2) * 100
+    percentile.9 <- round(stats::quantile(pop,.9), digits = 2) * 100
     col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
     col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
     col <- c(col1,col2)
     breaks <-  seq(0, 1, length.out = length(col))     
     
-    g1 = renderCeldaHeatmap(pop, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
-    g2 = renderCeldaHeatmap(pop.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Expression", silent=TRUE) 
+    g1 = plotHeatmap(pop, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
+    g2 = plotHeatmap(pop.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Expression", silent=TRUE) 
     gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol=2)
   } else {
-    samp <- factorized$proportions$sample.states
+    samp <- factorized$proportions$sample
     col <- colorRampPalette(c("white","blue","#08306B","#006D2C","yellowgreen","yellow","orange","red"))(100)
     breaks <-  seq(0, 1, length.out = length(col))     
-    g1 = renderCeldaHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
+    g1 = plotHeatmap(samp, color.scheme="sequential", scale.row=NULL, cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, breaks = breaks, col=col, main = "Absolute Probability", silent=TRUE)
 
     if(ncol(samp) > 1) {
-      samp.norm = normalizeCounts(factorized$counts$sample.states, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
-      g2 = renderCeldaHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
+      samp.norm = normalizeCounts(factorized$counts$sample, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
+      g2 = plotHeatmap(samp.norm, color.scheme="divergent", cluster.cell=FALSE, cluster.feature=FALSE, show.names.cell=TRUE, show.names.feature=TRUE, main = "Relative Abundance", silent=TRUE)   
       gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol=2)
     } else {
       gridExtra::grid.arrange(g1$gtable)
@@ -753,15 +795,28 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
-#' @param feature Character vector. Identify feature modules for the specified feature names. 
+#' @param feature Character vector. Identify feature modules for the specified feature names.
+#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
+#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
 #' @export
-featureModuleLookup.celda_CG = function(counts, celda.mod, feature){
+featureModuleLookup.celda_CG = function(counts, celda.mod, feature, exact.match = TRUE){
   list <- list()
+  if(!isTRUE(exact.match)){
+    feature.grep <- c()
+    for(x in 1:length(feature)){
+      feature.grep <- c(feature.grep, rownames(counts)[grep(feature[x],rownames(counts))]) 
+    }
+    feature <- feature.grep
+  }
   for(x in 1:length(feature)){
     if(feature[x] %in% rownames(counts)){
       list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
     }else{
-      list[x] <- c("The feature you specified does not exist within your data")
+      list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
     }
   } 
   names(list) <- feature

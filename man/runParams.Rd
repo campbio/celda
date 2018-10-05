@@ -9,6 +9,15 @@ runParams(celda.list)
 \arguments{
 \item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
 }
+\value{
+A data.frame containing the run parameters used to generate the provided celda_list.
+}
 \description{
 Get run parameters for a celda run.
+}
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+runParams(celda.mod)
 }
