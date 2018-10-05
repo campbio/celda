@@ -2,88 +2,78 @@
 % Please edit documentation in R/celda_heatmap.R
 \name{renderCeldaHeatmap}
 \alias{renderCeldaHeatmap}
-\title{Render a heatmap based on a matrix of counts where rows are genes and columns are cells.}
+\title{Renders a heatmap based on a matrix of counts where rows are features and columns are cells.}
 \usage{
-renderCeldaHeatmap(counts, z = NULL, y = NULL, scale_log = NULL,
-  scale_row = scale, normalize = normalizeCounts, trim = c(-2, 2),
-  pseudocount_normalize = 0, pseudocount_log = 0, gene.ix = NULL,
-  cell.ix = NULL, cluster_gene = TRUE, cluster_cell = TRUE,
-  color_scheme = c("divergent", "sequential"),
-  color_scheme_symmetric = TRUE, color_scheme_center = 0, col = NULL,
-  annotation_cell = NULL, annotation_gene = NULL, annotation_color = NULL,
-  breaks = NULL, legend = TRUE, annotation_legend = TRUE,
-  annotation_names_gene = TRUE, annotation_names_cell = TRUE,
-  show_genenames = FALSE, show_cellnames = FALSE,
-  hclust_method = "ward.D2", treeheight_gene = ifelse(cluster_gene, 50, 0),
-  treeheight_cell = ifelse(cluster_cell, 50, 0), ...)
+renderCeldaHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
+  trim = c(-2, 2), feature.ix = NULL, cell.ix = NULL,
+  cluster.feature = TRUE, cluster.cell = TRUE,
+  color.scheme = c("divergent", "sequential"),
+  color.scheme.symmetric = TRUE, color.scheme.center = 0, col = NULL,
+  annotation.cell = NULL, annotation.feature = NULL,
+  annotation.color = NULL, breaks = NULL, legend = TRUE,
+  annotation.legend = TRUE, annotation.names.feature = TRUE,
+  annotation.names.cell = TRUE, show.names.feature = FALSE,
+  show.names.cell = FALSE, hclust.method = "ward.D2",
+  treeheight.feature = ifelse(cluster.feature, 50, 0),
+  treeheight.cell = ifelse(cluster.cell, 50, 0), silent = FALSE, ...)
 }
 \arguments{
-\item{counts}{A count matrix where rows are genes and columns are cells.}
+\item{counts}{Numeric matrix. Normalized counts matrix where rows represent features and columns represent cells. .}
 
-\item{z}{A numeric vector of cluster assignments for cell.}
+\item{z}{Numeric vector. Denotes cell population labels.}
 
-\item{y}{A numeric vector of cluster assignments for gene.}
+\item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{scale_log}{Function; Applys a scale function such as log, log2, log10. Set to NULL to disable. Occurs after normalization. Default NULL.}
+\item{scale.row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
 
-\item{scale_row}{Function; A function to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.}
+\item{trim}{Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2).}
 
-\item{normalize}{A function to normalize the columns. Set to NULL to disable. Default is 'normalizeCounts', which normalizes to counts per million (CPM).}
+\item{feature.ix}{Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.}
 
-\item{trim}{A two element vector to specify the lower and upper cutoff for the data. Occurs after normalization, log transformation, and row scaling. Set to NULL to disable. Default c(-2,2).}
+\item{cell.ix}{Integer vector. Select cells for display in heatmap. If NULL, no subsetting will be performed. Default NULL.}
 
-\item{pseudocount_normalize}{Numeric; A pseudocount to add to data before normalization. Default  1.}
+\item{cluster.feature}{Logical. Determines whether rows should be clustered. Default TRUE.}
 
-\item{pseudocount_log}{Numeric; A pseudocount to add to data before log transforming. Default  0.}
+\item{cluster.cell}{Logical. Determines whether columns should be clustered. Default TRUE.}
 
-\item{gene.ix}{Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.}
+\item{color.scheme}{"Character. One of ""divergent"" or ""sequential"". A ""divergent"" scheme is best for highlighting relative data (denoted by 'color.scheme.center') such as gene expression data that has been normalized and centered. A ""sequential"" scheme is best for highlighting data that are ordered low to high such as raw counts or probabilities. Default "divergent".}
 
-\item{cell.ix}{Index of genes to pull out of the matrix after normalization. If NULL, no subsettig will be performed. Default NULL.}
+\item{color.scheme.symmetric}{Logical. When the color.scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric from [-max(abs(data)),max(abs(data))]. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the color scheme to range from -2 to 2. Default TRUE.}
 
-\item{cluster_gene}{Logical; determining if rows should be clustered.}
+\item{color.scheme.center}{Numeric. Indicates the center of a "divergent" color.scheme. Default 0.}
 
-\item{cluster_cell}{Logical; determining if columns should be clustered.}
+\item{col}{Color for the heatmap.}
 
-\item{color_scheme}{One of "divergent" or "sequential". A "divergent" scheme is best for highlighting either end of the data with a break in the middle (denoted by 'color_scheme_center') such as gene expression data that has been normalized and centered. 
-A "sequential" scheme is best for data that are ordered low to high such as raw counts or probabilities.}
+\item{annotation.cell}{Data frame. Additional annotations for each cell will be shown in the column color bars. The format of the data frame should be one row for each cell and one column for each annotation. Numeric variables will be displayed as continuous color bars and factors will be displayed as discrete color bars. Default NULL.}
 
-\item{color_scheme_symmetric}{Boolean; When the color_scheme is "divergent" and the data contains both positive and negative numbers, TRUE indicates that the color scheme should be symmetric about the center. For example, if the data ranges goes from -1.5 to 2, then setting this to TRUE will force the colors to range from -2 to 2.}
+\item{annotation.feature}{A data frame for the feature annotations (rows).}
 
-\item{color_scheme_center}{Numeric. Indicates the center of a "divergent" color_scheme. Default 0.}
+\item{annotation.color}{List. Contains color scheme for all annotations. See `?pheatmap` for more details.}
 
-\item{col}{color for the heatmap.}
+\item{breaks}{Numeric vector. A sequence of numbers that covers the range of values in the normalized `counts`. Values in the normalized `matrix` are assigned to each bin in `breaks`. Each break is assigned to a unique color from `col`. If NULL, then breaks are calculated automatically. Default NULL.}
 
-\item{annotation_cell}{A data frame for the cell annotations (columns).}
+\item{legend}{Logical. Determines whether legend should be drawn. Default TRUE.}
 
-\item{annotation_gene}{A data frame for the gene annotations (rows).}
+\item{annotation.legend}{Logical. Whether legend for all annotations should be drawn. Default TRUE.}
 
-\item{annotation_color}{A list containing color scheme for cell and/or gene annotation. See '?pheatmap' for more details.}
+\item{annotation.names.feature}{Logical. Whether the names for features should be shown. Default TRUE.}
 
-\item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
-element longer than color vector. Used for mapping values to colors. Useful, if needed 
-to map certain values to certain colors, to certain values. If value is NA then the 
-breaks are calculated automatically.}
+\item{annotation.names.cell}{Logical. Whether the names for cells should be shown. Default TRUE.}
 
-\item{legend}{logical; determining if legend should be drawn or not. Default to be TRUE.}
+\item{show.names.feature}{Logical. Specifies if feature names should be shown. Default TRUE.}
 
-\item{annotation_legend}{Logical; showing if the legend for annotation tracks should be drawn.}
+\item{show.names.cell}{Logical. Specifies if cell names should be shown. Default FALSE.}
 
-\item{annotation_names_gene}{Logical; showing if the names for gene annotation tracks should be drawn. Default to be TRUE.}
+\item{hclust.method}{Character. Specifies the method to use for the 'hclust' function. See `?hclust` for possible values. Default "ward.D2".}
 
-\item{annotation_names_cell}{Logical; showing if the names for cell annotation tracks should be drawn. Default to be TRUE.}
+\item{treeheight.feature}{Numeric. Width of the feature dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.feature == TRUE, then treeheight.feature = 50, else treeheight.feature = 0.}
 
-\item{show_genenames}{Logical; specifying if gene names should be shown. Default to be FALSE.}
+\item{treeheight.cell}{Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.}
 
-\item{show_cellnames}{Logical; specifying if cell names should be shown. Default to be FALSE.}
+\item{silent}{Logical. Whether to plot the heatmap.}
 
-\item{hclust_method}{Character; Specifies the method to use for the 'hclust' function. Default is "ward.D2". See ?hclust for possible values.}
-
-\item{treeheight_gene}{Numeric; Width of the gene dedrogram. Set to 0 to disable plotting of this dendrogram.}
-
-\item{treeheight_cell}{Numeric; Hieght of the cell dedrogram. Set to 0 to disable plotting of this dendrogram.}
-
-\item{...}{Other arguments to be passed to underlying pheatmap function}
+\item{...}{Other arguments to be passed to underlying pheatmap function.}
 }
 \description{
-Render a heatmap based on a matrix of counts where rows are genes and columns are cells.
+Renders a heatmap based on a matrix of counts where rows are features and columns are cells.
 }

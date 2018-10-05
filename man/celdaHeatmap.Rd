@@ -4,14 +4,14 @@
 \alias{celdaHeatmap}
 \title{Render a stylable heatmap of count data based on celda clustering results.}
 \usage{
-celdaHeatmap(celda.mod, counts, ...)
+celdaHeatmap(counts, celda.mod, ...)
 }
 \arguments{
-\item{celda.mod}{A celda model object (of class "celda_C", "celda_G" or "celda_CG")}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{counts}{the counts matrix}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 
-\item{...}{extra parameters passed onto celda_heatmap}
+\item{...}{Additional parameters.}
 }
 \description{
 Render a stylable heatmap of count data based on celda clustering results.
