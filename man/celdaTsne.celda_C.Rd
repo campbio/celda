@@ -4,7 +4,7 @@
 \alias{celdaTsne.celda_C}
 \title{Embeds cells in two dimensions using tSNE based on celda_C results.}
 \usage{
-\method{celdaTsne}{celda_C}(counts, celda.mod, max.cells = 10000,
+\method{celdaTsne}{celda_C}(counts, celda.mod, max.cells = 25000,
   min.cluster.size = 100, initial.dims = 20, perplexity = 20,
   max.iter = 2500, seed = 12345, ...)
 }
@@ -13,7 +13,7 @@
 
 \item{celda.mod}{Celda object of class "celda_C".}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
 
 \item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
@@ -27,6 +27,14 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+A two column matrix of t-SNE coordinates
+}
 \description{
 Embeds cells in two dimensions using tSNE based on celda_C results.
+}
+\examples{
+celda.sim = simulateCells("celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
+tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 }

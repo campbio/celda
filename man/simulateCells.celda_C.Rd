@@ -4,22 +4,22 @@
 \alias{simulateCells.celda_C}
 \title{Simulate cells from the cell clustering generative model}
 \usage{
-\method{simulateCells}{celda_C}(model, S = 10, C.Range = c(10, 100),
-  N.Range = c(500, 5000), G = 500, K = 5, alpha = 1, beta = 1,
+\method{simulateCells}{celda_C}(model, S = 5, C.Range = c(50, 100),
+  N.Range = c(500, 1000), G = 100, K = 5, alpha = 1, beta = 1,
   seed = 12345, ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::available.models`.}
 
-\item{S}{Integer. Number of samples to simulate.}
+\item{S}{Integer. Number of samples to simulate. Default 5.}
 
-\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution.}
+\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution. Default c(50, 100).}
 
-\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
+\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000).}
 
-\item{G}{Numeric. The total number of features to be simulated.}
+\item{G}{Integer. The total number of features to be simulated. Default 100.}
 
-\item{K}{Integer. Number of cell populations.}
+\item{K}{Integer. Number of cell populations. Default 5.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
@@ -29,6 +29,14 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+}
 \description{
-Simulate cells from the cell clustering generative model
+This function generates a list containing a simulated counts matrix, as well as various parameters
+used in the simulation which can be useful for running celda.
+}
+\examples{
+celda.c.sim = simulateCells(model="celda_C", K=10)
+sim.counts = celda.c.sim$counts
 }
