@@ -4,15 +4,24 @@
 \alias{clusterProbability}
 \title{Get the probability of the cluster assignments generated during a celda run.}
 \usage{
-clusterProbability(celda.mod, counts, log = FALSE)
+clusterProbability(counts, celda.mod, log = FALSE)
 }
 \arguments{
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
-
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 }
+\value{
+A numeric vector of the cluster assignment probabilties
+}
 \description{
 Get the probability of the cluster assignments generated during a celda run.
+}
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 }

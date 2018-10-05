@@ -10,3 +10,33 @@ eigenMatMultInt <- function(A, B) {
     .Call('_celda_eigenMatMultInt', PACKAGE = 'celda', A, B)
 }
 
+<<<<<<< HEAD
+=======
+#' Fast normalization for numeric matrix
+#' 
+#' @param R_counts An integer matrix
+#' @param R_alpha A double value to be added to the matrix as a pseudocount
+#' @return A numeric matrix where the columns have been normalized to proportions
+fastNormProp <- function(R_counts, R_alpha) {
+    .Call('_celda_fastNormProp', PACKAGE = 'celda', R_counts, R_alpha)
+}
+
+#' Fast normalization for numeric matrix
+#' 
+#' @param R_counts An integer matrix
+#' @param R_alpha A double value to be added to the matrix as a pseudocount
+#' @return A numeric matrix where the columns have been normalized to proportions
+fastNormPropLog <- function(R_counts, R_alpha) {
+    .Call('_celda_fastNormPropLog', PACKAGE = 'celda', R_counts, R_alpha)
+}
+
+#' Fast normalization for numeric matrix
+#' 
+#' @param R_counts An integer matrix
+#' @param R_alpha A double value to be added to the matrix as a pseudocount
+#' @return A numeric matrix where the columns have been normalized to proportions
+fastNormPropSqrt <- function(R_counts, R_alpha) {
+    .Call('_celda_fastNormPropSqrt', PACKAGE = 'celda', R_counts, R_alpha)
+}
+
+>>>>>>> upstream-devel

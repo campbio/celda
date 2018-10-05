@@ -118,8 +118,13 @@ lo = function(rown, coln, nrow, ncol, cellheight = NA, cellwidth = NA, treeheigh
     # Produce gtable
     gt = gtable(widths = unit.c(treeheight_row, annot_row_width, mat_width, rown_width, legend_width, annot_legend_width), heights = unit.c(main_height, treeheight_col, annot_col_height, mat_height, coln_height), vp = viewport(gp = do.call(gpar, gp)))
     
+<<<<<<< HEAD
     cw = convertWidth(mat_width - (length(gaps_col) * unit(0, "bigpts")), "bigpts", valueOnly = T) / ncol
     ch = convertHeight(mat_height - (length(gaps_row) * unit(0, "bigpts")), "bigpts", valueOnly = T) / nrow
+=======
+    cw = convertWidth(mat_width - (length(gaps_col) * unit(0, "bigpts")), "bigpts", valueOnly = TRUE) / ncol
+    ch = convertHeight(mat_height - (length(gaps_row) * unit(0, "bigpts")), "bigpts", valueOnly = TRUE) / nrow
+>>>>>>> upstream-devel
     
     # Return minimal cell dimension in bigpts to decide if borders are drawn
     mindim = min(cw, ch) 
@@ -146,7 +151,11 @@ find_coordinates = function(n, gaps, m = 1:n){
     return(list(coord = coord, size = size))
 }
 
+<<<<<<< HEAD
 draw_dendrogram = function(hc, gaps, horizontal = T){
+=======
+draw_dendrogram = function(hc, gaps, horizontal = TRUE){
+>>>>>>> upstream-devel
     h = hc$height / max(hc$height) / 1.05
     m = hc$merge
     o = hc$order
@@ -387,10 +396,17 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
     
     if(!is.na(filename)){
         if(is.na(height)){
+<<<<<<< HEAD
             height = convertHeight(gtable_height(res), "inches", valueOnly = T)
         }
         if(is.na(width)){
             width = convertWidth(gtable_width(res), "inches", valueOnly = T)
+=======
+            height = convertHeight(gtable_height(res), "inches", valueOnly = TRUE)
+        }
+        if(is.na(width)){
+            width = convertWidth(gtable_width(res), "inches", valueOnly = TRUE)
+>>>>>>> upstream-devel
         }
         
         # Get file type
@@ -431,13 +447,21 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
     
     # Draw tree for the columns
     if(!is.na2(tree_col) & treeheight_col != 0){
+<<<<<<< HEAD
         elem = draw_dendrogram(tree_col, gaps_col, horizontal = T)
+=======
+        elem = draw_dendrogram(tree_col, gaps_col, horizontal = TRUE)
+>>>>>>> upstream-devel
         res = gtable_add_grob(res, elem, t = 2, l = 3, name = "col_tree")
     }
     
     # Draw tree for the rows
     if(!is.na2(tree_row) & treeheight_row != 0){
+<<<<<<< HEAD
         elem = draw_dendrogram(tree_row, gaps_row, horizontal = F)
+=======
+        elem = draw_dendrogram(tree_row, gaps_row, horizontal = FALSE)
+>>>>>>> upstream-devel
         res = gtable_add_grob(res, elem, t = 4, l = 1, name = "row_tree")
     }
     
@@ -463,12 +487,20 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
     if(!is.na2(annotation_col)){
         # Draw tracks
         converted_annotation = convert_annotations(annotation_col, annotation_colors)
+<<<<<<< HEAD
         elem = draw_annotations(converted_annotation, border_color, gaps_col, fontsize, horizontal = T)
+=======
+        elem = draw_annotations(converted_annotation, border_color, gaps_col, fontsize, horizontal = TRUE)
+>>>>>>> upstream-devel
         res = gtable_add_grob(res, elem, t = 3, l = 3, clip = "off", name = "col_annotation")
         
         # Draw names
         if(annotation_names_col){
+<<<<<<< HEAD
             elem = draw_annotation_names(annotation_col, fontsize, horizontal = T)
+=======
+            elem = draw_annotation_names(annotation_col, fontsize, horizontal = TRUE)
+>>>>>>> upstream-devel
             res = gtable_add_grob(res, elem, t = 3, l = 4, clip = "off", name = "col_annotation_names")
         }
     }
@@ -477,12 +509,20 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
     if(!is.na2(annotation_row)){
         # Draw tracks
         converted_annotation = convert_annotations(annotation_row, annotation_colors)
+<<<<<<< HEAD
         elem = draw_annotations(converted_annotation, border_color, gaps_row, fontsize, horizontal = F)
+=======
+        elem = draw_annotations(converted_annotation, border_color, gaps_row, fontsize, horizontal = FALSE)
+>>>>>>> upstream-devel
         res = gtable_add_grob(res, elem, t = 4, l = 2, clip = "off", name = "row_annotation")
         
         # Draw names
         if(annotation_names_row){
+<<<<<<< HEAD
             elem = draw_annotation_names(annotation_row, fontsize, horizontal = F)
+=======
+            elem = draw_annotation_names(annotation_row, fontsize, horizontal = FALSE)
+>>>>>>> upstream-devel
             res = gtable_add_grob(res, elem, t = 5, l = 2, clip = "off", name = "row_annotation_names")
         }
     }
@@ -509,6 +549,7 @@ heatmap_motor = function(matrix, border_color, cellwidth, cellheight, tree_col, 
     return(res)
 }
 
+<<<<<<< HEAD
 generate_breaks = function(x, n, center = F){
     if(center){
         m = max(abs(c(min(x, na.rm = T), max(x, na.rm = T))))
@@ -516,13 +557,26 @@ generate_breaks = function(x, n, center = F){
     }
     else{
         res = seq(min(x, na.rm = T), max(x, na.rm = T), length.out = n + 1)
+=======
+generate_breaks = function(x, n, center = FALSE){
+    if(center){
+        m = max(abs(c(min(x, na.rm = TRUE), max(x, na.rm = TRUE))))
+        res = seq(-m, m, length.out = n + 1)
+    }
+    else{
+        res = seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE), length.out = n + 1)
+>>>>>>> upstream-devel
     }
     
     return(res)
 }
 
 scale_vec_colours = function(x, col = rainbow(10), breaks = NA){
+<<<<<<< HEAD
     return(col[as.numeric(cut(x, breaks = breaks, include.lowest = T))])
+=======
+    return(col[as.numeric(cut(x, breaks = breaks, include.lowest = TRUE))])
+>>>>>>> upstream-devel
 }
 
 scale_colours = function(mat, col = rainbow(10), breaks = NA){
@@ -657,8 +711,13 @@ cluster_mat <- function(mat, labels, distance, method){
 }
 
 scale_rows = function(x){
+<<<<<<< HEAD
     m = base::apply(x, 1, mean, na.rm = T)
     s = base::apply(x, 1, sd, na.rm = T)
+=======
+    m = base::apply(x, 1, mean, na.rm = TRUE)
+    s = base::apply(x, 1, stats::sd, na.rm = TRUE)
+>>>>>>> upstream-devel
     return((x - m) / s)
 }
 
@@ -722,13 +781,21 @@ generate_annotation_colours = function(annotation, annotation_colors, drop){
 kmeans_pheatmap = function(mat, k = min(nrow(mat), 150), sd_limit = NA, ...){
     # Filter data
     if(!is.na(sd_limit)){
+<<<<<<< HEAD
         s = base::apply(mat, 1, sd)
+=======
+        s = base::apply(mat, 1, stats::sd)
+>>>>>>> upstream-devel
         mat = mat[s > sd_limit, ]    
     }
     
     # Cluster data
     set.seed(1245678)
+<<<<<<< HEAD
     km = kmeans(mat, k, iter.max = 100)
+=======
+    km = stats::kmeans(mat, k, iter.max = 100)
+>>>>>>> upstream-devel
     mat2 = km$centers
     
     # Compose rownames
@@ -1014,14 +1081,22 @@ semi_pheatmap = function(mat,
 
     
     if(is.na2(breaks)){
+<<<<<<< HEAD
       breaks = generate_breaks(mat, length(color), center = T)
+=======
+      breaks = generate_breaks(mat, length(color), center = TRUE)
+>>>>>>> upstream-devel
     }
     
     
     # Kmeans
     if(!is.na(kmeans_k)){
         # Cluster data
+<<<<<<< HEAD
         km = kmeans(mat, kmeans_k, iter.max = 100)
+=======
+        km = stats::kmeans(mat, kmeans_k, iter.max = 100)
+>>>>>>> upstream-devel
         mat = km$centers
         
         # Compose rownames
@@ -1161,6 +1236,12 @@ semi_pheatmap = function(mat,
         annotation_colors = NA
     }
     
+<<<<<<< HEAD
+=======
+    labels_row = rownames(mat)
+    labels_col = colnames(mat)
+    
+>>>>>>> upstream-devel
     if(!show_rownames){
         labels_row = NULL
     }
