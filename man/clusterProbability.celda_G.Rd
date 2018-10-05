@@ -4,12 +4,12 @@
 \alias{clusterProbability.celda_G}
 \title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
 \usage{
-\method{clusterProbability}{celda_G}(celda.mod, counts, log = FALSE, ...)
+\method{clusterProbability}{celda_G}(counts, celda.mod, log = FALSE, ...)
 }
 \arguments{
-\item{celda.mod}{Celda object of class "celda_G".}
-
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+
+\item{celda.mod}{Celda object of class "celda_G".}
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 
@@ -20,4 +20,9 @@ A list containging a matrix for the conditional cell cluster probabilities.
 }
 \description{
 Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+}
+\examples{
+celda.sim = simulateCells("celda_G")
+celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
+cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
 }

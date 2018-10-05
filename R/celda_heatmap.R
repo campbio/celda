@@ -28,6 +28,16 @@
 #' @param treeheight.cell Numeric. Height of the cell dendrogram. Set to 0 to disable plotting of this dendrogram. Default: if cluster.cell == TRUE, then treeheight.cell = 50, else treeheight.cell = 0.  
 #' @param silent Logical. Whether to plot the heatmap.
 #' @param ... Other arguments to be passed to underlying pheatmap function.
+<<<<<<< HEAD
+=======
+#' @examples 
+#' celda.sim = simulateCells(model="celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      sample.label=celda.sim$sample.label,
+#'                      max.iter=2, nchains=1)
+#' plotHeatmap(celda.sim$counts, z=celda.mod$z, y=celda.mod$y)
+#' @return list A list containing dendrogram information and the heatmap grob
+>>>>>>> upstream-devel
 #' @import gtable
 #' @import grid
 #' @import scales
@@ -35,6 +45,7 @@
 #' @import grDevices
 #' @import graphics
 #' @export 
+<<<<<<< HEAD
 renderCeldaHeatmap <- function(counts, z = NULL, y = NULL, 
                                  scale.row = scale,
                                  trim=c(-2,2), 
@@ -59,6 +70,32 @@ renderCeldaHeatmap <- function(counts, z = NULL, y = NULL,
 								 treeheight.cell = ifelse(cluster.cell, 50, 0),
 								 silent = FALSE,
                                  ...) {
+=======
+plotHeatmap <- function(counts, z = NULL, y = NULL, 
+                        scale.row = scale,
+                        trim=c(-2,2), 
+                        feature.ix = NULL,
+                        cell.ix = NULL,
+                        cluster.feature = TRUE, cluster.cell = TRUE,
+                        color.scheme = c("divergent", "sequential"),
+                        color.scheme.symmetric = TRUE,
+                        color.scheme.center = 0,
+                        col= NULL,
+                        annotation.cell = NULL, annotation.feature = NULL, 
+                        annotation.color = NULL,
+                        breaks = NULL, 
+                        legend = TRUE,
+                        annotation.legend = TRUE,
+                        annotation.names.feature = TRUE, 
+                        annotation.names.cell = TRUE,
+                        show.names.feature = FALSE, 
+                        show.names.cell = FALSE,
+                        hclust.method = "ward.D2",
+                        treeheight.feature = ifelse(cluster.feature, 50, 0), 
+      								  treeheight.cell = ifelse(cluster.cell, 50, 0),
+      								  silent = FALSE,
+                        ...) {
+>>>>>>> upstream-devel
   
   
   # Check for same lengths for z and y group variables
