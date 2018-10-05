@@ -9,13 +9,13 @@ distinct_colors(n, hues = c("red", "cyan", "orange", "blue", "yellow",
   value.range = c(0.7, 1))
 }
 \arguments{
-\item{n}{Integer; Number of colors to generate}
+\item{n}{Integer. Number of colors to generate.}
 
-\item{hues}{Character vector of R colors available from the colors() function. These will be used as the base colors for the clustering scheme. Different saturations and values (i.e. darkness) will be generated for each hue.}
+\item{hues}{Character vector. Colors available from `colors()`. These will be used as the base colors for the clustering scheme in HSV. Different saturations and values will be generated for each hue. Default c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta").}
 
-\item{saturation.range}{Numeric vector of length 2 with values between 0 and 1. Default: c(0.25, 1)}
+\item{saturation.range}{Numeric vector. A vector of length 2 denoting the saturation for HSV. Values must be in [0,1]. Default: c(0.25, 1).}
 
-\item{value.range}{Numeric vector of length 2 with values between 0 and 1. Default: c(0.5, 1)}
+\item{value.range}{Numeric vector. A vector of length 2 denoting the range of values for HSV. Values must be in [0,1]. Default: `c(0.5, 1)`.}
 }
 \value{
 A vector of distinct colors that have been converted to  HEX from HSV.
