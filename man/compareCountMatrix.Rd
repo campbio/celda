@@ -24,3 +24,9 @@ with similar dimensions to the one provided.
 Then, compare the MD5 checksum of a provided count.matrix to the count matrix
 checksum on a celda_list object, to see if they're the same.
 }
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+ compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
+}
