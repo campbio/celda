@@ -1,85 +1,78 @@
 #' @title Transcriptional state heatmap
 #' @description Draws a heatmap focusing on a transcriptional state. Both cells and genes are sorted by 
 #'    their proportions of counts in a given transcriptional state. Allows for nice visualization of 
-#'    co-expression of those genes grouped into transcriptional states by Celda.
-#'    
-#' @param counts A numeric count matrix.
-#' @param celda.mod An object of class celda_G or celda_CG.
-#' @param state.use Numeric. A transcriptional state to plot.
-#' @param cells.use Numeric or character. If a number, plot only this number of cells with respectively 
-#'    highest and lowest proportions of counts in the transcriptional state. If a list of cell names, 
-#'    plot only these cells orderd by their proportions of counts in the transcriptional state from 
-#'    left to right. If NULL, plot all cells (NULL by default).
-#' @param genes.use Numeric or character. If a number, plot only this number of genes with respectively 
-#'    highest and lowest proportions of counts in the transcriptional state. If a list of gene names, 
-#'    plot only these genes orderd by their proportions of counts in the transcriptional state from 
-#'    the bottom up. If NULL, plot all genes in the transcriptional state (NULL by default).
-#' @param normalize Logical. Should the columns be normmalized? Set to FALSE to disable. 'normalizeCounts' 
-#'    normalizes to counts per million (CPM) (default by TRUE).
-#' @param scale_row Function; A function to scale each individual row. Set to NULL to disable. Occurs 
-#'    after normalization and log transformation. Defualt is 'scale' and thus will Z-score transform each row.
-#' @param show_genenames Logical; specifying if gene names should be shown. Default to be TRUE.
+#'    co-expression of those genes grouped into transcriptional states by Celda.    
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_G" or "celda_CG". 
+#' @param feature.module Integer. The feature module to display.
+#' @param top.cells Integer. Number of cells with the highest and lowest probabilities for this module to plot. For example, if `top.cells` = 50, the 50 cells with the lowest probability and the 50 cells with the highest probability for that feature module will be plotted. If NULL, all cells will be plotted. Default NULL. 
+#' @param top.features Integer. Plot `top.features` with the highest probability in the feature module. If NULL, plot all features in the module. Default NULL.
+#' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
+#' @param scale.row Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. 'scale' will Z-score transform each row. Default 'scale'.
+#' @param show_featurenames Logical. Specifies if feature names should be shown. Default TRUE. 
 #' @export 
-stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, genes.use = NULL, normalize = TRUE, scale_row = scale, show_genenames = TRUE){
+moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NULL, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
   if (is.null(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
   if (is.null(celda.mod) || is.null(celda.mod$y)){
     stop("'celda.mod' should be an object of class celda_G or celda_CG")
   }
+  compareCountMatrix(counts, celda.mod)
+  
   factorize.matrix <-
     factorizeMatrix(celda.mod = celda.mod, counts = counts)
-  genes <- celda.mod$names$row[celda.mod$y %in% state.use]
+  genes <- celda.mod$names$row[celda.mod$y %in% feature.module]
   ascending_ordered_matrix <-
-    factorize.matrix$proportions$gene.states[, state.use, drop = FALSE][which(rownames(factorize.matrix$proportions$gene.states[, state.use, drop = FALSE]) %in% genes),]
+    factorize.matrix$proportions$gene.states[, feature.module, drop = FALSE][which(rownames(factorize.matrix$proportions$gene.states[, feature.module, drop = FALSE]) %in% genes),]
   if(class(ascending_ordered_matrix) == "numeric"){
     ascending_ordered_genes <- names(sort(ascending_ordered_matrix))
   }else{
     ascending_ordered_genes <- names(sort(rowMeans(ascending_ordered_matrix)))
   }
-  if (class(genes.use) == "character") {
-    if (setequal(intersect(genes.use, ascending_ordered_genes), genes.use)) {
-      filtered_genes <- names(sort(factorize.matrix$proportions$gene.states[, state.use][which(rownames(factorize.matrix$proportions$gene.states[, state.use, drop = FALSE]) %in% genes.use)]))
+  if (class(top.features) == "character") {
+    if (setequal(intersect(top.features, ascending_ordered_genes), top.features)) {
+      filtered_genes <- names(sort(factorize.matrix$proportions$gene.states[, feature.module][which(rownames(factorize.matrix$proportions$gene.states[, feature.module, drop = FALSE]) %in% top.features)]))
     } else {
-      miss_genes <- setdiff(genes.use, intersect(genes.use, ascending_ordered_genes))
+      miss_genes <- setdiff(top.features, intersect(top.features, ascending_ordered_genes))
       miss_genes[-length(miss_genes)] <- paste0(miss_genes[-length(miss_genes)], ', ')
-      stop("'genes.use': gene(s) (", miss_genes, ") is/are not in L", state.use)
+      stop("'top.features': gene(s) (", miss_genes, ") is/are not in L", feature.module)
     }
   }else{
-    if(is.null(genes.use) || genes.use >= ceiling(length(ascending_ordered_genes) / 2)){
+    if(is.null(top.features) || top.features >= ceiling(length(ascending_ordered_genes) / 2)){
       filtered_genes <- ascending_ordered_genes
-      message(paste0("Use all genes in L", state.use, " "))
+      message(paste0("Use all genes in L", feature.module, " "))
     } else{
       filtered_genes <-
         c(
-          head(ascending_ordered_genes, genes.use),
-          tail(ascending_ordered_genes, genes.use)
+          head(ascending_ordered_genes, top.features),
+          tail(ascending_ordered_genes, top.features)
         )
     }
   }
   ascending_ordered_cells <-
-    names(sort(colMeans(factorize.matrix$proportions$cell.states[state.use,,drop = FALSE])))
-  if (is.null(cells.use)) {
+    names(sort(colMeans(factorize.matrix$proportions$cell.states[feature.module,,drop = FALSE])))
+  if (is.null(top.cells)) {
     filtered_cells <-
       ascending_ordered_cells
     message("Use all cells")
-  } else if (is.numeric(cells.use)){
-    if (cells.use >= ceiling(length(ascending_ordered_cells) / 2)) {
+  } else if (is.numeric(top.cells)){
+    if (top.cells >= ceiling(length(ascending_ordered_cells) / 2)) {
       filtered_cells <- ascending_ordered_cells
       message("Use all cells")
     } else{
       filtered_cells <-
         c(
-          head(ascending_ordered_cells, cells.use),
-          tail(ascending_ordered_cells, cells.use)
+          head(ascending_ordered_cells, top.cells),
+          tail(ascending_ordered_cells, top.cells)
         )
     }
   }else{
     filtered_cells <-
-      names(sort(factorize.matrix$proportions$cell.states[state.use, cells.use]))
+      names(sort(factorize.matrix$proportions$cell.states[feature.module, top.cells]))
   }
   if(normalize){
-    norm.counts <- normalizeCounts(counts)
+    norm.counts <- normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
   } else{
     norm.counts <- counts
   }
@@ -98,10 +91,9 @@ stateHeatmap <- function(counts, celda.mod, state.use = 1, cells.use = NULL, gen
     filtered_norm.counts,
     z = celda.mod$z[cell_ix],
     y = celda.mod$y[gene_ix],
-    normalize = NULL,
-    scale_row = scale_row,
+    scale.row = scale.row,
     color_scheme = "divergent",
-    show_genenames = show_genenames,
+    show_featurenames = show_featurenames,
     cluster_gene = FALSE,
     cluster_cell = FALSE,
     annotation_color = anno_cell_colors

@@ -7,16 +7,16 @@
 #' 
 #' Convenience function for picking out specific models from a celda_list, returned from celda().
 #' Models can be selected by various parameters, most importantly the K/L parameters (number of cell
-#'  clusters / number of gene clusters). 
+#'  clusters / number of feature clusters). 
 #' 
-#' @param celda.list A celda_list object returned from celda()
+#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @param K The K parameter for the desired model in the results list. Matches all K by default. Accepts ranges.
 #' @param L The L parameter for the desired model in the results list. Matches all L by default. Accepts ranges.
 #' @param chain The desired chain(s) for the specified model, for the specified K/L. Matches all chains by default. Accepts ranges.
 #' @param index The index of the desired model in the run.parameters in the provided celda_list. Overrides all other parameters if provided. Defaults to NULL.
 #' @return A celda model object matching the provided parameters, or a list of celda model objects if multiple models were matched (of class "celda_C", "celda_G", "celda_CG" accordingly), or NA if one is not found.
 #' @export
-getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
+filterCeldaList = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
   validateGetModelParams(celda.list, K, L, chain) 
   
   # If user provides index / range of indices to select, override all else
@@ -47,33 +47,34 @@ getModel = function(celda.list, K=c(), L=c(), chain=c(), index=NULL) {
 }
 
 
-#' Select the best model from a celda_list, as determined by final log-likelihood.
+#' Select the best model from a celda_list by final log-likelihood.
 #' 
-#' This function returns the celda model (celda_C, celda_G, celda_CG) from a celda_list
-#' with the maxiumim final log-likelihood. If a K or L (or combination) parameter is provided,
-#' the model with these K/L and the highest log-likelihood is returned.
+#' This function returns the celda model from a celda_list object containing
+#' the maxiumim final log-likelihood. K, L, or combination of K and L must be 
+#' provided for celda_list objects containing celda_C, celda_G, and celda_CG 
+#' models, respectively.
 #' 
-#' @param celda.list A celda_list object returned from celda()
+#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @param K Limit search for best model to models with this number of cell clusters.
-#' @param L Limit search for best model to models with this number of gene clusters.
+#' @param L Limit search for best model to models with this number of feature clusters.
 #' @return The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
 #' @export
-getBestModel = function(celda.list, K=c(), L=c()) {
-  if (class(celda.list) != "celda_list") {
+selectBestModel = function(celda.list, K=c(), L=c()) {
+  if (class(celda.list)[1] != "celda_list") {
     stop("Provided object is not of class celda_list")
   }
  
-  matching.models = getModel(celda.list, K=K, L=L)
+  matching.models = filterCeldaList(celda.list, K=K, L=L)
   
   logliks = unlist(sapply(matching.models, function(mod) { mod[["finalLogLik"]] }))
-  max.idx = which(logliks == max(logliks, na.rm=T))
+  max.idx = which(logliks == max(logliks, na.rm=TRUE))
   
   return(matching.models[[max.idx[1]]])
 }
 
 
 validateGetModelParams = function(celda.list, K, L, chain) {
-  if (class(celda.list) != "celda_list") stop("First argument to getModel() should be an object of class 'celda_list'")
+  if (class(celda.list)[1] != "celda_list") stop("First argument to getModel() should be an object of class 'celda_list'")
   
   if ((is.null(K) | is.null(L)) & celda.list$content.type == "celda_CG") {
     stop("Both K and L parameters needed for subsetting celda_CG result lists")
