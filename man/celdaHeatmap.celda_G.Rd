@@ -15,6 +15,9 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+list A list containing dendrogram information and the heatmap grob
+}
 \description{
 celdaHeatmap for celda Gene clustering model
 }

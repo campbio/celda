@@ -34,6 +34,7 @@
 #'                      sample.label=celda.sim$sample.label,
 #'                      max.iter=2, nchains=1)
 #' plotHeatmap(celda.sim$counts, z=celda.mod$z, y=celda.mod$y)
+#' @return list A list containing dendrogram information and the heatmap grob
 #' @import gtable
 #' @import grid
 #' @import scales

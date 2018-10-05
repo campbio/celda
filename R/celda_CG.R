@@ -328,6 +328,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' @return A list of lists of the types of factorized matrices specified
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
                                     type=c("counts", "proportion", "posterior")) {                             
@@ -478,6 +479,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters.
+#' @return The log-likelihood for the given cluster assignments
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
 #' loglik = logLikelihood(celda.sim$counts, model="celda_CG", 
@@ -498,13 +500,13 @@ logLikelihood.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta,
 }
 
 
-#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
-#' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param s Integer vector. Contains the sample label for each cell (column) in the count matrix. 
-#' @param z Numeric vector. Denotes cell population labels. 
-#' @param y Numeric vector. Denotes feature module labels. 
-#' @param K Integer. Number of cell populations. 
-#' @param L Integer. Number of feature modules.  
+# Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+# @param counts Integer matrix. Rows represent features and columns represent cells. 
+# @param s Integer vector. Contains the sample label for each cell (column) in the count matrix. 
+# @param z Numeric vector. Denotes cell population labels. 
+# @param y Numeric vector. Denotes feature module labels. 
+# @param K Integer. Number of cell populations. 
+# @param L Integer. Number of feature modules.  
 cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   nS = length(unique(s))
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
@@ -651,6 +653,7 @@ reorder.celda_CG = function(counts, res){
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' celdaHeatmap(celda.sim$counts, celda.mod)
+#' @return A list containing dendrogram information and the heatmap grob
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
@@ -676,6 +679,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+#' @return A two column matrix of t-SNE coordinates
 #' @export
 celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
 								perplexity=20, max.iter=2500, seed=12345, ...) {
@@ -744,6 +748,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
 #' celdaProbabilityMap(celda.sim$counts, celda.mod)
+#' @return A grob containing the specified plots
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
   counts = processCounts(counts)
