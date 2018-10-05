@@ -7,7 +7,7 @@
 \method{getK}{celda_CG}(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of "Celda_CG"}
+\item{celda.mod}{Celda object of class "celda_CG".}
 }
 \description{
 getK for the celda Cell and Gene clustering model

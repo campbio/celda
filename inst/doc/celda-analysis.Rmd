@@ -166,16 +166,16 @@ pop.states
 
 ## Visualization of the Celda model
 
-Celda contains several plotting tools for data dimensionality reduction tool outputs. The PCA result for the factorized matrix is plotted by the `plotDrCluster` and `plotDrState` function based off of the Celda clusters and state probabilities for each cell respectively:
+Celda contains several plotting tools for data dimensionality reduction tool outputs. The PCA result for the factorized matrix is plotted by the `plotDimReduceCluster` and `plotDimReduceState` function based off of the Celda clusters and state probabilities for each cell respectively:
 
 ```{r, fig.width = 8, fig.height = 8}
 data.pca <- prcomp(t(scale(t(factorized$proportions$cell.states))),
                    scale = F, center = F)
 
-plotDrCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], 
+plotDimReduceCluster(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2], 
               cluster = celda.res$res.list[[1]]$z)
 
-plotDrState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2],
+plotDimReduceState(dim1 = data.pca$rotation[,1], dim2 = data.pca$rotation[,2],
             matrix = factorized$proportions$cell.states, rescale = TRUE)
 ```
 
@@ -270,7 +270,7 @@ model.pbmc <- getBestModel(pbmc_res, K = 13, L = 50)
 relativeProbabilityHeatmap(counts = pbmc_select, celda.mod = model.pbmc)
 ```
 
-Celda supports the use of tSNE (t-stochastic neighbor embedding) via the `celdaTsne` function. We can plot these tSNE results via `plotDrCluster`, `plotDrState` and `plotDrGene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectively of a specific gene module and visualize each cell's expression of a set of genes. 
+Celda supports the use of tSNE (t-stochastic neighbor embedding) via the `celdaTsne` function. We can plot these tSNE results via `plotDimReduceCluster`, `plotDimReduceState` and `plotDimReduceGene`. These will determine how each cell is labeled via celda, visualize each cell's expression respectively of a specific gene module and visualize each cell's expression of a set of genes. 
 
 ```{r, message = FALSE}
 factorize.matrix <- factorizeMatrix(counts=pbmc_select, celda.mod = model.pbmc)
@@ -282,9 +282,9 @@ pbmc_tsne <- celdaTsne(counts = pbmc_select, celda.mod = model.pbmc, distance = 
 With the use of the plots, it is also possible to determine which cell clusters express specific marker genes. 
 
 ```{r, fig.width = 8, fig.height = 8}
-plotDrCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.pbmc$z))
+plotDimReduceCluster(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], cluster = as.factor(model.pbmc$z))
 
-plotDrState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
+plotDimReduceState(dim1 = pbmc_tsne[,1], dim2 = pbmc_tsne[,2], matrix = factorize.matrix$proportions$cell.states, rescale = TRUE)
 
 marker.genes <- c("ENSG00000168685_IL7R","ENSG00000132646_PCNA",
                   "ENSG00000105374_NKG7","ENSG00000203747_FCGR3A",
@@ -292,7 +292,7 @@ marker.genes <- c("ENSG00000168685_IL7R","ENSG00000132646_PCNA",
                   "ENSG00000156738_MS4A1", "ENSG00000163736_PPBP",
                   "ENSG00000101439_CST3")
 gene.counts <- pbmc_select[marker.genes,]
-plotDrGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, 
+plotDimReduceGene(dim1 = pbmc_tsne[,1],dim2 = pbmc_tsne[,2], matrix = gene.counts, 
            rescale = TRUE)
 ```
 
