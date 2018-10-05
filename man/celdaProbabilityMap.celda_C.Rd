@@ -4,8 +4,13 @@
 \alias{celdaProbabilityMap.celda_C}
 \title{Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.}
 \usage{
+<<<<<<< HEAD
 \method{celdaProbabilityMap}{celda_C}(counts, celda.mod, level = c("sample"),
   ...)
+=======
+\method{celdaProbabilityMap}{celda_C}(counts, celda.mod,
+  level = c("sample"), ...)
+>>>>>>> upstream-devel
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -16,6 +21,21 @@
 
 \item{...}{Additional parameters.}
 }
+<<<<<<< HEAD
 \description{
 Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
+=======
+\value{
+A grob containing the specified plots
+}
+\description{
+It is often useful to visualize to what degree each feature influences each 
+cell cluster. This can also be useful for identifying features which may
+be redundant or unassociated with cell clustering.
+}
+\examples{
+celda.sim = simulateCells("celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
+celdaProbabilityMap(celda.sim$counts, celda.mod)
+>>>>>>> upstream-devel
 }

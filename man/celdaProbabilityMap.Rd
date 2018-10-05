@@ -2,7 +2,11 @@
 % Please edit documentation in R/s3_generics.R
 \name{celdaProbabilityMap}
 \alias{celdaProbabilityMap}
+<<<<<<< HEAD
 \title{Generate factorized matrices showing each feature's influence on cell / gene clustering}
+=======
+\title{Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.}
+>>>>>>> upstream-devel
 \usage{
 celdaProbabilityMap(counts, celda.mod, ...)
 }
@@ -13,6 +17,22 @@ celdaProbabilityMap(counts, celda.mod, ...)
 
 \item{...}{Additional parameters.}
 }
+<<<<<<< HEAD
 \description{
 Generate factorized matrices showing each feature's influence on cell / gene clustering
+=======
+\value{
+A grob containing the specified plots
+}
+\description{
+It is often useful to visualize to what degree each feature influences each 
+cell cluster. This can also be useful for identifying features which may
+be redundant or unassociated with cell clustering.
+}
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+celdaProbabilityMap(celda.sim$counts, celda.mod)
+>>>>>>> upstream-devel
 }

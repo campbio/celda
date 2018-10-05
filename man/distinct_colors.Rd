@@ -23,3 +23,6 @@ A vector of distinct colors that have been converted to  HEX from HSV.
 \description{
 Generate a distinct palette for coloring different clusters
 }
+\examples{
+color.pal = distinct_colors(6)  # can be used in plotting functions
+}

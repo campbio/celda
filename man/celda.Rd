@@ -9,6 +9,12 @@ celda(...)
 \arguments{
 \item{...}{Additional parameters.}
 }
+<<<<<<< HEAD
+=======
+\value{
+None
+}
+>>>>>>> upstream-devel
 \description{
 Deprecation warning for old grid search function
 }

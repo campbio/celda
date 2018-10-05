@@ -1,5 +1,5 @@
 # cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
-cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
+cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
 
   ## Identify clusters to split
   z.ta = tabulate(z, K)
@@ -14,7 +14,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
   ## Loop through each split-able Z and perform split
   clust.split = vector("list", K)
   for(i in z.to.split) { 
-    clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$z
   }
 
@@ -42,7 +42,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
     ll.shuffle[i] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
     previous.z = new.z
   } 
-  z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  z.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
 
   
   pairs = c(NA, NA)
@@ -91,7 +91,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta,
 
 
 # cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
-cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
+cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob, max.clusters.to.try=10, min.cell=3) {
 
   ## Identify clusters to split
   z.ta = tabulate(z, K)
@@ -106,7 +106,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
   ## Loop through each split-able Z and perform split
   clust.split = vector("list", K)
   for(i in z.to.split) { 
-    clustLabel = suppressMessages(celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$z
   }
 
@@ -134,7 +134,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
     ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
     previous.z = new.z
   } 
-  z.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  z.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
 
   
   pairs = c(NA, NA)
@@ -199,7 +199,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
     if(z.ta[i] <= K.subclusters) {
       temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
     } else {
-      clustLabel = suppressMessages(celda_C(counts[,z == i], K=K.subclusters, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+      clustLabel = suppressMessages(.celda_C(counts[,z == i], K=K.subclusters, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
       temp.z[ix] = clustLabel$z + current.top.z 
     }
     current.top.z = max(temp.z, na.rm=TRUE)
@@ -225,7 +225,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
   ## Loop through each split-able Z and perform split
   clust.split = vector("list", L)
   for(i in y.to.split) { 
-    clustLabel = suppressMessages(celda_G(temp.n.G.by.CP[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(.celda_G(temp.n.G.by.CP[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$y
   }
 
@@ -255,7 +255,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
     ll.shuffle[i] = cCG.calcLL(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) 
     previous.y = new.y
   } 
-  y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  y.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
   
   pairs = c(NA, NA)
   split.ix = 2
@@ -307,11 +307,11 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
 
 
 #cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
-cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob, min=3, max.clusters.to.try=10) { 
+cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob, min.feature=3, max.clusters.to.try=10) { 
   
   ## Identify clusters to split
   y.ta = table(factor(y, levels=1:L))
-  y.to.split = which(y.ta >= min)
+  y.to.split = which(y.ta >= min.feature)
   y.non.empty = which(y.ta > 0)
 
   if(length(y.to.split) == 0) {
@@ -322,7 +322,7 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   ## Loop through each split-able y and find best split
   clust.split = vector("list", L)
   for(i in y.to.split) {
-    clustLabel = suppressMessages(celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
+    clustLabel = suppressMessages(.celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
     clust.split[[i]] = clustLabel$y
   }
 
@@ -347,7 +347,7 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
     ll.shuffle[i] = cG.calcLL(p$n.TS.by.C, p$n.by.TS, n.by.G, p$nG.by.TS, nM, nG, L, beta, delta, gamma)
     previous.y = new.y
   }
-  y.to.shuffle = head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
+  y.to.shuffle = utils::head(order(ll.shuffle, decreasing = TRUE, na.last=NA), n = max.clusters.to.try)
   
   pairs = c(NA, NA)
   split.ix = 2  

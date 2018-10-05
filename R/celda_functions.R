@@ -23,7 +23,11 @@ spearmanDist = function(x){
 }
 
 hellingerDist = function(x) {
+<<<<<<< HEAD
   y = dist(t(sqrt(x)), method = "euclidean") * 1/sqrt(2)
+=======
+  y = stats::dist(t(sqrt(x)), method = "euclidean") * 1/sqrt(2)
+>>>>>>> upstream-devel
   return(y)
 }  
 
@@ -43,10 +47,20 @@ normalizeLogProbs = function(ll.probs) {
 #' @param scale.fun Function. Scales the rows of the normalized and transformed count matrix. Default NULL.
 #' @param pseudocount.normalize Numeric. Add a pseudocount to counts before normalization. Default  0. 
 #' @param pseudocount.transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
+<<<<<<< HEAD
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
 							transformation.fun=NULL, scale.fun=NULL,
 							pseudocount.normalize=0, pseudocount.transform=0) {
+=======
+#' @return Matrix, the normalized counts matrix.
+#' @examples
+#' normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
+#' @export
+normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
+            							 transformation.fun=NULL, scale.fun=NULL,
+            							 pseudocount.normalize=0, pseudocount.transform=0) {
+>>>>>>> upstream-devel
 
   normalize = match.arg(normalize)
   if(!is.null(transformation.fun) && !is.function(transformation.fun)) {
@@ -57,6 +71,7 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
   }
 
   # Perform normalization  
+<<<<<<< HEAD
   counts = counts + pseudocount.normalize
   cs = .colSums(counts, nrow(counts), ncol(counts))
   norm = switch(normalize,
@@ -65,6 +80,20 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
     "median" = sweep(counts, 2, cs / median(cs), "/"),
     "mean" = sweep(counts, 2, cs / mean(cs), "/")
   )  
+=======
+  if(normalize == "proportion") {
+    norm = fastNormProp(counts, pseudocount.normalize)
+  } else {
+    counts = counts + pseudocount.normalize
+    cs = .colSums(counts, nrow(counts), ncol(counts))
+    norm = switch(normalize,
+      "proportion" = sweep(counts, 2, cs, "/"),
+      "cpm" = sweep(counts, 2, cs / 1e6, "/"),
+      "median" = sweep(counts, 2, cs / stats::median(cs), "/"),
+      "mean" = sweep(counts, 2, cs / mean(cs), "/"))
+  }  
+ 
+>>>>>>> upstream-devel
   
   if(!is.null(transformation.fun)){
     norm <- do.call(transformation.fun, list(norm + pseudocount.transform))
@@ -90,6 +119,15 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
 #' @param celda.mod Celda object of class "celda_C" or "celda_CG". 
 #' @param from Numeric vector. Unique values in the range of 1:K that correspond to the original cluster labels in `celda.mod`.  
 #' @param to Numeric vector. Unique values in the range of 1:K that correspond to the new cluster labels. 
+<<<<<<< HEAD
+=======
+#' @return Celda object with cell feature clusters, with class corresponding to that of `celda.mod`.
+#' @examples
+#' celda.mod = celda_CG(pbmc_select, K=10, 
+#'                      L=50, max.iter=2, nchains=1)
+#' celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
+#' @export
+>>>>>>> upstream-devel
 #' @export
 recodeClusterZ = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
@@ -105,15 +143,29 @@ recodeClusterZ = function(celda.mod, from, to) {
 
 #' Re-code gene cluster labels by provided mapping scheme
 #' 
+<<<<<<< HEAD
 #' This function will re-code _gene_ cluster labels based off of a mapping provided by the user,
 #' for all fields on a celda object involving cluster labels.
 #' e.g. if Y (gene cluster) values range from 1-4 and the user would like all 3's switched to 1's and
+=======
+#' This function will re-code _feature_ cluster labels based off of a mapping provided by the user,
+#' for all fields on a celda object involving cluster labels.
+#' e.g. if Y (feature cluster) values range from 1-4 and the user would like all 3's switched to 1's and
+>>>>>>> upstream-devel
 #' vice versa, this function can be useful. NOTE: it is recommended that this function's results
 #' aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
 #' 
 #' @param celda.mod Celda object of class "celda_G" or "celda_CG". 
 #' @param from Numeric vector. Unique values in the range of 1:L that correspond to the original cluster labels in `celda.mod`. 
 #' @param to Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels. 
+<<<<<<< HEAD
+=======
+#' @return Celda object with recoded feature clusters, with class corresponding to that of `celda.mod`.
+#' @examples
+#' celda.mod = celda_CG(pbmc_select, K=10, 
+#'                       L=50, max.iter=2, nchains=1)
+#' celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
+>>>>>>> upstream-devel
 #' @export
 recodeClusterY = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
@@ -138,6 +190,14 @@ recodeClusterY = function(celda.mod, from, to) {
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param error.on.mismatch Logical. Whether to stop execution in the event of a count matrix mismatch. Default TRUE.
 #' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise. Error on FALSE if error.on.mismatch is TRUE.
+<<<<<<< HEAD
+=======
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#'  compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
+>>>>>>> upstream-devel
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
@@ -149,6 +209,10 @@ compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   }
   
   celda.checksum = celda.mod$count.checksum
+<<<<<<< HEAD
+=======
+  counts = processCounts(counts)  # Checksums are generated in celdaGridSearch and model functions after processing
+>>>>>>> upstream-devel
   count.md5 = digest::digest(counts, algo="md5")
   res = isTRUE(count.md5 == celda.checksum)
   if (res) return(TRUE)
@@ -157,6 +221,7 @@ compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
 }
 
 
+<<<<<<< HEAD
 # Check whether the given celda_list's run.params attribute ordering matches it's res.list models
 # 
 # @param celda.list A celda_list model as generated by celda().
@@ -189,6 +254,8 @@ newRunParamsFromResList = function(celda.list) {
   return(new.res.list)
 }
 
+=======
+>>>>>>> upstream-devel
 
 logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose = TRUE) {
   if(isTRUE(verbose)) {
@@ -211,6 +278,11 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose =
 #' @param saturation.range Numeric vector. A vector of length 2 denoting the saturation for HSV. Values must be in [0,1]. Default: c(0.25, 1).
 #' @param value.range Numeric vector. A vector of length 2 denoting the range of values for HSV. Values must be in [0,1]. Default: `c(0.5, 1)`.
 #' @return A vector of distinct colors that have been converted to  HEX from HSV.
+<<<<<<< HEAD
+=======
+#' @examples
+#' color.pal = distinct_colors(6)  # can be used in plotting functions
+>>>>>>> upstream-devel
 #' @export
 distinct_colors = function(n,
 						   hues = c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta"),
@@ -246,6 +318,7 @@ distinct_colors = function(n,
 }
 
 
+<<<<<<< HEAD
 initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, seed=12345) {
 
   ## If initial values are given, then they will not be randomly initialized
@@ -295,6 +368,8 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 }
 
 
+=======
+>>>>>>> upstream-devel
 processCounts = function(counts) {
   if (typeof(counts) != "integer") {
     counts = round(counts)
@@ -304,11 +379,31 @@ processCounts = function(counts) {
 }
 
 
+<<<<<<< HEAD
+=======
+# Perform some simple checks on the counts matrix, to ensure celda modeling
+# expectations are met
+validateCounts = function(counts) {
+  # And each row/column of the count matrix must have at least one count
+  count.row.sum = rowSums(counts)
+  count.col.sum = colSums(counts)
+  
+  if (sum(count.row.sum == 0) > 1 | sum(count.col.sum == 0) > 1) {
+    stop("Each row and column of the count matrix must have at least one count")
+  }
+}
+
+
+>>>>>>> upstream-devel
 ## Generate n random deviates from the Dirichlet function with shape parameters alpha
 ## Adapted from gtools v3.5
 rdirichlet <- function(n, alpha) {
     l <- length(alpha);
+<<<<<<< HEAD
     x <- matrix(rgamma(l * n, alpha), ncol = l, byrow=TRUE);
+=======
+    x <- matrix(stats::rgamma(l * n, alpha), ncol = l, byrow=TRUE);
+>>>>>>> upstream-devel
     
     ## Check for case where all sampled entries are zero due to round off
     ## One entry will be randomly chosen to be one
