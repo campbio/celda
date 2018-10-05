@@ -25,6 +25,9 @@ moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = NULL,
 
 \item{show_featurenames}{Logical. Specifies if feature names should be shown. Default TRUE.}
 }
+\value{
+A list containing row and column dendrogram information, as well as a gtable for grob plotting
+}
 \description{
 Draws a heatmap focusing on a gene module. Both cells and genes are sorted by 
    their proportions of counts in a given gene module. Allows for nice visualization of 

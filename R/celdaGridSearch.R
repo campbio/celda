@@ -220,6 +220,7 @@ selectBestModel = function(celda.list) {
 #' 
 #' @param ... Additional parameters.
 #' @export
+#' @return None
 celda = function(...) {
   warning("Warning: The celda() wrapper function has been deprecated. Please see celdaGridSearch().")
 }

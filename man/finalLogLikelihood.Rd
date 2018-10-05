@@ -10,6 +10,9 @@ finalLogLikelihood(celda.mod)
 \arguments{
 \item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 }
+\value{
+The final log-likelihood determined by Gibbs sampling for this model
+}
 \description{
 Get the log likelihood from the final iteration of Gibbs sampling
 for a given celda model.

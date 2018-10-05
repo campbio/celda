@@ -5,6 +5,12 @@
 #' Get run parameters for a celda run.
 #'
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
+#' @examples 
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)
+#' runParams(celda.mod)
+#' @return A data.frame containing the run parameters used to generate the provided celda_list.
 #' @export
 runParams = function(celda.list) {
   return(celda.list$run.params)
@@ -30,12 +36,13 @@ completeLogLikelihood = function(celda.mod) {
 #' for a given celda model.
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @export
 #' @examples
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      nchains=1, max.iter=1)
 #' finalLogLikelihood(celda.mod = celda.mod)
+#' @return The final log-likelihood determined by Gibbs sampling for this model
+#' @export
 finalLogLikelihood = function(celda.mod) {
   return(celda.mod$finalLogLik)
 }
@@ -51,6 +58,7 @@ finalLogLikelihood = function(celda.mod) {
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      nchains=1, max.iter=1)
 #' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+#' @return A numeric vector of the cluster assignment probabilties
 #' @export
 clusterProbability = function(counts, celda.mod, log=FALSE) {
   UseMethod("clusterProbability", celda.mod)
@@ -67,6 +75,7 @@ clusterProbability = function(counts, celda.mod, log=FALSE) {
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      nchains=1, max.iter=1)
 #' celdaHeatmap(celda.sim$counts, celda.mod)
+#' @return list A list containing dendrogram information and the heatmap grob
 #' @export 
 celdaHeatmap <- function(counts, celda.mod, ...) {
   UseMethod("celdaHeatmap", celda.mod)
@@ -104,10 +113,11 @@ logLikelihood = function(counts, model, ...) {
 #' 
 #' @param model Character. Options available in `celda::available.models`.
 #' @param ... Additional parameters.
-#' @export
+#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
 #' celda.sim = simulateCells(model = "celda_CG")
 #' dim(celda.sim$counts)
+#' @export
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
   UseMethod("simulateCells", model)
@@ -124,6 +134,7 @@ simulateCells = function(model, ...) {
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      nchains=1, max.iter=1)
 #' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' @return A list of lists of the types of factorized matrices specified
 #' @export
 factorizeMatrix = function(counts, celda.mod, type) {
   
@@ -144,9 +155,9 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      nchains=1, max.iter=1)
 #' celdaProbabilityMap(celda.sim$counts, celda.mod)
+#' @return A grob containing the specified plots
 #' @export
 celdaProbabilityMap = function(counts, celda.mod, ...) {
-  
   UseMethod("celdaProbabilityMap", celda.mod)
 }
 
@@ -179,12 +190,13 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' @param celda.mod Model of class "celda_G" or "celda_CG".
 #' @param feature Character vector. Identify feature modules for the specified feature names. 
 #' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
-#' @export
+#' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples 
 #' celda.sim = simulateCells("celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
 #'                      nchains=1, max.iter=1)
 #' featureModuleLookup(counts = celda.sim$counts, celda.mod = celda.mod, "Gene_1")
+#' @export
 featureModuleLookup = function(counts, celda.mod, feature, exact.match = TRUE){
   class(celda.mod) = c(class(celda.mod), celda.mod)
   UseMethod("featureModuleLookup", celda.mod)
