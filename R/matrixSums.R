@@ -42,15 +42,3 @@ colSumByGroup.numeric <- function(x, group, K) {
   res <- .Call("_colSumByGroup_numeric", x, group)
   return(res)
 }
-
-#' @useDynLib celda _mvMult
-mvMult <- function(x, v, by.row) {
-  res <- .Call("_mvMult", x, v, by.row) 
-  return(res)
-}
-
-#' @useDynLib celda _mvAdd 
-mvAdd <- function(x, v, by.row) {
-  res <- .Call("_mvAdd", x, v, by.row)
-  return(res)
-}

@@ -5,7 +5,8 @@
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
 \method{celdaTsne}{celda_G}(counts, celda.mod, max.cells = 10000,
-  modules = NULL, perplexity = 20, max.iter = 2500, seed = 12345, ...)
+  modules = NULL, perplexity = 20, max.iter = 2500, seed = 12345,
+  ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -24,6 +25,14 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+A two column matrix of t-SNE coordinates
+}
 \description{
 Embeds cells in two dimensions using tSNE based on celda_CG results.
+}
+\examples{
+celda.sim = simulateCells("celda_G")
+celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
+tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 }
