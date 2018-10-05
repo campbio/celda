@@ -4,7 +4,12 @@
 \alias{featureModuleLookup.celda_CG}
 \title{Obtain the feature module of a feature of interest}
 \usage{
+<<<<<<< HEAD
 \method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature)
+=======
+\method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature,
+  exact.match = TRUE)
+>>>>>>> upstream-devel
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -12,7 +17,23 @@
 \item{celda.mod}{Model of class "celda_G" or "celda_CG".}
 
 \item{feature}{Character vector. Identify feature modules for the specified feature names.}
+<<<<<<< HEAD
+=======
+
+\item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
+}
+\value{
+List. Each entry corresponds to the feature module determined for the provided features
+>>>>>>> upstream-devel
 }
 \description{
 This function will output the gene module of a specific gene(s) from a celda model
 }
+<<<<<<< HEAD
+=======
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
+}
+>>>>>>> upstream-devel

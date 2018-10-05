@@ -15,6 +15,14 @@
 
 \item{...}{Additional parameters.}
 }
+\value{
+A list containing dendrogram information and the heatmap grob
+}
 \description{
 celdaHeatmap for celda Cell and Gene clustering model.
+}
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
+celdaHeatmap(celda.sim$counts, celda.mod)
 }

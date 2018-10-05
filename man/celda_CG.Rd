@@ -4,18 +4,27 @@
 \alias{celda_CG}
 \title{celda Cell and Gene Clustering Model}
 \usage{
+<<<<<<< HEAD
 celda_CG(counts, sample.label = NULL, K.to.test, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
   max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
   seed = 12345, nchains = 3, count.checksum = NULL, z.init = NULL,
   y.init = NULL, logfile = NULL, verbose = TRUE)
+=======
+celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
+  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
+  stop.iter = 10, max.iter = 200, split.on.iter = 10,
+  split.on.last = TRUE, seed = 12345, nchains = 3,
+  initialize = c("random", "split"), count.checksum = NULL,
+  z.init = NULL, y.init = NULL, logfile = NULL, verbose = TRUE)
+>>>>>>> upstream-devel
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
-\item{K.to.test}{Integer. Number of cell populations.}
+\item{K}{Integer. Number of cell populations.}
 
 \item{L}{Integer. Number of feature modules.}
 
@@ -41,16 +50,29 @@ celda_CG(counts, sample.label = NULL, K.to.test, L, alpha = 1, beta = 1,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
+\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.}
+
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.}
 
-\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. Default NULL.}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
+<<<<<<< HEAD
+=======
+}
+\value{
+An object of class celda_CG with clustering results and various sampling statistics.
+>>>>>>> upstream-devel
 }
 \description{
 celda Cell and Gene Clustering Model
+}
+\examples{
+celda.sim = simulateCells(model="celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     sample.label=celda.sim$sample.label, nchains=1)
 }

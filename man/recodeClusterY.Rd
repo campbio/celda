@@ -13,10 +13,18 @@ recodeClusterY(celda.mod, from, to)
 
 \item{to}{Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels.}
 }
+\value{
+Celda object with recoded feature clusters, with class corresponding to that of `celda.mod`.
+}
 \description{
-This function will re-code _gene_ cluster labels based off of a mapping provided by the user,
+This function will re-code _feature_ cluster labels based off of a mapping provided by the user,
 for all fields on a celda object involving cluster labels.
-e.g. if Y (gene cluster) values range from 1-4 and the user would like all 3's switched to 1's and
+e.g. if Y (feature cluster) values range from 1-4 and the user would like all 3's switched to 1's and
 vice versa, this function can be useful. NOTE: it is recommended that this function's results
 aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
+}
+\examples{
+celda.mod = celda_CG(pbmc_select, K=10, 
+                      L=50, max.iter=2, nchains=1)
+celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
 }
