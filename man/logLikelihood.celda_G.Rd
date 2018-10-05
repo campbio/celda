@@ -22,7 +22,7 @@ logLikelihood.celda_G(counts, y, L, beta, delta, gamma)
 \item{...}{Additional parameters.}
 }
 \value{
-The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
+The log-likelihood for the given cluster assignments
 }
 \description{
 This function calculates the log likelihood of each clustering of genes generated

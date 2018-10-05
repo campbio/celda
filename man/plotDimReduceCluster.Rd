@@ -23,6 +23,9 @@ plotDimReduceCluster(dim1, dim2, cluster, size = 1,
 
 \item{specific_clusters}{Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL.}
 }
+\value{
+The plot as a ggplot object
+}
 \description{
 Create a scatterplot based on celda cluster labels.
 }
