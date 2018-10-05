@@ -12,7 +12,7 @@
 calc.perplexity2
 }
 \description{
-The result of running the calculatePerplexityWithResamplingfunction on the pbmc_res model. Done on K = 10:20, L = 10:50
+The result of running the resamplePerplexity function on the pbmc_res model. Done on K = 10:20, L = 10:50
 }
 \details{
 Perplexity plot created with the pbmc_res model, 2nd-pass.
