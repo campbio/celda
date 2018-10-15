@@ -22,6 +22,7 @@ library(Rtsne)
 library(reshape2)
 
 ## --------------------------------------------------------------------------
+getwd()
 sim_counts <- simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 500)
 
 ## --------------------------------------------------------------------------
@@ -44,8 +45,8 @@ table(celda.model$z, sim_counts$z)
 table(celda.model$y, sim_counts$y)
 
 
-## ---- fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE------
-celdaHeatmap(counts = sim_counts$counts, celda.mod = celda.model)
+## ---- eval=FALSE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE----
+#  celdaHeatmap(counts = sim_counts$counts, celda.mod = celda.model)
 
 ## --------------------------------------------------------------------------
 factorized <- factorizeMatrix(counts = sim_counts$counts, celda.mod = celda.model)
@@ -70,35 +71,37 @@ top.genes <- topRank(matrix = factorized$proportions$module, n = 50, threshold =
 ## --------------------------------------------------------------------------
 top.genes$names$L1
 
-## ---- fig.width = 8, fig.height = 8----------------------------------------
-top.genes.ix <- unique(unlist(top.genes$index))
-celdaHeatmap(counts = sim_counts$counts, celda.mod = celda.model, nfeatures = 10)
+## ---- eval = FALSE, fig.width = 8, fig.height = 8--------------------------
+#  top.genes.ix <- unique(unlist(top.genes$index))
+#  celdaHeatmap(counts = sim_counts$counts, celda.mod = celda.model, nfeatures = 10)
 
-## ---- fig.width = 8, fig.height = 8----------------------------------------
+## --------------------------------------------------------------------------
 tsne <- celdaTsne(counts = sim_counts$counts, celda.mod = celda.model)
 
-plotDimReduceCluster(dim1 = tsne[,1], 
-                     dim2 = tsne[,2], 
-                     cluster = celda.model$z)
+## ---- eval = FALSE---------------------------------------------------------
+#  plotDimReduceCluster(dim1 = tsne[,1],
+#                       dim2 = tsne[,2],
+#                       cluster = celda.model$z)
+#  
+#  plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2],
+#                     celda.mod = celda.model, counts = sim_counts$counts, rescale = TRUE)
+#  
+#  plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2],
+#                       counts = sim_counts$counts, features = "Gene_1")
 
-plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2], 
-                   celda.mod = celda.model, counts = sim_counts$counts, rescale = TRUE)
+## ---- eval = FALSE, fig.width = 8, fig.height = 8--------------------------
+#  celdaProbabilityMap(counts = sim_counts$counts, celda.mod = celda.model)
 
-plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2],
-                     counts = sim_counts$counts, features = "Gene_1")
+## ---- eval = FALSE, fig.width = 8, fig.height = 8--------------------------
+#  moduleHeatmap(counts = sim_counts$counts, celda.mod = celda.model, feature.module = 1:2)
 
-## ---- fig.width = 8, fig.height = 8----------------------------------------
-celdaProbabilityMap(counts = sim_counts$counts, celda.mod = celda.model)
-
-## ---- fig.width = 8, fig.height = 8----------------------------------------
-moduleHeatmap(counts = sim_counts$counts, celda.mod = celda.model, feature.module = 1:2)
-
-## ---- fig.width = 8, fig.height = 8----------------------------------------
+## --------------------------------------------------------------------------
 genes = c("Gene_1","Gene_2","Gene_3")
 gene.ix = which(rownames(sim_counts$counts) %in% genes)
-
 norm.counts <- normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
-plotHeatmap(counts = norm.counts, z = celda.model$z, y = celda.model$y, feature.ix = gene.ix, show.names.feature = TRUE)
+
+## ---- eval = FALSE, fig.width = 8, fig.height = 8--------------------------
+#  plotHeatmap(counts = norm.counts, z = celda.model$z, y = celda.model$y, feature.ix = gene.ix, show.names.feature = TRUE)
 
 ## ----message=FALSE---------------------------------------------------------
 diff.exp.clust1 <- differentialExpression(counts = sim_counts$counts, 
@@ -115,37 +118,36 @@ diff.exp.clust1vs2 <- diff.exp.clust1vs2[diff.exp.clust1vs2$fdr < 0.25,]
 ## --------------------------------------------------------------------------
 upreg.genes <- head(diff.exp.clust1vs2[order(diff.exp.clust1vs2$log2fc, decreasing = TRUE),],10)
 
-## ---- fig.height = 8, fig.width = 8----------------------------------------
+## --------------------------------------------------------------------------
 upreg.gene.ix = which(rownames(sim_counts$counts) %in% upreg.genes$Gene)
 
 norm.counts <- normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
-plotHeatmap(counts = norm.counts, z = celda.model$z, y = celda.model$y, feature.ix = upreg.gene.ix, show.names.feature = TRUE)
 
-## ---- fig.height = 8, fig.width = 8----------------------------------------
-plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2], counts = sim_counts$counts, features = upreg.genes$Gene[1:9])
+## ---- eval = FALSE---------------------------------------------------------
+#  plotHeatmap(counts = norm.counts, z = celda.model$z, y = celda.model$y, feature.ix = upreg.gene.ix, show.names.feature = TRUE)
 
-## ---- message = FALSE------------------------------------------------------
-cgs <- celdaGridSearch(sim_counts$counts,
-                            params.test = list(K = 3:7, L = 8:12),
-                            cores = 1,
-                            model = "celda_CG",
-                            nchains = 2,
-                            max.iter = 100,
-                            best.only = TRUE)
+## ---- eval = FALSE, fig.height = 8, fig.width = 8--------------------------
+#  plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2], counts = sim_counts$counts, features = upreg.genes$Gene[1:9])
 
-## --------------------------------------------------------------------------
-head(cgs$run.params)
+## ---- eval = FALSE, message = FALSE----------------------------------------
+#  cgs <- celdaGridSearch(sim_counts$counts,
+#                              params.test = list(K = 3:7, L = 8:12),
+#                              cores = 1,
+#                              model = "celda_CG",
+#                              nchains = 2,
+#                              max.iter = 100,
+#                              best.only = TRUE)
 
-## --------------------------------------------------------------------------
-cgs <- resamplePerplexity(counts = sim_counts$counts,
-                                     celda.list = cgs,
-                                     resample = 5)
+## ---- eval = FALSE---------------------------------------------------------
+#  cgs <- resamplePerplexity(counts = sim_counts$counts,
+#                                       celda.list = cgs,
+#                                       resample = 5)
 
-## ---- fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE------
-plotGridSearchPerplexity(celda.list = cgs)
+## ---- eval = FALSE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE----
+#  plotGridSearchPerplexity(celda.list = cgs)
 
-## --------------------------------------------------------------------------
-celda.model = subsetCeldaList(celda.list = cgs, params = list(K = 5, L = 10))
+## ---- eval = FALSE---------------------------------------------------------
+#  celda.model = subsetCeldaList(celda.list = cgs, params = list(K = 5, L = 10))
 
 ## ---- message=FALSE, eval=FALSE--------------------------------------------
 #  cgs <- celdaGridSearch(sim_counts$counts,
