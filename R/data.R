@@ -8,25 +8,6 @@
 #' @source \url{http://github.com/definitelysean/celda}
 "sample.cells"
 
-#' 3000 Peripheral Blood Mononuclear Cells (PBMC) from 10X Genomics.
-#'
-#' @title pbmc_select
-#' @description A dataset of 3000 Peripheral Blood Mononuclear Cells (PBMC),
-#' available from 10X Genomics.  The raw dataset can be found at the URL below.
-#' @format The rows are organized by gene names, while the
-#' columns are organized by barcodes. For this tutorial, the dataset has been
-#' slightly modified so the rownames are comprised of the Ensembl gene ID as
-#' well as the gene name.
-#' @source \url{https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit}
-"pbmc_select"
-
-#' Celda model created from 3000 Peripheral Blood Mononuclear Cells (PBMC) from 10X Genomics.
-#'
-#' @title pbmc_res
-#' @description A celda model made from pbmc_data, run with parameters K = 10:30 and L = 20,30.
-#' @source \url{https://support.10xgenomics.com/single-cell/software/pipelines/latest/rkit}
-"pbmc_res"
-
 #' Perplexity plot created with the pbmc_res model. 
 #'
 #' @title calc.perplexity
