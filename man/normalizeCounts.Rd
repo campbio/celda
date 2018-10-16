@@ -4,9 +4,9 @@
 \alias{normalizeCounts}
 \title{Performs normalization, transformation, and/or scaling on a counts matrix}
 \usage{
-normalizeCounts(counts, normalize = c("proportion", "cpm", "median",
-  "mean"), transformation.fun = NULL, scale.fun = NULL,
-  pseudocount.normalize = 0, pseudocount.transform = 0)
+normalizeCounts(counts, normalize = c("proportion", "cpm", "median", "mean"),
+  transformation.fun = NULL, scale.fun = NULL, pseudocount.normalize = 0,
+  pseudocount.transform = 0)
 }
 \arguments{
 \item{counts}{A count matrix}
@@ -28,5 +28,6 @@ Matrix, the normalized counts matrix.
 Performs normalization, transformation, and/or scaling on a counts matrix
 }
 \examples{
-normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
+celda.sim = simulateCells("celda_CG")
+normalized.counts = normalizeCounts(celda.sim$counts, "proportion", pseudocount.normalize=1)
 }
