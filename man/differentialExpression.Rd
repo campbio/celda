@@ -4,8 +4,8 @@
 \alias{differentialExpression}
 \title{Gene expression markers for cell clusters using MAST}
 \usage{
-differentialExpression(counts, celda.mod, c1, c2 = NULL,
-  only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1)
+differentialExpression(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE,
+  log2fc.threshold = NULL, fdr.threshold = 1)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
