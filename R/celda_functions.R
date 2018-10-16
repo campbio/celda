@@ -45,7 +45,8 @@ normalizeLogProbs = function(ll.probs) {
 #' @param pseudocount.transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
 #' @return Matrix, the normalized counts matrix.
 #' @examples
-#' normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
+#' celda.sim = simulateCells("celda_CG")
+#' normalized.counts = normalizeCounts(celda.sim$counts, "proportion", pseudocount.normalize=1)
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
             							 transformation.fun=NULL, scale.fun=NULL,
@@ -99,8 +100,9 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
 #' @param to Numeric vector. Unique values in the range of 1:K that correspond to the new cluster labels. 
 #' @return Celda object with cell feature clusters, with class corresponding to that of `celda.mod`.
 #' @examples
-#' celda.mod = celda_CG(pbmc_select, K=10, 
-#'                      L=50, max.iter=2, nchains=1)
+#' celda.sim = simulateCells("celda_CG", K=5, L=5)
+#' celda.mod = celda_CG(celda.sim$counts, K=5, 
+#'                      L=5, max.iter=2, nchains=1)
 #' celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
 #' @export
 #' @export
@@ -129,8 +131,9 @@ recodeClusterZ = function(celda.mod, from, to) {
 #' @param to Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels. 
 #' @return Celda object with recoded feature clusters, with class corresponding to that of `celda.mod`.
 #' @examples
-#' celda.mod = celda_CG(pbmc_select, K=10, 
-#'                       L=50, max.iter=2, nchains=1)
+#' celda.sim = simulateCells("celda_CG", K=5, L=5)
+#' celda.mod = celda_CG(celda.sim$counts, K=5, 
+#'                      L=5, max.iter=2, nchains=1)
 #' celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY = function(celda.mod, from, to) {

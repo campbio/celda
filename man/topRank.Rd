@@ -4,8 +4,7 @@
 \alias{topRank}
 \title{Identify features with the highest influence on clustering.}
 \usage{
-topRank(matrix, n = 25, margin = 2, threshold = 0,
-  decreasing = TRUE)
+topRank(matrix, n = 25, margin = 2, threshold = 0, decreasing = TRUE)
 }
 \arguments{
 \item{matrix}{Numeric matrix.}
@@ -26,6 +25,6 @@ topRank() can quickly identify the top `n` rows for each column of a matrix.
 For example, this can be useful for identifying the top `n` features per cell.
 }
 \examples{
-top.ranks.per.cell = topRank(celda::pbmc_select, n=10)
+top.ranks.per.cell = topRank(sample.cells, n=5)
 top.feature.names.for.cell = top.ranks.per.cell$names[1]
 }
