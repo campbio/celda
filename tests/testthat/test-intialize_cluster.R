@@ -1,4 +1,3 @@
-
 test_that(desc = "Test 'split' initialization for all models", {
   sim.res = simulateCells(model="celda_CG")
   model_CG <- celda_CG(sim.res$counts, sim.res$sample.label, K=sim.res$K, L=sim.res$L, initialize="split", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
