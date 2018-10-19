@@ -46,7 +46,7 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
                "The following elements in 'params.fixed' are not arguments of 'celda_G': xxx")
   expect_warning(celdaGridSearch(counts=celdaG.sim$counts, model="celda_G",params.test=list(L=5:6, nchains = 2)),"Parameter 'nchains' should not be used within the params.test list")
 
-  expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
+  expect_true(all(is(celdaG.res, "celda_list"), is(celdaG.res, "celda_G")))
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
   expect_equal(names(runParams(celda.list = celdaG.res)), c("index","chain","L","log_likelihood"))
