@@ -18,10 +18,10 @@ test_that(desc = "Testing simulation and celda_CG model", {
   # GitHub #347
   numeric.counts = celdaCG.sim$counts
   storage.mode(numeric.counts) = "numeric"
-  expect_equal(class(celda_CG(counts=celdaCG.sim$counts, 
-                              sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, 
-                              L=celdaCG.sim$L, algorithm="EM", verbose=FALSE)),
-               "celda_CG")
+  expect_true(is(celda_CG(counts=celdaCG.sim$counts, 
+                          sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, 
+                          L=celdaCG.sim$L, algorithm="EM", verbose=FALSE),
+               "celda_CG"))
 })
 
 # Cluster probabilities
@@ -58,7 +58,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   
   
   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=FALSE)
-  expect_true(all(class(celdaCG.res) == c("celda_list", "celda_CG")))
+  expect_true(all(is(celdaCG.res, "celda_list"), is(celdaCG.res, "celda_CG")))
   expect_equal(is.null(celdaCG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaCG.res))
   expect_equal(names(runParams(celda.list = celdaCG.res)), c("index","chain","K","L","log_likelihood"))
@@ -87,7 +87,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample='a'))
   
   celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
-  expect_true(all(class(celdaCG.res.index1) == "celda_CG" && class(celdaCG.res.index1) != "celda_list"))
+  expect_true(all(is(celdaCG.res.index1, "celda_CG") && !is(celdaCG.res.index1, "celda_list")))
   
   celdaC.res = celdaGridSearch(counts=celdaCG.sim$counts, model="celda_C", nchains = 1, params.test=list(K=4:5), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_CG(celdaC.res))
