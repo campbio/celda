@@ -11,10 +11,8 @@ Depends:
     SummarizedExperiment
 Imports:
     plyr,
-    dplyr,
     foreach,
     ggplot2,
-    plotly,
     RColorBrewer,
     pheatmap,
     grid,
