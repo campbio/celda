@@ -5,11 +5,11 @@
 \title{celda Cell and Gene Clustering Model}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
-  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
-  seed = 12345, nchains = 3, initialize = c("random", "split"),
-  count.checksum = NULL, z.init = NULL, y.init = NULL, logfile = NULL,
-  verbose = TRUE)
+  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
+  stop.iter = 10, max.iter = 200, split.on.iter = 10,
+  split.on.last = TRUE, seed = 12345, nchains = 3,
+  initialize = c("random", "split"), count.checksum = NULL,
+  z.init = NULL, y.init = NULL, logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -61,7 +61,6 @@ An object of class celda_CG with clustering results and various sampling statist
 celda Cell and Gene Clustering Model
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     sample.label=celda.sim$sample.label, nchains=1)
+celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
+                     sample.label=celda.CG.sim$sample.label, nchains=1)
 }

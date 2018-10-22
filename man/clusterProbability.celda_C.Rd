@@ -22,7 +22,5 @@ A list containging a matrix for the conditional cell cluster probabilities.
 Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
 }
 \examples{
-celda.sim = simulateCells("celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
-cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+cluster.prob = clusterProbability(celda.C.sim$counts, celda.C.mod)
 }

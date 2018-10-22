@@ -6,10 +6,7 @@
 #'
 #' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' runParams(celda.mod)
+#' runParams(celda.CG.mod)
 #' @return A data.frame containing the run parameters used to generate the provided celda_list.
 #' @export
 runParams = function(celda.list) {
@@ -22,10 +19,7 @@ runParams = function(celda.list) {
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @return Numeric Vector. The log-likelihood of the model's cluster assignments during each iteration.
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' complete.loglik = completeLogLikelihood(celda.mod)
+#' complete.loglik = completeLogLikelihood(celda.CG.mod)
 #' @export
 completeLogLikelihood = function(celda.mod) {
   return(celda.mod$completeLogLik)
@@ -37,10 +31,7 @@ completeLogLikelihood = function(celda.mod) {
 #'
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' finalLogLikelihood(celda.mod = celda.mod)
+#' finalLogLikelihood(celda.mod = celda.CG.mod)
 #' @return The final log-likelihood determined by Gibbs sampling for this model
 #' @export
 finalLogLikelihood = function(celda.mod) {
@@ -54,10 +45,7 @@ finalLogLikelihood = function(celda.mod) {
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+#' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
 #' @return A numeric vector of the cluster assignment probabilties
 #' @export
 clusterProbability = function(counts, celda.mod, log=FALSE) {
@@ -71,10 +59,7 @@ clusterProbability = function(counts, celda.mod, log=FALSE) {
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param ... Additional parameters.
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' celdaHeatmap(celda.sim$counts, celda.mod)
+#' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export 
 celdaHeatmap <- function(counts, celda.mod, ...) {
@@ -89,13 +74,12 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #' @param ... Additional parameters.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' loglik = logLikelihood(celda.sim$counts, model="celda_CG", 
-#'                        sample.label=celda.sim$sample.label,
-#'                        z=celda.sim$z, y=celda.sim$y,
-#'                        K=celda.sim$K, L=celda.sim$L,
-#'                        alpha=celda.sim$alpha, beta=celda.sim$beta,
-#'                        gamma=celda.sim$gamma, delta=celda.sim$delta)
+#' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
+#'                        sample.label=celda.CG.sim$sample.label,
+#'                        z=celda.CG.sim$z, y=celda.CG.sim$y,
+#'                        K=celda.CG.sim$K, L=celda.CG.sim$L,
+#'                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
+#'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
 #' @export
 logLikelihood = function(counts, model, ...) {
   class(counts) = c(model)
@@ -115,8 +99,7 @@ logLikelihood = function(counts, model, ...) {
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
-#' celda.sim = simulateCells(model = "celda_CG")
-#' dim(celda.sim$counts)
+#' dim(celda.CG.sim$counts)
 #' @export
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
@@ -130,10 +113,8 @@ simulateCells = function(model, ...) {
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, 
+#'                                       "posterior")
 #' @return A list of lists of the types of factorized matrices specified
 #' @export
 factorizeMatrix = function(counts, celda.mod, type) {
@@ -151,10 +132,7 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' @param celda.mod Celda object of class "celda_C" or "celda_CG".
 #' @param ... Additional parameters.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' celdaProbabilityMap(celda.sim$counts, celda.mod)
+#' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
 #' @export
 celdaProbabilityMap = function(counts, celda.mod, ...) {
@@ -168,10 +146,7 @@ celdaProbabilityMap = function(counts, celda.mod, ...) {
 #' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 celdaTsne = function(counts, celda.mod, ...) {
   counts = processCounts(counts)
@@ -192,10 +167,8 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' featureModuleLookup(counts = celda.sim$counts, celda.mod = celda.mod, "Gene_1")
+#' featureModuleLookup(counts = celda.CG.sim$counts, 
+#'                     celda.mod = celda.CG.mod, "Gene_1")
 #' @export
 featureModuleLookup = function(counts, celda.mod, feature, exact.match = TRUE){
   class(celda.mod) = c(class(celda.mod), celda.mod)
