@@ -15,11 +15,8 @@
 #' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
 #'    and associated statistics (p-value, log2fc and FDR).
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)   
-#' cluster.diffexp.res = differentialExpression(celda.sim$counts, celda.mod, 
-#'                                              c1=c(1,2))
+#' cluster.diffexp.res = differentialExpression(celda.CG.sim$counts, 
+#'                                              celda.CG.mod, c1=c(1,2))
 #' @export
 #' @import data.table
 #' @import plyr
