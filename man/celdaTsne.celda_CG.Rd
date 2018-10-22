@@ -34,7 +34,5 @@ A two column matrix of t-SNE coordinates
 Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 }

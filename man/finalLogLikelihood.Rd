@@ -18,8 +18,5 @@ Get the log likelihood from the final iteration of Gibbs sampling
 for a given celda model.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-finalLogLikelihood(celda.mod = celda.mod)
+finalLogLikelihood(celda.mod = celda.CG.mod)
 }

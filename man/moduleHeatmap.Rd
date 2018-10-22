@@ -34,8 +34,5 @@ Draws a heatmap focusing on a gene module. Both cells and genes are sorted by
    co-expression of those genes grouped into gene modules by Celda.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-moduleHeatmap(celda.sim$counts, celda.mod)
+moduleHeatmap(celda.CG.sim$counts, celda.CG.mod)
 }

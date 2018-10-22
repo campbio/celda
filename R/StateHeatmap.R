@@ -12,10 +12,7 @@
 #' @param show_featurenames Logical. Specifies if feature names should be shown. Default TRUE. 
 #' @return A list containing row and column dendrogram information, as well as a gtable for grob plotting
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' moduleHeatmap(celda.sim$counts, celda.mod)
+#' moduleHeatmap(celda.CG.sim$counts, celda.CG.mod)
 #' @export 
 moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NULL, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
   #input checks

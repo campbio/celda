@@ -8,10 +8,7 @@
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-#' celda.mod = celda_CG(celda.sim$counts, sample.label=celda.sim$sample.label,
-#'                      K=celda.sim$K, L=celda.sim$L, nchain=1)
-#' perplexity = perplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 perplexity = function(counts, celda.mod, new.counts=NULL) {
   compareCountMatrix(counts, celda.mod)

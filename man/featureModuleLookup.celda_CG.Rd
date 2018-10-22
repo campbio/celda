@@ -23,7 +23,6 @@ List. Each entry corresponds to the feature module determined for the provided f
 This function will output the gene module of a specific gene(s) from a celda model
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
+module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
+                             c("Gene_1", "Gene_XXX"))
 }

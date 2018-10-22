@@ -20,8 +20,5 @@ A numeric vector of the cluster assignment probabilties
 Get the probability of the cluster assignments generated during a celda run.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
 }
