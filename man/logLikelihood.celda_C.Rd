@@ -28,9 +28,8 @@ The log-likelihood for the given cluster assignments
 Calculate the celda_C log likelihood for user-provided cluster assignments
 }
 \examples{
-celda.sim = simulateCells(model="celda_C")
-loglik = logLikelihood(celda.sim$counts, model="celda_C", 
-                       sample.label=celda.sim$sample.label,
-                       z=celda.sim$z, K=celda.sim$K,
-                       alpha=celda.sim$alpha, beta=celda.sim$beta)
+loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
+                       sample.label=celda.C.sim$sample.label,
+                       z=celda.C.sim$z, K=celda.C.sim$K,
+                       alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
 }

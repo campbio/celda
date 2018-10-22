@@ -28,6 +28,6 @@ Matrix, the normalized counts matrix.
 Performs normalization, transformation, and/or scaling on a counts matrix
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-normalized.counts = normalizeCounts(celda.sim$counts, "proportion", pseudocount.normalize=1)
+normalized.counts = normalizeCounts(celda.CG.sim$counts, "proportion", 
+                                    pseudocount.normalize=1)
 }

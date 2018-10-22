@@ -6,7 +6,7 @@ celdaCG.sim = simulateCells("celda_CG", K=5, L=10)
 model_CG = celda_CG(counts=celdaCG.sim$counts, 
                     sample.label=celdaCG.sim$sample.label, 
                     K=celdaCG.sim$K, L=celdaCG.sim$L, 
-                    max.iter = 1, nchains = 1,
+                    max.iter = 1, nchains = 2,
                     algorithm="EM", verbose=FALSE)
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 
@@ -85,7 +85,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   
   
   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, 
-                                 model="celda_CG", nchains = 1, 
+                                 model="celda_CG", nchains = 2, 
                                  params.test=list(K=5, L=10), 
                                  params.fixed=list(sample.label=celdaCG.sim$sample.label), 
                                  max.iter = 1, verbose = FALSE, 

@@ -21,6 +21,5 @@ used in the simulation which can be useful for running celda. The user must prov
 functions as detailed below.
 }
 \examples{
-celda.sim = simulateCells(model = "celda_CG")
-dim(celda.sim$counts)
+dim(celda.CG.sim$counts)
 }
