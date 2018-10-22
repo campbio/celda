@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{celda_CG}
 \alias{celda_CG}
-\title{celda Cell and Gene Clustering Model}
+\title{Cell and feature clustering with Celda}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
@@ -28,7 +28,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The \code{EM} algorithm for cell clustering is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.}
 
 \item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
@@ -36,11 +36,11 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{split.on.last}{Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
+\item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
 \item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
+\item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
 \item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.}
 
@@ -55,13 +55,16 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_CG with clustering results and various sampling statistics.
+An object of class celda_CG with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
 }
 \description{
-celda Cell and Gene Clustering Model
+Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG")
 celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     sample.label=celda.sim$sample.label, nchains=1)
+                     sample.label=celda.sim$sample.label, nchains=3)
+}
+\seealso{
+\code{\link{celda_G}} for feature clustering and \code{\link{celda_C}} for clustering of cells. \code{\link{celdaGridSearch}} can be used to run multiple values of K/L and multiple chains in parallel.
 }

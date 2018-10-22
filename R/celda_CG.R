@@ -1,5 +1,7 @@
-#' celda Cell and Gene Clustering Model
+#' Cell and feature clustering with Celda
 #' 
+#' Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.  
+#'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param K Integer. Number of cell populations. 
@@ -8,24 +10,25 @@
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
-#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.
+#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The \code{EM} algorithm for cell clustering is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.
 #' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
-#' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
+#' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to set.seed(). Default 12345.   
-#' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
-#' @return An object of class celda_CG with clustering results and various sampling statistics.
+#' @return An object of class celda_CG with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
+#' @seealso \code{\link{celda_G}} for feature clustering and \code{\link{celda_C}} for clustering of cells. \code{\link{celdaGridSearch}} can be used to run multiple values of K/L and multiple chains in parallel. 
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
 #' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      sample.label=celda.sim$sample.label, nchains=1)
+#'                      sample.label=celda.sim$sample.label, nchains=3)
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
