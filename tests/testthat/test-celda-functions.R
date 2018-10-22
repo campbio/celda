@@ -11,4 +11,4 @@ test_that(desc = "Testing compareCountMatrix with numeric matrix input", {
   storage.mode(counts) = "numeric"
   expect_true(compareCountMatrix(counts, model_CG, error.on.mismatch = TRUE))
 })
-  
+
