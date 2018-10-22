@@ -38,11 +38,9 @@ Object of class "celda_list", which contains results for all model parameter com
 Yields assigments of genes/cells to clusters, depending on the provided model type.
 }
 \examples{
-## Simulate a small dataset with 5 cell clusters and 10 feature modules
-celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-
 ## Run various combinations of parameters with 'celdaGridSearch'
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+cgs = celdaGridSearch(celda.CG.sim$counts, model="celda_CG", 
+                      params.test=list(K=4:6, L=9:11), 
                       params.fixed=list(sample.label=celda.sim$sample.label),
                       best.only=TRUE, nchains=1)
 }

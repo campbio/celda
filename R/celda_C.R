@@ -19,7 +19,7 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_C with clustering results and various sampling statistics.
 #' @examples
-#' celda.mod = celda_C(celda.C.sim$counts, K=celda.sim$K, 
+#' celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
 #'                     sample.label=celda.C.sim$sample.label)
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
@@ -405,11 +405,10 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param ... Additional parameters.
 #' @return The log-likelihood for the given cluster assignments
 #' @examples
-#' celda.sim = simulateCells(model="celda_C")
-#' loglik = logLikelihood(celda.sim$counts, model="celda_C", 
-#'                        sample.label=celda.sim$sample.label,
-#'                        z=celda.sim$z, K=celda.sim$K,
-#'                        alpha=celda.sim$alpha, beta=celda.sim$beta)
+#' loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
+#'                        sample.label=celda.C.sim$sample.label,
+#'                        z=celda.C.sim$z, K=celda.C.sim$K,
+#'                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
 #' @export
 logLikelihood.celda_C = function(counts, sample.label, z, K, alpha, beta) {
   if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")

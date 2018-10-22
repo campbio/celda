@@ -25,6 +25,13 @@
 #'                         L=celda.CG.sim$L, nchains=1)
 "celda.CG.mod"
 
+#' Example results of celdaGridSearch on celda.CG.sim
+#' @title celda.CG.grid.search.res
+#' @format An object as returned from celdaGridSearch()
+#' @examples
+#' 
+"celda.CG.grid.search.res"
+
 #' An example simulated count matrix from the celda_C model.
 #' 
 #' @title celda.C.sim
