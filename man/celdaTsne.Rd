@@ -20,8 +20,5 @@ Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and 
 Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 }
