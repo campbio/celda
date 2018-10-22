@@ -4,9 +4,10 @@
 \alias{plotHeatmap}
 \title{Renders a heatmap based on a matrix of counts where rows are features and columns are cells.}
 \usage{
-plotHeatmap(counts, z = NULL, y = NULL, scale.row = scale, trim = c(-2,
-  2), feature.ix = NULL, cell.ix = NULL, cluster.feature = TRUE,
-  cluster.cell = TRUE, color.scheme = c("divergent", "sequential"),
+plotHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
+  trim = c(-2, 2), feature.ix = NULL, cell.ix = NULL,
+  cluster.feature = TRUE, cluster.cell = TRUE,
+  color.scheme = c("divergent", "sequential"),
   color.scheme.symmetric = TRUE, color.scheme.center = 0, col = NULL,
   annotation.cell = NULL, annotation.feature = NULL,
   annotation.color = NULL, breaks = NULL, legend = TRUE,
@@ -80,9 +81,5 @@ list A list containing dendrogram information and the heatmap grob
 Renders a heatmap based on a matrix of counts where rows are features and columns are cells.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     sample.label=celda.sim$sample.label,
-                     max.iter=2, nchains=1)
-plotHeatmap(celda.sim$counts, z=celda.mod$z, y=celda.mod$y)
+plotHeatmap(celda.CG.sim$counts, z=celda.CG.mod$z, y=celda.CG.mod$y)
 }

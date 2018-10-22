@@ -100,10 +100,7 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
 #' @param to Numeric vector. Unique values in the range of 1:K that correspond to the new cluster labels. 
 #' @return Celda object with cell feature clusters, with class corresponding to that of `celda.mod`.
 #' @examples
-#' celda.sim = simulateCells("celda_CG", K=5, L=5)
-#' celda.mod = celda_CG(celda.sim$counts, K=5, 
-#'                      L=5, max.iter=2, nchains=1)
-#' celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
+#' celda.mod.reordered.z = recodeClusterZ(celda.CG.mod, c(1, 3), c(3, 1))
 #' @export
 #' @export
 recodeClusterZ = function(celda.mod, from, to) {
@@ -131,10 +128,7 @@ recodeClusterZ = function(celda.mod, from, to) {
 #' @param to Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels. 
 #' @return Celda object with recoded feature clusters, with class corresponding to that of `celda.mod`.
 #' @examples
-#' celda.sim = simulateCells("celda_CG", K=5, L=5)
-#' celda.mod = celda_CG(celda.sim$counts, K=5, 
-#'                      L=5, max.iter=2, nchains=1)
-#' celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
+#' celda.mod.reordered.y = recodeClusterY(celda.CG.mod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
@@ -160,10 +154,8 @@ recodeClusterY = function(celda.mod, from, to) {
 #' @param error.on.mismatch Logical. Whether to stop execution in the event of a count matrix mismatch. Default TRUE.
 #' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise. Error on FALSE if error.on.mismatch is TRUE.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#'  compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
+#'  compareCountMatrix(celda.CG.sim$counts, celda.CG.mod, 
+#'                     error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
