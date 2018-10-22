@@ -2,12 +2,12 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceFeature}
 \alias{plotDimReduceFeature}
-\title{Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.}
+\title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
 plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
-  exact.match = TRUE, trim = c(-2, 2), size = 1,
-  xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
-  color_mid = NULL, color_high = "blue")
+  exact.match = TRUE, trim = c(-2, 2), size = 1, xlab = "Dimension_1",
+  ylab = "Dimension_2", color_low = "grey", color_mid = NULL,
+  color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -40,7 +40,7 @@ plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
 The plot as a ggplot object
 }
 \description{
-Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.
+Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by expression of the specified feature.
 }
 \examples{
 \donttest{

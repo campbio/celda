@@ -4,10 +4,9 @@
 \alias{plotHeatmap}
 \title{Renders a heatmap based on a matrix of counts where rows are features and columns are cells.}
 \usage{
-plotHeatmap(counts, z = NULL, y = NULL, scale.row = scale,
-  trim = c(-2, 2), feature.ix = NULL, cell.ix = NULL,
-  cluster.feature = TRUE, cluster.cell = TRUE,
-  color.scheme = c("divergent", "sequential"),
+plotHeatmap(counts, z = NULL, y = NULL, scale.row = scale, trim = c(-2,
+  2), feature.ix = NULL, cell.ix = NULL, cluster.feature = TRUE,
+  cluster.cell = TRUE, color.scheme = c("divergent", "sequential"),
   color.scheme.symmetric = TRUE, color.scheme.center = 0, col = NULL,
   annotation.cell = NULL, annotation.feature = NULL,
   annotation.color = NULL, breaks = NULL, legend = TRUE,
