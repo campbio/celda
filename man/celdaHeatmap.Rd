@@ -20,8 +20,5 @@ list A list containing dendrogram information and the heatmap grob
 Render a stylable heatmap of count data based on celda clustering results.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-celdaHeatmap(celda.sim$counts, celda.mod)
+celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
 }

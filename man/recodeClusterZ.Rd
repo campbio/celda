@@ -24,8 +24,5 @@ vice versa, this function can be useful. NOTE: it is recommended that this funct
 aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
 }
 \examples{
-celda.sim = simulateCells("celda_CG", K=5, L=5)
-celda.mod = celda_CG(celda.sim$counts, K=5, 
-                     L=5, max.iter=2, nchains=1)
-celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
+celda.mod.reordered.z = recodeClusterZ(celda.CG.mod, c(1, 3), c(3, 1))
 }
