@@ -22,7 +22,5 @@ list A list containing dendrogram information and the heatmap grob
 celdaHeatmap for celda Gene clustering model
 }
 \examples{
-celda.sim = simulateCells("celda_G")
-celda.mod = celda_G(celda.sim$counts, L=celda.sim$L, nchains=1, max.iter=1)
-celdaHeatmap(celda.sim$counts, celda.mod)
+celdaHeatmap(celda.G.sim$counts, celda.G.mod)
 }
