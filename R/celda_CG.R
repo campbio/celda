@@ -23,9 +23,8 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class celda_CG with clustering results and various sampling statistics.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      sample.label=celda.sim$sample.label, nchains=1)
+#' celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
+#'                      sample.label=celda.CG.sim$sample.label, nchains=1)
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
@@ -325,9 +324,8 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.  
 #' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x gene modules (cols).
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, 
+#'                                       "posterior")
 #' @return A list of lists of the types of factorized matrices specified
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
@@ -534,9 +532,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+#' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
   
@@ -579,9 +575,7 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' perplexity = perplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 perplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
   if (!("celda_CG" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_CG.")
@@ -650,9 +644,7 @@ reorder.celda_CG = function(counts, res){
 #' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' celdaHeatmap(celda.sim$counts, celda.mod)
+#' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A list containing dendrogram information and the heatmap grob
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
@@ -676,9 +668,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
 celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
@@ -745,9 +735,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
 #' @param level Character. One of "cell.population" or "sample". "cell.population" will display the absolute probabilities and relative normalized expression of each module in each cell population. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "cell.population".
 #' @param ... Additional parameters.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' celdaProbabilityMap(celda.sim$counts, celda.mod)
+#' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
@@ -799,9 +787,8 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
+#' module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
+#'                              c("Gene_1", "Gene_XXX"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature, exact.match = TRUE){
   list <- list()
