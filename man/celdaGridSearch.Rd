@@ -41,6 +41,6 @@ Yields assigments of genes/cells to clusters, depending on the provided model ty
 ## Run various combinations of parameters with 'celdaGridSearch'
 cgs = celdaGridSearch(celda.CG.sim$counts, model="celda_CG", 
                       params.test=list(K=4:6, L=9:11), 
-                      params.fixed=list(sample.label=celda.sim$sample.label),
+                      params.fixed=list(sample.label=celda.CG.sim$sample.label),
                       best.only=TRUE, nchains=1)
 }

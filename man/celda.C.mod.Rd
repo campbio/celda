@@ -12,6 +12,6 @@ celda.C.mod
 celda_C results generated from celda.C.sim
 }
 \examples{
-celda.C.mod = celda_C(celda.C.sim$counts, K=celda.CG.sim$K, nchains=1)
+celda.C.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, nchains=1)
 }
 \keyword{datasets}
