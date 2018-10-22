@@ -74,13 +74,12 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #' @param ... Additional parameters.
 #' @return The log-likelihood of the provided cluster assignment for the provided counts matrix.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' loglik = logLikelihood(celda.sim$counts, model="celda_CG", 
-#'                        sample.label=celda.sim$sample.label,
-#'                        z=celda.sim$z, y=celda.sim$y,
-#'                        K=celda.sim$K, L=celda.sim$L,
-#'                        alpha=celda.sim$alpha, beta=celda.sim$beta,
-#'                        gamma=celda.sim$gamma, delta=celda.sim$delta)
+#' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
+#'                        sample.label=celda.CG.sim$sample.label,
+#'                        z=celda.CG.sim$z, y=celda.CG.sim$y,
+#'                        K=celda.CG.sim$K, L=celda.CG.sim$L,
+#'                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
+#'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
 #' @export
 logLikelihood = function(counts, model, ...) {
   class(counts) = c(model)
@@ -100,8 +99,7 @@ logLikelihood = function(counts, model, ...) {
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
 #' @examples
-#' celda.sim = simulateCells(model = "celda_CG")
-#' dim(celda.sim$counts)
+#' dim(celda.CG.sim$counts)
 #' @export
 simulateCells = function(model, ...) {
   class(model) = c(class(model), model)
@@ -115,10 +113,8 @@ simulateCells = function(model, ...) {
 #' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
 #' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+#' factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, 
+#'                                       "posterior")
 #' @return A list of lists of the types of factorized matrices specified
 #' @export
 factorizeMatrix = function(counts, celda.mod, type) {

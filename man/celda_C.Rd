@@ -53,6 +53,6 @@ An object of class celda_C with clustering results and various sampling statisti
 celda Cell Clustering Model
 }
 \examples{
-celda.mod = celda_C(celda.C.sim$counts, K=celda.sim$K, 
+celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
                     sample.label=celda.C.sim$sample.label)
 }

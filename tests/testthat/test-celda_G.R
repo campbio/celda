@@ -77,7 +77,7 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   expect_is(plot.obj, "ggplot")
 
   celdaC.res = celdaGridSearch(counts = celdaG.sim$counts, model = "celda_C", 
-                               nchains = 1, params.test=list(K=c(5,10)), 
+                               nchains = 2, params.test=list(K=c(5,10)), 
                                max.iter = 1, verbose = FALSE, best.only=TRUE)
   expect_error(plotGridSearchPerplexity.celda_G(celdaC.res))
   
