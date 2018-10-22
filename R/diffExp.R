@@ -93,8 +93,8 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
     }
   }
   fcHurdleSig <- fcHurdleSig[,-c(4,5)]
-  names(fcHurdleSig)[c(1,3)] <- c("Gene", "log2fc")
-  fcHurdleSig <- fcHurdleSig[order(abs(fcHurdleSig$log2fc), decreasing = TRUE),]
+  names(fcHurdleSig)[c(1,2,3,4)] <- c("Gene","Pvalue","Log2_FC","FDR")
+  fcHurdleSig <- fcHurdleSig[order(fcHurdleSig$Pvalue, decreasing = FALSE),]
   return(fcHurdleSig)
 }
 
