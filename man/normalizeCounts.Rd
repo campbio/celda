@@ -4,9 +4,9 @@
 \alias{normalizeCounts}
 \title{Performs normalization, transformation, and/or scaling on a counts matrix}
 \usage{
-normalizeCounts(counts, normalize = c("proportion", "cpm", "median",
-  "mean"), transformation.fun = NULL, scale.fun = NULL,
-  pseudocount.normalize = 0, pseudocount.transform = 0)
+normalizeCounts(counts, normalize = c("proportion", "cpm", "median", "mean"),
+  transformation.fun = NULL, scale.fun = NULL, pseudocount.normalize = 0,
+  pseudocount.transform = 0)
 }
 \arguments{
 \item{counts}{A count matrix}
