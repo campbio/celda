@@ -1,5 +1,5 @@
-#' @title Gene expression markers for cell clusters using MAST
-#' @description Finds markers (differentially expressed genes) for cell clusters
+#' @title Feature expression markers for cell clusters using MAST
+#' @description Finds markers (differentially expressed features) for cell clusters
 #'    using MAST: a flexible statistical framework for assessing transcriptional
 #'    changes and characterizing heterogeneity in single-cell RNA sequencing data
 #'    (Finak et al, Genome Biology, 2015)

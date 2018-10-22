@@ -1,7 +1,7 @@
-#' @title Gene module heatmap
-#' @description Draws a heatmap focusing on a gene module. Both cells and genes are sorted by 
-#'    their proportions of counts in a given gene module. Allows for nice visualization of 
-#'    co-expression of those genes grouped into gene modules by Celda.    
+#' @title Creating a heatmap using specific feature modules
+#' @description Draws a heatmap focusing on a feature module. Both cells and features are sorted by 
+#'    their proportions of counts in a given feature module. Allows for nice visualization of 
+#'    co-expression of those genes grouped into feature modules by Celda.    
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_G" or "celda_CG". 
 #' @param feature.module Integer. The feature module to display.
