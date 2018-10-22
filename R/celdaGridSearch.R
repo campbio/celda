@@ -136,7 +136,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' @return A new `celda_list` object containing all models matching the provided criteria in `params`. If only one item in the `celda_list` matches the given criteria, the matching model will be returned directly instead of a `celda_list` object.
 #' @seealso `celdaGridSearch` can run Celda with multiple parameters and chains in parallel. `selectBestModel` can get the best model for each combination of parameters. 
 #' @examples
-#' res.K5.L10 = subsetCeldaList(, params=list(K=5, L=10))
+#' res.K5.L10 = subsetCeldaList(cgscelda.CG.grid.search.res, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
