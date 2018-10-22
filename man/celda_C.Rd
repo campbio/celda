@@ -22,7 +22,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The \code{EM} algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.}
 
 \item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
@@ -32,7 +32,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed`. Default 12345.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
@@ -40,7 +40,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from `1:K`. 'z.init' can only be used when `initialize = 'random'`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
@@ -57,5 +57,5 @@ celda.sim = simulateCells(model="celda_C")
 celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
 }
 \seealso{
-\code{\link{celda_G}} for feature clustering and \code{\link{celda_CG}} for simultaneous clustering of features and cells. \code{\link{celdaGridSearch}} can be used to run multiple values of K and multiple chains in parallel.
+`celda_G` for feature clustering and `celda_CG` for simultaneous clustering of features and cells. `celdaGridSearch` can be used to run multiple values of K and multiple chains in parallel.
 }
