@@ -70,9 +70,9 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NUL
   }
   
   #filter counts based on feature.indices 
-  filtered_norm.counts <- norm.counts[feature.indices, cell.indices]
+  filtered_norm.counts <- norm.counts[feature.indices, cell.indices, drop = FALSE]
   
-  filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0,]
+  filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0,,drop = FALSE]
   
   gene_ix = match(rownames(filtered_norm.counts), celda.mod$names$row)
   cell_ix = match(colnames(filtered_norm.counts), celda.mod$names$column)
