@@ -2,7 +2,7 @@
 % Please edit documentation in R/StateHeatmap.R
 \name{moduleHeatmap}
 \alias{moduleHeatmap}
-\title{Gene module heatmap}
+\title{Creating a heatmap using specific feature modules}
 \usage{
 moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = NULL,
   top.features = NULL, normalize = TRUE, scale.row = scale,
@@ -29,9 +29,9 @@ moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = NULL,
 A list containing row and column dendrogram information, as well as a gtable for grob plotting
 }
 \description{
-Draws a heatmap focusing on a gene module. Both cells and genes are sorted by 
-   their proportions of counts in a given gene module. Allows for nice visualization of 
-   co-expression of those genes grouped into gene modules by Celda.
+Draws a heatmap focusing on a feature module. Both cells and features are sorted by 
+   their proportions of counts in a given feature module. Allows for nice visualization of 
+   co-expression of those genes grouped into feature modules by Celda.
 }
 \examples{
 moduleHeatmap(celda.CG.sim$counts, celda.CG.mod)

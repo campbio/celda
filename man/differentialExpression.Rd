@@ -2,10 +2,10 @@
 % Please edit documentation in R/diffExp.R
 \name{differentialExpression}
 \alias{differentialExpression}
-\title{Gene expression markers for cell clusters using MAST}
+\title{Feature expression markers for cell clusters using MAST}
 \usage{
-differentialExpression(counts, celda.mod, c1, c2 = NULL,
-  only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1)
+differentialExpression(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE,
+  log2fc.threshold = NULL, fdr.threshold = 1)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -27,7 +27,7 @@ Data frame containing a ranked list (based on the absolute value of log2fc) of p
    and associated statistics (p-value, log2fc and FDR).
 }
 \description{
-Finds markers (differentially expressed genes) for cell clusters
+Finds markers (differentially expressed features) for cell clusters
    using MAST: a flexible statistical framework for assessing transcriptional
    changes and characterizing heterogeneity in single-cell RNA sequencing data
    (Finak et al, Genome Biology, 2015)
