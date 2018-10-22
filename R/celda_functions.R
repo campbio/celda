@@ -45,8 +45,8 @@ normalizeLogProbs = function(ll.probs) {
 #' @param pseudocount.transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
 #' @return Matrix, the normalized counts matrix.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' normalized.counts = normalizeCounts(celda.sim$counts, "proportion", pseudocount.normalize=1)
+#' normalized.counts = normalizeCounts(celda.CG.sim$counts, "proportion", 
+#'                                     pseudocount.normalize=1)
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
             							 transformation.fun=NULL, scale.fun=NULL,

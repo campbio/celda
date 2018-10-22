@@ -439,11 +439,10 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @keywords log likelihood
 #' @return The log-likelihood for the given cluster assignments
 #' @examples
-#' celda.sim = simulateCells(model="celda_G")
-#' loglik = logLikelihood(celda.sim$counts, model="celda_G", 
-#'                        y=celda.sim$y, L=celda.sim$L,
-#'                        beta=celda.sim$beta, delta=celda.sim$delta,
-#'                        gamma=celda.sim$gamma)
+#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
+#'                        y=celda.G.sim$y, L=celda.G.sim$L,
+#'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
+#'                        gamma=celda.G.sim$gamma)
 #' @export
 logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
   if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
