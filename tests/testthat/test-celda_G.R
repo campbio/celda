@@ -46,7 +46,7 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
                "The following elements in 'params.fixed' are not arguments of 'celda_G': xxx")
   expect_warning(celdaGridSearch(counts=celdaG.sim$counts, model="celda_G",params.test=list(L=5:6, nchains = 2)),"Parameter 'nchains' should not be used within the params.test list")
 
-  expect_true(all(class(celdaG.res) == c("celda_list", "celda_G")))
+  expect_true(all(is(celdaG.res, "celda_list"), is(celdaG.res, "celda_G")))
   expect_equal(is.null(celdaG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaG.res))
   expect_equal(names(runParams(celda.list = celdaG.res)), c("index","chain","L","log_likelihood"))
@@ -183,7 +183,7 @@ test_that(desc = "Testing plotDimReduceModule with celda_G", {
   celda.tsne <- celdaTsne(counts = celdaG.sim$counts,max.iter = 50,celda.mod = model_G)
   expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L1","L2"), rescale = F)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L1","L2"), rescale = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
   expect_error(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaG.sim$counts, celda.mod = model_G, modules = c("L11","L12")))
 })
