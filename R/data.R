@@ -40,3 +40,19 @@
 #' @examples 
 #' celda.C.mod = celda_C(celda.C.sim$counts, K=celda.CG.sim$K, nchains=1)
 "celda.C.mod"
+
+#' An example simulated count matrix from the celda_G model.
+#' 
+#' @title celda.G.sim
+#' @format A list of counts and properties as returned from simulateCells()
+#' @examples 
+#' celda.G.sim = simulateCells("celda_G")
+"celda.G.sim"
+
+#' celda_G results generated from celda.G.sim
+#' 
+#' @title celda.G.mod
+#' @format A celda_G object
+#' @examples 
+#' celda.G.mod = celda_G(celda.G.sim$counts, L=celda.G.sim$L, nchains=1)
+"celda.G.mod"
