@@ -6,9 +6,10 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
-  initialize = c("random", "split"), count.checksum = NULL, z.init = NULL,
-  logfile = NULL, verbose = TRUE)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
+  nchains = 3, initialize = c("random", "split"),
+  count.checksum = NULL, z.init = NULL, logfile = NULL,
+  verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -52,6 +53,6 @@ An object of class celda_C with clustering results and various sampling statisti
 celda Cell Clustering Model
 }
 \examples{
-celda.sim = simulateCells(model="celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
+celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
+                    sample.label=celda.C.sim$sample.label)
 }

@@ -22,8 +22,5 @@ cell cluster. This can also be useful for identifying features which may
 be redundant or unassociated with cell clustering.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-celdaProbabilityMap(celda.sim$counts, celda.mod)
+celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 }
