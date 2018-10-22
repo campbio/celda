@@ -51,6 +51,5 @@ Provides cluster assignments for all genes in a provided single-cell
 sequencing count matrix, using the celda Bayesian hierarchical model.
 }
 \examples{
-celda.sim = simulateCells(model="celda_G")
-celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
+celda.mod = celda_G(celda.G.sim$counts, L=celda.G.sim$L)
 }
