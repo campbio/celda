@@ -41,16 +41,14 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   if (length(c1) > 1){
     cells1 <-
       celda.mod$names$column[which(celda.mod$z %in% c1)]
-  }
-  else{
+  }else{
     cells1 <-
       celda.mod$names$column[which(celda.mod$z == c1)]
   }
   if (length(c2) > 1){
     cells2 <-
       celda.mod$names$column[which(celda.mod$z %in% c2)]
-  }
-  else{
+  }else{
     cells2 <-
       celda.mod$names$column[which(celda.mod$z == c2)]
   }
@@ -63,7 +61,7 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
       ngeneson = rep("", (length(cells1) + length(cells2))),
       stringsAsFactors = FALSE
     )
-  sca <- MAST::FromMatrix(log_normalized_mat, cdat)
+  sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
   cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
   SummarizedExperiment::colData(sca)$cngeneson <- scale(cdr2)
   cond <- factor(SummarizedExperiment::colData(sca)$condition)
