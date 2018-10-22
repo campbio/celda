@@ -4,7 +4,8 @@ context("Testing celda_C")
 
 celdaC.sim = simulateCells("celda_C", K=10)
 model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, 
-                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
+                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE,
+                  max.iter=2)
 factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)  
 
 # celda_C
@@ -20,27 +21,46 @@ test_that(desc = "Testing simulation and celda_C model", {
   storage.mode(numeric.counts) = "numeric"
   expect_equal(class(celda_C(counts=celdaC.sim$counts, 
                              sample.label=celdaC.sim$sample.label, 
-                             K=celdaC.sim$K, algorithm="EM", verbose=FALSE)),
+                             K=celdaC.sim$K, algorithm="EM", verbose=FALSE,
+                             max.iter=2)),
                "celda_C")
 })
 
 # clusterProbability
 test_that(desc = "Testing clusterProbability with celda_C", {
-  expect_true(all(rowSums(clusterProbability(model_C, counts = celdaC.sim$counts)[[1]]) == 1))
+  expect_true(all(round(rowSums(clusterProbability(model_C, counts = celdaC.sim$counts)[[1]])) == 1))
 })
 
 # celdaGridSearch and perplexity calculations
 test_that(desc = "Testing celdaGridSearch with celda_C", {
-  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, params.test=list(K=c(5,10)), params.fixed=list(sample.label=celdaC.sim$sample.label), max.iter = 15, verbose = FALSE, best.only=FALSE)
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", params.test=list(K=4:5, M = 3:4), params.fixed=list(sample.label=celdaC.sim$sample.label), best.only=FALSE),
+  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  
+                                nchains = 2, params.test=list(K=c(5,6)), 
+                                params.fixed=list(sample.label=celdaC.sim$sample.label),
+                                max.iter = 2, verbose = FALSE, best.only=FALSE)
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", 
+                               params.test=list(K=4:5, M = 3:4), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label),
+                               best.only=FALSE),
                "The following elements in 'params.test' are not arguments of 'celda_C': M")
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=4:5, sample.label = "Sample"), params.fixed=list(sample.label=celdaC.sim$sample.label)),
+  
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, 
+                               model="celda_C", nchains = 1, max.iter=1,
+                               params.test=list(K=4:5, sample.label = "Sample"), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label)),
                "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(), params.fixed=list(sample.label=celdaC.sim$sample.label)),
+  
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, 
+                               model="celda_C", nchains = 1, max.iter=1,
+                               params.test=list(), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label)),
                "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_C': K")
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=9:10), params.fixed=list(sample.label=celdaC.sim$sample.label, xxx = "xxx")),
+  
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", 
+                               nchains = 1, max.iter = 1,
+                               params.test=list(K=9:10), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label,
+                                                 xxx = "xxx")),
                "The following elements in 'params.fixed' are not arguments of 'celda_C': xxx")
-  expect_warning(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C",params.test=list(K=9:10, nchains = 2)),"Parameter 'nchains' should not be used within the params.test list")
   
   expect_true(class(celdaC.res)[1] == "celda_list")
   expect_equal(names(runParams(celda.list = celdaC.res)), c("index","chain","K","log_likelihood"))
@@ -57,9 +77,6 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
   plot.obj = plotGridSearchPerplexity(celdaC.res)
   expect_is(plot.obj, "ggplot")
 
-  celdaG.res = celdaGridSearch(counts = celdaC.sim$counts, model = "celda_G", nchains = 1, params.test=list(L=c(5,10)), max.iter = 5, verbose = FALSE, best.only=TRUE)
-  expect_error(plotGridSearchPerplexity.celda_C(celdaG.res))
-  
   celdaC.res.index1 = subsetCeldaList(celdaC.res, params=list(index = 1))
   expect_true(all(is(celdaC.res.index1, "celda_C") && !is(celdaC.res.index1, "celda_list")))
   

@@ -21,7 +21,6 @@ A list of lists of the types of factorized matrices specified
 Generate factorized matrices showing each feature's influence on the celda_G model clustering
 }
 \examples{
-celda.sim = simulateCells("celda_G")
-celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
-factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
+factorized.matrices = factorizeMatrix(celda.G.sim$counts, celda.G.mod, 
+                                      "posterior")
 }

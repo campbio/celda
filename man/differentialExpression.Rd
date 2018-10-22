@@ -4,8 +4,8 @@
 \alias{differentialExpression}
 \title{Gene expression markers for cell clusters using MAST}
 \usage{
-differentialExpression(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE,
-  log2fc.threshold = NULL, fdr.threshold = 1)
+differentialExpression(counts, celda.mod, c1, c2 = NULL,
+  only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -33,9 +33,6 @@ Finds markers (differentially expressed genes) for cell clusters
    (Finak et al, Genome Biology, 2015)
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)   
-cluster.diffexp.res = differentialExpression(celda.sim$counts, celda.mod, 
-                                             c1=c(1,2))
+cluster.diffexp.res = differentialExpression(celda.CG.sim$counts, 
+                                             celda.CG.mod, c1=c(1,2))
 }

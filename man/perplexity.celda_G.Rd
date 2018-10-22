@@ -21,7 +21,5 @@ Perplexity can be seen as a measure of how well a provided set of
 cluster assignments fit the data being clustered.
 }
 \examples{
-celda.sim = simulateCells(model="celda_G")
-celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
-perplexity = perplexity(celda.sim$counts, celda.mod)
+perplexity = perplexity(celda.G.sim$counts, celda.G.mod)
 }
