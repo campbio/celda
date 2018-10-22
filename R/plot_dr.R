@@ -13,10 +13,8 @@
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = sim.res$counts, 
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
+#' plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = celda.CG.sim$counts, 
 #'                   xlab = "Dimension1", ylab = "Dimension 2", var_label = "tsne", 
 #'                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")
 #'}
@@ -52,11 +50,11 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
-#'                   counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
+#'                         celda.mod = celda.CG.mod)
+#' plotDimReduceFeature(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
+#'                      counts = celda.CG.sim$counts,
+#'                      features = c("Gene_99"), exact.match = TRUE)
 #'}
 #' @export 
 plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
@@ -106,11 +104,11 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, 
+#'                         celda.mod = celda.CG.mod)
 #' plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], 
-#'                    counts = sim.res$counts, celda.mod = celda_cg, modules = c("L1","L2"))
+#'                     counts = celda.CG.sim$counts, celda.mod = celda.CG.mod,
+#'                     modules = c("L1","L2"))
 #'}
 #' @export 
 plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
@@ -150,11 +148,9 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
 #' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-#'                      cluster = as.factor(celda_cg$z),
+#'                      cluster = as.factor(celda.CG.mod$z),
 #'                      specific_clusters = c(1,2,3))
 #' }
 #' @export 
