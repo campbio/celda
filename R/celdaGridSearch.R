@@ -134,7 +134,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' @return A new `celda_list` object containing all models matching the provided criteria in `params`. If only one item in the `celda_list` matches the given criteria, the matching model will be returned directly instead of a `celda_list` object.
 #' @seealso `celdaGridSearch()` can run Celda with multiple parameters and chains in parallel. `selectBestModel()` can get the best model for each combination of parameters. 
 #' @examples
-#' res.K5.L10 = subsetCeldaList(cgscelda.CG.grid.search.res, params=list(K=5, L=10))
+#' res.K5.L10 = subsetCeldaList(celda.CG.grid.search.res, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
@@ -173,14 +173,8 @@ subsetCeldaList = function(celda.list, params) {
 #' @return A new `celda_list` object containing one model with the best log likelihood for each set of parameters. If only one set of parameters is in the `celda_list`, the best model will be returned directly instead of a `celda_list` object.
 #' @seealso `celdaGridSearch()` can run Celda with multiple parameters and chains in parallel. `subsetCeldaList()` can subset the `celda_list` object.
 #' @examples
-#' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.CG.sim$counts, model="celda_CG", 
-#'                       params.test=list(K=4:5, L=9:10), 
-#'                       params.fixed=list(sample.label=celda.CG.sim$sample.label),
-#'                       best.only=FALSE, nchains=3)
-#'
 #' ## Returns same result as running celdaGridSearch with "best.only = TRUE"
-#' cgs.best = selectBestModel(cgs)
+#' cgs.best = selectBestModel(celda.CG.grid.search.res)
 #' @import data.table
 #' @export
 selectBestModel = function(celda.list) {

@@ -390,6 +390,3 @@ test_that(desc = "miscellaneous distance fxns that are not directly used within 
   expect_equal(class(spearmanDist(x)), "dist")
 })
 
-test_that(desc = "celda wrapper fxn should return warning", {
-  expect_warning(celda())
-})
