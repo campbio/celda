@@ -35,7 +35,8 @@ normalizeLogProbs = function(ll.probs) {
 }
 
 
-#' Performs normalization, transformation, and/or scaling on a counts matrix
+#' @title Normalization of counts data
+#' @description Performs normalization, transformation, and/or scaling on a counts matrix
 #' 
 #' @param counts A count matrix 
 #' @param normalize Character. Divides counts by the library sizes for each cell. One of "proportion", "cpm", "median", or "mean". "proportion" uses the total counts for each cell as the library size. "cpm" divides the library size of each cell by one million to produce counts per million. "median" divides the library size of each cell by the median library size across all cells.  "mean" divides the library size of each cell by the mean library size across all cells.
@@ -87,9 +88,9 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
 }
   
 
-#' Re-code cell cluster labels by provided mapping scheme
+#' @title Re-code cell cluster labels 
 #' 
-#' This function will re-code _cell_ cluster labels based off of a mapping provided by the user,
+#' @description This function will re-code _cell_ cluster labels based off of a mapping provided by the user,
 #' for all fields on a celda object involving cluster labels.
 #' e.g. if Z (cell cluster) values range from 1-4 and the user would like all 3's switched to 1's and
 #' vice versa, this function can be useful. NOTE: it is recommended that this function's results
@@ -115,9 +116,9 @@ recodeClusterZ = function(celda.mod, from, to) {
 }
   
 
-#' Re-code gene cluster labels by provided mapping scheme
+#' @title Re-code feature cluster labels
 #' 
-#' This function will re-code _feature_ cluster labels based off of a mapping provided by the user,
+#' @description This function will re-code feature cluster labels based off of a mapping provided by the user,
 #' for all fields on a celda object involving cluster labels.
 #' e.g. if Y (feature cluster) values range from 1-4 and the user would like all 3's switched to 1's and
 #' vice versa, this function can be useful. NOTE: it is recommended that this function's results
@@ -142,10 +143,10 @@ recodeClusterY = function(celda.mod, from, to) {
 }
 
 
-#' Check whether a count matrix was the one used in a given celda run
+#' @title Check whether a count matrix was the one used in a given celda run
 #' 
-#' Ensures that the provided celda object was generated from a counts matrix
-#' with similar dimensions to the one provided. 
+#' @description Ensures that the provided celda object was generated from a counts matrix
+#' with exact dimensions to the one provided. 
 #' 
 #' Then, compare the MD5 checksum of a provided count.matrix to the count matrix
 #' checksum on a celda_list object, to see if they're the same.
@@ -159,7 +160,7 @@ recodeClusterY = function(celda.mod, from, to) {
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
-    stop("The provided celda object was generated from a counts matrix with a different number of genes than the one provided.")
+    stop("The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
   }
   
   if (length(celda.mod$z != 0 ) & ncol(counts) != length(celda.mod$z)) {
@@ -190,8 +191,8 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose =
   }	
 }
 
-
-#' Generate a distinct palette for coloring different clusters
+#' @title Create color palette
+#' @description Generate a distinct palette for coloring different clusters based on the number of clusters
 #' 
 #' @param n Integer. Number of colors to generate. 
 #' @param hues Character vector. Colors available from `colors()`. These will be used as the base colors for the clustering scheme in HSV. Different saturations and values will be generated for each hue. Default c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta").
