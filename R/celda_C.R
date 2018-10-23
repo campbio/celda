@@ -1,6 +1,6 @@
-#' Cell clustering with Celda
+#' @title Cell clustering with Celda
 #' 
-#' Clusters the columns of a count matrix containing single-cell data into K subpopulations. 
+#' @descriptionClusters the columns of a count matrix containing single-cell data into K subpopulations. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
@@ -12,15 +12,15 @@
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling or EM to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells are randomly assigned to a clusters. With 'split' cell clusters will be recurssively split into two clusters using `celda_C` until the specified K is reached. Default 'random'.
 #' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from `1:K`. 'z.init' can only be used when `initialize = 'random'`. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
-#' @return An object of class celda_C with the cell population clusters stored in in `z`.
-#' @seealso `celda_G` for feature clustering and `celda_CG` for simultaneous clustering of features and cells. `celdaGridSearch` can be used to run multiple values of K and multiple chains in parallel. 
+#' @return An object of class `celda_C` with the cell population clusters stored in in `z`.
+#' @seealso `celda_G()` for feature clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of K and multiple chains in parallel. 
 #' @examples
 #' celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
 #'                     sample.label=celda.C.sim$sample.label)
