@@ -195,7 +195,7 @@ plotHeatmap <- function(counts, z = NULL, y = NULL,
     }
   } else {  # Sequential color scheme
     if(is.null(col)){
-      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(100)
+      col <- colorRampPalette(c("#FFFFFF", RColorBrewer::brewer.pal(n = 9, name = "Blues")))(100)
     }
     col.len = length(col)
     if(is.null(breaks)){

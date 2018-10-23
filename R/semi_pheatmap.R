@@ -545,7 +545,7 @@ cluster_mat <- function(mat, labels, distance, method){
   
   # distance function preparation 
   dis <- function(mat, distance) {
-    if(!(distance[1] %in% c("correlation", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")) & !is(distance, "dist")){
+    if(!(distance[1] %in% c("correlation", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")) & !methods::is(distance, "dist")){
       stop("distance has to be a dissimilarity structure as produced by dist or one measure  form the list: 'correlation', 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary', 'minkowski'")
     }
     if(distance[1] == "correlation"){
@@ -687,7 +687,7 @@ generate_annotation_colours = function(annotation, annotation_colors, drop){
         }
     }
     
-    factor_colors = dscale(factor(1:count), hue_pal(l = 75))
+    factor_colors = scales::dscale(factor(1:count), RColorBrewer::hue_pal(l = 75))
     
     set.seed(3453)
     
@@ -711,7 +711,7 @@ generate_annotation_colours = function(annotation, annotation_colors, drop){
                 factor_colors = factor_colors[-ind]
             }
             else{
-                annotation_colors[[names(annotation)[i]]] = brewer_pal("seq", cont_counter)(5)[1:4]
+                annotation_colors[[names(annotation)[i]]] = scales::brewer_pal("seq", cont_counter)(5)[1:4]
                 cont_counter = cont_counter + 1
             }
         }
@@ -962,7 +962,7 @@ identity2 = function(x, ...){
 #' 
 #' @export
 semi_pheatmap = function(mat, 
-	color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100), 
+	color = colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100), 
 	kmeans_k = NA, 
 	breaks = NA, 
 	border_color = "grey60", 
