@@ -20,5 +20,5 @@ Models can be selected by various parameters, most importantly the K/L parameter
  clusters / number of feature clusters).
 }
 \examples{
-res.K5.L10 = subsetCeldaList(, params=list(K=5, L=10))
+res.K5.L10 = subsetCeldaList(celda.CG.grid.search.res, params=list(K=5, L=10))
 }
