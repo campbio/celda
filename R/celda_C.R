@@ -458,7 +458,7 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 }
 
 
-#' @title Conditional probabilities for cells in subpopulations from Celda_C
+#' @title Conditional probabilities for cells in subpopulations from a Celda_C model
 #' @description Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments in a `celda_C()` result. 
 #'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
@@ -492,15 +492,14 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
   return(list(z.probability=z.prob))
 }
 
-#' Calculate the perplexity from a single celda model
-#' 
-#' Perplexity can be seen as a measure of how well a provided set of 
-#' cluster assignments fit the data being clustered.
+#' @title Calculate the perplexity on new data with a celda_C model
+#' @description Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C"
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' perplexity = perplexity(celda.C.sim$counts, celda.C.mod)
 #' @export
@@ -551,6 +550,7 @@ reorder.celda_C = function(counts, res){
 #' @param celda.mod Celda object of class "celda_C".
 #' @param feature.ix Integer vector. Indices of features to plot, such the top features from a differential expression analysis. 
 #' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells and `celdaTsne()` for generating 2-dimensional coordinates
 #' @examples 
 #' celdaHeatmap(celda.C.sim$counts, celda.C.mod)
 #' @return list A list containing dendrogram information and the heatmap grob
@@ -572,6 +572,7 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells and `celdaHeatmap` for displaying expression
 #' @examples
 #' tsne.res = celdaTsne(celda.C.sim$counts, celda.C.mod)
 #' @return A two column matrix of t-SNE coordinates
@@ -630,6 +631,7 @@ celdaTsne.celda_C = function(counts, celda.mod,
 #' @param celda.mod Celda object of class "celda_CG".   
 #' @param level Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".
 #' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' celdaProbabilityMap(celda.C.sim$counts, celda.C.mod)
 #' @return A grob containing the specified plots
