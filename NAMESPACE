@@ -81,7 +81,6 @@ import(lintr)
 import(ineq)
 import(Rcpp)
 import(RcppEigen)
-
 useDynLib(celda,"_colSumByGroup")
 useDynLib(celda,"_colSumByGroupChange")
 useDynLib(celda,"_colSumByGroup_numeric")

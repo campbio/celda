@@ -2,16 +2,13 @@
 % Please edit documentation in R/celdaGridSearch.R
 \name{celda}
 \alias{celda}
-\title{Deprecation warning for old grid search function}
+\title{Celda models}
 \usage{
-celda(...)
-}
-\arguments{
-\item{...}{Additional parameters.}
+celda()
 }
 \value{
 None
 }
 \description{
-Deprecation warning for old grid search function
+List of available Celda models with correpsonding descriptions.
 }
