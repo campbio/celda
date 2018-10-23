@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_C.R
 \name{factorizeMatrix.celda_C}
 \alias{factorizeMatrix.celda_C}
-\title{Generate factorized matrices showing each feature's influence on the celda_C model clustering}
+\title{Matrix factorization for results from celda_C()}
 \usage{
 \method{factorizeMatrix}{celda_C}(counts, celda.mod, type = c("counts",
   "proportion", "posterior"))
@@ -15,12 +15,14 @@
 \item{type}{Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.}
 }
 \value{
-A list of lists of the types of factorized matrices specified
+A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module` and `sample`.
 }
 \description{
-Generate factorized matrices showing each feature's influence on the celda_C model clustering
+Generates factorized matrices showing the contribution of each feature in each cell population or each cell population in each sample.
 }
 \examples{
-factorized.matrices = factorizeMatrix(celda.C.sim$counts, celda.C.mod, 
-                                      "posterior")
+factorized.matrices = factorizeMatrix(celda.C.sim$counts, celda.C.mod, "posterior")
+}
+\seealso{
+`celda_C()` for clustering cells
 }
