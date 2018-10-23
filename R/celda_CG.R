@@ -532,7 +532,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 
 
 
-#' @title Conditional probabilities for cells in subpopulations and features in modules from Celda_CG
+#' @title Conditional probabilities for cells and features from a Celda_CG model
 #' @description Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments as well as each feature belonging to each module given all other feature cluster assignments in a `celda_CG()` result. 
 #'
 #' @param celda.mod Celda object of class `celda_CG`.
@@ -575,15 +575,14 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 }
 
 
-#' Calculate the perplexity from a single celda model
-#' 
-#' Perplexity can be seen as a measure of how well a provided set of 
-#' cluster assignments fit the data being clustered.
+#' @title Calculate the perplexity on new data with a celda_CG model
+#' @description Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
 #' @export
@@ -653,6 +652,7 @@ reorder.celda_CG = function(counts, res){
 #' @param celda.mod Celda object of class "celda_CG". 
 #' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples 
 #' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A list containing dendrogram information and the heatmap grob
@@ -677,6 +677,7 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to set.seed(). Default 12345.  
 #' @param ... Additional parameters.
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 #' @return A two column matrix of t-SNE coordinates
@@ -747,6 +748,7 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
 #' @examples
 #' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
+#' @seealso `celda_CG()` for clustering features and cells
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
   counts = processCounts(counts)
@@ -787,15 +789,15 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 }
 
 
-#' Obtain the feature module of a feature of interest
-#' 
-#' This function will output the gene module of a specific gene(s) from a celda model
+#' @title Lookup the module of a feature
+#' @description Finds the module assignments of given features in a `celda_G()` model
 #'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Model of class "celda_G" or "celda_CG".
-#' @param feature Character vector. Identify feature modules for the specified feature names.
-#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
+#' @param celda.mod Model of class `celda_CG`.
+#' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE. 
 #' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
 #'                              c("Gene_1", "Gene_XXX"))
