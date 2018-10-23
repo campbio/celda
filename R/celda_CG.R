@@ -24,7 +24,7 @@
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
-#' @seealso `celda_G()` for feature clustering and `celda_C()` for clustering of cells. `celdaGridSearch()` can be used to run multiple values of K/L and multiple chains in parallel. 
+#' @seealso `celda_G()` for feature clustering and `celda_C()` for clustering cells. `celdaGridSearch()` can be used to run multiple values of K/L and multiple chains in parallel. 
 #' @examples
 #' celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
 #'                      sample.label=celda.CG.sim$sample.label, nchains=1)
@@ -324,16 +324,16 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
 }
 
 
-##' Generate factorized matrices showing each feature's influence on the celda_CG model clustering 
+#' @title Matrix factorization for results from celda_CG
+#' @description Generates factorized matrices showing the contribution of each feature in each module, each module in each cell and/or cell population, and each cell population in each sample. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".  
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.  
-#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x gene modules (cols).
+#' @return A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module`, `cell.population`, and `sample`. Additionally, the contribution of each module in each individual cell will be included in the `cell` element of `counts` and `proportions` elements. 
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples 
-#' factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, 
-#'                                       "posterior")
-#' @return A list of lists of the types of factorized matrices specified
+#' factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, "posterior")
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
                                     type=c("counts", "proportion", "posterior")) {                             
