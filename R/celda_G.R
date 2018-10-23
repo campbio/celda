@@ -572,7 +572,7 @@ reorder.celda_G = function(counts, res) {
 
 #' celdaHeatmap for celda Gene clustering model
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_G". 
+#' @param celda.mod Celda object of class `celda_G`. 
 #' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
 #' @seealso `celda_G()` for clustering features
@@ -588,18 +588,18 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
   plotHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
 }
 
-
-#' Embeds cells in two dimensions using tSNE based on celda_CG results.
+#' @title tSNE for celda_G
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_G` model. tSNE is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_G".  
+#' @param celda.mod Celda object of class `celda_G`.  
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
 #' @param modules Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @seealso `celda_G()` for clustering features
+#' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for displaying expression
 #' @examples
 #' tsne.res = celdaTsne(celda.G.sim$counts, celda.G.mod)
 #' @return A two column matrix of t-SNE coordinates
@@ -637,7 +637,7 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' @param celda.mod Model of class `celda_G`.
 #' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
 #' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE. 
-#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @return List. Each element contains the module of the provided feature.
 #' @seealso `celda_G()` for clustering features
 #' @examples
 #' module = featureModuleLookup(celda.G.sim$counts, celda.G.mod, 
