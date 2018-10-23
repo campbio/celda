@@ -194,7 +194,7 @@ test_that(desc = "Testing CompareCountMatrix with celda_CG", {
   
   less.features <- celdaCG.sim$counts[1:50,]
   expect_error(compareCountMatrix(counts = less.features, celda.mod = model_CG),
-               "The provided celda object was generated from a counts matrix with a different number of genes than the one provided.")
+               "The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
   less.cells <- celdaCG.sim$counts[,1:100]
   expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_CG),
                "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
