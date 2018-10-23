@@ -22,7 +22,7 @@ test_that(desc = "Testing simulation and celda_CG model", {
   # GitHub #347
   numeric.counts = celdaCG.sim$counts
   storage.mode(numeric.counts) = "numeric"
-  expect_true(methods::is(celda_CG(counts=celdaCG.sim$counts, 
+  expect_true(is(celda_CG(counts=celdaCG.sim$counts, 
                           sample.label=celdaCG.sim$sample.label, 
                           K=celdaCG.sim$K,  L=celdaCG.sim$L, 
                           algorithm="EM", verbose=FALSE,
@@ -90,8 +90,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                                  params.fixed=list(sample.label=celdaCG.sim$sample.label), 
                                  max.iter = 1, verbose = FALSE, 
                                  best.only=FALSE)
-  expect_true(all(methods::is(celdaCG.res, "celda_list"), 
-                  methods::is(celdaCG.res, "celda_CG")))
+  expect_true(all(is(celdaCG.res, "celda_list"), is(celdaCG.res, "celda_CG")))
   expect_equal(is.null(celdaCG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaCG.res))
   expect_equal(names(runParams(celda.list = celdaCG.res)), c("index","chain","K","L","log_likelihood"))
@@ -120,7 +119,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample='a'))
   
   celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
-  expect_true(all(methods::is(celdaCG.res.index1, "celda_CG") && !methods::is(celdaCG.res.index1, "celda_list")))
+  expect_true(all(is(celdaCG.res.index1, "celda_CG") && !is(celdaCG.res.index1, "celda_list")))
   
   res <- perplexity.celda_CG(celdaCG.sim$counts, model_CG)
   res2 <- perplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)

@@ -78,7 +78,7 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
   expect_is(plot.obj, "ggplot")
 
   celdaC.res.index1 = subsetCeldaList(celdaC.res, params=list(index = 1))
-  expect_true(all(methods::is(celdaC.res.index1, "celda_C") && !methods::is(celdaC.res.index1, "celda_list")))
+  expect_true(all(is(celdaC.res.index1, "celda_C") && !is(celdaC.res.index1, "celda_list")))
   
   expect_error(subsetCeldaList(celdaC.res, params = list(K = 11)))
   expect_error(subsetCeldaList(celdaC.res, params = list(K = 5, M = 10)))

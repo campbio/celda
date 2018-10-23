@@ -186,8 +186,7 @@ selectBestModel = function(celda.list) {
   log_likelihood = NULL
   group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
   dt = data.table::as.data.table(celda.list$run.params)
-  new.run.params = as.data.frame(dt[,data.table::.SD[which.max(log_likelihood)], 
-                                    by=group])
+  new.run.params = as.data.frame(dt[,.SD[which.max(log_likelihood)], by=group])
   new.run.params = new.run.params[,colnames(celda.list$run.params)]
   
   ix = match(new.run.params$index, celda.list$run.params$index)
