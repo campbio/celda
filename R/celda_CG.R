@@ -221,10 +221,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 
 
 
-#' Simulate cells from the cell/feature bi-clustering generative model
+#' @title Simulate cells from the celda_CG model
 #' 
-#' This function generates a list containing a simulated counts matrix, as well as various parameters
-#' used in the simulation which can be useful for running celda. 
+#' @description Generates a simulated counts matrix, cell subpopulation clusters, sample labels, and feature module clusters
+#' according to the generative process of the celda_CG model. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param S Integer. Number of samples to simulate. Default 5.  
@@ -237,9 +237,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @return List. Contains the simulated matrix `counts`, cell population clusters `z`, feature module clusters `y`, sample assignments `sample.label`, and input parameters.
+#' @seealso `celda_C()` for simulating cell subpopulations and `celda_G()` for simulating feature modules. 
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
 #' @export
@@ -319,7 +320,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
-  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, seed=seed))
 }
 
 

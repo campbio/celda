@@ -238,11 +238,10 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
-#' Simulate cells from the feature clustering generative model
+#' @title Simulate cells from the celda_G model
 #' 
-#' This function generates a list containing a simulated counts matrix, as well as various parameters
-#' used in the simulation which can be useful for running celda. 
-#' 
+#' @description Generates a simulated counts matrix and feature module clusters
+#' according to the generative process of the celda_G model.  
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param C Integer. Number of cells to simulate. Default 100. 
@@ -252,9 +251,10 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @return List. Contains the simulated matrix `counts`, feature module clusters `y`, and input parameters.
+#' @seealso `celda_C()` for simulating cell subpopulations and `celda_CG()` for simulating feature modules and cell populations. 
 #' @examples
 #' celda.g.sim = simulateCells(model="celda_G")
 #' @export
@@ -309,7 +309,7 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
   class(result) = "celda_G" 
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
-  return(list(y=result$y, counts=processCounts(cell.counts), L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(y=result$y, counts=processCounts(cell.counts), L=L, beta=beta, delta=delta, gamma=gamma, seed=seed))
 }
 
 
