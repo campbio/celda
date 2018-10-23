@@ -647,15 +647,17 @@ reorder.celda_CG = function(counts, res){
 }
 
 
-#' celdaHeatmap for celda Cell and Gene clustering model.
+#' @title Heatmap for celda_CG
+#' @description Renders an expression heatmap to visualize `celda_CG()` results. The top `nfeatures` for each module will be included in the heatmap. 
+#'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_CG". 
+#' @param celda.mod Celda object of class `celda_CG`. 
 #' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
-#' @seealso `celda_CG()` for clustering features and cells
+#' @seealso `celda_CG()` for clustering features and cells and `celdaTsne()` for generating 2-dimensional coordinates
 #' @examples 
 #' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
-#' @return A list containing dendrogram information and the heatmap grob
+#' @return A list containing dendrograms and the heatmap grob
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")

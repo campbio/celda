@@ -545,15 +545,17 @@ reorder.celda_C = function(counts, res){
 }
 
 
-#' celdaHeatmap for celda Cell clustering function 
+#' @title Heatmap for celda_C
+#' @description Renders an expression heatmap to visualize `celda_C()` results. Features to include in the heatmap must be supplied. 
+#'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C".
+#' @param celda.mod Celda object of class `celda_C`.
 #' @param feature.ix Integer vector. Indices of features to plot, such the top features from a differential expression analysis. 
 #' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells and `celdaTsne()` for generating 2-dimensional coordinates
 #' @examples 
 #' celdaHeatmap(celda.C.sim$counts, celda.C.mod)
-#' @return list A list containing dendrogram information and the heatmap grob
+#' @return list A list containing dendrograms and the heatmap grob
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
@@ -562,7 +564,7 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 
 
 #' @title tSNE for celda_C
-#' @description Embeds cells in two dimensions using tSNE based on a `celda_C` model. PCA on the normalized counts is used to reduce the number of features. 
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_C` model. PCA on the normalized counts is used to reduce the number of features before applying tSNE. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class `celda_C`. 
