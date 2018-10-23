@@ -136,7 +136,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' @param params List. List of parameters used to subset celda.list.
 #' @return A new 'celda_list' object containing all models matching the provided criteria in 'params'. If entry in the list matches, the results for the matching model will be returned.
 #' @examples
-#' res.K5.L10 = subsetCeldaList(, params=list(K=5, L=10))
+#' res.K5.L10 = subsetCeldaList(celda.CG.grid.search.res, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
