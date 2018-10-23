@@ -757,7 +757,7 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
     pop.norm = normalizeCounts(pop, normalize="proportion", transformation.fun=sqrt, scale.fun=base::scale)
   
     percentile.9 <- round(stats::quantile(pop,.9), digits = 2) * 100
-    col1 <- colorRampPalette(c("#FFFFFF", RColorBrewer::brewer.pal(n = 9, name = "Blues")))(percentile.9)
+    col1 <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9, name = "Blues")))(percentile.9)
     col2 <- colorRampPalette(c("#08306B", c("#006D2C","Yellowgreen","Yellow","Orange","Red")))(100-percentile.9)
     col <- c(col1,col2)
     breaks <-  seq(0, 1, length.out = length(col))     

@@ -1,11 +1,11 @@
 test_that(desc = "Test 'split' initialization for all models", {
   sim.res = simulateCells(model="celda_CG")
   model_CG <- celda_CG(sim.res$counts, sim.res$sample.label, K=sim.res$K, L=sim.res$L, initialize="split", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
-  expect_true(methods::is(model_CG, "celda_CG"))
+  expect_true(is(model_CG, "celda_CG"))
   model_G <- celda_G(sim.res$counts, L=sim.res$L, initialize="split", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
-  expect_true(methods::is(model_G, "celda_G"))
+  expect_true(is(model_G, "celda_G"))
   model_C <- celda_C(sim.res$counts, sim.res$sample.label, K=sim.res$K, initialize="split", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
-  expect_true(methods::is(model_C, "celda_C"))
+  expect_true(is(model_C, "celda_C"))
 })
 
 

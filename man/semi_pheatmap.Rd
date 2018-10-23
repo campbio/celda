@@ -4,8 +4,7 @@
 \alias{semi_pheatmap}
 \title{A function to draw clustered heatmaps.}
 \usage{
-semi_pheatmap(mat,
-  color = colorRampPalette(rev(RColorBrewer::brewer.pal(n = 7, name =
+semi_pheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
   "RdYlBu")))(100), kmeans_k = NA, breaks = NA,
   border_color = "grey60", cellwidth = NA, cellheight = NA,
   scale = "none", cluster_rows = TRUE, cluster_cols = TRUE,
