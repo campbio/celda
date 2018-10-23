@@ -666,18 +666,19 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 }
 
 
-#' Embeds cells in two dimensions using tSNE based on celda_CG results.
+#' @title tSNE for celda_CG
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_CG` model. tSNE is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda model. Options available in `celda::available.models`. 
+#' @param celda.mod Celda object of class `celda_CG`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @seealso `celda_CG()` for clustering features and cells
+#' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
 #' @examples
 #' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 #' @return A two column matrix of t-SNE coordinates
@@ -735,15 +736,12 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
 
 
 
-#' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
-#' 
-#' It is often useful to visualize to what degree each feature influences each 
-#' cell cluster. This can also be useful for identifying features which may
-#' be redundant or unassociated with cell clustering.
+#' @title Probability map for a celda_CG model
+#' @description Renders probability and relative expression heatmaps to visualize the relationship between features and cell populations or cell populations and samples.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_CG".   
-#' @param level Character. One of "cell.population" or "sample". "cell.population" will display the absolute probabilities and relative normalized expression of each module in each cell population. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "cell.population".
+#' @param celda.mod Celda object of class `celda_CG`.   
+#' @param level Character. One of 'cell.population' or 'sample'. 'cell.population' will display the absolute probabilities and relative normalized expression of each module in each cell population. 'sample' will display the absolute probabilities and relative normalized abundance of each cell population in each sample. Default 'cell.population'.
 #' @param ... Additional parameters.
 #' @examples
 #' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
@@ -796,7 +794,7 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param celda.mod Model of class `celda_CG`.
 #' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
 #' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE. 
-#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @return List. Each element contains the module of the provided feature.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
