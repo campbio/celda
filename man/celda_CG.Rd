@@ -38,7 +38,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
@@ -55,7 +55,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_CG with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
+An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
 }
 \description{
 Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.
@@ -65,5 +65,5 @@ celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
                      sample.label=celda.CG.sim$sample.label, nchains=1)
 }
 \seealso{
-`celda_G` for feature clustering and `celda_C` for clustering of cells. `celdaGridSearch` can be used to run multiple values of K/L and multiple chains in parallel.
+`celda_G()` for feature clustering and `celda_C()` for clustering cells. `celdaGridSearch()` can be used to run multiple values of K/L and multiple chains in parallel.
 }

@@ -13,7 +13,7 @@ celdaGridSearch(counts, model, params.test, params.fixed = NULL,
 
 \item{model}{Celda model. Options available in `celda::available.models`.}
 
-\item{params.test}{List. A list denoting the combinations of parameters to run in a celda model. For example, `list(K=5:10, L=15:20)` will run all combinations of K from 5 to 10 and L from 15 to 20 in model `celda_CG`.}
+\item{params.test}{List. A list denoting the combinations of parameters to run in a celda model. For example, `list(K=5:10, L=15:20)` will run all combinations of K from 5 to 10 and L from 15 to 20 in model `celda_CG()`.}
 
 \item{params.fixed}{List. A list denoting additional parameters to use in each celda model. Default NULL.}
 
@@ -25,7 +25,7 @@ celdaGridSearch(counts, model, params.test, params.fixed = NULL,
 
 \item{best.only}{Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 
@@ -45,5 +45,5 @@ cgs = celdaGridSearch(celda.CG.sim$counts, model="celda_CG",
                       best.only=TRUE, nchains=1)
 }
 \seealso{
-`celda_G` for feature clustering, `celda_C` for clustering of cells, and `celda_CG` for simultaneous clustering of features and cells. `subsetCeldaList` can subset the `celda_list` object. `selectBestModel` can get the best model for each combination of parameters.
+`celda_G()` for feature clustering, `celda_C()` for clustering of cells, and `celda_CG()` for simultaneous clustering of features and cells. `subsetCeldaList()` can subset the `celda_list` object. `selectBestModel()` can get the best model for each combination of parameters.
 }
