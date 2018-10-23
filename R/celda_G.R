@@ -313,15 +313,16 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
 }
 
 
-#' Generate factorized matrices showing each feature's influence on the celda_G model clustering 
+#' @title Matrix factorization for results from celda_G
+#' @description Generates factorized matrices showing the contribution of each feature in each module and each module in each cell.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_G". 
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
+#' @return A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module` and `cell`.
+#' @seealso `celda_G()` for clustering features
 #' @examples 
-#' factorized.matrices = factorizeMatrix(celda.G.sim$counts, celda.G.mod, 
-#'                                       "posterior")
-#' @return A list of lists of the types of factorized matrices specified
+#' factorized.matrices = factorizeMatrix(celda.G.sim$counts, celda.G.mod, "posterior")
 #' @export
 factorizeMatrix.celda_G = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {
