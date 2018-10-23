@@ -251,10 +251,10 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
-#' Simulate cells from the cell clustering generative model
+#' @title Simulate cells from the celda_C model
 #' 
-#' This function generates a list containing a simulated counts matrix, as well as various parameters
-#' used in the simulation which can be useful for running celda. 
+#' @description Generates a simulated counts matrix, cell subpopulation clusters, and sample labels
+#' according to the generative process of the celda_C model. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param S Integer. Number of samples to simulate. Default 5.
@@ -264,9 +264,10 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param K Integer. Number of cell populations. Default 5.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @return List. Contains the simulated matrix `counts`, cell population clusters `z`, sample assignments `sample.label`, and input parameters.
+#' @seealso `celda_G()` for simulating feature modules and `celda_CG()` for simulating feature modules and cell populations. 
 #' @examples
 #' celda.c.sim = simulateCells(model="celda_C", K=10)
 #' sim.counts = celda.c.sim$counts
