@@ -471,7 +471,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 }
 
 
-#' Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
+#' @title Calculate Celda_CG log likelihood
+#' @description Calculates the log likelihood for user-provided cell population and feature module clusters using the `celda_CG()` model.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
@@ -484,7 +485,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters.
-#' @return The log-likelihood for the given cluster assignments
+#' @return The log likelihood for the given cluster assignments
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
 #'                        sample.label=celda.CG.sim$sample.label,
@@ -530,13 +532,15 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#' @title Conditional probabilities for cells in subpopulations and features in modules from Celda_CG
+#' @description Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments as well as each feature belonging to each module given all other feature cluster assignments in a `celda_CG()` result. 
 #'
-#' @param celda.mod Celda object of class "celda_CG".
+#' @param celda.mod Celda object of class `celda_CG`.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
 #' @export
