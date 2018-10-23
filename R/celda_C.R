@@ -400,7 +400,8 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 }
 
 
-#' Calculate the celda_C log likelihood for user-provided cluster assignments
+#' @title Calculate Celda_C log likelihood
+#' @description Calculates the log likelihood for user-provided cell population clusters using the `celda_C()` model.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
@@ -409,7 +410,8 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param ... Additional parameters.
-#' @return The log-likelihood for the given cluster assignments
+#' @return Numeric. The log likelihood for the given cluster assignments
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
 #'                        sample.label=celda.C.sim$sample.label,
@@ -456,13 +458,15 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 }
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#' @title Conditional probabilities for cells in subpopulations from Celda_C
+#' @description Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments in a `celda_C()` result. 
 #'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C".
+#' @param celda.mod Celda object of class `celda_C`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @return A list containging a matrix for the conditional cell subpopulation cluster probabilities. 
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' cluster.prob = clusterProbability(celda.C.sim$counts, celda.C.mod)
 #' @export
