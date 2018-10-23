@@ -426,10 +426,8 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 }
 
 
-#' Calculate the celda_G log likelihood for user-provided cluster assignments
-#'
-#' This function calculates the log likelihood of each clustering of genes generated
-#' over multiple iterations of Gibbs sampling.
+#' @title Calculate Celda_G log likelihood
+#' @description Calculates the log likelihood for user-provided feature module clusters using the `celda_G()` model.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param y Numeric vector. Denotes feature module labels. 
@@ -440,6 +438,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @param ... Additional parameters.
 #' @keywords log likelihood
 #' @return The log-likelihood for the given cluster assignments
+#' @seealso `celda_G()` for clustering features
 #' @examples
 #' loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
 #'                        y=celda.G.sim$y, L=celda.G.sim$L,
@@ -482,13 +481,15 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 }
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#' @title Conditional probabilities for features in modules from Celda_G
+#' @description Calculates the conditional probability of each feature belonging to each module given all other feature cluster assignments in a `celda_G()` result. 
 #'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_G". 
+#' @param celda.mod Celda object of class `celda_G`. 
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @seealso `celda_G()` for clustering features
 #' @examples
 #' cluster.prob = clusterProbability(celda.G.sim$counts, celda.G.mod)
 #' @export
