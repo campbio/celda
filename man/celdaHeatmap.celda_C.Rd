@@ -2,25 +2,28 @@
 % Please edit documentation in R/celda_C.R
 \name{celdaHeatmap.celda_C}
 \alias{celdaHeatmap.celda_C}
-\title{celdaHeatmap for celda Cell clustering function}
+\title{Heatmap for celda_C}
 \usage{
 \method{celdaHeatmap}{celda_C}(counts, celda.mod, feature.ix, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_C".}
+\item{celda.mod}{Celda object of class `celda_C`.}
 
 \item{feature.ix}{Integer vector. Indices of features to plot, such the top features from a differential expression analysis.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-list A list containing dendrogram information and the heatmap grob
+list A list containing dendrograms and the heatmap grob
 }
 \description{
-celdaHeatmap for celda Cell clustering function
+Renders an expression heatmap to visualize `celda_C()` results. Features to include in the heatmap must be supplied.
 }
 \examples{
 celdaHeatmap(celda.C.sim$counts, celda.C.mod)
+}
+\seealso{
+`celda_C()` for clustering cells and `celdaTsne()` for generating 2-dimensional coordinates
 }

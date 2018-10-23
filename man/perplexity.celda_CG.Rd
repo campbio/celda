@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{perplexity.celda_CG}
 \alias{perplexity.celda_CG}
-\title{Calculate the perplexity from a single celda model}
+\title{Calculate the perplexity on new data with a celda_CG model}
 \usage{
 \method{perplexity}{celda_CG}(counts, celda.mod, new.counts = NULL)
 }
@@ -17,9 +17,11 @@
 Numeric. The perplexity for the provided count data and model.
 }
 \description{
-Perplexity can be seen as a measure of how well a provided set of 
-cluster assignments fit the data being clustered.
+Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model.
 }
 \examples{
 perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
+}
+\seealso{
+`celda_CG()` for clustering features and cells
 }
