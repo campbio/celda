@@ -1,6 +1,6 @@
-#' Feature clustering with Celda
+#' @title Feature clustering with Celda
 #'
-#' Clusters the rows of a count matrix containing single-cell data into L modules. 
+#' @description Clusters the rows of a count matrix containing single-cell data into L modules. 
 #'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param L Integer. Number of feature modules.  
@@ -11,15 +11,15 @@
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
-#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G` until the specified L is reached. Default 'random'.
+#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from `1:L`. `y.init` can only be used when `initialize = 'random'`. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
-#' @return An object of class celda_G with the feature module clusters stored in `y`.
-#' @seealso `celda_C` for cell clustering and `celda_CG` for simultaneous clustering of features and cells. `celdaGridSearch` can be used to run multiple values of L and multiple chains in parallel. 
+#' @return An object of class `celda_G` with the feature module clusters stored in `y`.
+#' @seealso `celda_C()` for cell clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of L and multiple chains in parallel. 
 #' @examples
 #' celda.mod = celda_G(celda.G.sim$counts, L=celda.G.sim$L)
 #' @export
