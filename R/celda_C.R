@@ -561,18 +561,19 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 }
 
 
-#' Embeds cells in two dimensions using tSNE based on celda_C results.
+#' @title tSNE for celda_C
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_C` model. PCA on the normalized counts is used to reduce the number of features. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C". 
+#' @param celda.mod Celda object of class `celda_C`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @seealso `celda_C()` for clustering cells and `celdaHeatmap` for displaying expression
+#' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying expression
 #' @examples
 #' tsne.res = celdaTsne(celda.C.sim$counts, celda.C.mod)
 #' @return A two column matrix of t-SNE coordinates
@@ -620,16 +621,12 @@ celdaTsne.celda_C = function(counts, celda.mod,
 
 
 
-
-#' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
-#' 
-#' It is often useful to visualize to what degree each feature influences each 
-#' cell cluster. This can also be useful for identifying features which may
-#' be redundant or unassociated with cell clustering.
+#' @title Probability map for a celda_C model
+#' @description Renders probability and relative expression heatmaps to visualize the relationship between cell populations and samples.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_CG".   
-#' @param level Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".
+#' @param celda.mod Celda object of class `celda_C`.   
+#' @param level Character. 'sample' will display the absolute probabilities and relative normalized abundance of each cell population in each sample. Default 'sample'.
 #' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
@@ -657,20 +654,18 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
   } else {
 	gridExtra::grid.arrange(g1$gtable)
   } 
-
 }
 
 
-#' Obtain the gene module of a gene of interest
-#' 
-#' This function will output the gene module of a specific gene(s) from a celda model
+#' @title Lookup the module of a feature
+#' @description Finds the module assignments of given features in a `celda_C()` model
 #'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Model of class "celda_G" or "celda_CG".
-#' @param feature Character vector. Identify feature modules for the specified feature names. 
-#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
-#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @param celda.mod Model of class `celda_C`.
+#' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE. 
+#' @return List. Each element contains the module of the provided feature.
 #' @export
 featureModuleLookup.celda_C = function(counts, celda.mod, feature, exact.match){
-  stop("Provided model does not contain feature modules.")
+  stop("Celda_C models do not contain feature modules.")
 }
