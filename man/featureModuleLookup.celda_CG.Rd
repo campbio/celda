@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{featureModuleLookup.celda_CG}
 \alias{featureModuleLookup.celda_CG}
-\title{Obtain the feature module of a feature of interest}
+\title{Lookup the module of a feature}
 \usage{
 \method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature,
   exact.match = TRUE)
@@ -10,19 +10,22 @@
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Model of class "celda_G" or "celda_CG".}
+\item{celda.mod}{Model of class `celda_CG`.}
 
-\item{feature}{Character vector. Identify feature modules for the specified feature names.}
+\item{feature}{Character vector. The module assignemnts will be found for feature names in this vector.}
 
-\item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
+\item{exact.match}{Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE.}
 }
 \value{
-List. Each entry corresponds to the feature module determined for the provided features
+List. Each element contains the module of the provided feature.
 }
 \description{
-This function will output the gene module of a specific gene(s) from a celda model
+Finds the module assignments of given features in a `celda_G()` model
 }
 \examples{
 module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
                              c("Gene_1", "Gene_XXX"))
+}
+\seealso{
+`celda_CG()` for clustering features and cells
 }
