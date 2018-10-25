@@ -14,7 +14,7 @@
 
 \item{feature}{Character vector. The module assignemnts will be found for feature names in this vector.}
 
-\item{exact.match}{Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE.}
+\item{exact.match}{Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE.}
 }
 \value{
 List. Each element contains the module of the provided feature.
