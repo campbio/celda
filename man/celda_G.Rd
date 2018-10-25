@@ -29,11 +29,11 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G` until the specified L is reached. Default 'random'.}
+\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.}
 
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
@@ -44,7 +44,7 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_G with the feature module clusters stored in `y`.
+An object of class `celda_G` with the feature module clusters stored in `y`.
 }
 \description{
 Clusters the rows of a count matrix containing single-cell data into L modules.
@@ -53,5 +53,5 @@ Clusters the rows of a count matrix containing single-cell data into L modules.
 celda.mod = celda_G(celda.G.sim$counts, L=celda.G.sim$L)
 }
 \seealso{
-`celda_C` for cell clustering and `celda_CG` for simultaneous clustering of features and cells. `celdaGridSearch` can be used to run multiple values of L and multiple chains in parallel.
+`celda_C()` for cell clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of L and multiple chains in parallel.
 }
