@@ -795,7 +795,7 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Model of class `celda_CG`.
 #' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
-#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE. 
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE. 
 #' @return List. Each element contains the module of the provided feature.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
