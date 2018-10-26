@@ -1,6 +1,5 @@
 #' @title Cell clustering with Celda
-#' 
-#' @descriptionClusters the columns of a count matrix containing single-cell data into K subpopulations. 
+#' @description Clusters the columns of a count matrix containing single-cell data into K subpopulations. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
