@@ -1,23 +1,26 @@
-#' celda Cell Clustering Model
+#' @title Cell clustering with Celda
+#' 
+#' @descriptionClusters the columns of a count matrix containing single-cell data into K subpopulations. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param K Integer. Number of cell populations. 
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.
+#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.
 #' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
-#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
+#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling or EM to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.
-#' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
-#' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells are randomly assigned to a clusters. With 'split' cell clusters will be recurssively split into two clusters using `celda_C` until the specified K is reached. Default 'random'.
 #' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.
+#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from `1:K`. 'z.init' can only be used when `initialize = 'random'`. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
-#' @return An object of class celda_C with clustering results and various sampling statistics.
+#' @return An object of class `celda_C` with the cell population clusters stored in in `z`.
+#' @seealso `celda_G()` for feature clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of K and multiple chains in parallel. 
 #' @examples
 #' celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
 #'                     sample.label=celda.C.sim$sample.label)
@@ -99,7 +102,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 	  z = next.z$z
 
 	  ## Perform split on i-th iteration of no improvement in log likelihood
-	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+	  temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
+	  if(K > 2 & (((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
 		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
@@ -247,10 +251,10 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
 
-#' Simulate cells from the cell clustering generative model
+#' @title Simulate cells from the celda_C model
 #' 
-#' This function generates a list containing a simulated counts matrix, as well as various parameters
-#' used in the simulation which can be useful for running celda. 
+#' @description Generates a simulated counts matrix, cell subpopulation clusters, and sample labels
+#' according to the generative process of the celda_C model. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param S Integer. Number of samples to simulate. Default 5.
@@ -260,9 +264,10 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param K Integer. Number of cell populations. Default 5.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @return List. Contains the simulated matrix `counts`, cell population clusters `z`, sample assignments `sample.label`, and input parameters.
+#' @seealso `celda_G()` for simulating feature modules and `celda_CG()` for simulating feature modules and cell populations. 
 #' @examples
 #' celda.c.sim = simulateCells(model="celda_C", K=10)
 #' sim.counts = celda.c.sim$counts
@@ -309,15 +314,16 @@ simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1
 }
 
 
-#' Generate factorized matrices showing each feature's influence on the celda_C model clustering 
+#' @title Matrix factorization for results from celda_C()
+#' @description Generates factorized matrices showing the contribution of each feature in each cell population or each cell population in each sample. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C".
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
 #' @examples 
-#' factorized.matrices = factorizeMatrix(celda.C.sim$counts, celda.C.mod, 
-#'                                       "posterior")
-#' @return A list of lists of the types of factorized matrices specified
+#' factorized.matrices = factorizeMatrix(celda.C.sim$counts, celda.C.mod, "posterior")
+#' @return A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module` and `sample`.
+#' @seealso `celda_C()` for clustering cells
 #' @export
 factorizeMatrix.celda_C = function(counts, celda.mod, 
                                    type=c("counts", "proportion", "posterior")) {
@@ -394,7 +400,8 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 }
 
 
-#' Calculate the celda_C log likelihood for user-provided cluster assignments
+#' @title Calculate Celda_C log likelihood
+#' @description Calculates the log likelihood for user-provided cell population clusters using the `celda_C()` model.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
@@ -403,7 +410,8 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
 #' @param ... Additional parameters.
-#' @return The log-likelihood for the given cluster assignments
+#' @return Numeric. The log likelihood for the given cluster assignments
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
 #'                        sample.label=celda.C.sim$sample.label,
@@ -450,13 +458,15 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 }
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#' @title Conditional probabilities for cells in subpopulations from a Celda_C model
+#' @description Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments in a `celda_C()` result. 
 #'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C".
+#' @param celda.mod Celda object of class `celda_C`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @return A list containging a matrix for the conditional cell subpopulation cluster probabilities. 
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' cluster.prob = clusterProbability(celda.C.sim$counts, celda.C.mod)
 #' @export
@@ -482,15 +492,14 @@ clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
   return(list(z.probability=z.prob))
 }
 
-#' Calculate the perplexity from a single celda model
-#' 
-#' Perplexity can be seen as a measure of how well a provided set of 
-#' cluster assignments fit the data being clustered.
+#' @title Calculate the perplexity on new data with a celda_C model
+#' @description Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C"
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' perplexity = perplexity(celda.C.sim$counts, celda.C.mod)
 #' @export
@@ -536,14 +545,17 @@ reorder.celda_C = function(counts, res){
 }
 
 
-#' celdaHeatmap for celda Cell clustering function 
+#' @title Heatmap for celda_C
+#' @description Renders an expression heatmap to visualize `celda_C()` results. Features to include in the heatmap must be supplied. 
+#'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C".
+#' @param celda.mod Celda object of class `celda_C`.
 #' @param feature.ix Integer vector. Indices of features to plot, such the top features from a differential expression analysis. 
 #' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells and `celdaTsne()` for generating 2-dimensional coordinates
 #' @examples 
 #' celdaHeatmap(celda.C.sim$counts, celda.C.mod)
-#' @return list A list containing dendrogram information and the heatmap grob
+#' @return list A list containing dendrograms and the heatmap grob
 #' @export
 celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
   norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
@@ -551,17 +563,19 @@ celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
 }
 
 
-#' Embeds cells in two dimensions using tSNE based on celda_C results.
+#' @title tSNE for celda_C
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_C` model. PCA on the normalized counts is used to reduce the number of features before applying tSNE. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C". 
+#' @param celda.mod Celda object of class `celda_C`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying expression
 #' @examples
 #' tsne.res = celdaTsne(celda.C.sim$counts, celda.C.mod)
 #' @return A two column matrix of t-SNE coordinates
@@ -609,17 +623,14 @@ celdaTsne.celda_C = function(counts, celda.mod,
 
 
 
-
-#' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
-#' 
-#' It is often useful to visualize to what degree each feature influences each 
-#' cell cluster. This can also be useful for identifying features which may
-#' be redundant or unassociated with cell clustering.
+#' @title Probability map for a celda_C model
+#' @description Renders probability and relative expression heatmaps to visualize the relationship between cell populations and samples.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_CG".   
-#' @param level Character. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "sample".
+#' @param celda.mod Celda object of class `celda_C`.   
+#' @param level Character. 'sample' will display the absolute probabilities and relative normalized abundance of each cell population in each sample. Default 'sample'.
 #' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells
 #' @examples
 #' celdaProbabilityMap(celda.C.sim$counts, celda.C.mod)
 #' @return A grob containing the specified plots
@@ -645,20 +656,18 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
   } else {
 	gridExtra::grid.arrange(g1$gtable)
   } 
-
 }
 
 
-#' Obtain the gene module of a gene of interest
-#' 
-#' This function will output the gene module of a specific gene(s) from a celda model
+#' @title Lookup the module of a feature
+#' @description Finds the module assignments of given features in a `celda_C()` model
 #'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Model of class "celda_G" or "celda_CG".
-#' @param feature Character vector. Identify feature modules for the specified feature names. 
-#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
-#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @param celda.mod Model of class `celda_C`.
+#' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is required to look up the feature in the rownames of the counts matrix. Default TRUE. 
+#' @return List. Each element contains the module of the provided feature.
 #' @export
 featureModuleLookup.celda_C = function(counts, celda.mod, feature, exact.match){
-  stop("Provided model does not contain feature modules.")
+  stop("Celda_C models do not contain feature modules.")
 }
