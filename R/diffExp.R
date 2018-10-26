@@ -1,22 +1,16 @@
-#' @title Feature expression markers for cell clusters using MAST
-#' @description Finds markers (differentially expressed features) for cell clusters
-#'    using MAST: a flexible statistical framework for assessing transcriptional
-#'    changes and characterizing heterogeneity in single-cell RNA sequencing data
-#'    (Finak et al, Genome Biology, 2015)
+#' @title Differential expression for cell subpopulations using MAST
+#' @description Uses MAST to find differentially expressed features for specified cell subpopulations.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". 
+#' @param celda.mod Celda object of class `celda_C` or `celda_CG`. 
 #' @param c1 Integer vector. Cell populations to include in group 1 for the differential expression analysis. 
-#' @param c2 Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, everything in c1 is compared to all other clusters. Default NULL. 
-#' @param only.pos Logical. Whether to only return markers with positive log2fc. Default FALSE.
-
-#' @param log2fc.threshold Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned.
-#' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned.
-#' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
-#'    and associated statistics (p-value, log2fc and FDR).
+#' @param c2 Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, the clusters in the c1 group are compared to all other clusters. Default NULL. 
+#' @param only.pos Logical. Whether to only return markers with positive log2 fold change. Default FALSE.
+#' @param log2fc.threshold Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned. If NULL, this filter will not be applied. Default NULL.
+#' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned. Default 1. 
+#' @return Data frame containing MAST results including statistics such as p-value, log2 fold change, and FDR.
 #' @examples
-#' cluster.diffexp.res = differentialExpression(celda.CG.sim$counts, 
-#'                                              celda.CG.mod, c1=c(1,2))
+#' cluster.diffexp.res = differentialExpression(celda.CG.sim$counts, celda.CG.mod, c1=c(1,2))
 #' @export
 #' @import data.table
 #' @import plyr

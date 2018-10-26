@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{logLikelihood.celda_CG}
 \alias{logLikelihood.celda_CG}
-\title{Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments}
+\title{Calculate Celda_CG log likelihood}
 \usage{
 logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta, delta,
   gamma)
@@ -31,10 +31,10 @@ logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta, delta,
 \item{...}{Additional parameters.}
 }
 \value{
-The log-likelihood for the given cluster assignments
+The log likelihood for the given cluster assignments
 }
 \description{
-Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
+Calculates the log likelihood for user-provided cell population and feature module clusters using the `celda_CG()` model.
 }
 \examples{
 loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
@@ -43,4 +43,7 @@ loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG",
                        K=celda.CG.sim$K, L=celda.CG.sim$L,
                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
+}
+\seealso{
+`celda_CG()` for clustering features and cells
 }
