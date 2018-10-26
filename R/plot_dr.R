@@ -40,7 +40,7 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param features Character vector. Uses these genes for plotting.
 #' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE.
-#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE. 
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".

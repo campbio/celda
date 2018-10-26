@@ -20,7 +20,7 @@ plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
 
-\item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
+\item{exact.match}{Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2).}
 
