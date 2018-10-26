@@ -1,20 +1,19 @@
-#' @title Creating a heatmap using specific feature modules
-#' @description Draws a heatmap focusing on a feature module. Both cells and features are sorted by 
-#'    their proportions of counts in a given feature module. Allows for nice visualization of 
-#'    co-expression of those genes grouped into feature modules by Celda.    
+#' @title Heatmap for feature modules
+#' @description Renders a heatmap for selected feature modules. Cells are ordered from those with the lowest probability of the module on the left to the highest probability on the right. If more than one module is used, then cells will be ordered by the probabilities of the first module only. Features are ordered from those with the highest probability in the module on the top to the lowest probability on the bottom.
+#'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_G" or "celda_CG". 
-#' @param feature.module Integer. The feature module to display.
-#' @param top.cells Integer. Number of cells with the highest and lowest probabilities for this module to plot. For example, if `top.cells` = 50, the 50 cells with the lowest probability and the 50 cells with the highest probability for that feature module will be plotted. If NULL, all cells will be plotted. Default NULL. 
+#' @param celda.mod Celda object of class `celda_G` or `celda_CG`. 
+#' @param feature.module Integer Vector. The feature module(s) to display. Multiple modules can be included in a vector. 
+#' @param top.cells Integer. Number of cells with the highest and lowest probabilities for this module to include in the heatmap. For example, if `top.cells` = 50, the 50 cells with the lowest probability and the 50 cells with the highest probability for that feature module will be included. If NULL, all cells will be plotted. Default 100. 
 #' @param top.features Integer. Plot `top.features` with the highest probability in the feature module. If NULL, plot all features in the module. Default NULL.
 #' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE. 
-#' @param scale.row Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. 'scale' will Z-score transform each row. Default 'scale'.
-#' @param show_featurenames Logical. Specifies if feature names should be shown. Default TRUE. 
-#' @return A list containing row and column dendrogram information, as well as a gtable for grob plotting
+#' @param scale.row Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. For example, `scale` will Z-score transform each row. Default `scale`.
+#' @param show_featurenames Logical. Wheter feature names should be displayed. Default TRUE. 
+#' @return A list containing row and column dendrograms as well as a gtable for grob plotting
 #' @examples
 #' moduleHeatmap(celda.CG.sim$counts, celda.CG.mod)
 #' @export 
-moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = NULL, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
+moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100, top.features = NULL, normalize = TRUE, scale.row = scale, show_featurenames = TRUE){
   #input checks
   if (is.null(counts) || !is.matrix(counts) & !is.data.frame(counts)){
     stop("'counts' should be a numeric count matrix")

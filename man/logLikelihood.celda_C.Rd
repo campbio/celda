@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_C.R
 \name{logLikelihood.celda_C}
 \alias{logLikelihood.celda_C}
-\title{Calculate the celda_C log likelihood for user-provided cluster assignments}
+\title{Calculate Celda_C log likelihood}
 \usage{
 logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 }
@@ -22,14 +22,17 @@ logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 \item{...}{Additional parameters.}
 }
 \value{
-The log-likelihood for the given cluster assignments
+Numeric. The log likelihood for the given cluster assignments
 }
 \description{
-Calculate the celda_C log likelihood for user-provided cluster assignments
+Calculates the log likelihood for user-provided cell population clusters using the `celda_C()` model.
 }
 \examples{
 loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
                        sample.label=celda.C.sim$sample.label,
                        z=celda.C.sim$z, K=celda.C.sim$K,
                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
+}
+\seealso{
+`celda_C()` for clustering cells
 }
