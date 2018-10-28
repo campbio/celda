@@ -43,7 +43,7 @@ Celda will take a matrix of counts where each row is a feature, each cell is a c
 In the function `simulateCells`, the K parameter designates the number of cell clusters, the L parameter determines the number of feature modules, the S parameter determines the number of samples in the simulated dataset, and the G parameter determines the number of features to be simulated.
 
 ```{r}
-sim_counts <- simulateCells("celda_CG", K = 5, L = 10, S = 4, G = 100)
+sim_counts <- simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 100)
 ```
 
 The `counts` variable contains the counts matrix.
