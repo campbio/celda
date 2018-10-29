@@ -209,12 +209,11 @@ distinct_colors = function(n,
   v = seq(from=value.range[2], to=value.range[1], length=num.vs)
 
   ## Create all combination of hues with saturation/value pairs
-  new.hsv = c()
-  for(i in 1:num.vs) {
-    temp = rbind(hues.hsv[1,], s[i], v[i])
-    new.hsv = cbind(new.hsv, temp)  
-  }
-
+  list <- lapply(1:num.vs, function(x){
+    rbind(hues.hsv[1,], s[x], v[x])
+  })
+  new.hsv <- do.call(cbind,list)
+  
   ## Convert to hex
   col = grDevices::hsv(new.hsv[1,], new.hsv[2,], new.hsv[3,])
   
