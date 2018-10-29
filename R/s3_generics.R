@@ -2,56 +2,6 @@
 # Generics
 ################################################################################
 
-#' Get run parameters for a celda run.
-#'
-#' @param celda.list Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.
-#' @examples 
-#' runParams(celda.CG.mod)
-#' @return A data.frame containing the run parameters used to generate the provided celda_list.
-#' @export
-runParams = function(celda.list) {
-  return(celda.list$run.params)
-}
-
-
-#' Get the complete log likelihood for a given celda model.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @return Numeric Vector. The log-likelihood of the model's cluster assignments during each iteration.
-#' @examples 
-#' complete.loglik = completeLogLikelihood(celda.CG.mod)
-#' @export
-completeLogLikelihood = function(celda.mod) {
-  return(celda.mod$completeLogLik)
-}
-
-
-#' Get the log likelihood from the final iteration of Gibbs sampling
-#' for a given celda model.
-#'
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
-#' @examples
-#' finalLogLikelihood(celda.mod = celda.CG.mod)
-#' @return The final log-likelihood determined by Gibbs sampling for this model
-#' @export
-finalLogLikelihood = function(celda.mod) {
-  return(celda.mod$finalLogLik)
-}
-
-
-#' Get the probability of the cluster assignments generated during a celda run.
-#'
-#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
-#' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
-#' @examples
-#' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
-#' @return A numeric vector of the cluster assignment probabilties
-#' @export
-clusterProbability = function(counts, celda.mod, log=FALSE) {
-  UseMethod("clusterProbability", celda.mod)
-}
-
 
 #' Render a stylable heatmap of count data based on celda clustering results.
 #'
@@ -62,9 +12,12 @@ clusterProbability = function(counts, celda.mod, log=FALSE) {
 #' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export 
-celdaHeatmap <- function(counts, celda.mod, ...) {
-  UseMethod("celdaHeatmap", celda.mod)
-}
+ssetGeneric("celdaHeatmap", 
+           signature="celda.mod",
+           function(counts, celda.mod, feature.ix, ...) {
+             standardGeneric("celdaHeatmap")
+           })
+
 
 
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
@@ -81,6 +34,7 @@ celdaHeatmap <- function(counts, celda.mod, ...) {
 #'                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
 #'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
 #' @export
+#' 
 logLikelihood = function(counts, model, ...) {
   class(counts) = c(model)
   do.call(paste("logLikelihood.", model, sep=""),
