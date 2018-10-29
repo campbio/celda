@@ -1,3 +1,30 @@
+setClass("celda_G",
+         representation(y = "numeric",
+                        L = "numeric",
+                        delta = "numeric",
+                        gamma = "numeric"),
+         contains = "celdaModel")
+setGeneric("getY",
+           function(celda.mod){ standardGeneric("getY") })
+setGeneric("getL",
+          function(celda.mod){ standardGeneric("getL") })
+setGeneric("getDelta",
+          function(celda.mod){ standardGeneric("getDelta") })
+setGeneric("getGamma",
+          function(celda.mod){ standardGeneric("getGamma") })
+setMethod("getY",
+          signature=c(celda.mod = "celda_G"),
+          function(celda.mod){ return(celda.mod@y) })
+setMethod("getL",
+          signature=c(celda.mod = "celda_G"),
+          function(celda.mod){ return(celda.mod@L) })
+setMethod("getDelta",
+          signature=c(celda.mod = "celda_G"),
+          function(celda.mod){ return(celda.mod@alpha) })
+setMethod("getGamma",
+          signature=c(celda.mod = "celda_G"),
+          function(celda.mod){ return(celda.mod@beta) })
+
 #' @title Feature clustering with Celda
 #'
 #' @description Clusters the rows of a count matrix containing single-cell data into L modules. 
