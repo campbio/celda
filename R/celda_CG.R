@@ -1,3 +1,5 @@
+setClass("celda_CG",
+         contains = c("celda_C", "celda_G"))
 #' @title Cell and feature clustering with Celda
 #' 
 #' @description Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.  

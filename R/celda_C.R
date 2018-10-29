@@ -1,3 +1,54 @@
+setClass("celda_C",
+         representation(z = "numeric",
+                        K = "numeric",
+                        alpha = "numeric",
+                        beta = "numeric"),
+         contains = "celdaModel")
+setGeneric("getZ",
+           function(celda.mod){ standardGeneric("getZ") })
+setGeneric("getK",
+          function(celda.mod){ standardGeneric("getK") })
+setGeneric("getAlpha",
+          function(celda.mod){ standardGeneric("getAlpha") })
+setGeneric("getBeta",
+          function(celda.mod){ standardGeneric("getBeta") })
+setGeneric("setZ",
+           function(celda.mod, z){ standardGeneric("setZ") })
+setGeneric("setK",
+          function(celda.mod){ standardGeneric("setK") })
+setGeneric("setAlpha",
+          function(celda.mod){ standardGeneric("setAlpha") })
+setGeneric("setBeta",
+          function(celda.mod){ standardGeneric("setBeta") })
+setMethod("getZ",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@z) })
+setMethod("getK",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@K) })
+setMethod("getAlpha",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@alpha) })
+setMethod("getBeta",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@beta) })
+setMethod("setZ",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod, z){ 
+            celda.mod@z = z
+            return(celda.mod)
+          })
+setMethod("setK",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@K) })
+setMethod("setAlpha",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@alpha) })
+setMethod("setBeta",
+          signature=c(celda.mod = "celda_C"),
+          function(celda.mod){ return(celda.mod@beta) })
+
+
 #' @title Cell clustering with Celda
 #' @description Clusters the columns of a count matrix containing single-cell data into K subpopulations. 
 #' 
@@ -329,11 +380,11 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
   counts = processCounts(counts) 
   compareCountMatrix(counts, celda.mod)
   
-  K = celda.mod$K
-  z = celda.mod$z
-  alpha = celda.mod$alpha
-  beta = celda.mod$beta
-  sample.label = celda.mod$sample.label
+  K = celda.mod@K
+  z = celda.mod@z
+  alpha = celda.mod@alpha
+  beta = celda.mod@beta
+  sample.label = celda.mod@sample.label
   s = as.integer(sample.label)
         
   p = cC.decomposeCounts(counts, s, z, K)
@@ -341,10 +392,10 @@ factorizeMatrix.celda_C = function(counts, celda.mod,
   n.G.by.CP = p$n.G.by.CP
     
   K.names = paste0("K", 1:K)
-  rownames(n.G.by.CP) = celda.mod$names$row
+  rownames(n.G.by.CP) = celda.mod@names$row
   colnames(n.G.by.CP) = K.names
   rownames(m.CP.by.S) = K.names
-  colnames(m.CP.by.S) = celda.mod$names$sample
+  colnames(m.CP.by.S) = celda.mod@names$sample
 
   counts.list = c()
   prop.list = c()
@@ -417,7 +468,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #'                        z=celda.C.sim$z, K=celda.C.sim$K,
 #'                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
 #' @export
-logLikelihood.celda_C = function(counts, sample.label, z, K, alpha, beta) {
+logLikelihood.celda_C = function(counts, model,sample.label, z, K, alpha, beta) {
   if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
   s = as.integer(sample.label)
@@ -471,13 +522,13 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 #' @export
 clusterProbability.celda_C = function(counts, celda.mod, log=FALSE, ...) {
 
-  z = celda.mod$z
-  sample.label = celda.mod$sample.label
+  z = celda.mod@z
+  sample.label = celda.mod@sample.label
   s = as.integer(sample.label)
   
-  K = celda.mod$K
-  alpha = celda.mod$alpha
-  beta = celda.mod$beta
+  K = celda.mod@K
+  alpha = celda.mod@alpha
+  beta = celda.mod@beta
   
   p = cC.decomposeCounts(counts, s, z, K)  
   
@@ -521,7 +572,7 @@ perplexity.celda_C = function(counts, celda.mod, new.counts=NULL) {
                                type="posterior")
   theta = log(factorized$posterior$sample)
   phi = log(factorized$posterior$module)
-  s = as.integer(celda.mod$sample.label)
+  s = as.integer(celda.mod@sample.label)
   
   inner.log.prob = (t(phi) %*% new.counts) + theta[, s]  
   log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
@@ -556,10 +607,12 @@ reorder.celda_C = function(counts, res){
 #' celdaHeatmap(celda.C.sim$counts, celda.C.mod)
 #' @return list A list containing dendrograms and the heatmap grob
 #' @export
-celdaHeatmap.celda_C = function(counts, celda.mod, feature.ix, ...) {
-  norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-  plotHeatmap(norm[feature.ix,], z=celda.mod$z, ...)
-}
+setMethod("celdaHeatmap", 
+          signature(celda.mod = "celda_C"),
+          function(counts, celda.mod, feature.ix, ...) {
+            norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
+            plotHeatmap(norm[feature.ix,], z=celda.mod@z, ...)
+          })
 
 
 #' @title tSNE for celda_C
@@ -584,15 +637,15 @@ celdaTsne.celda_C = function(counts, celda.mod,
 							 perplexity=20, max.iter=2500, seed=12345, ...) {
 
   ## Checking if max.cells and min.cluster.size will work
-  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod$K)) {
-    stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod$K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
+  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@K)) {
+    stop(paste0("Cannot distribute ", max.cells, " cells among ", celda.mod@K, " clusters while maintaining a minumum of ", min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
   }
   
   ## Select a subset of cells to sample if greater than 'max.cells'
   total.cells.to.remove = ncol(counts) - max.cells
   z.include = rep(TRUE, ncol(counts))
   if(total.cells.to.remove > 0) {
-	z.ta = tabulate(celda.mod$z, celda.mod$K)
+	z.ta = tabulate(celda.mod@z, celda.mod@K)
 	
 	## Number of cells that can be sampled from each cluster without going below the minimum threshold
 	cluster.cells.to.sample = z.ta - min.cluster.size          
@@ -606,7 +659,7 @@ celdaTsne.celda_C = function(counts, celda.mod,
 
 	## Perform sampling for each cluster
 	for(i in which(cluster.n.to.sample > 0)) {
-	  z.include[sample(which(celda.mod$z == i), cluster.n.to.sample[i])] = FALSE
+	  z.include[sample(which(celda.mod@z == i), cluster.n.to.sample[i])] = FALSE
 	}
   }   
   cell.ix = which(z.include)
@@ -638,7 +691,7 @@ celdaProbabilityMap.celda_C <- function(counts, celda.mod, level=c("sample"), ..
   counts = processCounts(counts)
   compareCountMatrix(counts, celda.mod)
   
-  z.include = which(tabulate(celda.mod$z, celda.mod$K) > 0)
+  z.include = which(tabulate(celda.mod@z, celda.mod@K) > 0)
   
   level = match.arg(level)
   factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
