@@ -15,7 +15,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
   clust.split = vector("list", K)
   for(i in z.to.split) { 
     clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-    clust.split[[i]] = clustLabel$z
+    clust.split[[i]] = clustLabel@z
   }
 
   ## Find second best assignment give current assignments for each cell
