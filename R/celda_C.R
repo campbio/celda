@@ -1,54 +1,3 @@
-setClass("celda_C",
-         representation(z = "numeric",
-                        K = "numeric",
-                        alpha = "numeric",
-                        beta = "numeric"),
-         contains = "celdaModel")
-setGeneric("getZ",
-           function(celda.mod){ standardGeneric("getZ") })
-setGeneric("getK",
-          function(celda.mod){ standardGeneric("getK") })
-setGeneric("getAlpha",
-          function(celda.mod){ standardGeneric("getAlpha") })
-setGeneric("getBeta",
-          function(celda.mod){ standardGeneric("getBeta") })
-setGeneric("setZ",
-           function(celda.mod, z){ standardGeneric("setZ") })
-setGeneric("setK",
-          function(celda.mod){ standardGeneric("setK") })
-setGeneric("setAlpha",
-          function(celda.mod){ standardGeneric("setAlpha") })
-setGeneric("setBeta",
-          function(celda.mod){ standardGeneric("setBeta") })
-setMethod("getZ",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@z) })
-setMethod("getK",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@K) })
-setMethod("getAlpha",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@alpha) })
-setMethod("getBeta",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@beta) })
-setMethod("setZ",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod, z){ 
-            celda.mod@z = z
-            return(celda.mod)
-          })
-setMethod("setK",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@K) })
-setMethod("setAlpha",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@alpha) })
-setMethod("setBeta",
-          signature=c(celda.mod = "celda_C"),
-          function(celda.mod){ return(celda.mod@beta) })
-
-
 #' @title Cell clustering with Celda
 #' @description Clusters the columns of a count matrix containing single-cell data into K subpopulations. 
 #' 
@@ -193,12 +142,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 	names = list(row=rownames(counts), column=colnames(counts), sample=levels(sample.label))
 
 	result = list(z=z.best, completeLogLik=ll,  
-				  finalLogLik=ll.best, seed=current.seed, K=K, 
-				  sample.label=sample.label, alpha=alpha, 
-				  beta=beta, count.checksum=count.checksum, 
-				  names=names)
-  
-	class(result) = "celda_C"
+      				  finalLogLik=ll.best, seed=current.seed, K=K, 
+      				  sample.label=sample.label, alpha=alpha, 
+      				  beta=beta, count.checksum=count.checksum)
 	
     if(is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
       best.result = result
@@ -214,7 +160,10 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   logMessages("Completed Celda_C. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
 
-  return(best.result)
+  return(new("celda_C", z=best.result$z, completeLogLik=best.result$completeLogLik,
+             finalLogLik=best.result$finalLogLik, seed=best.result$seed,
+             K=best.result$K, sample.label=best.result$sample.label, alpha=best.result$alpha, 
+             beta=best.result$beta, count.checksum=best.result$count.checksum))
 }
 
 
