@@ -427,18 +427,17 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #'                        z=celda.C.sim$z, K=celda.C.sim$K,
 #'                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
 #' @export
-setMethod("logLikelihood", 
-          signature(model = "celda_C"),
-          function(counts, model, sample.label, z, K, alpha, beta) {
-            if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
-            sample.label = processSampleLabels(sample.label, ncol(counts))
-            s = as.integer(sample.label)
-            p = cC.decomposeCounts(counts, s, z, K)  
-            final = cC.calcLL(m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, 
-                              s=s, z=z, K=K, nS=p$nS, nG=p$nG, alpha=alpha,
-                              beta=beta)
-            return(final)
-         })
+logLikelihood.celda_C = function(counts, model, sample.label, z, K, 
+                                 alpha, beta) {
+  if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
+  sample.label = processSampleLabels(sample.label, ncol(counts))
+  s = as.integer(sample.label)
+  p = cC.decomposeCounts(counts, s, z, K)  
+  final = cC.calcLL(m.CP.by.S=p$m.CP.by.S, n.G.by.CP=p$n.G.by.CP, 
+                    s=s, z=z, K=K, nS=p$nS, nG=p$nG, alpha=alpha,
+                    beta=beta)
+  return(final)
+}
 
 
 # Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
@@ -485,7 +484,7 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 #' @export
 setMethod("clusterProbability", 
           signature(celda.mod = "celda_C"),
-          function(counts, celda.mod, log=FALSE) {
+          function(counts, celda.mod, log=FALSE, ...) {
             z = celda.mod@z
             sample.label = celda.mod@sample.label
             s = as.integer(sample.label)
