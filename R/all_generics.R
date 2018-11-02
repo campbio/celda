@@ -152,6 +152,7 @@ setReplaceMethod("sample.label", "celdaModel",
 setClass("celda_G",
          representation(y = "numeric",
                         L = "numeric",
+                        beta = "numeric",
                         delta = "numeric",
                         gamma = "numeric"),
          contains = "celdaModel")
@@ -234,7 +235,6 @@ setGeneric("celdaHeatmap",
            })
 
 
-
 #' Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model. 
 #' 
 #' @param counts The counts matrix used to generate the provided cluster assignments.
@@ -250,11 +250,11 @@ setGeneric("celdaHeatmap",
 #'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
 #' @export
 #' 
-setGeneric("logLikelihood", 
-           signature="model",
-           function(counts, model, ...) {
-             standardGeneric("logLikelihood")
-           })
+#' 
+logLikelihood = function(counts, model, ...) {
+  do.call(paste0("logLikelihood.", as.character(class(model))), 
+          args=list(counts, model, ...))
+}
 
 
 #' Get the probability of the cluster assignments generated during a celda run.
@@ -268,7 +268,7 @@ setGeneric("logLikelihood",
 #' @export
 setGeneric("clusterProbability", 
            signature="celda.mod",
-           function(counts, celda.mod, log=FALSE) {
+           function(counts, celda.mod, log=FALSE, modules=NULL, ...) {
              standardGeneric("clusterProbability")
            })
 
