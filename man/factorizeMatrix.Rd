@@ -4,7 +4,8 @@
 \alias{factorizeMatrix}
 \title{Generate factorized matrices showing each feature's influence on cell / gene clustering}
 \usage{
-factorizeMatrix(counts, celda.mod, type)
+factorizeMatrix(counts, celda.mod, type = c("counts", "proportion",
+  "posterior"))
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
