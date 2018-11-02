@@ -4,7 +4,7 @@
 \alias{factorizeMatrix.celda_CG}
 \title{Matrix factorization for results from celda_CG}
 \usage{
-\method{factorizeMatrix}{celda_CG}(counts, celda.mod, type = c("counts",
+factorizeMatrix.celda_CG(counts, celda.mod, type = c("counts",
   "proportion", "posterior"))
 }
 \arguments{

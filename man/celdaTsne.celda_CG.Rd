@@ -4,7 +4,7 @@
 \alias{celdaTsne.celda_CG}
 \title{tSNE for celda_CG}
 \usage{
-\method{celdaTsne}{celda_CG}(counts, celda.mod, max.cells = 25000,
+celdaTsne.celda_CG(counts, celda.mod, max.cells = 25000,
   min.cluster.size = 100, modules = NULL, perplexity = 20,
   max.iter = 2500, seed = 12345, ...)
 }

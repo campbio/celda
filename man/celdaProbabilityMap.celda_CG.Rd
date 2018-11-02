@@ -4,7 +4,7 @@
 \alias{celdaProbabilityMap.celda_CG}
 \title{Probability map for a celda_CG model}
 \usage{
-\method{celdaProbabilityMap}{celda_CG}(counts, celda.mod,
+celdaProbabilityMap.celda_CG(counts, celda.mod,
   level = c("cell.population", "sample"), ...)
 }
 \arguments{
