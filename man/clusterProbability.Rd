@@ -4,7 +4,7 @@
 \alias{clusterProbability}
 \title{Get the probability of the cluster assignments generated during a celda run.}
 \usage{
-clusterProbability(counts, celda.mod, log = FALSE)
+clusterProbability(counts, celda.mod, log = FALSE, modules = NULL, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
