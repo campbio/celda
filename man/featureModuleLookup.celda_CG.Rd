@@ -4,7 +4,7 @@
 \alias{featureModuleLookup.celda_CG}
 \title{Lookup the module of a feature}
 \usage{
-\method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature,
+featureModuleLookup.celda_CG(counts, celda.mod, feature,
   exact.match = TRUE)
 }
 \arguments{

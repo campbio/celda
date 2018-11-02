@@ -2,7 +2,8 @@ setClass("celdaModel",
          representation(completeLogLik = "numeric", 
                         finalLogLik = "numeric",
                         seed = "numeric", 
-                        count.checksum = "character"))
+                        count.checksum = "character",
+                        names = "list"))
 
 setGeneric("completeLogLik",
            function(celda.mod){ standardGeneric("completeLogLik") })
@@ -56,6 +57,18 @@ setReplaceMethod("countChecksum", "celdaModel",
                    celda.mod
                  })
 
+setGeneric("matrixNames",
+           function(celda.mod){ standardGeneric("matrixNames") })
+setGeneric("matrixNames<-",
+           function(celda.mod, value){ standardGeneric("matrixNames<-") })
+setMethod("matrixNames",
+           signature=c(celda.mod="celdaModel"),
+           function(celda.mod){  celda.mod@names  })
+setReplaceMethod("matrixNames", "celdaModel",
+                 function(celda.mod, value){
+                   celda.mod@names = value
+                   celda.mod
+                 })
 
 
 setClass("celdaList",
@@ -237,11 +250,46 @@ setGeneric("celdaHeatmap",
 #'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
 #' @export
 #' 
-logLikelihood = function(counts, model, ...) {
-  class(counts) = c(model)
-  do.call(paste("logLikelihood.", model, sep=""),
-          list(counts, ...))
-}
+setGeneric("logLikelihood", 
+           signature="model",
+           function(counts, model, ...) {
+             standardGeneric("logLikelihood")
+           })
+
+
+#' Get the probability of the cluster assignments generated during a celda run.
+#'
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
+#' @examples
+#' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
+#' @return A numeric vector of the cluster assignment probabilties
+#' @export
+setGeneric("clusterProbability", 
+           signature="celda.mod",
+           function(counts, celda.mod, log=FALSE) {
+             standardGeneric("clusterProbability")
+           })
+
+
+#' Calculate the perplexity from a single celda model
+#' 
+#' Perplexity can be seen as a measure of how well a provided set of 
+#' cluster assignments fit the data being clustered.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
+#' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
+#' @return Numeric. The perplexity for the provided count data and model.
+#' @examples
+#' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
+#' @export
+setGeneric("perplexity",
+           signature="celda.mod",
+           function(counts, celda.mod, new.counts=NULL) {
+             standardGeneric("perplexity")
+           })
 
 
 #' Simulate count data from the celda generative models.
@@ -258,8 +306,7 @@ logLikelihood = function(counts, model, ...) {
 #' dim(celda.CG.sim$counts)
 #' @export
 simulateCells = function(model, ...) {
-  class(model) = c(class(model), model)
-  UseMethod("simulateCells", model)
+  do.call(paste0("simulateCells.", model), args=list(...))
 }
 
 
@@ -273,10 +320,12 @@ simulateCells = function(model, ...) {
 #'                                       "posterior")
 #' @return A list of lists of the types of factorized matrices specified
 #' @export
-factorizeMatrix = function(counts, celda.mod, type) {
-  
-  UseMethod("factorizeMatrix", celda.mod)
-}
+setGeneric("factorizeMatrix",
+           signature = "celda.mod",
+           function(counts, celda.mod,  
+                    type=c("counts", "proportion", "posterior")){ 
+             standardGeneric("factorizeMatrix") 
+           })
 
 #' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
 #' 
@@ -291,9 +340,12 @@ factorizeMatrix = function(counts, celda.mod, type) {
 #' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
 #' @export
-celdaProbabilityMap = function(counts, celda.mod, ...) {
-  UseMethod("celdaProbabilityMap", celda.mod)
-}
+setGeneric("celdaProbabilityMap",
+           signature="celda.mod",
+           function(counts, celda.mod, ...) {
+             standardGeneric("celdaProbabilityMap")
+           })
+
 
 #' Embeds cells in two dimensions using tSNE based on celda_CG results.
 #' 
@@ -304,14 +356,16 @@ celdaProbabilityMap = function(counts, celda.mod, ...) {
 #' @examples 
 #' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 #' @export
-celdaTsne = function(counts, celda.mod, ...) {
-  counts = processCounts(counts)
-  compareCountMatrix(counts, celda.mod)
-  if (!isTRUE(class(celda.mod) %in% c("celda_CG","celda_C","celda_G"))) {
-    stop("celda.mod argument is not of class celda_C, celda_G or celda_CG")
-  }
-  UseMethod("celdaTsne", celda.mod)
-}
+setGeneric("celdaTsne",
+           signature = "celda.mod",
+           function(counts, celda.mod, max.cells=25000, min.cluster.size=100, 
+                    initial.dims=20, perplexity=20, max.iter=2500, seed=12345, 
+                    ...) {
+             # counts = processCounts(counts)
+             # compareCountMatrix(counts, celda.mod)
+             standardGeneric("celdaTsne")
+           })
+
 
 #' Obtain the gene module of a gene of interest
 #' 
@@ -326,7 +380,8 @@ celdaTsne = function(counts, celda.mod, ...) {
 #' featureModuleLookup(counts = celda.CG.sim$counts, 
 #'                     celda.mod = celda.CG.mod, "Gene_1")
 #' @export
-featureModuleLookup = function(counts, celda.mod, feature, exact.match = TRUE){
-  class(celda.mod) = c(class(celda.mod), celda.mod)
-  UseMethod("featureModuleLookup", celda.mod)
-}
+setGeneric("featureModuleLookup",
+           signature = "celda.mod",
+           function(counts, celda.mod, feature, exact.match = TRUE){
+             standardGeneric("featureModuleLookup")
+           })

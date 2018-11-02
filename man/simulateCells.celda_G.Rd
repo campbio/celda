@@ -4,7 +4,7 @@
 \alias{simulateCells.celda_G}
 \title{Simulate cells from the celda_G model}
 \usage{
-\method{simulateCells}{celda_G}(model, C = 100, N.Range = c(500, 1000),
+simulateCells.celda_G(model, C = 100, N.Range = c(500, 1000),
   G = 100, L = 10, beta = 1, gamma = 5, delta = 1,
   seed = 12345, ...)
 }

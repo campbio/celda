@@ -4,7 +4,7 @@
 \alias{perplexity.celda_CG}
 \title{Calculate the perplexity on new data with a celda_CG model}
 \usage{
-\method{perplexity}{celda_CG}(counts, celda.mod, new.counts = NULL)
+perplexity.celda_CG(counts, celda.mod, new.counts = NULL)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
