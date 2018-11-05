@@ -71,12 +71,6 @@ setReplaceMethod("matrixNames", "celdaModel",
                  })
 
 
-setClass("celdaList",
-         representation(runParams = "data.frame",
-                        res.list = "list",
-                        count.checksum = "numeric"))
-
-
 setClass("celda_C",
          representation(z = "numeric",
                         K = "numeric",
@@ -211,7 +205,59 @@ setClass("celda_CG",
          contains = c("celda_C", "celda_G"))
 
 
-
+setClass("celdaList",
+         representation(run.params = "data.frame",
+                        res.list = "list",
+                        count.checksum = "character",
+                        perplexity = "matrix"))
+setGeneric("run.params",
+           function(celda.mod){ standardGeneric("run.params") })
+setGeneric("run.params<-",
+           function(celda.mod, value){ standardGeneric("run.params<-") })
+setMethod("run.params",
+           signature=c(celda.mod="celdaList"),
+           function(celda.mod){  celda.mod@run.params  })
+setReplaceMethod("run.params", "celdaModel",
+                 function(celda.mod, value){
+                   celda.mod@run.params = value
+                   celda.mod
+                 })
+setGeneric("res.list",
+           function(celda.mod){ standardGeneric("res.list") })
+setGeneric("res.list<-",
+           function(celda.mod, value){ standardGeneric("res.list<-") })
+setMethod("res.list",
+           signature=c(celda.mod="celdaList"),
+           function(celda.mod){  celda.mod@res.list  })
+setReplaceMethod("res.list", "celdaModel",
+                 function(celda.mod, value){
+                   celda.mod@res.list = value
+                   celda.mod
+                 })
+setGeneric("count.checksum",
+           function(celda.mod){ standardGeneric("count.checksum") })
+setGeneric("count.checksum<-",
+           function(celda.mod, value){ standardGeneric("count.checksum<-") })
+setMethod("count.checksum",
+           signature=c(celda.mod="celdaList"),
+           function(celda.mod){  celda.mod@count.checksum  })
+setReplaceMethod("count.checksum", "celdaModel",
+                 function(celda.mod, value){
+                   celda.mod@count.checksum = value
+                   celda.mod
+                 })
+setGeneric("getPerplexity",
+           function(celda.mod){ standardGeneric("getPerplexity") })
+setGeneric("setPerplexity<-",
+           function(celda.mod, value){ standardGeneric("setPerplexity<-") })
+setMethod("getPerplexity",
+           signature=c(celda.mod="celdaList"),
+           function(celda.mod){  celda.mod@getPerplexity  })
+setReplaceMethod("setPerplexity", "celdaModel",
+                 function(celda.mod, value){
+                   celda.mod@perplexity = value
+                   celda.mod
+                 })
 
 
 ################################################################################
@@ -252,8 +298,8 @@ setGeneric("celdaHeatmap",
 #' 
 #' 
 logLikelihood = function(counts, model, ...) {
-  do.call(paste0("logLikelihood.", as.character(class(model))), 
-          args=list(counts, model, ...))
+  do.call(paste0("logLikelihood.", model), 
+          args=list(counts=counts, ...))
 }
 
 
@@ -358,9 +404,9 @@ setGeneric("celdaProbabilityMap",
 #' @export
 setGeneric("celdaTsne",
            signature = "celda.mod",
-           function(counts, celda.mod, max.cells=25000, min.cluster.size=100, 
-                    initial.dims=20, perplexity=20, max.iter=2500, seed=12345, 
-                    ...) {
+           function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                    initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
+                    seed=12345, ...) {
              # counts = processCounts(counts)
              # compareCountMatrix(counts, celda.mod)
              standardGeneric("celdaTsne")

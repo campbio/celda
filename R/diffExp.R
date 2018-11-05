@@ -18,7 +18,7 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   if (!is.matrix(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
-  if (!class(celda.mod) %in% c("celda_C", "celda_CG") || is.null(celda.mod$z)){
+  if (!(is(celda.mod, "celda_C") || is(celda.mod, "celda_CG")) || is.null(celda.mod@z)){
     stop("'celda.mod' should be an object of class celda_C or celda_CG")
   }
   if (is.null(c1)) {
@@ -27,21 +27,21 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   compareCountMatrix(counts, celda.mod)
   
   if (is.null(c2)){
-    c2 <- sort(setdiff(unique(celda.mod$z),c1))
+    c2 <- sort(setdiff(unique(celda.mod@z),c1))
   }
   if (length(c1) > 1){
     cells1 <-
-      celda.mod$names$column[which(celda.mod$z %in% c1)]
+      celda.mod@names$column[which(celda.mod@z %in% c1)]
   }else{
     cells1 <-
-      celda.mod$names$column[which(celda.mod$z == c1)]
+      celda.mod@names$column[which(celda.mod@z == c1)]
   }
   if (length(c2) > 1){
     cells2 <-
-      celda.mod$names$column[which(celda.mod$z %in% c2)]
+      celda.mod@names$column[which(celda.mod@z %in% c2)]
   }else{
     cells2 <-
-      celda.mod$names$column[which(celda.mod$z == c2)]
+      celda.mod@names$column[which(celda.mod@z == c2)]
   }
   mat <- counts[,c(cells1,cells2)]
   log_normalized_mat <- normalizeCounts(mat, normalize="cpm", transformation.fun=log1p)
