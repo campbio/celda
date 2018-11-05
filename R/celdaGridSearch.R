@@ -81,7 +81,9 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)   
   i = NULL  # Setting visible binding for R CMD CHECK
-  res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
+  #res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
+  #res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
+  res.list = sapply(1:nrow(run.params), function(i) {
     
     ## Set up chain parameter list
     current.run = c(run.params[i,])
@@ -100,15 +102,14 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     ## Run model
     res = do.call(model, c(chain.params, params.fixed))
     return(list(res))
-  }
+  })
   parallel::stopCluster(cl)  
   
-  logliks = sapply(res.list, function(mod) { mod[["finalLogLik"]] })
+  logliks = sapply(res.list, function(mod) { mod@finalLogLik })
   run.params = cbind(run.params, log_likelihood=logliks)
     
-  celda.res = list(run.params=run.params, res.list=res.list, 
-                   content.type=model, count.checksum=count.checksum)
-  class(celda.res) = c("celda_list", model)
+  celda.res = new("celdaList", run.params=run.params, res.list=res.list, 
+                  count.checksum=count.checksum)
   
   if (isTRUE(best.only)) {
     celda.res = selectBestModel(celda.res) 
@@ -137,31 +138,31 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' res.K5.L10 = subsetCeldaList(celda.CG.grid.search.res, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
-  if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
+  if (!is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
 
   ## Check for bad parameter names
-  if(!all(names(params) %in% colnames(celda.list$run.params))) {
-	bad.params = setdiff(names(params), colnames(celda.list$run.params))
-	stop(paste0("The following elements in 'params' are not columns in celda.list$run.params: ", paste(bad.params, collapse=",")))
+  if(!all(names(params) %in% colnames(celda.list@run.params))) {
+	bad.params = setdiff(names(params), colnames(celda.list@run.params))
+	stop(paste0("The following elements in 'params' are not columns in run.params(celdaList)", paste(bad.params, collapse=",")))
   }
   
   ## Subset 'run.params' based on items in 'params'
-  new.run.params = celda.list$run.params
+  new.run.params = celda.list@run.params
   for(i in names(params)) {
 	new.run.params = subset(new.run.params, new.run.params[,i] %in% params[[i]])
 	
 	if(nrow(new.run.params) == 0) {
-	  stop("No runs matched the criteria given in 'params'. Check 'celda.list$run.params' for complete list of parameters used to generate 'celda.list'.")
+	  stop("No runs matched the criteria given in 'params'. Check 'run.params(celda.list)' for complete list of parameters used to generate 'celda.list'.")
 	}
   }
   
   ## Get index of selected models, subset celda.list, and return
-  ix = match(new.run.params$index, celda.list$run.params$index)
+  ix = match(new.run.params$index, celda.list@run.params$index)
   if(length(ix) == 1) {
-	return(celda.list$res.list[[ix]])
+	return(celda.list@res.list[[ix]])
   } else {
-	celda.list$run.params = as.data.frame(new.run.params)
-	celda.list$res.list = celda.list$res.list[ix]
+	celda.list@run.params = as.data.frame(new.run.params)
+	celda.list@res.list = celda.list@res.list[ix]
 	return(celda.list)
   }
 }
@@ -178,20 +179,20 @@ subsetCeldaList = function(celda.list, params) {
 #' @import data.table
 #' @export
 selectBestModel = function(celda.list) {
-  if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
+  if (!is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
  
   log_likelihood = NULL
-  group = setdiff(colnames(celda.list$run.params), c("index", "chain", "log_likelihood"))
-  dt = data.table::as.data.table(celda.list$run.params)
+  group = setdiff(colnames(celda.list@run.params), c("index", "chain", "log_likelihood"))
+  dt = data.table::as.data.table(celda.list@run.params)
   new.run.params = as.data.frame(dt[,.SD[which.max(log_likelihood)], by=group])
-  new.run.params = new.run.params[,colnames(celda.list$run.params)]
+  new.run.params = new.run.params[,colnames(celda.list@run.params)]
   
-  ix = match(new.run.params$index, celda.list$run.params$index)
+  ix = match(new.run.params$index, celda.list@run.params$index)
   if(nrow(new.run.params) == 1) {
-    return(celda.list$res.list[[ix]])
+    return(celda.list@res.list[[ix]])
   } else {
-    celda.list$run.params = as.data.frame(new.run.params)
-    celda.list$res.list = celda.list$res.list[ix]
+    celda.list@run.params = as.data.frame(new.run.params)
+    celda.list@res.list = celda.list@res.list[ix]
     return(celda.list)
   }
 }

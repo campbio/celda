@@ -308,14 +308,12 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
   ## Peform reordering on final Z and Y assigments:
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
-  result = list(y=y, completeLogLik=NULL, 
-                finalLogLik=NULL, L=L, 
-                beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                names=names, count.checksum=digest::digest(cell.counts, algo="md5"))
-  class(result) = "celda_G" 
+  result = new("celda_G", y=y, L=L, beta=beta, delta=delta, gamma=gamma, 
+               seed=seed,  names=names, 
+               count.checksum=digest::digest(cell.counts, algo="md5"))
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
-  return(new("celda_G", y=result$y, counts=processCounts(cell.counts), L=L, 
+  return(list(y=result@y, counts=processCounts(cell.counts), L=L, 
               beta=beta, delta=delta, gamma=gamma, seed=seed))
 }
 
@@ -605,7 +603,7 @@ setMethod("celdaHeatmap",
             top = topRank(fm$proportions$module, n=nfeatures)
             ix = unlist(top$index)
             norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-            plotHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
+            plotHeatmap(norm[ix,], y=celda.mod@y[ix], ...)
           })
 
 #' @title tSNE for celda_G
@@ -626,8 +624,9 @@ setMethod("celdaHeatmap",
 #' @export
 setMethod("celdaTsne",
           signature(celda.mod = "celda_G"),
-          function(counts, celda.mod, max.cells=10000, modules=NULL, 
-                   perplexity=20, max.iter=2500, seed=12345, ...) {
+          function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                    initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
+                    seed=12345, ...) {
   
             if(max.cells > ncol(counts)) {
               max.cells = ncol(counts)
