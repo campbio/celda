@@ -132,8 +132,12 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 	  if(((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll)) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0))) {
 		if(K > 2 & isTRUE(do.cell.split)) {
-		  logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
+		  logMessages(date(), " .... Determining if any cell clusters should be split.", 
+		              logfile=logfile, append=TRUE, sep="", verbose=verbose)
+		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
+		                   nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, 
+		                   gamma, z.prob=t(next.z$probs),  max.clusters.to.try=K, 
+		                   min.cell=3)
 		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		  # Reset convergence counter if a split occured
@@ -208,6 +212,11 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   } 
   
   ## Peform reordering on final Z and Y assigments:
+  best.result = new("celda_CG", z=z.best, y=y.best, completeLogLik=ll, 
+      				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
+      				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
+      				  sample.label=sample.label, names=names,
+      				  count.checksum=count.checksum)
   best.result = reorder.celda_CG(counts = counts, res = best.result)
   
   end.time = Sys.time()
@@ -311,16 +320,17 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
-  result = list(z=z, y=y, completeLogLik=NULL, 
-                finalLogLik=NULL, K=K, L=L, alpha=alpha, 
-                beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                sample.label=cell.sample.label, names=names,
-                count.checksum=digest::digest(cell.counts, algo="md5"))
-  class(result) = "celda_CG" 
+  result = new("celda_CG", z=z, y=y, K=K, L=L, alpha=alpha, 
+               beta=beta, delta=delta, gamma=gamma, seed=seed, 
+               sample.label=cell.sample.label, names=names,
+               count.checksum=digest::digest(cell.counts, algo="md5"))
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
-  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, seed=seed))
+  return(list(z=result@z, y=result@y, sample.label=cell.sample.label, 
+              counts=cell.counts, K=K, L=L, C.Range=C.Range, 
+              N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, 
+              delta=delta, seed=seed))
 }
 
 
@@ -342,15 +352,15 @@ setMethod("factorizeMatrix",
             counts = processCounts(counts)
             compareCountMatrix(counts, celda.mod)
             
-            K = celda.mod$K
-            L = celda.mod$L
-            z = celda.mod$z
-            y = celda.mod$y
-            alpha = celda.mod$alpha
-            beta = celda.mod$beta
-            delta = celda.mod$delta
-            gamma = celda.mod$gamma
-            sample.label = celda.mod$sample.label
+            K = celda.mod@K
+            L = celda.mod@L
+            z = celda.mod@z
+            y = celda.mod@y
+            alpha = celda.mod@alpha
+            beta = celda.mod@beta
+            delta = celda.mod@delta
+            gamma = celda.mod@gamma
+            sample.label = celda.mod@sample.label
             s = as.integer(sample.label)
             
             ## Calculate counts one time up front
@@ -372,12 +382,12 @@ setMethod("factorizeMatrix",
           
             L.names = paste0("L", 1:L)
             K.names = paste0("K", 1:K)
-            colnames(n.TS.by.C) = celda.mod$names$column
+            colnames(n.TS.by.C) = celda.mod@names$column
             rownames(n.TS.by.C) = L.names
             colnames(n.G.by.TS) = L.names
-            rownames(n.G.by.TS) = celda.mod$names$row
+            rownames(n.G.by.TS) = celda.mod@names$row
             rownames(m.CP.by.S) = K.names
-            colnames(m.CP.by.S) = celda.mod$names$sample
+            colnames(m.CP.by.S) = celda.mod@names$sample
             colnames(n.TS.by.CP) = K.names
             rownames(n.TS.by.CP) = L.names
           
@@ -636,10 +646,10 @@ setMethod("perplexity",
 
 reorder.celda_CG = function(counts, res){
   # Reorder K
-  if(res$K > 2 & isTRUE(length(unique(res$z)) > 1)) {
-    res$z = as.integer(as.factor(res$z))
+  if(res@K > 2 & isTRUE(length(unique(res@z)) > 1)) {
+    res@z = as.integer(as.factor(res@z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.z = sort(unique(res$z))
+    unique.z = sort(unique(res@z))
     d <- cosineDist(fm$posterior$cell.population[,unique.z])
     h <- stats::hclust(d, method = "complete")
     
@@ -647,10 +657,10 @@ reorder.celda_CG = function(counts, res){
   }  
   
   # Reorder L
-  if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
-    res$y = as.integer(as.factor(res$y))
+  if(res@L > 2 & isTRUE(length(unique(res@y)) > 1)) {
+    res@y = as.integer(as.factor(res@y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.y = sort(unique(res$y))
+    unique.y = sort(unique(res@y))
     cs <- prop.table(t(fm$posterior$cell.population[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- stats::hclust(d, method = "complete")
@@ -680,7 +690,7 @@ setMethod("celdaHeatmap",
             top = celda::topRank(fm$proportions$module, n=nfeatures)
             ix = unlist(top$index)
             norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-            plotHeatmap(norm[ix,], z=celda.mod$z, y=celda.mod$y[ix], ...)
+            plotHeatmap(norm[ix,], z=celda.mod@z, y=celda.mod@y[ix], ...)
           })
 
 
@@ -704,12 +714,13 @@ setMethod("celdaHeatmap",
 setMethod("celdaTsne",
           signature(celda.mod = "celda_CG"),
           function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
-                   modules=NULL, perplexity=20, max.iter=2500, seed=12345, ...){
+                     initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
+                     seed=12345, ...) {
 
             ## Checking if max.cells and min.cluster.size will work
-            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod$K)) {
+            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@K)) {
               stop(paste0("Cannot distribute ", max.cells, " cells among ",
-                          celda.mod$K, " clusters while maintaining a minumum of ", 
+                          celda.mod@K, " clusters while maintaining a minumum of ", 
                           min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
             }
             
@@ -729,7 +740,7 @@ setMethod("celdaTsne",
             total.cells.to.remove = ncol(counts) - max.cells
             z.include = rep(TRUE, ncol(counts))
             if(total.cells.to.remove > 0) {
-            	z.ta = tabulate(celda.mod$z, celda.mod$K)
+            	z.ta = tabulate(celda.mod@z, celda.mod@K)
             	
             	## Number of cells that can be sampled from each cluster without 
             	## going below the minimum threshold
@@ -745,7 +756,7 @@ setMethod("celdaTsne",
             
             	## Perform sampling for each cluster
             	for(i in which(cluster.n.to.sample > 0)) {
-            	  z.include[sample(which(celda.mod$z == i), cluster.n.to.sample[i])] = FALSE
+            	  z.include[sample(which(celda.mod@z == i), cluster.n.to.sample[i])] = FALSE
             	}
             }   
             cell.ix = which(z.include)
@@ -783,8 +794,8 @@ setMethod("celdaProbabilityMap",
             
             level = match.arg(level)
             factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
-            z.include = which(tabulate(celda.mod$z, celda.mod$K) > 0)
-            y.include = which(tabulate(celda.mod$y, celda.mod$L) > 0)    
+            z.include = which(tabulate(celda.mod@z, celda.mod@K) > 0)
+            y.include = which(tabulate(celda.mod@y, celda.mod@L) > 0)    
           
             if(level == "cell.population") {
               pop <- factorized$proportions$cell.population[y.include,z.include,drop=FALSE]
@@ -843,7 +854,7 @@ setMethod("featureModuleLookup",
             }
             for(x in 1:length(feature)){
               if(feature[x] %in% rownames(counts)){
-                list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
+                list[x] <- celda.mod@y[which(rownames(counts) == feature[x])]
               }else{
                 list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
               }
