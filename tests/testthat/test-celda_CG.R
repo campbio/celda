@@ -16,8 +16,8 @@ test_that(desc = "Testing simulation and celda_CG model", {
   expect_true(all(sweep(factorized$counts$cell, 2, colSums(celdaCG.sim$counts), "/") == factorized$proportions$cell))
   expect_equal(celdaCG.sim$K, ncol(factorized$proportions$cell.population))
   expect_equal(celdaCG.sim$L, nrow(factorized$proportions$cell.population))   
-  expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_CG))))
-  expect_equal(max(completeLogLikelihood(celda.mod = model_CG)), finalLogLikelihood(model_CG))
+  expect_true(all(is.numeric(completeLogLik(celda.mod = model_CG))))
+  expect_equal(max(completeLogLik(celda.mod = model_CG)), finalLogLik(model_CG))
   
   # GitHub #347
   numeric.counts = celdaCG.sim$counts
@@ -90,15 +90,13 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                                  params.fixed=list(sample.label=celdaCG.sim$sample.label), 
                                  max.iter = 1, verbose = FALSE, 
                                  best.only=FALSE)
-  expect_true(all(is(celdaCG.res, "celda_list"), is(celdaCG.res, "celda_CG")))
-  expect_equal(is.null(celdaCG.res$perplexity), TRUE)
+  expect_true(is(celdaCG.res, "celdaList"))
   expect_error(plotGridSearchPerplexity(celdaCG.res))
-  expect_equal(names(runParams(celda.list = celdaCG.res)), c("index","chain","K","L","log_likelihood"))
+  expect_equal(names(run.params(celdaCG.res)), 
+               c("index","chain","K","L","log_likelihood"))
   
   celdaCG.res = resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample=2)
-  expect_equal(is.null(celdaCG.res$perplexity), FALSE)
-  expect_is(celdaCG.res, "celda_list")
-  expect_is(celdaCG.res, "celda_CG")
+  expect_is(celdaCG.res, "celdaList")
   expect_error(resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample="2"))
   expect_error(resamplePerplexity(celdaCG.sim$counts, "celdaCG.res", resample=2))
   
@@ -106,7 +104,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   expect_is(plot.obj, "ggplot")
   
   expect_error(subsetCeldaList(celda.list = "celda_list"),
-               "celda.list parameter was not of class celda_list.")
+               "celda.list parameter was not of class celdaList.")
   expect_error(subsetCeldaList(celdaCG.res, params = list(K = 7, L = 11)))
   expect_error(subsetCeldaList(celdaCG.res, params = list(K = 5, M = 10)))
                  
@@ -114,17 +112,17 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   model_CG = selectBestModel(celdaCG.res.K5.L10)
   
   expect_error(selectBestModel("celda_list"),
-               "celda.list parameter was not of class celda_list.")
+               "celda.list parameter was not of class celdaList.")
   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, model_CG, resample=2))
   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample='a'))
   
   celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
   expect_true(all(is(celdaCG.res.index1, "celda_CG") && !is(celdaCG.res.index1, "celda_list")))
   
-  res <- perplexity.celda_CG(celdaCG.sim$counts, model_CG)
-  res2 <- perplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
+  res <- perplexity(celdaCG.sim$counts, model_CG)
+  res2 <- perplexity(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
   
-  expect_error(res <- perplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))    
+  expect_error(res <- perplexity(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))    
 })
 
 # Ensure logLikelihood calculates the expected values
@@ -134,7 +132,8 @@ test_that(desc = "Testing logLikelihood.celda_CG", {
                           delta = 1, gamma = 1,  beta = 1, 
                           alpha = 1, K = celdaCG.sim$K, L = celdaCG.sim$L, 
                           s = celdaCG.sim$sample.label, 
-                          counts=celdaCG.sim$counts),0)
+                          counts=celdaCG.sim$counts),
+            0)
   
   fake.z = celdaCG.sim$z
   fake.z[1] = celdaCG.sim$K + 1
@@ -176,7 +175,7 @@ test_that(desc = "Testing recodeClusterY with celda_CG", {
   expect_error(recodeClusterY(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(1,2,4,3,6)))
   expect_error(recodeClusterY(celda.mod = model_CG, from = c(1,2,3,4,6), to = c(1,2,4,3,5)))
   new.recoded <- recodeClusterY(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(3,2,1,4,5))
-  expect_equal(model_CG$y == 1, new.recoded$y == 3)
+  expect_equal(model_CG@y == 1, new.recoded@y == 3)
 })
 
 # recodeClusterZ
@@ -185,7 +184,7 @@ test_that(desc = "Testing recodeClusterZ with celda_CG", {
   expect_error(recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))  
   new.recoded <- recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_CG$z == 1, new.recoded$z == 5)
+  expect_equal(model_CG@z == 1, new.recoded@z == 5)
 })
 
 # compareCountMatrix
@@ -215,15 +214,15 @@ test_that(desc = "Testing topRank with celda_CG", {
 
 # plotHeatmap
 test_that(desc = "Testing plotHeatmap with celda_CG", {
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$y, y = model_CG$y), "Length of z must match number of columns in counts matrix")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$z), "Length of y must match number of rows in counts matrix")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG$y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG$z, y = model_CG$y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@y, y = model_CG@y), "Length of z must match number of columns in counts matrix")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@z), "Length of y must match number of rows in counts matrix")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG@y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
 })
 
 #plotHeatmap with annotations
@@ -235,12 +234,12 @@ test_that(desc = "Testing plotHeatmap with annotations", {
   colnames(annot.cell) <- "cell"
   rownames(annot.feature) <- rownames(celdaCG.sim$counts)
   colnames(annot.feature) <- "feature"
-  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG$z, y = model_CG$y)),
+  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG@z, y = model_CG@y)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot.cell) <- NULL
   rownames(annot.feature) <- NULL
-  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG$z, y = model_CG$y)),
+  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG@z, y = model_CG@y)),
                c("tree_row", "tree_col", "gtable"))
   
 })
@@ -290,17 +289,17 @@ test_that(desc = "Testing differentialExpression for celda_CG", {
 # plotDimReduce
 test_that(desc = "Testing plotDimReduce* with celda_CG", {
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
-  expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG$z),specific_clusters = c(1,2,3))),
+  expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG@z),specific_clusters = c(1,2,3))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"))),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"), rescale = FALSE)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"), rescale = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
   expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
   expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_error(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L11","L12")))
+  expect_error(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c(11,12)))
   expect_error(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = NULL, exact.match = TRUE))
   expect_error(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), trim = 2, exact.match = TRUE))
 })
@@ -310,13 +309,13 @@ test_that(desc = "Testing celdaTsne with celda_CG when model class is changed, s
   model_X <- model_CG
   class(model_X) <- "celda_X"
   expect_error(celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_X),
-               "celda.mod argument is not of class celda_C, celda_G or celda_CG")
+               "unable to find an inherited method for function 'celdaTsne' for signature '\"celda_X\"'")
 })
 
 test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
-  tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG$z))
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z))
+  tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@z))
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@z))
   expect_true(!is.null(plot.obj))
   
   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
@@ -326,15 +325,15 @@ test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
 test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG$z) && sum(!is.na(tsne[,1])) == 100)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
 
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup with celda_CG", {
   res = featureModuleLookup(celdaCG.sim$counts, model_CG, "Gene_1")
-  expect_true(res == model_CG$y[1])
+  expect_true(res == model_CG@y[1])
 
   res = featureModuleLookup(celdaCG.sim$counts, model_CG, "Gene_2", exact.match = FALSE)
   expect_true(length(res) == 11)
@@ -366,7 +365,7 @@ test_that(desc = "Testing perplexity.celda_CG", {
   
   class(model_CG) = c("celda_C")
   expect_error(perplexity.celda_CG(celdaCG.sim$counts, model_CG),
-               "The celda.mod provided was not of class celda_CG.")
+               "could not find function \"perplexity.celda_CG\"")
 })
 
 #miscellaneous fxns

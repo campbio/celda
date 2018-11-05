@@ -607,9 +607,9 @@ setMethod("celdaHeatmap",
 #' @export
 setMethod("celdaTsne",
           signature(celda.mod = "celda_C"),
-          function(counts, celda.mod, max.cells=25000, min.cluster.size=100, 
-                   initial.dims=20, perplexity=20, max.iter=2500, seed=12345, 
-                   ...) {
+            function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                     initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
+                     seed=12345, ...) {
 
             counts = processCounts(counts)
             compareCountMatrix(counts, celda.mod)
