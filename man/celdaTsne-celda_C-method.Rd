@@ -6,8 +6,8 @@
 \title{tSNE for celda_C}
 \usage{
 \S4method{celdaTsne}{celda_C}(counts, celda.mod, max.cells = 25000,
-  min.cluster.size = 100, initial.dims = 20, perplexity = 20,
-  max.iter = 2500, seed = 12345, ...)
+  min.cluster.size = 100, initial.dims = 20, modules = NULL,
+  perplexity = 20, max.iter = 2500, seed = 12345, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
