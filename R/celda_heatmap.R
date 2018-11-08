@@ -29,7 +29,7 @@
 #' @param silent Logical. Whether to plot the heatmap.
 #' @param ... Other arguments to be passed to underlying pheatmap function.
 #' @examples 
-#' plotHeatmap(celda.CG.sim$counts, z=celda.CG.mod$z, y=celda.CG.mod$y)
+#' plotHeatmap(celda.CG.sim$counts, z=z(celda.CG.mod), y=y(celda.CG.mod))
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @import gtable
 #' @import grid
