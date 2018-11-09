@@ -5,19 +5,21 @@
 \title{A function to draw clustered heatmaps.}
 \usage{
 semi_pheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
-  "RdYlBu")))(100), kmeans_k = NA, breaks = NA, border_color = "grey60",
-  cellwidth = NA, cellheight = NA, scale = "none", cluster_rows = TRUE,
-  cluster_cols = TRUE, clustering_distance_rows = "euclidean",
-  clustering_distance_cols = "euclidean", clustering_method = "complete",
-  clustering_callback = identity2, cutree_rows = NA, cutree_cols = NA,
+  "RdYlBu")))(100), kmeans_k = NA, breaks = NA,
+  border_color = "grey60", cellwidth = NA, cellheight = NA,
+  scale = "none", cluster_rows = TRUE, cluster_cols = TRUE,
+  clustering_distance_rows = "euclidean",
+  clustering_distance_cols = "euclidean",
+  clustering_method = "complete", clustering_callback = identity2,
+  cutree_rows = NA, cutree_cols = NA,
   treeheight_row = ifelse(cluster_rows, 50, 0),
   treeheight_col = ifelse(cluster_cols, 50, 0), legend = TRUE,
   legend_breaks = NA, legend_labels = NA, annotation_row = NA,
   annotation_col = NA, annotation = NA, annotation_colors = NA,
   annotation_legend = TRUE, annotation_names_row = TRUE,
-  annotation_names_col = TRUE, drop_levels = TRUE, show_rownames = TRUE,
-  show_colnames = TRUE, main = NA, fontsize = 10,
-  fontsize_row = fontsize, fontsize_col = fontsize,
+  annotation_names_col = TRUE, drop_levels = TRUE,
+  show_rownames = TRUE, show_colnames = TRUE, main = NA,
+  fontsize = 10, fontsize_row = fontsize, fontsize_col = fontsize,
   display_numbers = FALSE, number_format = "\%.2f",
   number_color = "grey30", fontsize_number = 0.8 * fontsize,
   gaps_row = NULL, gaps_col = NULL, labels_row = NULL,
@@ -32,10 +34,7 @@ semi_pheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
 \item{kmeans_k}{the number of kmeans clusters to make, if we want to agggregate the 
 rows before drawing heatmap. If NA then the rows are not aggregated.}
 
-\item{breaks}{a sequence of numbers that covers the range of values in mat and is one 
-element longer than color vector. Used for mapping values to colors. Useful, if needed 
-to map certain values to certain colors, to certain values. If value is NA then the 
-breaks are calculated automatically.}
+\item{breaks}{Numeric vector. A sequence of numbers that covers the range of values in the normalized `counts`. Values in the normalized `matrix` are assigned to each bin in `breaks`. Each break is assigned to a unique color from `col`. If NULL, then breaks are calculated automatically. Default NULL.}
 
 \item{border_color}{color of cell borders on heatmap, use NA if no border should be 
 drawn.}

@@ -5,17 +5,23 @@
 \title{Generate factorized matrices showing each feature's influence on the celda_C model clustering}
 \usage{
 \method{factorizeMatrix}{celda_C}(counts, celda.mod, type = c("counts",
-  "proportion", "posterior"), validate.counts = TRUE)
+  "proportion", "posterior"))
 }
 \arguments{
-\item{counts}{A numeric count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Object return from celda_C function}
+\item{celda.mod}{Celda object of class "celda_C".}
 
-\item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
-
-\item{validate.counts}{Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.}
+\item{type}{Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.}
+}
+\value{
+A list of lists of the types of factorized matrices specified
 }
 \description{
 Generate factorized matrices showing each feature's influence on the celda_C model clustering
+}
+\examples{
+celda.sim = simulateCells("celda_C")
+celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
+factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
 }

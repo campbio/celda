@@ -4,25 +4,30 @@
 #'    changes and characterizing heterogeneity in single-cell RNA sequencing data
 #'    (Finak et al, Genome Biology, 2015)
 #' 
-#' @param counts A numeric count matrix.
-#' @param celda.mod An object of class celda_C or celda_CG.
-#' @param c1 Numeric. Cell cluster(s) to define markers for.
-#' @param c2 Numeric. Second cell cluster(s) for comparison. If NULL (default) - use all
-#'    other cells for comparison.
-#' @param only.pos Logical. Only return markers with positive log2fc (FALSE by default).
-#' @param log2fc.threshold Numeric. Only return markers whose the absolute values of log2fc
-#'    are greater than this threshold (NULL by default).
-#' @param fdr.threshold Numeric. Only return markers whose false discovery rates (FDRs) are less
-#'    than this threshold (1 by default).
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". 
+#' @param c1 Integer vector. Cell populations to include in group 1 for the differential expression analysis. 
+#' @param c2 Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, everything in c1 is compared to all other clusters. Default NULL. 
+#' @param only.pos Logical. Whether to only return markers with positive log2fc. Default FALSE.
+
+#' @param log2fc.threshold Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned.
+#' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned.
 #' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
 #'    and associated statistics (p-value, log2fc and FDR).
+#' @examples
+#' celda.sim = simulateCells("celda_CG")
+#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+#'                      nchains=1, max.iter=1)   
+#' cluster.diffexp.res = differentialExpression(celda.sim$counts, celda.mod, 
+#'                                              c1=c(1,2))
 #' @export
 #' @import data.table
-diffExpBetweenCellStates <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
-  if (is.null(counts)) {
+#' @import plyr
+differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1) {
+  if (!is.matrix(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
-  if (is.null(celda.mod) || is.null(celda.mod$z)){
+  if (!class(celda.mod) %in% c("celda_C", "celda_CG") || is.null(celda.mod$z)){
     stop("'celda.mod' should be an object of class celda_C or celda_CG")
   }
   if (is.null(c1)) {
@@ -50,7 +55,7 @@ diffExpBetweenCellStates <- function(counts, celda.mod, c1, c2 = NULL, only.pos 
       celda.mod$names$column[which(celda.mod$z == c2)]
   }
   mat <- counts[,c(cells1,cells2)]
-  log_normalized_mat <- log2(normalizeCounts(mat) + 1)
+  log_normalized_mat <- normalizeCounts(mat, normalize="cpm", transformation.fun=log1p)
   cdat <-
     data.frame(
       wellKey = c(cells1, cells2),
@@ -62,18 +67,19 @@ diffExpBetweenCellStates <- function(counts, celda.mod, c1, c2 = NULL, only.pos 
   cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
   SummarizedExperiment::colData(sca)$cngeneson <- scale(cdr2)
   cond <- factor(SummarizedExperiment::colData(sca)$condition)
-  cond <- relevel(cond, "c2")
+  cond <- stats::relevel(cond, "c2")
   SummarizedExperiment::colData(sca)$condition <- cond
   zlmCond <- MAST::zlm( ~ condition + cngeneson, sca)
   summaryCond <- MAST::summary(zlmCond, doLRT = 'conditionc1')
   summaryDt <- summaryCond$datatable
+  contrast <- component <- primerid <- coef <- ci.hi <- ci.lo <- `Pr(>Chisq)` <- fdr <- NULL # Avoid NSE notes in check
   fcHurdle <-
     merge(summaryDt[contrast == 'conditionc1' &
                       component == 'H', .(primerid, `Pr(>Chisq)`)],
           summaryDt[contrast == 'conditionc1' &
                       component == 'logFC', .(primerid, coef, ci.hi, ci.lo)], by = 'primerid')
   
-  fcHurdle[, fdr := p.adjust(`Pr(>Chisq)`, 'fdr')]
+  fcHurdle[, fdr := stats::p.adjust(`Pr(>Chisq)`, 'fdr')]
   ###Some genes aren't outputted because log2FC gets NaN if one or both clusters have 0 counts for a gene
   ###and then they're discarded because NaN !> 0
   if(is.null(log2fc.threshold)){
