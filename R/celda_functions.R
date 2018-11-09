@@ -145,13 +145,13 @@ recodeClusterY = function(celda.mod, from, to) {
 #'                     error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
-  if (.hasSlot(celda.mod, "y")) {
+  if (methods::.hasSlot(celda.mod, "y")) {
     if (nrow(counts) != length(celda.mod@y)) {
       stop(paste0("The provided celda object was generated from a counts matrix with a different number of features than the one provided."))
     }  
   }
   
-  if (.hasSlot(celda.mod, "z")) {  
+  if (methods::.hasSlot(celda.mod, "z")) {  
     if (ncol(counts) != length(celda.mod@z)) {
       stop(paste0("The provided celda object was generated from a counts matrix with a different number of cells than the one provided."))
     }
