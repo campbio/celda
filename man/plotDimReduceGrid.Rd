@@ -36,10 +36,8 @@ Create a scatterplot given two dimensions from a data dimensionality reduction t
 }
 \examples{
 \donttest{
-sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = sim.res$counts, 
+celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
+plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = celda.CG.sim$counts, 
                   xlab = "Dimension1", ylab = "Dimension 2", var_label = "tsne", 
                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")
 }

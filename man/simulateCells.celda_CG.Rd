@@ -2,9 +2,9 @@
 % Please edit documentation in R/celda_CG.R
 \name{simulateCells.celda_CG}
 \alias{simulateCells.celda_CG}
-\title{Simulate cells from the cell/feature bi-clustering generative model}
+\title{Simulate cells from the celda_CG model}
 \usage{
-\method{simulateCells}{celda_CG}(model, S = 5, C.Range = c(50, 100),
+simulateCells.celda_CG(model, S = 5, C.Range = c(50, 100),
   N.Range = c(500, 1000), G = 100, K = 5, L = 10, alpha = 1,
   beta = 1, gamma = 5, delta = 1, seed = 12345, ...)
 }
@@ -31,17 +31,20 @@
 
 \item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+List. Contains the simulated matrix `counts`, cell population clusters `z`, feature module clusters `y`, sample assignments `sample.label`, and input parameters.
 }
 \description{
-This function generates a list containing a simulated counts matrix, as well as various parameters
-used in the simulation which can be useful for running celda.
+Generates a simulated counts matrix, cell subpopulation clusters, sample labels, and feature module clusters
+according to the generative process of the celda_CG model.
 }
 \examples{
 celda.sim = simulateCells(model="celda_CG")
+}
+\seealso{
+`celda_C()` for simulating cell subpopulations and `celda_G()` for simulating feature modules.
 }
