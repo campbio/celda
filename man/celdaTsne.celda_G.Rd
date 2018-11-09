@@ -4,27 +4,35 @@
 \alias{celdaTsne.celda_G}
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
-\method{celdaTsne}{celda_G}(counts, celda.mod, states = NULL,
-  perplexity = 20, max.iter = 2500, distance = "hellinger",
-  seed = 12345, ...)
+\method{celdaTsne}{celda_G}(counts, celda.mod, max.cells = 10000,
+  modules = NULL, perplexity = 20, max.iter = 2500, seed = 12345,
+  ...)
 }
 \arguments{
-\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda model to use for tsne.}
+\item{celda.mod}{Celda object of class "celda_G".}
 
-\item{states}{Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.}
 
-\item{perplexity}{Numeric vector; determines perplexity for tSNE. Default 20.}
+\item{modules}{Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
 
-\item{max.iter}{Numeric vector; determines iterations for tsne. Default 1000.}
+\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
 
-\item{distance}{Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.}
+\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
-\item{seed}{Seed for random number generation. Default 12345.}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{...}{Further arguments passed to or from other methods.}
+\item{...}{Additional parameters.}
+}
+\value{
+A two column matrix of t-SNE coordinates
 }
 \description{
 Embeds cells in two dimensions using tSNE based on celda_CG results.
+}
+\examples{
+celda.sim = simulateCells("celda_G")
+celda.mod = celda_G(celda.sim$counts, L=celda.sim$L)
+tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 }

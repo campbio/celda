@@ -4,56 +4,45 @@
 \alias{celdaGridSearch}
 \title{Run the celda Bayesian hierarchical model on a matrix of counts.}
 \usage{
-celdaGridSearch(counts, model, sample.label = NULL, K = NULL, L = NULL,
-  alpha = 1, beta = 1, delta = 1, gamma = 1, max.iter = 200,
-  z.init = NULL, y.init = NULL, stop.iter = 10, split.on.iter = 10,
-  nchains = 1, bestChainsOnly = TRUE, cores = 1, seed = 12345,
-  verbose = FALSE, logfile_prefix = "Celda")
+celdaGridSearch(counts, model, params.test, params.fixed = NULL,
+  max.iter = 200, nchains = 3, cores = 1, best.only = TRUE,
+  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
 }
 \arguments{
-\item{counts}{A count matrix}
+\item{counts}{A count matrix.}
 
-\item{model}{Which celda sub-model to run. Options include "celda_C" (cell clustering), "celda_G" (gene clustering), "celda_CG" (gene and cell clustering)}
+\item{model}{Celda model. Options available in `celda::available.models`.}
 
-\item{sample.label}{A numeric vector, character vector, or factor indicating the originating sample for each cell (column) in the count matrix. By default, every cell will be assumed to be from an independent sample.}
+\item{params.test}{List. A list denoting the combinations of parameters to run in a celda model. For example, "list(K=5:10, L=15:20)" will run all combinations of K from 5 to 10 and L from 15 to 20 in model 'celda_CG'.}
 
-\item{K}{Number of desired cell subpopulation clusters. Required for celda_C and celda_CG models.}
+\item{params.fixed}{List. A list denoting additional parameters to use in each celda model. Default NULL.}
 
-\item{L}{Number of desired gene clusters. Required for celda_G and celda_CG models.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
 
-\item{alpha}{Non-zero concentration parameter for sample Dirichlet distribution (celda_C / celda_CG only)}
+\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
 
-\item{beta}{Non-zero concentration parameter for gene Dirichlet distribution}
+\item{cores}{Integer. The number of cores to use for parallel Gibbs sampling. Default 1.}
 
-\item{delta}{The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state (celda_G / celda_CG only)}
+\item{best.only}{Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE.}
 
-\item{gamma}{The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state (celda_G / celda_CG only)}
+\item{seed}{Integer. Passed to set.seed(). Default 12345.}
 
-\item{max.iter}{The maximum number of iterations}
+\item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 
-\item{z.init}{Initial values of z. If NULL, z will be randomly sampled. Default NULL. (celda_C / celda_CG only)}
-
-\item{y.init}{Initial values of y. If NULL, y will be randomly sampled. Default NULL. (celda_G / celda_CG only)}
-
-\item{stop.iter}{Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.}
-
-\item{split.on.iter}{On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.}
-
-\item{nchains}{The number of chains of Gibbs sampling to run for every combination of K/L parameters. Defaults to 1 (celda_G / celda_CG only)}
-
-\item{bestChainsOnly}{Return only the best chain (by final log-likelihood) per K/L combination.}
-
-\item{cores}{The number of cores to use for parallell Gibbs sampling. Defaults to 1.}
-
-\item{seed}{The base seed for random number generation}
-
-\item{verbose}{Print log messages during celda chain execution}
-
-\item{logfile_prefix}{Prefix for log files from worker threads and main process.}
+\item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
 }
 \value{
 Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
 }
 \description{
 Yields assigments of genes/cells to clusters, depending on the provided model type.
+}
+\examples{
+## Simulate a small dataset with 5 cell clusters and 10 feature modules
+celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
+
+## Run various combinations of parameters with 'celdaGridSearch'
+cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
+                      params.fixed=list(sample.label=celda.sim$sample.label),
+                      best.only=TRUE, nchains=1)
 }

@@ -7,8 +7,17 @@
 completeLogLikelihood(celda.mod)
 }
 \arguments{
-\item{celda.mod}{A celda model object (of class "celda_C", "celda_G" or "celda_CG")}
+\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+}
+\value{
+Numeric Vector. The log-likelihood of the model's cluster assignments during each iteration.
 }
 \description{
 Get the complete log likelihood for a given celda model.
+}
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+complete.loglik = completeLogLikelihood(celda.mod)
 }
