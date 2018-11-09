@@ -18,7 +18,7 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   if (!is.matrix(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
-  if (!(is(celda.mod, "celda_C") || is(celda.mod, "celda_CG")) || is.null(celda.mod@z)){
+  if (!(methods::is(celda.mod, "celda_C") || methods::is(celda.mod, "celda_CG")) || is.null(celda.mod@z)){
     stop("'celda.mod' should be an object of class celda_C or celda_CG")
   }
   if (is.null(c1)) {
