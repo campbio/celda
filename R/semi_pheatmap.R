@@ -545,7 +545,7 @@ cluster_mat <- function(mat, labels, distance, method){
   
   # distance function preparation 
   dis <- function(mat, distance) {
-    if(!(distance[1] %in% c("correlation", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")) & class(distance) != "dist"){
+    if(!(distance[1] %in% c("correlation", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")) & !methods::is(distance, "dist")){
       stop("distance has to be a dissimilarity structure as produced by dist or one measure  form the list: 'correlation', 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary', 'minkowski'")
     }
     if(distance[1] == "correlation"){
