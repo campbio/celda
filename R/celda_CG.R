@@ -212,11 +212,11 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   } 
   
   ## Peform reordering on final Z and Y assigments:
-  best.result = new("celda_CG", z=z.best, y=y.best, completeLogLik=ll, 
-      				  finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
-      				  beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
-      				  sample.label=sample.label, names=names,
-      				  count.checksum=count.checksum)
+  best.result = methods::new("celda_CG", z=z.best, y=y.best, completeLogLik=ll, 
+                  				   finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
+                  				   beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
+                  				   sample.label=sample.label, names=names,
+                  				   count.checksum=count.checksum)
   best.result = reorder.celda_CG(counts = counts, res = best.result)
   
   end.time = Sys.time()
@@ -320,10 +320,10 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
-  result = new("celda_CG", z=z, y=y, K=K, L=L, alpha=alpha, 
-               beta=beta, delta=delta, gamma=gamma, seed=seed, 
-               sample.label=cell.sample.label, names=names,
-               count.checksum=digest::digest(cell.counts, algo="md5"))
+  result = methods::new("celda_CG", z=z, y=y, K=K, L=L, alpha=alpha, 
+                        beta=beta, delta=delta, gamma=gamma, seed=seed, 
+                        sample.label=cell.sample.label, names=names,
+                        count.checksum=digest::digest(cell.counts, algo="md5"))
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
   

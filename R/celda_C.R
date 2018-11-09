@@ -153,13 +153,13 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     
     logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
   }  
-  best.result = new("celda_C", z=best.result$z, 
-                    completeLogLik=best.result$completeLogLik,
-                    finalLogLik=best.result$finalLogLik, seed=best.result$seed,
-                    K=best.result$K, sample.label=best.result$sample.label, 
-                    alpha=best.result$alpha, beta=best.result$beta, 
-                    count.checksum=best.result$count.checksum,
-                    names=best.result$names)
+  best.result = methods::new("celda_C", z=best.result$z, 
+                             completeLogLik=best.result$completeLogLik,
+                             finalLogLik=best.result$finalLogLik, seed=best.result$seed,
+                             K=best.result$K, sample.label=best.result$sample.label, 
+                             alpha=best.result$alpha, beta=best.result$beta, 
+                             count.checksum=best.result$count.checksum,
+                             names=best.result$names)
   best.result = reorder.celda_C(counts = counts, res = best.result)
   
   end.time = Sys.time()
@@ -305,9 +305,9 @@ simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts) 
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
-  result = new("celda_C", z=z, K=K, alpha=alpha, beta=beta, seed=seed, 
-               sample.label=cell.sample.label, names=names,
-               count.checksum=digest::digest(cell.counts, algo="md5"))
+  result = methods::new("celda_C", z=z, K=K, alpha=alpha, beta=beta, seed=seed, 
+                        sample.label=cell.sample.label, names=names,
+                        count.checksum=digest::digest(cell.counts, algo="md5"))
   class(result) = "celda_C" 
   result = reorder.celda_C(counts = cell.counts, res = result)
   

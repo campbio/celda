@@ -108,8 +108,8 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   logliks = sapply(res.list, function(mod) { mod@finalLogLik })
   run.params = cbind(run.params, log_likelihood=logliks)
     
-  celda.res = new("celdaList", run.params=run.params, res.list=res.list, 
-                  count.checksum=count.checksum)
+  celda.res = methods::new("celdaList", run.params=run.params, res.list=res.list, 
+                           count.checksum=count.checksum)
   
   if (isTRUE(best.only)) {
     celda.res = selectBestModel(celda.res) 
@@ -138,7 +138,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
 #' res.K5.L10 = subsetCeldaList(celda.CG.grid.search.res, params=list(K=5, L=10))
 #' @export
 subsetCeldaList = function(celda.list, params) {
-  if (!is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
+  if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
 
   ## Check for bad parameter names
   if(!all(names(params) %in% colnames(celda.list@run.params))) {
@@ -179,7 +179,7 @@ subsetCeldaList = function(celda.list, params) {
 #' @import data.table
 #' @export
 selectBestModel = function(celda.list) {
-  if (!is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
+  if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
  
   log_likelihood = NULL
   group = setdiff(colnames(celda.list@run.params), c("index", "chain", "log_likelihood"))
