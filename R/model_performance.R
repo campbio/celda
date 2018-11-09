@@ -18,7 +18,7 @@
 #' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
-  if (!is(celda.list, "celdaList")) stop("celda.list parameter was not of class celda_list.")
+  if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
   set.seed(seed)
