@@ -31,11 +31,9 @@ Create a scatterplot based on celda cluster labels.
 }
 \examples{
 \donttest{
-sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
 plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-                     cluster = as.factor(celda_cg$z),
+                     cluster = as.factor(z(celda.CG.mod)),
                      specific_clusters = c(1,2,3))
 }
 }

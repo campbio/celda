@@ -2,29 +2,23 @@
 % Please edit documentation in R/celdaGridSearch.R
 \name{selectBestModel}
 \alias{selectBestModel}
-\title{Select models with the best log likelihood from a 'celda_list' object gererated by celdaGridSearch.}
+\title{Select best chain within each combination of parameters}
 \usage{
 selectBestModel(celda.list)
 }
 \arguments{
-\item{celda.list}{Object of class "celda_list". An object containing celda models returned from `celdaGridSearch()`.}
+\item{celda.list}{Object of class `celda_list`. An object containing celda models returned from `celdaGridSearch()`.}
 }
 \value{
-The celda model object with the highest finalLogLik attribute, meeting any K/L criteria provided
+A new `celda_list` object containing one model with the best log likelihood for each set of parameters. If only one set of parameters is in the `celda_list`, the best model will be returned directly instead of a `celda_list` object.
 }
 \description{
-This function returns the celda model from a celda_list object containing
-the maxiumim final log-likelihood. K, L, or combination of K and L must be 
-provided for celda_list objects containing celda_C, celda_G, and celda_CG 
-models, respectively.
+Select the chain with the best log likelihood for each combination of tested parameters from a `celda_list` object gererated by `celdaGridSearch()`.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-## Run various combinations of parameters with 'celdaGridSearch'
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:5, L=9:10), 
-                      params.fixed=list(sample.label=celda.sim$sample.label),
-                      best.only=FALSE, nchains=3)
-
 ## Returns same result as running celdaGridSearch with "best.only = TRUE"
-cgs.best = selectBestModel(cgs)
+cgs.best = selectBestModel(celda.CG.grid.search.res)
+}
+\seealso{
+`celdaGridSearch()` can run Celda with multiple parameters and chains in parallel. `subsetCeldaList()` can subset the `celda_list` object.
 }
