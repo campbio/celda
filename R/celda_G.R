@@ -1,79 +1,71 @@
-# -----------------------------------
-# Variable description
-# -----------------------------------
-# C = Cell
-# S or s = Sample
-# G = Gene
-# TS = Transcriptional State
-# CP = Cell population
-# n = counts of transcripts
-# m = counts of cells
-# K = Total number of cell populations
-# L = Total number of transcriptional states
-# nM = Number of cells
-# nG = Number of genes
-# nS = Number of samples
-
-# -----------------------------------
-# Count matrices descriptions
-# -----------------------------------
-
-# All n.* variables contain counts of transcripts
-# n.CP.by.TS = Number of counts in each Cellular Population per Transcriptional State
-# n.TS.by.C = Number of counts in each Transcriptional State per Cell 
-# n.CP.by.G = Number of counts in each Cellular Population per Gene
-# n.by.G = Number of counts per gene (i.e. rowSums)
-# n.by.TS = Number of counts per Transcriptional State
-
-## All m.* variables contain counts of cells
-# m.CP.by.S = Number of cells in each Cellular Population per Sample
-
-# nG.by.TS = Number of genes in each Transcriptional State
-
-
-#' celda Gene Clustering Model
+#' @title Feature clustering with Celda
 #'
-#' Provides cluster assignments for all genes in a provided single-cell 
-#' sequencing count matrix, using the celda Bayesian hierarchical model.
-#' 
-#' @param counts A numeric count matrix
-#' @param L The number of clusters to generate
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell.
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state. Default to 1.
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param stop.iter Number of iterations without improvement in the log likelihood to stop the Gibbs sampler. Default 10.
-#' @param max.iter Maximum iterations of Gibbs sampling to perform regardless of convergence. Default 200.
-#' @param split.on.iter On every 'split.on.iter' iteration, a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. Default 10.
-#' @param split.on.last After the the chain has converged according to 'stop.iter', a heuristic will be applied to determine if a gene/cell cluster should be reassigned and another gene/cell cluster should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param seed Parameter to set.seed() for random number generation. Default 12345.
-#' @param nchains Number of random y initializations. Default 3. 
-#' @param count.checksum An MD5 checksum for the provided counts matrix. Default NULL.
-#' @param y.init Initial values of y. If NULL, y will be randomly sampled. Default NULL.
-#' @param logfile The name of the logfile to redirect messages to.
-#' @keywords LDA gene clustering gibbs
+#' @description Clusters the rows of a count matrix containing single-cell data into L modules. 
+#'
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param L Integer. Number of feature modules.  
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
+#' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
+#' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
+#' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param nchains Integer. Number of random cluster initializations. Default 3.  
+#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.
+#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from `1:L`. `y.init` can only be used when `initialize = 'random'`. Default NULL.
+#' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#' @param verbose Logical. Whether to print log messages. Default TRUE. 
+#' @return An object of class `celda_G` with the feature module clusters stored in `y`.
+#' @seealso `celda_C()` for cell clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of L and multiple chains in parallel. 
+#' @examples
+#' celda.mod = celda_G(celda.G.sim$counts, L=celda.G.sim$L)
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, count.checksum=NULL, 
-					y.init=NULL, logfile=NULL) {
+					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+					y.init=NULL, logfile=NULL, verbose=TRUE) {
+  
+  validateCounts(counts)
+  return(.celda_G(counts, L, beta, delta, gamma, stop.iter, max.iter, split.on.iter,
+                  split.on.last, seed, nchains, initialize, count.checksum,
+                  y.init, logfile, verbose))
+}
+
+.celda_G = function(counts, L, beta=1, delta=1, gamma=1,
+					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
+					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+					y.init=NULL, logfile=NULL, verbose=TRUE) {
+
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  start.time = Sys.time()
 
   ## Error checking and variable processing
+  counts = processCounts(counts)
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-
+  initialize = match.arg(initialize)
+   
   all.seeds = seed:(seed + nchains - 1)
-  
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
-  logMessages("Celda_G: Clustering genes.", logfile=logfile, append=FALSE)
-  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE)  
-
+    
   best.result = NULL  
   for(i in seq_along(all.seeds)) {   
 
 	## Randomly select y or y to supplied initial values
-	current.seed = all.seeds[i]	
-	y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	## Initialize cluster labels
+    current.seed = all.seeds[i]	
+    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+
+    if(initialize == "random") {
+	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
+	} else {
+	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=100, seed=seed)
+	}  
 	y.best = y  
 
 	## Calculate counts one time up front
@@ -103,10 +95,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	  y = next.y$y
 	
 	  ## Perform split on i-th iteration of no improvement in log likelihood
-	  if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
-		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="")
-		res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob=t(next.y$probs), min=3, max.clusters.to.try=10)
-		logMessages(res$message, logfile=logfile, append=TRUE)
+	  temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	  if(L > 2 & (((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
+		res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, 
+		                beta, delta, gamma, y.prob=t(next.y$probs), 
+		                min.feature=3, max.clusters.to.try=max(L/2, 10))
+		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 	  
 		# Reset convergence counter if a split occured	    
 		if(!isTRUE(all.equal(y, res$y))) {
@@ -134,7 +129,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	  }
 	  ll <- c(ll, temp.ll)
 
-	  logMessages(date(), ".... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE)
+	  logMessages(date(), ".... Completed iteration:", iter, "| logLik:", temp.ll, logfile=logfile, append=TRUE, verbose=verbose)
 	  iter = iter + 1    	  
     }
     
@@ -143,17 +138,27 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	result = list(y=y.best, completeLogLik=ll, 
 				  finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
 				  count.checksum=count.checksum, seed=current.seed, names=names)
-	class(result) = "celda_G"
 	
-	if(is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
+	if (is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
       best.result = result
     }
     
-    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=FALSE)
+    logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
   } 
   
-  result = reorder.celda_G(counts = counts, res = result) 
-  return(result)
+  
+  best.result = methods::new("celda_G", y=y.best, completeLogLik=ll, finalLogLik=ll.best, 
+                             L=L, beta=beta, delta=delta, gamma=gamma, 
+                             count.checksum=count.checksum, seed=current.seed, 
+                             names=names)
+  best.result = reorder.celda_G(counts = counts, res = best.result) 
+  
+  end.time = Sys.time()
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  logMessages("Completed Celda_G. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+
+  return(best.result)
 }
 
 
@@ -163,13 +168,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 # represented in the provided count matrix.
 # 
 # 
-# @param n.TS.by.C Number of counts in each Transcriptional State per Cell 
-# @param n.by.TS Number of counts per Transcriptional State
-# @param nG.by.TS Number of genes in each Transcriptional State
-# @param nG.in.Y  Number of genes in each of the cell cluster
-# @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-# @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state.
-# @param beta Vector of non-zero concentration parameters for cluster <-> gene assignment Dirichlet distribution
+# @param n.TS.by.C Number of counts in each Transcriptional State per Cell.
+# @param n.by.TS Number of counts per Transcriptional State.
+# @param nG.by.TS Number of genes in each Transcriptional State.
+# @param nG.in.Y  Number of genes in each of the cell cluster.
+# @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+# @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+# @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 # @keywords log likelihood
 cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
 
@@ -239,25 +244,28 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
 }
 
-
-#' Simulate cells from the gene clustering generative model
-#'
-#' Generate a simulated count matrix, based off a generative distribution whose 
-#' parameters can be provided by the user.
+#' @title Simulate cells from the celda_G model
 #' 
-#' @param model Celda model to use for simulation. One of 'available_models'. 
-#' @param C The number of cells
-#' @param L The number of transcriptional states
-#' @param N.Range Vector of length 2 given the range (min,max) of number of counts for each cell to be randomly generated from the uniform distribution
-#' @param G The number of genes for which to simulate counts
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param delta The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state.
-#' @param seed Parameter to set.seed() for random number generation
-#' @param ... Other arguments
+#' @description Generates a simulated counts matrix and feature module clusters
+#' according to the generative process of the celda_G model.  
+#' 
+#' @param model Character. Options available in `celda::available.models`. 
+#' @param C Integer. Number of cells to simulate. Default 100. 
+#' @param L Integer. Number of feature modules. Default 10.
+#' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000). 
+#' @param G Integer. The total number of features to be simulated. Default 100. 
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param ... Additional parameters.
+#' @return List. Contains the simulated matrix `counts`, feature module clusters `y`, and input parameters.
+#' @seealso `celda_C()` for simulating cell subpopulations and `celda_CG()` for simulating feature modules and cell populations. 
+#' @examples
+#' celda.g.sim = simulateCells(model="celda_G")
 #' @export
-simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000, 
-                                 L=5, beta=1, gamma=5, delta=1, seed=12345, ...) {
+simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
+                                 L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
   set.seed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
@@ -265,7 +273,6 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   if(length(table(y)) < L) {
     stop("Some states did not receive any genes after sampling. Try increasing G and/or setting gamma > 1.")
   }
-  y = reorder.label.by.size(y, L)$new.labels
   
   psi = matrix(0, nrow=G, ncol=L)
   for(i in 1:L) {
@@ -299,89 +306,98 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,5000),  G=1000,
   colnames(cell.counts) = paste0("Cell_", 1:ncol(cell.counts))
   
   ## Peform reordering on final Z and Y assigments:
+  cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
-  result = list(y=y, completeLogLik=NULL, 
-                finalLogLik=NULL, L=L, 
-                beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                names=names, count.checksum=NULL)
-  class(result) = "celda_G" 
-  storage.mode(cell.counts) = "integer"
+  result = methods::new("celda_G", y=y, L=L, beta=beta, delta=delta, gamma=gamma, 
+                        seed=seed,  names=names, 
+                        count.checksum=digest::digest(cell.counts, algo="md5"))
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
-  return(list(y=result$y, counts=processCounts(cell.counts), L=L, beta=beta, delta=delta, gamma=gamma, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(y=result@y, counts=processCounts(cell.counts), L=L, 
+              beta=beta, delta=delta, gamma=gamma, seed=seed))
 }
 
 
-#' Generate factorized matrices showing each feature's influence on the celda_G model clustering 
+#' @title Matrix factorization for results from celda_G
+#' @description Generates factorized matrices showing the contribution of each feature in each module and each module in each cell.
 #' 
-#' @param counts A numeric count matrix
-#' @param celda.mod Object return from celda_C function
-#' @param type A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).
-#' @param validate.counts Whether to verify that the counts matrix provided was used to generate the results in celda.mod. Defaults to TRUE.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_G". 
+#' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`. 
+#' @return A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module` and `cell`.
+#' @seealso `celda_G()` for clustering features
+#' @examples 
+#' factorized.matrices = factorizeMatrix(celda.G.sim$counts, celda.G.mod, "posterior")
 #' @export
-factorizeMatrix.celda_G = function(counts, celda.mod, type=c("counts", "proportion", "posterior")) {
-
-  counts = processCounts(counts)
-  L = celda.mod$L
-  y = celda.mod$y
-  beta = celda.mod$beta
-  delta = celda.mod$delta
-  gamma = celda.mod$gamma
-  
-  p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  n.TS.by.C = p$n.TS.by.C
-  n.by.G = p$n.by.G
-  n.by.TS = p$n.by.TS
-  nG.by.TS = p$nG.by.TS
-  nM = p$nM
-  nG = p$nG
-  rm(p)
-  
-  nG.by.TS[nG.by.TS == 0] = 1  
-  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
-  n.G.by.TS[cbind(1:nG,y)] = n.by.G
-
-  L.names = paste0("L", 1:L)
-  colnames(n.TS.by.C) = celda.mod$names$column
-  rownames(n.TS.by.C) = L.names
-  colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = celda.mod$names$row
-  names(nG.by.TS) = L.names
-  
-  counts.list = c()
-  prop.list = c()
-  post.list = c()
-  res = list()
-  
-  if(any("counts" %in% type)) {
-    counts.list = list(cell.states=n.TS.by.C, gene.states=n.G.by.TS, gene.distribution=nG.by.TS)
-    res = c(res, list(counts=counts.list))
-  }
-  if(any("proportion" %in% type)) {
-    ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.y = sort(unique(y))
-    temp.n.G.by.TS = n.G.by.TS
-    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], scale.factor=1)
-    temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
-    
-    prop.list = list(cell.states = normalizeCounts(n.TS.by.C, scale.factor=1),
-    							  gene.states = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
-    res = c(res, list(proportions=prop.list))
-  }
-  if(any("posterior" %in% type)) {
-  
-    gs = n.G.by.TS
-    gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
-    gs = normalizeCounts(gs, scale.factor=1)
-    temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
-    
-    post.list = list(cell.states = normalizeCounts(n.TS.by.C + beta, scale.factor=1),
-    						    gene.states = gs, gene.distribution=temp.nG.by.TS)
-    res = c(res, posterior = list(post.list))						    
-  }
-  
-  return(res)
-}
+setMethod("factorizeMatrix",
+          signature(celda.mod = "celda_G"),
+           function(counts, celda.mod, 
+                    type=c("counts", "proportion", "posterior")) {
+            counts = processCounts(counts)
+            compareCountMatrix(counts, celda.mod)
+            
+            L = celda.mod@L
+            y = celda.mod@y
+            beta = celda.mod@beta
+            delta = celda.mod@delta
+            gamma = celda.mod@gamma
+            
+            p = cG.decomposeCounts(counts=counts, y=y, L=L)
+            n.TS.by.C = p$n.TS.by.C
+            n.by.G = p$n.by.G
+            n.by.TS = p$n.by.TS
+            nG.by.TS = p$nG.by.TS
+            nM = p$nM
+            nG = p$nG
+            rm(p)
+            
+            nG.by.TS[nG.by.TS == 0] = 1  
+            n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+            n.G.by.TS[cbind(1:nG,y)] = n.by.G
+          
+            L.names = paste0("L", 1:L)
+            colnames(n.TS.by.C) = celda.mod@names$column
+            rownames(n.TS.by.C) = L.names
+            colnames(n.G.by.TS) = L.names
+            rownames(n.G.by.TS) = celda.mod@names$row
+            names(nG.by.TS) = L.names
+            
+            counts.list = c()
+            prop.list = c()
+            post.list = c()
+            res = list()
+            
+            if(any("counts" %in% type)) {
+              counts.list = list(cell=n.TS.by.C, module=n.G.by.TS, 
+                                 gene.distribution=nG.by.TS)
+              res = c(res, list(counts=counts.list))
+            }
+            if(any("proportion" %in% type)) {
+              ## Need to avoid normalizing cell/gene states with zero cells/genes
+              unique.y = sort(unique(y))
+              temp.n.G.by.TS = n.G.by.TS
+              temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], 
+                                                          normalize="proportion")
+              temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
+              
+              prop.list = list(cell = normalizeCounts(n.TS.by.C, normalize="proportion"),
+              							  module = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
+              res = c(res, list(proportions=prop.list))
+            }
+            if(any("posterior" %in% type)) {
+            
+              gs = n.G.by.TS
+              gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
+              gs = normalizeCounts(gs, normalize="proportion")
+              temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
+              
+              post.list = list(cell = normalizeCounts(n.TS.by.C + beta, normalize="proportion"),
+              						     module = gs, gene.distribution=temp.nG.by.TS)
+              res = c(res, posterior = list(post.list))						    
+            }
+            
+            return(res)
+          })
 
 
 # Calculate log-likelihood of celda_CG model
@@ -419,23 +435,27 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 }
 
 
-#' Calculate the celda_G log likelihood for user-provided cluster assignments
-#'
-#' This function calculates the log likelihood of each clustering of genes generated
-#' over multiple iterations of Gibbs sampling.
+#' @title Calculate Celda_G log likelihood
+#' @description Calculates the log likelihood for user-provided feature module clusters using the `celda_G()` model.
 #' 
-#' @param counts A numeric count matrix
-#' @param y A numeric vector of gene cluster assignments
-#' @param L The number of clusters being considered
-#' @param beta The Dirichlet distribution parameter for Phi; adds a pseudocount to each transcriptional state within each cell
-#' @param delta The Dirichlet distribution parameter for Eta; adds a gene pseudocount to the numbers of genes each state
-#' @param gamma The Dirichlet distribution parameter for Psi; adds a pseudocount to each gene within each transcriptional state
-#' @param ... Additional parameters
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param y Numeric vector. Denotes feature module labels. 
+#' @param L Integer. Number of feature modules.  
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param ... Additional parameters.
 #' @keywords log likelihood
-#' @return The log likelihood of the provided cluster assignment, as calculated by the celda_G likelihood function
+#' @return The log-likelihood for the given cluster assignments
+#' @seealso `celda_G()` for clustering features
+#' @examples
+#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
+#'                        y=celda.G.sim$y, L=celda.G.sim$L,
+#'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
+#'                        gamma=celda.G.sim$gamma)
 #' @export
-calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma) {
-
+logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
+  if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
   p = cG.decomposeCounts(counts=counts, y=y, L=L)
   final <- cG.calcLL(n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, n.by.G=p$n.by.G, nG.by.TS=p$nG.by.TS, nM=p$nM, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma)
   
@@ -443,10 +463,10 @@ calculateLoglikFromVariables.celda_G = function(counts, y, L, beta, delta, gamma
 }
 
 
-#' Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
-#' @param counts A numeric count matrix
-#' @param y A numeric vector of gene cluster assignments
-#' @param L The number of clusters being considered
+# Takes raw counts matrix and converts it to a series of matrices needed for log likelihood calculation
+# @param counts Integer matrix. Rows represent features and columns represent cells. 
+# @param y Numeric vector. Denotes feature module labels. 
+# @param L Integer. Number of feature modules.  
 cG.decomposeCounts = function(counts, y, L) {
 
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
@@ -470,128 +490,206 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 }
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#' @title Conditional probabilities for features in modules from a Celda_G model
+#' @description Calculates the conditional probability of each feature belonging to each module given all other feature cluster assignments in a `celda_G()` result. 
 #'
-#' @param celda.mod A model returned from the 'celda_G' function
-#' @param counts The original count matrix used in the model
-#' @param log If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned.  
-#' @param ... Other arguments
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class `celda_G`. 
+#' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
+#' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell cluster probabilities. 
+#' @seealso `celda_G()` for clustering features
+#' @examples
+#' cluster.prob = clusterProbability(celda.G.sim$counts, celda.G.mod)
 #' @export
-clusterProbability.celda_G = function(celda.mod, counts, log=FALSE, ...) {
+setMethod("clusterProbability",
+           signature(celda.mod = "celda_G"),
+           function(counts, celda.mod, log=FALSE, ...) {
+              y = celda.mod@y
+              L = celda.mod@L
+              delta = celda.mod@delta
+              beta = celda.mod@beta
+              gamma = celda.mod@gamma
+              
+              ## Calculate counts one time up front
+              p = cG.decomposeCounts(counts=counts, y=y, L=L)
+              next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, 
+                                         n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
+                                         n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, 
+                                         beta=beta, delta=delta, gamma=gamma, 
+                                         do.sample=FALSE)  
+              y.prob = t(next.y$probs)
+              
+              if(!isTRUE(log)) {
+                y.prob = normalizeLogProbs(y.prob)
+              }
+              
+              return(list(y.probability=y.prob))
+          })
 
-  y = celda.mod$y
-  L = celda.mod$L
-  delta = celda.mod$delta
-  beta = celda.mod$beta
-  gamma = celda.mod$gamma
-  
-  ## Calculate counts one time up front
-  p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)  
-  y.prob = t(next.y$probs)
-  
-  if(!isTRUE(log)) {
-    y.prob = normalizeLogProbs(y.prob)
-  }
-  
-  return(list(y.probability=y.prob))
-}
 
-
+#' @title Calculate the perplexity on new data with a celda_G model
+#' @description Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. 
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class "celda_C"
+#' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
+#' @return Numeric. The perplexity for the provided count data and model.
+#' @seealso `celda_G()` for clustering features
+#' @examples
+#' perplexity = perplexity(celda.G.sim$counts, celda.G.mod)
 #' @export
-calculatePerplexity.celda_G = function(counts, celda.mod, validate.counts) {
- 
-  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
-                               "posterior", validate.counts)
-  phi <- factorized$posterior$gene.states
-  psi <- factorized$posterior$cell.states
-  eta <- factorized$posterior$gene.distribution
-  nG.by.TS = factorized$counts$gene.distribution
-  
-  eta.prob = log(eta) * nG.by.TS
-  gene.by.cell.prob = log(phi %*% psi) 
-  log.px = sum(eta.prob) + sum(gene.by.cell.prob * counts)
-  
-  perplexity = exp(-(log.px/sum(counts)))
-  return(perplexity)
-}
+setMethod("perplexity",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, new.counts=NULL) {
+            counts = processCounts(counts)
+            compareCountMatrix(counts, celda.mod)
+          
+            if(is.null(new.counts)) {
+              new.counts = counts
+            } else {
+              new.counts = processCounts(new.counts)
+            }
+            if(nrow(new.counts) != nrow(counts)) {
+              stop("new.counts should have the same number of rows as counts.")
+            }
+            
+            factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
+                                         type=c("posterior", "counts"))
+            phi <- factorized$posterior$module
+            psi <- factorized$posterior$cell
+            eta <- factorized$posterior$gene.distribution
+            nG.by.TS = factorized$counts$gene.distribution
+            
+            eta.prob = log(eta) * nG.by.TS
+            gene.by.cell.prob = log(phi %*% psi) 
+            log.px = sum(eta.prob) + sum(gene.by.cell.prob * new.counts)
+            
+            perplexity = exp(-(log.px/sum(new.counts)))
+            return(perplexity)
+          })
 
 
 reorder.celda_G = function(counts, res) {
-  if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
-    res$y = as.integer(as.factor(res$y))
-    fm <- factorizeMatrix(counts = counts, celda.mod = res,
-                          validate.counts = FALSE)
-    unique.y = sort(unique(res$y))
-    cs = prop.table(t(fm$posterior$cell.states[unique.y,]), 2)
+  if(res@L > 2 & isTRUE(length(unique(res@y)) > 1)) {
+    res@y = as.integer(as.factor(res@y))
+    fm <- factorizeMatrix(counts = counts, celda.mod = res)
+    unique.y = sort(unique(res@y))
+    cs = prop.table(t(fm$posterior$cell[unique.y,]), 2)
     d <- cosineDist(cs)
-    h <- hclust(d, method = "complete")
+    h <- stats::hclust(d, method = "complete")
     res <- recodeClusterY(res, from = h$order, to = 1:length(h$order))
   }  
   return(res)
 }
 
 
-#' finalClusterAssignment for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
+#' @title Heatmap for celda_CG
+#' @description Renders an expression heatmap to visualize `celda_CG()` results. The top `nfeatures` for each module will be included in the heatmap. 
+#'
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class `celda_G`. 
+#' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
+#' @param ... Additional parameters.
+#' @seealso `celda_G()` for clustering features and `celdaTsne()` for generating 2-dimensional coordinates
+#' @examples
+#' celdaHeatmap(celda.G.sim$counts, celda.G.mod)
+#' @return list A list containing the dendrograms and the heatmap grob
 #' @export
-finalClusterAssignment.celda_G = function(celda.mod) {
-  return(celda.mod$y)
-}
+setMethod("celdaHeatmap",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, nfeatures=25, ...) {
+            fm = factorizeMatrix(counts, celda.mod, type="proportion")
+            top = topRank(fm$proportions$module, n=nfeatures)
+            ix = unlist(top$index)
+            norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
+            plotHeatmap(norm[ix,], y=celda.mod@y[ix], ...)
+          })
 
-
-#' getK for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-getK.celda_G = function(celda.mod) { return(NA) }
-
-
-#' getL for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @export
-getL.celda_G = function(celda.mod) {
-  return(celda.mod$L)
-}
-
-
-#' celdaHeatmap for celda Gene clustering model
-#' @param celda.mod A celda model object of class "celda_G"
-#' @param counts A numeric count matrix
-#' @param ... extra parameters passed onto renderCeldaHeatmap
-#' @export
-celdaHeatmap.celda_G = function(celda.mod, counts, ...) {
-  renderCeldaHeatmap(counts, y=celda.mod$y, ...)
-}
-
-
-#' Embeds cells in two dimensions using tSNE based on celda_CG results.
+#' @title tSNE for celda_G
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_G` model. tSNE is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE. 
 #' 
-#' @param counts Counts matrix, should have cell name for column name and gene name for row name.
-#' @param celda.mod Celda model to use for tsne. 
-#' @param states Numeric vector; determines which gene states to use for tSNE. If NULL, all states will be used. Default NULL.
-#' @param perplexity Numeric vector; determines perplexity for tSNE. Default 20.
-#' @param max.iter Numeric vector; determines iterations for tsne. Default 1000.
-#' @param distance Character vector; determines which distance metric to use for tSNE. One of 'hellinger', 'cosine', 'spearman'.
-#' @param seed Seed for random number generation. Default 12345.
-#' @param ... Further arguments passed to or from other methods.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class `celda_G`.  
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param modules Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param ... Additional parameters.
+#' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for displaying expression
+#' @examples
+#' tsne.res = celdaTsne(celda.G.sim$counts, celda.G.mod)
+#' @return A two column matrix of t-SNE coordinates
 #' @export
-celdaTsne.celda_G = function(counts, celda.mod, states=NULL, perplexity=20, max.iter=2500, 
-                             distance="hellinger", seed=12345, ...) {
-                             
-  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
-    
-  states.to.use = 1:nrow(fm$counts$cell.states)
-  if (!is.null(states)) {
-	if (!all(states %in% states.to.use)) {
-	  stop("'states' must be a vector of numbers between 1 and ", states.to.use, ".")
-	}
-	states.to.use = states 
-  } 
-  norm = normalizeCounts(fm$counts$cell.states[states.to.use,], scale.factor=1)
+setMethod("celdaTsne",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                    initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
+                    seed=12345, ...) {
+  
+            if(max.cells > ncol(counts)) {
+              max.cells = ncol(counts)
+            }
+            
+            fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, 
+                                 type="counts")
+              
+            modules.to.use = 1:nrow(fm$counts$cell)
+            if (!is.null(modules)) {
+          	if (!all(modules %in% modules.to.use)) {
+          	  stop("'modules' must be a vector of numbers between 1 and ", 
+          	       modules.to.use, ".")
+          	}
+          	modules.to.use = modules 
+            }
+             
+            cell.ix = sample(1:ncol(counts), max.cells)
+            norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], 
+                                     normalize="proportion", 
+                                     transformation.fun=sqrt))
+          
+            res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, 
+                                max.iter=max.iter, seed=seed)
+            rownames(res) = colnames(counts)
+            colnames(res) = c("tsne_1", "tsne_2")
+            return(res)
+          })
 
-  res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, distance=distance, seed=seed)
-  rownames(res) = colnames(norm)
-  colnames(res) = c("tsne_1", "tsne_2")
-  return(res)
-}
+
+#' @title Lookup the module of a feature
+#' @description Finds the module assignments of given features in a `celda_G()` model
+#'  
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Model of class `celda_G`.
+#' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE. 
+#' @return List. Each element contains the module of the provided feature.
+#' @seealso `celda_G()` for clustering features
+#' @examples
+#' module = featureModuleLookup(celda.G.sim$counts, celda.G.mod, 
+#'                              c("Gene_1", "Gene_XXX"))
+#' @export
+setMethod("featureModuleLookup",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, feature, exact.match = TRUE){
+            list <- list()
+            if(!isTRUE(exact.match)){
+              feature.grep <- c()
+              for(x in 1:length(feature)){
+                feature.grep <- c(feature.grep, 
+                                  rownames(counts)[grep(feature[x],rownames(counts))]) 
+              }
+              feature <- feature.grep
+            }
+            for(x in 1:length(feature)){
+              if(feature[x] %in% rownames(counts)){
+                list[x] <- celda.mod@y[which(rownames(counts) == feature[x])]
+              }else{
+                list[x] <- paste0("No feature was identified matching '", 
+                                  feature[x], "'.")
+              }
+            } 
+            names(list) <- feature
+            return(list)
+         })

@@ -2,47 +2,48 @@
 % Please edit documentation in R/celdaGridSearch.R
 \name{celdaGridSearch}
 \alias{celdaGridSearch}
-\title{Run the celda Bayesian hierarchical model on a matrix of counts.}
+\title{Run Celda in parallel with multiple parameters}
 \usage{
 celdaGridSearch(counts, model, params.test, params.fixed = NULL,
   max.iter = 200, nchains = 3, cores = 1, best.only = TRUE,
   seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
 }
 \arguments{
-\item{counts}{A count matrix.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
 \item{model}{Celda model. Options available in `celda::available.models`.}
 
-\item{params.test}{List. A list denoting the combinations of parameters to run in a celda model. For example, "list(K=5:10, L=15:20)" will run all combinations of K from 5 to 10 and L from 15 to 20 in model 'celda_CG'.}
+\item{params.test}{List. A list denoting the combinations of parameters to run in a celda model. For example, `list(K=5:10, L=15:20)` will run all combinations of K from 5 to 10 and L from 15 to 20 in model `celda_CG()`.}
 
 \item{params.fixed}{List. A list denoting additional parameters to use in each celda model. Default NULL.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
+\item{max.iter}{Integer. Maximum number of iterations of sampling to perform. Default 200.}
 
-\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
+\item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{cores}{Integer. The number of cores to use for parallel Gibbs sampling. Default 1.}
+\item{cores}{Integer. The number of cores to use for parallel estimation of chains. Default 1.}
 
 \item{best.only}{Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 
 \item{logfile.prefix}{Character. Prefix for log files from worker threads and main process. Default "Celda".}
 }
 \value{
-Object of class "celda_list", which contains results for all model parameter combinations and summaries of the run parameters
+Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
 }
 \description{
-Yields assigments of genes/cells to clusters, depending on the provided model type.
+Run Celda with different combinations of parameters and multiple chains in parallel. The variable `available_models` contains the potential models that can be utilized. Different parameters to be tested should be stored in a list and passed to the argument `params.test`. Fixed parameters to be used in all models, such as `sample.label`, can be passed as a list to the argument `params.fixed`. When `verbose=TRUE`, output from each chain will be sent to a log file but not be displayed in stdout.
 }
 \examples{
-## Simulate a small dataset with 5 cell clusters and 10 feature modules
-celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-
 ## Run various combinations of parameters with 'celdaGridSearch'
-cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
-                      params.fixed=list(sample.label=celda.sim$sample.label),
+cgs = celdaGridSearch(celda.CG.sim$counts, model="celda_CG", 
+                      params.test=list(K=4:6, L=9:11), 
+                      params.fixed=list(sample.label=celda.CG.sim$sample.label),
                       best.only=TRUE, nchains=1)
+}
+\seealso{
+`celda_G()` for feature clustering, `celda_C()` for clustering of cells, and `celda_CG()` for simultaneous clustering of features and cells. `subsetCeldaList()` can subset the `celda_list` object. `selectBestModel()` can get the best model for each combination of parameters.
 }

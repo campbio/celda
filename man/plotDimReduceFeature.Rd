@@ -20,7 +20,7 @@ plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
 
-\item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
+\item{exact.match}{Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2).}
 
@@ -44,10 +44,10 @@ Create a scatterplot for each row of a normalized gene expression matrix where x
 }
 \examples{
 \donttest{
-sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
-                  counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
+celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
+                        celda.mod = celda.CG.mod)
+plotDimReduceFeature(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
+                     counts = celda.CG.sim$counts,
+                     features = c("Gene_99"), exact.match = TRUE)
 }
 }

@@ -2,31 +2,24 @@
 % Please edit documentation in R/celda_functions.R
 \name{compareCountMatrix}
 \alias{compareCountMatrix}
-\title{Check whether a count matrix was the one used in a given celda run}
+\title{Check count matrix consistency}
 \usage{
 compareCountMatrix(counts, celda.mod, error.on.mismatch = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{celda.mod}{Celda model object.}
 
-\item{error.on.mismatch}{Logical. Whether to stop execution in the event of a count matrix mismatch. Default TRUE.}
+\item{error.on.mismatch}{Logical. Whether to throw an error in the event of a mismatch. Default TRUE.}
 }
 \value{
-TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise. Error on FALSE if error.on.mismatch is TRUE.
+Returns TRUE if provided count matrix matches the one used in the celda object and/or `error.on.mismatch=FALSE`, FALSE otherwise.
 }
 \description{
-Ensures that the provided celda object was generated from a counts matrix
-with similar dimensions to the one provided.
-}
-\details{
-Then, compare the MD5 checksum of a provided count.matrix to the count matrix
-checksum on a celda_list object, to see if they're the same.
+Checks if the counts matrix is the same one used to generate the celda model object by comparing dimensions and MD5 checksum.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
- compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
+ compareCountMatrix(celda.CG.sim$counts, celda.CG.mod, 
+                    error.on.mismatch=FALSE)
 }

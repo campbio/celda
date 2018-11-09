@@ -4,72 +4,87 @@ context("Testing celda_C")
 
 celdaC.sim = simulateCells("celda_C", K=10)
 model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, 
-                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
+                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE,
+                  max.iter=2)
 factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)  
 
 # celda_C
 test_that(desc = "Testing simulation and celda_C model", {
   expect_equal(typeof(celdaC.sim$counts), "integer")
   expect_true(all(sweep(factorized$counts$sample, 2, colSums(factorized$counts$sample), "/") == factorized$proportions$sample))  
-  expect_true(ncol(factorized$proportions$module) == model_C$K)
-  expect_true(all(is.numeric(completeLogLikelihood(celda.mod = model_C))))
-  expect_equal(max(completeLogLikelihood(celda.mod = model_C)), finalLogLikelihood(model_C))
+  expect_true(ncol(factorized$proportions$module) == model_C@K)
+  expect_true(all(is.numeric(completeLogLik(celda.mod = model_C))))
+  expect_equal(max(completeLogLik(celda.mod = model_C)), finalLogLik(model_C))
   
   # GitHub #347
   numeric.counts = celdaC.sim$counts
   storage.mode(numeric.counts) = "numeric"
-  expect_equal(class(celda_C(counts=celdaC.sim$counts, 
+  expect_true(is(celda_C(counts=celdaC.sim$counts, 
                              sample.label=celdaC.sim$sample.label, 
-                             K=celdaC.sim$K, algorithm="EM", verbose=FALSE)),
-               "celda_C")
+                             K=celdaC.sim$K, algorithm="EM", verbose=FALSE,
+                             max.iter=2),
+               "celda_C"))
 })
 
 # clusterProbability
 test_that(desc = "Testing clusterProbability with celda_C", {
-  expect_true(all(rowSums(clusterProbability(model_C, counts = celdaC.sim$counts)[[1]]) == 1))
+  expect_true(all(round(rowSums(clusterProbability(model_C, counts = celdaC.sim$counts)[[1]])) == 1))
 })
 
 # celdaGridSearch and perplexity calculations
 test_that(desc = "Testing celdaGridSearch with celda_C", {
-  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  nchains = 2, params.test=list(K=c(5,10)), params.fixed=list(sample.label=celdaC.sim$sample.label), max.iter = 15, verbose = FALSE, best.only=FALSE)
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", params.test=list(K=4:5, M = 3:4), params.fixed=list(sample.label=celdaC.sim$sample.label), best.only=FALSE),
+  celdaC.res <- celdaGridSearch(counts = celdaC.sim$counts, model = "celda_C",  
+                                nchains = 2, params.test=list(K=c(5,6)), 
+                                params.fixed=list(sample.label=celdaC.sim$sample.label),
+                                max.iter = 2, verbose = FALSE, best.only=FALSE)
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", 
+                               params.test=list(K=4:5, M = 3:4), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label),
+                               best.only=FALSE),
                "The following elements in 'params.test' are not arguments of 'celda_C': M")
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=4:5, sample.label = "Sample"), params.fixed=list(sample.label=celdaC.sim$sample.label)),
-               "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(), params.fixed=list(sample.label=celdaC.sim$sample.label)),
-               "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_C': K")
-  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", nchains = 2, params.test=list(K=9:10), params.fixed=list(sample.label=celdaC.sim$sample.label, xxx = "xxx")),
-               "The following elements in 'params.fixed' are not arguments of 'celda_C': xxx")
-  expect_warning(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C",params.test=list(K=9:10, nchains = 2)),"Parameter 'nchains' should not be used within the params.test list")
   
-  expect_true(class(celdaC.res)[1] == "celda_list")
-  expect_equal(names(runParams(celda.list = celdaC.res)), c("index","chain","K","log_likelihood"))
-  expect_equal(is.null(celdaC.res$perplexity), TRUE)
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, 
+                               model="celda_C", nchains = 1, max.iter=1,
+                               params.test=list(K=4:5, sample.label = "Sample"), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label)),
+               "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
+  
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, 
+                               model="celda_C", nchains = 1, max.iter=1,
+                               params.test=list(), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label)),
+               "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_C': K")
+  
+  expect_error(celdaGridSearch(counts=celdaC.sim$counts, model="celda_C", 
+                               nchains = 1, max.iter = 1,
+                               params.test=list(K=9:10), 
+                               params.fixed=list(sample.label=celdaC.sim$sample.label,
+                                                 xxx = "xxx")),
+               "The following elements in 'params.fixed' are not arguments of 'celda_C': xxx")
+  
+  expect_true(class(celdaC.res)[1] == "celdaList")
+  expect_equal(names(run.params(celdaC.res)), c("index","chain","K","log_likelihood"))
   expect_error(plotGridSearchPerplexity(celdaC.res))
 
   celdaC.res = resamplePerplexity(celdaC.sim$counts, celdaC.res, resample=2)
-  expect_equal(is.null(celdaC.res$perplexity), FALSE)
-  expect_is(celdaC.res, "celda_list")
-  expect_is(celdaC.res, "celda_C")
+  expect_equal(is.null(celdaC.res@perplexity), FALSE)
+  expect_true(is(celdaC.res, "celdaList"))
   expect_error(resamplePerplexity(celdaC.sim$counts, celdaC.res, resample="2"))
   expect_error(resamplePerplexity(celdaC.sim$counts, "celdaC.res", resample=2))
   
   plot.obj = plotGridSearchPerplexity(celdaC.res)
   expect_is(plot.obj, "ggplot")
 
-  celdaG.res = celdaGridSearch(counts = celdaC.sim$counts, model = "celda_G", nchains = 1, params.test=list(L=c(5,10)), max.iter = 5, verbose = FALSE, best.only=TRUE)
-  expect_error(plotGridSearchPerplexity.celda_C(celdaG.res))
-  
   celdaC.res.index1 = subsetCeldaList(celdaC.res, params=list(index = 1))
-  expect_true(all(class(celdaC.res.index1) == "celda_C" && class(celdaC.res.index1) != "celda_list"))
+  expect_true(all(is(celdaC.res.index1, "celda_C") && !is(celdaC.res.index1, "celda_list")))
   
   expect_error(subsetCeldaList(celdaC.res, params = list(K = 11)))
   expect_error(subsetCeldaList(celdaC.res, params = list(K = 5, M = 10)))
   
   celdaC.res.K5 <- subsetCeldaList(celdaC.res, params=list(K = 5))
   model_C_2 = selectBestModel(celdaC.res.K5)
-  res <- perplexity.celda_C(celdaC.sim$counts, model_C)
-  res2 <- perplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts + 1)
+  res <- perplexity(celdaC.sim$counts, model_C)
+  res2 <- perplexity(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts + 1)
   
   expect_error(res <- perplexity.celda_C(celdaC.sim$counts, model_C, new.counts = celdaC.sim$counts[-1,]))
 })
@@ -116,7 +131,7 @@ test_that(desc = "Testing recodeClusterZ with celda_C", {
   expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))    
   new.recoded <- recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_C$z == 1, new.recoded$z == 5)
+  expect_equal(model_C@z == 1, new.recoded@z == 5)
 })
 
 # compareCountMatrix
@@ -144,9 +159,9 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
 
 # plotHeatmap
 test_that(desc = "Testing plotHeatmap with celda_C", {
-  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C$K), "Length of z must match number of columns in counts matrix")
-  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C$z, scale.row = model_C), "'scale.row' needs to be of class 'function'")
-  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C$z, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@K), "Length of z must match number of columns in counts matrix")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@z, scale.row = model_C), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@z, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
 })
 
 
@@ -155,15 +170,15 @@ test_that(desc = "Testing plotHeatmap with celda_C, including annotations",{
   annot <- as.data.frame(c(rep(x = 1, times = ncol(celdaC.sim$counts) - 100),rep(x = 2, 100)))
   
   rownames(annot) <- colnames(celdaC.sim$counts)
-  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C$z)),
+  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C@z)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot) <- NULL
-  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.feature = as.matrix(annot), z = model_C$z)),
+  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.feature = as.matrix(annot), z = model_C@z)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot) <- rev(colnames(celdaC.sim$counts))
-  expect_error(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C$z),
+  expect_error(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C@z),
                "Row names of 'annotation.cell' are different than the column names of 'counts'")
 })
 
@@ -199,22 +214,22 @@ test_that(desc = "Testing differentialExpression with celda_C", {
 test_that(desc = "Testing celdaTsne with celda_C when model class is changed, should error",{
   model_X <- model_C
   class(model_X) <- "celda_X"
-  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C$z), min.cluster.size=10),
-               "celda.mod argument is not of class celda_C, celda_G or celda_CG")
+  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C@z), min.cluster.size=10),
+               "unable to find an inherited method for function 'celdaTsne' for signature '\"celda_X\"'")
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
-  tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C$z), min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C$z))
+  tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C@z), min.cluster.size=10)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@z))
   expect_true(!is.null(plot.obj))
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including a subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=50, min.cluster.size=50)))
   tsne <- celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C$z) && sum(!is.na(tsne[,1])) == 100)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
 
@@ -236,5 +251,5 @@ test_that(desc = "Testing perplexity.celda_C", {
   
   class(model_C) = c("celda_CG")
   expect_error(perplexity.celda_C(celdaC.sim$counts, model_C),
-               "The celda.mod provided was not of class celda_C.")
+               "could not find function \"perplexity.celda_C\"")
 })

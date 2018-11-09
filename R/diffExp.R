@@ -1,25 +1,16 @@
-#' @title Gene expression markers for cell clusters using MAST
-#' @description Finds markers (differentially expressed genes) for cell clusters
-#'    using MAST: a flexible statistical framework for assessing transcriptional
-#'    changes and characterizing heterogeneity in single-cell RNA sequencing data
-#'    (Finak et al, Genome Biology, 2015)
+#' @title Differential expression for cell subpopulations using MAST
+#' @description Uses MAST to find differentially expressed features for specified cell subpopulations.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". 
+#' @param celda.mod Celda object of class `celda_C` or `celda_CG`. 
 #' @param c1 Integer vector. Cell populations to include in group 1 for the differential expression analysis. 
-#' @param c2 Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, everything in c1 is compared to all other clusters. Default NULL. 
-#' @param only.pos Logical. Whether to only return markers with positive log2fc. Default FALSE.
-
-#' @param log2fc.threshold Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned.
-#' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned.
-#' @return Data frame containing a ranked list (based on the absolute value of log2fc) of putative markers,
-#'    and associated statistics (p-value, log2fc and FDR).
+#' @param c2 Integer vector. Cell populations to include in group 2 for the differential expression analysis. If NULL, the clusters in the c1 group are compared to all other clusters. Default NULL. 
+#' @param only.pos Logical. Whether to only return markers with positive log2 fold change. Default FALSE.
+#' @param log2fc.threshold Numeric. A number greater than 0 that specifies the absolute log2 fold change threshold. Only features with absolute value above this threshold will be returned. If NULL, this filter will not be applied. Default NULL.
+#' @param fdr.threshold Numeric. A number between 0 and 1 that specifies the false discovery rate (FDR) threshold. Only features below this threshold will be returned. Default 1. 
+#' @return Data frame containing MAST results including statistics such as p-value, log2 fold change, and FDR.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)   
-#' cluster.diffexp.res = differentialExpression(celda.sim$counts, celda.mod, 
-#'                                              c1=c(1,2))
+#' cluster.diffexp.res = differentialExpression(celda.CG.sim$counts, celda.CG.mod, c1=c(1,2))
 #' @export
 #' @import data.table
 #' @import plyr
@@ -27,7 +18,7 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   if (!is.matrix(counts)) {
     stop("'counts' should be a numeric count matrix")
   }
-  if (!class(celda.mod) %in% c("celda_C", "celda_CG") || is.null(celda.mod$z)){
+  if (!(methods::is(celda.mod, "celda_C") || methods::is(celda.mod, "celda_CG")) || is.null(celda.mod@z)){
     stop("'celda.mod' should be an object of class celda_C or celda_CG")
   }
   if (is.null(c1)) {
@@ -36,23 +27,21 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   compareCountMatrix(counts, celda.mod)
   
   if (is.null(c2)){
-    c2 <- sort(setdiff(unique(celda.mod$z),c1))
+    c2 <- sort(setdiff(unique(celda.mod@z),c1))
   }
   if (length(c1) > 1){
     cells1 <-
-      celda.mod$names$column[which(celda.mod$z %in% c1)]
-  }
-  else{
+      celda.mod@names$column[which(celda.mod@z %in% c1)]
+  }else{
     cells1 <-
-      celda.mod$names$column[which(celda.mod$z == c1)]
+      celda.mod@names$column[which(celda.mod@z == c1)]
   }
   if (length(c2) > 1){
     cells2 <-
-      celda.mod$names$column[which(celda.mod$z %in% c2)]
-  }
-  else{
+      celda.mod@names$column[which(celda.mod@z %in% c2)]
+  }else{
     cells2 <-
-      celda.mod$names$column[which(celda.mod$z == c2)]
+      celda.mod@names$column[which(celda.mod@z == c2)]
   }
   mat <- counts[,c(cells1,cells2)]
   log_normalized_mat <- normalizeCounts(mat, normalize="cpm", transformation.fun=log1p)
@@ -63,7 +52,7 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
       ngeneson = rep("", (length(cells1) + length(cells2))),
       stringsAsFactors = FALSE
     )
-  sca <- MAST::FromMatrix(log_normalized_mat, cdat)
+  sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
   cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
   SummarizedExperiment::colData(sca)$cngeneson <- scale(cdr2)
   cond <- factor(SummarizedExperiment::colData(sca)$condition)
@@ -93,8 +82,8 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
     }
   }
   fcHurdleSig <- fcHurdleSig[,-c(4,5)]
-  names(fcHurdleSig)[c(1,3)] <- c("Gene", "log2fc")
-  fcHurdleSig <- fcHurdleSig[order(abs(fcHurdleSig$log2fc), decreasing = TRUE),]
+  names(fcHurdleSig)[c(1,2,3,4)] <- c("Gene","Pvalue","Log2_FC","FDR")
+  fcHurdleSig <- fcHurdleSig[order(fcHurdleSig$Pvalue, decreasing = FALSE),]
   return(fcHurdleSig)
 }
 

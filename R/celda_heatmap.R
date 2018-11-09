@@ -29,11 +29,7 @@
 #' @param silent Logical. Whether to plot the heatmap.
 #' @param ... Other arguments to be passed to underlying pheatmap function.
 #' @examples 
-#' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      sample.label=celda.sim$sample.label,
-#'                      max.iter=2, nchains=1)
-#' plotHeatmap(celda.sim$counts, z=celda.mod$z, y=celda.mod$y)
+#' plotHeatmap(celda.CG.sim$counts, z=z(celda.CG.mod), y=y(celda.CG.mod))
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @import gtable
 #' @import grid
@@ -42,17 +38,21 @@
 #' @import grDevices
 #' @import graphics
 #' @export 
-plotHeatmap <- function(counts, z = NULL, y = NULL, 
+plotHeatmap <- function(counts, 
+                        z = NULL, 
+                        y = NULL, 
                         scale.row = scale,
                         trim=c(-2,2), 
                         feature.ix = NULL,
                         cell.ix = NULL,
-                        cluster.feature = TRUE, cluster.cell = TRUE,
+                        cluster.feature = TRUE, 
+                        cluster.cell = TRUE,
                         color.scheme = c("divergent", "sequential"),
                         color.scheme.symmetric = TRUE,
                         color.scheme.center = 0,
                         col= NULL,
-                        annotation.cell = NULL, annotation.feature = NULL, 
+                        annotation.cell = NULL, 
+                        annotation.feature = NULL, 
                         annotation.color = NULL,
                         breaks = NULL, 
                         legend = TRUE,
