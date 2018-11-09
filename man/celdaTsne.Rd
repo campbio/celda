@@ -2,17 +2,26 @@
 % Please edit documentation in R/s3_generics.R
 \name{celdaTsne}
 \alias{celdaTsne}
-\title{Runs tSNE via Rtsne based on the CELDA model and specified cell states.}
+\title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
 celdaTsne(counts, celda.mod, ...)
 }
 \arguments{
-\item{counts}{Counts matrix, should have cell name for column name and gene name for row name.}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda model to use for tsne. class "celda_C","celda_G" or "celda_CG".}
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
-\item{...}{Other arguments to be passed to model-specific tSNE functions. Use methods("celdaTsne") for list of 'celdaTsne' functions.}
+\item{...}{Additional parameters.}
+}
+\value{
+Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
 }
 \description{
-Runs tSNE via Rtsne based on the CELDA model and specified cell states.
+Embeds cells in two dimensions using tSNE based on celda_CG results.
+}
+\examples{
+celda.sim = simulateCells("celda_CG")
+celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
+                     nchains=1, max.iter=1)
+tsne.res = celdaTsne(celda.sim$counts, celda.mod)
 }
