@@ -43,7 +43,7 @@ Celda will take a matrix of counts where each row is a feature, each cell is a c
 In the function `simulateCells`, the K parameter designates the number of cell clusters, the L parameter determines the number of feature modules, the S parameter determines the number of samples in the simulated dataset, and the G parameter determines the number of features to be simulated.
 
 ```{r}
-sim_counts <- simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 500)
+sim_counts <- simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 100)
 ```
 
 The `counts` variable contains the counts matrix.
@@ -137,11 +137,9 @@ top.genes$names$L1
 
 The clustering results can be viewed with a heatmap of the normalized counts using the function `celdaHeatmap`. The top `nfeatures` in each module will be selected according to the factorized module probability matrix. 
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 celdaHeatmap(counts = sim_counts$counts, celda.mod = celda.model, nfeatures = 10)
 ```
-![](celdaHeatmap1.jpg)
-
 ## Plotting cell populations with tSNE
 
 Celda contains its own wrapper function for tSNE, `celdaTsne`, which can be used to embed cells into 2-dimensions. The output can be used in the downstream plotting functions `plotDimReduceCluster`, `plotDimReduceModule`, and `plotDimReduceFeature` to show cell population clusters, module probabilities, and expression of a individual features, respectively:
@@ -150,7 +148,7 @@ Celda contains its own wrapper function for tSNE, `celdaTsne`, which can be used
 tsne <- celdaTsne(counts = sim_counts$counts, celda.mod = celda.model)
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 plotDimReduceCluster(dim1 = tsne[,1], 
                      dim2 = tsne[,2], 
                      cluster = celda.model$z)
@@ -161,28 +159,21 @@ plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2],
 plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2],
                      counts = sim_counts$counts, features = "Gene_1")
 ```
-![](plotDimReduceCluster1.jpg)
-![](plotDimReduceModule1.jpg)
-![](plotDimReduceFeature1.jpg)
-
 
 ## Displaying relationships between modules and cell populations
 
 The relationships between feature modules and cell populations can be visualized with `celdaProbabilityMap`. The absolute probabilities of each feature module in each cellular subpopulation is shown on the left. The normalized and z-scored expression of each module in each cell population is shown on the right.
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 celdaProbabilityMap(counts = sim_counts$counts, celda.mod = celda.model)
 ```
-![](celdaProbabilityMap1.jpg)
-
 ## Examining co-expression with module heatmaps
 
 moduleHeatmap creates a heatmap using only the features from a specific feature module. Cells are ordered from those with the lowest probability of the module to the highest. If more than one module is used, then cells will be ordered by the probabilities of the first module.
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 moduleHeatmap(counts = sim_counts$counts, celda.mod = celda.model, feature.module = 1, top.cells = 100)
 ```
-![](moduleHeatmap1.jpg)
 
 While `celdaHeatmap` will plot a heatmap directly with a Celda object, the `plotHeatmap` function is a more general heatmap function which takes a normalized expression matrix as the input. Simple normalization of the counts matrix can be performed with the `normalizeCounts` function. For instance, if users want to display specific modules and cell populations, the `feature.ix`  and `cells.ix` parameters can be used to select rows and columns out of the matrix. 
 
@@ -192,11 +183,9 @@ gene.ix = which(rownames(sim_counts$counts) %in% genes)
 norm.counts <- normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 plotHeatmap(counts = norm.counts, z = celda.model$z, y = celda.model$y, feature.ix = gene.ix, show.names.feature = TRUE)
 ```
-![](plotHeatmap1.jpg)
-
 # Differential Expression Analysis
 
 Celda employs the MAST package [(McDavid A, 2018)](https://bioconductor.org/packages/release/bioc/html/MAST.html) for differential expression analysis of single-cell data. The `differentialExpression` function can determine features that are differentially expressed in one cell subpopulation versus all other subpopulations, between two individual cell subpopulations, or between different groups of cell populations. 
@@ -229,10 +218,9 @@ diffexp.gene.ix = which(rownames(sim_counts$counts) %in% diffexp.clust1vs2$Gene)
 norm.counts <- normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 plotHeatmap(counts = norm.counts[,celda.model$z %in% c(1,2)], z = celda.model$z[celda.model$z %in% c(1,2)], y = celda.model$y, feature.ix = diffexp.gene.ix, show.names.feature = TRUE)
 ```
-![](plotHeatmap2.jpg)
 
 
 # Identifying the optimal number of cell subpopulations and feature modules
@@ -241,9 +229,9 @@ In the previous example, the best K and L was already known. However, the optima
 
 Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. The `resamplePerplexity` function "perturbs" the original counts matrix by resampling the counts of each cell according to its normalized probability distribution. Perplexity is calculated on the resampled matrix and the procedure is repeated `resample` times. These results can be visualized with `plotGridSearchPerplexity`. The major goal is to pick the lowest K and L combination with relatively good perplexity. In general, visual inspection of the plot can be used to select the number of modules (L) or cell populations (K) where the rate of decrease in the perplexity starts to drop off.
 
-```{r, eval = FALSE, message = FALSE}
+```{r, eval = TRUE, message = FALSE}
 cgs <- celdaGridSearch(sim_counts$counts,
-                            params.test = list(K = 3:7, L = 8:12),
+                            params.test = list(K = 3:6, L = 8:11),
                             cores = 1,
                             model = "celda_CG",
                             nchains = 2,
@@ -255,30 +243,28 @@ cgs <- celdaGridSearch(sim_counts$counts,
 
 `resamplePerplexity` calculates the perplexity of each model's cluster assignments, as well as resamplings of that count matrix. The result of this function can be visualized with `plotGridSearchPerplexity` for determination of the optimal K/L values.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 cgs <- resamplePerplexity(counts = sim_counts$counts,
                                      celda.list = cgs,
                                      resample = 5)
 ```
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE}
+```{r, eval = TRUE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE}
 plotGridSearchPerplexity(celda.list = cgs)
 ```
-![](plotGridSearchPerplexity1.jpg)
-
 In this example, the perplexity for L stops decreasing at L = 10 for the majority of K values. For the line corresponding to L = 10, the perplexity stops decreasing at K = 5. Thus L = 10 and K = 5 would be a good choice. Generally, this method can be used to pick a reasonable L and a potential range of K. However, manual review of specific selections of K is often be required to ensure results are biologically coherent.
 
 Once users have chosen the K/L parameters for further analysis, the `subsetCeldaList` function can be used to subset the celda_list object to a single model.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 celda.model = subsetCeldaList(celda.list = cgs, params = list(K = 5, L = 10))
 ```
 
 If the "best.only" parameter is set to FALSE in the `celdaGridSearch`, then the `selectBestModel` function can be used to select the chains with the lowest log likelihoods within each combination of parameters. Alternatively, users can use select a specific chain by specifying the index within the `subsetCeldaList` function.
 
-```{r, message=FALSE, eval=FALSE}
+```{r, message=FALSE, eval=TRUE}
 cgs <- celdaGridSearch(sim_counts$counts,
-                            params.test = list(K = 3:7, L = 8:12),
+                            params.test = list(K = 3:6, L = 8:11),
                             cores = 1,
                             model = "celda_CG",
                             nchains = 2,

@@ -2,11 +2,10 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceCluster}
 \alias{plotDimReduceCluster}
-\title{Create a scatterplot based on celda cluster labels.}
+\title{Plotting the cell labels on a dimensionality reduction plot}
 \usage{
-plotDimReduceCluster(dim1, dim2, cluster, size = 1,
-  xlab = "Dimension_1", ylab = "Dimension_2",
-  specific_clusters = NULL)
+plotDimReduceCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
+  ylab = "Dimension_2", specific_clusters = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -27,7 +26,7 @@ plotDimReduceCluster(dim1, dim2, cluster, size = 1,
 The plot as a ggplot object
 }
 \description{
-Create a scatterplot based on celda cluster labels.
+Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by its given `cluster` label.
 }
 \examples{
 \donttest{
