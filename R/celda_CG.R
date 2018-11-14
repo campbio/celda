@@ -80,7 +80,9 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
 	} else {
 	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
-	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=z, K=K, K.subclusters=10, min.feature=3, max.cells=100, seed=seed)
+	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=z, 
+	                       K=K, K.subclusters=10, min.feature=3, max.cells=100,
+	                       seed=seed)
 	}  
 	z.best = z
 	y.best = y  
