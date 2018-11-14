@@ -1,19 +1,4 @@
-#' Calculate the perplexity from a single celda model
-#' 
-#' Perplexity can be seen as a measure of how well a provided set of 
-#' cluster assignments fit the data being clustered.
-#' 
-#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
-#' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
-#' @return Numeric. The perplexity for the provided count data and model.
-#' @examples
-#' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
-#' @export
-perplexity = function(counts, celda.mod, new.counts=NULL) {
-  compareCountMatrix(counts, celda.mod)
-  UseMethod("perplexity", celda.mod)
-}
+
 
 
 #' Calculate and visualize perplexity of all models in a celda_list, with count resampling
@@ -33,7 +18,7 @@ perplexity = function(counts, celda.mod, new.counts=NULL) {
 #' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
-  if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
+  if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
   set.seed(seed)
@@ -42,13 +27,13 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
     countsList[[i]] = resampleCountMatrix(counts)
   }
  
-  perp.res = matrix(NA, nrow=length(celda.list$res.list), ncol=resample)
-  for(i in 1:length(celda.list$res.list)) {
+  perp.res = matrix(NA, nrow=length(celda.list@res.list), ncol=resample)
+  for(i in 1:length(celda.list@res.list)) {
     for(j in 1:resample) {
-      perp.res[i,j] = perplexity(counts, celda.list$res.list[[i]], countsList[[j]])
+      perp.res[i,j] = perplexity(counts, celda.list@res.list[[i]], countsList[[j]])
     }
   }
-  celda.list$perplexity = perp.res
+  celda.list@perplexity = perp.res
   
   return(celda.list)
 }
@@ -65,8 +50,11 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
 #' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity = function(celda.list) {
-  UseMethod("plotGridSearchPerplexity", celda.list)
+  do.call(paste0("plotGridSearchPerplexity.", 
+                 as.character(class(celda.list@res.list[[1]]))),
+          args=list(celda.list))
 }
+
 
 #' Plot perplexity as a function of K and L from celda_CG models
 #' 
@@ -80,16 +68,16 @@ plotGridSearchPerplexity = function(celda.list) {
 #' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity.celda_CG = function(celda.list) {
-  if (!all(c("K", "L") %in% colnames(celda.list$run.params))) {
-    stop("celda.list$run.params needs K and L columns.")
+  if (!all(c("K", "L") %in% colnames(celda.list@run.params))) {
+    stop("celda.list@run.params needs K and L columns.")
   }
-  if (is.null(celda.list$perplexity)) {
+  if (is.null(celda.list@perplexity)) {
     stop("No perplexity measurements available. First run 'resamplePerplexity' with celda.list object.")
   }
 
-  ix1 = rep(1:nrow(celda.list$perplexity), each=ncol(celda.list$perplexity))
-  ix2 = rep(1:ncol(celda.list$perplexity), nrow(celda.list$perplexity))
-  df = data.frame(celda.list$run.params[ix1,], perplexity=celda.list$perplexity[cbind(ix1, ix2)])
+  ix1 = rep(1:nrow(celda.list@perplexity), each=ncol(celda.list@perplexity))
+  ix2 = rep(1:ncol(celda.list@perplexity), nrow(celda.list@perplexity))
+  df = data.frame(celda.list@run.params[ix1,], perplexity=celda.list@perplexity[cbind(ix1, ix2)])
   df$K = as.factor(df$K)
   df$L = as.factor(df$L)  
 
@@ -123,16 +111,16 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
 #' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity.celda_C = function(celda.list) {
-  if (!all(c("K") %in% colnames(celda.list$run.params))) {
-    stop("celda.list$run.params needs the column K.")
+  if (!all(c("K") %in% colnames(celda.list@run.params))) {
+    stop("run.params(celda.list) needs the column K.")
   }
-  if (is.null(celda.list$perplexity)) {
+  if (is.null(celda.list@perplexity)) {
     stop("No perplexity measurements available. First run 'resamplePerplexity' with celda.list object.")
   }
 
-  ix1 = rep(1:nrow(celda.list$perplexity), each=ncol(celda.list$perplexity))
-  ix2 = rep(1:ncol(celda.list$perplexity), nrow(celda.list$perplexity))
-  df = data.frame(celda.list$run.params[ix1,], perplexity=celda.list$perplexity[cbind(ix1, ix2)])
+  ix1 = rep(1:nrow(celda.list@perplexity), each=ncol(celda.list@perplexity))
+  ix2 = rep(1:ncol(celda.list@perplexity), nrow(celda.list@perplexity))
+  df = data.frame(celda.list@run.params[ix1,], perplexity=celda.list@perplexity[cbind(ix1, ix2)])
   df$K = as.factor(df$K)
 
 
@@ -164,16 +152,16 @@ plotGridSearchPerplexity.celda_C = function(celda.list) {
 #' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity.celda_G = function(celda.list) {
-  if (!all(c("L") %in% colnames(celda.list$run.params))) {
-    stop("celda.list$run.params needs the column L.")
+  if (!all(c("L") %in% colnames(celda.list@run.params))) {
+    stop("celda.list@run.params needs the column L.")
   }
-  if (is.null(celda.list$perplexity)) {
+  if (length(celda.list@perplexity) == 0) {
     stop("No perplexity measurements available. First run 'resamplePerplexity' with celda.list object.")
   }
 
-  ix1 = rep(1:nrow(celda.list$perplexity), each=ncol(celda.list$perplexity))
-  ix2 = rep(1:ncol(celda.list$perplexity), nrow(celda.list$perplexity))
-  df = data.frame(celda.list$run.params[ix1,], perplexity=celda.list$perplexity[cbind(ix1, ix2)])
+  ix1 = rep(1:nrow(celda.list@perplexity), each=ncol(celda.list@perplexity))
+  ix2 = rep(1:ncol(celda.list@perplexity), nrow(celda.list@perplexity))
+  df = data.frame(celda.list@run.params[ix1,], perplexity=celda.list@perplexity[cbind(ix1, ix2)])
   df$L = as.factor(df$L)
 
 
