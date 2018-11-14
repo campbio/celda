@@ -4,8 +4,8 @@
 \alias{celdaProbabilityMap.celda_C}
 \title{Probability map for a celda_C model}
 \usage{
-\method{celdaProbabilityMap}{celda_C}(counts, celda.mod,
-  level = c("sample"), ...)
+\method{celdaProbabilityMap}{celda_C}(counts, celda.mod, level = c("sample"),
+  ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
