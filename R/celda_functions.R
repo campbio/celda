@@ -103,10 +103,10 @@ recodeClusterZ = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
     stop("All values in 'from' must have a mapping in 'to'")
   }
-  if (is.null(celda.mod$z)) {
+  if (is.null(celda.mod@z)) {
     stop("Provided celda.mod argument does not have a z attribute")
   }
-  celda.mod$z = plyr::mapvalues(celda.mod$z, from, to)
+  celda.mod@z = plyr::mapvalues(celda.mod@z, from, to)
   return(celda.mod)
 }
   
@@ -125,10 +125,10 @@ recodeClusterY = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
     stop("All values in 'from' must have a mapping in 'to'")
   }
-  if (is.null(celda.mod$y)) {
+  if (is.null(celda.mod@y)) {
     stop("Provided celda.mod argument does not have a y attribute")
   }
-  celda.mod$y = plyr::mapvalues(celda.mod$y, from, to)
+  celda.mod@y = plyr::mapvalues(celda.mod@y, from, to)
   return(celda.mod)
 }
 
@@ -145,15 +145,19 @@ recodeClusterY = function(celda.mod, from, to) {
 #'                     error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
-  if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
-    stop("The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
+  if (methods::.hasSlot(celda.mod, "y")) {
+    if (nrow(counts) != length(celda.mod@y)) {
+      stop(paste0("The provided celda object was generated from a counts matrix with a different number of features than the one provided."))
+    }  
   }
   
-  if (length(celda.mod$z != 0 ) & ncol(counts) != length(celda.mod$z)) {
-    stop("The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
+  if (methods::.hasSlot(celda.mod, "z")) {  
+    if (ncol(counts) != length(celda.mod@z)) {
+      stop(paste0("The provided celda object was generated from a counts matrix with a different number of cells than the one provided."))
+    }
   }
   
-  celda.checksum = celda.mod$count.checksum
+  celda.checksum = celda.mod@count.checksum
   counts = processCounts(counts)  # Checksums are generated in celdaGridSearch and model functions after processing
   count.md5 = digest::digest(counts, algo="md5")
   res = isTRUE(count.md5 == celda.checksum)

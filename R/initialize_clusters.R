@@ -108,7 +108,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
 		temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
 	  } else {
 		clustLabel = suppressMessages(.celda_C(counts[,z == i], K=K.subclusters, max.iter=5, stop.iter=1, algorithm="EM", nchains=1, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, initialize="random"))
-		temp.z[ix] = clustLabel$z + current.top.z 
+		temp.z[ix] = clustLabel@z + current.top.z 
 	  }
 	  current.top.z = max(temp.z, na.rm=TRUE)
 	}
