@@ -81,5 +81,5 @@ list A list containing dendrogram information and the heatmap grob
 Renders a heatmap based on a matrix of counts where rows are features and columns are cells.
 }
 \examples{
-plotHeatmap(celda.CG.sim$counts, z=z(celda.CG.mod), y=y(celda.CG.mod))
+plotHeatmap(celda.CG.sim$counts, z=celda.CG.mod@z, y=celda.CG.mod@y)
 }
