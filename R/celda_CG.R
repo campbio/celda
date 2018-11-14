@@ -803,21 +803,21 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 #'                              c("Gene_1", "Gene_XXX"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature, exact.match = TRUE){
-  list <- list()
   if(!isTRUE(exact.match)){
-    feature.grep <- c()
-    for(x in 1:length(feature)){
-      feature.grep <- c(feature.grep, rownames(counts)[grep(feature[x],rownames(counts))]) 
-    }
+    feature.grep <- lapply(feature, function(x){
+      rownames(counts)[grep(x, rownames(counts))]
+    })
+    feature.grep <- unlist(feature.grep)
     feature <- feature.grep
   }
-  for(x in 1:length(feature)){
-    if(feature[x] %in% rownames(counts)){
-      list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
+  
+  list <- lapply(feature, function(x){
+    if(x %in% rownames(counts)){
+      celda.mod$y[which(rownames(counts) == x)]
     }else{
-      list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
+      paste0("No feature was identified matching '", feature, "'.")
     }
-  } 
+  })
   names(list) <- feature
   return(list)
 }
