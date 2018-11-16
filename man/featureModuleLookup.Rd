@@ -15,6 +15,9 @@ featureModuleLookup(counts, celda.mod, feature, exact.match = TRUE)
 
 \item{exact.match}{Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.}
 }
+\value{
+List. Each entry corresponds to the feature module determined for the provided features
+}
 \description{
 This function will output the corresponding feature module for a specified list of genes from a celda model.
 }
