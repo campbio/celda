@@ -274,6 +274,15 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
   expect_error(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L11","L12")))
   expect_error(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = NULL, exact.match = TRUE))
   expect_error(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), trim = 2, exact.match = TRUE))
+  expect_error(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Nonexistent_Gene"), exact.match = TRUE))
+  
+  # Check cases when there are some or all features not present in the counts matrix
+  expect_error(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Nonexistent_Gene"), exact.match = TRUE))
+  expect_warning(plotDimReduceFeature(dim1 = celda.tsne[,1],
+                                      dim2 = celda.tsne[,2],
+                                      counts = celdaCG.sim$counts,
+                                      features = c("Gene_99","Nonexistent_Gene"), 
+                                      exact.match = TRUE))
 })
 
 # celdaTsne
