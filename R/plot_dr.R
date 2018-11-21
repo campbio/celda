@@ -83,7 +83,16 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
     }
     counts = counts[features.indices, , drop = FALSE]
   } else {
-    counts = counts[features, , drop = FALSE]
+    features.not.found = setdiff(features, intersect(features, rownames(counts)))
+    if (length(features.not.found) > 0) {
+      if (length(features.not.found) == length(features)) {
+        stop("None of the provided features had matching rownames in the provided counts matrix.")
+      }
+      warning(paste0("The following features were not present in the provided count matrix: ",
+                     paste0(features.not.found, ",")))
+    }
+    features.found = setdiff(features, features.not.found)
+    counts = counts[features.found, , drop = FALSE]
   }
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
