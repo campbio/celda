@@ -47,5 +47,91 @@ simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta =
 }
 
 
+#' This function calculates the log-likelihood
+#' 
+#' @param omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells
+#' @param z Integer vector. Cell population labels
+#' @param phi Numeric matrix. Rows represent features and columns represent cell populations
+#' @param eta Numeric matrix. Rows represent features and columns represent cell populations 
+#' @param theta Numeric vector. Proportion of truely expressed transcripts
+decon.calcLL = function(omat, z,  phi, eta, theta){
+  #ll = sum( t(omat) * log( (1-conP )*geneDist[z,] + conP * conDist[z, ] + 1e-20 ) )  # when dist_mat are K x G matrices
+  ll = sum( t(omat) * log( theta * phi[z,] + (1-theta) * eta[z,]  + 1e-20  ))   
+  return(ll)
+}
 
 
+#' This function updates decontamination 
+#' 
+#' @param omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells
+#' @param phi Numeric matrix. Rows represent features and columns represent cell populations
+#' @param eta Numeric matrix. Rows represent features and columns represent cell populations
+#' @param theta Numeric vector. Proportion of truely expressed transctripts
+#' @param z Integer vector. Cell population labels
+#' @param K Integer. Number of cell populations
+#' @param beta Numeric. Concentration parameter for Phi
+#' @param delta Numeric. Concentration parameter for Theta
+cD.calcEMDecontamination = function(omat, phi, eta, theta,  z, K, beta, delta ) {
+
+   log.Pr = log(  t(phi)[z,] + 1e-20) + log(theta + 1e-20 )
+   log.Pc = log(  t(eta)[z,] + 1e-20) + log(1-theta + 1e-20)  
+
+   Pr = exp(log.Pr) / (  exp(log.Pr) + exp(log.Pc) )   
+   
+   est.rmat = t(Pr) * omat 
+   rn.G.by.K = colSumByGroup.numeric(est.rmat, z, K)  
+   cn.G.by.K = rowSums(rn.G.by.K) - rn.G.by.K 
+
+   #update parameters 
+   theta = (colSums(est.rmat) + delta) / (colSums(omat) + 2*delta)  
+   phi  = normalizeCounts(rn.G.by.K, pseudocount.normalize =beta ) 
+   eta  = normalizeCounts(cn.G.by.K, pseudocount.normalize = beta) 
+
+   return( list("est.rmat"=est.rmat,  "theta"=theta, "phi"=phi, "eta"=eta ) ) 
+}
+
+
+#' This function updates decontamination 
+#' 
+#' @param omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells. 
+#' @param z Integer vector. Cell population labels. 
+#' @param max.iter Integer. Maximum iterations of EM algorithm. Default to be 200 
+#' @param beta Numeric. Concentration parameter for Phi. Default to be 1e-6
+#' @param delta Numeric / Numeric vector. Concentration parameter for Theta. Default to be 10 
+#' @export 
+DeconX = function(omat, z, max.iter=200, beta=1e-6, delta=10 ) {
+
+  nG = nrow(omat)
+  nC = ncol(omat)
+  K =  length(unique(z)) 
+
+  # initialization
+  theta  = runif(nC, min = 0.1, max = 0.9)  
+  est.rmat = t (t(omat) * theta )       
+  phi =   colSumByGroup.numeric(est.rmat, z, K)
+  eta =   rowSums(phi) - phi 
+  phi = normalizeCounts(phi, pseudocount.normalize =beta )
+  eta = normalizeCounts(eta, pseudocount.normalize = beta)
+  ll = c()
+
+  # EM updates
+  for (iteration in 1:max.iter) {
+
+
+    next.decon = cD.calcEMDecontamination(omat=omat, phi=phi, eta=eta, theta=theta, z=z, K=K,  beta=beta, delta=delta) 
+
+    theta = next.decon$theta 
+    phi = next.decon$phi
+    eta = next.decon$eta 
+
+    # Calculate log-likelihood
+    ll.temp = decon.calcLL(omat=omat, z=z, phi = t(phi), eta = t(eta), theta=theta )
+    ll  = c(ll, ll.temp)
+  }
+
+  res.conp  = 1- colSums(next.decon$est.rmat) / colSums(omat)
+
+  run.params = list("beta" = beta, "delta" = delta, "iteration"=max.iter)
+  res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta ,  "est.GeneDist"=phi,  "est.ConDist"=eta )
+  return(list("run.params"=run.params, "res.list"=res.list ))
+}
