@@ -82,9 +82,8 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
       features.indices = c(features.indices, grep(gene, rownames(counts)))
     }
     counts = counts[features.indices, , drop = FALSE]
-  }else{
-    counts = counts[rownames(counts) %in% features, , drop = FALSE]
-    counts = counts[match(rownames(counts), features), , drop = FALSE]
+  } else {
+    counts = counts[features, , drop = FALSE]
   }
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
