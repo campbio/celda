@@ -3,10 +3,14 @@ setClass("celdaModel",
                         finalLogLik = "numeric",
                         seed = "numeric", 
                         count.checksum = "character",
-                        names = "list"))
+                        names = "list",
+                        clustering = "list",    # K, L, z, y, etc.
+                        modelPriors = "list"))  # alpha, beta, delta, etc.
 
+#'@export
 setGeneric("completeLogLik",
            function(celda.mod){ standardGeneric("completeLogLik") })
+#'@export
 setGeneric("completeLogLik<-",
            function(celda.mod, value){ standardGeneric("completeLogLik<-") })
 setMethod("completeLogLik",
@@ -18,8 +22,10 @@ setReplaceMethod("completeLogLik", "celdaModel",
                    celda.mod
                  })
 
+#' @export
 setGeneric("finalLogLik",
            function(celda.mod){ standardGeneric("finalLogLik") })
+#'@export
 setGeneric("finalLogLik<-",
            function(celda.mod, value){ standardGeneric("finalLogLik<-") })
 setMethod("finalLogLik",
@@ -30,22 +36,25 @@ setReplaceMethod("finalLogLik", "celdaModel",
                    celda.mod@finalLogLik = value
                    celda.mod
                  })
-
-setGeneric("seed",
-           function(celda.mod){ standardGeneric("seed") })
-setGeneric("seed<-",
-           function(celda.mod, value){ standardGeneric("seed<-") })
-setMethod("seed",
+#'@export
+setGeneric("initialSeed",
+           function(celda.mod){ standardGeneric("initialSeed") })
+#'@export
+setGeneric("initialSeed<-",
+           function(celda.mod, value){ standardGeneric("initialSeed<-") })
+setMethod("initialSeed",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@seed  })
-setReplaceMethod("seed", "celdaModel",
+setReplaceMethod("initialSeed", "celdaModel",
                  function(celda.mod, value){
                    celda.mod@seed = value
                    celda.mod
                  })
 
+#'@export
 setGeneric("countChecksum",
            function(celda.mod){ standardGeneric("countChecksum") })
+#'@export
 setGeneric("countChecksum<-",
            function(celda.mod, value){ standardGeneric("countChecksum<-") })
 setMethod("countChecksum",
@@ -57,8 +66,10 @@ setReplaceMethod("countChecksum", "celdaModel",
                    celda.mod
                  })
 
+#'@export
 setGeneric("matrixNames",
            function(celda.mod){ standardGeneric("matrixNames") })
+#'@export
 setGeneric("matrixNames<-",
            function(celda.mod, value){ standardGeneric("matrixNames<-") })
 setMethod("matrixNames",
@@ -70,73 +81,59 @@ setReplaceMethod("matrixNames", "celdaModel",
                    celda.mod
                  })
 
+setGeneric("clustering",
+           function(celda.mod){ standardGeneric("clustering")})
+setGeneric("clustering<-",
+           function(celda.mod, value){ standardGeneric("clustering<-") })
+setMethod("clustering", signature=c(celda.mod="celdaModel"),
+          function(celda.mod){
+            return(celda.mod@clustering)
+          })
+
+setGeneric("modelPriors",
+           function(celda.mod){ standardGeneric("modelPriors")})
+setGeneric("modelPriors<-",
+           function(celda.mod, value){ standardGeneric("modelPriors<-") })
+setMethod("modelPriors", signature=c(celda.mod="celdaModel"),
+          function(celda.mod){
+            return(celda.mod@modelPriors)
+          })
+
+
 
 setClass("celda_C",
-         representation(z = "numeric",
-                        K = "numeric",
-                        alpha = "numeric",
-                        beta = "numeric",
-                        sample.label = "factor"),
+         representation(sample.label = "factor"),
          contains = "celdaModel")
-
-setGeneric("z",
-           function(celda.mod){ standardGeneric("z") })
-setGeneric("z<-",
-           function(celda.mod, value){ standardGeneric("z<-") })
-setMethod("z",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@z  })
-setReplaceMethod("z", "celdaModel",
+setReplaceMethod("clustering", "celda_C",
                  function(celda.mod, value){
-                   celda.mod@z = value
-                   celda.mod
+                   lapply(names(value),
+                          function(key) {
+                            if (!is.element(key, c("K", "z"))) {
+                              stop(paste0("Invalid parameter provided: ", key))
+                            }
+                            celda.mod@clustering[[key]] = value[[key]]
+                          })
                  })
-setGeneric("K",
-           function(celda.mod){ standardGeneric("K") })
-setGeneric("K<-",
-           function(celda.mod, value){ standardGeneric("K<-") })
-setMethod("K",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@K  })
-setReplaceMethod("K", "celdaModel",
+setReplaceMethod("modelPriors", "celda_C",
                  function(celda.mod, value){
-                   celda.mod@K = value
-                   celda.mod
+                   lapply(names(value),
+                          function(key) {
+                            if (!is.element(key, c("alpha", "beta"))) {
+                              stop(paste0("Invalid parameter provided: ", key))
+                            }
+                            celda.mod@modelPriors[[key]] = value[[key]]
+                          })
                  })
-setGeneric("alpha",
-           function(celda.mod){ standardGeneric("alpha") })
-setGeneric("alpha<-",
-           function(celda.mod, value){ standardGeneric("alpha<-") })
-setMethod("alpha",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@alpha  })
-setReplaceMethod("alpha", "celdaModel",
-                 function(celda.mod, value){
-                   celda.mod@alpha = value
-                   celda.mod
-                 })
-# TODO Overwrites base::beta()...
-setGeneric("beta",
-           function(celda.mod){ standardGeneric("beta") })
-setGeneric("beta<-",
-           function(celda.mod, value){ standardGeneric("beta<-") })
-setMethod("beta",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@beta  })
-setReplaceMethod("beta", "celdaModel",
-                 function(celda.mod, value){
-                   celda.mod@beta = value
-                   celda.mod
-                 })
-
-setGeneric("sample.label",
-           function(celda.mod){ standardGeneric("sample.label") })
-setGeneric("sample.label<-",
-           function(celda.mod, value){ standardGeneric("sample.label<-") })
-setMethod("sample.label",
+#'@export
+setGeneric("sampleLabel",
+           function(celda.mod){ standardGeneric("sampleLabel") })
+#'@export
+setGeneric("sampleLabel<-",
+           function(celda.mod, value){ standardGeneric("sampleLabel<-") })
+setMethod("sampleLabel",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@sample.label  })
-setReplaceMethod("sample.label", "celdaModel",
+setReplaceMethod("sampleLabel", "celdaModel",
                  function(celda.mod, value){
                    celda.mod@sample.label = value
                    celda.mod
@@ -144,65 +141,53 @@ setReplaceMethod("sample.label", "celdaModel",
 
 
 setClass("celda_G",
-         representation(y = "numeric",
-                        L = "numeric",
-                        beta = "numeric",
-                        delta = "numeric",
-                        gamma = "numeric"),
          contains = "celdaModel")
+setReplaceMethod("clustering", "celda_G",
+                 function(celda.mod, value){
+                   lapply(names(value),
+                          function(key) {
+                            if (!is.element(key, c("L", "y"))) {
+                              stop(paste0("Invalid parameter provided: ", key))
+                            }
+                            celda.mod@clustering[[key]] = value[[key]]
+                          })
+                 })
+setReplaceMethod("modelPriors", "celda_G",
+                 function(celda.mod, value){
+                   lapply(names(value),
+                          function(key) {
+                            if (!is.element(key, c("beta", "delta", "gamma"))) {
+                              stop(paste0("Invalid parameter provided: ", key))
+                            }
+                            celda.mod@modelPriors[[key]] = value[[key]]
+                          })
+                 })
 
-setGeneric("y",
-           function(celda.mod){ standardGeneric("y") })
-setGeneric("y<-",
-           function(celda.mod, value){ standardGeneric("y<-") })
-setMethod("y",
-           signature=c(celda.mod="celda_G"),
-           function(celda.mod){  celda.mod@y  })
-setReplaceMethod("y", "celdaModel",
-                 function(celda.mod, value){
-                   celda.mod@y = value
-                   celda.mod
-                 })
-setGeneric("L",
-           function(celda.mod){ standardGeneric("L") })
-setGeneric("L<-",
-           function(celda.mod, value){ standardGeneric("L<-") })
-setMethod("L",
-           signature=c(celda.mod="celda_G"),
-           function(celda.mod){  celda.mod@L  })
-setReplaceMethod("L", "celdaModel",
-                 function(celda.mod, value){
-                   celda.mod@L = value
-                   celda.mod
-                 })
-setGeneric("delta",
-           function(celda.mod){ standardGeneric("delta") })
-setGeneric("delta<-",
-           function(celda.mod, value){ standardGeneric("delta<-") })
-setMethod("delta",
-           signature=c(celda.mod="celda_G"),
-           function(celda.mod){  celda.mod@delta  })
-setReplaceMethod("delta", "celdaModel",
-                 function(celda.mod, value){
-                   celda.mod@delta = value
-                   celda.mod
-                 })
-# TODO Overwrites base::gamma()...
-# setGeneric("gamma",
-#            function(celda.mod){ standardGeneric("gamma") })
-# setGeneric("gamma<-",
-#            function(celda.mod, value){ standardGeneric("gamma<-") })
-# setMethod("gamma",
-#            signature=c(celda.mod="celda_G"),
-#            function(celda.mod){  celda.mod@gamma  })
-# setReplaceMethod("gamma", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@gamma = value
-#                    celda.mod
-#                  })
 
 setClass("celda_CG",
          contains = c("celda_C", "celda_G"))
+setReplaceMethod("clustering", "celda_CG",
+                 function(celda.mod, value){
+                   lapply(names(value),
+                          function(key) {
+                            if (!is.element(key, c("K", "L", "y", "z"))) {
+                              stop(paste0("Invalid parameter provided: ", key))
+                            }
+                            celda.mod@clustering[[key]] = value[[key]]
+                          })
+                 })
+setReplaceMethod("modelPriors", "celda_CG",
+                 function(celda.mod, value){
+                   lapply(names(value),
+                          function(key) {
+                            if (!is.element(key, c("alpha", "beta", "delta", "gamma"))) {
+                              stop(paste0("Invalid parameter provided: ", key))
+                            }
+                            celda.mod@modelPriors[[key]] = value[[key]]
+                          })
+                 })
+
+
 
 
 setClass("celdaList",
@@ -210,44 +195,52 @@ setClass("celdaList",
                         res.list = "list",
                         count.checksum = "character",
                         perplexity = "matrix"))
-setGeneric("run.params",
-           function(celda.mod){ standardGeneric("run.params") })
-setGeneric("run.params<-",
-           function(celda.mod, value){ standardGeneric("run.params<-") })
-setMethod("run.params",
+#'@export
+setGeneric("runParams",
+           function(celda.mod){ standardGeneric("runParams") })
+#'@export
+setGeneric("runParams<-",
+           function(celda.mod, value){ standardGeneric("runParams<-") })
+setMethod("runParams",
            signature=c(celda.mod="celdaList"),
-           function(celda.mod){  celda.mod@run.params  })
-setReplaceMethod("run.params", "celdaModel",
+           function(celda.mod){  celda.mod@runParams  })
+setReplaceMethod("runParams", "celdaModel",
                  function(celda.mod, value){
-                   celda.mod@run.params = value
+                   celda.mod@runParams = value
                    celda.mod
                  })
-setGeneric("res.list",
-           function(celda.mod){ standardGeneric("res.list") })
-setGeneric("res.list<-",
-           function(celda.mod, value){ standardGeneric("res.list<-") })
-setMethod("res.list",
+#'@export
+setGeneric("resList",
+           function(celda.mod){ standardGeneric("resList") })
+#'@export
+setGeneric("resList<-",
+           function(celda.mod, value){ standardGeneric("resList<-") })
+setMethod("resList",
            signature=c(celda.mod="celdaList"),
-           function(celda.mod){  celda.mod@res.list  })
-setReplaceMethod("res.list", "celdaModel",
+           function(celda.mod){  celda.mod@resList  })
+setReplaceMethod("resList", "celdaModel",
                  function(celda.mod, value){
-                   celda.mod@res.list = value
+                   celda.mod@resList = value
                    celda.mod
                  })
-setGeneric("count.checksum",
-           function(celda.mod){ standardGeneric("count.checksum") })
-setGeneric("count.checksum<-",
-           function(celda.mod, value){ standardGeneric("count.checksum<-") })
-setMethod("count.checksum",
+#'@export
+setGeneric("countChecksum",
+           function(celda.mod){ standardGeneric("countChecksum") })
+#'@export
+setGeneric("countChecksum<-",
+           function(celda.mod, value){ standardGeneric("countChecksum<-") })
+setMethod("countChecksum",
            signature=c(celda.mod="celdaList"),
-           function(celda.mod){  celda.mod@count.checksum  })
-setReplaceMethod("count.checksum", "celdaModel",
+           function(celda.mod){  celda.mod@countChecksum  })
+setReplaceMethod("countChecksum", "celdaModel",
                  function(celda.mod, value){
-                   celda.mod@count.checksum = value
+                   celda.mod@countChecksum = value
                    celda.mod
                  })
+#'@export
 setGeneric("getPerplexity",
            function(celda.mod){ standardGeneric("getPerplexity") })
+#'@export
 setGeneric("setPerplexity<-",
            function(celda.mod, value){ standardGeneric("setPerplexity<-") })
 setMethod("getPerplexity",
