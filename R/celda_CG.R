@@ -214,9 +214,11 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   } 
   
   ## Peform reordering on final Z and Y assigments:
-  best.result = methods::new("celda_CG", z=z.best, y=y.best, completeLogLik=ll, 
-                  				   finalLogLik=ll.best, K=K, L=L, alpha=alpha, 
-                  				   beta=beta, delta=delta, gamma=gamma, seed=current.seed, 
+  best.result = methods::new("celda_CG", 
+                             clustering=list(z=z.best, y=y.best, K=K, L=L),
+                             modelPriors=list(alpha=alpha, beta=beta, delta=delta, gamma=gamma),
+                             completeLogLik=ll, finalLogLik=ll.best,
+                  				   seed=current.seed, 
                   				   sample.label=sample.label, names=names,
                   				   count.checksum=count.checksum)
   best.result = reorder.celda_CG(counts = counts, res = best.result)
@@ -329,7 +331,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
-  return(list(z=result@z, y=result@y, sample.label=cell.sample.label, 
+  return(list(z=result@clustering$z, y=result@clustering$y, sample.label=cell.sample.label, 
               counts=cell.counts, K=K, L=L, C.Range=C.Range, 
               N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, 
               delta=delta, seed=seed))
@@ -354,14 +356,14 @@ setMethod("factorizeMatrix",
             counts = processCounts(counts)
             compareCountMatrix(counts, celda.mod)
             
-            K = celda.mod@K
-            L = celda.mod@L
-            z = celda.mod@z
-            y = celda.mod@y
-            alpha = celda.mod@alpha
-            beta = celda.mod@beta
-            delta = celda.mod@delta
-            gamma = celda.mod@gamma
+            K = celda.mod@clustering$K
+            L = celda.mod@clustering$L
+            z = celda.mod@clustering$z
+            y = celda.mod@clustering$y
+            alpha = celda.mod@modelPriors$alpha
+            beta = celda.mod@modelPriors$beta
+            delta = celda.mod@modelPriors$delta
+            gamma = celda.mod@modelPriors$gamma
             sample.label = celda.mod@sample.label
             s = as.integer(sample.label)
             
@@ -563,14 +565,14 @@ setMethod("clusterProbability",
           function(counts, celda.mod, log=FALSE, ...) {
   
             s = as.integer(celda.mod@sample.label)
-            z = celda.mod@z
-            K = celda.mod@K  
-            y = celda.mod@y
-            L = celda.mod@L
-            alpha = celda.mod@alpha
-            delta = celda.mod@delta
-            beta = celda.mod@beta
-            gamma = celda.mod@gamma
+            z = celda.mod@clustering$z
+            K = celda.mod@clustering$K  
+            y = celda.mod@clustering$y
+            L = celda.mod@clustering$L
+            alpha = celda.mod@modelPriors$alpha
+            delta = celda.mod@modelPriors$delta
+            beta = celda.mod@modelPriors$beta
+            gamma = celda.mod@modelPriors$gamma
           
             p = cCG.decomposeCounts(counts, s, z, y, K, L)
           
@@ -648,10 +650,10 @@ setMethod("perplexity",
 
 reorder.celda_CG = function(counts, res){
   # Reorder K
-  if(res@K > 2 & isTRUE(length(unique(res@z)) > 1)) {
-    res@z = as.integer(as.factor(res@z))
+  if(res@clustering$K > 2 & isTRUE(length(unique(res@clustering$z)) > 1)) {
+    res@clustering$z = as.integer(as.factor(res@clustering$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.z = sort(unique(res@z))
+    unique.z = sort(unique(res@clustering$z))
     d <- cosineDist(fm$posterior$cell.population[,unique.z])
     h <- stats::hclust(d, method = "complete")
     
@@ -659,10 +661,10 @@ reorder.celda_CG = function(counts, res){
   }  
   
   # Reorder L
-  if(res@L > 2 & isTRUE(length(unique(res@y)) > 1)) {
-    res@y = as.integer(as.factor(res@y))
+  if(res@clustering$L > 2 & isTRUE(length(unique(res@clustering$y)) > 1)) {
+    res@clustering$y = as.integer(as.factor(res@clustering$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res, type="posterior")
-    unique.y = sort(unique(res@y))
+    unique.y = sort(unique(res@clustering$y))
     cs <- prop.table(t(fm$posterior$cell.population[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- stats::hclust(d, method = "complete")
@@ -692,7 +694,7 @@ setMethod("celdaHeatmap",
             top = celda::topRank(fm$proportions$module, n=nfeatures)
             ix = unlist(top$index)
             norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-            plotHeatmap(norm[ix,], z=celda.mod@z, y=celda.mod@y[ix], ...)
+            plotHeatmap(norm[ix,], z=celda.mod@clustering$z, y=celda.mod@clustering$y[ix], ...)
           })
 
 
@@ -720,9 +722,9 @@ setMethod("celdaTsne",
                      seed=12345, ...) {
 
             ## Checking if max.cells and min.cluster.size will work
-            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@K)) {
+            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@clustering$K)) {
               stop(paste0("Cannot distribute ", max.cells, " cells among ",
-                          celda.mod@K, " clusters while maintaining a minumum of ", 
+                          celda.mod@clustering$K, " clusters while maintaining a minumum of ", 
                           min.cluster.size, " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
             }
             
@@ -742,7 +744,7 @@ setMethod("celdaTsne",
             total.cells.to.remove = ncol(counts) - max.cells
             z.include = rep(TRUE, ncol(counts))
             if(total.cells.to.remove > 0) {
-            	z.ta = tabulate(celda.mod@z, celda.mod@K)
+            	z.ta = tabulate(celda.mod@clustering$z, celda.mod@clustering$K)
             	
             	## Number of cells that can be sampled from each cluster without 
             	## going below the minimum threshold
@@ -758,7 +760,7 @@ setMethod("celdaTsne",
             
             	## Perform sampling for each cluster
             	for(i in which(cluster.n.to.sample > 0)) {
-            	  z.include[sample(which(celda.mod@z == i), cluster.n.to.sample[i])] = FALSE
+            	  z.include[sample(which(celda.mod@clustering$z == i), cluster.n.to.sample[i])] = FALSE
             	}
             }   
             cell.ix = which(z.include)
@@ -796,8 +798,8 @@ setMethod("celdaProbabilityMap",
             
             level = match.arg(level)
             factorized <- factorizeMatrix(celda.mod = celda.mod, counts = counts)
-            z.include = which(tabulate(celda.mod@z, celda.mod@K) > 0)
-            y.include = which(tabulate(celda.mod@y, celda.mod@L) > 0)    
+            z.include = which(tabulate(celda.mod@clustering$z, celda.mod@clustering$K) > 0)
+            y.include = which(tabulate(celda.mod@clustering$y, celda.mod@clustering$L) > 0)    
           
             if(level == "cell.population") {
               pop <- factorized$proportions$cell.population[y.include,z.include,drop=FALSE]
@@ -856,7 +858,7 @@ setMethod("featureModuleLookup",
             }
             for(x in 1:length(feature)){
               if(feature[x] %in% rownames(counts)){
-                list[x] <- celda.mod@y[which(rownames(counts) == feature[x])]
+                list[x] <- celda.mod@clustering$y[which(rownames(counts) == feature[x])]
               }else{
                 list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
               }

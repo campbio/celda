@@ -147,8 +147,10 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   } 
   
   
-  best.result = methods::new("celda_G", y=y.best, completeLogLik=ll, finalLogLik=ll.best, 
-                             L=L, beta=beta, delta=delta, gamma=gamma, 
+  best.result = methods::new("celda_G", 
+                             clustering=list(y=y.best, L=L),
+                             modelPriors=list(beta=beta, delta=delta, gamma=gamma),
+                             completeLogLik=ll, finalLogLik=ll.best, 
                              count.checksum=count.checksum, seed=current.seed, 
                              names=names)
   best.result = reorder.celda_G(counts = counts, res = best.result) 
@@ -308,12 +310,13 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
   ## Peform reordering on final Z and Y assigments:
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
-  result = methods::new("celda_G", y=y, L=L, beta=beta, delta=delta, gamma=gamma, 
+  result = methods::new("celda_G", clustering=list(y=y, L=L), 
+                        modelPriors=list(beta=beta, delta=delta, gamma=gamma), 
                         seed=seed,  names=names, 
                         count.checksum=digest::digest(cell.counts, algo="md5"))
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
-  return(list(y=result@y, counts=processCounts(cell.counts), L=L, 
+  return(list(y=result@clustering$y, counts=processCounts(cell.counts), L=L, 
               beta=beta, delta=delta, gamma=gamma, seed=seed))
 }
 
@@ -336,11 +339,11 @@ setMethod("factorizeMatrix",
             counts = processCounts(counts)
             compareCountMatrix(counts, celda.mod)
             
-            L = celda.mod@L
-            y = celda.mod@y
-            beta = celda.mod@beta
-            delta = celda.mod@delta
-            gamma = celda.mod@gamma
+            L = celda.mod@clustering$L
+            y = celda.mod@clustering$y
+            beta = celda.mod@modelPriors$beta
+            delta = celda.mod@modelPriors$delta
+            gamma = celda.mod@modelPriors$gamma
             
             p = cG.decomposeCounts(counts=counts, y=y, L=L)
             n.TS.by.C = p$n.TS.by.C
@@ -505,11 +508,11 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 setMethod("clusterProbability",
            signature(celda.mod = "celda_G"),
            function(counts, celda.mod, log=FALSE, ...) {
-              y = celda.mod@y
-              L = celda.mod@L
-              delta = celda.mod@delta
-              beta = celda.mod@beta
-              gamma = celda.mod@gamma
+              y = celda.mod@clustering$y
+              L = celda.mod@clustering$L
+              delta = celda.mod@modelPriors$delta
+              beta = celda.mod@modelPriors$beta
+              gamma = celda.mod@modelPriors$gamma
               
               ## Calculate counts one time up front
               p = cG.decomposeCounts(counts=counts, y=y, L=L)
@@ -571,10 +574,10 @@ setMethod("perplexity",
 
 
 reorder.celda_G = function(counts, res) {
-  if(res@L > 2 & isTRUE(length(unique(res@y)) > 1)) {
-    res@y = as.integer(as.factor(res@y))
+  if(res@clustering$L > 2 & isTRUE(length(unique(res@clustering$y)) > 1)) {
+    res@clustering$y = as.integer(as.factor(res@clustering$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.y = sort(unique(res@y))
+    unique.y = sort(unique(res@clustering$y))
     cs = prop.table(t(fm$posterior$cell[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- stats::hclust(d, method = "complete")
@@ -603,7 +606,7 @@ setMethod("celdaHeatmap",
             top = topRank(fm$proportions$module, n=nfeatures)
             ix = unlist(top$index)
             norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-            plotHeatmap(norm[ix,], y=celda.mod@y[ix], ...)
+            plotHeatmap(norm[ix,], y=celda.mod@clustering$y[ix], ...)
           })
 
 #' @title tSNE for celda_G
@@ -684,7 +687,7 @@ setMethod("featureModuleLookup",
             }
             for(x in 1:length(feature)){
               if(feature[x] %in% rownames(counts)){
-                list[x] <- celda.mod@y[which(rownames(counts) == feature[x])]
+                list[x] <- celda.mod@clustering$y[which(rownames(counts) == feature[x])]
               }else{
                 list[x] <- paste0("No feature was identified matching '", 
                                   feature[x], "'.")
