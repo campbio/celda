@@ -68,11 +68,11 @@ decon.calcLL = function(omat, z,  phi, eta, theta){
 }
 
 
-#' This function updates decontamination 
-#' 
-#'  phi Numeric matrix. Rows represent features and columns represent cell populations
-#'  eta Numeric matrix. Rows represent features and columns represent cell populations
-#'  theta Numeric vector. Proportion of truely expressed transctripts
+# This function updates decontamination 
+# 
+#  phi Numeric matrix. Rows represent features and columns represent cell populations
+#  eta Numeric matrix. Rows represent features and columns represent cell populations
+#  theta Numeric vector. Proportion of truely expressed transctripts
 cD.calcEMDecontamination = function(omat, phi, eta, theta,  z, K, beta, delta ) {
 
    log.Pr = log(  t(phi)[z,] + 1e-20) + log(theta + 1e-20 )
