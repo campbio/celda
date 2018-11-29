@@ -4,7 +4,8 @@
 \alias{DeconX}
 \title{This function updates decontamination}
 \usage{
-DeconX(omat, z, max.iter = 200, beta = 1e-06, delta = 10)
+DeconX(omat, z, max.iter = 200, beta = 1e-06, delta = 10,
+  logfile = NULL, verbose = TRUE, seed = 1234567)
 }
 \arguments{
 \item{omat}{Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells.}
@@ -15,7 +16,13 @@ DeconX(omat, z, max.iter = 200, beta = 1e-06, delta = 10)
 
 \item{beta}{Numeric. Concentration parameter for Phi. Default to be 1e-6}
 
-\item{delta}{Numeric / Numeric vector. Concentration parameter for Theta. Default to be 10}
+\item{delta}{Numeric. Symmetric concentration parameter for Theta. Default to be 10}
+
+\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL}
+
+\item{verbose}{Logical. Whether to print log messages. Default TRUE}
+
+\item{seed}{Integer. Passed to set.seed(). Default to be 1234567}
 }
 \description{
 This function updates decontamination
