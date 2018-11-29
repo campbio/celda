@@ -3,7 +3,7 @@
   context("Testing Deconx")
 
 
-  Decon.sim = simulateObservedMatrix(K=10)
+  Decon.sim = simulateObservedMatrix(K=10, delta=c(1,5))
   model_DeconX = DeconX( Decon.sim$rmat + Decon.sim$cmat, z= Decon.sim$z, max.iter=2, seed=1234567) 
   model_DeconX.iter1 = DeconX( Decon.sim$rmat + Decon.sim$cmat, z= Decon.sim$z, max.iter=1, seed=1234567)
 
@@ -13,6 +13,13 @@
     expect_equal( object=dim(Decon.sim$phi), expected=dim(Decon.sim$eta) ) 
     expect_equal( typeof(Decon.sim$rmat), "integer")
     expect_equal( typeof(Decon.sim$cmat), "integer")
+    
+    Decon.sim.SingleDelta = simulateObservedMatrix(K=10, delta=1)
+    expect_equivalent( object=colSums(Decon.sim.SingleDelta$rmat) + colSums(Decon.sim.SingleDelta$cmat), expected=Decon.sim.SingleDelta$N.by.C)
+
+    Decon.sim.KTooLarge = simulateObservedMatrix(K=101, C=10)
+    expect_equal( unique(Decon.sim.KTooLarge$z), 1:ncol(Decon.sim.KTooLarge$eta) )
+
     } )
 
   # DeconX
@@ -20,6 +27,17 @@
     expect_equal( model_DeconX$res.list$est.conp  , 1 - colSums(model_DeconX$res.list$est.rmat) /  colSums( Decon.sim$rmat + Decon.sim$cmat) )
     expect_equal( dim(model_DeconX$res.list$est.GeneDist),  dim( model_DeconX$res.list$est.ConDist) ) 
     expect_equal( model_DeconX$res.list$theta, (model_DeconX$run.params$delta + colSums(model_DeconX$res.list$est.rmat) ) / ( 2*model_DeconX$run.params$delta + colSums(Decon.sim$cmat + Decon.sim$rmat) ) )
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=Decon.sim$z, beta=-1), "'beta' should be a single positive value.")
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=Decon.sim$z, beta=c(1,1) ), "'beta' should be a single positive value.")
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=Decon.sim$z, delta=-1), "'delta' should be a single positive value.")
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=Decon.sim$z, delta=c(1,1) ), "'delta' should be a single positive value.")
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=NULL), "'z' must be of the same length as the number of cells in the 'counts' matrix.") 
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=c(Decon.sim$z, 1) ), "'z' must be of the same length as the number of cells in the 'counts' matrix.")   
+    expect_error( DeconX(omat=Decon.sim$rmat+Decon.sim$cmat, z=rep(1, ncol(Decon.sim$rmat)) ), "'z' must have at least 2 different values.") 
+
+    omat.NA = Decon.sim$rmat + Decon.sim$cmat
+    omat.NA[1,1] = NA
+    expect_error( DeconX(omat=omat.NA, z=Decon.sim$z), "Missing value in 'omat' matrix.") 
     } )
 
 
@@ -34,3 +52,5 @@
     z.process = processCellLabels(Decon.sim$z, num.cells=ncol(Decon.sim$rmat) )
     expect_equal( cD.calcEMDecontamination( omat=Decon.sim$cmat+Decon.sim$rmat, z=z.process, K=length(unique(Decon.sim$z)), theta=model_DeconX.iter1$res.list$theta, phi=model_DeconX.iter1$res.list$est.GeneDist, eta=model_DeconX.iter1$res.list$est.ConDist, beta=model_DeconX.iter1$run.params$beta, delta=model_DeconX.iter1$run.params$delta)$theta,   model_DeconX$res.list$theta )
     } )
+
+
