@@ -54,13 +54,13 @@ simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta =
 }
 
 
-#' This function calculates the log-likelihood
-#' 
-#' @param omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells
-#' @param z Integer vector. Cell population labels
-#' @param phi Numeric matrix. Rows represent features and columns represent cell populations
-#' @param eta Numeric matrix. Rows represent features and columns represent cell populations 
-#' @param theta Numeric vector. Proportion of truely expressed transcripts
+# This function calculates the log-likelihood
+# 
+# omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells
+# z Integer vector. Cell population labels
+# phi Numeric matrix. Rows represent features and columns represent cell populations
+# eta Numeric matrix. Rows represent features and columns represent cell populations 
+# theta Numeric vector. Proportion of truely expressed transcripts
 decon.calcLL = function(omat, z,  phi, eta, theta){
   #ll = sum( t(omat) * log( (1-conP )*geneDist[z,] + conP * conDist[z, ] + 1e-20 ) )  # when dist_mat are K x G matrices
   ll = sum( t(omat) * log( theta * phi[z,] + (1-theta) * eta[z,]  + 1e-20  ))   
