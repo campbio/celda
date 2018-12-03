@@ -203,10 +203,10 @@ setGeneric("runParams<-",
            function(celda.mod, value){ standardGeneric("runParams<-") })
 setMethod("runParams",
            signature=c(celda.mod="celdaList"),
-           function(celda.mod){  celda.mod@runParams  })
+           function(celda.mod){  celda.mod@run.params  })
 setReplaceMethod("runParams", "celdaModel",
                  function(celda.mod, value){
-                   celda.mod@runParams = value
+                   celda.mod@run.params = value
                    celda.mod
                  })
 #'@export

@@ -324,10 +324,11 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
-  result = methods::new("celda_CG", z=z, y=y, K=K, L=L, alpha=alpha, 
-                        beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                        sample.label=cell.sample.label, names=names,
-                        count.checksum=digest::digest(cell.counts, algo="md5"))
+  result = methods::new("celda_CG", 
+                        clustering=list(z=z, y=y, K=K, L=L),
+                        modelPriors=list(alpha=alpha, beta=beta, delta=delta, gamma=gamma),
+            				    seed =seed,  sample.label=cell.sample.label, names=names,
+            				    count.checksum=digest::digest(cell.counts, algo="md5"))
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
