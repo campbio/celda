@@ -92,7 +92,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                                  best.only=FALSE)
   expect_true(is(celdaCG.res, "celdaList"))
   expect_error(plotGridSearchPerplexity(celdaCG.res))
-  expect_equal(names(run.params(celdaCG.res)), 
+  expect_equal(names(runParams(celdaCG.res)), 
                c("index","chain","K","L","log_likelihood"))
   
   celdaCG.res = resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample=2)
@@ -175,7 +175,7 @@ test_that(desc = "Testing recodeClusterY with celda_CG", {
   expect_error(recodeClusterY(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(1,2,4,3,6)))
   expect_error(recodeClusterY(celda.mod = model_CG, from = c(1,2,3,4,6), to = c(1,2,4,3,5)))
   new.recoded <- recodeClusterY(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(3,2,1,4,5))
-  expect_equal(model_CG@y == 1, new.recoded@y == 3)
+  expect_equal(model_CG@clustering$y == 1, new.recoded@clustering$y == 3)
 })
 
 # recodeClusterZ
@@ -184,7 +184,7 @@ test_that(desc = "Testing recodeClusterZ with celda_CG", {
   expect_error(recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))  
   new.recoded <- recodeClusterZ(celda.mod = model_CG, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_CG@z == 1, new.recoded@z == 5)
+  expect_equal(model_CG@clustering$z == 1, new.recoded@clustering$z == 5)
 })
 
 # compareCountMatrix
@@ -193,10 +193,10 @@ test_that(desc = "Testing CompareCountMatrix with celda_CG", {
   
   less.features <- celdaCG.sim$counts[1:50,]
   expect_error(compareCountMatrix(counts = less.features, celda.mod = model_CG),
-               "The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
+               "There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
   less.cells <- celdaCG.sim$counts[,1:100]
   expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_CG),
-               "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
+               "There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
   
   counts.matrix.error <- matrix(data = 1, nrow = nrow(celdaCG.sim$counts), ncol = ncol(celdaCG.sim$counts))
   expect_false(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_CG, error.on.mismatch = FALSE))
@@ -214,15 +214,15 @@ test_that(desc = "Testing topRank with celda_CG", {
 
 # plotHeatmap
 test_that(desc = "Testing plotHeatmap with celda_CG", {
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@y, y = model_CG@y), "Length of z must match number of columns in counts matrix")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@z), "Length of y must match number of rows in counts matrix")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG@y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@z, y = model_CG@y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$y, y = model_CG@clustering$y), "Length of z must match number of columns in counts matrix")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = model_CG@clustering$z), "Length of y must match number of rows in counts matrix")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = model_CG@clustering$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = model_CG@clustering$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = model_CG@clustering$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG@clustering$y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = model_CG@clustering$y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clustering$z, y = model_CG@clustering$y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
 })
 
 #plotHeatmap with annotations
@@ -234,12 +234,12 @@ test_that(desc = "Testing plotHeatmap with annotations", {
   colnames(annot.cell) <- "cell"
   rownames(annot.feature) <- rownames(celdaCG.sim$counts)
   colnames(annot.feature) <- "feature"
-  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG@z, y = model_CG@y)),
+  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG@clustering$z, y = model_CG@clustering$y)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot.cell) <- NULL
   rownames(annot.feature) <- NULL
-  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG@z, y = model_CG@y)),
+  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG@clustering$z, y = model_CG@clustering$y)),
                c("tree_row", "tree_col", "gtable"))
   
 })
@@ -289,7 +289,7 @@ test_that(desc = "Testing differentialExpression for celda_CG", {
 # plotDimReduce
 test_that(desc = "Testing plotDimReduce* with celda_CG", {
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
-  expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG@z),specific_clusters = c(1,2,3))),
+  expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG@clustering$z),specific_clusters = c(1,2,3))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
   expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
@@ -322,9 +322,9 @@ test_that(desc = "Testing celdaTsne with celda_CG when model class is changed, s
 })
 
 test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
-  tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@z))
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@z))
+  tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@clustering$z))
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@clustering$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@clustering$z))
   expect_true(!is.null(plot.obj))
   
   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
@@ -334,15 +334,15 @@ test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
 test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@z) && sum(!is.na(tsne[,1])) == 100)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@clustering$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@clustering$z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
 
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup with celda_CG", {
   res = featureModuleLookup(celdaCG.sim$counts, model_CG, "Gene_1")
-  expect_true(res == model_CG@y[1])
+  expect_true(res == model_CG@clustering$y[1])
 
   res = featureModuleLookup(celdaCG.sim$counts, model_CG, "Gene_2", exact.match = FALSE)
   expect_true(length(res) == 11)

@@ -77,17 +77,17 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100
   cell_ix = match(colnames(filtered_norm.counts), celda.mod@names$column)
   z.to.plot = c()
   if(methods::.hasSlot(celda.mod, "z")){
-    cell <- distinct_colors(length(unique(celda.mod@z)))[sort(unique(celda.mod@z[cell_ix]))]
-    names(cell) <- sort(unique(celda.mod@z[cell_ix]))
+    cell <- distinct_colors(length(unique(celda.mod@clustering$z)))[sort(unique(celda.mod@clustering$z[cell_ix]))]
+    names(cell) <- sort(unique(celda.mod@clustering$z[cell_ix]))
     anno_cell_colors <- list(cell = cell)
-    z.to.plot = celda.mod@z[cell.indices]
+    z.to.plot = celda.mod@clustering$z[cell.indices]
   }else{
     anno_cell_colors <- NULL
   }
   plotHeatmap(
     filtered_norm.counts,
     z = z.to.plot,
-    y = celda.mod@y[gene_ix],
+    y = celda.mod@clustering$y[gene_ix],
     scale.row = scale.row,
     color.scheme = "divergent",
     show.names.feature = show_featurenames,
