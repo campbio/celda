@@ -81,8 +81,10 @@ setReplaceMethod("matrixNames", "celdaModel",
                    celda.mod
                  })
 
+#'@export
 setGeneric("clustering",
            function(celda.mod){ standardGeneric("clustering")})
+#'@export
 setGeneric("clustering<-",
            function(celda.mod, value){ standardGeneric("clustering<-") })
 setMethod("clustering", signature=c(celda.mod="celdaModel"),
@@ -90,8 +92,10 @@ setMethod("clustering", signature=c(celda.mod="celdaModel"),
             return(celda.mod@clustering)
           })
 
+#'@export
 setGeneric("modelPriors",
            function(celda.mod){ standardGeneric("modelPriors")})
+#'@export
 setGeneric("modelPriors<-",
            function(celda.mod, value){ standardGeneric("modelPriors<-") })
 setMethod("modelPriors", signature=c(celda.mod="celdaModel"),
