@@ -14,9 +14,9 @@ simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta =
     set.seed(seed) 
 
     if(length(delta)==1) { 
-	    cp.byC = rbeta(n=C, shape1=delta, shape2=delta) 
+	    cp.byC = stats::rbeta(n=C, shape1=delta, shape2=delta) 
     } else {
-            cp.byC = rbeta(n=C, shape1=delta[1], shape2=delta[2] ) 
+            cp.byC = stats::rbeta(n=C, shape1=delta[1], shape2=delta[2] ) 
     } 
  
     z = sample(1:K, size=C, replace=TRUE) 
@@ -28,7 +28,7 @@ simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta =
 
 
     N.byC = sample(min(N.Range):max(N.Range), size=C , replace=TRUE  ) 
-    cN.byC = sapply(1:C, function(i)  rbinom(n=1, size=N.byC[i], p=cp.byC[i] )  ) 
+    cN.byC = sapply(1:C, function(i)  stats::rbinom(n=1, size=N.byC[i], p=cp.byC[i] )  ) 
     rN.byC = N.byC - cN.byC 
     
     phi = rdirichlet(K, rep(beta, G)) 
@@ -123,7 +123,7 @@ DeconX = function(omat, z, max.iter=200, beta=1e-6, delta=10, logfile=NULL, verb
 
   # initialization
   set.seed(seed)
-  theta  = runif(nC, min = 0.1, max = 0.9)  
+  theta  = stats::runif(nC, min = 0.1, max = 0.9)  
   est.rmat = t (t(omat) * theta )       
   phi =   colSumByGroup.numeric(est.rmat, z, K)
   eta =   rowSums(phi) - phi 
