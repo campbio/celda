@@ -28,6 +28,6 @@ This function generates a list containing two count matrices -- one for real exp
 used in the simulation which can be useful for running decontamination
 }
 \examples{
-cont.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
-cont.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
+contamination.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
+contamination.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
 }
