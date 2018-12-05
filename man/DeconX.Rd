@@ -28,6 +28,6 @@ DeconX(omat, z = NULL, max.iter = 200, beta = 1e-06, delta = 10,
 This function updates decontamination
 }
 \examples{
-decon.c = DeconX( omat = cont.sim$rmat + cont.sim$cmat, z=cont.sim$z)
-decon.bg = DeconX( omat=cont.sim$rmat + cont.sim$cmat)  
+decon.c = DeconX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
+decon.bg = DeconX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
 }
