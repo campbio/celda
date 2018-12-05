@@ -4,13 +4,13 @@
 \alias{DeconX}
 \title{This function updates decontamination}
 \usage{
-DeconX(omat, z, max.iter = 200, beta = 1e-06, delta = 10,
+DeconX(omat, z = NULL, max.iter = 200, beta = 1e-06, delta = 10,
   logfile = NULL, verbose = TRUE, seed = 1234567)
 }
 \arguments{
 \item{omat}{Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells.}
 
-\item{z}{Integer vector. Cell population labels.}
+\item{z}{Integer vector. Cell population labels. Default NULL}
 
 \item{max.iter}{Integer. Maximum iterations of EM algorithm. Default to be 200}
 
@@ -26,4 +26,8 @@ DeconX(omat, z, max.iter = 200, beta = 1e-06, delta = 10,
 }
 \description{
 This function updates decontamination
+}
+\examples{
+decon.c = DeconX( omat = cont.sim$rmat + cont.sim$cmat, z=cont.sim$z)
+decon.bg = DeconX( omat=cont.sim$rmat + cont.sim$cmat)  
 }
