@@ -27,3 +27,7 @@ simulateObservedMatrix(C = 300, G = 100, K = 3, N.Range = c(500,
 This function generates a list containing two count matrices -- one for real expression, the other one for contamination, as well as other parameters 
 used in the simulation which can be useful for running decontamination
 }
+\examples{
+contamination.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
+contamination.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
+}
