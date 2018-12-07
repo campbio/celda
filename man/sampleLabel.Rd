@@ -13,5 +13,5 @@ Character. Contains the sample labels provided at model creation time, or those 
 Returns the sample labels for the count matrix provided for generation of a given celda model.
 }
 \examples{
-modelPriors(celda.CG.mod)
+sampleLabel(celda.CG.mod)
 }
