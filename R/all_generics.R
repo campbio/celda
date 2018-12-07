@@ -50,11 +50,11 @@ setMethod("logLikelihoodHistory",
 #' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
 #' @examples
-#' logLikelihood(celda.CG.mod)
+#' bestLogLikelihood(celda.CG.mod)
 #' @export
-setGeneric("logLikelihood",
-           function(celda.mod){ standardGeneric("logLikelihood") })
-setMethod("logLikelihood",
+setGeneric("bestLogLikelihood",
+           function(celda.mod){ standardGeneric("bestLogLikelihood") })
+setMethod("bestLogLikelihood",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@finalLogLik  })
 
