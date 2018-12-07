@@ -157,7 +157,7 @@ compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
     }
   }
   
-  celda.checksum = celda.mod@count.checksum
+  celda.checksum = celda.mod@params$count.checksum
   counts = processCounts(counts)  # Checksums are generated in celdaGridSearch and model functions after processing
   count.md5 = digest::digest(counts, algo="md5")
   res = isTRUE(count.md5 == celda.checksum)
