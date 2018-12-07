@@ -12,7 +12,7 @@ factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)
 test_that(desc = "Testing simulation and celda_C model", {
   expect_equal(typeof(celdaC.sim$counts), "integer")
   expect_true(all(sweep(factorized$counts$sample, 2, colSums(factorized$counts$sample), "/") == factorized$proportions$sample))  
-  expect_true(ncol(factorized$proportions$module) == model_C@clustering$K)
+  expect_true(ncol(factorized$proportions$module) == model_C@params$K)
   expect_true(all(is.numeric(completeLogLik(celda.mod = model_C))))
   expect_equal(max(completeLogLik(celda.mod = model_C)), finalLogLik(model_C))
   
@@ -131,7 +131,7 @@ test_that(desc = "Testing recodeClusterZ with celda_C", {
   expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))    
   new.recoded <- recodeClusterZ(celda.mod = model_C, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_C@clustering$z == 1, new.recoded@clustering$z == 5)
+  expect_equal(model_C@clusters$z == 1, new.recoded@clusters$z == 5)
 })
 
 # compareCountMatrix
@@ -159,9 +159,9 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
 
 # plotHeatmap
 test_that(desc = "Testing plotHeatmap with celda_C", {
-  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@clustering$K), "Length of z must match number of columns in counts matrix")
-  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@clustering$z, scale.row = model_C), "'scale.row' needs to be of class 'function'")
-  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@clustering$z, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@params$K), "Length of z must match number of columns in counts matrix")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@clusters$z, scale.row = model_C), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaC.sim$counts, z = model_C@clusters$z, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
 })
 
 
@@ -170,15 +170,15 @@ test_that(desc = "Testing plotHeatmap with celda_C, including annotations",{
   annot <- as.data.frame(c(rep(x = 1, times = ncol(celdaC.sim$counts) - 100),rep(x = 2, 100)))
   
   rownames(annot) <- colnames(celdaC.sim$counts)
-  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C@clustering$z)),
+  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C@clusters$z)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot) <- NULL
-  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.feature = as.matrix(annot), z = model_C@clustering$z)),
+  expect_equal(names(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.feature = as.matrix(annot), z = model_C@clusters$z)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot) <- rev(colnames(celdaC.sim$counts))
-  expect_error(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C@clustering$z),
+  expect_error(plotHeatmap(celda.mod = model_C, counts = celdaC.sim$counts, annotation.cell = annot, z = model_C@clusters$z),
                "Row names of 'annotation.cell' are different than the column names of 'counts'")
 })
 
@@ -214,22 +214,22 @@ test_that(desc = "Testing differentialExpression with celda_C", {
 test_that(desc = "Testing celdaTsne with celda_C when model class is changed, should error",{
   model_X <- model_C
   class(model_X) <- "celda_X"
-  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C@clustering$z), min.cluster.size=10),
+  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C@clusters$z), min.cluster.size=10),
                "unable to find an inherited method for function 'celdaTsne' for signature '\"celda_X\"'")
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
-  tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C@clustering$z), min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@clustering$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@clustering$z))
+  tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C@clusters$z), min.cluster.size=10)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@clusters$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@clusters$z))
   expect_true(!is.null(plot.obj))
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including a subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=50, min.cluster.size=50)))
   tsne <- celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=100, min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@clustering$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@clustering$z) && sum(!is.na(tsne[,1])) == 100)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@clusters$z)
+  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@clusters$z) && sum(!is.na(tsne[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
 

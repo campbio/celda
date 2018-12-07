@@ -154,12 +154,12 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
   }  
   best.result = methods::new("celda_C",
-                             clustering=list(z=best.result$z, K=best.result$K),
-                             modelPriors=list(alpha=best.result$alpha, beta=best.result$beta),
+                             clusters=list(z=best.result$z),
+                             params=list(K=best.result$K, alpha=best.result$alpha, beta=best.result$beta,
+                                         sample.label=best.result$sample.label, 
+                                         count.checksum=best.result$count.checksum),
                              completeLogLik=best.result$completeLogLik,
                              finalLogLik=best.result$finalLogLik, seed=best.result$seed,
-                             sample.label=best.result$sample.label, 
-                             count.checksum=best.result$count.checksum,
                              names=best.result$names)
   best.result = reorder.celda_C(counts = counts, res = best.result)
   
@@ -306,14 +306,16 @@ simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts) 
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
-  result = methods::new("celda_C", clustering=list(z=z, K=K),
-                        modelPriors=list(alpha=alpha, beta=beta), seed=seed, 
-                        sample.label=cell.sample.label, names=names,
-                        count.checksum=digest::digest(cell.counts, algo="md5"))
+  result = methods::new("celda_C", clusters=list(z=z),
+                        params=list(alpha=alpha, beta=beta, seed=seed,
+                                    count.checksum=digest::digest(cell.counts, algo="md5"),
+                                    K=K),
+                        sample.label=cell.sample.label, 
+                        names=names)
   class(result) = "celda_C" 
   result = reorder.celda_C(counts = cell.counts, res = result)
   
-  return(list(z=result@clustering$z, counts=processCounts(cell.counts), 
+  return(list(z=result@clusters$z, counts=processCounts(cell.counts), 
               sample.label=cell.sample.label, K=K, alpha=alpha, 
               beta=beta, C.Range=C.Range, N.Range=N.Range, S=S))
 }
@@ -337,8 +339,8 @@ setMethod("factorizeMatrix",
             counts = processCounts(counts) 
             compareCountMatrix(counts, celda.mod)
             
-            K = celda.mod@clustering$K
-            z = celda.mod@clustering$z
+            K = celda.mod@params$K
+            z = celda.mod@clusters$z
             alpha = celda.mod@modelPriors$alpha
             beta = celda.mod@modelPriors$beta
             sample.label = celda.mod@sample.label
@@ -487,11 +489,11 @@ cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 setMethod("clusterProbability", 
           signature(celda.mod = "celda_C"),
           function(counts, celda.mod, log=FALSE, ...) {
-            z = celda.mod@clustering$z
+            z = celda.mod@clusters$z
             sample.label = celda.mod@sample.label
             s = as.integer(sample.label)
             
-            K = celda.mod@clustering$K
+            K = celda.mod@params$K
             alpha = celda.mod@modelPriors$alpha
             beta = celda.mod@modelPriors$beta
             
@@ -558,10 +560,10 @@ setMethod("perplexity",
 
 
 reorder.celda_C = function(counts, res){
-  if(res@clustering$K > 2 & isTRUE(length(unique(res@clustering$z)) > 1)) {
-    res@clustering$z = as.integer(as.factor(res@clustering$z))
+  if(res@params$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
+    res@clusters$z = as.integer(as.factor(res@clusters$z))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.z = sort(unique(res@clustering$z))
+    unique.z = sort(unique(res@clusters$z))
     d <- cosineDist(fm$posterior$module[,unique.z])
     h <- stats::hclust(d, method = "complete")
     res <- recodeClusterZ(res, from = h$order, to = 1:length(h$order))
@@ -586,7 +588,7 @@ setMethod("celdaHeatmap",
           signature(celda.mod = "celda_C"),
           function(counts, celda.mod, feature.ix, ...) {
             norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-            plotHeatmap(norm[feature.ix,], z=celda.mod@clustering$z, ...)
+            plotHeatmap(norm[feature.ix,], z=celda.mod@clusters$z, ...)
           })
 
 
@@ -617,9 +619,9 @@ setMethod("celdaTsne",
             compareCountMatrix(counts, celda.mod)
             
             ## Checking if max.cells and min.cluster.size will work
-            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@clustering$K)) {
+            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@params$K)) {
               stop(paste0("Cannot distribute ", max.cells, " cells among ", 
-                          celda.mod@clustering$K, " clusters while maintaining a minumum of ", 
+                          celda.mod@params$K, " clusters while maintaining a minumum of ", 
                           min.cluster.size, 
                           " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
             }
@@ -628,7 +630,7 @@ setMethod("celdaTsne",
             total.cells.to.remove = ncol(counts) - max.cells
             z.include = rep(TRUE, ncol(counts))
             if(total.cells.to.remove > 0) {
-          	z.ta = tabulate(celda.mod@clustering$z, celda.mod@clustering$K)
+          	z.ta = tabulate(celda.mod@clusters$z, celda.mod@params$K)
           	
           	## Number of cells that can be sampled from each cluster without 
           	## going below the minimum threshold
@@ -644,7 +646,7 @@ setMethod("celdaTsne",
           
           	## Perform sampling for each cluster
           	for(i in which(cluster.n.to.sample > 0)) {
-          	  z.include[sample(which(celda.mod@clustering$z == i), cluster.n.to.sample[i])] = FALSE
+          	  z.include[sample(which(celda.mod@clusters$z == i), cluster.n.to.sample[i])] = FALSE
           	}
             }   
             cell.ix = which(z.include)
@@ -681,7 +683,7 @@ setMethod("celdaProbabilityMap",
             counts = processCounts(counts)
             compareCountMatrix(counts, celda.mod)
             
-            z.include = which(tabulate(celda.mod@clustering$z, celda.mod@clustering$K) > 0)
+            z.include = which(tabulate(celda.mod@clusters$z, celda.mod@params$K) > 0)
             
             level = match.arg(level)
             factorized <- factorizeMatrix(celda.mod = celda.mod, 

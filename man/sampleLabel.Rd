@@ -2,7 +2,7 @@
 % Please edit documentation in R/all_generics.R
 \name{sampleLabel}
 \alias{sampleLabel}
-\title{Get sample labels}
+\title{Get sample labels from a celda model}
 \usage{
 sampleLabel(celda.mod)
 }
