@@ -27,21 +27,21 @@ differentialExpression <- function(counts, celda.mod, c1, c2 = NULL, only.pos = 
   compareCountMatrix(counts, celda.mod)
   
   if (is.null(c2)){
-    c2 <- sort(setdiff(unique(celda.mod@clustering$z),c1))
+    c2 <- sort(setdiff(unique(celda.mod@clusters$z),c1))
   }
   if (length(c1) > 1){
     cells1 <-
-      celda.mod@names$column[which(celda.mod@clustering$z %in% c1)]
+      celda.mod@names$column[which(celda.mod@clusters$z %in% c1)]
   }else{
     cells1 <-
-      celda.mod@names$column[which(celda.mod@clustering$z == c1)]
+      celda.mod@names$column[which(celda.mod@clusters$z == c1)]
   }
   if (length(c2) > 1){
     cells2 <-
-      celda.mod@names$column[which(celda.mod@clustering$z %in% c2)]
+      celda.mod@names$column[which(celda.mod@clusters$z %in% c2)]
   }else{
     cells2 <-
-      celda.mod@names$column[which(celda.mod@clustering$z == c2)]
+      celda.mod@names$column[which(celda.mod@clusters$z == c2)]
   }
   mat <- counts[,c(cells1,cells2)]
   log_normalized_mat <- normalizeCounts(mat, normalize="cpm", transformation.fun=log1p)

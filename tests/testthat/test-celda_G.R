@@ -129,7 +129,7 @@ test_that(desc = "Testing recodeClusterY with celda_G", {
   expect_error(recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,5), to = c(1,2,3,4,6)))
   expect_error(recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,6), to = c(1,2,3,4,5)))  
   new.recoded = recodeClusterY(celda.mod = model_G, from = c(1,2,3,4,5), to = c(5,4,3,2,1))
-  expect_equal(model_G@clustering$y == 1, new.recoded@clustering$y == 5)
+  expect_equal(model_G@clusters$y == 1, new.recoded@clusters$y == 5)
 })
 
 # compareCountMatrix
@@ -156,9 +156,9 @@ test_that(desc = "Testing topRank function with celda_G", {
 
 # plotHeatmap
 test_that(desc = "Testing plotHeatmap with celda_G", {
-  expect_error(plotHeatmap(counts = celdaG.sim$counts, y = model_G@clustering$L), "Length of y must match number of rows in counts matrix")
-  expect_error(plotHeatmap(counts = celdaG.sim$counts, y = model_G@clustering$y, scale.row = "scale"), "'scale.row' needs to be of class 'function'")
-  expect_error(plotHeatmap(counts = celdaG.sim$counts, y = model_G@clustering$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+  expect_error(plotHeatmap(counts = celdaG.sim$counts, y = model_G@params$L), "Length of y must match number of rows in counts matrix")
+  expect_error(plotHeatmap(counts = celdaG.sim$counts, y = model_G@clusters$y, scale.row = "scale"), "'scale.row' needs to be of class 'function'")
+  expect_error(plotHeatmap(counts = celdaG.sim$counts, y = model_G@clusters$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
 })
 
 test_that(desc = "Testing plotHeatmap with celda_G, including annotations",{
@@ -166,15 +166,15 @@ test_that(desc = "Testing plotHeatmap with celda_G, including annotations",{
   rownames(annot) <- rownames(celdaG.sim$counts)
   colnames(annot) <- "label"
   
-  expect_equal(names(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = annot, y = model_G@clustering$y)),
+  expect_equal(names(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = annot, y = model_G@clusters$y)),
                c("tree_row", "tree_col", "gtable"))
   
   rownames(annot) <- NULL
-  expect_equal(names(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = as.matrix(annot), y = model_G@clustering$y)),
+  expect_equal(names(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = as.matrix(annot), y = model_G@clusters$y)),
                c("tree_row", "tree_col", "gtable"))
 
   rownames(annot) <- rev(rownames(celdaG.sim$counts))
-  expect_error(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = annot, y = model_G@clustering$y),
+  expect_error(plotHeatmap(celda.mod = model_G, counts = celdaG.sim$counts, annotation.feature = annot, y = model_G@clusters$y),
                "Row names of 'annotation.feature' are different than the row names of 'counts'")
 })
 
@@ -234,7 +234,7 @@ test_that(desc = "Testing celdaTsne with celda_G including a subset of cells",{
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup with celda_G", {
   res = featureModuleLookup(celdaG.sim$counts, model_G, "Gene_1")
-  expect_true(res == model_G@clustering$y[1])
+  expect_true(res == model_G@clusters$y[1])
   res = featureModuleLookup(celdaG.sim$counts, model_G, "Gene_2", exact.match = FALSE)
   expect_true(length(res) == 11)
   res = featureModuleLookup(celdaG.sim$counts, model_G, "XXXXXXX")
