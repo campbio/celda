@@ -156,10 +156,11 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   best.result = methods::new("celda_C",
                              clusters=list(z=best.result$z),
                              params=list(K=best.result$K, alpha=best.result$alpha, beta=best.result$beta,
-                                         sample.label=best.result$sample.label, 
-                                         count.checksum=best.result$count.checksum),
+                                         count.checksum=best.result$count.checksum,
+                                         seed=best.result$seed),
+                             sample.label=best.result$sample.label, 
                              completeLogLik=best.result$completeLogLik,
-                             finalLogLik=best.result$finalLogLik, seed=best.result$seed,
+                             finalLogLik=best.result$finalLogLik,
                              names=best.result$names)
   best.result = reorder.celda_C(counts = counts, res = best.result)
   
@@ -341,8 +342,8 @@ setMethod("factorizeMatrix",
             
             K = celda.mod@params$K
             z = celda.mod@clusters$z
-            alpha = celda.mod@modelPriors$alpha
-            beta = celda.mod@modelPriors$beta
+            alpha = celda.mod@params$alpha
+            beta = celda.mod@params$beta
             sample.label = celda.mod@sample.label
             s = as.integer(sample.label)
                   
@@ -494,8 +495,8 @@ setMethod("clusterProbability",
             s = as.integer(sample.label)
             
             K = celda.mod@params$K
-            alpha = celda.mod@modelPriors$alpha
-            beta = celda.mod@modelPriors$beta
+            alpha = celda.mod@params$alpha
+            beta = celda.mod@params$beta
             
             p = cC.decomposeCounts(counts, s, z, K)  
             

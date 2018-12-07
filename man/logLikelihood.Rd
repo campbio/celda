@@ -2,8 +2,10 @@
 % Please edit documentation in R/all_generics.R
 \name{logLikelihood}
 \alias{logLikelihood}
-\title{Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model.}
+\title{Get final log-likelihood}
 \usage{
+logLikelihood(celda.mod)
+
 logLikelihood(counts, model, ...)
 }
 \arguments{
@@ -14,12 +16,15 @@ logLikelihood(counts, model, ...)
 \item{...}{Additional parameters.}
 }
 \value{
+Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
+
 The log-likelihood of the provided cluster assignment for the provided counts matrix.
 }
 \description{
-Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model.
+Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
 }
 \examples{
+logLikelihood(celda.CG.mod)
 loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
                        sample.label=celda.CG.sim$sample.label,
                        z=celda.CG.sim$z, y=celda.CG.sim$y,
