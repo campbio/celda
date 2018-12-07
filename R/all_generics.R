@@ -1,108 +1,23 @@
 setClass("celdaModel", 
-         representation(completeLogLik = "numeric", 
-                        finalLogLik = "numeric",
-                        seed = "numeric", 
-                        count.checksum = "character",
+         representation(params = "list", # K, L, model priors, seed, checksum
                         names = "list",
-                        clustering = "list",    # K, L, z, y, etc.
-                        modelPriors = "list"))  # alpha, beta, delta, etc.
+                        completeLogLik = "numeric", 
+                        finalLogLik = "numeric",
+                        clusters = "list"))  # z and or y
 
-#' @title Get log-likelihood history
-#' @description Retrieves the complete log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
-#' 
-#' @return Numeric. The log-likelihood at each step of Gibbs sampling used to generate the model.
+
+#' @title Get parameter values provided for celda model creation
+#' @description Retrieves the K/L, model priors (e.g. alpha, beta), random seed, and count matrix checksum parameters provided during the creation of the provided celda model.
+#' @return List. Contains the model-specific parameters for the provided celda model object depending on its class.
 #' @examples
-#' completeLogLik(celda.CG.mod)
+#' params(celda.CG.mod)
 #' @export
-setGeneric("completeLogLik",
-           function(celda.mod){ standardGeneric("completeLogLik") })
-setMethod("completeLogLik",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@completeLogLik  })
+setGeneric("params",
+           function(celda.mod){ standardGeneric("params") })
+setMethod("params",
+          signature=c(celda.mod="celdaModel"),
+          function(celda.mod){  celda.mod@params  })
 
-# @title Set log-likelihood history on a celda model
-# @description Set the complete log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
-# @return A celdaModel object. The provided input object, with the updated completeLogLik property.
-# @examples
-# completeLogLik(celda.CG.mod) = c(0.00, 0.01, 0.02)  # Lenth must match num.iter
-#@export
-# setGeneric("completeLogLik<-",
-#            function(celda.mod, value){ standardGeneric("completeLogLik<-") })
-# setReplaceMethod("completeLogLik", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@completeLogLik = value
-#                    celda.mod
-#                  })
-
-
-#' @title Get final log-likelihood 
-#' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
-#' 
-#' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
-#' @examples
-#' finalLogLik(celda.CG.mod)
-#' @export
-setGeneric("finalLogLik",
-           function(celda.mod){ standardGeneric("finalLogLik") })
-setMethod("finalLogLik",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@finalLogLik  })
-
-# @title Set log-likelihood history on a celda model
-# @description Set the final log-likelihood of Gibbs sampling used to generate a celda model.
-# @return A celdaModel object. The provided input object, with the updated completeLogLik property.
-# @examples
-# finalLogLik(celda.CG.mod) = 0.97 
-#@export
-# setGeneric("finalLogLik<-",
-#            function(celda.mod, value){ standardGeneric("finalLogLik<-") })
-# setReplaceMethod("finalLogLik", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@finalLogLik = value
-#                    celda.mod
-#                  })
-
-
-#' @title Get seed used to generate model
-#' @description Retrieves the random seed used to generate a celda model.
-#' @return Numeric. The random seed used to generate the provided celda model.
-#' @examples
-#' initialSeed(celda.CG.mod)
-#' @export
-setGeneric("initialSeed",
-           function(celda.mod){ standardGeneric("initialSeed") })
-setMethod("initialSeed",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@seed  })
-#@export
-# setGeneric("initialSeed<-",
-#            function(celda.mod, value){ standardGeneric("initialSeed<-") })
-# setReplaceMethod("initialSeed", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@seed = value
-#                    celda.mod
-#                  })
-
-
-#' @title Get count matrix checksum for comparison
-#' @description Retrieves the MD5 checksum of the count matrix used to generate the provided celda mdoel.
-#' @return Character. The MD5 hash of the count matrix used to generate the provided celda model.
-#' @examples
-#' countChecksum(celda.CG.mod)
-#' @export
-setGeneric("countChecksum",
-           function(celda.mod){ standardGeneric("countChecksum") })
-setMethod("countChecksum",
-           signature=c(celda.mod="celdaModel"),
-           function(celda.mod){  celda.mod@count.checksum  })
-#@export
-# setGeneric("countChecksum<-",
-#            function(celda.mod, value){ standardGeneric("countChecksum<-") })
-# setReplaceMethod("countChecksum", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@count.checksum = value
-#                    celda.mod
-#                  })
 
 #' @title Get feature, cell and sample names from a celda model
 #' @description Retrieves the row, column, and sample names used to generate a celda model.
@@ -113,78 +28,57 @@ setMethod("countChecksum",
 setGeneric("matrixNames",
            function(celda.mod){ standardGeneric("matrixNames") })
 setMethod("matrixNames",
-           signature=c(celda.mod="celdaModel"),
-#@export
-# setGeneric("matrixNames<-",
-#            function(celda.mod, value){ standardGeneric("matrixNames<-") })
+          signature=c(celda.mod="celdaModel"),
           function(celda.mod){  celda.mod@names  })
-# setReplaceMethod("matrixNames", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@names = value
-#                    celda.mod
-#                  })
 
 
-#' @title Get clustering parameters and outcomes from a celda model.
-#' @description Returns the K/L parameters provided for modeling, as well as the corresponding z/y results.
-#' @return List. Contains K, z (for celda_C and celda_CG models), and/or L, y (for celda_G and celda_CG models.) 
+#' @title Get log-likelihood history
+#' @description Retrieves the complete log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+#' 
+#' @return Numeric. The log-likelihood at each step of Gibbs sampling used to generate the model.
 #' @examples
-#' clustering(celda.CG.mod)
+#' logLikelihoodHistory(celda.CG.mod)
 #' @export
-setGeneric("clustering",
-           function(celda.mod){ standardGeneric("clustering")})
-setMethod("clustering", signature=c(celda.mod="celdaModel"),
-          function(celda.mod){
-            return(celda.mod@clustering)
-          })
-#@export
-# setGeneric("clustering<-",
-#            function(celda.mod, value){ standardGeneric("clustering<-") })
+setGeneric("logLikelihoodHistory",
+           function(celda.mod){ standardGeneric("logLikelihoodHistory") })
+setMethod("logLikelihoodHistory",
+           signature=c(celda.mod="celdaModel"),
+           function(celda.mod){  celda.mod@completeLogLik  })
 
 
-#' @title Get model prior parameters from a celda model.
-#' @description Returns the model priors (e.g. alpha, beta) provided at model creation for a given celda model.
-#' @return List. Contains alpha, beta (for celda_C and celda_CG models), or delta, gamma (for celda_G and celda_CG models).
+#' @title Get final log-likelihood 
+#' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+#' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
 #' @examples
-#' modelPriors(celda.CG.mod)
+#' logLikelihood(celda.CG.mod)
 #' @export
-setGeneric("modelPriors",
-           function(celda.mod){ standardGeneric("modelPriors")})
-setMethod("modelPriors", signature=c(celda.mod="celdaModel"),
+setGeneric("logLikelihood",
+           function(celda.mod){ standardGeneric("logLikelihood") })
+setMethod("logLikelihood",
+           signature=c(celda.mod="celdaModel"),
+           function(celda.mod){  celda.mod@finalLogLik  })
+
+
+#' @title Get clustering outcomes from a celda model
+#' @description Returns the z / y results corresponding to the cell / gene cluster labels determined by the provided celda model.
+#' @return List. Contains z (for celda_C and celda_CG models) and/or y (for celda_G and celda_CG models)
+#' @examples
+#' clusters(celda.CG.mod)
+#' @export
+setGeneric("clusters",
+           function(celda.mod){ standardGeneric("clusters")})
+setMethod("clusters", signature=c(celda.mod="celdaModel"),
           function(celda.mod){
-            return(celda.mod@modelPriors)
+            return(celda.mod@clusters)
           })
-#@export
-# setGeneric("modelPriors<-",
-#            function(celda.mod, value){ standardGeneric("modelPriors<-") })
 
 
 setClass("celda_C",
          representation(sample.label = "factor"),
          contains = "celdaModel")
-# setReplaceMethod("clustering", "celda_C",
-#                  function(celda.mod, value){
-#                    lapply(names(value),
-#                           function(key) {
-#                             if (!is.element(key, c("K", "z"))) {
-#                               stop(paste0("Invalid parameter provided: ", key))
-#                             }
-#                             celda.mod@clustering[[key]] = value[[key]]
-#                           })
-#                  })
-# setReplaceMethod("modelPriors", "celda_C",
-#                  function(celda.mod, value){
-#                    lapply(names(value),
-#                           function(key) {
-#                             if (!is.element(key, c("alpha", "beta"))) {
-#                               stop(paste0("Invalid parameter provided: ", key))
-#                             }
-#                             celda.mod@modelPriors[[key]] = value[[key]]
-#                           })
-#                  })
 
 
-#' @title Get sample labels
+#' @title Get sample labels from a celda model
 #' @description Returns the sample labels for the count matrix provided for generation of a given celda model.
 #' @return Character. Contains the sample labels provided at model creation time, or those automatically generated by celda.
 #' @examples
@@ -195,71 +89,20 @@ setGeneric("sampleLabel",
 setMethod("sampleLabel",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@sample.label  })
-#@export
-# setGeneric("sampleLabel<-",
-#            function(celda.mod, value){ standardGeneric("sampleLabel<-") })
-# setReplaceMethod("sampleLabel", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@sample.label = value
-#                    celda.mod
-#                  })
 
 
 setClass("celda_G",
          contains = "celdaModel")
-# setReplaceMethod("clustering", "celda_G",
-#                  function(celda.mod, value){
-#                    lapply(names(value),
-#                           function(key) {
-#                             if (!is.element(key, c("L", "y"))) {
-#                               stop(paste0("Invalid parameter provided: ", key))
-#                             }
-#                             celda.mod@clustering[[key]] = value[[key]]
-#                           })
-#                  })
-# setReplaceMethod("modelPriors", "celda_G",
-#                  function(celda.mod, value){
-#                    lapply(names(value),
-#                           function(key) {
-#                             if (!is.element(key, c("beta", "delta", "gamma"))) {
-#                               stop(paste0("Invalid parameter provided: ", key))
-#                             }
-#                             celda.mod@modelPriors[[key]] = value[[key]]
-#                           })
-#                  })
-
 
 setClass("celda_CG",
          contains = c("celda_C", "celda_G"))
-# setReplaceMethod("clustering", "celda_CG",
-#                  function(celda.mod, value){
-#                    lapply(names(value),
-#                           function(key) {
-#                             if (!is.element(key, c("K", "L", "y", "z"))) {
-#                               stop(paste0("Invalid parameter provided: ", key))
-#                             }
-#                             celda.mod@clustering[[key]] = value[[key]]
-#                           })
-#                  })
-# setReplaceMethod("modelPriors", "celda_CG",
-#                  function(celda.mod, value){
-#                    lapply(names(value),
-#                           function(key) {
-#                             if (!is.element(key, c("alpha", "beta", "delta", "gamma"))) {
-#                               stop(paste0("Invalid parameter provided: ", key))
-#                             }
-#                             celda.mod@modelPriors[[key]] = value[[key]]
-#                           })
-#                  })
-
-
-
 
 setClass("celdaList",
          representation(run.params = "data.frame",
                         res.list = "list",
                         count.checksum = "character",
                         perplexity = "matrix"))
+
 
 #' @title Get run parameters provided to `celdaGridSearch()`
 #' @description Returns details on the clustering parameters, model priors, and seeds provided to `celdaGridSearch()` when the provided celdaList was created.
@@ -272,14 +115,7 @@ setGeneric("runParams",
 setMethod("runParams",
            signature=c(celda.mod="celdaList"),
            function(celda.mod){  celda.mod@run.params  })
-#@export
-# setGeneric("runParams<-",
-#            function(celda.mod, value){ standardGeneric("runParams<-") })
-# setReplaceMethod("runParams", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@run.params = value
-#                    celda.mod
-#                  })
+
 
 #' @title Get final celda models from a celdaList
 #' @description Returns all models generated during a `celdaGridSearch()` run.
@@ -292,38 +128,19 @@ setGeneric("resList",
 setMethod("resList",
            signature=c(celda.mod="celdaList"),
            function(celda.mod){  celda.mod@res.list  })
-#@export
-#setGeneric("resList<-",
-#           function(celda.mod, value){ standardGeneric("resList<-") })
-# setReplaceMethod("resList", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@resList = value
-#                    celda.mod
-#                  })
-
-setMethod("countChecksum",
-           signature=c(celda.mod="celdaList"),
-           function(celda.mod){  celda.mod@count.checksum  })
 
 
 #' @title Get perplexity for every model in a celdaList
 #' @description Returns perplexity for each model in a celdaList as calculated by `perplexity().`
 #' @return List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
 #' @examples
-#' celda.CG.grid.model.perplexities = getPerplexity(celda.CG.grid.search.res)
+#' celda.CG.grid.model.perplexities = celdaPerplexity(celda.CG.grid.search.res)
 #' @export
-setGeneric("getPerplexity",
-           function(celda.mod){ standardGeneric("getPerplexity") })
-setMethod("getPerplexity",
+setGeneric("celdaPerplexity",
+           function(celda.mod){ standardGeneric("celdaPerplexity") })
+setMethod("celdaPerplexity",
            signature=c(celda.mod="celdaList"),
            function(celda.mod){  celda.mod@perplexity  })
-# setGeneric("setPerplexity<-",
-#            function(celda.mod, value){ standardGeneric("setPerplexity<-") })
-# setReplaceMethod("setPerplexity", "celdaModel",
-#                  function(celda.mod, value){
-#                    celda.mod@perplexity = value
-#                    celda.mod
-#                  })
 
 
 ################################################################################
