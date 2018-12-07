@@ -342,9 +342,9 @@ setMethod("factorizeMatrix",
             
             L = celda.mod@params$L
             y = celda.mod@clusters$y
-            beta = celda.mod@modelPriors$beta
-            delta = celda.mod@modelPriors$delta
-            gamma = celda.mod@modelPriors$gamma
+            beta = celda.mod@params$beta
+            delta = celda.mod@params$delta
+            gamma = celda.mod@params$gamma
             
             p = cG.decomposeCounts(counts=counts, y=y, L=L)
             n.TS.by.C = p$n.TS.by.C
@@ -511,9 +511,9 @@ setMethod("clusterProbability",
            function(counts, celda.mod, log=FALSE, ...) {
               y = celda.mod@clusters$y
               L = celda.mod@params$L
-              delta = celda.mod@modelPriors$delta
-              beta = celda.mod@modelPriors$beta
-              gamma = celda.mod@modelPriors$gamma
+              delta = celda.mod@params$delta
+              beta = celda.mod@params$beta
+              gamma = celda.mod@params$gamma
               
               ## Calculate counts one time up front
               p = cG.decomposeCounts(counts=counts, y=y, L=L)
