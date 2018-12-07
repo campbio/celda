@@ -46,7 +46,7 @@ setMethod("logLikelihoodHistory",
            function(celda.mod){  celda.mod@completeLogLik  })
 
 
-#' @title Get final log-likelihood 
+#' @title Get the log-likelihood 
 #' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
 #' @examples
