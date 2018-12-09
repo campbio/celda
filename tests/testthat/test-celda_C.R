@@ -14,7 +14,7 @@ test_that(desc = "Testing simulation and celda_C model", {
   expect_true(all(sweep(factorized$counts$sample, 2, colSums(factorized$counts$sample), "/") == factorized$proportions$sample))  
   expect_true(ncol(factorized$proportions$module) == model_C@params$K)
   expect_true(all(is.numeric(logLikelihoodHistory(celda.mod = model_C))))
-  expect_equal(max(logLikelihoodHistory(celda.mod = model_C)), logLikelihood(model_C))
+  expect_equal(max(logLikelihoodHistory(celda.mod = model_C)), bestLogLikelihood(model_C))
   
   # GitHub #347
   numeric.counts = celdaC.sim$counts
