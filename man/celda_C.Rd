@@ -2,14 +2,13 @@
 % Please edit documentation in R/celda_C.R
 \name{celda_C}
 \alias{celda_C}
-\title{celda Cell Clustering Model}
+\title{Cell clustering with Celda}
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
-  nchains = 3, initialize = c("random", "split"),
-  count.checksum = NULL, z.init = NULL, logfile = NULL,
-  verbose = TRUE)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
+  initialize = c("random", "split"), count.checksum = NULL, z.init = NULL,
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -22,37 +21,40 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.}
 
 \item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
+\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling or EM to perform. Default 200.}
 
 \item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{split.on.last}{Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
+\item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
-\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
+\item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
 \item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', cells are randomly assigned to a clusters. With 'split' cell clusters will be recurssively split into two clusters using `celda_C` until the specified K is reached. Default 'random'.}
 
 \item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from `1:K`. 'z.init' can only be used when `initialize = 'random'`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_C with clustering results and various sampling statistics.
+An object of class `celda_C` with the cell population clusters stored in in `z`.
 }
 \description{
-celda Cell Clustering Model
+Clusters the columns of a count matrix containing single-cell data into K subpopulations.
 }
 \examples{
-celda.sim = simulateCells(model="celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
+celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
+                    sample.label=celda.C.sim$sample.label)
+}
+\seealso{
+`celda_G()` for feature clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of K and multiple chains in parallel.
 }
