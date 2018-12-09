@@ -30,7 +30,7 @@ test_that(desc = "Testing simulateCells.celda_G, make sure all genes expressed",
 
 test_that(desc = "Testing LogLikelihood functions", {
   expect_true(all(is.numeric(logLikelihoodHistory(celda.mod = model_G))))
-  expect_equal(max(logLikelihoodHistory(celda.mod = model_G)), logLikelihood(model_G))
+  expect_equal(max(logLikelihoodHistory(celda.mod = model_G)), bestLogLikelihood(model_G))
 })
 
 test_that(desc = "Testing celdaGridSearch with celda_G", {
