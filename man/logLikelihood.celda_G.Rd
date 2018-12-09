@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_G.R
 \name{logLikelihood.celda_G}
 \alias{logLikelihood.celda_G}
-\title{Calculate the celda_G log likelihood for user-provided cluster assignments}
+\title{Calculate Celda_G log likelihood}
 \usage{
 logLikelihood.celda_G(counts, y, L, beta, delta, gamma)
 }
@@ -25,15 +25,16 @@ logLikelihood.celda_G(counts, y, L, beta, delta, gamma)
 The log-likelihood for the given cluster assignments
 }
 \description{
-This function calculates the log likelihood of each clustering of genes generated
-over multiple iterations of Gibbs sampling.
+Calculates the log likelihood for user-provided feature module clusters using the `celda_G()` model.
 }
 \examples{
-celda.sim = simulateCells(model="celda_G")
-loglik = logLikelihood(celda.sim$counts, model="celda_G", 
-                       y=celda.sim$y, L=celda.sim$L,
-                       beta=celda.sim$beta, delta=celda.sim$delta,
-                       gamma=celda.sim$gamma)
+loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
+                       y=celda.G.sim$y, L=celda.G.sim$L,
+                       beta=celda.G.sim$beta, delta=celda.G.sim$delta,
+                       gamma=celda.G.sim$gamma)
+}
+\seealso{
+`celda_G()` for clustering features
 }
 \keyword{likelihood}
 \keyword{log}

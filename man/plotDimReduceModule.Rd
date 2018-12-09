@@ -2,12 +2,11 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceModule}
 \alias{plotDimReduceModule}
-\title{Create a scatterplot based off of a matrix containing the celda state probabilities per cell.}
+\title{Plotting the Celda module probability on a dimensionality reduction plot}
 \usage{
 plotDimReduceModule(dim1, dim2, counts, celda.mod, modules = NULL,
-  rescale = TRUE, size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", color_low = "grey", color_mid = NULL,
-  color_high = "blue")
+  rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2",
+  color_low = "grey", color_mid = NULL, color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -38,14 +37,14 @@ plotDimReduceModule(dim1, dim2, counts, celda.mod, modules = NULL,
 The plot as a ggplot object
 }
 \description{
-Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
+Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by the module probability(s).
 }
 \examples{
 \donttest{
-sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, 
+                        celda.mod = celda.CG.mod)
 plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], 
-                   counts = sim.res$counts, celda.mod = celda_cg, modules = c("L1","L2"))
+                    counts = celda.CG.sim$counts, celda.mod = celda.CG.mod,
+                    modules = c("L1","L2"))
 }
 }

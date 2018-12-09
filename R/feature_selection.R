@@ -10,7 +10,7 @@
 #' @param decreasing Logical. Specifies if the rank should be decreasing. Default TRUE.  
 #' @return List. The `index` variable provides the top `n` row (feature) indices contributing the most to each column (cell). The `names` variable provides the rownames corresponding to these indexes.
 #' @examples
-#' top.ranks.per.cell = topRank(celda::pbmc_select, n=10)
+#' top.ranks.per.cell = topRank(sample.cells, n=5)
 #' top.feature.names.for.cell = top.ranks.per.cell$names[1]
 #' @export
 topRank = function(matrix, n=25, margin=2, threshold=0, decreasing=TRUE) {

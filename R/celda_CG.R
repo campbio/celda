@@ -1,5 +1,7 @@
-#' celda Cell and Gene Clustering Model
+#' @title Cell and feature clustering with Celda
 #' 
+#' @description Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.  
+#'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param K Integer. Number of cell populations. 
@@ -8,24 +10,24 @@
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
-#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.
+#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm for cell clustering is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.
 #' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
-#' @param split.on.last Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param seed Integer. Passed to set.seed(). Default 12345.   
-#' @param nchains Integer. Number of random cluster initializations. Default 1.  
+#' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.   
+#' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
-#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.
-#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.
+#' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when `initialize' = 'random'`. Default NULL.
+#' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when `initialize = 'random'`. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
-#' @return An object of class celda_CG with clustering results and various sampling statistics.
+#' @return An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
+#' @seealso `celda_G()` for feature clustering and `celda_C()` for clustering cells. `celdaGridSearch()` can be used to run multiple values of K/L and multiple chains in parallel. 
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      sample.label=celda.sim$sample.label, nchains=1)
+#' celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
+#'                      sample.label=celda.CG.sim$sample.label, nchains=1)
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
@@ -127,46 +129,49 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	
 		
 	  ## Perform split on i-th iteration defined by split.on.iter
-	  if(K > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
-		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
-		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
+	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
+	  if(((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll)) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0))) {
+		if(K > 2 & isTRUE(do.cell.split)) {
+		  logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
+		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
+		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
-		# Reset convergence counter if a split occured
-		if(!isTRUE(all.equal(z, res$z))) {
-		  num.iter.without.improvement = 0L
-		  do.cell.split = TRUE
-		} else {
-		  do.cell.split = FALSE
-		}
+		  # Reset convergence counter if a split occured
+		  if(!isTRUE(all.equal(z, res$z))) {
+			num.iter.without.improvement = 0L
+			do.cell.split = TRUE
+		  } else {
+			do.cell.split = FALSE
+		  }
 
-		## Re-calculate variables
-		z = res$z      
-		m.CP.by.S = res$m.CP.by.S
-		n.TS.by.CP = res$n.TS.by.CP
-		n.CP = res$n.CP
-		n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-	  }  
-	  if(L > 2 & (((iter == max.iter | num.iter.without.improvement == stop.iter) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
-		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=max(L/2, 10), min.cell=3)
-		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
+		  ## Re-calculate variables
+		  z = res$z      
+		  m.CP.by.S = res$m.CP.by.S
+		  n.TS.by.CP = res$n.TS.by.CP
+		  n.CP = res$n.CP
+		  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+		}  
+		if(L > 2 & isTRUE(do.gene.split)) {
+		  logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
+		  res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=max(L/2, 10), min.cell=3)
+		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
-		# Reset convergence counter if a split occured	    
-		if(!isTRUE(all.equal(y, res$y))) {
-		  num.iter.without.improvement = 1L
-		  do.gene.split = TRUE
-		} else {
-		  do.gene.split = FALSE
-		}
+		  # Reset convergence counter if a split occured	    
+		  if(!isTRUE(all.equal(y, res$y))) {
+			num.iter.without.improvement = 1L
+			do.gene.split = TRUE
+		  } else {
+			do.gene.split = FALSE
+		  }
 
-		## Re-calculate variables
-		y = res$y        
-		n.TS.by.CP = res$n.TS.by.CP
-		n.by.TS = res$n.by.TS
-		nG.by.TS = res$nG.by.TS
-		n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
-	  }      
+		  ## Re-calculate variables
+		  y = res$y        
+		  n.TS.by.CP = res$n.TS.by.CP
+		  n.by.TS = res$n.by.TS
+		  nG.by.TS = res$nG.by.TS
+		  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
+  	    }
+  	  }        
 
 	  ## Calculate complete likelihood
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
@@ -216,10 +221,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 
 
 
-#' Simulate cells from the cell/feature bi-clustering generative model
+#' @title Simulate cells from the celda_CG model
 #' 
-#' This function generates a list containing a simulated counts matrix, as well as various parameters
-#' used in the simulation which can be useful for running celda. 
+#' @description Generates a simulated counts matrix, cell subpopulation clusters, sample labels, and feature module clusters
+#' according to the generative process of the celda_CG model. 
 #' 
 #' @param model Character. Options available in `celda::available.models`. 
 #' @param S Integer. Number of samples to simulate. Default 5.  
@@ -232,9 +237,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
-#' @return List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
+#' @return List. Contains the simulated matrix `counts`, cell population clusters `z`, feature module clusters `y`, sample assignments `sample.label`, and input parameters.
+#' @seealso `celda_C()` for simulating cell subpopulations and `celda_G()` for simulating feature modules. 
 #' @examples
 #' celda.sim = simulateCells(model="celda_CG")
 #' @export
@@ -314,21 +320,20 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
   
-  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, theta=theta, phi=phi, psi=psi, eta=eta, seed=seed))
+  return(list(z=result$z, y=result$y, sample.label=cell.sample.label, counts=cell.counts, K=K, L=L, C.Range=C.Range, N.Range=N.Range, S=S, alpha=alpha, beta=beta, gamma=gamma, delta=delta, seed=seed))
 }
 
 
-##' Generate factorized matrices showing each feature's influence on the celda_CG model clustering 
+#' @title Matrix factorization for results from celda_CG
+#' @description Generates factorized matrices showing the contribution of each feature in each module, each module in each cell and/or cell population, and each cell population in each sample. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".  
 #' @param type Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.  
-#' @return A list of factorized matrices, of the types requested by the user. NOTE: "population" state matrices are always returned in cell population (rows) x gene modules (cols).
+#' @return A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module`, `cell.population`, and `sample`. Additionally, the contribution of each module in each individual cell will be included in the `cell` element of `counts` and `proportions` elements. 
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' factorized.matrices = factorizeMatrix(celda.sim$counts, celda.mod, "posterior")
-#' @return A list of lists of the types of factorized matrices specified
+#' factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, "posterior")
 #' @export 
 factorizeMatrix.celda_CG = function(counts, celda.mod, 
                                     type=c("counts", "proportion", "posterior")) {                             
@@ -466,7 +471,8 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 }
 
 
-#' Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
+#' @title Calculate Celda_CG log likelihood
+#' @description Calculates the log likelihood for user-provided cell population and feature module clusters using the `celda_CG()` model.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
@@ -479,15 +485,15 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param ... Additional parameters.
-#' @return The log-likelihood for the given cluster assignments
+#' @return The log likelihood for the given cluster assignments
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' loglik = logLikelihood(celda.sim$counts, model="celda_CG", 
-#'                        sample.label=celda.sim$sample.label,
-#'                        z=celda.sim$z, y=celda.sim$y,
-#'                        K=celda.sim$K, L=celda.sim$L,
-#'                        alpha=celda.sim$alpha, beta=celda.sim$beta,
-#'                        gamma=celda.sim$gamma, delta=celda.sim$delta)
+#' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
+#'                        sample.label=celda.CG.sim$sample.label,
+#'                        z=celda.CG.sim$z, y=celda.CG.sim$y,
+#'                        K=celda.CG.sim$K, L=celda.CG.sim$L,
+#'                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
+#'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
 #' @export
 logLikelihood.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
   if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
@@ -526,17 +532,17 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
 
 
 
-#' Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+#' @title Conditional probabilities for cells and features from a Celda_CG model
+#' @description Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments as well as each feature belonging to each module given all other feature cluster assignments in a `celda_CG()` result. 
 #'
-#' @param celda.mod Celda object of class "celda_CG".
+#' @param celda.mod Celda object of class `celda_CG`.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
 #' @param ... Additional parameters.
 #' @return A list containging a matrix for the conditional cell and feature cluster probabilities. 
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+#' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
   
@@ -569,19 +575,16 @@ clusterProbability.celda_CG = function(counts, celda.mod, log=FALSE, ...) {
 }
 
 
-#' Calculate the perplexity from a single celda model
-#' 
-#' Perplexity can be seen as a measure of how well a provided set of 
-#' cluster assignments fit the data being clustered.
+#' @title Calculate the perplexity on new data with a celda_CG model
+#' @description Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' perplexity = perplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 perplexity.celda_CG = function(counts, celda.mod, new.counts=NULL) {
   if (!("celda_CG" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_CG.")
@@ -644,16 +647,17 @@ reorder.celda_CG = function(counts, res){
 }
 
 
-#' celdaHeatmap for celda Cell and Gene clustering model.
+#' @title Heatmap for celda_CG
+#' @description Renders an expression heatmap to visualize `celda_CG()` results. The top `nfeatures` for each module will be included in the heatmap. 
+#'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_CG". 
+#' @param celda.mod Celda object of class `celda_CG`. 
 #' @param nfeatures Integer. Maximum number of features to select for each module. Default 25.
 #' @param ... Additional parameters.
+#' @seealso `celda_CG()` for clustering features and cells and `celdaTsne()` for generating 2-dimensional coordinates
 #' @examples 
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' celdaHeatmap(celda.sim$counts, celda.mod)
-#' @return A list containing dendrogram information and the heatmap grob
+#' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
+#' @return A list containing dendrograms and the heatmap grob
 #' @export
 celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
   fm = factorizeMatrix(counts, celda.mod, type="proportion")
@@ -664,21 +668,21 @@ celdaHeatmap.celda_CG = function(counts, celda.mod, nfeatures=25, ...) {
 }
 
 
-#' Embeds cells in two dimensions using tSNE based on celda_CG results.
+#' @title tSNE for celda_CG
+#' @description Embeds cells in two dimensions using tSNE based on a `celda_CG` model. tSNE is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE. 
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda model. Options available in `celda::available.models`. 
+#' @param celda.mod Celda object of class `celda_CG`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to set.seed(). Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
 #' @param ... Additional parameters.
+#' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
 celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.size=100, modules=NULL,
@@ -734,21 +738,17 @@ celdaTsne.celda_CG = function(counts, celda.mod, max.cells=25000, min.cluster.si
 
 
 
-#' Renders probability and relative expression heatmaps to visualize the relationship between feature modules and cell populations.
-#' 
-#' It is often useful to visualize to what degree each feature influences each 
-#' cell cluster. This can also be useful for identifying features which may
-#' be redundant or unassociated with cell clustering.
+#' @title Probability map for a celda_CG model
+#' @description Renders probability and relative expression heatmaps to visualize the relationship between features and cell populations or cell populations and samples.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_CG".   
-#' @param level Character. One of "cell.population" or "sample". "cell.population" will display the absolute probabilities and relative normalized expression of each module in each cell population. "sample" will display the absolute probabilities and relative normalized abundance of each cell population in each sample." Default "cell.population".
+#' @param celda.mod Celda object of class `celda_CG`.   
+#' @param level Character. One of 'cell.population' or 'sample'. 'cell.population' will display the absolute probabilities and relative normalized expression of each module in each cell population. 'sample' will display the absolute probabilities and relative normalized abundance of each cell population in each sample. Default 'cell.population'.
 #' @param ... Additional parameters.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' celdaProbabilityMap(celda.sim$counts, celda.mod)
+#' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
+#' @seealso `celda_CG()` for clustering features and cells
 #' @export 
 celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.population", "sample"), ...){
   counts = processCounts(counts)
@@ -789,36 +789,35 @@ celdaProbabilityMap.celda_CG <- function(counts, celda.mod, level=c("cell.popula
 }
 
 
-#' Obtain the feature module of a feature of interest
-#' 
-#' This function will output the gene module of a specific gene(s) from a celda model
+#' @title Lookup the module of a feature
+#' @description Finds the module assignments of given features in a `celda_G()` model
 #'  
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Model of class "celda_G" or "celda_CG".
-#' @param feature Character vector. Identify feature modules for the specified feature names.
-#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE. 
-#' @return List. Each entry corresponds to the feature module determined for the provided features
+#' @param celda.mod Model of class `celda_CG`.
+#' @param feature Character vector. The module assignemnts will be found for feature names in this vector. 
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE. 
+#' @return List. Each element contains the module of the provided feature.
+#' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-#' module = featureModuleLookup(celda.sim$counts, celda.mod, c("Gene_1", "Gene_XXX"))
+#' module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
+#'                              c("Gene_1", "Gene_XXX"))
 #' @export
 featureModuleLookup.celda_CG = function(counts, celda.mod, feature, exact.match = TRUE){
-  list <- list()
   if(!isTRUE(exact.match)){
-    feature.grep <- c()
-    for(x in 1:length(feature)){
-      feature.grep <- c(feature.grep, rownames(counts)[grep(feature[x],rownames(counts))]) 
-    }
+    feature.grep <- lapply(feature, function(x){
+      rownames(counts)[grep(x, rownames(counts))]
+    })
+    feature.grep <- unlist(feature.grep)
     feature <- feature.grep
   }
-  for(x in 1:length(feature)){
-    if(feature[x] %in% rownames(counts)){
-      list[x] <- celda.mod$y[which(rownames(counts) == feature[x])]
+  
+  list <- lapply(feature, function(x){
+    if(x %in% rownames(counts)){
+      celda.mod$y[which(rownames(counts) == x)]
     }else{
-      list[x] <- paste0("No feature was identified matching '", feature[x], "'.")
+      paste0("No feature was identified matching '", feature, "'.")
     }
-  } 
+  })
   names(list) <- feature
   return(list)
 }
