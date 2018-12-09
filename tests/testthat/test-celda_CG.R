@@ -3,7 +3,11 @@ library(celda)
 context("Testing celda_CG")
 
 celdaCG.sim = simulateCells("celda_CG", K=5, L=10)
-model_CG = celda_CG(counts=celdaCG.sim$counts, sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, L=celdaCG.sim$L, algorithm="EM", verbose=FALSE)
+model_CG = celda_CG(counts=celdaCG.sim$counts, 
+                    sample.label=celdaCG.sim$sample.label, 
+                    K=celdaCG.sim$K, L=celdaCG.sim$L, 
+                    max.iter = 1, nchains = 2,
+                    algorithm="EM", verbose=FALSE)
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 
 # celda_CG
@@ -18,10 +22,12 @@ test_that(desc = "Testing simulation and celda_CG model", {
   # GitHub #347
   numeric.counts = celdaCG.sim$counts
   storage.mode(numeric.counts) = "numeric"
-  expect_equal(class(celda_CG(counts=celdaCG.sim$counts, 
-                              sample.label=celdaCG.sim$sample.label, K=celdaCG.sim$K, 
-                              L=celdaCG.sim$L, algorithm="EM", verbose=FALSE)),
-               "celda_CG")
+  expect_true(is(celda_CG(counts=celdaCG.sim$counts, 
+                          sample.label=celdaCG.sim$sample.label, 
+                          K=celdaCG.sim$K,  L=celdaCG.sim$L, 
+                          algorithm="EM", verbose=FALSE,
+                          max.iter=1, nchains=1),
+               "celda_CG"))
 })
 
 # Cluster probabilities
@@ -45,20 +51,46 @@ test_that(desc = "Testing simulateCells.celda_CG, make sure all genes expressed"
 })
 
 test_that(desc = "Testing celdaGridSearch with celda_CG", {  
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", params.test=list(K=4:5, L=10:11, M = 3:4), params.fixed=list(sample.label=celdaCG.sim$sample.label), best.only=FALSE),
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, 
+                               model="celda_CG", 
+                               max.iter=1, nchains=1,
+                               params.test=list(K=5, L=10, M = 3:4), 
+                               params.fixed=list(sample.label=celdaCG.sim$sample.label),
+                               best.only=FALSE),
                "The following elements in 'params.test' are not arguments of 'celda_CG': M")
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10, sample.label = "Sample"), params.fixed=list(sample.label=celdaCG.sim$sample.label)),
+  
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, 
+                               model="celda_CG", nchains = 1, 
+                               max.iter=1,
+                               params.test=list(K=5, L=10, 
+                                                sample.label = "Sample"), 
+                               params.fixed=list(sample.label=celdaCG.sim$sample.label)),
                "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(), params.fixed=list(sample.label=celdaCG.sim$sample.label)),
+  
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, 
+                               model="celda_CG", nchains = 1, max.iter=1,
+                               params.test=list(), 
+                               params.fixed=list(sample.label=celdaCG.sim$sample.label)),
                "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_CG': K,L")
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10), params.fixed=list(sample.label=celdaCG.sim$sample.label, xxx = "xxx")),
+  
+  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", 
+                               nchains = 1, max.iter=1, params.test=list(K=4:5, L=9:10), 
+                               params.fixed=list(sample.label=celdaCG.sim$sample.label, xxx = "xxx")),
                "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
-  expect_warning(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", params.test=list(K=4:5, L=9:10, nchains = 2)),
+  
+  expect_warning(celdaGridSearch(counts=celdaCG.sim$counts, 
+                                 model="celda_CG", max.iter=1,
+                                 params.test=list(K=5, L=10, nchains = 2)),
                                  "Parameter 'nchains' should not be used within the params.test list")
   
   
-  celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG", nchains = 2, params.test=list(K=4:5, L=9:10), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=FALSE)
-  expect_true(all(class(celdaCG.res) == c("celda_list", "celda_CG")))
+  celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, 
+                                 model="celda_CG", nchains = 2, 
+                                 params.test=list(K=5, L=10), 
+                                 params.fixed=list(sample.label=celdaCG.sim$sample.label), 
+                                 max.iter = 1, verbose = FALSE, 
+                                 best.only=FALSE)
+  expect_true(all(is(celdaCG.res, "celda_list"), is(celdaCG.res, "celda_CG")))
   expect_equal(is.null(celdaCG.res$perplexity), TRUE)
   expect_error(plotGridSearchPerplexity(celdaCG.res))
   expect_equal(names(runParams(celda.list = celdaCG.res)), c("index","chain","K","L","log_likelihood"))
@@ -87,10 +119,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample='a'))
   
   celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
-  expect_true(all(class(celdaCG.res.index1) == "celda_CG" && class(celdaCG.res.index1) != "celda_list"))
-  
-  celdaC.res = celdaGridSearch(counts=celdaCG.sim$counts, model="celda_C", nchains = 1, params.test=list(K=4:5), params.fixed=list(sample.label=celdaCG.sim$sample.label), max.iter = 10, verbose = FALSE, best.only=TRUE)
-  expect_error(plotGridSearchPerplexity.celda_CG(celdaC.res))
+  expect_true(all(is(celdaCG.res.index1, "celda_CG") && !is(celdaCG.res.index1, "celda_list")))
   
   res <- perplexity.celda_CG(celdaCG.sim$counts, model_CG)
   res2 <- perplexity.celda_CG(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
@@ -165,7 +194,7 @@ test_that(desc = "Testing CompareCountMatrix with celda_CG", {
   
   less.features <- celdaCG.sim$counts[1:50,]
   expect_error(compareCountMatrix(counts = less.features, celda.mod = model_CG),
-               "The provided celda object was generated from a counts matrix with a different number of genes than the one provided.")
+               "The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
   less.cells <- celdaCG.sim$counts[,1:100]
   expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_CG),
                "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
@@ -265,7 +294,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
   expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"), rescale = F)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"), rescale = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
   expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
@@ -370,6 +399,3 @@ test_that(desc = "miscellaneous distance fxns that are not directly used within 
   expect_equal(class(spearmanDist(x)), "dist")
 })
 
-test_that(desc = "celda wrapper fxn should return warning", {
-  expect_warning(celda())
-})

@@ -2,10 +2,10 @@
 % Please edit documentation in R/celda_CG.R
 \name{logLikelihood.celda_CG}
 \alias{logLikelihood.celda_CG}
-\title{Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments}
+\title{Calculate Celda_CG log likelihood}
 \usage{
-logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta,
-  delta, gamma)
+logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta, delta,
+  gamma)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -31,17 +31,19 @@ logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta,
 \item{...}{Additional parameters.}
 }
 \value{
-The log-likelihood for the given cluster assignments
+The log likelihood for the given cluster assignments
 }
 \description{
-Calculate log lileklihood for the celda Cell and Gene clustering model, given a set of cell / gene cluster assignments
+Calculates the log likelihood for user-provided cell population and feature module clusters using the `celda_CG()` model.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-loglik = logLikelihood(celda.sim$counts, model="celda_CG", 
-                       sample.label=celda.sim$sample.label,
-                       z=celda.sim$z, y=celda.sim$y,
-                       K=celda.sim$K, L=celda.sim$L,
-                       alpha=celda.sim$alpha, beta=celda.sim$beta,
-                       gamma=celda.sim$gamma, delta=celda.sim$delta)
+loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
+                       sample.label=celda.CG.sim$sample.label,
+                       z=celda.CG.sim$z, y=celda.CG.sim$y,
+                       K=celda.CG.sim$K, L=celda.CG.sim$L,
+                       alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
+                       gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
+}
+\seealso{
+`celda_CG()` for clustering features and cells
 }

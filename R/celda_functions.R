@@ -35,17 +35,19 @@ normalizeLogProbs = function(ll.probs) {
 }
 
 
-#' Performs normalization, transformation, and/or scaling on a counts matrix
+#' @title Normalization of count data
+#' @description Performs normalization, transformation, and/or scaling of a counts matrix
 #' 
-#' @param counts A count matrix 
-#' @param normalize Character. Divides counts by the library sizes for each cell. One of "proportion", "cpm", "median", or "mean". "proportion" uses the total counts for each cell as the library size. "cpm" divides the library size of each cell by one million to produce counts per million. "median" divides the library size of each cell by the median library size across all cells.  "mean" divides the library size of each cell by the mean library size across all cells.
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param normalize Character. Divides counts by the library sizes for each cell. One of 'proportion', 'cpm', 'median', or 'mean'. 'proportion' uses the total counts for each cell as the library size. 'cpm' divides the library size of each cell by one million to produce counts per million. 'median' divides the library size of each cell by the median library size across all cells.  'mean' divides the library size of each cell by the mean library size across all cells.
 #' @param transformation.fun Function. Applys a transformation such as `sqrt`, `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be applied. Occurs after normalization. Default NULL.
-#' @param scale.fun Function. Scales the rows of the normalized and transformed count matrix. Default NULL.
+#' @param scale.fun Function. Scales the rows of the normalized and transformed count matrix. For example, 'scale' can be used to z-score normalize the rows. Default NULL.
 #' @param pseudocount.normalize Numeric. Add a pseudocount to counts before normalization. Default  0. 
 #' @param pseudocount.transform Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0. 
-#' @return Matrix, the normalized counts matrix.
+#' @return Numeric Matrix. A normalized matrix.
 #' @examples
-#' normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
+#' normalized.counts = normalizeCounts(celda.CG.sim$counts, "proportion", 
+#'                                     pseudocount.normalize=1)
 #' @export
 normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "mean"),
             							 transformation.fun=NULL, scale.fun=NULL,
@@ -86,22 +88,15 @@ normalizeCounts = function(counts, normalize=c("proportion", "cpm", "median", "m
 }
   
 
-#' Re-code cell cluster labels by provided mapping scheme
+#' @title Recode cell cluster labels 
+#' @description Recode cell subpopulaton clusters using a mapping in the `from` and `to` arguments.
 #' 
-#' This function will re-code _cell_ cluster labels based off of a mapping provided by the user,
-#' for all fields on a celda object involving cluster labels.
-#' e.g. if Z (cell cluster) values range from 1-4 and the user would like all 3's switched to 1's and
-#' vice versa, this function can be useful. NOTE: it is recommended that this function's results
-#' aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
-#' 
-#' @param celda.mod Celda object of class "celda_C" or "celda_CG". 
+#' @param celda.mod Celda object of class `celda_C` or `celda_CG`. 
 #' @param from Numeric vector. Unique values in the range of 1:K that correspond to the original cluster labels in `celda.mod`.  
 #' @param to Numeric vector. Unique values in the range of 1:K that correspond to the new cluster labels. 
-#' @return Celda object with cell feature clusters, with class corresponding to that of `celda.mod`.
+#' @return Celda object with cell subpopulation clusters, with class corresponding to that of `celda.mod`.
 #' @examples
-#' celda.mod = celda_CG(pbmc_select, K=10, 
-#'                      L=50, max.iter=2, nchains=1)
-#' celda.mod.reordered.z = recodeClusterZ(celda.mod, c(1, 3), c(3, 1))
+#' celda.mod.reordered.z = recodeClusterZ(celda.CG.mod, c(1, 3), c(3, 1))
 #' @export
 #' @export
 recodeClusterZ = function(celda.mod, from, to) {
@@ -116,22 +111,15 @@ recodeClusterZ = function(celda.mod, from, to) {
 }
   
 
-#' Re-code gene cluster labels by provided mapping scheme
+#' @title Recode feature module clusters
+#' @description Recode feature module clusters using a mapping in the `from` and `to` arguments.
 #' 
-#' This function will re-code _feature_ cluster labels based off of a mapping provided by the user,
-#' for all fields on a celda object involving cluster labels.
-#' e.g. if Y (feature cluster) values range from 1-4 and the user would like all 3's switched to 1's and
-#' vice versa, this function can be useful. NOTE: it is recommended that this function's results
-#' aren't used to overwrite the original celda model object provided, in the event of a mis-mapping.
-#' 
-#' @param celda.mod Celda object of class "celda_G" or "celda_CG". 
+#' @param celda.mod Celda object of class `celda_G` or `celda_CG`. 
 #' @param from Numeric vector. Unique values in the range of 1:L that correspond to the original cluster labels in `celda.mod`. 
 #' @param to Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels. 
-#' @return Celda object with recoded feature clusters, with class corresponding to that of `celda.mod`.
+#' @return Celda object with recoded feature module clusters, with class corresponding to that of `celda.mod`.
 #' @examples
-#' celda.mod = celda_CG(pbmc_select, K=10, 
-#'                       L=50, max.iter=2, nchains=1)
-#' celda.mod.reordered.y = recodeClusterY(celda.mod, c(1, 3), c(3, 1))
+#' celda.mod.reordered.y = recodeClusterY(celda.CG.mod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY = function(celda.mod, from, to) {
   if (length(setdiff(from, to)) != 0) {
@@ -145,26 +133,20 @@ recodeClusterY = function(celda.mod, from, to) {
 }
 
 
-#' Check whether a count matrix was the one used in a given celda run
+#' @title Check count matrix consistency
+#' @description Checks if the counts matrix is the same one used to generate the celda model object by comparing dimensions and MD5 checksum.
 #' 
-#' Ensures that the provided celda object was generated from a counts matrix
-#' with similar dimensions to the one provided. 
-#' 
-#' Then, compare the MD5 checksum of a provided count.matrix to the count matrix
-#' checksum on a celda_list object, to see if they're the same.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
-#' @param error.on.mismatch Logical. Whether to stop execution in the event of a count matrix mismatch. Default TRUE.
-#' @return TRUE if provided count matrix matches the one used in the celda run, FALSE otherwise. Error on FALSE if error.on.mismatch is TRUE.
+#' @param celda.mod Celda model object. 
+#' @param error.on.mismatch Logical. Whether to throw an error in the event of a mismatch. Default TRUE.
+#' @return Returns TRUE if provided count matrix matches the one used in the celda object and/or `error.on.mismatch=FALSE`, FALSE otherwise.
 #' @examples
-#' celda.sim = simulateCells("celda_CG")
-#' celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-#'                      nchains=1, max.iter=1)
-#'  compareCountMatrix(celda.sim$counts, celda.mod, error.on.mismatch=FALSE)
+#'  compareCountMatrix(celda.CG.sim$counts, celda.CG.mod, 
+#'                     error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   if (length(celda.mod$y != 0) & nrow(counts) != length(celda.mod$y)) {
-    stop("The provided celda object was generated from a counts matrix with a different number of genes than the one provided.")
+    stop("The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
   }
   
   if (length(celda.mod$z != 0 ) & ncol(counts) != length(celda.mod$z)) {
@@ -195,8 +177,8 @@ logMessages = function(..., sep = " ", logfile = NULL, append = FALSE, verbose =
   }	
 }
 
-
-#' Generate a distinct palette for coloring different clusters
+#' @title Create a color palette
+#' @description Generate a palette of `n` distinct colors. 
 #' 
 #' @param n Integer. Number of colors to generate. 
 #' @param hues Character vector. Colors available from `colors()`. These will be used as the base colors for the clustering scheme in HSV. Different saturations and values will be generated for each hue. Default c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta").
@@ -227,12 +209,11 @@ distinct_colors = function(n,
   v = seq(from=value.range[2], to=value.range[1], length=num.vs)
 
   ## Create all combination of hues with saturation/value pairs
-  new.hsv = c()
-  for(i in 1:num.vs) {
-    temp = rbind(hues.hsv[1,], s[i], v[i])
-    new.hsv = cbind(new.hsv, temp)  
-  }
-
+  list <- lapply(1:num.vs, function(x){
+    rbind(hues.hsv[1,], s[x], v[x])
+  })
+  new.hsv <- do.call(cbind,list)
+  
   ## Convert to hex
   col = grDevices::hsv(new.hsv[1,], new.hsv[2,], new.hsv[3,])
   
