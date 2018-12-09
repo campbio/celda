@@ -2,31 +2,32 @@
 % Please edit documentation in R/celda_functions.R
 \name{normalizeCounts}
 \alias{normalizeCounts}
-\title{Performs normalization, transformation, and/or scaling on a counts matrix}
+\title{Normalization of count data}
 \usage{
-normalizeCounts(counts, normalize = c("proportion", "cpm", "median",
-  "mean"), transformation.fun = NULL, scale.fun = NULL,
-  pseudocount.normalize = 0, pseudocount.transform = 0)
+normalizeCounts(counts, normalize = c("proportion", "cpm", "median", "mean"),
+  transformation.fun = NULL, scale.fun = NULL, pseudocount.normalize = 0,
+  pseudocount.transform = 0)
 }
 \arguments{
-\item{counts}{A count matrix}
+\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{normalize}{Character. Divides counts by the library sizes for each cell. One of "proportion", "cpm", "median", or "mean". "proportion" uses the total counts for each cell as the library size. "cpm" divides the library size of each cell by one million to produce counts per million. "median" divides the library size of each cell by the median library size across all cells.  "mean" divides the library size of each cell by the mean library size across all cells.}
+\item{normalize}{Character. Divides counts by the library sizes for each cell. One of 'proportion', 'cpm', 'median', or 'mean'. 'proportion' uses the total counts for each cell as the library size. 'cpm' divides the library size of each cell by one million to produce counts per million. 'median' divides the library size of each cell by the median library size across all cells.  'mean' divides the library size of each cell by the mean library size across all cells.}
 
 \item{transformation.fun}{Function. Applys a transformation such as `sqrt`, `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be applied. Occurs after normalization. Default NULL.}
 
-\item{scale.fun}{Function. Scales the rows of the normalized and transformed count matrix. Default NULL.}
+\item{scale.fun}{Function. Scales the rows of the normalized and transformed count matrix. For example, 'scale' can be used to z-score normalize the rows. Default NULL.}
 
 \item{pseudocount.normalize}{Numeric. Add a pseudocount to counts before normalization. Default  0.}
 
 \item{pseudocount.transform}{Numeric. Add a pseudocount to normalized counts before applying the transformation function. Adding a pseudocount can be useful before applying a log transformation. Default  0.}
 }
 \value{
-Matrix, the normalized counts matrix.
+Numeric Matrix. A normalized matrix.
 }
 \description{
-Performs normalization, transformation, and/or scaling on a counts matrix
+Performs normalization, transformation, and/or scaling of a counts matrix
 }
 \examples{
-normalized.counts = normalizeCounts(celda::pbmc_select, "proportion", pseudocount.normalize=1)
+normalized.counts = normalizeCounts(celda.CG.sim$counts, "proportion", 
+                                    pseudocount.normalize=1)
 }

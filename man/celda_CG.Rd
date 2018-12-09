@@ -2,14 +2,14 @@
 % Please edit documentation in R/celda_CG.R
 \name{celda_CG}
 \alias{celda_CG}
-\title{celda Cell and Gene Clustering Model}
+\title{Cell and feature clustering with Celda}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
-  stop.iter = 10, max.iter = 200, split.on.iter = 10,
-  split.on.last = TRUE, seed = 12345, nchains = 3,
-  initialize = c("random", "split"), count.checksum = NULL,
-  z.init = NULL, y.init = NULL, logfile = NULL, verbose = TRUE)
+  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
+  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
+  seed = 12345, nchains = 3, initialize = c("random", "split"),
+  count.checksum = NULL, z.init = NULL, y.init = NULL, logfile = NULL,
+  verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -28,7 +28,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
 
-\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm for cell clustering is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.}
 
 \item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
@@ -36,32 +36,34 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{split.on.last}{Integer. After the the chain has converged, according to `stop.iter`, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
+\item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
-\item{nchains}{Integer. Number of random cluster initializations. Default 1.}
+\item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
 \item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.}
 
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
-\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when 'initialize' = "random". Default NULL.}
+\item{z.init}{Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when `initialize' = 'random'`. Default NULL.}
 
-\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when 'initialize' = "random". Default NULL.}
+\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when `initialize = 'random'`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_CG with clustering results and various sampling statistics.
+An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
 }
 \description{
-celda Cell and Gene Clustering Model
+Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     sample.label=celda.sim$sample.label, nchains=1)
+celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
+                     sample.label=celda.CG.sim$sample.label, nchains=1)
+}
+\seealso{
+`celda_G()` for feature clustering and `celda_C()` for clustering cells. `celdaGridSearch()` can be used to run multiple values of K/L and multiple chains in parallel.
 }

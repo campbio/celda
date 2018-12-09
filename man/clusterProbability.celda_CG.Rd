@@ -2,15 +2,14 @@
 % Please edit documentation in R/celda_CG.R
 \name{clusterProbability.celda_CG}
 \alias{clusterProbability.celda_CG}
-\title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
+\title{Conditional probabilities for cells and features from a Celda_CG model}
 \usage{
-\method{clusterProbability}{celda_CG}(counts, celda.mod, log = FALSE,
-  ...)
+\method{clusterProbability}{celda_CG}(counts, celda.mod, log = FALSE, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_CG".}
+\item{celda.mod}{Celda object of class `celda_CG`.}
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 
@@ -20,10 +19,11 @@
 A list containging a matrix for the conditional cell and feature cluster probabilities.
 }
 \description{
-Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments as well as each feature belonging to each module given all other feature cluster assignments in a `celda_CG()` result.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
+}
+\seealso{
+`celda_CG()` for clustering features and cells
 }

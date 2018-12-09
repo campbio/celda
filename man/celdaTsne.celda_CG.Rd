@@ -2,7 +2,7 @@
 % Please edit documentation in R/celda_CG.R
 \name{celdaTsne.celda_CG}
 \alias{celdaTsne.celda_CG}
-\title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
+\title{tSNE for celda_CG}
 \usage{
 \method{celdaTsne}{celda_CG}(counts, celda.mod, max.cells = 25000,
   min.cluster.size = 100, modules = NULL, perplexity = 20,
@@ -11,7 +11,7 @@
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{celda.mod}{Celda object of class `celda_CG`.}
 
 \item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
 
@@ -23,7 +23,7 @@
 
 \item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{...}{Additional parameters.}
 }
@@ -31,10 +31,11 @@
 A two column matrix of t-SNE coordinates
 }
 \description{
-Embeds cells in two dimensions using tSNE based on celda_CG results.
+Embeds cells in two dimensions using tSNE based on a `celda_CG` model. tSNE is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-tsne.res = celdaTsne(celda.sim$counts, celda.mod)
+tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+}
+\seealso{
+`celda_CG()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
 }
