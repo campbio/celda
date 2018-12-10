@@ -37,12 +37,11 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100
   }
   
   #filter topRank using feature.module into feature.indices
-  feature.indices <- c()
-  for(module in feature.module){
-    feature.indices <- c(feature.indices, top.rank$index[[module]])
-  }
-  
-  
+  feature.indices <- lapply(feature.module, function(module) {
+    top.rank$index[[module]]
+  })
+  feature.indices <- unlist(feature.indices)
+
   #Determine cell order from factorize.matrix$proportions$cell
   cell.states <- factorize.matrix$proportions$cell
   cell.states <- cell.states[feature.module, ,drop = FALSE]
