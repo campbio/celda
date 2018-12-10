@@ -134,11 +134,9 @@ top.genes$names$L1
 
 The clustering results can be viewed with a heatmap of the normalized counts using the function `celdaHeatmap`. The top `nfeatures` in each module will be selected according to the factorized module probability matrix. 
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 celdaHeatmap(counts = sim_counts$counts, celda.mod = celda.model, nfeatures = 10)
 ```
-![](celdaHeatmap1.jpg)
-
 ## Plotting cell populations with tSNE
 
 Celda contains its own wrapper function for tSNE, `celdaTsne`, which can be used to embed cells into 2-dimensions. The output can be used in the downstream plotting functions `plotDimReduceCluster`, `plotDimReduceModule`, and `plotDimReduceFeature` to show cell population clusters, module probabilities, and expression of a individual features, respectively:
@@ -147,7 +145,7 @@ Celda contains its own wrapper function for tSNE, `celdaTsne`, which can be used
 tsne = celdaTsne(counts = sim_counts$counts, celda.mod = celda.model)
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 plotDimReduceCluster(dim1 = tsne[,1], 
                      dim2 = tsne[,2], 
                      cluster = clustering(celda.model)$z)
@@ -158,28 +156,21 @@ plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2],
 plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2],
                      counts = sim_counts$counts, features = "Gene_1")
 ```
-![](plotDimReduceCluster1.jpg)
-![](plotDimReduceModule1.jpg)
-![](plotDimReduceFeature1.jpg)
-
 
 ## Displaying relationships between modules and cell populations
 
 The relationships between feature modules and cell populations can be visualized with `celdaProbabilityMap`. The absolute probabilities of each feature module in each cellular subpopulation is shown on the left. The normalized and z-scored expression of each module in each cell population is shown on the right.
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 celdaProbabilityMap(counts = sim_counts$counts, celda.mod = celda.model)
 ```
-![](celdaProbabilityMap1.jpg)
-
 ## Examining co-expression with module heatmaps
 
 moduleHeatmap creates a heatmap using only the features from a specific feature module. Cells are ordered from those with the lowest probability of the module to the highest. If more than one module is used, then cells will be ordered by the probabilities of the first module.
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 moduleHeatmap(counts = sim_counts$counts, celda.mod = celda.model, feature.module = 1, top.cells = 100)
 ```
-![](moduleHeatmap1.jpg)
 
 While `celdaHeatmap` will plot a heatmap directly with a Celda object, the `plotHeatmap` function is a more general heatmap function which takes a normalized expression matrix as the input. Simple normalization of the counts matrix can be performed with the `normalizeCounts` function. For instance, if users want to display specific modules and cell populations, the `feature.ix`  and `cells.ix` parameters can be used to select rows and columns out of the matrix. 
 
@@ -190,10 +181,8 @@ norm.counts = normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
 
 ```{r, eval = FALSE, fig.width = 8, fig.height = 8}
-plotHeatmap(counts = norm.counts, z = clustering(celda.model)$z, y = custering(celda.model)$y, feature.ix = gene.ix, show.names.feature = TRUE)
+plotHeatmap(counts = norm.counts, z = clusters(celda.model)$z, y = clusters(celda.model)$y, feature.ix = gene.ix, show.names.feature = TRUE)
 ```
-![](plotHeatmap1.jpg)
-
 # Differential Expression Analysis
 
 Celda employs the MAST package [(McDavid A, 2018)](https://bioconductor.org/packages/release/bioc/html/MAST.html) for differential expression analysis of single-cell data. The `differentialExpression` function can determine features that are differentially expressed in one cell subpopulation versus all other subpopulations, between two individual cell subpopulations, or between different groups of cell populations. 
@@ -226,14 +215,12 @@ diffexp.gene.ix = which(rownames(sim_counts$counts) %in% diffexp.clust1vs2$Gene)
 
 norm.counts = normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
-
 ```{r, eval = FALSE}
 plotHeatmap(counts = norm.counts[,celda.model$z %in% c(1,2)], 
-            z = clustering(celda.model)$z[clustering(celda.model)$z %in% c(1,2)], 
-            y = clustering(celda.model)$y, feature.ix = diffexp.gene.ix, 
+            z = clusters(celda.model)$z[clusters(celda.model)$z %in% c(1,2)], 
+            y = clusters(celda.model)$y, feature.ix = diffexp.gene.ix, 
             show.names.feature = TRUE)
 ```
-![](plotHeatmap2.jpg)
 
 
 # Identifying the optimal number of cell subpopulations and feature modules
@@ -262,16 +249,14 @@ cgs = resamplePerplexity(counts = sim_counts$counts,
                           resample = 5)
 ```
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE}
+```{r, eval = TRUE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE}
 plotGridSearchPerplexity(celda.list = cgs)
 ```
-![](plotGridSearchPerplexity1.jpg)
-
 In this example, the perplexity for L stops decreasing at L = 10 for the majority of K values. For the line corresponding to L = 10, the perplexity stops decreasing at K = 5. Thus L = 10 and K = 5 would be a good choice. Generally, this method can be used to pick a reasonable L and a potential range of K. However, manual review of specific selections of K is often be required to ensure results are biologically coherent.
 
 Once users have chosen the K/L parameters for further analysis, the `subsetCeldaList` function can be used to subset the celda_list object to a single model.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 celda.model = subsetCeldaList(celda.list = cgs, params = list(K = 5, L = 10))
 ```
 
@@ -286,7 +271,7 @@ cgs = celdaGridSearch(sim_counts$counts,
                        max.iter = 100,
                        best.only = FALSE)
 
-cgs = resamplePerplexity(counts = sim_counts$counts,
+cgs <- resamplePerplexity(counts = sim_counts$counts,
                           celda.list = cgs,
                           resample = 2)
 
