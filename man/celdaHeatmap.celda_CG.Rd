@@ -2,27 +2,28 @@
 % Please edit documentation in R/celda_CG.R
 \name{celdaHeatmap.celda_CG}
 \alias{celdaHeatmap.celda_CG}
-\title{celdaHeatmap for celda Cell and Gene clustering model.}
+\title{Heatmap for celda_CG}
 \usage{
 \method{celdaHeatmap}{celda_CG}(counts, celda.mod, nfeatures = 25, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_CG".}
+\item{celda.mod}{Celda object of class `celda_CG`.}
 
 \item{nfeatures}{Integer. Maximum number of features to select for each module. Default 25.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-A list containing dendrogram information and the heatmap grob
+A list containing dendrograms and the heatmap grob
 }
 \description{
-celdaHeatmap for celda Cell and Gene clustering model.
+Renders an expression heatmap to visualize `celda_CG()` results. The top `nfeatures` for each module will be included in the heatmap.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L)
-celdaHeatmap(celda.sim$counts, celda.mod)
+celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
+}
+\seealso{
+`celda_CG()` for clustering features and cells and `celdaTsne()` for generating 2-dimensional coordinates
 }

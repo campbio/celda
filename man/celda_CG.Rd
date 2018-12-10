@@ -5,11 +5,11 @@
 \title{Cell and feature clustering with Celda}
 \usage{
 celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
-  stop.iter = 10, max.iter = 200, split.on.iter = 10,
-  split.on.last = TRUE, seed = 12345, nchains = 3,
-  initialize = c("random", "split"), count.checksum = NULL,
-  z.init = NULL, y.init = NULL, logfile = NULL, verbose = TRUE)
+  delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"), stop.iter = 10,
+  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
+  seed = 12345, nchains = 3, initialize = c("random", "split"),
+  count.checksum = NULL, z.init = NULL, y.init = NULL, logfile = NULL,
+  verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -38,7 +38,7 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to set.seed(). Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
@@ -55,16 +55,15 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_CG with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
+An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
 }
 \description{
 Clusters the rows and columns of a count matrix containing single-cell data into L modules and K subpopulations, respectively.
 }
 \examples{
-celda.sim = simulateCells(model="celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     sample.label=celda.sim$sample.label, nchains=3)
+celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
+                     sample.label=celda.CG.sim$sample.label, nchains=1)
 }
 \seealso{
-`celda_G` for feature clustering and `celda_C` for clustering of cells. `celdaGridSearch` can be used to run multiple values of K/L and multiple chains in parallel.
+`celda_G()` for feature clustering and `celda_C()` for clustering cells. `celdaGridSearch()` can be used to run multiple values of K/L and multiple chains in parallel.
 }

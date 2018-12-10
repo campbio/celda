@@ -2,40 +2,35 @@
 % Please edit documentation in R/StateHeatmap.R
 \name{moduleHeatmap}
 \alias{moduleHeatmap}
-\title{Gene module heatmap}
+\title{Heatmap for feature modules}
 \usage{
-moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = NULL,
+moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = 100,
   top.features = NULL, normalize = TRUE, scale.row = scale,
   show_featurenames = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_G" or "celda_CG".}
+\item{celda.mod}{Celda object of class `celda_G` or `celda_CG`.}
 
-\item{feature.module}{Integer. The feature module to display.}
+\item{feature.module}{Integer Vector. The feature module(s) to display. Multiple modules can be included in a vector.}
 
-\item{top.cells}{Integer. Number of cells with the highest and lowest probabilities for this module to plot. For example, if `top.cells` = 50, the 50 cells with the lowest probability and the 50 cells with the highest probability for that feature module will be plotted. If NULL, all cells will be plotted. Default NULL.}
+\item{top.cells}{Integer. Number of cells with the highest and lowest probabilities for this module to include in the heatmap. For example, if `top.cells` = 50, the 50 cells with the lowest probability and the 50 cells with the highest probability for that feature module will be included. If NULL, all cells will be plotted. Default 100.}
 
 \item{top.features}{Integer. Plot `top.features` with the highest probability in the feature module. If NULL, plot all features in the module. Default NULL.}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
 
-\item{scale.row}{Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. 'scale' will Z-score transform each row. Default 'scale'.}
+\item{scale.row}{Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. For example, `scale` will Z-score transform each row. Default `scale`.}
 
-\item{show_featurenames}{Logical. Specifies if feature names should be shown. Default TRUE.}
+\item{show_featurenames}{Logical. Wheter feature names should be displayed. Default TRUE.}
 }
 \value{
-A list containing row and column dendrogram information, as well as a gtable for grob plotting
+A list containing row and column dendrograms as well as a gtable for grob plotting
 }
 \description{
-Draws a heatmap focusing on a gene module. Both cells and genes are sorted by 
-   their proportions of counts in a given gene module. Allows for nice visualization of 
-   co-expression of those genes grouped into gene modules by Celda.
+Renders a heatmap for selected feature modules. Cells are ordered from those with the lowest probability of the module on the left to the highest probability on the right. If more than one module is used, then cells will be ordered by the probabilities of the first module only. Features are ordered from those with the highest probability in the module on the top to the lowest probability on the bottom.
 }
 \examples{
-celda.sim = simulateCells("celda_CG")
-celda.mod = celda_CG(celda.sim$counts, K=celda.sim$K, L=celda.sim$L,
-                     nchains=1, max.iter=1)
-moduleHeatmap(celda.sim$counts, celda.mod)
+moduleHeatmap(celda.CG.sim$counts, celda.CG.mod)
 }
