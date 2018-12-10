@@ -15,7 +15,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
   clust.split = vector("list", K)
   for(i in z.to.split) { 
     clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-    clust.split[[i]] = clustLabel$z
+    clust.split[[i]] = clustLabel@clusters$z
   }
 
   ## Find second best assignment give current assignments for each cell
@@ -107,7 +107,7 @@ cCG.splitZ = function(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS,
   clust.split = vector("list", K)
   for(i in z.to.split) { 
     clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-    clust.split[[i]] = clustLabel$z
+    clust.split[[i]] = clustLabel@clusters$z
   }
 
   ## Find second best assignment give current assignments for each cell
@@ -200,7 +200,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
       temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
     } else {
       clustLabel = suppressMessages(.celda_C(counts[,z == i], K=K.subclusters, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-      temp.z[ix] = clustLabel$z + current.top.z 
+      temp.z[ix] = clustLabel@clusters$z + current.top.z 
     }
     current.top.z = max(temp.z, na.rm=TRUE)
   }
@@ -226,7 +226,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
   clust.split = vector("list", L)
   for(i in y.to.split) { 
     clustLabel = suppressMessages(.celda_G(temp.n.G.by.CP[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-    clust.split[[i]] = clustLabel$y
+    clust.split[[i]] = clustLabel@clusters$y
   }
 
   ## Find second best assignment give current assignments for each cell
@@ -323,7 +323,7 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   clust.split = vector("list", L)
   for(i in y.to.split) {
     clustLabel = suppressMessages(.celda_G(counts[y == i,], L=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
-    clust.split[[i]] = clustLabel$y
+    clust.split[[i]] = clustLabel@clusters$y
   }
 
   ## Find second best assignment give current assignments for each cell
