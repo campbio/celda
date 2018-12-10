@@ -2,27 +2,28 @@
 % Please edit documentation in R/celda_C.R
 \name{clusterProbability.celda_C}
 \alias{clusterProbability.celda_C}
-\title{Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments}
+\title{Conditional probabilities for cells in subpopulations from a Celda_C model}
 \usage{
 \method{clusterProbability}{celda_C}(counts, celda.mod, log = FALSE, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_C".}
+\item{celda.mod}{Celda object of class `celda_C`.}
 
 \item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-A list containging a matrix for the conditional cell cluster probabilities.
+A list containging a matrix for the conditional cell subpopulation cluster probabilities.
 }
 \description{
-Calculates the conditional probability of each cell belong to each cluster given all other cluster assignments
+Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments in a `celda_C()` result.
 }
 \examples{
-celda.sim = simulateCells("celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K)
-cluster.prob = clusterProbability(celda.sim$counts, celda.mod)
+cluster.prob = clusterProbability(celda.C.sim$counts, celda.C.mod)
+}
+\seealso{
+`celda_C()` for clustering cells
 }

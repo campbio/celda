@@ -6,10 +6,9 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
-  nchains = 3, initialize = c("random", "split"),
-  count.checksum = NULL, z.init = NULL, logfile = NULL,
-  verbose = TRUE)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
+  initialize = c("random", "split"), count.checksum = NULL, z.init = NULL,
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -32,7 +31,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
@@ -47,15 +46,15 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class celda_C with the cell population clusters stored in in `z`.
+An object of class `celda_C` with the cell population clusters stored in in `z`.
 }
 \description{
 Clusters the columns of a count matrix containing single-cell data into K subpopulations.
 }
 \examples{
-celda.sim = simulateCells(model="celda_C")
-celda.mod = celda_C(celda.sim$counts, K=celda.sim$K, sample.label=celda.sim$sample.label)
+celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
+                    sample.label=celda.C.sim$sample.label)
 }
 \seealso{
-`celda_G` for feature clustering and `celda_CG` for simultaneous clustering of features and cells. `celdaGridSearch` can be used to run multiple values of K and multiple chains in parallel.
+`celda_G()` for feature clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of K and multiple chains in parallel.
 }

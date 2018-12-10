@@ -8,10 +8,7 @@
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-#' celda.mod = celda_CG(celda.sim$counts, sample.label=celda.sim$sample.label,
-#'                      K=celda.sim$K, L=celda.sim$L, nchain=1)
-#' perplexity = perplexity(celda.sim$counts, celda.mod)
+#' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 perplexity = function(counts, celda.mod, new.counts=NULL) {
   compareCountMatrix(counts, celda.mod)
@@ -31,26 +28,19 @@ perplexity = function(counts, celda.mod, new.counts=NULL) {
 #' @param seed Parameter to set.seed() for random number generation. Default 12345.
 #' @return celda_list. Returns the provided `celda.list` with a `perplexity` property, detailing the perplexity of all K/L combinations that appeared in the celda_list's models.
 #' @examples
-#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-#'
-#' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
-#'                       params.fixed=list(sample.label=celda.sim$sample.label),
-#'                       best.only=TRUE, nchains=1)
-#' cgs = resamplePerplexity(celda.sim$counts, cgs)
-#' plotGridSearchPerplexity(cgs)
+#' celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
+#'                                               celda.CG.grid.search.res)
+#' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   if (!isTRUE(class(celda.list)[1] == "celda_list")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
   set.seed(seed)
-  countsList = list(counts)
-  for(i in 1:resample) {
-    countsList[[i]] = resampleCountMatrix(counts)
-  }
- 
+  countsList <- lapply(1:resample, function(x){
+    resampleCountMatrix(counts)
+  })
+  
   perp.res = matrix(NA, nrow=length(celda.list$res.list), ncol=resample)
   for(i in 1:length(celda.list$res.list)) {
     for(j in 1:resample) {
@@ -68,15 +58,10 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-#'
 #' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
-#'                       params.fixed=list(sample.label=celda.sim$sample.label),
-#'                       best.only=TRUE, nchains=1)
-#' cgs = resamplePerplexity(celda.sim$counts, cgs)
-#' plotGridSearchPerplexity(cgs)
+#' celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
+#'                                               celda.CG.grid.search.res)
+#' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity = function(celda.list) {
   UseMethod("plotGridSearchPerplexity", celda.list)
@@ -89,15 +74,9 @@ plotGridSearchPerplexity = function(celda.list) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
-#' celda.sim = simulateCells(model="celda_CG", K=5, L=10, G=100)
-#'
-#' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_CG", params.test=list(K=4:6, L=9:11), 
-#'                       params.fixed=list(sample.label=celda.sim$sample.label),
-#'                       best.only=TRUE, nchains=1)
-#' cgs = resamplePerplexity(celda.sim$counts, cgs)
-#' plotGridSearchPerplexity(cgs)
+#' celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
+#'                                               celda.CG.grid.search.res)
+#' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity.celda_CG = function(celda.list) {
   if (!all(c("K", "L") %in% colnames(celda.list$run.params))) {
@@ -138,12 +117,9 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
-#' celda.sim = simulateCells(model="celda_C", K=5, G=100)
-#' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_C", params.test=list(K=3:5))
-#' cgs = resamplePerplexity(celda.sim$counts, cgs)
-#' plotGridSearchPerplexity(cgs)
+#' celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts,
+#'                                               celda.CG.grid.search.res)
+#' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity.celda_C = function(celda.list) {
   if (!all(c("K") %in% colnames(celda.list$run.params))) {
@@ -182,12 +158,9 @@ plotGridSearchPerplexity.celda_C = function(celda.list) {
 #' @param celda.list Object of class 'celda_list'. 
 #' @return A ggplot plot object showing perplexity as a function of clustering parameters.
 #' @examples
-#' ## Simulate a small dataset with 5 cell clusters and 10 feature modules
-#' celda.sim = simulateCells(model="celda_G", L=10, G=100, C=100)
-#' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs = celdaGridSearch(celda.sim$counts, model="celda_G", params.test=list(L=9:11))
-#' cgs = resamplePerplexity(celda.sim$counts, cgs)
-#' plotGridSearchPerplexity(cgs)
+#' celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
+#'                                               celda.CG.grid.search.res)
+#' plotGridSearchPerplexity(celda.CG.grid.search.res)
 #' @export
 plotGridSearchPerplexity.celda_G = function(celda.list) {
   if (!all(c("L") %in% colnames(celda.list$run.params))) {

@@ -1,11 +1,12 @@
-#' Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)
+#' @title Mapping the dimensionality reduction plot 
+#' @description Creates a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE) output.
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param matrix Numeric matrix. Each row of the matrix will be plotted as a separate facet. 
 #' @param size Numeric. Sets size of point on plot. Default 1. 
-#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1". 
-#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2". 
+#' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'. 
+#' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'. 
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'. 
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
@@ -13,13 +14,10 @@
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = sim.res$counts, 
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
+#' plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = celda.CG.sim$counts, 
 #'                   xlab = "Dimension1", ylab = "Dimension 2", var_label = "tsne", 
-#'                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")
-#'}
+#'                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")}
 #' @export
 plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df = data.frame(dim1,dim2,t(as.data.frame(matrix)))
@@ -34,14 +32,15 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
                    panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black"))
 }
 
-#' Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.  
+#' @title Plotting feature expression on a dimensionality reduction plot
+#' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by expression of the specified feature.
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param features Character vector. Uses these genes for plotting.
 #' @param normalize Logical. Whether to normalize the columns of `counts`. Default TRUE.
-#' @param exact.match Logical. Whether to look for exact match of the gene name within counts matrix. Default TRUE.
+#' @param exact.match Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE. 
 #' @param trim Numeric vector. Vector of length two that specifies the lower and upper bounds for the data. This threshold is applied after row scaling. Set to NULL to disable. Default c(-2,2). 
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
@@ -52,11 +51,11 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
-#' plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],
-#'                   counts = sim.res$counts,features = c("Gene_99"), exact.match = TRUE)
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
+#'                         celda.mod = celda.CG.mod)
+#' plotDimReduceFeature(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
+#'                      counts = celda.CG.sim$counts,
+#'                      features = c("Gene_99"), exact.match = TRUE)
 #'}
 #' @export 
 plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, exact.match = TRUE, trim = c(-2,2), size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
@@ -82,14 +81,23 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
       features.indices = c(features.indices, grep(gene, rownames(counts)))
     }
     counts = counts[features.indices, , drop = FALSE]
-  }else{
-    counts = counts[rownames(counts) %in% features, , drop = FALSE]
-    counts = counts[match(rownames(counts), features), , drop = FALSE]
+  } else {
+    features.not.found = setdiff(features, intersect(features, rownames(counts)))
+    if (length(features.not.found) > 0) {
+      if (length(features.not.found) == length(features)) {
+        stop("None of the provided features had matching rownames in the provided counts matrix.")
+      }
+      warning(paste0("The following features were not present in the provided count matrix: ",
+                     paste0(features.not.found, ",")))
+    }
+    features.found = setdiff(features, features.not.found)
+    counts = counts[features.found, , drop = FALSE]
   }
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
-#' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
+#' @title Plotting the Celda module probability on a dimensionality reduction plot
+#' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by the module probability(s).
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
@@ -106,11 +114,11 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, 
+#'                         celda.mod = celda.CG.mod)
 #' plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], 
-#'                    counts = sim.res$counts, celda.mod = celda_cg, modules = c("L1","L2"))
+#'                     counts = celda.CG.sim$counts, celda.mod = celda.CG.mod,
+#'                     modules = c("L1","L2"))
 #'}
 #' @export 
 plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey", color_mid = NULL, color_high = "blue"){
@@ -138,7 +146,8 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
   plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
-#' Create a scatterplot based on celda cluster labels.
+#' @title Plotting the cell labels on a dimensionality reduction plot
+#' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by its given `cluster` label.
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
@@ -150,11 +159,9 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' sim.res = simulateCells(model="celda_CG", K = 5, L = 5)
-#' celda_cg <- celda_CG(counts = sim.res$counts, K = 5, L = 5)
-#' celda.tsne <- celdaTsne(counts = sim.res$counts, celda.mod = celda_cg)
+#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
 #' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-#'                      cluster = as.factor(celda_cg$z),
+#'                      cluster = as.factor(celda.CG.mod$z),
 #'                      specific_clusters = c(1,2,3))
 #' }
 #' @export 
