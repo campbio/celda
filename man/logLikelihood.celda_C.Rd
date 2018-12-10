@@ -4,7 +4,7 @@
 \alias{logLikelihood.celda_C}
 \title{Calculate Celda_C log likelihood}
 \usage{
-logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
+logLikelihood.celda_C(counts, model, sample.label, z, K, alpha, beta)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}

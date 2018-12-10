@@ -32,7 +32,7 @@ Create a scatterplot for each row of a normalized gene expression matrix where x
 \donttest{
 celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
 plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-                     cluster = as.factor(celda.CG.mod$z),
+                     cluster = as.factor(z(celda.CG.mod)),
                      specific_clusters = c(1,2,3))
 }
 }

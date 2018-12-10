@@ -98,7 +98,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	  temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
 	  if(L > 2 & (((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma, y.prob=t(next.y$probs), min.feature=3, max.clusters.to.try=max(L/2, 10))
+		res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, 
+		                beta, delta, gamma, y.prob=t(next.y$probs), 
+		                min.feature=3, max.clusters.to.try=max(L/2, 10))
 		logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 	  
 		# Reset convergence counter if a split occured	    
@@ -136,7 +138,6 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	result = list(y=y.best, completeLogLik=ll, 
 				  finalLogLik=ll.best, L=L, beta=beta, delta=delta, gamma=gamma,
 				  count.checksum=count.checksum, seed=current.seed, names=names)
-	class(result) = "celda_G"
 	
 	if (is.null(best.result) || result$finalLogLik > best.result$finalLogLik) {
       best.result = result
@@ -145,14 +146,21 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
     logMessages(date(), ".. Finished chain", i, "with seed", current.seed, logfile=logfile, append=TRUE, verbose=verbose)
   } 
   
-  result = reorder.celda_G(counts = counts, res = result) 
+  
+  best.result = methods::new("celda_G", 
+                             clusters=list(y=y.best),
+                             params=list(L=L, beta=beta, delta=delta, gamma=gamma,
+                                         count.checksum=count.checksum, seed=current.seed),
+                             completeLogLik=ll, finalLogLik=ll.best, 
+                             names=names)
+  best.result = reorder.celda_G(counts = counts, res = best.result) 
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   logMessages("Completed Celda_G. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
 
-  return(result)
+  return(best.result)
 }
 
 
@@ -302,14 +310,15 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
   ## Peform reordering on final Z and Y assigments:
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
-  result = list(y=y, completeLogLik=NULL, 
-                finalLogLik=NULL, L=L, 
-                beta=beta, delta=delta, gamma=gamma, seed=seed, 
-                names=names, count.checksum=digest::digest(cell.counts, algo="md5"))
-  class(result) = "celda_G" 
+  result = methods::new("celda_G", clusters=list(y=y), 
+                        params=list(L=L, beta=beta, delta=delta, gamma=gamma,
+                                    seed=seed,
+                                    count.checksum=digest::digest(cell.counts, algo="md5")),
+                        names=names)
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
-  return(list(y=result$y, counts=processCounts(cell.counts), L=L, beta=beta, delta=delta, gamma=gamma, seed=seed))
+  return(list(y=result@clusters$y, counts=processCounts(cell.counts), L=L, 
+              beta=beta, delta=delta, gamma=gamma, seed=seed))
 }
 
 
@@ -324,71 +333,75 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
 #' @examples 
 #' factorized.matrices = factorizeMatrix(celda.G.sim$counts, celda.G.mod, "posterior")
 #' @export
-factorizeMatrix.celda_G = function(counts, celda.mod, 
-                                   type=c("counts", "proportion", "posterior")) {
-  counts = processCounts(counts)
-  compareCountMatrix(counts, celda.mod)
-  
-  L = celda.mod$L
-  y = celda.mod$y
-  beta = celda.mod$beta
-  delta = celda.mod$delta
-  gamma = celda.mod$gamma
-  
-  p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  n.TS.by.C = p$n.TS.by.C
-  n.by.G = p$n.by.G
-  n.by.TS = p$n.by.TS
-  nG.by.TS = p$nG.by.TS
-  nM = p$nM
-  nG = p$nG
-  rm(p)
-  
-  nG.by.TS[nG.by.TS == 0] = 1  
-  n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
-  n.G.by.TS[cbind(1:nG,y)] = n.by.G
-
-  L.names = paste0("L", 1:L)
-  colnames(n.TS.by.C) = celda.mod$names$column
-  rownames(n.TS.by.C) = L.names
-  colnames(n.G.by.TS) = L.names
-  rownames(n.G.by.TS) = celda.mod$names$row
-  names(nG.by.TS) = L.names
-  
-  counts.list = c()
-  prop.list = c()
-  post.list = c()
-  res = list()
-  
-  if(any("counts" %in% type)) {
-    counts.list = list(cell=n.TS.by.C, module=n.G.by.TS, gene.distribution=nG.by.TS)
-    res = c(res, list(counts=counts.list))
-  }
-  if(any("proportion" %in% type)) {
-    ## Need to avoid normalizing cell/gene states with zero cells/genes
-    unique.y = sort(unique(y))
-    temp.n.G.by.TS = n.G.by.TS
-    temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], normalize="proportion")
-    temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
-    
-    prop.list = list(cell = normalizeCounts(n.TS.by.C, normalize="proportion"),
-    							  module = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
-    res = c(res, list(proportions=prop.list))
-  }
-  if(any("posterior" %in% type)) {
-  
-    gs = n.G.by.TS
-    gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
-    gs = normalizeCounts(gs, normalize="proportion")
-    temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
-    
-    post.list = list(cell = normalizeCounts(n.TS.by.C + beta, normalize="proportion"),
-    						     module = gs, gene.distribution=temp.nG.by.TS)
-    res = c(res, posterior = list(post.list))						    
-  }
-  
-  return(res)
-}
+setMethod("factorizeMatrix",
+          signature(celda.mod = "celda_G"),
+           function(counts, celda.mod, 
+                    type=c("counts", "proportion", "posterior")) {
+            counts = processCounts(counts)
+            compareCountMatrix(counts, celda.mod)
+            
+            L = celda.mod@params$L
+            y = celda.mod@clusters$y
+            beta = celda.mod@params$beta
+            delta = celda.mod@params$delta
+            gamma = celda.mod@params$gamma
+            
+            p = cG.decomposeCounts(counts=counts, y=y, L=L)
+            n.TS.by.C = p$n.TS.by.C
+            n.by.G = p$n.by.G
+            n.by.TS = p$n.by.TS
+            nG.by.TS = p$nG.by.TS
+            nM = p$nM
+            nG = p$nG
+            rm(p)
+            
+            nG.by.TS[nG.by.TS == 0] = 1  
+            n.G.by.TS = matrix(0, nrow=length(y), ncol=L)
+            n.G.by.TS[cbind(1:nG,y)] = n.by.G
+          
+            L.names = paste0("L", 1:L)
+            colnames(n.TS.by.C) = celda.mod@names$column
+            rownames(n.TS.by.C) = L.names
+            colnames(n.G.by.TS) = L.names
+            rownames(n.G.by.TS) = celda.mod@names$row
+            names(nG.by.TS) = L.names
+            
+            counts.list = c()
+            prop.list = c()
+            post.list = c()
+            res = list()
+            
+            if(any("counts" %in% type)) {
+              counts.list = list(cell=n.TS.by.C, module=n.G.by.TS, 
+                                 gene.distribution=nG.by.TS)
+              res = c(res, list(counts=counts.list))
+            }
+            if(any("proportion" %in% type)) {
+              ## Need to avoid normalizing cell/gene states with zero cells/genes
+              unique.y = sort(unique(y))
+              temp.n.G.by.TS = n.G.by.TS
+              temp.n.G.by.TS[,unique.y] = normalizeCounts(temp.n.G.by.TS[,unique.y], 
+                                                          normalize="proportion")
+              temp.nG.by.TS = nG.by.TS/sum(nG.by.TS)
+              
+              prop.list = list(cell = normalizeCounts(n.TS.by.C, normalize="proportion"),
+              							  module = temp.n.G.by.TS, gene.distribution=temp.nG.by.TS)
+              res = c(res, list(proportions=prop.list))
+            }
+            if(any("posterior" %in% type)) {
+            
+              gs = n.G.by.TS
+              gs[cbind(1:nG,y)] = gs[cbind(1:nG,y)] + delta
+              gs = normalizeCounts(gs, normalize="proportion")
+              temp.nG.by.TS = (nG.by.TS + gamma)/sum(nG.by.TS + gamma)
+              
+              post.list = list(cell = normalizeCounts(n.TS.by.C + beta, normalize="proportion"),
+              						     module = gs, gene.distribution=temp.nG.by.TS)
+              res = c(res, posterior = list(post.list))						    
+            }
+            
+            return(res)
+          })
 
 
 # Calculate log-likelihood of celda_CG model
@@ -493,25 +506,30 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
 #' @examples
 #' cluster.prob = clusterProbability(celda.G.sim$counts, celda.G.mod)
 #' @export
-clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
-
-  y = celda.mod$y
-  L = celda.mod$L
-  delta = celda.mod$delta
-  beta = celda.mod$beta
-  gamma = celda.mod$gamma
-  
-  ## Calculate counts one time up front
-  p = cG.decomposeCounts(counts=counts, y=y, L=L)
-  next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, beta=beta, delta=delta, gamma=gamma, do.sample=FALSE)  
-  y.prob = t(next.y$probs)
-  
-  if(!isTRUE(log)) {
-    y.prob = normalizeLogProbs(y.prob)
-  }
-  
-  return(list(y.probability=y.prob))
-}
+setMethod("clusterProbability",
+           signature(celda.mod = "celda_G"),
+           function(counts, celda.mod, log=FALSE, ...) {
+              y = celda.mod@clusters$y
+              L = celda.mod@params$L
+              delta = celda.mod@params$delta
+              beta = celda.mod@params$beta
+              gamma = celda.mod@params$gamma
+              
+              ## Calculate counts one time up front
+              p = cG.decomposeCounts(counts=counts, y=y, L=L)
+              next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, 
+                                         n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
+                                         n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, 
+                                         beta=beta, delta=delta, gamma=gamma, 
+                                         do.sample=FALSE)  
+              y.prob = t(next.y$probs)
+              
+              if(!isTRUE(log)) {
+                y.prob = normalizeLogProbs(y.prob)
+              }
+              
+              return(list(y.probability=y.prob))
+          })
 
 
 #' @title Calculate the perplexity on new data with a celda_G model
@@ -525,42 +543,42 @@ clusterProbability.celda_G = function(counts, celda.mod, log=FALSE, ...) {
 #' @examples
 #' perplexity = perplexity(celda.G.sim$counts, celda.G.mod)
 #' @export
-perplexity.celda_G = function(counts, celda.mod, new.counts=NULL) {
-  if (!("celda_G" %in% class(celda.mod))) stop("The celda.mod provided was not of class celda_G.")
- 
-  counts = processCounts(counts)
-  compareCountMatrix(counts, celda.mod)
-
-  if(is.null(new.counts)) {
-    new.counts = counts
-  } else {
-    new.counts = processCounts(new.counts)
-  }
-  if(nrow(new.counts) != nrow(counts)) {
-    stop("new.counts should have the same number of rows as counts.")
-  }
-  
-  factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
-                               type=c("posterior", "counts"))
-  phi <- factorized$posterior$module
-  psi <- factorized$posterior$cell
-  eta <- factorized$posterior$gene.distribution
-  nG.by.TS = factorized$counts$gene.distribution
-  
-  eta.prob = log(eta) * nG.by.TS
-  gene.by.cell.prob = log(phi %*% psi) 
-  log.px = sum(eta.prob) + sum(gene.by.cell.prob * new.counts)
-  
-  perplexity = exp(-(log.px/sum(new.counts)))
-  return(perplexity)
-}
+setMethod("perplexity",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, new.counts=NULL) {
+            counts = processCounts(counts)
+            compareCountMatrix(counts, celda.mod)
+          
+            if(is.null(new.counts)) {
+              new.counts = counts
+            } else {
+              new.counts = processCounts(new.counts)
+            }
+            if(nrow(new.counts) != nrow(counts)) {
+              stop("new.counts should have the same number of rows as counts.")
+            }
+            
+            factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
+                                         type=c("posterior", "counts"))
+            phi <- factorized$posterior$module
+            psi <- factorized$posterior$cell
+            eta <- factorized$posterior$gene.distribution
+            nG.by.TS = factorized$counts$gene.distribution
+            
+            eta.prob = log(eta) * nG.by.TS
+            gene.by.cell.prob = log(phi %*% psi) 
+            log.px = sum(eta.prob) + sum(gene.by.cell.prob * new.counts)
+            
+            perplexity = exp(-(log.px/sum(new.counts)))
+            return(perplexity)
+          })
 
 
 reorder.celda_G = function(counts, res) {
-  if(res$L > 2 & isTRUE(length(unique(res$y)) > 1)) {
-    res$y = as.integer(as.factor(res$y))
+  if(res@params$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
+    res@clusters$y = as.integer(as.factor(res@clusters$y))
     fm <- factorizeMatrix(counts = counts, celda.mod = res)
-    unique.y = sort(unique(res$y))
+    unique.y = sort(unique(res@clusters$y))
     cs = prop.table(t(fm$posterior$cell[unique.y,]), 2)
     d <- cosineDist(cs)
     h <- stats::hclust(d, method = "complete")
@@ -582,13 +600,15 @@ reorder.celda_G = function(counts, res) {
 #' celdaHeatmap(celda.G.sim$counts, celda.G.mod)
 #' @return list A list containing the dendrograms and the heatmap grob
 #' @export
-celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
-  fm = factorizeMatrix(counts, celda.mod, type="proportion")
-  top = topRank(fm$proportions$module, n=nfeatures)
-  ix = unlist(top$index)
-  norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
-  plotHeatmap(norm[ix,], y=celda.mod$y[ix], ...)
-}
+setMethod("celdaHeatmap",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, nfeatures=25, ...) {
+            fm = factorizeMatrix(counts, celda.mod, type="proportion")
+            top = topRank(fm$proportions$module, n=nfeatures)
+            ix = unlist(top$index)
+            norm = normalizeCounts(counts, normalize="proportion", transformation.fun=sqrt)
+            plotHeatmap(norm[ix,], y=celda.mod@clusters$y[ix], ...)
+          })
 
 #' @title tSNE for celda_G
 #' @description Embeds cells in two dimensions using tSNE based on a `celda_G` model. tSNE is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE. 
@@ -606,30 +626,39 @@ celdaHeatmap.celda_G = function(counts, celda.mod, nfeatures=25, ...) {
 #' tsne.res = celdaTsne(celda.G.sim$counts, celda.G.mod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
-celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, perplexity=20, max.iter=2500, seed=12345, ...) {
+setMethod("celdaTsne",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                    initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
+                    seed=12345, ...) {
   
-  if(max.cells > ncol(counts)) {
-    max.cells = ncol(counts)
-  }
-  
-  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, type="counts")
-    
-  modules.to.use = 1:nrow(fm$counts$cell)
-  if (!is.null(modules)) {
-	if (!all(modules %in% modules.to.use)) {
-	  stop("'modules' must be a vector of numbers between 1 and ", modules.to.use, ".")
-	}
-	modules.to.use = modules 
-  }
-   
-  cell.ix = sample(1:ncol(counts), max.cells)
-  norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], normalize="proportion", transformation.fun=sqrt))
-
-  res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, max.iter=max.iter, seed=seed)
-  rownames(res) = colnames(counts)
-  colnames(res) = c("tsne_1", "tsne_2")
-  return(res)
-}
+            if(max.cells > ncol(counts)) {
+              max.cells = ncol(counts)
+            }
+            
+            fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, 
+                                 type="counts")
+              
+            modules.to.use = 1:nrow(fm$counts$cell)
+            if (!is.null(modules)) {
+          	if (!all(modules %in% modules.to.use)) {
+          	  stop("'modules' must be a vector of numbers between 1 and ", 
+          	       modules.to.use, ".")
+          	}
+          	modules.to.use = modules 
+            }
+             
+            cell.ix = sample(1:ncol(counts), max.cells)
+            norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], 
+                                     normalize="proportion", 
+                                     transformation.fun=sqrt))
+          
+            res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, 
+                                max.iter=max.iter, seed=seed)
+            rownames(res) = colnames(counts)
+            colnames(res) = c("tsne_1", "tsne_2")
+            return(res)
+          })
 
 
 #' @title Lookup the module of a feature
@@ -645,22 +674,26 @@ celdaTsne.celda_G = function(counts, celda.mod, max.cells=10000, modules=NULL, p
 #' module = featureModuleLookup(celda.G.sim$counts, celda.G.mod, 
 #'                              c("Gene_1", "Gene_XXX"))
 #' @export
-featureModuleLookup.celda_G = function(counts, celda.mod, feature, exact.match = TRUE){
-  if(!isTRUE(exact.match)){
-    feature.grep <- lapply(feature, function(x){
-      rownames(counts)[grep(x, rownames(counts))]
-    })
-    feature.grep <- unlist(feature.grep)
-    feature <- feature.grep
-  }
-  
-  list <- lapply(feature, function(x){
-    if(x %in% rownames(counts)){
-      celda.mod$y[which(rownames(counts) == x)]
-    }else{
-      paste0("No feature was identified matching '", feature, "'.")
-    }
-  })
-  names(list) <- feature
-  return(list)
-}
+setMethod("featureModuleLookup",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, feature, exact.match = TRUE){
+            list <- list()
+            if(!isTRUE(exact.match)){
+              feature.grep <- c()
+              for(x in 1:length(feature)){
+                feature.grep <- c(feature.grep, 
+                                  rownames(counts)[grep(feature[x],rownames(counts))]) 
+              }
+              feature <- feature.grep
+            }
+            for(x in 1:length(feature)){
+              if(feature[x] %in% rownames(counts)){
+                list[x] <- celda.mod@clusters$y[which(rownames(counts) == feature[x])]
+              }else{
+                list[x] <- paste0("No feature was identified matching '", 
+                                  feature[x], "'.")
+              }
+            } 
+            names(list) <- feature
+            return(list)
+         })
