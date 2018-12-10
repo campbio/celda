@@ -18,7 +18,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100
   if (is.null(counts) || !is.matrix(counts) & !is.data.frame(counts)){
     stop("'counts' should be a numeric count matrix")
   }
-  if (is.null(celda.mod) || !is(celda.mod, "celda_G") & !is(celda.mod, "celda_CG")){
+  if (is.null(celda.mod) || !methods::is(celda.mod, "celda_G") & !methods::is(celda.mod, "celda_CG")){
     stop("'celda.mod' should be an object of class celda_G or celda_CG")
   }
   compareCountMatrix(counts, celda.mod)
@@ -72,19 +72,21 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100
   
   filtered_norm.counts <- filtered_norm.counts[rowSums(filtered_norm.counts>0)>0,,drop = FALSE]
   
-  gene_ix = match(rownames(filtered_norm.counts), celda.mod$names$row)
-  cell_ix = match(colnames(filtered_norm.counts), celda.mod$names$column)
-  if(!is.null(celda.mod$z)){
-    cell <- distinct_colors(length(unique(celda.mod$z)))[sort(unique(celda.mod$z[cell_ix]))]
-    names(cell) <- sort(unique(celda.mod$z[cell_ix]))
+  gene_ix = match(rownames(filtered_norm.counts), celda.mod@names$row)
+  cell_ix = match(colnames(filtered_norm.counts), celda.mod@names$column)
+  z.to.plot = c()
+  if(methods::.hasSlot(celda.mod, "z")){
+    cell <- distinct_colors(length(unique(celda.mod@clusters$z)))[sort(unique(celda.mod@clusters$z[cell_ix]))]
+    names(cell) <- sort(unique(celda.mod@clusters$z[cell_ix]))
     anno_cell_colors <- list(cell = cell)
+    z.to.plot = celda.mod@clusters$z[cell.indices]
   }else{
     anno_cell_colors <- NULL
   }
   plotHeatmap(
     filtered_norm.counts,
-    z = celda.mod$z[cell.indices],
-    y = celda.mod$y[gene_ix],
+    z = z.to.plot,
+    y = celda.mod@clusters$y[gene_ix],
     scale.row = scale.row,
     color.scheme = "divergent",
     show.names.feature = show_featurenames,

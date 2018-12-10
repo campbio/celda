@@ -64,30 +64,31 @@ recursive.splitZ = function(counts, s, K, alpha, beta, min.cell = 3, seed=12345)
       if(isTRUE(cluster.split.flag[i])) {
         ix = which(overall.z == i)
         res = suppressMessages(.celda_C(counts[,ix], K=2, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchains=1, seed=seed, verbose=FALSE, initialize="random"))
-        cluster.splits[cbind(ix, i)] = res$z
+        cluster.splits[cbind(ix, i)] = res@clusters$z
         cluster.split.flag[i] = FALSE
       }
     }
 
     ## Calculate likelihood for each cluster split
     temp.z = matrix(overall.z, nrow=ncol(counts), ncol=length(z.to.split))
-	ll = rep(NA, ncol(temp.z))    
-	for(i in 1:ncol(temp.z)) {
-	  temp.z[cluster.splits[,i] == 2,i] = current.K 
-	  ll[i] = logLikelihood.celda_C(counts, s, temp.z[,i], current.K, alpha, beta)	  
-	}  
+  	ll = rep(NA, ncol(temp.z))    
+  	for(i in 1:ncol(temp.z)) {
+  	  temp.z[cluster.splits[,i] == 2,i] = current.K 
+  	  ll[i] = logLikelihood.celda_C(counts, "celda_C", s, temp.z[,i], current.K, alpha, beta)	  
+  	}  
 
     ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
     best.ix = which.max(ll)
-	overall.z = temp.z[,best.ix]  
-	cluster.splits[,z.to.split[best.ix]] = NA
+  	overall.z = temp.z[,best.ix]  
+  	cluster.splits[,z.to.split[best.ix]] = NA
     cluster.split.flag[z.to.split[best.ix]] = TRUE
     	
-	current.K = current.K + 1
+	  current.K = current.K + 1
   }
   
   return(overall.z)
 }  
+
 
 recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=100, seed=12345) {
 
@@ -108,7 +109,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
 		temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
 	  } else {
 		clustLabel = suppressMessages(.celda_C(counts[,z == i], K=K.subclusters, max.iter=5, stop.iter=1, algorithm="EM", nchains=1, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, initialize="random"))
-		temp.z[ix] = clustLabel$z + current.top.z 
+		temp.z[ix] = clustLabel@clusters$z + current.top.z 
 	  }
 	  current.top.z = max(temp.z, na.rm=TRUE)
 	}
@@ -116,7 +117,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
   } else {
 	if(ncol(counts) > max.cells) {
 	  res = .celda_C(counts, K=max.cells, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchains=3, seed=seed, verbose=FALSE)
-	  temp.z = res$z
+	  temp.z = res@clusters$z
 	} else {
 	  temp.z = 1:ncol(counts)
 	}
@@ -141,7 +142,7 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
       if(isTRUE(cluster.split.flag[i])) {
         ix = which(overall.y == i)
         res = suppressMessages(.celda_G(counts[ix,], L=2, max.iter = 5, split.on.iter=-1, split.on.last=FALSE, nchains=1, seed=seed, verbose=FALSE, initialize="random"))
-        cluster.splits[cbind(ix, i)] = res$y
+        cluster.splits[cbind(ix, i)] = res@clusters$y
         cluster.split.flag[i] = FALSE
       }
     }
