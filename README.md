@@ -15,7 +15,7 @@
 To install the most recent beta release of celda via devtools:
 ```
 library(devtools)
-install_github("compbiomed/celda@v0.4")
+install_github("compbiomed/celda@v0.5")
 ```
 The most up-to-date (but potentially less stable) version of celda can similarly be installed with:
 ```
