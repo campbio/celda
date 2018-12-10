@@ -4,7 +4,7 @@
 \alias{plotGridSearchPerplexity.celda_C}
 \title{Plot perplexity as a function of K from celda_C models}
 \usage{
-\method{plotGridSearchPerplexity}{celda_C}(celda.list)
+plotGridSearchPerplexity.celda_C(celda.list)
 }
 \arguments{
 \item{celda.list}{Object of class 'celda_list'.}
