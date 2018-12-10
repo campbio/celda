@@ -1,11 +1,12 @@
-#' Create a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE)
+#' @title Mapping the dimensionality reduction plot 
+#' @description Creates a scatterplot given two dimensions from a data dimensionality reduction tool (e.g tSNE) output.
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
 #' @param matrix Numeric matrix. Each row of the matrix will be plotted as a separate facet. 
 #' @param size Numeric. Sets size of point on plot. Default 1. 
-#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1". 
-#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2". 
+#' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'. 
+#' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'. 
 #' @param color_low Character. A color available from `colors()`. The color will be used to signify the lowest values on the scale. Default 'grey'. 
 #' @param color_mid Character. A color available from `colors()`. The color will be used to signify the midpoint on the scale. 
 #' @param color_high Character. A color available from `colors()`. The color will be used to signify the highest values on the scale. Default 'blue'.
@@ -16,8 +17,7 @@
 #' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
 #' plotDimReduceGrid(celda.tsne[,1], celda.tsne[,2], matrix = celda.CG.sim$counts, 
 #'                   xlab = "Dimension1", ylab = "Dimension 2", var_label = "tsne", 
-#'                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")
-#'}
+#'                   size = 1, color_low = "grey", color_mid = NULL, color_high = "blue")}
 #' @export
 plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, color_mid, color_high, var_label){
   df = data.frame(dim1,dim2,t(as.data.frame(matrix)))
@@ -32,7 +32,8 @@ plotDimReduceGrid = function(dim1, dim2, matrix, size, xlab, ylab, color_low, co
                    panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black"))
 }
 
-#' Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool.  
+#' @title Plotting feature expression on a dimensionality reduction plot
+#' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by expression of the specified feature.
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
@@ -95,7 +96,8 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
-#' Create a scatterplot based off of a matrix containing the celda state probabilities per cell.
+#' @title Plotting the Celda module probability on a dimensionality reduction plot
+#' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by the module probability(s).
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
@@ -144,7 +146,8 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
   plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
-#' Create a scatterplot based on celda cluster labels.
+#' @title Plotting the cell labels on a dimensionality reduction plot
+#' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by its given `cluster` label.
 #' 
 #' @param dim1 Numeric vector. First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality reduction output.
