@@ -69,6 +69,9 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   all.seeds = seed:(seed + nchains - 1)
   
   best.result = NULL  
+  lgbeta = lgamma(1:1e7)
+  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+  lgdelta = c(0, lgamma((1:1e6) * delta))
   for(i in seq_along(all.seeds)) { 
   
 	## Initialize cluster labels
@@ -122,7 +125,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  z = next.z$z
 		
 	  ## Gibbs sampling for each gene
-	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma)
+	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta)
 	  n.TS.by.CP = next.y$n.TS.by.C
 	  nG.by.TS = next.y$nG.by.TS
 	  n.by.TS = next.y$n.by.TS
@@ -451,9 +454,8 @@ setMethod("factorizeMatrix",
 
 # Calculate the loglikelihood for the celda_CG model
 cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) {
-  nG.by.TS[nG.by.TS == 0] = 1
   nG = sum(nG.by.TS)
-  
+
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
   b = sum(lgamma(m.CP.by.S+alpha))
@@ -543,7 +545,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   n.by.G = as.integer(rowSums(counts))
   n.by.C = as.integer(colSums(counts))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each module
   n.G.by.CP = colSumByGroup(counts, group=z, K=K)
   
   nG = nrow(counts)
