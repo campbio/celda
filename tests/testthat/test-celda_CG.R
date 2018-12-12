@@ -378,6 +378,11 @@ test_that(desc = "Testing perplexity.celda_CG", {
                "The celda.mod provided was not of class celda_CG.")
 })
 
+test_that(desc = "Testing featureModuleTable",{
+  table = featureModuleTable(celda.CG.sim$counts, celda.CG.mod, output.file = NULL) 
+  expect_equal(ncol(table), 10)
+})
+
 #miscellaneous fxns
 
 #functions used internally
