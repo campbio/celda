@@ -192,18 +192,20 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
     probs[,i] = cG_CalcGibbsProbY(index=i, counts=counts, nTSbyC=n.TS.by.C, nbyTS=n.by.TS, nGbyTS=nG.by.TS, nbyG=n.by.G, y=y, L=L, nG=nG, lg_beta=lgbeta, lg_gamma=lggamma, lg_delta=lgdelta, delta=delta)
     
 	## Sample next state and add back counts
-	prev.y = y[i]
-	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
-	
-	if(prev.y != y[i]) {
-	  n.TS.by.C[prev.y,] = n.TS.by.C[prev.y,] - counts[i,]
-  	  nG.by.TS[prev.y] = nG.by.TS[prev.y] - 1L
-	  n.by.TS[prev.y] = n.by.TS[prev.y] - n.by.G[i]	  
+	if(isTRUE(do.sample)) {
+	  prev.y = y[i]
+	  y[i] = sample.ll(probs[,i])
 	  
-	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
-  	  nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
-	  n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]	  
-	}	
+	  if(prev.y != y[i]) {
+		n.TS.by.C[prev.y,] = n.TS.by.C[prev.y,] - counts[i,]
+		nG.by.TS[prev.y] = nG.by.TS[prev.y] - 1L
+		n.by.TS[prev.y] = n.by.TS[prev.y] - n.by.G[i]	  
+	  
+		n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+		nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
+		n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]	  
+	  }	
+	} 
   }
   
   return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
