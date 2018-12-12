@@ -1,3 +1,4 @@
+
 # cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
 cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
 
@@ -12,6 +13,10 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
   }
   
   ## Loop through each split-able Z and perform split
+  clust.split = lapply(z.to.split, function(x){
+    suppressMessages(.celda_C(counts[,z == x], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))$z
+  })
+  
   clust.split = vector("list", K)
   for(i in z.to.split) { 
     clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
@@ -24,7 +29,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
 
   ## Set up initial variables
   z.split = matrix(NA, nrow=length(z), ncol=length(z.to.split) * max.clusters.to.try)
-  z.split.ll = rep(NA, ncol=length(z.to.split) * max.clusters.to.try)  
+  z.split.ll = rep(NA, times=length(z.to.split) * max.clusters.to.try)  
   z.split.ll[1] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
   z.split[,1] = z
 
@@ -77,6 +82,48 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
 	}  
   }
 
+  ###########################################
+  
+  foo <- lapply(z.to.shuffle,function(i){
+    
+    other.clusters = setdiff(z.to.split, i)
+    
+    goo <- lapply(other.clusters, function(j){
+      previous.z = new.z
+      new.z = z
+    
+      
+      ## Assign cluster i to the next most similar cluster (excluding cluster j) 
+      ## as defined above by the correlation      
+      ix.to.move = z == i
+      new.z[ix.to.move] = z.second[ix.to.move]
+      
+      ## Split cluster j according to the clustering defined above
+      ix.to.split = z == j
+      new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
+      
+      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
+      n.G.by.CP = p$n.G.by.CP
+      m.CP.by.S = p$m.CP.by.S
+      
+      ## Calculate likelihood of split
+      z.split.ll[split.ix] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
+      z.split[,split.ix] = new.z
+      split.ix = split.ix + 1L
+      previous.z = new.z
+      
+      pairs = rbind(pairs, c(i, j))
+      list.res <- list(c(i,j), calcll ,new.z)
+      names(list.res) <- c("pairs","loglik","z.label")
+      return(list.res)
+    })
+    return(goo)
+  })
+  
+  ##################################
+  
+  
+  
   select = which.max(z.split.ll) 
 
   if(select == 1) {
@@ -389,8 +436,4 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   p = cG.reDecomposeCounts(counts, y.split[,select], previous.y, n.TS.by.C, n.by.G, L)
   return(list(y=y.split[,select], n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, message=m))
 }
-
-
-
-
 
