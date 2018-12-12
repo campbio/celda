@@ -80,49 +80,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
       
 	  pairs = rbind(pairs, c(i, j))
 	}  
-  }
-
-  ###########################################
-  
-  foo <- lapply(z.to.shuffle,function(i){
-    
-    other.clusters = setdiff(z.to.split, i)
-    
-    goo <- lapply(other.clusters, function(j){
-      previous.z = new.z
-      new.z = z
-    
-      
-      ## Assign cluster i to the next most similar cluster (excluding cluster j) 
-      ## as defined above by the correlation      
-      ix.to.move = z == i
-      new.z[ix.to.move] = z.second[ix.to.move]
-      
-      ## Split cluster j according to the clustering defined above
-      ix.to.split = z == j
-      new.z[ix.to.split] = ifelse(clust.split[[j]] == 1, j, i)
-      
-      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, K)
-      n.G.by.CP = p$n.G.by.CP
-      m.CP.by.S = p$m.CP.by.S
-      
-      ## Calculate likelihood of split
-      z.split.ll[split.ix] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
-      z.split[,split.ix] = new.z
-      split.ix = split.ix + 1L
-      previous.z = new.z
-      
-      pairs = rbind(pairs, c(i, j))
-      list.res <- list(c(i,j), calcll ,new.z)
-      names(list.res) <- c("pairs","loglik","z.label")
-      return(list.res)
-    })
-    return(goo)
-  })
-  
-  ##################################
-  
-  
+  }  
   
   select = which.max(z.split.ll) 
 
