@@ -236,18 +236,13 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   ## Expectation given current cell population labels
   theta = fastNormPropLog(m.CP.by.S, alpha)
   phi = fastNormPropLog(n.G.by.CP, beta)
-  #theta = log(normalizeCounts(m.CP.by.S + alpha, normalize="proportion"))
-  #phi = log(normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
   
   ## Maximization to find best label for each cell
-  probs = eigenMatMultInt(phi, counts) + theta[, s]  
-  #probs = (t(phi) %*% counts) + theta[, s]  
-  
+  probs = eigenMatMultInt(phi, counts) + theta[, s]    
   z.previous = z
   z = apply(probs, 2, which.max)
 
   ## Recalculate counts based on new label
-  #p = cC.decomposeCounts(counts, s, z, K)
   p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
   m.CP.by.S = p$m.CP.by.S
   n.G.by.CP = p$n.G.by.CP
