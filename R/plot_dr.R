@@ -76,15 +76,22 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
   var_label = "Expression"
   
   if(!isTRUE(exact.match)){
-    features.indices = c()  
+    features.indices = c()
+    not.found = c()
     for(gene in features){
       features.indices = c(features.indices, grep(gene, rownames(counts)))
+      if(length(grep(gene, rownames(counts))) == 0){
+        not.found = c(not.found, gene)
+      }
     }
     counts = counts[features.indices, , drop = FALSE]
+    message(paste0("Feature ",not.found," was not found in the matrix. \n"))
   }else{
     counts = counts[rownames(counts) %in% features, , drop = FALSE]
-    counts = counts[match(rownames(counts), features), , drop = FALSE]
-  }
+    counts = counts[match(features, rownames(counts)), , drop = FALSE]
+    message(paste0("Feature ",features[is.na(rowSums(counts))]," was not found in the matrix. \n"))
+    counts = counts[!is.na(rowSums(counts)),]
+    }
   plotDimReduceGrid(dim1, dim2, counts, size, xlab, ylab, color_low, color_mid, color_high, var_label)
 }
 
