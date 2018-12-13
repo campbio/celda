@@ -296,7 +296,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
   expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1","L2"), rescale = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
-  expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99","Nonexistent_Gene"), exact.match = TRUE)),
+  expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
   expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
@@ -312,6 +312,11 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
                                       counts = celdaCG.sim$counts,
                                       features = c("Gene_99","Nonexistent_Gene"), 
                                       exact.match = TRUE))
+  expect_warning(plotDimReduceFeature(dim1 = celda.tsne[,1],
+                                      dim2 = celda.tsne[,2],
+                                      counts = celdaCG.sim$counts,
+                                      features = c("Gene_99","Nonexistent_Gene"), 
+                                      exact.match = FALSE))
 })
 
 # celdaTsne
