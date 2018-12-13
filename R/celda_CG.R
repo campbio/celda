@@ -584,7 +584,10 @@ setMethod("clusterProbability",
             gamma = celda.mod@params$gamma
           
             p = cCG.decomposeCounts(counts, s, z, y, K, L)
-          
+            lgbeta = lgamma((0:max(p$n.CP))+beta)
+            lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+            lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+            
             ## Gibbs sampling for each cell
             next.z = cC.calcGibbsProbZ(counts=p$n.TS.by.C, m.CP.by.S=p$m.CP.by.S, 
                                        n.G.by.CP=p$n.TS.by.CP, n.CP=p$n.CP, 
@@ -597,8 +600,8 @@ setMethod("clusterProbability",
             next.y = cG.calcGibbsProbY(counts=p$n.G.by.CP, n.TS.by.C=p$n.TS.by.CP, 
                                        n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
                                        n.by.G=p$n.by.G, y=y, L=L, nG=p$nG, 
-                                       beta=beta, delta=delta, gamma=gamma, 
-                                       do.sample=FALSE)
+                                       lgbeta=lgbeta, lgdelta=lgdelta, lggamma=lggamma, 
+                                       delta = delta, do.sample=FALSE)
             y.prob = t(next.y$probs)
           
             if(!isTRUE(log)) {
