@@ -379,8 +379,15 @@ test_that(desc = "Testing perplexity.celda_CG", {
 })
 
 test_that(desc = "Testing featureModuleTable",{
-  table = featureModuleTable(celda.CG.sim$counts, celda.CG.mod, output.file = NULL) 
+  table = featureModuleTable(celda.CG.sim$counts, model_CG, output.file = NULL) 
   expect_equal(ncol(table), 10)
+})
+
+test_that(desc = "Testing violinPlot",{
+  violin = violinPlot(counts = celda.CG.sim$counts,
+                      celda.mod = model_CG, features = "Gene_1")
+  expect_equal(names(violin),
+               c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
 })
 
 #miscellaneous fxns
