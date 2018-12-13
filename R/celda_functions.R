@@ -307,3 +307,28 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
     write.table(res, file = output.file, sep = "\t", row.names = F, quote = F)
   }
 }
+
+#' @title Feature Expression Violin Plot 
+#' @description Outputs a violin plot for feature expression data.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param celda.mod Celda object of class "celda_G" or "celda_CG".
+#' @param features Character vector. Uses these genes for plotting.
+#' @return Violin plot for each feature, grouped by celda cluster
+#' @examples
+#' violinPlot(counts = celda.CG.sim$counts,
+#'                    celda.mod = celda.CG.mod, features = "Gene_1")
+#' @export
+violinPlot = function(counts, celda.mod, features){
+  cluster = celda.mod$z
+  data_feature = counts[match(features,rownames(counts)),,drop = FALSE]
+  df = data.frame(cluster,t(data_feature))
+  df$cluster = as.factor(df$cluster)
+  
+  m = reshape2::melt(df, id.vars = c("cluster"))
+  
+  colnames(m) = c("Cluster","Feature","Expression")
+  p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill = Cluster)) + 
+    ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=T, scale = "width") + ggplot2::geom_jitter(height = 0, size = 0.1)
+  return(p)
+}
