@@ -480,11 +480,15 @@ setMethod("clusterProbability",
               
               ## Calculate counts one time up front
               p = cG.decomposeCounts(counts=counts, y=y, L=L)
+              lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
+			        lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+ 			        lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+
               next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, 
                                          n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
                                          n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, 
-                                         beta=beta, delta=delta, gamma=gamma, 
-                                         do.sample=FALSE)  
+                                         lgbeta=lgbeta, lgdelta=lgdelta, lggamma=lggamma, 
+                                         delta=delta, do.sample=FALSE)  
               y.prob = t(next.y$probs)
               
               if(!isTRUE(log)) {
