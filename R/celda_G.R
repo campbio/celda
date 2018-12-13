@@ -52,12 +52,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   initialize = match.arg(initialize)
    
   all.seeds = seed:(seed + nchains - 1)
+
+  # Pre-compute lgamma values
+  lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
+  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+  lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
     
   best.result = NULL
-  lgbeta = lgamma(0:max(colSums(counts)) + beta)
-  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
-  lgdelta = c(0, lgamma((1:1e6) * delta))
-  
   for(i in seq_along(all.seeds)) {   
 
 	## Randomly select y or y to supplied initial values
@@ -188,9 +189,8 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   probs = matrix(NA, ncol=nG, nrow=L)
   ix <- sample(1:nG)
   for(i in ix) {
-	  
     probs[,i] = cG_CalcGibbsProbY(index=i, counts=counts, nTSbyC=n.TS.by.C, nbyTS=n.by.TS, nGbyTS=nG.by.TS, nbyG=n.by.G, y=y, L=L, nG=nG, lg_beta=lgbeta, lg_gamma=lggamma, lg_delta=lgdelta, delta=delta)
-    
+    if(any(is.na(probs[,i]))) browser()
 	## Sample next state and add back counts
 	if(isTRUE(do.sample)) {
 	  prev.y = y[i]

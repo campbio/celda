@@ -67,11 +67,12 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   initialize = match.arg(initialize)
   
   all.seeds = seed:(seed + nchains - 1)
+
+  # Pre-compute lgamma values
+  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+  lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
   
   best.result = NULL  
-  lgbeta = lgamma(1:1e7)
-  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
-  lgdelta = c(0, lgamma((1:1e6) * delta))
   for(i in seq_along(all.seeds)) { 
   
 	## Initialize cluster labels
@@ -125,6 +126,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  z = next.z$z
 		
 	  ## Gibbs sampling for each gene
+	  lgbeta = lgamma((0:max(n.CP))+beta)
 	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta)
 	  n.TS.by.CP = next.y$n.TS.by.C
 	  nG.by.TS = next.y$nG.by.TS
