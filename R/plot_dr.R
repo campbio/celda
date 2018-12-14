@@ -76,11 +76,22 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
   var_label = "Expression"
   
   if(!isTRUE(exact.match)){
-    features.indices = c()  
+    features.indices = c()
+    not.found = c()
     for(gene in features){
       features.indices = c(features.indices, grep(gene, rownames(counts)))
+      if(length(grep(gene, rownames(counts))) == 0){
+        not.found = c(not.found, gene)
+      }
     }
     counts = counts[features.indices, , drop = FALSE]
+    if (length(not.found) > 0) {
+      if (length(not.found) == length(features)) {
+        stop("None of the provided features had matching rownames in the provided counts matrix.")
+      }
+      warning(paste0("The following features were not present in the provided count matrix: ",
+                     paste(not.found, sep="", collapse = ",")))
+    }
   } else {
     features.not.found = setdiff(features, intersect(features, rownames(counts)))
     if (length(features.not.found) > 0) {
@@ -88,7 +99,7 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
         stop("None of the provided features had matching rownames in the provided counts matrix.")
       }
       warning(paste0("The following features were not present in the provided count matrix: ",
-                     paste0(features.not.found, ",")))
+                     paste(features.not.found, sep="", collapse = ",")))
     }
     features.found = setdiff(features, features.not.found)
     counts = counts[features.found, , drop = FALSE]
