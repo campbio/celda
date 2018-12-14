@@ -117,14 +117,6 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	do.gene.split = TRUE  
 	while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
-	  ## Gibbs or EM sampling for each cell
-	  next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
-	  m.CP.by.S = next.z$m.CP.by.S
-	  n.TS.by.CP = next.z$n.G.by.CP
-	  n.CP = next.z$n.CP
-	  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
-	  z = next.z$z
-		
 	  ## Gibbs sampling for each gene
 	  lgbeta = lgamma((0:max(n.CP))+beta)
 	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta)
@@ -133,12 +125,20 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  n.by.TS = next.y$n.by.TS
 	  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
 	  y = next.y$y
-	
-		
+	  
+	  ## Gibbs or EM sampling for each cell
+	  next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
+	  m.CP.by.S = next.z$m.CP.by.S
+	  n.TS.by.CP = next.z$n.G.by.CP
+	  n.CP = next.z$n.CP
+	  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
+	  z = next.z$z
+			      
 	  ## Perform split on i-th iteration defined by split.on.iter
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-	  if((((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0))) {
-		if(K > 2 & isTRUE(do.cell.split)) {
+	  if(K > 2 & iter != max.iter & 
+	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
+	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 		  logMessages(date(), " .... Determining if any cell clusters should be split.", 
 		              logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
@@ -161,18 +161,20 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.TS.by.CP = res$n.TS.by.CP
 		  n.CP = res$n.CP
 		  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-		}  
-		if(L > 2 & isTRUE(do.gene.split)) {
+	  }  
+	  if(L > 2 & iter != max.iter & 
+	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
+	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 		  logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		  res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=max(L/2, 10), min.cell=3)
 		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		  # Reset convergence counter if a split occured	    
 		  if(!isTRUE(all.equal(y, res$y))) {
-			num.iter.without.improvement = 1L
-			do.gene.split = TRUE
+			  num.iter.without.improvement = 1L
+			  do.gene.split = TRUE
 		  } else {
-			do.gene.split = FALSE
+			  do.gene.split = FALSE
 		  }
 
 		  ## Re-calculate variables
@@ -181,8 +183,8 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.by.TS = res$n.by.TS
 		  nG.by.TS = res$nG.by.TS
 		  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
-  	    }
-  	  }        
+  	  }
+  	          
 
 	  ## Calculate complete likelihood
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
