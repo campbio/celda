@@ -1,3 +1,4 @@
+
 # cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
 cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
 
@@ -12,6 +13,10 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
   }
   
   ## Loop through each split-able Z and perform split
+  clust.split = lapply(z.to.split, function(x){
+    suppressMessages(.celda_C(counts[,z == x], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))$z
+  })
+  
   clust.split = vector("list", K)
   for(i in z.to.split) { 
     clustLabel = suppressMessages(.celda_C(counts[,z == i], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))
@@ -24,7 +29,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
 
   ## Set up initial variables
   z.split = matrix(NA, nrow=length(z), ncol=length(z.to.split) * max.clusters.to.try)
-  z.split.ll = rep(NA, ncol=length(z.to.split) * max.clusters.to.try)  
+  z.split.ll = rep(NA, times=length(z.to.split) * max.clusters.to.try)  
   z.split.ll[1] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
   z.split[,1] = z
 
@@ -75,8 +80,8 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
       
 	  pairs = rbind(pairs, c(i, j))
 	}  
-  }
-
+  }  
+  
   select = which.max(z.split.ll) 
 
   if(select == 1) {
@@ -389,8 +394,4 @@ cG.splitY = function(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L,
   p = cG.reDecomposeCounts(counts, y.split[,select], previous.y, n.TS.by.C, n.by.G, L)
   return(list(y=y.split[,select], n.TS.by.C=p$n.TS.by.C, n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, message=m))
 }
-
-
-
-
 
