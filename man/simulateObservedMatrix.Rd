@@ -5,8 +5,8 @@
 \title{This function generates a list containing two count matrices -- one for real expression, the other one for contamination, as well as other parameters 
 used in the simulation which can be useful for running decontamination}
 \usage{
-simulateObservedMatrix(C = 300, G = 100, K = 3, N.Range = c(500, 1000),
-  beta = 0.5, delta = c(1, 2), seed = 12345)
+simulateObservedMatrix(C = 300, G = 100, K = 3, N.Range = c(500,
+  1000), beta = 0.5, delta = c(1, 2), seed = 12345)
 }
 \arguments{
 \item{C}{Integer. Number of cells to be simulated. Default to be 300}

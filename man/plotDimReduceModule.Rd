@@ -5,8 +5,9 @@
 \title{Plotting the Celda module probability on a dimensionality reduction plot}
 \usage{
 plotDimReduceModule(dim1, dim2, counts, celda.mod, modules = NULL,
-  rescale = TRUE, size = 1, xlab = "Dimension_1", ylab = "Dimension_2",
-  color_low = "grey", color_mid = NULL, color_high = "blue")
+  rescale = TRUE, size = 1, xlab = "Dimension_1",
+  ylab = "Dimension_2", color_low = "grey", color_mid = NULL,
+  color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
