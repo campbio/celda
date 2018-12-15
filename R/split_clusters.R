@@ -14,7 +14,7 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
   
   ## Loop through each split-able Z and perform split
   clust.split = lapply(z.to.split, function(x){
-    suppressMessages(.celda_C(counts[,z == x], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))$z
+    suppressMessages(.celda_C(counts[,z == x], K=2, max.iter=5, split.on.iter=-1, split.on.last=FALSE))@clusters$z
   })
   
   clust.split = vector("list", K)
