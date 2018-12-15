@@ -6,9 +6,10 @@
 \usage{
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
-  split.on.iter = 10, split.on.last = TRUE, seed = 12345, nchains = 3,
-  initialize = c("random", "split"), count.checksum = NULL, z.init = NULL,
-  logfile = NULL, verbose = TRUE)
+  split.on.iter = 10, split.on.last = TRUE, seed = 12345,
+  nchains = 3, initialize = c("random", "split"),
+  count.checksum = NULL, z.init = NULL, logfile = NULL,
+  verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -21,7 +22,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.}
+\item{algorithm}{String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. If 'EM' is selected, then 'stop.iter' will be automatically set to 1. Default 'EM'.}
 
 \item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
 
