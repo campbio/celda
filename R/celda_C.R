@@ -6,7 +6,7 @@
 #' @param K Integer. Number of cell populations. 
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.
+#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. If 'EM' is selected, then 'stop.iter' will be automatically set to 1. Default 'EM'.
 #' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling or EM to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.
@@ -56,6 +56,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   s = as.integer(sample.label)
   
   algorithm <- match.arg(algorithm)
+  if(algorithm == "EM") { stop.iter = 1 }
+  
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   initialize = match.arg(initialize)
   
