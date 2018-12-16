@@ -22,10 +22,10 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
   set.seed(seed)
-  countsList = list(counts)
-  for(i in 1:resample) {
-    countsList[[i]] = resampleCountMatrix(counts)
-  }
+  countsList = lapply(1:resample,
+                      function(i) {
+                        return(resampleCountsMatrix(counts))
+                      })
  
   perp.res = matrix(NA, nrow=length(celda.list@res.list), ncol=resample)
   for(i in 1:length(celda.list@res.list)) {

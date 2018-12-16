@@ -679,21 +679,20 @@ setMethod("featureModuleLookup",
           function(counts, celda.mod, feature, exact.match = TRUE){
             list <- list()
             if(!isTRUE(exact.match)){
-              feature.grep <- c()
-              for(x in 1:length(feature)){
-                feature.grep <- c(feature.grep, 
-                                  rownames(counts)[grep(feature[x],rownames(counts))]) 
-              }
-              feature <- feature.grep
+              feature <- vapply(1:length(feature),
+                                function(x) {
+                                  rownames(counts)[grep(feature[x],rownames(counts))]
+                                }, character(length(feature)))
             }
-            for(x in 1:length(feature)){
-              if(feature[x] %in% rownames(counts)){
-                list[x] <- celda.mod@clusters$y[which(rownames(counts) == feature[x])]
-              }else{
-                list[x] <- paste0("No feature was identified matching '", 
-                                  feature[x], "'.")
-              }
-            } 
-            names(list) <- feature
-            return(list)
+            feat.list <- lapply(1:length(feature),
+                           function(x) {
+                             if (feature[x] %in% rownames(counts)){
+                               return(celda.mod@clusters$y[which(rownames(counts) == feature[x])])
+                             } else {
+                               return(paste0("No feature was identified matching '", 
+                                             feature[x], "'."))
+                             }              
+                           })
+            names(feat.list) <- feature
+            return(feat.list)
          })
