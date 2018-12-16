@@ -1,6 +1,3 @@
-
-
-
 #' Calculate and visualize perplexity of all models in a celda_list, with count resampling
 #' 
 #' Calculates the erplexity of each model's cluster assignments given the provided count matrix,
@@ -26,7 +23,6 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
                       function(i) {
                         return(resampleCountsMatrix(counts))
                       })
- 
   perp.res = matrix(NA, nrow=length(celda.list@res.list), ncol=resample)
   for(i in 1:length(celda.list@res.list)) {
     for(j in 1:resample) {
