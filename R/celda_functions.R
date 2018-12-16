@@ -324,7 +324,7 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
 #'                    celda.mod = celda.CG.mod, features = "Gene_1")
 #' @export
 violinPlot = function(counts, celda.mod, features){
-  cluster = celda.mod$z
+  cluster = celda.mod@clusters$z
   data_feature = counts[match(features,rownames(counts)),,drop = FALSE]
   df = data.frame(cluster,t(data_feature))
   df$cluster = as.factor(df$cluster)
