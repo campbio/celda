@@ -113,7 +113,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_fastNormProp", (DL_FUNC) &_celda_fastNormProp, 2},
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},
     {"_celda_fastNormPropSqrt", (DL_FUNC) &_celda_fastNormPropSqrt, 2},
-<<<<<<< HEAD
     {"_colSumByGroup",                  (DL_FUNC) &_colSumByGroup,                   2},
     {"_colSumByGroup_numeric",          (DL_FUNC) &_colSumByGroup_numeric,           2},
     {"_colSumByGroupChange",            (DL_FUNC) &_colSumByGroupChange,             4},
