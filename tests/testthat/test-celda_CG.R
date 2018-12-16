@@ -311,6 +311,11 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
                                       counts = celdaCG.sim$counts,
                                       features = c("Gene_99","Nonexistent_Gene"), 
                                       exact.match = TRUE))
+  expect_warning(plotDimReduceFeature(dim1 = celda.tsne[,1],
+                                      dim2 = celda.tsne[,2],
+                                      counts = celdaCG.sim$counts,
+                                      features = c("Gene_99","Nonexistent_Gene"), 
+                                      exact.match = FALSE))
 })
 
 # celdaTsne

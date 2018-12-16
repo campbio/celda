@@ -76,9 +76,13 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
   var_label = "Expression"
   
   if(!isTRUE(exact.match)){
-    features.indices = c()  
+    features.indices = c()
+    not.found = c()
     for(gene in features){
       features.indices = c(features.indices, grep(gene, rownames(counts)))
+      if(length(grep(gene, rownames(counts))) == 0){
+        not.found = c(not.found, gene)
+      }
     }
     counts = counts[features.indices, , drop = FALSE]
     if (length(not.found) > 0) {

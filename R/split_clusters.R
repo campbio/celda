@@ -1,3 +1,4 @@
+
 # cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) 
 cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob, max.clusters.to.try=10, min.cell=3) {
 
@@ -78,8 +79,8 @@ cC.splitZ = function(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha,
       
 	  pairs = rbind(pairs, c(i, j))
 	}  
-  }
-
+  }  
+  
   select = which.max(z.split.ll) 
 
   if(select == 1) {
