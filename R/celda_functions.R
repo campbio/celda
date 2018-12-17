@@ -280,3 +280,59 @@ processSampleLabels = function(sample.label, num.cells) {
   }
   return(sample.label)
 }
+
+#' @title Outputting a feature module table
+#' @description Creates a table that contains the list of features in each feature module
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param celda.mod Celda object of class "celda_G" or "celda_CG".
+#' @param output.file File name for feature module table. If NULL, file will not be created. Default NULL.
+#' @return Matrix. Contains a list of features per each column (feature module)
+#' @examples
+#' featureModuleTable(celda.CG.sim$counts, celda.CG.mod, output.file = NULL) 
+#' 
+#' \donttest{
+#' featureModuleTable(celda.CG.sim$counts, celda.CG.mod, output.file = "Celda_Output.txt") 
+#' }
+#' @export
+featureModuleTable = function(counts, celda.mod, output.file = NULL){
+  factorize.matrix = factorizeMatrix(counts, celda.mod)
+  all.genes = topRank(factorize.matrix$proportions$module, n = nrow(counts))
+  res <- as.data.frame(stringi::stri_list2matrix(all.genes$names))
+  res <- apply(res,1:2,function(x){
+    if(is.na(x)){
+      return("")}
+    else{
+      return(x)}})
+  colnames(res) <- gsub(pattern = "V", replacement = "L", x = colnames(res))
+  if(is.null(output.file)){
+    return(res)
+  }else{
+    write.table(res, file = output.file, sep = "\t", row.names = F, quote = F)
+  }
+}
+
+#' @title Feature Expression Violin Plot 
+#' @description Outputs a violin plot for feature expression data.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param celda.mod Celda object of class "celda_G" or "celda_CG".
+#' @param features Character vector. Uses these genes for plotting.
+#' @return Violin plot for each feature, grouped by celda cluster
+#' @examples
+#' violinPlot(counts = celda.CG.sim$counts,
+#'                    celda.mod = celda.CG.mod, features = "Gene_1")
+#' @export
+violinPlot = function(counts, celda.mod, features){
+  cluster = celda.mod@clusters$z
+  data_feature = counts[match(features,rownames(counts)),,drop = FALSE]
+  df = data.frame(cluster,t(data_feature))
+  df$cluster = as.factor(df$cluster)
+  
+  m = reshape2::melt(df, id.vars = c("cluster"))
+  
+  colnames(m) = c("Cluster","Feature","Expression")
+  p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill = Cluster)) + 
+    ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=T, scale = "width") + ggplot2::geom_jitter(height = 0, size = 0.1)
+  return(p)
+}
