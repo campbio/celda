@@ -6,7 +6,7 @@
 #' @param K Integer. Number of cell populations. 
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. Default 'EM'.
+#' @param algorithm String. Algorithm to use for clustering cell subpopulations. One of 'EM' or 'Gibbs'. The EM algorithm is faster, especially for larger numbers of cells. However, more chains may be required to ensure a good solution is found. If 'EM' is selected, then 'stop.iter' will be automatically set to 1. Default 'EM'.
 #' @param stop.iter Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling or EM to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.
@@ -56,6 +56,8 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   s = as.integer(sample.label)
   
   algorithm <- match.arg(algorithm)
+  if(algorithm == "EM") { stop.iter = 1 }
+  
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
   initialize = match.arg(initialize)
   
@@ -102,7 +104,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
 
 	  ## Perform split on i-th iteration of no improvement in log likelihood
 	  temp.ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
-	  if(K > 2 & (((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+	  if(K > 2 & iter != max.iter & ((((num.iter.without.improvement == stop.iter & !all(temp.ll > ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 
 		logMessages(date(), " .... Determining if any cell clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		res = cC.splitZ(counts, m.CP.by.S, n.G.by.CP, n.CP, s, z, K, nS, nG, alpha, beta, z.prob=t(next.z$probs), max.clusters.to.try=K, min.cell=3)
@@ -236,18 +238,13 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   ## Expectation given current cell population labels
   theta = fastNormPropLog(m.CP.by.S, alpha)
   phi = fastNormPropLog(n.G.by.CP, beta)
-  #theta = log(normalizeCounts(m.CP.by.S + alpha, normalize="proportion"))
-  #phi = log(normalizeCounts(n.G.by.CP + beta, normalize="proportion"))
   
   ## Maximization to find best label for each cell
-  probs = eigenMatMultInt(phi, counts) + theta[, s]  
-  #probs = (t(phi) %*% counts) + theta[, s]  
-  
+  probs = eigenMatMultInt(phi, counts) + theta[, s]    
   z.previous = z
   z = apply(probs, 2, which.max)
 
   ## Recalculate counts based on new label
-  #p = cC.decomposeCounts(counts, s, z, K)
   p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
   m.CP.by.S = p$m.CP.by.S
   n.G.by.CP = p$n.G.by.CP
