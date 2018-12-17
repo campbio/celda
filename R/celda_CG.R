@@ -458,9 +458,8 @@ setMethod("factorizeMatrix",
 
 # Calculate the loglikelihood for the celda_CG model
 cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) {
-  nG.by.TS[nG.by.TS == 0] = 1
   nG = sum(nG.by.TS)
-  
+
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
   b = sum(lgamma(m.CP.by.S+alpha))
@@ -550,7 +549,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   n.by.G = as.integer(rowSums(counts))
   n.by.C = as.integer(colSums(counts))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each module
   n.G.by.CP = colSumByGroup(counts, group=z, K=K)
   
   nG = nrow(counts)
@@ -587,7 +586,10 @@ setMethod("clusterProbability",
             gamma = celda.mod@params$gamma
           
             p = cCG.decomposeCounts(counts, s, z, y, K, L)
-          
+            lgbeta = lgamma((0:max(p$n.CP))+beta)
+            lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+            lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+            
             ## Gibbs sampling for each cell
             next.z = cC.calcGibbsProbZ(counts=p$n.TS.by.C, m.CP.by.S=p$m.CP.by.S, 
                                        n.G.by.CP=p$n.TS.by.CP, n.CP=p$n.CP, 
@@ -600,8 +602,8 @@ setMethod("clusterProbability",
             next.y = cG.calcGibbsProbY(counts=p$n.G.by.CP, n.TS.by.C=p$n.TS.by.CP, 
                                        n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
                                        n.by.G=p$n.by.G, y=y, L=L, nG=p$nG, 
-                                       beta=beta, delta=delta, gamma=gamma, 
-                                       do.sample=FALSE)
+                                       lgbeta=lgbeta, lgdelta=lgdelta, lggamma=lggamma, 
+                                       delta = delta, do.sample=FALSE)
             y.prob = t(next.y$probs)
           
             if(!isTRUE(log)) {

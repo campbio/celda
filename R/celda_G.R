@@ -371,10 +371,8 @@ setMethod("factorizeMatrix",
 
 # Calculate log-likelihood of celda_CG model
 cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
-  
-  nG.by.TS[nG.by.TS == 0] = 1
   nG = sum(nG.by.TS)
-  
+
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
   b <- sum(lgamma(n.TS.by.C + beta))
@@ -441,7 +439,7 @@ cG.decomposeCounts = function(counts, y, L) {
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
   n.by.G = as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each state
   nM = ncol(counts)
   nG = nrow(counts)
   
@@ -453,7 +451,7 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
   ## Recalculate counts based on new label
   n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, y, previous.y, L)
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1
 
   return(list(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS))  
 }
@@ -482,11 +480,15 @@ setMethod("clusterProbability",
               
               ## Calculate counts one time up front
               p = cG.decomposeCounts(counts=counts, y=y, L=L)
+              lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
+			        lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+ 			        lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+
               next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, 
                                          n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
                                          n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, 
-                                         beta=beta, delta=delta, gamma=gamma, 
-                                         do.sample=FALSE)  
+                                         lgbeta=lgbeta, lgdelta=lgdelta, lggamma=lggamma, 
+                                         delta=delta, do.sample=FALSE)  
               y.prob = t(next.y$probs)
               
               if(!isTRUE(log)) {

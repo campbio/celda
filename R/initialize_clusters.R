@@ -165,4 +165,9 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
   }
   
   return(overall.y)
-} 
+}  
+
+
+
+
+
