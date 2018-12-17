@@ -181,8 +181,8 @@ plotHeatmap <- function(counts,
   }
 
   ## Set color scheme and breaks
-  ubound.range <- max(counts)
-  lbound.range <- min(counts)
+  ubound.range <- max(counts, na.rm=TRUE)
+  lbound.range <- min(counts, na.rm=TRUE)
 
   if(color.scheme == "divergent"){  
     if(color.scheme.symmetric == TRUE){
