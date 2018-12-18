@@ -3,7 +3,7 @@ library(celda)
 context("Testing celda_G")
 
 celdaG.sim = simulateCells("celda_G", L=5, G=100)
-model_G = celda_G(counts=celdaG.sim$counts, L=celdaG.sim$L, max.iter=1, verbose=FALSE)
+model_G = celda_G(counts=celdaG.sim$counts, L=celdaG.sim$L, verbose=FALSE)
 factorized = factorizeMatrix(counts=celdaG.sim$counts, celda.mod = model_G)  
 
 test_that(desc = "Testing celda_G model with numeric input matrix", {
@@ -210,8 +210,7 @@ test_that(desc = "Testing plotDimReduceModule with celda_G", {
 test_that(desc = "Testing celdaTsne with celda_G when model class is changed, should error",{
   model_X <- model_G
   class(model_X) <- "celda_X"
-  expect_error(celdaTsne(counts=celdaG.sim$counts, celda.mod=model_X),
-               "unable to find an inherited method for function 'celdaTsne' for signature '\"celda_X\"'")
+  expect_error(celdaTsne(counts=celdaG.sim$counts, celda.mod=model_X), "unable to find")
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
