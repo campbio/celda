@@ -648,12 +648,11 @@ setMethod("celdaTsne",
 setMethod("featureModuleLookup",
           signature(celda.mod = "celda_G"),
           function(counts, celda.mod, feature, exact.match = TRUE){
-            #list <- list()
             if(!isTRUE(exact.match)){
-              feature <- vapply(1:length(feature),
-                                function(x) {
-                                  rownames(counts)[grep(feature[x], rownames(counts))]
-                                }, character(length(feature)))
+              feature <- unlist(lapply(1:length(feature),
+                                       function(x) {
+                                         rownames(counts)[grep(feature[x], rownames(counts))]
+                                       }))
             }
             feat.list <- lapply(1:length(feature),
                                 function(x) {
