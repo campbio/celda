@@ -4,8 +4,7 @@ context("Testing celda_C")
 
 celdaC.sim = simulateCells("celda_C", K=10)
 model_C = celda_C(counts=celdaC.sim$counts, sample.label=celdaC.sim$sample.label, 
-                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE,
-                  max.iter=2)
+                  K=celdaC.sim$K, algorithm="EM", verbose=FALSE)
 factorized = factorizeMatrix(counts=celdaC.sim$counts, celda.mod = model_C)  
 
 # celda_C
@@ -214,8 +213,7 @@ test_that(desc = "Testing differentialExpression with celda_C", {
 test_that(desc = "Testing celdaTsne with celda_C when model class is changed, should error",{
   model_X <- model_C
   class(model_X) <- "celda_X"
-  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C@clusters$z), min.cluster.size=10),
-               "unable to find an inherited method for function 'celdaTsne' for signature '\"celda_X\"'")
+  expect_error(celdaTsne(counts=celdaC.sim$counts, celda.mod=model_X, max.cells=length(model_C@clusters$z), min.cluster.size=10), "unable to find")
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
