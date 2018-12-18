@@ -11,7 +11,7 @@
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling or EM to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. To disable splitting, set to -1. Default 10.
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made. 
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells are randomly assigned to a clusters. With 'split' cell clusters will be recurssively split into two clusters using `celda_C` until the specified K is reached. Default 'random'.
 #' @param count.checksum "Character. An MD5 checksum for the `counts` matrix. Default NULL.
@@ -89,7 +89,9 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
 	ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
+	if (!is.null(seed)) {
     set.seed(seed)
+	}
 	iter = 1L
 	num.iter.without.improvement = 0L
 	do.cell.split = TRUE
@@ -266,7 +268,7 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 #' @param K Integer. Number of cell populations. Default 5.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1. 
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, cell population clusters `z`, sample assignments `sample.label`, and input parameters.
 #' @seealso `celda_G()` for simulating feature modules and `celda_CG()` for simulating feature modules and cell populations. 
@@ -277,7 +279,9 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1000), 
                          G=100, K=5, alpha=1, beta=1, seed=12345, ...) {
  
-  set.seed(seed) 
+  if (!is.null(seed)) {
+    set.seed(seed) 
+  }
     
   phi <- rdirichlet(K, rep(beta, G))
   theta <- rdirichlet(S, rep(alpha, K))
@@ -600,7 +604,7 @@ setMethod("celdaHeatmap",
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying expression
 #' @examples

@@ -29,7 +29,7 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
