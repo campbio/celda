@@ -5,8 +5,7 @@ context("Testing celda_CG")
 celdaCG.sim = simulateCells("celda_CG", K=5, L=10)
 model_CG = celda_CG(counts=celdaCG.sim$counts, 
                     sample.label=celdaCG.sim$sample.label, 
-                    K=celdaCG.sim$K, L=celdaCG.sim$L, 
-                    max.iter = 1, nchains = 2,
+                    K=celdaCG.sim$K, L=celdaCG.sim$L, nchains = 2,
                     algorithm="EM", verbose=FALSE)
 factorized <- factorizeMatrix(celda.mod = model_CG, counts = celdaCG.sim$counts)
 
@@ -323,7 +322,7 @@ test_that(desc = "Testing celdaTsne with celda_CG when model class is changed, s
   model_X <- model_CG
   class(model_X) <- "celda_X"
   expect_error(celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_X),
-               "unable to find an inherited method for function 'celdaTsne' for signature '\"celda_X\"'")
+               "unable to find")
 })
 
 test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
