@@ -24,7 +24,7 @@
 
 \item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
 }

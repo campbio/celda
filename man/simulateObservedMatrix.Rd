@@ -21,7 +21,7 @@ simulateObservedMatrix(C = 300, G = 100, K = 3, N.Range = c(500,
 
 \item{delta}{Numeric / Numeric vector. Concentration parameter for Theta. If input as a single numeric value, symmetric values for beta distribution are specified; if input as a vector of lenght 2, the two values will be the shape1 and shape2 paramters of the beta distribution respectively}
 
-\item{seed}{Integer. Passed to set.seed(). Default to be 12345}
+\item{seed}{Integer. Passed to set.seed(). Default to be 12345. If NULL, no calls to `set.seed()` are made.}
 }
 \description{
 This function generates a list containing two count matrices -- one for real expression, the other one for contamination, as well as other parameters 

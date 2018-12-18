@@ -203,12 +203,14 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
 # @param norm Normalized count matrix.
 # @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
 # @param max.iter Numeric vector. Determines iterations for tsne. Default 1000.
-# @param seed Integer. Seed for random number generation. Defaults to 12345.
+# @param seed Integer. Seed for random number generation. Defaults to 12345. If NULL, no calls to `set.seed()` are made.
 # @param do.pca Logical. Whether to perform dimensionality reduction with PCA before tSNE.
 # @param initial.dims Integer. Number of dimensions from PCA to use as input in tSNE.
 calculateTsne = function(norm, perplexity=20, max.iter=2500, seed=12345, do.pca=FALSE, initial.dims = 20) {
 
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   res = Rtsne::Rtsne(norm, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
                      check_duplicates = FALSE, is_distance = FALSE, initial_dims=initial.dims)$Y
   return(res)                     

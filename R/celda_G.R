@@ -11,7 +11,7 @@
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
@@ -83,7 +83,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	nG = p$nG
 	rm(p)
 
-	set.seed(seed)
+	if (!is.null(seed)) {
+	  set.seed(seed)
+	}
   
 	## Calculate initial log likelihood
 	ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
@@ -224,7 +226,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, feature module clusters `y`, and input parameters.
 #' @seealso `celda_C()` for simulating cell subpopulations and `celda_CG()` for simulating feature modules and cell populations. 
@@ -233,7 +235,9 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
                                  L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   eta = rdirichlet(1, rep(gamma, L))
   
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
@@ -586,7 +590,7 @@ setMethod("celdaHeatmap",
 #' @param modules Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for displaying expression
 #' @examples
@@ -644,23 +648,22 @@ setMethod("celdaTsne",
 setMethod("featureModuleLookup",
           signature(celda.mod = "celda_G"),
           function(counts, celda.mod, feature, exact.match = TRUE){
-            list <- list()
+            #list <- list()
             if(!isTRUE(exact.match)){
-              feature.grep <- c()
-              for(x in 1:length(feature)){
-                feature.grep <- c(feature.grep, 
-                                  rownames(counts)[grep(feature[x],rownames(counts))]) 
-              }
-              feature <- feature.grep
+              feature <- vapply(1:length(feature),
+                                function(x) {
+                                  rownames(counts)[grep(feature[x], rownames(counts))]
+                                }, character(length(feature)))
             }
-            for(x in 1:length(feature)){
-              if(feature[x] %in% rownames(counts)){
-                list[x] <- celda.mod@clusters$y[which(rownames(counts) == feature[x])]
-              }else{
-                list[x] <- paste0("No feature was identified matching '", 
-                                  feature[x], "'.")
-              }
-            } 
-            names(list) <- feature
-            return(list)
+            feat.list <- lapply(1:length(feature),
+                                function(x) {
+                                  if(feature[x] %in% rownames(counts)){
+                                   return(celda.mod@clusters$y[which(rownames(counts) == feature[x])])
+                                  } else {
+                                    return(paste0("No feature was identified matching '", 
+                                                  feature[x], "'."))
+                                  }
+                                })
+            names(feat.list) <- feature
+            return(feat.list)
          })

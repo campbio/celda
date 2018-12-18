@@ -22,7 +22,7 @@ DeconX(omat, z = NULL, max.iter = 200, beta = 1e-06, delta = 10,
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE}
 
-\item{seed}{Integer. Passed to set.seed(). Default to be 1234567}
+\item{seed}{Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.}
 }
 \description{
 This function updates decontamination
