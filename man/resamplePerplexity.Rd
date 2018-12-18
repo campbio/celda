@@ -13,7 +13,7 @@ resamplePerplexity(counts, celda.list, resample = 5, seed = 12345)
 
 \item{resample}{Integer. The number of times to resample the counts matrix for evaluating perplexity. Default 5.}
 
-\item{seed}{Parameter to set.seed() for random number generation. Default 12345.}
+\item{seed}{Parameter to set.seed() for random number generation. Default 12345.If NULL, no calls to `set.seed()` are made.}
 }
 \value{
 celda_list. Returns the provided `celda.list` with a `perplexity` property, detailing the perplexity of all K/L combinations that appeared in the celda_list's models.

@@ -25,7 +25,7 @@ celdaGridSearch(counts, model, params.test, params.fixed = NULL,
 
 \item{best.only}{Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 

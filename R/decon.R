@@ -7,14 +7,16 @@
 #' @param N.Range Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default to be c(500, 1000)
 #' @param beta Numeric. Concentration parameter for Phi. Default to be 0.5
 #' @param delta Numeric / Numeric vector. Concentration parameter for Theta. If input as a single numeric value, symmetric values for beta distribution are specified; if input as a vector of lenght 2, the two values will be the shape1 and shape2 paramters of the beta distribution respectively
-#' @param seed Integer. Passed to set.seed(). Default to be 12345
+#' @param seed Integer. Passed to set.seed(). Default to be 12345. If NULL, no calls to `set.seed()` are made.
 #' @examples 
 #' contamination.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
 #' contamination.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
 #' @export
 simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta = 0.5, delta=c(1,2),  seed=12345) {
   
-    set.seed(seed) 
+    if (!is.null(seed)) {
+      set.seed(seed) 
+    }
 
     if(length(delta)==1) { 
 	    cp.byC = rbeta(n=C, shape1=delta, shape2=delta) 
@@ -135,7 +137,7 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 #' @param delta Numeric. Symmetric concentration parameter for Theta. Default to be 10 
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL
 #' @param verbose Logical. Whether to print log messages. Default TRUE
-#' @param seed Integer. Passed to set.seed(). Default to be 1234567
+#' @param seed Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.
 #' @examples 
 #' decon.c = DeconX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
 #' decon.bg = DeconX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
@@ -164,7 +166,9 @@ DeconX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL,
   if( decon.method == "clustering") {
 
   # initialization
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   theta  = runif(nC, min = 0.1, max = 0.5)  
   est.rmat = t (t(omat) * theta )       
   phi =   colSumByGroup.numeric(est.rmat, z, K)
@@ -193,7 +197,9 @@ DeconX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL,
   if ( decon.method == "background") {
 
   # Initialization
-  set.seed(seed) 
+  if (!is.null(seed)) {
+    set.seed(seed) 
+  }
   theta = runif( nC, min =0.1, max=0.5) 
   est.rmat = t( t(omat) *theta) 
   bgDist = rowSums( omat ) / sum( omat) 
