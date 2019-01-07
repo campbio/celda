@@ -321,7 +321,7 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
 #' @return Violin plot for each feature, grouped by celda cluster
 #' @examples
 #' violinPlot(counts = celda.CG.sim$counts,
-#'                    celda.mod = celda.CG.mod, features = "Gene_1")
+#'            celda.mod = celda.CG.mod, features = "Gene_1")
 #' @export
 violinPlot = function(counts, celda.mod, features){
   cluster = clusters(celda.mod)$z
@@ -332,7 +332,10 @@ violinPlot = function(counts, celda.mod, features){
   m = reshape2::melt(df, id.vars = c("cluster"))
   
   colnames(m) = c("Cluster","Feature","Expression")
-  p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill = Cluster)) + 
-    ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=T, scale = "width") + ggplot2::geom_jitter(height = 0, size = 0.1)
+  color_pal = distinct_colors(length(unique(cluster)))
+  p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill=Cluster)) + 
+    ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=T, scale = "width") + 
+    ggplot2::geom_jitter(height = 0, size = 0.1) +
+    ggplot2::scale_fill_manual(values = color_pal)
   return(p)
 }
