@@ -81,10 +81,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)   
   i = NULL  # Setting visible binding for R CMD CHECK
-  #res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
-  #res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
-  res.list = sapply(1:nrow(run.params), function(i) {
-    
+  res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     ## Set up chain parameter list
     current.run = c(run.params[i,])
     chain.params = list()
@@ -102,7 +99,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     ## Run model
     res = do.call(model, c(chain.params, params.fixed))
     return(list(res))
-  })
+  }
   parallel::stopCluster(cl)  
   
   logliks = sapply(res.list, function(mod) { mod@finalLogLik })
