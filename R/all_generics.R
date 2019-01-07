@@ -143,6 +143,27 @@ setMethod("celdaPerplexity",
            function(celda.mod){  celda.mod@perplexity  })
 
 
+#' @title Append two celdaList objects
+#' @description Returns a single celdaList representing the combination of two provided celdaList objects.
+#' @return A celdaList object. This object contains all resList entries and runParam records from both lists.
+#' @examples
+#' appended.list = appendCeldaList(celda.CG.grid.search.res, celda.CG.grid.search.res)
+#' @export
+appendCeldaList = function(list1, list2) {
+  if (!is.element("celdaList", class(list1)) | !is.element("celdaList", class(list2))) {
+    stop("Both parameters to appendCeldaList must be of class celdaList.")
+  }
+  if (!(list1@count.checksum == list2@count.checksum)) {
+    warning("Provided lists have different count.checksums and may have been generated from different count matrices. Using checksum from first list...")
+  }
+  newList = methods::new("celdaList",
+                         run.params = dplyr::bind_rows(list1@run.params, list2@run.params),
+                         res.list = c(list1@res.list, list2@res.list),
+                         count.checksum = list1@count.checksum,
+                         perplexity = matrix(nrow=0, ncol=0))
+  return(newList)
+}
+
 ################################################################################
 # Generics
 ################################################################################
