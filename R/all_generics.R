@@ -157,7 +157,7 @@ appendCeldaList = function(list1, list2) {
     warning("Provided lists have different count.checksums and may have been generated from different count matrices. Using checksum from first list...")
   }
   newList = methods::new("celdaList",
-                         run.params = dplyr::bind_rows(list1@run.params, list2@run.params),
+                         run.params = rbind(list1@run.params, list2@run.params),
                          res.list = c(list1@res.list, list2@res.list),
                          count.checksum = list1@count.checksum,
                          perplexity = matrix(nrow=0, ncol=0))
