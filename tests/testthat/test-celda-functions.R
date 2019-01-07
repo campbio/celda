@@ -12,3 +12,14 @@ test_that(desc = "Testing compareCountMatrix with numeric matrix input", {
   expect_true(compareCountMatrix(counts, model_CG, error.on.mismatch = TRUE))
 })
 
+test_that(desc = "Testing appendCeldaList", {
+  eg.list = celda::celda.CG.grid.search.res
+  expect_error(appendCeldaList(eg.list, matrix(0)),
+               "Both parameters to appendCeldaList must be of class celdaList.")
+  modified.eg.list = eg.list
+  modified.eg.list@count.checksum = "abcd12345"
+  expect_warning(appendCeldaList(eg.list, modified.eg.list),
+                 "Provided lists have different count.checksums and may have been generated from different count matrices. Using checksum from first list...")
+  expect_equal(length(eg.list@res.list)*2,
+               length(appendCeldaList(eg.list, eg.list)@res.list))
+})
