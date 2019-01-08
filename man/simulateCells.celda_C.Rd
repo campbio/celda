@@ -25,7 +25,7 @@ simulateCells.celda_C(model, S = 5, C.Range = c(50, 100),
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
 }

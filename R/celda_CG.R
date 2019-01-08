@@ -15,7 +15,7 @@
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.   
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
@@ -67,6 +67,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   initialize = match.arg(initialize)
   
   all.seeds = seed:(seed + nchains - 1)
+
+  # Pre-compute lgamma values
+  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+  lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
   
   best.result = NULL  
   for(i in seq_along(all.seeds)) { 
@@ -106,13 +110,24 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
 
-	set.seed(current.seed)
+	if (!is.null(current.seed)) {
+	  set.seed(current.seed)
+	}
 	iter = 1L
 	num.iter.without.improvement = 0L
 	do.cell.split = TRUE
 	do.gene.split = TRUE  
 	while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
+	  ## Gibbs sampling for each gene
+	  lgbeta = lgamma((0:max(n.CP))+beta)
+	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta)
+	  n.TS.by.CP = next.y$n.TS.by.C
+	  nG.by.TS = next.y$nG.by.TS
+	  n.by.TS = next.y$n.by.TS
+	  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
+	  y = next.y$y
+	  
 	  ## Gibbs or EM sampling for each cell
 	  next.z = do.call(algorithm.fun, list(counts=n.TS.by.C, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.TS.by.CP, n.CP=n.CP, n.by.C=n.by.C, z=z, s=s, K=K, nG=L, nM=nM, alpha=alpha, beta=beta))
 	  m.CP.by.S = next.z$m.CP.by.S
@@ -120,20 +135,12 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  n.CP = next.z$n.CP
 	  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
 	  z = next.z$z
-		
-	  ## Gibbs sampling for each gene
-	  next.y = cG.calcGibbsProbY(counts=n.G.by.CP, n.TS.by.C=n.TS.by.CP, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, L=L, nG=nG, beta=beta, delta=delta, gamma=gamma)
-	  n.TS.by.CP = next.y$n.TS.by.C
-	  nG.by.TS = next.y$nG.by.TS
-	  n.by.TS = next.y$n.by.TS
-	  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
-	  y = next.y$y
-	
-		
+			      
 	  ## Perform split on i-th iteration defined by split.on.iter
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-	  if(((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll)) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0))) {
-		if(K > 2 & isTRUE(do.cell.split)) {
+	  if(K > 2 & iter != max.iter & 
+	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
+	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
 		  logMessages(date(), " .... Determining if any cell clusters should be split.", 
 		              logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
@@ -156,18 +163,20 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.TS.by.CP = res$n.TS.by.CP
 		  n.CP = res$n.CP
 		  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-		}  
-		if(L > 2 & isTRUE(do.gene.split)) {
+	  }  
+	  if(L > 2 & iter != max.iter & 
+	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
+	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 		  logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		  res = cCG.splitY(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, gamma, y.prob=t(next.y$probs), max.clusters.to.try=max(L/2, 10), min.cell=3)
 		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
 
 		  # Reset convergence counter if a split occured	    
 		  if(!isTRUE(all.equal(y, res$y))) {
-			num.iter.without.improvement = 1L
-			do.gene.split = TRUE
+			  num.iter.without.improvement = 1L
+			  do.gene.split = TRUE
 		  } else {
-			do.gene.split = FALSE
+			  do.gene.split = FALSE
 		  }
 
 		  ## Re-calculate variables
@@ -176,8 +185,8 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.by.TS = res$n.by.TS
 		  nG.by.TS = res$nG.by.TS
 		  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
-  	    }
-  	  }        
+  	  }
+  	          
 
 	  ## Calculate complete likelihood
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
@@ -253,7 +262,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, cell population clusters `z`, feature module clusters `y`, sample assignments `sample.label`, and input parameters.
 #' @seealso `celda_C()` for simulating cell subpopulations and `celda_G()` for simulating feature modules. 
@@ -263,8 +272,10 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1000), 
                                   G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
-  
-  set.seed(seed)
+
+  if (!is.null(seed)) { 
+    set.seed(seed)
+  }
 
   ## Number of cells per sample
   nC = sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)
@@ -451,9 +462,8 @@ setMethod("factorizeMatrix",
 
 # Calculate the loglikelihood for the celda_CG model
 cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS, nG, alpha, beta, delta, gamma) {
-  nG.by.TS[nG.by.TS == 0] = 1
   nG = sum(nG.by.TS)
-  
+
   ## Calculate for "Theta" component
   a = nS * lgamma(K*alpha)
   b = sum(lgamma(m.CP.by.S+alpha))
@@ -543,7 +553,7 @@ cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   n.by.G = as.integer(rowSums(counts))
   n.by.C = as.integer(colSums(counts))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each module
   n.G.by.CP = colSumByGroup(counts, group=z, K=K)
   
   nG = nrow(counts)
@@ -580,7 +590,10 @@ setMethod("clusterProbability",
             gamma = celda.mod@params$gamma
           
             p = cCG.decomposeCounts(counts, s, z, y, K, L)
-          
+            lgbeta = lgamma((0:max(p$n.CP))+beta)
+            lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+            lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+            
             ## Gibbs sampling for each cell
             next.z = cC.calcGibbsProbZ(counts=p$n.TS.by.C, m.CP.by.S=p$m.CP.by.S, 
                                        n.G.by.CP=p$n.TS.by.CP, n.CP=p$n.CP, 
@@ -593,8 +606,8 @@ setMethod("clusterProbability",
             next.y = cG.calcGibbsProbY(counts=p$n.G.by.CP, n.TS.by.C=p$n.TS.by.CP, 
                                        n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
                                        n.by.G=p$n.by.G, y=y, L=L, nG=p$nG, 
-                                       beta=beta, delta=delta, gamma=gamma, 
-                                       do.sample=FALSE)
+                                       lgbeta=lgbeta, lgdelta=lgdelta, lggamma=lggamma, 
+                                       delta = delta, do.sample=FALSE)
             y.prob = t(next.y$probs)
           
             if(!isTRUE(log)) {
@@ -713,7 +726,7 @@ setMethod("celdaHeatmap",
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
 #' @examples

@@ -76,11 +76,22 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
   var_label = "Expression"
   
   if(!isTRUE(exact.match)){
-    features.indices = c()  
+    features.indices = c()
+    not.found = c()
     for(gene in features){
       features.indices = c(features.indices, grep(gene, rownames(counts)))
+      if(length(grep(gene, rownames(counts))) == 0){
+        not.found = c(not.found, gene)
+      }
     }
     counts = counts[features.indices, , drop = FALSE]
+    if (length(not.found) > 0) {
+      if (length(not.found) == length(features)) {
+        stop("None of the provided features had matching rownames in the provided counts matrix.")
+      }
+      warning(paste0("The following features were not present in the provided count matrix: ",
+                     paste(not.found, sep="", collapse = ",")))
+    }
   } else {
     features.not.found = setdiff(features, intersect(features, rownames(counts)))
     if (length(features.not.found) > 0) {
@@ -88,7 +99,7 @@ plotDimReduceFeature = function(dim1, dim2, counts, features, normalize = TRUE, 
         stop("None of the provided features had matching rownames in the provided counts matrix.")
       }
       warning(paste0("The following features were not present in the provided count matrix: ",
-                     paste0(features.not.found, ",")))
+                     paste(features.not.found, sep="", collapse = ",")))
     }
     features.found = setdiff(features, features.not.found)
     counts = counts[features.found, , drop = FALSE]
@@ -192,12 +203,14 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
 # @param norm Normalized count matrix.
 # @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
 # @param max.iter Numeric vector. Determines iterations for tsne. Default 1000.
-# @param seed Integer. Seed for random number generation. Defaults to 12345.
+# @param seed Integer. Seed for random number generation. Defaults to 12345. If NULL, no calls to `set.seed()` are made.
 # @param do.pca Logical. Whether to perform dimensionality reduction with PCA before tSNE.
 # @param initial.dims Integer. Number of dimensions from PCA to use as input in tSNE.
 calculateTsne = function(norm, perplexity=20, max.iter=2500, seed=12345, do.pca=FALSE, initial.dims = 20) {
 
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   res = Rtsne::Rtsne(norm, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
                      check_duplicates = FALSE, is_distance = FALSE, initial_dims=initial.dims)$Y
   return(res)                     

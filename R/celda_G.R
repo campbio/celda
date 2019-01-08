@@ -11,7 +11,7 @@
 #' @param max.iter Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.
 #' @param split.on.iter Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
 #' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.
 #' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
@@ -52,8 +52,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   initialize = match.arg(initialize)
    
   all.seeds = seed:(seed + nchains - 1)
+
+  # Pre-compute lgamma values
+  lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
+  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+  lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
     
-  best.result = NULL  
+  best.result = NULL
   for(i in seq_along(all.seeds)) {   
 
 	## Randomly select y or y to supplied initial values
@@ -78,7 +83,9 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	nG = p$nG
 	rm(p)
 
-	set.seed(seed)
+	if (!is.null(seed)) {
+	  set.seed(seed)
+	}
   
 	## Calculate initial log likelihood
 	ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
@@ -88,7 +95,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	do.gene.split = TRUE
 	while(iter <= max.iter & num.iter.without.improvement <= stop.iter) {
 
-	  next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
+	  next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, y=y, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta)
 	  n.TS.by.C = next.y$n.TS.by.C
 	  nG.by.TS = next.y$nG.by.TS
 	  n.by.TS = next.y$n.by.TS
@@ -96,7 +103,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	
 	  ## Perform split on i-th iteration of no improvement in log likelihood
 	  temp.ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
-	  if(L > 2 & (((iter == max.iter | (num.iter.without.improvement == stop.iter & all(temp.ll < ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
+	  if(L > 2 & iter != max.iter & ((((num.iter.without.improvement == stop.iter & !all(temp.ll > ll))) & isTRUE(split.on.last)) | (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
 		logMessages(date(), " .... Determining if any gene clusters should be split.", logfile=logfile, append=TRUE, sep="", verbose=verbose)
 		res = cG.splitY(counts, y, n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, 
 		                beta, delta, gamma, y.prob=t(next.y$probs), 
@@ -178,69 +185,29 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 # @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 # @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 # @keywords log likelihood
-cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, do.sample=TRUE) {
+cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L, nG, beta, delta, gamma, lgbeta, lggamma, lgdelta, do.sample=TRUE) {
 
   ## Set variables up front outside of loop
   probs = matrix(NA, ncol=nG, nrow=L)
-  temp.nG.by.TS = nG.by.TS 
-  temp.n.by.TS = n.by.TS 
-#  temp.n.TS.by.C = n.TS.by.C
-
   ix <- sample(1:nG)
   for(i in ix) {
-	  
-	## Subtract current gene counts from matrices
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] - 1L
-	n.by.TS[y[i]] = n.by.TS[y[i]] - n.by.G[i]
-	
-	n.TS.by.C_1 = n.TS.by.C
-	n.TS.by.C_1[y[i],] = n.TS.by.C_1[y[i],] - counts[i,]
-    n.TS.by.C_1 = .rowSums(lgamma(n.TS.by.C_1 + beta), nrow(n.TS.by.C), ncol(n.TS.by.C))
-    
-	n.TS.by.C_2 = n.TS.by.C
-	other.ix = (1:L)[-y[i]]
-	n.TS.by.C_2[other.ix,] = n.TS.by.C_2[other.ix,] + counts[rep(i, length(other.ix)),]
-    n.TS.by.C_2 = .rowSums(lgamma(n.TS.by.C_2 + beta), nrow(n.TS.by.C), ncol(n.TS.by.C))
-    
-	## Calculate probabilities for each state
-	for(j in 1:L) {
-	
-	  temp.nG.by.TS = nG.by.TS 
-	  temp.n.by.TS = n.by.TS 
-#	  temp.n.TS.by.C = n.TS.by.C
-	
-	  temp.nG.by.TS[j] = temp.nG.by.TS[j] + 1L      
-	  temp.n.by.TS[j] = temp.n.by.TS[j] + n.by.G[i]
-#	  temp.n.TS.by.C[j,] = temp.n.TS.by.C[j,] + counts[i,]
-
-
-      pseudo.nG.by.TS = temp.nG.by.TS
-	  pseudo.nG.by.TS[temp.nG.by.TS == 0L] = 1L
-	  pseudo.nG = sum(pseudo.nG.by.TS)
-
-	  other.ix = (1:L)[-j]
-      probs[j,i] <- 	sum(lgamma(pseudo.nG.by.TS + gamma)) -
-						sum(lgamma(sum(pseudo.nG.by.TS + gamma))) +
-						sum(n.TS.by.C_1[other.ix]) + n.TS.by.C_2[j] +
-#						sum(lgamma(temp.n.TS.by.C + beta)) +
-						sum(lgamma(pseudo.nG.by.TS * delta)) -
-						(pseudo.nG * lgamma(delta)) -
-						sum(lgamma(temp.n.by.TS + (pseudo.nG.by.TS * delta)))
-
-    }
-
+    probs[,i] = cG_CalcGibbsProbY(index=i, counts=counts, nTSbyC=n.TS.by.C, nbyTS=n.by.TS, nGbyTS=nG.by.TS, nbyG=n.by.G, y=y, L=L, nG=nG, lg_beta=lgbeta, lg_gamma=lggamma, lg_delta=lgdelta, delta=delta)
+    if(any(is.na(probs[,i]))) browser()
 	## Sample next state and add back counts
-	prev.y = y[i]
-	if(isTRUE(do.sample)) y[i] = sample.ll(probs[,i])
-	
-	if(prev.y != y[i]) {
-	  n.TS.by.C[prev.y,] = n.TS.by.C[prev.y,] - counts[i,]
-	  n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
-	}
-	
-	nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
-	n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]
-	#n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+	if(isTRUE(do.sample)) {
+	  prev.y = y[i]
+	  y[i] = sample.ll(probs[,i])
+	  
+	  if(prev.y != y[i]) {
+		n.TS.by.C[prev.y,] = n.TS.by.C[prev.y,] - counts[i,]
+		nG.by.TS[prev.y] = nG.by.TS[prev.y] - 1L
+		n.by.TS[prev.y] = n.by.TS[prev.y] - n.by.G[i]	  
+	  
+		n.TS.by.C[y[i],] = n.TS.by.C[y[i],] + counts[i,]
+		nG.by.TS[y[i]] = nG.by.TS[y[i]] + 1L
+		n.by.TS[y[i]] = n.by.TS[y[i]] + n.by.G[i]	  
+	  }	
+	} 
   }
   
   return(list(n.TS.by.C=n.TS.by.C, nG.by.TS=nG.by.TS, n.by.TS=n.by.TS, y=y, probs=probs))
@@ -259,7 +226,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, feature module clusters `y`, and input parameters.
 #' @seealso `celda_C()` for simulating cell subpopulations and `celda_CG()` for simulating feature modules and cell populations. 
@@ -268,7 +235,9 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
                                  L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   eta = rdirichlet(1, rep(gamma, L))
   
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
@@ -406,10 +375,8 @@ setMethod("factorizeMatrix",
 
 # Calculate log-likelihood of celda_CG model
 cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delta, gamma) {
-  
-  nG.by.TS[nG.by.TS == 0] = 1
   nG = sum(nG.by.TS)
-  
+
   ## Calculate for "Phi" component
   a <- nM * lgamma(L * beta)
   b <- sum(lgamma(n.TS.by.C + beta))
@@ -476,7 +443,7 @@ cG.decomposeCounts = function(counts, y, L) {
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
   n.by.G = as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each state
   nM = ncol(counts)
   nG = nrow(counts)
   
@@ -488,7 +455,7 @@ cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
   ## Recalculate counts based on new label
   n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, y, previous.y, L)
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
-  nG.by.TS = tabulate(y, L)
+  nG.by.TS = tabulate(y, L) + 1
 
   return(list(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS))  
 }
@@ -517,11 +484,15 @@ setMethod("clusterProbability",
               
               ## Calculate counts one time up front
               p = cG.decomposeCounts(counts=counts, y=y, L=L)
+              lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
+			        lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+ 			        lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+
               next.y = cG.calcGibbsProbY(counts=counts, n.TS.by.C=p$n.TS.by.C, 
                                          n.by.TS=p$n.by.TS, nG.by.TS=p$nG.by.TS, 
                                          n.by.G=p$n.by.G, y=y, nG=p$nG, L=L, 
-                                         beta=beta, delta=delta, gamma=gamma, 
-                                         do.sample=FALSE)  
+                                         lgbeta=lgbeta, lgdelta=lgdelta, lggamma=lggamma, 
+                                         delta=delta, do.sample=FALSE)  
               y.prob = t(next.y$probs)
               
               if(!isTRUE(log)) {
@@ -619,7 +590,7 @@ setMethod("celdaHeatmap",
 #' @param modules Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for displaying expression
 #' @examples
@@ -677,23 +648,21 @@ setMethod("celdaTsne",
 setMethod("featureModuleLookup",
           signature(celda.mod = "celda_G"),
           function(counts, celda.mod, feature, exact.match = TRUE){
-            list <- list()
             if(!isTRUE(exact.match)){
-              feature.grep <- c()
-              for(x in 1:length(feature)){
-                feature.grep <- c(feature.grep, 
-                                  rownames(counts)[grep(feature[x],rownames(counts))]) 
-              }
-              feature <- feature.grep
+              feature <- unlist(lapply(1:length(feature),
+                                       function(x) {
+                                         rownames(counts)[grep(feature[x], rownames(counts))]
+                                       }))
             }
-            for(x in 1:length(feature)){
-              if(feature[x] %in% rownames(counts)){
-                list[x] <- celda.mod@clusters$y[which(rownames(counts) == feature[x])]
-              }else{
-                list[x] <- paste0("No feature was identified matching '", 
-                                  feature[x], "'.")
-              }
-            } 
-            names(list) <- feature
-            return(list)
+            feat.list <- lapply(1:length(feature),
+                                function(x) {
+                                  if(feature[x] %in% rownames(counts)){
+                                   return(celda.mod@clusters$y[which(rownames(counts) == feature[x])])
+                                  } else {
+                                    return(paste0("No feature was identified matching '", 
+                                                  feature[x], "'."))
+                                  }
+                                })
+            names(feat.list) <- feature
+            return(feat.list)
          })

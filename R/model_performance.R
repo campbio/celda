@@ -10,7 +10,7 @@
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.list Object of class 'celda_list'. 
 #' @param resample Integer. The number of times to resample the counts matrix for evaluating perplexity. Default 5.
-#' @param seed Parameter to set.seed() for random number generation. Default 12345.
+#' @param seed Parameter to set.seed() for random number generation. Default 12345.If NULL, no calls to `set.seed()` are made.
 #' @return celda_list. Returns the provided `celda.list` with a `perplexity` property, detailing the perplexity of all K/L combinations that appeared in the celda_list's models.
 #' @examples
 #' celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
@@ -21,12 +21,14 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
-  set.seed(seed)
-  countsList = list(counts)
-  for(i in 1:resample) {
-    countsList[[i]] = resampleCountMatrix(counts)
+  if (!is.null(seed)) {
+    set.seed(seed)
   }
- 
+  countsList = lapply(1:resample,
+                      function(i){
+                        resampleCountMatrix(counts)
+                      })
+  
   perp.res = matrix(NA, nrow=length(celda.list@res.list), ncol=resample)
   for(i in 1:length(celda.list@res.list)) {
     for(j in 1:resample) {

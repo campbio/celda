@@ -27,7 +27,9 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
   }  
 
   ## Randomly sample remaining values
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   z.na = which(is.na(z))
   if(length(z.na) > 0) {
     z[z.na] = sample(z.not.used, length(z.na), replace=TRUE)
@@ -71,7 +73,7 @@ recursive.splitZ = function(counts, s, K, alpha, beta, min.cell = 3, seed=12345)
 
     ## Calculate likelihood for each cluster split
     temp.z = matrix(overall.z, nrow=ncol(counts), ncol=length(z.to.split))
-  	ll = rep(NA, ncol(temp.z))    
+  	ll = vector(mode="numeric", length=ncol(temp.z))    
   	for(i in 1:ncol(temp.z)) {
   	  temp.z[cluster.splits[,i] == 2,i] = current.K 
   	  ll[i] = logLikelihood.celda_C(counts, "celda_C", s, temp.z[,i], current.K, alpha, beta)	  
@@ -149,25 +151,22 @@ recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.sub
 
     ## Calculate likelihood for each cluster split
     temp.y = matrix(overall.y, nrow=nrow(counts), ncol=length(y.to.split))
-	ll = rep(NA, ncol(temp.y))    
-	for(i in 1:ncol(temp.y)) {
-	  temp.y[cluster.splits[,i] == 2,i] = current.L
-	  ll[i] = logLikelihood.celda_G(counts=counts, y=temp.y[,i], L=current.L, beta=beta, delta=delta, gamma=gamma)
+	  ll = vector(mode="numeric", length=ncol(temp.y))    
+	  for(i in 1:ncol(temp.y)) {
+	    temp.y[cluster.splits[,i] == 2,i] = current.L
+	    ll[i] = logLikelihood.celda_G(counts=counts, y=temp.y[,i], 
+	                                  L=current.L, beta=beta, delta=delta, 
+	                                  gamma=gamma)
 	}  
 
     ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
     best.ix = which.max(ll)
-	overall.y = temp.y[,best.ix]  
-	cluster.splits[,y.to.split[best.ix]] = NA
+  	overall.y = temp.y[,best.ix]  
+  	cluster.splits[,y.to.split[best.ix]] = NA
     cluster.split.flag[y.to.split[best.ix]] = TRUE
     	
-	current.L = current.L + 1
+	  current.L = current.L + 1
   }
   
   return(overall.y)
-}  
-
-
-
-
-
+} 

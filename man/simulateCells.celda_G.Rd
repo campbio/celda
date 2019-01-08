@@ -25,7 +25,7 @@ simulateCells.celda_G(model, C = 100, N.Range = c(500, 1000),
 
 \item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
 }

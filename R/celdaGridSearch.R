@@ -14,7 +14,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param nchains Integer. Number of random cluster initializations. Default 3. 
 #' @param cores Integer. The number of cores to use for parallel estimation of chains. Default 1.
 #' @param best.only Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE. 
-#' @param seed Integer. Passed to `set.seed()`. Default 12345.  
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages during celda chain execution. Default TRUE. 
 #' @param logfile.prefix Character. Prefix for log files from worker threads and main process. Default "Celda". 
 #' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
@@ -81,10 +81,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   cl = parallel::makeCluster(cores)
   doParallel::registerDoParallel(cl)   
   i = NULL  # Setting visible binding for R CMD CHECK
-  #res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
-  #res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
-  res.list = sapply(1:nrow(run.params), function(i) {
-    
+  res.list = foreach(i = 1:nrow(run.params), .export=model, .combine = c, .multicombine=TRUE) %dopar% {
     ## Set up chain parameter list
     current.run = c(run.params[i,])
     chain.params = list()
@@ -102,7 +99,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
     ## Run model
     res = do.call(model, c(chain.params, params.fixed))
     return(list(res))
-  })
+  }
   parallel::stopCluster(cl)  
   
   logliks = sapply(res.list, function(mod) { mod@finalLogLik })
