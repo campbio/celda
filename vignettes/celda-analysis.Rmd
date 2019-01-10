@@ -82,8 +82,8 @@ celda.model = celda_CG(counts = sim_counts$counts, K = 5, L = 10, verbose = FALS
 Here is a comparison between the true cluster labels and the estimated cluster labels, which can be found within the `z` and `y` objects.
 
 ```{r}
-table(clustering(celda.model)$z, sim_counts$z)
-table(clustering(celda.model)$y, sim_counts$y)
+table(clusters(celda.model)$z, sim_counts$z)
+table(clusters(celda.model)$y, sim_counts$y)
 ```
 
 # Matrix factorization
@@ -148,7 +148,7 @@ tsne = celdaTsne(counts = sim_counts$counts, celda.mod = celda.model)
 ```{r, eval = TRUE, fig.width = 7, fig.height = 7}
 plotDimReduceCluster(dim1 = tsne[,1], 
                      dim2 = tsne[,2], 
-                     cluster = clustering(celda.model)$z)
+                     cluster = clusters(celda.model)$z)
 
 plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2], 
                    celda.mod = celda.model, counts = sim_counts$counts, rescale = TRUE)
@@ -304,5 +304,5 @@ celda.model.z.recoded = recodeClusterZ(celda.mod = celda.model, from = c(1,2,3,4
 The model prior to reordering cell labels compared to after reordering cell labels:
 
 ```{r}
-table(clustering(celda.model)$z, clustering(celda.model.z.recoded)$z)
+table(clusters(celda.model)$z, clusters(celda.model.z.recoded)$z)
 ```
