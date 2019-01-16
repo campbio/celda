@@ -75,7 +75,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100
   gene_ix = match(rownames(filtered_norm.counts), celda.mod@names$row)
   cell_ix = match(colnames(filtered_norm.counts), celda.mod@names$column)
   z.to.plot = c()
-  if(methods::.hasSlot(celda.mod, "z")){
+  if(methods::.hasSlot(celda.mod, "clusters")){
     cell <- distinct_colors(length(unique(celda.mod@clusters$z)))[sort(unique(celda.mod@clusters$z[cell_ix]))]
     names(cell) <- sort(unique(celda.mod@clusters$z[cell_ix]))
     anno_cell_colors <- list(cell = cell)
