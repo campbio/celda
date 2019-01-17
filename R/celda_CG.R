@@ -763,7 +763,7 @@ setMethod("celdaTsne",
 #' @param umap.config Object of class `umap.config`. Configures parameters for umap. Default `umap::umap.defaults`
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
 #' @examples
-#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+#' umap.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
 setMethod("celdaUmap",
