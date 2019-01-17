@@ -624,7 +624,7 @@ setMethod("celdaTsne",
             res = calculateTsne(prepared.count.info$norm, perplexity=perplexity, max.iter=max.iter, 
                                 seed=seed, do.pca=TRUE, initial.dims = initial.dims)
             final = matrix(NA, nrow=ncol(counts), ncol=2)
-            final[prepared.couunt.info$cell.ix,] = res
+            final[prepared.count.info$cell.ix,] = res
             rownames(final) = colnames(counts)
             colnames(final) = c("tsne_1", "tsne_2")
             return(final)
