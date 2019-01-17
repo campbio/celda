@@ -21,5 +21,5 @@ Outputs a violin plot for feature expression data.
 }
 \examples{
 violinPlot(counts = celda.CG.sim$counts,
-                   celda.mod = celda.CG.mod, features = "Gene_1")
+           celda.mod = celda.CG.mod, features = "Gene_1")
 }
