@@ -300,7 +300,14 @@ setGeneric("celdaProbabilityMap",
 #' Embeds cells in two dimensions using tSNE based on celda_CG results.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @param celda.mod Celda object of class `celda_CG`. 
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param ... Additional parameters.
 #' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
 #' @examples 
@@ -314,6 +321,30 @@ setGeneric("celdaTsne",
              # counts = processCounts(counts)
              # compareCountMatrix(counts, celda.mod)
              standardGeneric("celdaTsne")
+           })
+
+
+#' Embeds cells in two dimensions using umap.
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class `celda_CG`. 
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param ... Additional parameters.
+#' @param ... Additional parameters.
+#' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
+#' @examples 
+#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+#' @export
+setGeneric("celdaUmap",
+           signature = "celda.mod",
+           function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                   modules=NULL, umap.config=umap::umap.defaults) {
+             standardGeneric("celdaUmap")
            })
 
 
