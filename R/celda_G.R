@@ -604,9 +604,9 @@ setMethod("celdaTsne",
                     seed=12345, ...) {
   
             
-            norm = prepareCountsForDimReduction.celda_G(counts, celda.mod, max.cells, 
-                                                        min.cluster.size, modules) 
-            res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, 
+            prepared.count.info =  prepareCountsForDimReduction.celda_G(counts, celda.mod, max.cells, 
+                                                                        min.cluster.size, modules) 
+            res = calculateTsne(prepared.count.info$norm, do.pca=FALSE, perplexity=perplexity, 
                                 max.iter=max.iter, seed=seed)
             rownames(res) = colnames(counts)
             colnames(res) = c("tsne_1", "tsne_2")
