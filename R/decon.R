@@ -139,10 +139,10 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 #' @param verbose Logical. Whether to print log messages. Default TRUE
 #' @param seed Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.
 #' @examples 
-#' decon.c = DeconX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
-#' decon.bg = DeconX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
+#' decon.c = DecontX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
+#' decon.bg = DecontX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
 #' @export 
-DeconX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
+DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
 
   checkCounts.decon(omat)
   checkParameters.decon(proportion.prior=delta, distribution.prior=beta) 
@@ -159,7 +159,7 @@ DeconX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL,
   }
 
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
-  logMessages("Start DeconX. Decontamination", logfile=logfile, append=TRUE, verbose=verbose) 
+  logMessages("Start DecontX. Decontamination", logfile=logfile, append=TRUE, verbose=verbose) 
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   start.time = Sys.time()
 
@@ -228,7 +228,7 @@ DeconX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL,
 
   end.time = Sys.time() 
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
-  logMessages("Completed DeconX. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose) 
+  logMessages("Completed DecontX. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose) 
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
 
   run.params = list("beta" = beta, "delta" = delta, "iteration"=max.iter)
