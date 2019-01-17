@@ -34,6 +34,14 @@ Vignettes are available in the package.
 An analysis example using celda with RNASeq via vignette('celda-analysis')
 
 
+### Decontamination with DecontX
+Highly expressed genes from various cells clusters will be expressed at low levels in other clusters in droplet-based systems due to contamination. DecontX will decompose an observed count matrix into a decontaminated expression matrix and a contamination matrix. The only other parameter needed is a vector of cell cluster labels. 
+
+```
+new.counts = DecontX( omat = counts, z = cell.label) 
+# Decontaminated matrix: new.counts$res.list$est.rmat
+# Percentage of contamination per cell: new.counts$res.list$est.conp
+```
 
 ## New Features and announcements
 The v0.4 release of celda represents a useable implementation of the various celda clustering models.
