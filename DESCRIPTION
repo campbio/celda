@@ -32,7 +32,8 @@ Imports:
     data.table,
     Rcpp,
     RcppEigen,
-    umap
+    umap,
+    enrichR
 Suggests:
     testthat,
     knitr,
