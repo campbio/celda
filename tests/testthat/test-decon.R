@@ -7,12 +7,12 @@
   model_DecontXoneBatch = DecontXoneBatch( Decon.sim$rmat + Decon.sim$cmat, z= Decon.sim$z, max.iter=2, seed=1234567) 
   model_DecontXoneBatch.iter1 = DecontXoneBatch( Decon.sim$rmat + Decon.sim$cmat, z= Decon.sim$z, max.iter=1, seed=1234567)
 
-  model_DecontXoneBatchbg = DecontXoneBatch( Decon.sim$rmat+Decon.sim$cmat, max.iter=2, seed=1234567) 
-  model_DecontXoneBatchbg.iter1 = DecontXoneBatch( Decon.sim$rmat+Decon.sim$cmat, max.iter=1, seed=1234567) 
-
+  model_DecontXoneBatchbg = DecontX( Decon.sim$rmat+Decon.sim$cmat, max.iter=2, seed=1234567) 
 
   Decon.sim2 = simulateObservedMatrix(K=10, delta=c(1,5), seed = 74) 
   batch_DecontX = DecontX( cbind( Decon.sim$rmat+Decon.sim$cmat, Decon.sim2$rmat+Decon.sim2$cmat ) ,z=c( Decon.sim$z, Decon.sim2$z) , batch = rep( 1:2, each = ncol(Decon.sim$rmat) )  , max.iter=2, seed=1234567)  
+  batch_DecontX.bg = DecontX( cbind( Decon.sim$rmat+Decon.sim$cmat, Decon.sim2$rmat+Decon.sim2$cmat ) , batch = rep( 1:2, each = ncol(Decon.sim$rmat) )  , max.iter=2, seed=1234567)  
+
 
   # simulateObservedMatrix
   test_that( desc = "Testing simulateObservedMatrix", { 
@@ -33,6 +33,7 @@
   test_that( desc = "Testing DecontX", {
     expect_equal( ncol( Decon.sim$rmat ) + ncol( Decon.sim2$rmat ) ,  ncol(  batch_DecontX$res.list$est.rmat )  ) 
     expect_equal( length( batch_DecontX$res.list$est.conp) , ncol(  batch_DecontX$res.list$est.rmat )  )  
+    expect_equal( batch_DecontX.bg$method, "background" ) 
   } )
 
 
