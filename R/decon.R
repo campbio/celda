@@ -126,12 +126,10 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 }
 
 
-
-
-#' This function updates decontamination 
-#' 
+#' This function updates decontamination on dataset with multiple batches 
 #' @param omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells. 
 #' @param z Integer vector. Cell population labels. Default NULL 
+#' @param batch Integer vector. Cell batch labels. Default NULL
 #' @param max.iter Integer. Maximum iterations of EM algorithm. Default to be 200 
 #' @param beta Numeric. Concentration parameter for Phi. Default to be 1e-6
 #' @param delta Numeric. Symmetric concentration parameter for Theta. Default to be 10 
@@ -142,7 +140,67 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 #' decon.c = DecontX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
 #' decon.bg = DecontX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
 #' @export 
-DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
+DecontX = function( omat , z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
+  
+
+  if ( !is.null(batch) ) { 
+      
+      # Set result lists upfront for all cells from different batches 
+      logLikelihood = c() 
+      est.rmat = matrix(NA, ncol = ncol(omat) , nrow = nrow(omat ) , dimnames = list( rownames( omat) , colnames( omat ) )      ) 
+      theta = rep(NA, ncol(omat ) ) 
+      est.conp = rep(NA, ncol(omat) ) 
+
+      batch.index = unique(batch) 
+
+      for ( BATCH in batch.index ) {  
+          omat.BATCH = omat[, batch == BATCH  ]
+          if( !is.null(z) ) { z.BATCH = z[ batch == BATCH ]  }  else { z.BATCH = z } 
+          res.BATCH = DecontX.oneBatch( omat = omat.BATCH, z = z.BATCH, batch = BATCH  ,max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed ) 
+
+          est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.rmat
+          est.conp[ batch == BATCH ] = res.BATCH$res.list$est.conp 
+          theta[  batch == BATCH ] = res.BATCH$res.list$theta 
+
+          if( is.null(logLikelihood)  )   { 
+              logLikelihood = res.BATCH$res.list$logLikelihood  
+          } else { 
+              logLikelihood = addLogLikelihood( logLikelihood, res.BATCH$res.list$logLikelihood ) 
+          }
+      } 
+      
+      run.params = res.BATCH$run.params 
+      method = res.BATCH$method 
+      res.list = list( "logLikelihood"=logLikelihood, "est.rmat"=est.rmat,"est.conp"= est.conp,  "theta"=theta ) 
+
+      return( list("run.params"=run.params, "res.list"=res.list, "method"=method )  ) 
+  } 
+
+  return( DecontX.oneBatch( omat = omat, z = z, max.iter = mat.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed )  ) 
+
+}
+
+
+# add two (varied-length) logLikelihood vector together 
+addLogLikelihood = function( ll.a,  ll.b   ) { 
+  length.a = length(ll.a ) 
+  length.b = length(ll.b) 
+
+  if( length.a >= length.b  )  { 
+      ll.b = c( ll.b, rep( ll.b[length.b] , length.a - length.b )  ) 
+      ll = ll.a + ll.b 
+  } else { 
+      ll.a = c( ll.a, rep( ll.a[length.a], length.b - length.a ) ) 
+      ll = ll.a + ll.b
+  } 
+  
+  return( ll ) 
+}
+
+
+
+# This function updates decontamination for one batch  
+DecontX.oneBatch = function(omat, z=NULL, batch= NULL,  max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
 
   checkCounts.decon(omat)
   checkParameters.decon(proportion.prior=delta, distribution.prior=beta) 
@@ -158,8 +216,12 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
       z = processCellLabels(z, num.cells= nC) 
   }
 
+        # remember that it has to return to a single matrix having column/row index unchanged
+
+
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   logMessages("Start DecontX. Decontamination", logfile=logfile, append=TRUE, verbose=verbose) 
+  if ( !is.null(batch) ) {  logMessages("batch: ",  batch, logfile=logfile, append=TRUE, verbose=verbose)    }
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   start.time = Sys.time()
 
@@ -229,6 +291,7 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
   end.time = Sys.time() 
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   logMessages("Completed DecontX. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose) 
+  if ( !is.null(batch) ) {  logMessages("batch: ",  batch, logfile=logfile, append=TRUE, verbose=verbose)    }
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
 
   run.params = list("beta" = beta, "delta" = delta, "iteration"=max.iter)
