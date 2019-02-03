@@ -156,7 +156,7 @@ DecontX = function( omat , z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=1
       for ( BATCH in batch.index ) {  
           omat.BATCH = omat[, batch == BATCH  ]
           if( !is.null(z) ) { z.BATCH = z[ batch == BATCH ]  }  else { z.BATCH = z } 
-          res.BATCH = DecontX.oneBatch( omat = omat.BATCH, z = z.BATCH, batch = BATCH  ,max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed ) 
+          res.BATCH = DecontXoneBatch( omat = omat.BATCH, z = z.BATCH, batch = BATCH  ,max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed ) 
 
           est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.rmat
           est.conp[ batch == BATCH ] = res.BATCH$res.list$est.conp 
@@ -176,31 +176,16 @@ DecontX = function( omat , z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=1
       return( list("run.params"=run.params, "res.list"=res.list, "method"=method )  ) 
   } 
 
-  return( DecontX.oneBatch( omat = omat, z = z, max.iter = mat.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed )  ) 
+  return( DecontXoneBatch( omat = omat, z = z, max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed )  ) 
 
 }
 
-
-# add two (varied-length) logLikelihood vector together 
-addLogLikelihood = function( ll.a,  ll.b   ) { 
-  length.a = length(ll.a ) 
-  length.b = length(ll.b) 
-
-  if( length.a >= length.b  )  { 
-      ll.b = c( ll.b, rep( ll.b[length.b] , length.a - length.b )  ) 
-      ll = ll.a + ll.b 
-  } else { 
-      ll.a = c( ll.a, rep( ll.a[length.a], length.b - length.a ) ) 
-      ll = ll.a + ll.b
-  } 
-  
-  return( ll ) 
-}
 
 
 
 # This function updates decontamination for one batch  
-DecontX.oneBatch = function(omat, z=NULL, batch= NULL,  max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
+#
+DecontXoneBatch = function(omat, z=NULL, batch= NULL,  max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
 
   checkCounts.decon(omat)
   checkParameters.decon(proportion.prior=delta, distribution.prior=beta) 
@@ -337,4 +322,20 @@ processCellLabels = function(z,  num.cells) {
     z = as.factor(z) 
   }
   return(z)
+}
+
+# Add two (veried-length) vectors of logLikelihood 
+addLogLikelihood = function( ll.a,  ll.b   ) { 
+  length.a = length(ll.a ) 
+  length.b = length(ll.b) 
+
+  if( length.a >= length.b  )  { 
+      ll.b = c( ll.b, rep( ll.b[length.b] , length.a - length.b )  ) 
+      ll = ll.a + ll.b 
+  } else { 
+      ll.a = c( ll.a, rep( ll.a[length.a], length.b - length.a ) ) 
+      ll = ll.a + ll.b
+  } 
+  
+  return( ll ) 
 }
