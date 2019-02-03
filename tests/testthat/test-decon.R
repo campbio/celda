@@ -12,7 +12,7 @@
 
 
   Decon.sim2 = simulateObservedMatrix(K=10, delta=c(1,5), seed = 74) 
-  batch_DecontX = DecontX( cbind( Decon.sim$rmat+Decon.sim$cmat, Decon.sim2$rmat+Decon.sim2$cmat ) ,  max.iter=2, seed=1234567)  
+  batch_DecontX = DecontX( cbind( Decon.sim$rmat+Decon.sim$cmat, Decon.sim2$rmat+Decon.sim2$cmat ) ,z=c( Decon.sim$z, Decon.sim2$z) , batch = rep( 1:2, each = ncol(Decon.sim$rmat) )  , max.iter=2, seed=1234567)  
 
   # simulateObservedMatrix
   test_that( desc = "Testing simulateObservedMatrix", { 
@@ -33,14 +33,12 @@
   test_that( desc = "Testing DecontX", {
     expect_equal( ncol( Decon.sim$rmat ) + ncol( Decon.sim2$rmat ) ,  ncol(  batch_DecontX$res.list$est.rmat )  ) 
     expect_equal( length( batch_DecontX$res.list$est.conp) , ncol(  batch_DecontX$res.list$est.rmat )  )  
-    expect_equal( length( batch_DecontX$res.list$theta ), length( batch_DecontX$res.list$est.conp)  )
   } )
 
 
   # DecontXoneBatch
   test_that( desc = "Testing DecontXoneBatch", {
     expect_equal( model_DecontXoneBatch$res.list$est.conp  , 1 - colSums(model_DecontXoneBatch$res.list$est.rmat) /  colSums( Decon.sim$rmat + Decon.sim$cmat) )
-    expect_equal( dim(model_DecontXoneBatch$res.list$est.GeneDist),  dim( model_DecontXoneBatch$res.list$est.ConDist) ) 
     expect_equal( model_DecontXoneBatch$res.list$theta, (model_DecontXoneBatch$run.params$delta + colSums(model_DecontXoneBatch$res.list$est.rmat) ) / ( 2*model_DecontXoneBatch$run.params$delta + colSums(Decon.sim$cmat + Decon.sim$rmat) ) )
     expect_error( DecontXoneBatch(omat=Decon.sim$rmat+Decon.sim$cmat, z=Decon.sim$z, beta=-1), "'beta' should be a single positive value.")
     expect_error( DecontXoneBatch(omat=Decon.sim$rmat+Decon.sim$cmat, z=Decon.sim$z, beta=c(1,1) ), "'beta' should be a single positive value.")
