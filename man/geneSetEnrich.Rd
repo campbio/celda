@@ -34,10 +34,10 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
 #subset 100 genes for fast clustering
-counts <- counts[sample(seq_len(nrow(countsMatrix)),
+counts <- counts[sample(seq_len(nrow(counts)),
     size = 100),]
 #cluster genes into 10 modules for quick demo
-cm <- celda_G(counts = as.matrix(countsMatrix), L = 10, verbose = FALSE)
+cm <- celda_G(counts = as.matrix(counts), L = 10, verbose = FALSE)
 gse <- geneSetEnrich(counts,
     cm,
     databases = c('GO_Biological_Process_2018','GO_Molecular_Function_2018'))
