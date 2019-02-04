@@ -250,7 +250,7 @@ DecontX <- function(
                 verbose = verbose,
                 seed = seed)
 
-            estRmat[, batch == BATCH ] <- res.BATCH$res.list$estRmat
+            estRmat[, batch == BATCH ] <- res.BATCH$res.list$est.rmat
             est.conp[batch == BATCH] <- res.BATCH$res.list$est.conp
             theta[batch == BATCH] <- res.BATCH$res.list$theta
 
@@ -443,7 +443,7 @@ DecontXoneBatch <- function(
         }
     }
 
-    resConp <- 1 - colSums(next.decon$estRmat) / colSums(omat)
+    resConp <- 1 - colSums(next.decon$est.rmat) / colSums(omat)
 
     end.time <- Sys.time()
     logMessages(paste(rep("-", 50), collapse = ""),
@@ -473,7 +473,7 @@ DecontXoneBatch <- function(
         "seed" = seed)
 
     res.list <- list("logLikelihood" = ll,
-        "est.rmat" = next.decon$estRmat,
+        "est.rmat" = next.decon$est.rmat,
         "est.conp" = resConp,
         "theta" = theta)
     if (decon.method == "clustering") {
