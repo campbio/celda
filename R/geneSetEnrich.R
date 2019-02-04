@@ -13,7 +13,7 @@
 #'  enriched.
 #' @return List of length 'L' where each member contains the significantly
 #'  enriched terms for the corresponding module.
-#' @example
+#' @examples
 #' if (!requireNamespace("BiocManager", quietly = TRUE))
 #'     install.packages("M3DExampleData")
 #' library(M3DExampleData)
