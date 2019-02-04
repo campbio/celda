@@ -2,32 +2,40 @@
 % Please edit documentation in R/decon.R
 \name{simulateObservedMatrix}
 \alias{simulateObservedMatrix}
-\title{This function generates a list containing two count matrices -- one for real expression, the other one for contamination, as well as other parameters 
-used in the simulation which can be useful for running decontamination}
+\title{Simulate observed count matrix with contamination}
 \usage{
-simulateObservedMatrix(C = 300, G = 100, K = 3, N.Range = c(500,
+simulateObservedMatrix(C = 300, G = 100, K = 3, NRange = c(500,
   1000), beta = 0.5, delta = c(1, 2), seed = 12345)
 }
 \arguments{
-\item{C}{Integer. Number of cells to be simulated. Default to be 300}
+\item{C}{Integer. Number of cells to be simulated. Default 300.}
 
-\item{G}{Integer. Number of genes to be simulated. Default to be 100}
+\item{G}{Integer. Number of genes to be simulated. Default 100.}
 
-\item{K}{Integer. Number of cell populations to be simulated. Default to be 3}
+\item{K}{Integer. Number of cell populations to be simulated. Default 3.}
 
-\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default to be c(500, 1000)}
+\item{NRange}{Integer vector. A vector of length 2 that specifies the lower
+and upper bounds of the number of counts generated for each cell. Default
+\code{c(500, 1000)}.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Default to be 0.5}
+\item{beta}{Numeric. Concentration parameter for Phi. Default 0.5.}
 
-\item{delta}{Numeric / Numeric vector. Concentration parameter for Theta. If input as a single numeric value, symmetric values for beta distribution are specified; if input as a vector of lenght 2, the two values will be the shape1 and shape2 paramters of the beta distribution respectively}
+\item{delta}{Numeric or numeric vector. Concentration parameter for Theta.
+If the input is a single numeric value, the symmetric values for beta
+distribution are specified. If the input is a vector of length 2, the two
+values will be the shape1 and shape2 paramters of the beta distribution
+respectively.}
 
-\item{seed}{Integer. Passed to set.seed(). Default to be 12345. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to \code{set.seed()}. Default 12345. If NULL,
+no calls to `set.seed()` are made.}
 }
 \description{
-This function generates a list containing two count matrices -- one for real expression, the other one for contamination, as well as other parameters 
-used in the simulation which can be useful for running decontamination
+This function generates a list of two simulated count matrices,
+ one for real expression and the other one for contamination. Numerous
+ parameters are specified in the simulation process and can be useful for
+ running decontamination.
 }
 \examples{
-contamination.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
-contamination.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
+contaminationSim <- simulateObservedMatrix(K=3, delta = c(1, 9))
+contaminationSim <- simulateObservedMatrix(K=3, delta = 1)
 }

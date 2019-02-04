@@ -2,32 +2,41 @@
 % Please edit documentation in R/decon.R
 \name{DecontX}
 \alias{DecontX}
-\title{This function updates decontamination}
+\title{Decontaminate the observed count matrix}
 \usage{
 DecontX(omat, z = NULL, max.iter = 200, beta = 1e-06, delta = 10,
   logfile = NULL, verbose = TRUE, seed = 1234567)
 }
 \arguments{
-\item{omat}{Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells.}
+\item{omat}{Numeric/Integer matrix. Observed count matrix, rows represent
+features and columns represent cells.}
 
-\item{z}{Integer vector. Cell population labels. Default NULL}
+\item{z}{Integer vector. Cell population labels. Default \code{NULL}.}
 
-\item{max.iter}{Integer. Maximum iterations of EM algorithm. Default to be 200}
+\item{max.iter}{Integer. Maximum iterations of EM algorithm. Default 200.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Default to be 1e-6}
+\item{beta}{Numeric. Concentration parameter for Phi. Default 1e-6.}
 
-\item{delta}{Numeric. Symmetric concentration parameter for Theta. Default to be 10}
+\item{delta}{Numeric. Symmetric concentration parameter for Theta. Default
+10.}
 
-\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL}
+\item{logfile}{Character. Messages will be redirected to a file named
+`logfile`. If NULL, messages will be printed to standard output. Default
+\code{NULL}.}
 
-\item{verbose}{Logical. Whether to print log messages. Default TRUE}
+\item{verbose}{Logical. Whether to print log messages. Default \code{TRUE}.}
 
-\item{seed}{Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to \code{set.seed()}. Default 1234567. If NULL,
+no calls to \code{set.seed()} are made.}
 }
 \description{
-This function updates decontamination
+This function calculates the decontaminated count matrix from
+ the observed count matrix. The log-likelihood and the contamination
+ proportion are also reported.
 }
 \examples{
-decon.c = DecontX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
-decon.bg = DecontX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
+decon.c <- DecontX(omat = contamination.sim$rmat + contamination.sim$cmat,
+    z = contamination.sim$z, max.iter = 3)
+decon.bg <- DecontX(omat = contamination.sim$rmat + contamination.sim$cmat,
+    max.iter = 3)
 }
