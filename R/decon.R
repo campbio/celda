@@ -126,12 +126,10 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 }
 
 
-
-
-#' This function updates decontamination 
-#' 
+#' This function updates decontamination on dataset with multiple batches 
 #' @param omat Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells. 
 #' @param z Integer vector. Cell population labels. Default NULL 
+#' @param batch Integer vector. Cell batch labels. Default NULL
 #' @param max.iter Integer. Maximum iterations of EM algorithm. Default to be 200 
 #' @param beta Numeric. Concentration parameter for Phi. Default to be 1e-6
 #' @param delta Numeric. Symmetric concentration parameter for Theta. Default to be 10 
@@ -142,7 +140,52 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 #' decon.c = DecontX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
 #' decon.bg = DecontX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
 #' @export 
-DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
+DecontX = function( omat , z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
+  
+
+  if ( !is.null(batch) ) { 
+      
+      # Set result lists upfront for all cells from different batches 
+      logLikelihood = c() 
+      est.rmat = matrix(NA, ncol = ncol(omat) , nrow = nrow(omat ) , dimnames = list( rownames( omat) , colnames( omat ) )      ) 
+      theta = rep(NA, ncol(omat ) ) 
+      est.conp = rep(NA, ncol(omat) ) 
+
+      batch.index = unique(batch) 
+
+      for ( BATCH in batch.index ) {  
+          omat.BATCH = omat[, batch == BATCH  ]
+          if( !is.null(z) ) { z.BATCH = z[ batch == BATCH ]  }  else { z.BATCH = z } 
+          res.BATCH = DecontXoneBatch( omat = omat.BATCH, z = z.BATCH, batch = BATCH  ,max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed ) 
+
+          est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.rmat
+          est.conp[ batch == BATCH ] = res.BATCH$res.list$est.conp 
+          theta[  batch == BATCH ] = res.BATCH$res.list$theta 
+
+          if( is.null(logLikelihood)  )   { 
+              logLikelihood = res.BATCH$res.list$logLikelihood  
+          } else { 
+              logLikelihood = addLogLikelihood( logLikelihood, res.BATCH$res.list$logLikelihood ) 
+          }
+      } 
+      
+      run.params = res.BATCH$run.params 
+      method = res.BATCH$method 
+      res.list = list( "logLikelihood"=logLikelihood, "est.rmat"=est.rmat,"est.conp"= est.conp,  "theta"=theta ) 
+
+      return( list("run.params"=run.params, "res.list"=res.list, "method"=method )  ) 
+  } 
+
+  return( DecontXoneBatch( omat = omat, z = z, max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed )  ) 
+
+}
+
+
+
+
+# This function updates decontamination for one batch  
+#
+DecontXoneBatch = function(omat, z=NULL, batch= NULL,  max.iter=200, beta=1e-6, delta=10, logfile=NULL, verbose=TRUE, seed=1234567 ) {
 
   checkCounts.decon(omat)
   checkParameters.decon(proportion.prior=delta, distribution.prior=beta) 
@@ -158,17 +201,26 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
       z = processCellLabels(z, num.cells= nC) 
   }
 
+  # Set seed for initialization 
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+
+
+  iter = 1L 
+  num.iter.without.improvement = 0L
+  stop.iter = 3L 
+
+
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   logMessages("Start DecontX. Decontamination", logfile=logfile, append=TRUE, verbose=verbose) 
+  if ( !is.null(batch) ) {  logMessages("batch: ",  batch, logfile=logfile, append=TRUE, verbose=verbose)    }
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   start.time = Sys.time()
 
   if( decon.method == "clustering") {
 
-  # initialization
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  # Initialization
   theta  = runif(nC, min = 0.1, max = 0.5)  
   est.rmat = t (t(omat) * theta )       
   phi =   colSumByGroup.numeric(est.rmat, z, K)
@@ -176,9 +228,13 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
   phi = normalizeCounts(phi, normalize="proportion", pseudocount.normalize =beta )
   eta = normalizeCounts(eta, normalize="proportion", pseudocount.normalize = beta)
   ll = c()
+  
+
+  ll.round =  decon.calcLL(omat=omat, z=z, phi = phi, eta = eta, theta=theta ) 
+
 
   # EM updates
-  for (iteration in 1:max.iter) {
+  while (iter <=  max.iter &  num.iter.without.improvement <= stop.iter  ) {
 
 
     next.decon = cD.calcEMDecontamination(omat=omat, phi=phi, eta=eta, theta=theta, z=z, K=K,  beta=beta, delta=delta) 
@@ -190,6 +246,15 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
     # Calculate log-likelihood
     ll.temp = decon.calcLL(omat=omat, z=z, phi = phi, eta = eta, theta=theta )
     ll  = c(ll, ll.temp)
+    ll.round = c( ll.round, round( ll.temp, 2) )  
+
+    if ( round( ll.temp, 2) > ll.round[ iter ]  |  iter== 1   )    {
+        num.iter.without.improvement = 1L 
+    }   else { 
+        num.iter.without.improvement = num.iter.without.improvement + 1L 
+    } 
+    iter = iter + 1L 
+
   }
 
   }
@@ -197,9 +262,6 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
   if ( decon.method == "background") {
 
   # Initialization
-  if (!is.null(seed)) {
-    set.seed(seed) 
-  }
   theta = runif( nC, min =0.1, max=0.5) 
   est.rmat = t( t(omat) *theta) 
   bgDist = rowSums( omat ) / sum( omat) 
@@ -207,8 +269,12 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
   cellDist = normalizeCounts( est.rmat, normalize="proportion", pseudocount.normalize=beta) 
   ll =c()
 
+
+  ll.round = bg.calcLL(omat=omat, cellDist=cellDist, bgDist=bgDist, theta=theta)  
+
+
   # EM updates
-  for (iteration in 1:max.iter) {
+    while (iter <=  max.iter &  num.iter.without.improvement <= stop.iter  ) { 
 
 
     next.decon = cD.calcEMbgDecontamination(omat=omat, cellDist=cellDist, bgDist=bgDist, theta=theta, beta=beta, delta=delta)  
@@ -219,6 +285,14 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
     # Calculate log-likelihood
     ll.temp = bg.calcLL(omat=omat, cellDist=cellDist, bgDist=bgDist, theta=theta) 
     ll  = c(ll, ll.temp) 
+    ll.round = c( ll.round, round( ll.temp, 2) )
+
+    if ( round( ll.temp, 2) > ll.round[ iter ]  |  iter== 1   )    {
+        num.iter.without.improvement = 1L
+    }   else {
+        num.iter.without.improvement = num.iter.without.improvement + 1L
+    }
+    iter = iter + 1L
   }
 
   }
@@ -229,11 +303,12 @@ DecontX = function(omat, z=NULL, max.iter=200, beta=1e-6, delta=10, logfile=NULL
   end.time = Sys.time() 
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
   logMessages("Completed DecontX. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose) 
+  if ( !is.null(batch) ) {  logMessages("batch: ",  batch, logfile=logfile, append=TRUE, verbose=verbose)    }
   logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
 
-  run.params = list("beta" = beta, "delta" = delta, "iteration"=max.iter)
+  run.params = list("beta" = beta, "delta" = delta, "iteration"=iter-1L, "seed"=seed)
 
-  res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta   )
+  res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta )
   if( decon.method=="clustering" ) {
     posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  ) 
     res.list = append( res.list , posterior.params ) 
@@ -274,4 +349,20 @@ processCellLabels = function(z,  num.cells) {
     z = as.factor(z) 
   }
   return(z)
+}
+
+# Add two (veried-length) vectors of logLikelihood 
+addLogLikelihood = function( ll.a,  ll.b   ) { 
+  length.a = length(ll.a ) 
+  length.b = length(ll.b) 
+
+  if( length.a >= length.b  )  { 
+      ll.b = c( ll.b, rep( ll.b[length.b] , length.a - length.b )  ) 
+      ll = ll.a + ll.b 
+  } else { 
+      ll.a = c( ll.a, rep( ll.a[length.a], length.b - length.a ) ) 
+      ll = ll.a + ll.b
+  } 
+  
+  return( ll ) 
 }
