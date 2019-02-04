@@ -44,7 +44,8 @@ Suggests:
     Matrix,
     biomaRt,
     Rtsne,
-    covr
+    covr,
+    M3DExampleData
 LinkingTo: Rcpp, RcppEigen
 VignetteBuilder: knitr
 License: MIT
