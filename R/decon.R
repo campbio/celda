@@ -223,7 +223,7 @@ DecontX <- function(
 
         # Set result lists upfront for all cells from different batches
         logLikelihood <- c()
-        est.rmat <- matrix(NA,
+        estRmat <- matrix(NA,
           ncol = ncol(omat),
           nrow = nrow(omat),
           dimnames = list(rownames(omat),
@@ -250,7 +250,7 @@ DecontX <- function(
                 verbose = verbose,
                 seed = seed)
 
-            est.rmat[, batch == BATCH ] <- res.BATCH$res.list$est.rmat
+            estRmat[, batch == BATCH ] <- res.BATCH$res.list$estRmat
             est.conp[batch == BATCH] <- res.BATCH$res.list$est.conp
             theta[batch == BATCH] <- res.BATCH$res.list$theta
 
@@ -265,7 +265,7 @@ DecontX <- function(
         run.params <- res.BATCH$run.params
         method <- res.BATCH$method
         res.list <- list("logLikelihood" = logLikelihood,
-            "est.rmat" = est.rmat,
+            "est.rmat" = estRmat,
             "est.conp" = est.conp,
             "theta" = theta)
 
