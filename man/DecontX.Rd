@@ -4,11 +4,12 @@
 \alias{DecontX}
 \title{Decontaminate the observed count matrix}
 \usage{
-DecontX(omat, z = NULL, batch = NULL, max.iter = 200, beta = 1e-06,
-  delta = 10, logfile = NULL, verbose = TRUE, seed = 1234567)
+DecontX(counts, z = NULL, batch = NULL, max.iter = 200,
+  beta = 1e-06, delta = 10, logfile = NULL, verbose = TRUE,
+  seed = 1234567)
 }
 \arguments{
-\item{omat}{Numeric/Integer matrix. Observed count matrix, rows represent
+\item{counts}{Numeric/Integer matrix. Observed count matrix, rows represent
 features and columns represent cells.}
 
 \item{z}{Integer vector. Cell population labels. Default NULL.}
@@ -37,8 +38,8 @@ This function calculates the decontaminated count matrix from
  the contamination proportion are also reported.
 }
 \examples{
-decon.c <- DecontX(omat = contamination.sim$rmat + contamination.sim$cmat,
+decon.c <- DecontX(counts = contamination.sim$rmat + contamination.sim$cmat,
     z = contamination.sim$z, max.iter = 3)
-decon.bg <- DecontX(omat = contamination.sim$rmat + contamination.sim$cmat,
+decon.bg <- DecontX(counts = contamination.sim$rmat + contamination.sim$cmat,
     max.iter = 3)
 }
