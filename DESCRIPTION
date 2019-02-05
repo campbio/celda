@@ -32,7 +32,8 @@ Imports:
     data.table,
     Rcpp,
     RcppEigen,
-    umap
+    umap,
+    enrichR
 Suggests:
     testthat,
     knitr,
@@ -43,12 +44,13 @@ Suggests:
     Matrix,
     biomaRt,
     Rtsne,
-    covr
+    covr,
+    M3DExampleData
 LinkingTo: Rcpp, RcppEigen
 VignetteBuilder: knitr
 License: MIT
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.0.9000
 BugReports: https://github.com/definitelysean/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian
