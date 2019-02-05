@@ -86,7 +86,7 @@ simulateObservedMatrix <- function(
 
 # This function calculates the log-likelihood
 #
-# omat Numeric/Integer matrix. Observed count matrix, rows represent features
+# counts Numeric/Integer matrix. Observed count matrix, rows represent features
 #  and columns represent cells
 # z Integer vector. Cell population labels
 # phi Numeric matrix. Rows represent features and columns represent cell
@@ -94,10 +94,10 @@ simulateObservedMatrix <- function(
 # eta Numeric matrix. Rows represent features and columns represent cell
 #  populations
 # theta Numeric vector. Proportion of truely expressed transcripts
-decon.calcLL <- function(omat, z,  phi, eta, theta) {
-    #ll = sum( t(omat) * log( (1-conP )*geneDist[z,] + conP * conDist[z, ] +
+decon.calcLL <- function(counts, z,  phi, eta, theta) {
+    #ll = sum( t(counts) * log( (1-conP )*geneDist[z,] + conP * conDist[z, ] +
     # 1e-20 ) )  # when dist_mat are K x G matrices
-    ll <- sum(t(omat) * log(theta * t(phi)[z, ] + (1 - theta) * t(eta)[z, ] +
+    ll <- sum(t(counts) * log(theta * t(phi)[z, ] + (1 - theta) * t(eta)[z, ] +
             1e-20))
     return(ll)
 }
@@ -108,8 +108,8 @@ decon.calcLL <- function(omat, z,  phi, eta, theta) {
 #
 # bgDist Numeric matrix. Rows represent feature and columns are the times that
 #  the background-distribution has been replicated.
-bg.calcLL <- function(omat, cellDist, bgDist, theta) {
-    ll <- sum(t(omat) * log(theta * t(cellDist) + (1 - theta) * t(bgDist) +
+bg.calcLL <- function(counts, cellDist, bgDist, theta) {
+    ll <- sum(t(counts) * log(theta * t(cellDist) + (1 - theta) * t(bgDist) +
             1e-20))
     return(ll)
 }
@@ -123,7 +123,7 @@ bg.calcLL <- function(omat, cellDist, bgDist, theta) {
 #   populations
 #  theta Numeric vector. Proportion of truely expressed transctripts
 cD.calcEMDecontamination <- function(
-    omat,
+    counts,
     phi,
     eta,
     theta,
@@ -137,12 +137,12 @@ cD.calcEMDecontamination <- function(
 
     Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
 
-    estRmat <- t(Pr) * omat
+    estRmat <- t(Pr) * counts
     rnGByK <- colSumByGroup.numeric(estRmat, z, K)
     cnGByK <- rowSums(rnGByK) - rnGByK
 
     #update parameters
-    theta <- (colSums(estRmat) + delta) / (colSums(omat) + 2 * delta)
+    theta <- (colSums(estRmat) + delta) / (colSums(counts) + 2 * delta)
     phi <- normalizeCounts(rnGByK, normalize = "proportion",
         pseudocount.normalize = beta)
     eta <- normalizeCounts(cnGByK, normalize = "proportion",
@@ -156,26 +156,26 @@ cD.calcEMDecontamination <- function(
 # This function updates decontamination using background distribution
 #
 cD.calcEMbgDecontamination <- function(
-    omat,
+    counts,
     cellDist,
     bgDist,
     theta,
     beta,
     delta) {
 
-    #meanNByC <- apply(omat, 2, mean)
+    #meanNByC <- apply(counts, 2, mean)
 
     logPr <- log(t(cellDist) + 1e-20) + log(theta + 1e-20)
-    # + log( t(omat) / meanNByC )   # better when without panelty
+    # + log( t(counts) / meanNByC )   # better when without panelty
 
     logPc <- log(t(bgDist) + 1e-20) + log(1 - theta + 2e-20)
 
     Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
 
-    estRmat <- t(Pr) * omat
+    estRmat <- t(Pr) * counts
 
     # Update paramters
-    theta <- (colSums(estRmat) + delta) / (colSums(omat) + 2 * delta)
+    theta <- (colSums(estRmat) + delta) / (colSums(counts) + 2 * delta)
     cellDist <- normalizeCounts(estRmat,
         normalize = "proportion",
         pseudocount.normalize = beta)
@@ -188,7 +188,7 @@ cD.calcEMbgDecontamination <- function(
 #' @description This function calculates the decontaminated count matrix from
 #'  the observed count matrix having multiple batches. The log-likelihood and
 #'  the contamination proportion are also reported.
-#' @param omat Numeric/Integer matrix. Observed count matrix, rows represent
+#' @param counts Numeric/Integer matrix. Observed count matrix, rows represent
 #'  features and columns represent cells.
 #' @param z Integer vector. Cell population labels. Default NULL.
 #' @param batch Integer vector. Cell batch labels. Default NULL.
@@ -203,13 +203,13 @@ cD.calcEMbgDecontamination <- function(
 #' @param seed Integer. Passed to \code{set.seed()}. Default 1234567. If NULL,
 #'  no calls to \code{set.seed()} are made.
 #' @examples
-#' decon.c <- DecontX(omat = contamination.sim$rmat + contamination.sim$cmat,
+#' decon.c <- DecontX(counts = contamination.sim$rmat + contamination.sim$cmat,
 #'     z = contamination.sim$z, max.iter = 3)
-#' decon.bg <- DecontX(omat = contamination.sim$rmat + contamination.sim$cmat,
+#' decon.bg <- DecontX(counts = contamination.sim$rmat + contamination.sim$cmat,
 #'     max.iter = 3)
 #' @export
 DecontX <- function(
-    omat,
+    counts,
     z = NULL,
     batch = NULL,
     max.iter = 200,
@@ -224,23 +224,23 @@ DecontX <- function(
         # Set result lists upfront for all cells from different batches
         logLikelihood <- c()
         estRmat <- matrix(NA,
-          ncol = ncol(omat),
-          nrow = nrow(omat),
-          dimnames = list(rownames(omat),
-            colnames(omat)))
-        theta <- rep(NA, ncol(omat))
-        est.conp <- rep(NA, ncol(omat))
+          ncol = ncol(counts),
+          nrow = nrow(counts),
+          dimnames = list(rownames(counts),
+            colnames(counts)))
+        theta <- rep(NA, ncol(counts))
+        est.conp <- rep(NA, ncol(counts))
 
         batch.index <- unique(batch)
 
         for (BATCH in batch.index) {
-            omat.BATCH <- omat[, batch == BATCH]
+            counts.BATCH <- counts[, batch == BATCH]
             if (!is.null(z)) {
                 z.BATCH <- z[batch == BATCH]
             } else {
                 z.BATCH <- z
             }
-            res.BATCH <- DecontXoneBatch(omat = omat.BATCH,
+            res.BATCH <- DecontXoneBatch(counts = counts.BATCH,
                 z = z.BATCH,
                 batch = BATCH,
                 max.iter = max.iter,
@@ -274,7 +274,7 @@ DecontX <- function(
             "method" = method))
     }
 
-    return(DecontXoneBatch(omat = omat,
+    return(DecontXoneBatch(counts = counts,
         z = z,
         max.iter = max.iter,
         beta = beta,
@@ -288,7 +288,7 @@ DecontX <- function(
 # This function updates decontamination for one batch
 #
 DecontXoneBatch <- function(
-    omat,
+    counts,
     z = NULL,
     batch = NULL,
     max.iter = 200,
@@ -298,11 +298,11 @@ DecontXoneBatch <- function(
     verbose = TRUE,
     seed = 1234567) {
 
-    checkCounts.decon(omat)
+    checkCounts.decon(counts)
     checkParameters.decon(proportion.prior = delta, distribution.prior = beta)
 
-    #nG <- nrow(omat)
-    nC <- ncol(omat)
+    #nG <- nrow(counts)
+    nC <- ncol(counts)
     K <- length(unique(z))
 
     if (is.null(z)) {
@@ -344,7 +344,7 @@ DecontXoneBatch <- function(
 
         # Initialization
         theta <- runif(nC, min = 0.1, max = 0.5)
-        estRmat <- t (t(omat) * theta)
+        estRmat <- t (t(counts) * theta)
         phi <- colSumByGroup.numeric(estRmat, z, K)
         eta <- rowSums(phi) - phi
         phi <- normalizeCounts(phi, normalize = "proportion",
@@ -354,7 +354,7 @@ DecontXoneBatch <- function(
         ll <- c()
 
         ll.round <- decon.calcLL(
-            omat = omat,
+            counts = counts,
             z = z,
             phi = phi,
             eta = eta,
@@ -363,7 +363,7 @@ DecontXoneBatch <- function(
         # EM updates
         while (iter <= max.iter && num.iter.without.improvement <= stop.iter) {
 
-            next.decon <- cD.calcEMDecontamination(omat = omat,
+            next.decon <- cD.calcEMDecontamination(counts = counts,
                 phi = phi,
                 eta = eta,
                 theta = theta,
@@ -377,7 +377,7 @@ DecontXoneBatch <- function(
             eta <- next.decon$eta
 
             # Calculate log-likelihood
-            ll.temp <- decon.calcLL(omat = omat,
+            ll.temp <- decon.calcLL(counts = counts,
                 z = z,
                 phi = phi,
                 eta = eta,
@@ -399,15 +399,15 @@ DecontXoneBatch <- function(
 
         # Initialization
         theta <- runif(nC, min = 0.1, max = 0.5)
-        estRmat <- t(t(omat) * theta)
-        bgDist <- rowSums(omat) / sum(omat)
+        estRmat <- t(t(counts) * theta)
+        bgDist <- rowSums(counts) / sum(counts)
         bgDist <- matrix(rep(bgDist, nC), ncol = nC)
         cellDist <- normalizeCounts(estRmat, normalize = "proportion",
             pseudocount.normalize = beta)
         ll <- c()
 
         ll.round <- bg.calcLL(
-            omat = omat,
+            counts = counts,
             cellDist = cellDist,
             bgDist = bgDist,
             theta = theta)
@@ -415,7 +415,7 @@ DecontXoneBatch <- function(
         # EM updates
         while (iter <= max.iter && num.iter.without.improvement <= stop.iter) {
 
-            next.decon <- cD.calcEMbgDecontamination(omat = omat,
+            next.decon <- cD.calcEMbgDecontamination(counts = counts,
                 cellDist = cellDist,
                 bgDist = bgDist,
                 theta = theta,
@@ -426,7 +426,7 @@ DecontXoneBatch <- function(
             cellDist <- next.decon$cellDist
 
             # Calculate log-likelihood
-            ll.temp <- bg.calcLL(omat = omat,
+            ll.temp <- bg.calcLL(counts = counts,
                 cellDist = cellDist,
                 bgDist = bgDist,
                 theta = theta)
@@ -443,7 +443,7 @@ DecontXoneBatch <- function(
         }
     }
 
-    resConp <- 1 - colSums(next.decon$est.rmat) / colSums(omat)
+    resConp <- 1 - colSums(next.decon$est.rmat) / colSums(counts)
 
     end.time <- Sys.time()
     logMessages(paste(rep("-", 50), collapse = ""),
@@ -500,9 +500,9 @@ checkParameters.decon <- function(proportion.prior, distribution.prior) {
 
 
 # Make sure provided rmat is the right type
-checkCounts.decon <- function(omat) {
-    if (sum(is.na(omat)) > 0) {
-        stop("Missing value in 'omat' matrix.")
+checkCounts.decon <- function(counts) {
+    if (sum(is.na(counts)) > 0) {
+        stop("Missing value in counts matrix.")
     }
 }
 
