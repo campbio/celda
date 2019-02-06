@@ -346,6 +346,7 @@ violinPlot = function(counts, celda.mod, features, plot_dots = F){
   }else{
     p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill = Cluster)) + 
       ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=T, scale = "width") + 
+      ggplot2::scale_fill_manual(values = color_pal) + 
       ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = grid::unit(0,"lines"),
                      panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black"))
     return(p)
