@@ -80,7 +80,7 @@ moduleHeatmap <- function(counts, celda.mod, feature.module = 1, top.cells = 100
     names(cell) <- sort(unique(celda.mod@clusters$z[cell_ix]))
     anno_cell_colors <- list(cell = cell)
     z.to.plot = celda.mod@clusters$z[cell.indices]
-  }else{
+  } else {
     anno_cell_colors <- NULL
   }
   plotHeatmap(
