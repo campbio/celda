@@ -88,21 +88,24 @@ bg.calcLL = function(omat, cellDist, bgDist, theta){
 #  theta Numeric vector. Proportion of truely expressed transctripts
 cD.calcEMDecontamination = function(omat, phi, eta, theta,  z, K, beta, delta ) {
 
+   # Notes: use fix-point iteration to update prior for theta, no need to feed delta anymore
    log.Pr = log(  t(phi)[z,] + 1e-20) + log(theta + 1e-20 )
    log.Pc = log(  t(eta)[z,] + 1e-20) + log(1-theta + 1e-20)  
 
    Pr = exp(log.Pr) / (  exp(log.Pr) + exp(log.Pc) )   
+   Pc = 1 - Pr 
+   delta.v2 = MCMCprecision::fit_dirichlet( matrix( c( Pr, Pc) , ncol = 2 ) )$alpha 
    
    est.rmat = t(Pr) * omat 
    rn.G.by.K = colSumByGroup.numeric(est.rmat, z, K)  
    cn.G.by.K = rowSums(rn.G.by.K) - rn.G.by.K 
 
    #update parameters 
-   theta = (colSums(est.rmat) + delta) / (colSums(omat) + 2*delta)  
+   theta = (colSums(est.rmat) + delta.v2[1]) / (colSums(omat) + sum(delta.v2)  )  
    phi  = normalizeCounts(rn.G.by.K, normalize="proportion",  pseudocount.normalize =beta ) 
    eta  = normalizeCounts(cn.G.by.K, normalize="proportion",  pseudocount.normalize = beta) 
 
-   return( list("est.rmat"=est.rmat,  "theta"=theta, "phi"=phi, "eta"=eta ) ) 
+   return( list("est.rmat"=est.rmat,  "theta"=theta, "phi"=phi, "eta"=eta, "delta"=delta.v2 ) ) 
 }
 
 
@@ -242,6 +245,7 @@ DecontXoneBatch = function(omat, z=NULL, batch= NULL,  max.iter=200, beta=1e-6, 
     theta = next.decon$theta 
     phi = next.decon$phi
     eta = next.decon$eta 
+    delta = next.decon$delta
 
     # Calculate log-likelihood
     ll.temp = decon.calcLL(omat=omat, z=z, phi = phi, eta = eta, theta=theta )
@@ -308,7 +312,7 @@ DecontXoneBatch = function(omat, z=NULL, batch= NULL,  max.iter=200, beta=1e-6, 
 
   run.params = list("beta" = beta, "delta" = delta, "iteration"=iter-1L, "seed"=seed)
 
-  res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta )
+  res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta , "delta"=delta)
   if( decon.method=="clustering" ) {
     posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  ) 
     res.list = append( res.list , posterior.params ) 
