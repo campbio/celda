@@ -18,5 +18,8 @@ notifications:
 
 r_github_packages:
   - r-lib/covr
+  - jimhester/lintr
 after_success:
   - Rscript -e 'covr::coveralls()'
+  - R CMD INSTALL $PKG_TARBALL
+  - Rscript -e 'lintr::lint_package()'
