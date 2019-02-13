@@ -22,4 +22,4 @@ r_github_packages:
 after_success:
   - Rscript -e 'covr::coveralls()'
   - R CMD INSTALL $PKG_TARBALL
-  - Rscript -e 'lintr::lint_package(linters = lintr::with_defaults(snake_case_linter = NULL))'
+  - Rscript -e 'lintr::lint_package(linters = lintr::with_defaults(camel_case_linter = NULL, snake_case_linter))'
