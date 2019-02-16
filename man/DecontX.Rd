@@ -2,15 +2,17 @@
 % Please edit documentation in R/decon.R
 \name{DecontX}
 \alias{DecontX}
-\title{This function updates decontamination}
+\title{This function updates decontamination on dataset with multiple batches}
 \usage{
-DecontX(omat, z = NULL, max.iter = 200, beta = 1e-06, delta = 10,
-  logfile = NULL, verbose = TRUE, seed = 1234567)
+DecontX(omat, z = NULL, batch = NULL, max.iter = 200, beta = 1e-06,
+  delta = 10, logfile = NULL, verbose = TRUE, seed = 1234567)
 }
 \arguments{
 \item{omat}{Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells.}
 
 \item{z}{Integer vector. Cell population labels. Default NULL}
+
+\item{batch}{Integer vector. Cell batch labels. Default NULL}
 
 \item{max.iter}{Integer. Maximum iterations of EM algorithm. Default to be 200}
 
@@ -25,7 +27,7 @@ DecontX(omat, z = NULL, max.iter = 200, beta = 1e-06, delta = 10,
 \item{seed}{Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.}
 }
 \description{
-This function updates decontamination
+This function updates decontamination on dataset with multiple batches
 }
 \examples{
 decon.c = DecontX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
