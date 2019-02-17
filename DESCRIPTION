@@ -33,13 +33,14 @@ Imports:
     Rcpp,
     RcppEigen,
     umap,
-    enrichR
+    enrichR,
+    vcd,
+    ggpubr
 Suggests:
     testthat,
     knitr,
     roxygen2,
     rmarkdown,
-    vcd,
     corrplot,
     Matrix,
     biomaRt,
