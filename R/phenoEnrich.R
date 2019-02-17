@@ -6,7 +6,7 @@
 #'  cells.
 #' @param celda.mod Celda model returned by the \link{celda_C},
 #'  \code{\link{celda_CG}} or \code{\link{subsetCeldaList}} functions. Must be
-#'  a \linkS4class{celda_C} or \linkS4class{celda_CG} object.
+#'  a \code{celda_C} or \code{celda_CG} object.
 #' @param phenoLabels Character vector of phenotype labels for the cells. Must
 #'  have the same length as the column number of count matrix \code{counts}.
 #' @param phenotype The phenotypes to inspect. If specified, cells will be
@@ -59,7 +59,7 @@ plotPhenoEnrich <- function(counts,
     plot = c("mosaic", "balloon"),
     ...) {
 
-    if (!(is(celdaModel, "celda_CG") || is(celdaModel, "celda_C"))) {
+    if (!(is(celda.mod, "celda_CG") || is(celda.mod, "celda_C"))) {
         stop("celda.mod must be of class 'celda_C' or 'celda_CG'")
     }
 

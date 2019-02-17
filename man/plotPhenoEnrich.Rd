@@ -14,7 +14,7 @@ cells.}
 
 \item{celda.mod}{Celda model returned by the \link{celda_C},
 \code{\link{celda_CG}} or \code{\link{subsetCeldaList}} functions. Must be
-a \linkS4class{celda_C} or \linkS4class{celda_CG} object.}
+a \code{celda_C} or \code{celda_CG} object.}
 
 \item{phenoLabels}{Character vector of phenotype labels for the cells. Must
 have the same length as the column number of count matrix \code{counts}.}
