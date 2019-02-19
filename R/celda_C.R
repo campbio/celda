@@ -39,7 +39,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
                    	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
-                   	z.init = NULL, logfile=NULL, verbose=TRUE) {
+                   	z.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -166,7 +166,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
                              completeLogLik=best.result$completeLogLik,
                              finalLogLik=best.result$finalLogLik,
                              names=best.result$names)
-  best.result = reorder.celda_C(counts = counts, res = best.result)
+  if(isTRUE(reorder)) best.result = reorder.celda_C(counts = counts, res = best.result)
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  

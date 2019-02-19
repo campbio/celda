@@ -31,13 +31,13 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   validateCounts(counts)
   return(.celda_G(counts, L, beta, delta, gamma, stop.iter, max.iter, split.on.iter,
                   split.on.last, seed, nchains, initialize, count.checksum,
-                  y.init, logfile, verbose))
+                  y.init, logfile, verbose, reorder=TRUE))
 }
 
 .celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
 					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
-					y.init=NULL, logfile=NULL, verbose=TRUE) {
+					y.init=NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -160,7 +160,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
                                          count.checksum=count.checksum, seed=current.seed),
                              completeLogLik=ll, finalLogLik=ll.best, 
                              names=names)
-  best.result = reorder.celda_G(counts = counts, res = best.result) 
+  if(isTRUE(reorder)) best.result = reorder.celda_G(counts = counts, res = best.result) 
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
@@ -307,7 +307,7 @@ setMethod("factorizeMatrix",
            function(counts, celda.mod, 
                     type=c("counts", "proportion", "posterior")) {
             counts = processCounts(counts)
-            compareCountMatrix(counts, celda.mod)
+            #compareCountMatrix(counts, celda.mod)
             
             L = celda.mod@params$L
             y = celda.mod@clusters$y
@@ -440,6 +440,9 @@ logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
 # @param L Integer. Number of feature modules.  
 cG.decomposeCounts = function(counts, y, L) {
 
+  if(any(y > L)) {
+    stop("Entries in the module clusters 'y' are greater than L.")
+  }
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
   n.by.G = as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
@@ -518,7 +521,7 @@ setMethod("perplexity",
           signature(celda.mod = "celda_G"),
           function(counts, celda.mod, new.counts=NULL) {
             counts = processCounts(counts)
-            compareCountMatrix(counts, celda.mod)
+            #compareCountMatrix(counts, celda.mod)
           
             if(is.null(new.counts)) {
               new.counts = counts
