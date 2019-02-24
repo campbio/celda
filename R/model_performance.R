@@ -21,9 +21,7 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celda_list.")
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  setSeed(seed)
   countsList = lapply(1:resample,
                       function(i){
                         resampleCountMatrix(counts)

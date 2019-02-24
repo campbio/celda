@@ -27,9 +27,7 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
   }  
 
   ## Randomly sample remaining values
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  setSeed(seed)
   z.na = which(is.na(z))
   if(length(z.na) > 0) {
     z[z.na] = sample(z.not.used, length(z.na), replace=TRUE)
