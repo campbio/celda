@@ -15,11 +15,11 @@
 To install the most recent release of celda (used in the preprint version of the celda paper) via devtools:
 ```
 library(devtools)
-install_github("compbiomed/celda@v0.6")
+install_github("campbio/celda@v0.6")
 ```
 The most up-to-date (but potentially less stable) version of celda can similarly be installed with:
 ```
-install_github("compbiomed/celda")
+install_github("campbio/celda@devel")
 ```
 
 **NOTE** On OSX, devtools::install_github() requires installation of **libgit2.** This can be installed via homebrew:
