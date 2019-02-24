@@ -242,15 +242,18 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   phi = fastNormPropLog(n.G.by.CP, beta)
   
   ## Maximization to find best label for each cell
-  probs = eigenMatMultInt(phi, counts) + theta[, s]    
-  z.previous = z
-  z = apply(probs, 2, which.max)
-
-  ## Recalculate counts based on new label
-  p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
-  m.CP.by.S = p$m.CP.by.S
-  n.G.by.CP = p$n.G.by.CP
-  n.CP = p$n.CP
+  probs = eigenMatMultInt(phi, counts) + theta[, s]  
+  
+  if(isTRUE(do.sample)) {
+    z.previous = z
+    z = apply(probs, 2, which.max)
+    
+    ## Recalculate counts based on new label
+    p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
+    m.CP.by.S = p$m.CP.by.S
+    n.G.by.CP = p$n.G.by.CP
+    n.CP = p$n.CP
+  }
 
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }
