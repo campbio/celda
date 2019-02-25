@@ -52,15 +52,17 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 
 
 
-initialize.splitZ = function(counts, K, K.subcluster=ceiling(sqrt(K)), alpha=1, beta=1, min.cell = 3, seed=12345) {
+initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=12345) {
   s = rep(1, ncol(counts))
+  if(is.null(K.subcluster)) K.subcluster = ceiling(sqrt(K))
   
   ## Initialize the model with K.subcluster clusters
-  res = .celda_C(counts, K=K.subcluster, max.iter=20, alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
+  res = .celda_C(counts, K=K.subcluster, max.iter=20, initialize="random", alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
   overall.z = as.integer(as.factor(res@clusters$z))
   current.K = max(overall.z)
   
   while(current.K < K) {
+    
     ## Determine which clusters are split-able
     K.remaining = K - current.K
     K.per.cluster = min(ceiling(K / current.K), K.subcluster)
@@ -72,7 +74,7 @@ initialize.splitZ = function(counts, K, K.subcluster=ceiling(sqrt(K)), alpha=1, 
     ## Cycle through each splitable cluster and split it up into K.sublcusters
     for(i in z.to.split) {
       
-      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.to.use, alpha=alpha, beta=beta, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
+      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.to.use, initialize="random", alpha=alpha, beta=beta, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
       temp.z = as.integer(as.factor(clustLabel@clusters$z))
       
       ## Reassign clusters with label > 1
@@ -146,21 +148,22 @@ initialize.splitZ = function(counts, K, K.subcluster=ceiling(sqrt(K)), alpha=1, 
 
 
 
-initialize.splitY = function(counts, L, L.subcluster=ceiling(sqrt(L)), temp.K=100, K.breaks=5, beta=1, delta=1, gamma=1, min.feature = 3, seed=12345) {
+initialize.splitY = function(counts, L, L.subcluster=NULL, temp.K=100, beta=1, delta=1, gamma=1, min.feature = 3, seed=12345) {
 
+  if(is.null(L.subcluster)) L.subcluster = ceiling(sqrt(L))
+  
   ## Collapse cells to managable number of clusters
   if(!is.null(temp.K) && ncol(counts) > temp.K) {
-    z = initialize.splitZ(counts, K=temp.K, K.subcluster=K.breaks, min.cell = 3, seed=seed)  
+    z = initialize.splitZ(counts, K=temp.K, seed=seed)  
     counts = colSumByGroup(counts, z, length(unique(z)))
   }
   
   ## Initialize the model with K.subcluster clusters
-  res = .celda_G(counts, L=L.subcluster, max.iter=10, nchain=3, beta=beta, delta=delta, gamma=gamma, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
+  res = .celda_G(counts, L=L.subcluster, max.iter=10, initialize="random", beta=beta, delta=delta, gamma=gamma, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
   overall.y = as.integer(as.factor(res@clusters$y))
   current.L = max(overall.y)
   
   while(current.L < L) {
-  print(current.L)  
     ## Determine which clusters are split-able
     y.ta = tabulate(overall.y, max(overall.y))
     y.to.split = sample(which(y.ta > min.feature & y.ta > L.subcluster))
@@ -168,7 +171,7 @@ initialize.splitY = function(counts, L, L.subcluster=ceiling(sqrt(L)), temp.K=10
     ## Cycle through each splitable cluster and split it up into L.sublcusters
     for(i in y.to.split) {
       
-      clustLabel = .celda_G(counts[overall.y == i,,drop=FALSE], L=L.subcluster, beta=beta, delta=delta, gamma=gamma, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=TRUE)
+      clustLabel = .celda_G(counts[overall.y == i,,drop=FALSE], L=L.subcluster, initialize="random", beta=beta, delta=delta, gamma=gamma, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
       temp.y = as.integer(as.factor(clustLabel@clusters$y))
       
       ## Reassign clusters with label > 1
@@ -204,7 +207,7 @@ initialize.splitY = function(counts, L, L.subcluster=ceiling(sqrt(L)), temp.K=10
   
   ## Remove clusters 1-by-1 until L is reached
   while(current.L > L) {
-    print(current.L)
+
     ## Find second best assignment give current assignments for each cell
     probs = cG.calcGibbsProbY(counts=counts, y=overall.y, L=current.L, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta, do.sample=FALSE)
     y.prob = t(probs$probs)

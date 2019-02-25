@@ -27,18 +27,18 @@
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                   	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+                   	seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
                    	z.init = NULL, logfile=NULL, verbose=TRUE) {
   validateCounts(counts)
   return(.celda_C(counts, sample.label, K, alpha, beta, algorithm, stop.iter,
                   max.iter, split.on.iter, split.on.last, seed, nchains,
-                  initialize, count.checksum, z.init, logfile, verbose))
+                  initialize, count.checksum, z.init, logfile, verbose, reorder=TRUE))
 }
 
 .celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                   	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+                   	seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
                    	z.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
@@ -73,7 +73,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
     if(initialize == "random") {
   	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
 	} else {
-	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
+	  z = initialize.splitZ(counts, s, K=K, alpha=alpha, beta=beta, seed=seed)
 	}  
 	z.best = z
   

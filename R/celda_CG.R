@@ -33,21 +33,21 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
+                    seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
   validateCounts(counts)
   return(.celda_CG(counts, sample.label, K, L, alpha, beta, delta, gamma,
                    algorithm, stop.iter, max.iter, split.on.iter, split.on.last,
                    seed, nchains, initialize, count.checksum, z.init, y.init,
-                   logfile, verbose))
+                   logfile, verbose, reorder=TRUE))
 }
 
 .celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
-                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
+                    seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL,
+                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -83,10 +83,8 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
 	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
 	} else {
-	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
-	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=z, 
-	                       K=K, K.subclusters=10, min.feature=3, max.cells=100,
-	                       seed=seed)
+	  z = initialize.splitZ(counts, K=K, alpha=alpha, beta=beta, seed=seed)
+	  y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
 	}  
 	z.best = z
 	y.best = y  
@@ -233,7 +231,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                              finalLogLik=ll.best,
                   				   sample.label=sample.label, 
                   				   names=names)
-  best.result = reorder.celda_CG(counts = counts, res = best.result)
+  if(isTRUE(reorder)) best.result = reorder.celda_CG(counts = counts, res = best.result)
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  

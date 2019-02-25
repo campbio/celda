@@ -25,7 +25,7 @@
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+					seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE) {
   
   validateCounts(counts)
@@ -36,7 +36,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 
 .celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+					seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
@@ -69,7 +69,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
     if(initialize == "random") {
 	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
 	} else {
-	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=100, seed=seed)
+	  y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
 	}  
 	y.best = y  
 
