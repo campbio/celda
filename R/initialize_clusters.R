@@ -57,7 +57,7 @@ initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.
   if(is.null(K.subcluster)) K.subcluster = ceiling(sqrt(K))
   
   ## Initialize the model with K.subcluster clusters
-  res = .celda_C(counts, K=K.subcluster, max.iter=20, initialize="random", alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
+  res = .celda_C(counts, K=K.subcluster, max.iter=20, z.initialize="random", alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
   overall.z = as.integer(as.factor(res@clusters$z))
   current.K = max(overall.z)
   
@@ -74,7 +74,7 @@ initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.
     ## Cycle through each splitable cluster and split it up into K.sublcusters
     for(i in z.to.split) {
       
-      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.to.use, initialize="random", alpha=alpha, beta=beta, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
+      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.to.use, z.initialize="random", alpha=alpha, beta=beta, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
       temp.z = as.integer(as.factor(clustLabel@clusters$z))
       
       ## Reassign clusters with label > 1
@@ -159,7 +159,7 @@ initialize.splitY = function(counts, L, L.subcluster=NULL, temp.K=100, beta=1, d
   }
   
   ## Initialize the model with K.subcluster clusters
-  res = .celda_G(counts, L=L.subcluster, max.iter=10, initialize="random", beta=beta, delta=delta, gamma=gamma, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
+  res = .celda_G(counts, L=L.subcluster, max.iter=10, y.initialize="random", beta=beta, delta=delta, gamma=gamma, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
   overall.y = as.integer(as.factor(res@clusters$y))
   current.L = max(overall.y)
   
@@ -171,7 +171,7 @@ initialize.splitY = function(counts, L, L.subcluster=NULL, temp.K=100, beta=1, d
     ## Cycle through each splitable cluster and split it up into L.sublcusters
     for(i in y.to.split) {
       
-      clustLabel = .celda_G(counts[overall.y == i,,drop=FALSE], L=L.subcluster, initialize="random", beta=beta, delta=delta, gamma=gamma, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
+      clustLabel = .celda_G(counts[overall.y == i,,drop=FALSE], L=L.subcluster, y.initialize="random", beta=beta, delta=delta, gamma=gamma, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
       temp.y = as.integer(as.factor(clustLabel@clusters$y))
       
       ## Reassign clusters with label > 1
