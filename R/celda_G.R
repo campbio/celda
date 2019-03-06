@@ -25,18 +25,18 @@
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
+					seed=12345, nchains=3, y.initialize=c("split", "random"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE) {
   
   validateCounts(counts)
   return(.celda_G(counts, L, beta, delta, gamma, stop.iter, max.iter, split.on.iter,
-                  split.on.last, seed, nchains, initialize, count.checksum,
+                  split.on.last, seed, nchains, y.initialize, count.checksum,
                   y.init, logfile, verbose, reorder=TRUE))
 }
 
 .celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
+					seed=12345, nchains=3, y.initialize=c("split", "random"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
@@ -49,7 +49,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-  initialize = match.arg(initialize)
+  y.initialize = match.arg(y.initialize)
    
   all.seeds = seed:(seed + nchains - 1)
 
@@ -64,14 +64,17 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	## Randomly select y or y to supplied initial values
 	## Initialize cluster labels
     current.seed = all.seeds[i]	
-    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+    logMessages(date(), ".. Initializing 'y' in chain", i, "with", paste0("'", y.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 
-    if(initialize == "random") {
-	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
-	} else {
-	  y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
-	}  
-	y.best = y  
+    if(y.initialize == "predefined") {
+      if(is.null(y.init)) stop("'y.init' needs to specified when initilize.y == 'given'.")
+      y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)  
+    } else if(y.initialize == "split") {
+      y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
+    } else {
+      y = initialize.cluster(L, nrow(counts), initial = NULL, fixed = NULL, seed=current.seed)  
+    } 
+    y.best = y  
 
 	## Calculate counts one time up front
 	p = cG.decomposeCounts(counts=counts, y=y, L=L)

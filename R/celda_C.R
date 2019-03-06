@@ -27,18 +27,18 @@
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                   	seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
+                   	seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
                    	z.init = NULL, logfile=NULL, verbose=TRUE) {
   validateCounts(counts)
   return(.celda_C(counts, sample.label, K, alpha, beta, algorithm, stop.iter,
                   max.iter, split.on.iter, split.on.last, seed, nchains,
-                  initialize, count.checksum, z.init, logfile, verbose, reorder=TRUE))
+                  z.initialize, count.checksum, z.init, logfile, verbose, reorder=TRUE))
 }
 
 .celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                   	seed=12345, nchains=3, initialize=c("split", "random"), count.checksum=NULL, 
+                   	seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
                    	z.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
@@ -59,7 +59,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   if(algorithm == "EM") { stop.iter = 1 }
   
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
-  initialize = match.arg(initialize)
+  z.initialize = match.arg(z.initialize)
   
   all.seeds = seed:(seed + nchains - 1)
     
@@ -68,13 +68,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
 	## Initialize cluster labels
 	current.seed = all.seeds[i]	
-	logMessages(date(), ".. Initializing chain", i, "with", paste0("'", initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+	logMessages(date(), ".. Initializing 'z' in chain", i, "with", paste0("'", z.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 	
-    if(initialize == "random") {
-  	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	if(z.initialize == "predefined") {
+	  if(is.null(z.init)) stop("'z.init' needs to specified when initilize.z == 'given'.")
+	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	} else if(z.initialize == "split") {
+	  z = initialize.splitZ(counts, K=K, alpha=alpha, beta=beta, seed=seed)
 	} else {
-	  z = initialize.splitZ(counts, s, K=K, alpha=alpha, beta=beta, seed=seed)
-	}  
+	  z = initialize.cluster(K, ncol(counts), initial = NULL, fixed = NULL, seed=current.seed)
+	} 
 	z.best = z
   
 	## Calculate counts one time up front
