@@ -92,7 +92,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
     if(y.initialize == "predefined") {
       if(is.null(y.init)) stop("'y.init' needs to specified when initilize.y == 'given'.")
       y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)  
-    } else if(z.initialize == "split") {
+    } else if(y.initialize == "split") {
       y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
     } else {
       y = initialize.cluster(L, nrow(counts), initial = NULL, fixed = NULL, seed=current.seed)  
