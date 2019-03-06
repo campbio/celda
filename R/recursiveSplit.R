@@ -1,163 +1,61 @@
 
 
-recursiveSplitCell = function(counts, s, K, K.subcluster, split.all=TRUE, alpha, beta, min.cell = 3, seed=12345) {
-  current.K = 2
-  overall.z = rep(1, ncol(counts))
-  cluster.splits = matrix(NA, nrow=ncol(counts), ncol=K)
-  cluster.split.flag = rep(TRUE, K)
-  
-  res = .celda_C(counts, K=K.subcluster, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
-  overall.z = as.integer(as.factor(res@clusters$z))
-  current.K = length(unique(overall.z)) + 1
-  
-  clust.split = vector("list", K)    
-  while(current.K <= K) {
-    z.ta = tabulate(overall.z, max(overall.z))
-    z.to.split = which(z.ta > min.cell)
-    
-    for(i in z.to.split) {
-      if(is.null(clust.split[[i]]) || is.na(clust.split[[i]])) {
-        if(z.ta[i] <= K.subcluster) {
-          clust.split[[i]] = seq.int(1, z.ta[i]) 
-        } else {
-          clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.subcluster, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
-          clust.split[[i]] = as.integer(as.factor(clustLabel@clusters$z))
-        }  
-      } 
-    }
-    
-    if(isTRUE(split.all)) {
-      for(i in z.to.split) {
-        split.ix = clust.split[[i]] > 1
-        ix = overall.z == i
-        new.z = overall.z[ix]
-        
-        new.z[split.ix] = current.K + clust.split[[i]][split.ix] - 2
-        
-        overall.z[ix] = new.z
-        current.K = max(overall.z) + 1
-        clust.split[[i]] = NA
-      }   
-    } else {
-      ## Calculate likelihood for each cluster split
-      temp.z = matrix(overall.z, nrow=ncol(counts), ncol=length(z.to.split))
-      ll = vector(mode="numeric", length=ncol(temp.z))    
-      for(i in 1:ncol(temp.z)) {
-        split.ix = clust.split[[z.to.split[i]]] > 1
-        ix = overall.z == z.to.split[i]
-        new.z = temp.z[ix,i]
-        new.z[split.ix] = current.K + clust.split[[z.to.split[i]]][split.ix] - 2
-        temp.z[ix,i] = new.z
-        temp.K = max(temp.z[,i])
-        ll[i] = logLikelihood.celda_C(counts, "celda_C", s, temp.z[,i], temp.K, alpha, beta)	    	  
-        
-        ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
-        best.ix = which.max(ll)
-        overall.z = temp.z[,best.ix]  
-        clust.split[[z.to.split[best.ix]]] = NA
-        
-        current.K = max(overall.z, na.rm=TRUE) + 1  
+singleSplitZ = function(counts, z, s, K, min.cell=3, alpha=1, beta=1, seed) {
+  z.ta = tabulate(z, K)
+  z.to.split = which(z.ta > min.cell)
+  best.z = z
+  best.ll = -Inf
+  for(i in z.to.split) {
+    clustLabel = .celda_C(counts[,z == i,drop=FALSE], K=2, z.initialize="random", split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed)
+    if(length(unique(clustLabel@clusters$z)) == 2) {
+      ix = z == i
+      new.z = z
+      new.z[ix] = ifelse(clustLabel@clusters$z == 2, i, K)
+      ll = logLikelihood.celda_C(counts, "celda_C", s, new.z, K, alpha, beta)
+      
+      if(ll > best.ll) {
+        best.z = new.z
+        best.ll = ll
       }
-    }
+    } 
   }
-  
-  return(overall.z)
-}  
+  return(list(ll=best.ll, z=best.z))
+}
 
-recursiveSplitCell_v2 = function(counts, sample.label=NULL, initial.K=5, max.K=25, alpha=1, beta=1, min.cell = 3, seed=12345, count.checksum=NULL) {
-  counts = processCounts(counts)
-  if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
+singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, seed) {
+  y.ta = tabulate(y, L)
+  y.to.split = which(y.ta > min.feature)
+  
+  best.y = y
+  best.ll = -Inf
+  previous.y = y
+  for(i in y.to.split) {
+    clustLabel = .celda_G(counts[y == i,,drop=FALSE], L=2, y.initialize="random", split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, seed=seed)
+    
+    if(length(unique(clustLabel@clusters$y)) == 2) {
+      ix = y == i
+      new.y = y
+      new.y[ix] = ifelse(clustLabel@clusters$y == 2, i, L)
+      ll = logLikelihood.celda_G(counts, new.y, L, beta, delta, gamma)
+      
+      if(ll > best.ll) {
+        best.y = new.y
+        best.ll = ll
+      }
+    }    
   }
-  
-  sample.label = processSampleLabels(sample.label, num.cells = ncol(counts))
-  s = as.integer(sample.label)
-  names = list(row=rownames(counts), column=colnames(counts), 
-               sample=levels(sample.label))
-  
-  
-  overall.z = rep(1, ncol(counts))
-  cluster.splits = matrix(NA, nrow=ncol(counts), ncol=max.K)
-  cluster.split.flag = rep(TRUE, max.K)
-  
-  model.initial = .celda_C(counts, sample.label=s, K=initial.K, alpha=alpha, beta=beta, verbose=TRUE)
-  overall.z = as.integer(as.factor(model.initial@clusters$z))
-  current.K = length(unique(overall.z)) + 1
-  current.ll = model.initial@finalLogLik
-  
-  res.list = list(model.initial)
-  clust.split = vector("list", max.K)    
-  while(current.K <= max.K) {
-    z.ta = tabulate(overall.z, current.K)
-    z.to.split = which(z.ta > min.cell)
-clust.split = vector("list", max.K)    
-    for(i in z.to.split) {
-      if(is.null(clust.split[[i]]) || is.na(clust.split[[i]])) {
-        clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=2, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
-        if(length(unique(clustLabel@clusters$z)) == 2) {
-          clust.split[[i]] = as.integer(as.factor(clustLabel@clusters$z))
-        } else {
-          z.to.split = setdiff(z.to.split, i) 
-        }
-      } 
-    }
-    
-      ## Calculate likelihood for each cluster split
-    temp.z = matrix(overall.z, nrow=ncol(counts), ncol=length(z.to.split))
-    ll = vector(mode="numeric", length=ncol(temp.z))    
-    for(i in 1:ncol(temp.z)) {
-#      split.ix = clust.split[[z.to.split[i]]] > 1
-      ix = overall.z == z.to.split[i]
-#      new.z = temp.z[ix,i]
-#      new.z[split.ix] = current.K + clust.split[[z.to.split[i]]][split.ix] - 2
-      temp.z[ix,i] = ifelse(clust.split[[z.to.split[i]]] == 1, z.to.split[i], current.K)
-#      temp.z[ix,i] = new.z
-      temp.K = max(temp.z[,i])
-      ll[i] = logLikelihood.celda_C(counts, "celda_C", s, temp.z[,i], temp.K, alpha, beta)	    	  
-    }        
-    ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
-    best.ix = which.max(ll)
-    overall.z = temp.z[,best.ix]  
-    clust.split[[z.to.split[best.ix]]] = NA
-#print(table(overall.z))
-#print(ll)
-#print(best.ix)
-    
-    print(current.K)
+  return(list(ll=best.ll, y=best.y))
+}
 
-  
 
-    ## Peform reordering on final Z and Y assigments:
-    ll = logLikelihood.celda_C(counts, "celda_C", s, overall.z, current.K, alpha, beta)
 
-    temp.model = .celda_C(counts, sample.label=s, K=current.K, nchains=1, alpha=alpha, beta=beta, split.on.last=FALSE, verbose=TRUE, z.init=overall.z, seed=seed)
-    overall.z = temp.model@clusters$z
-    current.K = length(unique(overall.z))
-    
-    new.model = methods::new("celda_C", 
-                             clusters=list(z=overall.z),
-                             params=list(K=current.K,  alpha=alpha, beta=beta, 
-                             seed=seed, count.checksum=count.checksum),
-                             finalLogLik=ll,
-                             sample.label=sample.label, 
-                             names=names)
-    res.list = c(res.list, list(new.model))
-    current.K = max(overall.z, na.rm=TRUE) + 1  
-  }
-  
-  ## Summarize paramters of different models
-  logliks = sapply(res.list, function(mod) { mod@finalLogLik })
-  runK = sapply(res.list, function(mod) { mod@params$K })
-  run.params = data.frame(index=seq.int(1, length(res.list)), K=runK, log_likelihood=logliks, stringsAsFactors=FALSE)
-  
-  
-  celda.res = methods::new("celdaList", run.params=run.params, res.list=res.list, 
-                           count.checksum=count.checksum)
-  
-  return(celda.res)
-}  
+recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, y.init=NULL, alpha=1, beta=1, delta=1, gamma=1, min.cell = 3, seed=12345, logfile=NULL, verbose=TRUE) {
 
-recursiveSplitCell_v3 = function(counts, sample.label=NULL, initial.K=5, max.K=25, alpha=1, beta=1, min.cell = 3, seed=12345) {
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
+  logMessages("Starting recursive cell population splitting.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  
+  start.time = Sys.time()
   counts = processCounts(counts)
   count.checksum = digest::digest(counts, algo="md5")
   
@@ -166,81 +64,105 @@ recursiveSplitCell_v3 = function(counts, sample.label=NULL, initial.K=5, max.K=2
   names = list(row=rownames(counts), column=colnames(counts), 
                sample=levels(sample.label))
   
-  
-  model.initial = .celda_C(counts, sample.label=s, K=initial.K, alpha=alpha, beta=beta, verbose=TRUE)
-  overall.z = as.integer(as.factor(model.initial@clusters$z))
-  current.K = length(unique(overall.z)) + 1
-  current.ll = model.initial@finalLogLik
-  
-  res.list = list(model.initial)
-  clust.split = vector("list", max.K)  
-  while(current.K <= max.K) {
-    print(paste0("currentK: ", current.K))    
-    z.ta = tabulate(overall.z, current.K)
-    z.to.split = which(z.ta > min.cell)
-    clust.split = vector("list", max.K)    
-    best.z = overall.z
-    best.ll = -Inf
+  ## Use predfined y labels and create celda_CG model
+  if(!is.null(y.init)) {
+    L = length(unique(y.init))
+    overall.y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
+    p = cG.decomposeCounts(counts, overall.y, L)
+    counts.y = p$n.TS.by.C
+    n.by.G = p$n.by.G
     
-    for(i in z.to.split) {
-      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=2, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
-      if(length(unique(clustLabel@clusters$z)) == 2) {
-        clust.split[[i]] = as.integer(as.factor(clustLabel@clusters$z))
+    ## Create initial model with initial.K and predifined y labels
+    model.initial = .celda_CG(counts, sample.label=s, K=initial.K, L=L, z.initialize="split", y.initialize="predefined", nchains=1, y.init=overall.y, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=TRUE, seed=seed, reorder=FALSE)
+    current.K = length(unique(model.initial@clusters$z)) + 1
+    overall.z = model.initial@clusters$z
+    res.list = list(model.initial)
+    while(current.K <= max.K) {
+      previous.y = overall.y
+      temp.split = singleSplitZ(counts.y, overall.z, s, current.K, min.cell=3, alpha=alpha, beta=beta, seed=seed)
+      temp.model = .celda_CG(counts, sample.label=s, K=current.K, L=L, y.init=overall.y, z.init=temp.split$z, nchains=1, z.initialize="predefined", y.initialize="predefined", split.on.last=FALSE, stop.iter=5, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=FALSE)
+      
+      ## Calculate new decomposed counts matrix with new module labels
+      overall.y = temp.model@clusters$y
+      p = cG.reDecomposeCounts(counts, overall.y, previous.y, counts.y, n.by.G, L = L)
+      counts.y = p$n.TS.by.C
 
-        ix = overall.z == i
-        new.z = overall.z
-        new.z[ix] = ifelse(clustLabel@clusters$z == 2, i, current.K)
-        ll = logLikelihood.celda_C(counts, "celda_C", s, new.z, current.K, alpha, beta)
-        
-        if(ll > best.ll) {
-          best.z = new.z
-          best.ll = ll
-        }
-      } 
-    }
+      ## If the number of clusters is still "current.K", then keep the reordering, otherwise keep the previous configuration
+      if(length(unique(temp.model@clusters$z)) == current.K) {
+        overall.z = temp.model@clusters$z
+      } else {
+        overall.z = temp.split$z
+        ll = logLikelihood.celda_CG(counts, s, overall.z, temp.model@clusters$y, current.K, L, alpha, beta, delta, gamma)
+        temp.model = methods::new("celda_CG", 
+                                 clusters=list(z=overall.z, y = temp.model@clusters$y),
+                                 params=list(K=current.K,  L=current.L,
+                                             alpha=alpha, beta=beta, delta=delta, gamma=gamma,
+                                             seed=seed, count.checksum=count.checksum),
+                                             finalLogLik=ll, sample.label=sample.label, names=names)
+      }
+      
+      res.list = c(res.list, list(temp.model))
+      logMessages(date(), ".. Current cell population", current.K, "| logLik:", temp.model@finalLogLik, append=TRUE, verbose=verbose, logfile=logfile)
+      current.K = length(unique(overall.z)) + 1
+    }  
+    
+    runK = sapply(res.list, function(mod) { mod@params$K })
+    runL = sapply(res.list, function(mod) { mod@params$L })
+    run.params = data.frame(index=seq.int(1, length(res.list)), L=runL, K=runK, stringsAsFactors=FALSE)
+    
+  ## Create celda_C model  
+  } else {
+    
+    ## Create initial model with initial.K 
+    model.initial = .celda_C(counts, sample.label=s, K=initial.K, z.initialize="split", nchains=1, alpha=alpha, beta=beta, verbose=FALSE, seed=seed, reorder=FALSE)
+    current.K = length(unique(model.initial@clusters$z)) + 1
+    overall.z = model.initial@clusters$z
+    res.list = list(model.initial)
+    while(current.K <= max.K) {
+      
+      temp.split = singleSplitZ(counts, overall.z, s, current.K, min.cell=3, alpha=alpha, beta=beta, seed=seed)
+      temp.model = .celda_C(counts, sample.label=s, K=current.K, nchains=1, z.initialize="random", alpha=alpha, beta=beta, stop.iter=5, split.on.last=FALSE, verbose=FALSE, z.init=temp.split$z, seed=seed, reorder=FALSE)    
 
-    temp.model = .celda_C(counts, sample.label=s, K=current.K, nchains=1, alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, z.init=best.z, seed=seed, reorder=FALSE)
-    ## If the number of clusters is still "current.K", then keep the reordering, otherwise keep the previous configuration
-    if(length(unique(temp.model@clusters$z)) == current.K) {
-      overall.z = temp.model@clusters$z
-    } else {
-      overall.z = best.z
-    }
+      if(length(unique(temp.model@clusters$z)) == current.K) {
+        overall.z = temp.model@clusters$z
+      } else {
+        overall.z = temp.split$z            
+        ll = logLikelihood.celda_C(counts, "celda_C", s, overall.z, current.K, alpha, beta)  
+        temp.model = methods::new("celda_C", clusters=list(z=overall.z),
+                                params=list(K=current.K,  alpha=alpha, beta=beta, seed=seed, count.checksum=count.checksum),
+                                finalLogLik=ll, sample.label=sample.label, names=names)
+      }
+      
+      res.list = c(res.list, list(temp.model))
+      logMessages(date(), ".. Current cell population", current.K, "| logLik:", temp.model@finalLogLik, append=TRUE, verbose=verbose, logfile=logfile)
+      current.K = length(unique(overall.z)) + 1
+    } 
     
-    ## Peform reordering on final Z and Y assigments:
-    ll = logLikelihood.celda_C(counts, "celda_C", s, overall.z, current.K, alpha, beta)
-    
-    new.model = methods::new("celda_C", 
-                             clusters=list(z=overall.z),
-                             params=list(K=current.K,  alpha=alpha, beta=beta, 
-                                         seed=seed, count.checksum=count.checksum),
-                             finalLogLik=ll,
-                             sample.label=sample.label, 
-                             names=names)
-    res.list = c(res.list, list(new.model))
-    current.K = current.K + 1  
+    runK = sapply(res.list, function(mod) { mod@params$K })
+    run.params = data.frame(index=seq.int(1, length(res.list)), K=runK, stringsAsFactors=FALSE)
   }
-  
+
   ## Summarize paramters of different models
   logliks = sapply(res.list, function(mod) { mod@finalLogLik })
-  runK = sapply(res.list, function(mod) { mod@params$K })
-  run.params = data.frame(index=seq.int(1, length(res.list)), K=runK, log_likelihood=logliks, stringsAsFactors=FALSE)
-  
+  run.params = data.frame(run.params, log_likelihood=logliks, stringsAsFactors=FALSE)
   
   celda.res = methods::new("celdaList", run.params=run.params, res.list=res.list, 
                            count.checksum=count.checksum)
+
+  end.time = Sys.time()
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+  logMessages("Completed recursive cell population splitting. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   
   return(celda.res)
 }  
 
 
 
-
-
-recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, K.breaks=5, z=NULL, beta=1, delta=1, gamma=1, min.feature=3, seed=12345, verbose=TRUE, logfile=NULL) {
+recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, beta=1, delta=1, gamma=1, min.feature=3, seed=12345, verbose=TRUE, logfile=NULL) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
-  logMessages("Starting celda_G with recursive module splitting.", logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("Starting recursive module splitting.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   
   counts = processCounts(counts)
@@ -249,11 +171,16 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, K.b
   
   start.time = Sys.time()
   s = rep(1, ncol(counts))
-  if(!is.null(z) | (!is.null(temp.K) && K.breaks > 0)) {
+  if(!is.null(z.init) | (!is.null(temp.K))) {
     if(is.null(z)) {
-      z = initialize.splitZ(counts, K=temp.K, K.subcluster=K.breaks, min.cell = 3, seed=seed)  
-    }      
-    logMessages(date(), ".. Collapsed to", length(unique(z)), "temporary cell populations", append=TRUE, verbose=verbose, logfile=logfile)
+      K = temp.K
+      z = initialize.splitZ(counts, K=K, min.cell = 3, seed=seed)  
+      logMessages(date(), ".. Collapsed to", K, "temporary cell populations", append=TRUE, verbose=verbose, logfile=logfile)
+    } else {
+      z = initialize.cluster(K, ncol(counts), initial = z.init, seed=seed)  
+      logMessages(date(), ".. Using", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)
+    }
+    
     new.counts = colSumByGroup(counts, z, length(unique(z)))
   }
   
@@ -283,30 +210,10 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, K.b
   res.list = list(model.initial)
   while(current.L <= max.L) {
     
-    y.ta = tabulate(overall.y, max.L)
-    y.to.split = which(y.ta > min.feature)
-    
-    best.y = overall.y
-    best.ll = -Inf
-    previous.y = overall.y
-    for(i in y.to.split) {
-      clustLabel = .celda_G(new.counts[overall.y == i,,drop=FALSE], L=2, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, seed=seed)
-      
-      if(length(unique(clustLabel@clusters$y)) == 2) {
-        ix = overall.y == i
-        new.y = overall.y
-        new.y[ix] = ifelse(clustLabel@clusters$y == 2, i, current.L)
-        ll = logLikelihood.celda_G(new.counts, new.y, current.L, beta, delta, gamma)
-
-        if(ll > best.ll) {
-          best.y = new.y
-          best.ll = ll
-        }
-      }    
-    }  
-    
     # Allow features to cluster further
-    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.init=best.y, reorder=FALSE)
+    previous.y = overall.y
+    temp.split = singleSplitY(counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
+    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.init=temp.split$y, reorder=FALSE)
     overall.y = temp.model@clusters$y
   
     # Adjust decomposed count matrices
@@ -344,7 +251,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, K.b
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-  logMessages("Completed celda_G with recursive module splitting. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
+  logMessages("Completed recursive module splitting. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   
   return(celda.res)
@@ -354,12 +261,18 @@ splitModule = function(counts, celda.mod, module, n=2) {
   ix = celda.mod@clusters$y == module
   new.L = max(celda.mod@clusters$y) + n - 1
   if(sum(ix) > 1) {
-    temp.model = .celda_G(counts[ix,,drop=FALSE], L=n, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE)  
-    new.y = celda.mod@clusters$y
-    new.y[ix] = ifelse(temp.model@clusters$y == 1, module, new.L)
-    #model = .celda_G(counts, L=new.L, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=TRUE, y.init=new.y, reorder=FALSE)
-    new.ll = logLikelihood.celda_G(counts=counts, y=new.y, L=new.L, beta=celda.mod@params$beta, delta=celda.mod@params$delta, gamma=celda.mod@params$gamma)
+    temp.model = .celda_G(counts[ix,,drop=FALSE], L=n, y.initialize="random", split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE)  
+
+    split.y = temp.model@clusters$y
+    split.ix = temp.model@clusters$y > 1
+    split.y[split.ix] = celda.mod@params$L + split.y[split.ix] - 1
+    split.y[!split.ix] = module
     
+    new.y = celda.mod@clusters$y
+    new.y[ix] = split.y
+    new.L = max(new.y)
+    
+    new.ll = logLikelihood.celda_G(counts=counts, y=new.y, L=new.L, beta=celda.mod@params$beta, delta=celda.mod@params$delta, gamma=celda.mod@params$gamma)
     model = methods::new("celda_G", clusters=list(y=new.y),
                          params=list(L=new.L, beta=celda.mod@params$beta, delta=celda.mod@params$delta, gamma=celda.mod@params$gamma, count.checksum=celda.mod@params$count.checksum),
                          names=celda.mod@names, 
