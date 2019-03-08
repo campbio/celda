@@ -27,19 +27,19 @@
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                   	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+                   	seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
                    	z.init = NULL, logfile=NULL, verbose=TRUE) {
   validateCounts(counts)
   return(.celda_C(counts, sample.label, K, alpha, beta, algorithm, stop.iter,
                   max.iter, split.on.iter, split.on.last, seed, nchains,
-                  initialize, count.checksum, z.init, logfile, verbose))
+                  z.initialize, count.checksum, z.init, logfile, verbose, reorder=TRUE))
 }
 
 .celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
                    	stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                   	seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
-                   	z.init = NULL, logfile=NULL, verbose=TRUE) {
+                   	seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
+                   	z.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_C: Clustering cells.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -59,7 +59,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   if(algorithm == "EM") { stop.iter = 1 }
   
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
-  initialize = match.arg(initialize)
+  z.initialize = match.arg(z.initialize)
   
   all.seeds = seed:(seed + nchains - 1)
     
@@ -68,13 +68,16 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
 	## Initialize cluster labels
 	current.seed = all.seeds[i]	
-	logMessages(date(), ".. Initializing chain", i, "with", paste0("'", initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+	logMessages(date(), ".. Initializing 'z' in chain", i, "with", paste0("'", z.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 	
-    if(initialize == "random") {
-  	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	if(z.initialize == "predefined") {
+	  if(is.null(z.init)) stop("'z.init' needs to specified when initilize.z == 'given'.")
+	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
+	} else if(z.initialize == "split") {
+	  z = initialize.splitZ(counts, K=K, alpha=alpha, beta=beta, seed=seed)
 	} else {
-	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
-	}  
+	  z = initialize.cluster(K, ncol(counts), initial = NULL, fixed = NULL, seed=current.seed)
+	} 
 	z.best = z
   
 	## Calculate counts one time up front
@@ -164,7 +167,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
                              completeLogLik=best.result$completeLogLik,
                              finalLogLik=best.result$finalLogLik,
                              names=best.result$names)
-  best.result = reorder.celda_C(counts = counts, res = best.result)
+  if(isTRUE(reorder)) best.result = reorder.celda_C(counts = counts, res = best.result)
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
@@ -240,15 +243,18 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
   phi = fastNormPropLog(n.G.by.CP, beta)
   
   ## Maximization to find best label for each cell
-  probs = eigenMatMultInt(phi, counts) + theta[, s]    
-  z.previous = z
-  z = apply(probs, 2, which.max)
-
-  ## Recalculate counts based on new label
-  p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
-  m.CP.by.S = p$m.CP.by.S
-  n.G.by.CP = p$n.G.by.CP
-  n.CP = p$n.CP
+  probs = eigenMatMultInt(phi, counts) + theta[, s]  
+  
+  if(isTRUE(do.sample)) {
+    z.previous = z
+    z = apply(probs, 2, which.max)
+    
+    ## Recalculate counts based on new label
+    p = cC.reDecomposeCounts(counts, s, z, z.previous, n.G.by.CP, K)
+    m.CP.by.S = p$m.CP.by.S
+    n.G.by.CP = p$n.G.by.CP
+    n.CP = p$n.CP
+  }
 
   return(list(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.CP=n.CP, z=z, probs=probs))
 }

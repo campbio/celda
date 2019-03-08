@@ -33,21 +33,21 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
+                    seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), y.initialize=c("split", "random", "predefined"), count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
   validateCounts(counts)
   return(.celda_CG(counts, sample.label, K, L, alpha, beta, delta, gamma,
                    algorithm, stop.iter, max.iter, split.on.iter, split.on.last,
-                   seed, nchains, initialize, count.checksum, z.init, y.init,
-                   logfile, verbose))
+                   seed, nchains, z.initialize, y.initialize, count.checksum, z.init, y.init,
+                   logfile, verbose, reorder=TRUE))
 }
 
 .celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
-                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
+                    seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), y.initialize=c("split", "random", "predefined"), count.checksum=NULL,
+                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -64,7 +64,8 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
-  initialize = match.arg(initialize)
+  z.initialize = match.arg(z.initialize)
+  y.initialize = match.arg(y.initialize)
   
   all.seeds = seed:(seed + nchains - 1)
 
@@ -77,17 +78,26 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   
 	## Initialize cluster labels
     current.seed = all.seeds[i]	
-    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
-
-    if(initialize == "random") {
+    logMessages(date(), ".. Initializing 'z' in chain", i, "with", paste0("'", z.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+    logMessages(date(), ".. Initializing 'y' in chain", i, "with", paste0("'", y.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+    
+    if(z.initialize == "predefined") {
+      if(is.null(z.init)) stop("'z.init' needs to specified when initilize.z == 'given'.")
   	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
-	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
-	} else {
-	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
-	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=z, 
-	                       K=K, K.subclusters=10, min.feature=3, max.cells=100,
-	                       seed=seed)
-	}  
+	  } else if(z.initialize == "split") {
+	    z = initialize.splitZ(counts, K=K, alpha=alpha, beta=beta, seed=seed)
+	  } else {
+	    z = initialize.cluster(K, ncol(counts), initial = NULL, fixed = NULL, seed=current.seed)
+	  } 
+    if(y.initialize == "predefined") {
+      if(is.null(y.init)) stop("'y.init' needs to specified when initilize.y == 'given'.")
+      y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)  
+    } else if(y.initialize == "split") {
+      y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
+    } else {
+      y = initialize.cluster(L, nrow(counts), initial = NULL, fixed = NULL, seed=current.seed)  
+    } 
+    
 	z.best = z
 	y.best = y  
   
@@ -231,7 +241,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                              finalLogLik=ll.best,
                   				   sample.label=sample.label, 
                   				   names=names)
-  best.result = reorder.celda_CG(counts = counts, res = best.result)
+  if(isTRUE(reorder)) best.result = reorder.celda_CG(counts = counts, res = best.result)
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
