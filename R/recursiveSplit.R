@@ -236,6 +236,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
   start.time = Sys.time()
   s = rep(1, ncol(counts))
   if(!is.null(z.init) | (!is.null(temp.K))) {
+    logMessages(date(), ".. Collapsing cells to temporary populations", append=TRUE, verbose=verbose, logfile=logfile)
     if(is.null(z.init)) {
       K = temp.K
       z = initialize.splitZ(counts, K=K, min.cell = 3, seed=seed)  
@@ -244,8 +245,9 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
       z = initialize.cluster(K, ncol(counts), initial = z.init, seed=seed)  
       logMessages(date(), ".. Using", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)
     }
-    
     new.counts = colSumByGroup(counts, z, length(unique(z)))
+  } else {
+    new.counts = counts
   }
   
   logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
@@ -276,7 +278,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     
     # Allow features to cluster further
     previous.y = overall.y
-    temp.split = singleSplitY(counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
+    temp.split = singleSplitY(new.counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
     temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.init=temp.split$y, reorder=FALSE)
     overall.y = temp.model@clusters$y
   
