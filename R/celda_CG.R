@@ -17,10 +17,11 @@
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
-#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
-#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
+#' @param z.initialize Chararacter. One of 'random', 'split', or 'predefined'. With 'random', cells are randomly assigned to a populations. With 'split', cells will be split into sqrt(K) populations and then each popluation will be subsequently split into another sqrt(K) populations. With 'predefined', values in `z.init` will be used to initialize `z`. Default 'split'.
+#' @param y.initialize Chararacter. One of 'random', 'split', or 'predefined'. With 'random', features are randomly assigned to a modules. With 'split', features will be split into sqrt(L) modules and then each module will be subsequently split into another sqrt(L) modules. With 'predefined', values in `y.init` will be used to initialize `y`. Default 'split'.
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when `initialize' = 'random'`. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when `initialize = 'random'`. Default NULL.
+#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
