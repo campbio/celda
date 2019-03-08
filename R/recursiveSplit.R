@@ -76,7 +76,7 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
 #' plotGridSearchPerplexity(module.split)
 #' module.split.select = subsetCeldaList(module.split, list(L=10))
 
-#' ## Then, use module labels for initialization in `recursiveSplitCell()` to produce `celda_CG` bi-clustering models
+#' ## Then use module labels for initialization in `recursiveSplitCell()` to produce `celda_CG` bi-clustering models
 #' cell.split = recursiveSplitCell(celda.CG.sim$counts, initial.K = 3, max.K=20, y.init = clusters(module.split.select)$y)
 #' plotGridSearchPerplexity(cell.split) 
 #' celda.mod = subsetCeldaList(cell.split, list(K=5, L=10))
