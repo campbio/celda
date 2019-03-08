@@ -146,32 +146,6 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 			      
 	  ## Perform split on i-th iteration defined by split.on.iter
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-	  if(K > 2 & iter != max.iter & 
-	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
-	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
-		  logMessages(date(), " .... Determining if any cell clusters should be split.", 
-		              logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
-		                   nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, 
-		                   gamma, z.prob=t(next.z$probs),  max.clusters.to.try=K, 
-		                   min.cell=3)
-		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
-
-		  # Reset convergence counter if a split occured
-		  if(!isTRUE(all.equal(z, res$z))) {
-			num.iter.without.improvement = 0L
-			do.cell.split = TRUE
-		  } else {
-			do.cell.split = FALSE
-		  }
-
-		  ## Re-calculate variables
-		  z = res$z      
-		  m.CP.by.S = res$m.CP.by.S
-		  n.TS.by.CP = res$n.TS.by.CP
-		  n.CP = res$n.CP
-		  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-	  }  
 	  if(L > 2 & iter != max.iter & 
 	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
 	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
@@ -193,8 +167,34 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.by.TS = res$n.by.TS
 		  nG.by.TS = res$nG.by.TS
 		  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
-  	  }
-  	          
+  	}
+	  if(K > 2 & iter != max.iter & 
+	     (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
+	      (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+	    logMessages(date(), " .... Determining if any cell clusters should be split.", 
+	                logfile=logfile, append=TRUE, sep="", verbose=verbose)
+	    res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
+	                     nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, 
+	                     gamma, z.prob=t(next.z$probs),  max.clusters.to.try=K, 
+	                     min.cell=3)
+	    logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
+	    
+	    # Reset convergence counter if a split occured
+	    if(!isTRUE(all.equal(z, res$z))) {
+	      num.iter.without.improvement = 0L
+	      do.cell.split = TRUE
+	    } else {
+	      do.cell.split = FALSE
+	    }
+	    
+	    ## Re-calculate variables
+	    z = res$z      
+	    m.CP.by.S = res$m.CP.by.S
+	    n.TS.by.CP = res$n.TS.by.CP
+	    n.CP = res$n.CP
+	    n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+	  }  
+	  
 
 	  ## Calculate complete likelihood
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
