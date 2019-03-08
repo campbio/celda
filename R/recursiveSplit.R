@@ -47,9 +47,41 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
   return(list(ll=best.ll, y=best.y))
 }
 
+#' @title Recursive cell splitting
+#' 
+#' @description Uses the `celda_C` model to cluster cells into population for range of possible K's. The cell population labels of the previous "K-1" model are used as the initial values in the current model with K cell populations. The best split of an existing cell population is found to create the K-th cluster. This procedure is much faster than randomly initializing each model with a different K. If module labels for each feature are given in 'y.init', the `celda_CG` model will be used to split cell populations based on those modules instead of individual features. Module labels will also be updated during sampling and thus may end up slightly different than `y.init`.
+#'
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
+#' @param initial.K Integer. Minimum number of cell populations to try. 
+#' @param max.K Integer. Maximum number of cell populations to try.
+#' @param y.init Integer vector. Module labels for features. Cells will be clusteredusing the `celda_CG` model based on the modules specified in `y.init` rather than the counts of individual features. While the feature module labels will be initialized to `y.init`, they will be allowed to move within each model with a new K.
+#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell (if `y.init` is not used) or to each module in each cell population (if `y.init` is set). Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Only used if `y.init` is set. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Only used if `y.init` is set. Default 1. 
+#' @param min.cell Integer. Only attempt to split cell populations with at least this many cells.
+#' @param perplexity Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param verbose Logical. Whether to print log messages. Default TRUE. 
+#' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
+#' @seealso `recursiveSplitModule()` for recursive splitting of cell populations. 
+#' @examples
+#' ## Create models that range from K=3 to K=10 by recursively splitting cell populations into two to produce `celda_C` cell clustering models
+#' testZ = recursiveSplitCell(celda.C.sim$counts, initial.K = 3, max.K=10)
+#'
+#' ## Alternatively, first identify features modules usinge `recursiveSplitModule()`
+#' module.split = recursiveSplitModule(celda.CG.sim$counts, initial.L = 3, max.L=20)
+#' plotGridSearchPerplexity(module.split)
+#' module.split.select = subsetCeldaList(module.split, list(L=10))
 
-
-recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, y.init=NULL, alpha=1, beta=1, delta=1, gamma=1, min.cell = 3, seed=12345, logfile=NULL, verbose=TRUE) {
+#' Then, use module labels for initialization in `recursiveSplitCell()` to produce `celda_CG` bi-clustering models
+#' cell.split = recursiveSplitCell(celda.CG.sim$counts, initial.K = 3, max.K=20, y.init = clusters(module.split.select)$y)
+#' plotGridSearchPerplexity(cell.split) 
+#' celda.mod = subsetCeldaList(cell.split, list(K=5, L=10))
+#' @export
+recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, y.init=NULL, alpha=1, beta=1, delta=1, gamma=1, min.cell = 3, perplexity=TRUE, seed=12345, logfile=NULL, verbose=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting recursive cell population splitting.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -149,6 +181,10 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
   celda.res = methods::new("celdaList", run.params=run.params, res.list=res.list, 
                            count.checksum=count.checksum)
 
+  if(isTRUE(perplexity)) {
+    logMessages(date(), ".. Calculating perplexity", append=TRUE, verbose=verbose, logfile=NULL)
+    celda.res = resamplePerplexity(counts, celda.res)
+  }
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   logMessages("Completed recursive cell population splitting. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
@@ -158,8 +194,36 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 }  
 
 
-
-recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, beta=1, delta=1, gamma=1, min.feature=3, seed=12345, verbose=TRUE, logfile=NULL) {
+#' @title Recursive module splitting
+#' 
+#' @description Uses the `celda_G` model to cluster features into modules for a range of possible L's. The module labels of the previous "L-1" model are used as the initial values in the current model with L modules. The best split of an existing module is found to create the L-th module. This procedure is much faster than randomly initializing each model with a different L.
+#'
+#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param initial.L Integer. Minimum number of modules to try. 
+#' @param max.L Integer. Maximum number of modules to try.
+#' @param temp.z Integer. Number of temporary cell populations to identify and use in module splitting. Only used if `z.init=NULL` Collapsing cells to a relatively smaller number of cell popluations will increase the speed of module clustering and tend to produce better modules. This number should be larger than the number of true cell populations expected in the dataset. Default 100.
+#' @param z.init Integer vector. Collapse cells to cell populations based on labels in `z.init` and then perform module splitting. If NULL, no collapasing will be performed unless `temp.z` is specified. Default NULL.
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
+#' @param min.feature Integer. Only attempt to split modules with at least this many features.
+#' @param perplexity Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param verbose Logical. Whether to print log messages. Default TRUE. 
+#' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
+#' @seealso `recursiveSplitCell()` for recursive splitting of cell populations. 
+#' @examples
+#' ## Create models that range from L=3 to L=20 by recursively splitting modules into two
+#' module.split = recursiveSplitModule(celda.CG.sim$counts, initial.L = 3, max.L=20)
+#' 
+#' ## Example results with perplexity
+#' plotGridSearchPerplexity(module.split)
+#' 
+#' ## Select model for downstream analysis
+#' celda.mod = subsetCeldaList(module.split, list(L=10))
+#' @export
+recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, beta=1, delta=1, gamma=1, min.feature=3, perplexity=TRUE, seed=12345, verbose=TRUE, logfile=NULL) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting recursive module splitting.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -172,7 +236,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
   start.time = Sys.time()
   s = rep(1, ncol(counts))
   if(!is.null(z.init) | (!is.null(temp.K))) {
-    if(is.null(z)) {
+    if(is.null(z.init)) {
       K = temp.K
       z = initialize.splitZ(counts, K=K, min.cell = 3, seed=seed)  
       logMessages(date(), ".. Collapsed to", K, "temporary cell populations", append=TRUE, verbose=verbose, logfile=logfile)
@@ -249,6 +313,11 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
   celda.res = methods::new("celdaList", run.params=run.params, res.list=res.list, 
                            count.checksum=count.checksum)
   
+  if(isTRUE(perplexity)) {
+    logMessages(date(), ".. Calculating perplexity", append=TRUE, verbose=verbose, logfile=NULL)
+    celda.res = resamplePerplexity(counts, celda.res)
+  }
+  
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
   logMessages("Completed recursive module splitting. Total time:", format(difftime(end.time, start.time)), logfile=logfile, append=TRUE, verbose=verbose)
@@ -256,33 +325,3 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
   
   return(celda.res)
 } 
-
-splitModule = function(counts, celda.mod, module, n=2) {
-  ix = celda.mod@clusters$y == module
-  new.L = max(celda.mod@clusters$y) + n - 1
-  if(sum(ix) > 1) {
-    temp.model = .celda_G(counts[ix,,drop=FALSE], L=n, y.initialize="random", split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE)  
-
-    split.y = temp.model@clusters$y
-    split.ix = temp.model@clusters$y > 1
-    split.y[split.ix] = celda.mod@params$L + split.y[split.ix] - 1
-    split.y[!split.ix] = module
-    
-    new.y = celda.mod@clusters$y
-    new.y[ix] = split.y
-    new.L = max(new.y)
-    
-    new.ll = logLikelihood.celda_G(counts=counts, y=new.y, L=new.L, beta=celda.mod@params$beta, delta=celda.mod@params$delta, gamma=celda.mod@params$gamma)
-    model = methods::new("celda_G", clusters=list(y=new.y),
-                         params=list(L=new.L, beta=celda.mod@params$beta, delta=celda.mod@params$delta, gamma=celda.mod@params$gamma, count.checksum=celda.mod@params$count.checksum),
-                         names=celda.mod@names, 
-                         finalLogLik=new.ll)
-    
-  } else {
-    message("No additional splitting was able to be performed.")
-    model = celda.mod
-  }
-  
-  return(model)
-}
-
