@@ -279,7 +279,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     # Allow features to cluster further
     previous.y = overall.y
     temp.split = singleSplitY(new.counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
-    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.init=temp.split$y, reorder=FALSE)
+    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", y.init=temp.split$y, reorder=FALSE)
     overall.y = temp.model@clusters$y
   
     # Adjust decomposed count matrices
