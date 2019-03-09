@@ -665,9 +665,10 @@ setMethod("perplexity",
             
             eta.prob = log(eta) * nG.by.TS
             gene.by.pop.prob = log(psi %*% phi)
-            inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, s]  
+            inner.log.prob = eigenMatMultInt(gene.by.pop.prob, new.counts) + theta[, s]  
+            #inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, s]  
             
-            log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) + sum(eta.prob)
+            log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) # + sum(eta.prob)
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)
           })

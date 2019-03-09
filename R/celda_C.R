@@ -555,7 +555,8 @@ setMethod("perplexity",
             phi = log(factorized$posterior$module)
             s = as.integer(celda.mod@sample.label)
             
-            inner.log.prob = (t(phi) %*% new.counts) + theta[, s]  
+            #inner.log.prob = (t(phi) %*% new.counts) + theta[, s]  
+            inner.log.prob = eigenMatMultInt(phi, new.counts) + theta[, s]  
             log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
             
             perplexity = exp(-(log.px/sum(new.counts)))
