@@ -25,7 +25,7 @@
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, y.initialize=c("split", "random"), count.checksum=NULL, 
+					seed=12345, nchains=3, y.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE) {
   
   validateCounts(counts)
@@ -36,7 +36,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 
 .celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, y.initialize=c("split", "random"), count.checksum=NULL, 
+					seed=12345, nchains=3, y.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
