@@ -192,7 +192,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   ix <- sample(1:nG)
   for(i in ix) {
     probs[,i] = cG_CalcGibbsProbY(index=i, counts=counts, nTSbyC=n.TS.by.C, nbyTS=n.by.TS, nGbyTS=nG.by.TS, nbyG=n.by.G, y=y, L=L, nG=nG, lg_beta=lgbeta, lg_gamma=lggamma, lg_delta=lgdelta, delta=delta)
-    if(any(is.na(probs[,i]))) browser()
+    #if(any(is.na(probs[,i]))) browser()
 	## Sample next state and add back counts
 	if(isTRUE(do.sample)) {
 	  prev.y = y[i]
