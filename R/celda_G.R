@@ -83,9 +83,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	nG = p$nG
 	rm(p)
 
-	if (!is.null(seed)) {
-	  set.seed(seed)
-	}
+	setSeed(seed)
   
 	## Calculate initial log likelihood
 	ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
@@ -235,9 +233,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
                                  L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  setSeed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
   y = sample(1:L, size=G, prob=eta, replace=TRUE)

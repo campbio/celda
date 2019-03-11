@@ -89,9 +89,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   
 	ll = cC.calcLL(m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, s=s, K=K, nS=nS, nG=nG, alpha=alpha, beta=beta)
 
-	if (!is.null(seed)) {
-    set.seed(seed)
-	}
+	setSeed(seed)
 	iter = 1L
 	num.iter.without.improvement = 0L
 	do.cell.split = TRUE
@@ -279,9 +277,7 @@ cC.calcEMProbZ = function(counts, m.CP.by.S, n.G.by.CP, n.by.C, n.CP, z, s, K, n
 simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1000), 
                          G=100, K=5, alpha=1, beta=1, seed=12345, ...) {
  
-  if (!is.null(seed)) {
-    set.seed(seed) 
-  }
+  setSeed(seed)
     
   phi <- rdirichlet(K, rep(beta, G))
   theta <- rdirichlet(S, rep(alpha, K))

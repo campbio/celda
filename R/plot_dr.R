@@ -205,9 +205,7 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
 # @param initial.dims Integer. Number of dimensions from PCA to use as input in tSNE.
 calculateTsne = function(norm, perplexity=20, max.iter=2500, seed=12345, do.pca=FALSE, initial.dims = 20) {
 
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  setSeed(seed)
   res = Rtsne::Rtsne(norm, pca=do.pca, max_iter=max.iter, perplexity = perplexity, 
                      check_duplicates = FALSE, is_distance = FALSE, initial_dims=initial.dims)$Y
   return(res)                     
