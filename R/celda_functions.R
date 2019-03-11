@@ -308,7 +308,7 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
   if(is.null(output.file)){
     return(res)
   }else{
-    write.table(res, file = output.file, sep = "\t", row.names = F, quote = F)
+    utils::write.table(res, file = output.file, sep = "\t", row.names = FALSE, quote = FALSE)
   }
 }
 
@@ -334,7 +334,7 @@ violinPlot = function(counts, celda.mod, features){
   colnames(m) = c("Cluster","Feature","Expression")
   color_pal = distinct_colors(length(unique(cluster)))
   p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill=Cluster)) + 
-    ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=T, scale = "width") + 
+    ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=TRUE, scale = "width") + 
     ggplot2::geom_jitter(height = 0, size = 0.1) +
     ggplot2::scale_fill_manual(values = color_pal)
   return(p)

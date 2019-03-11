@@ -8,6 +8,8 @@
 #' @param beta Numeric. Concentration parameter for Phi. Default to be 0.5
 #' @param delta Numeric / Numeric vector. Concentration parameter for Theta. If input as a single numeric value, symmetric values for beta distribution are specified; if input as a vector of lenght 2, the two values will be the shape1 and shape2 paramters of the beta distribution respectively
 #' @param seed Integer. Passed to set.seed(). Default to be 12345. If NULL, no calls to `set.seed()` are made.
+#' @return A list object containing the real expression matrix and contamination
+#' expression matrix as well as other parameters used in the simulation.
 #' @examples 
 #' contamination.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
 #' contamination.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
@@ -136,6 +138,7 @@ cD.calcEMbgDecontamination = function(omat, cellDist, bgDist, theta, beta, delta
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL
 #' @param verbose Logical. Whether to print log messages. Default TRUE
 #' @param seed Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.
+#' @return A list object which contains the decontaminated count matrix and related parameters
 #' @examples 
 #' decon.c = DecontX( omat = contamination.sim$rmat + contamination.sim$cmat, z=contamination.sim$z, max.iter=3)
 #' decon.bg = DecontX( omat=contamination.sim$rmat + contamination.sim$cmat, max.iter=3 ) 
@@ -221,7 +224,7 @@ DecontXoneBatch = function(omat, z=NULL, batch=NULL, max.iter=200, beta=1e-6, de
     if( decon.method == "clustering") {
 
         ## Initialization
-        theta  = runif(nC, min = 0.1, max = 0.5)  
+        theta  = stats::runif(nC, min = 0.1, max = 0.5)  
         est.rmat = t (t(omat) * theta )       
         phi =   colSumByGroup.numeric(est.rmat, z, K)
         eta =   rowSums(phi) - phi 
@@ -261,7 +264,7 @@ DecontXoneBatch = function(omat, z=NULL, batch=NULL, max.iter=200, beta=1e-6, de
     if ( decon.method == "background") {
 
     ## Initialization
-    theta = runif( nC, min =0.1, max=0.5) 
+    theta = stats::runif( nC, min =0.1, max=0.5) 
     est.rmat = t( t(omat) *theta) 
     bgDist = rowSums( omat ) / sum( omat) 
     bgDist = matrix( rep( bgDist, nC), ncol=nC) 

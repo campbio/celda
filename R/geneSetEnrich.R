@@ -14,8 +14,6 @@
 #' @return List of length 'L' where each member contains the significantly
 #'  enriched terms for the corresponding module.
 #' @examples
-#' if (!requireNamespace("BiocManager", quietly = TRUE))
-#'     install.packages("M3DExampleData")
 #' library(M3DExampleData)
 #' counts <- M3DExampleData::Mmus_example_list$data
 #' #subset 100 genes for fast clustering
