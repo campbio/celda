@@ -16,9 +16,7 @@
 #' @export
 simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta=0.5, delta=c(1,2), seed=12345) {
   
-    if (!is.null(seed)) {
-        set.seed(seed) 
-    }
+    setSeed(seed)
 
     if(length(delta) == 1 ) { 
         cp.byC = rbeta(n=C, shape1=delta, shape2=delta) 
@@ -205,9 +203,7 @@ DecontXoneBatch = function(omat, z=NULL, batch=NULL, max.iter=200, beta=1e-6, de
     }
 
     ## Set seed for initialization 
-    if (!is.null(seed)) {
-        set.seed(seed)
-    }
+    setSeed(seed)
 
 
     iter = 1L 

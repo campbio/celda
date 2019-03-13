@@ -110,9 +110,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
 
-	if (!is.null(current.seed)) {
-	  set.seed(current.seed)
-	}
+	setSeed(current.seed)
 	iter = 1L
 	num.iter.without.improvement = 0L
 	do.cell.split = TRUE
@@ -273,9 +271,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
                                   G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
 
-  if (!is.null(seed)) { 
-    set.seed(seed)
-  }
+  setSeed(seed)
 
   ## Number of cells per sample
   nC = sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)
