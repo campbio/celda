@@ -526,6 +526,7 @@ setMethod("clusterProbability",
 #' @seealso `celda_C()` for clustering cells
 #' @examples
 #' perplexity = perplexity(celda.C.sim$counts, celda.C.mod)
+#' @import matrixStats
 #' @export
 setMethod("perplexity",
           signature(celda.mod = "celda_C"),
@@ -617,54 +618,93 @@ setMethod("celdaTsne",
                      initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
                      seed=12345, ...) {
 
-            counts = processCounts(counts)
-            compareCountMatrix(counts, celda.mod)
+
+            prepared.count.info = prepareCountsForDimReduction.celda_C(counts, celda.mod, max.cells,
+                                                                       min.cluster.size, modules)
             
-            ## Checking if max.cells and min.cluster.size will work
-            if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@params$K)) {
-              stop(paste0("Cannot distribute ", max.cells, " cells among ", 
-                          celda.mod@params$K, " clusters while maintaining a minumum of ", 
-                          min.cluster.size, 
-                          " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
-            }
-            
-            ## Select a subset of cells to sample if greater than 'max.cells'
-            total.cells.to.remove = ncol(counts) - max.cells
-            z.include = rep(TRUE, ncol(counts))
-            if(total.cells.to.remove > 0) {
-          	z.ta = tabulate(celda.mod@clusters$z, celda.mod@params$K)
-          	
-          	## Number of cells that can be sampled from each cluster without 
-          	## going below the minimum threshold
-          	cluster.cells.to.sample = z.ta - min.cluster.size          
-          	cluster.cells.to.sample[cluster.cells.to.sample < 0] = 0
-          	
-          	## Number of cells to sample after exluding smaller clusters
-          	## Rounding can cause number to be off by a few, so ceiling is 
-          	## used with a second round of subtraction
-          	cluster.n.to.sample = ceiling((cluster.cells.to.sample / sum(cluster.cells.to.sample)) * total.cells.to.remove)
-          	diff = sum(cluster.n.to.sample) - total.cells.to.remove 
-          	cluster.n.to.sample[which.max(cluster.n.to.sample)] = cluster.n.to.sample[which.max(cluster.n.to.sample)] - diff
-          
-          	## Perform sampling for each cluster
-          	for(i in which(cluster.n.to.sample > 0)) {
-          	  z.include[sample(which(celda.mod@clusters$z == i), cluster.n.to.sample[i])] = FALSE
-          	}
-            }   
-            cell.ix = which(z.include)
-          
-            norm = t(normalizeCounts(counts[,cell.ix], normalize="proportion", 
-                                     transformation.fun=sqrt))
-            res = calculateTsne(norm, perplexity=perplexity, max.iter=max.iter, 
-                                seed=seed, do.pca=TRUE, 
-                                initial.dims = initial.dims)
+            res = calculateTsne(prepared.count.info$norm, perplexity=perplexity, max.iter=max.iter, 
+                                seed=seed, do.pca=TRUE, initial.dims = initial.dims)
             final = matrix(NA, nrow=ncol(counts), ncol=2)
-            final[cell.ix,] = res
+            final[prepared.count.info$cell.ix,] = res
             rownames(final) = colnames(counts)
             colnames(final) = c("tsne_1", "tsne_2")
             return(final)
           })
 
+
+#' @title umap for celda_C
+#' @description Embeds cells in two dimensions using umap based on a `celda_C` model. PCA on the normalized counts is used to reduce the number of features before applying umap. 
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class `celda_C`. 
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
+#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param ... Additional parameters.
+#' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying expression
+#' @examples
+#' umap.res = celdaUmap(celda.C.sim$counts, celda.C.mod)
+#' @return A two column matrix of t-SNE coordinates
+#' @export
+setMethod("celdaUmap",
+          signature(celda.mod = "celda_C"),
+          function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                   modules=NULL, umap.config=umap::umap.defaults) {
+            prepared.count.info = prepareCountsForDimReduction.celda_C(counts, celda.mod, max.cells,
+                                                                       min.cluster.size, modules)
+            res = calculateUmap(prepared.count.info$norm, umap.config)
+            final = matrix(NA, nrow=ncol(counts), ncol=2)
+            final[prepared.count.info$cell.ix,] = res
+            rownames(final) = colnames(counts)
+            colnames(final) = c("umap_1", "umap_2")
+            return(final)
+          })
+
+
+prepareCountsForDimReduction.celda_C = function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                                                modules=NULL) {
+  counts = processCounts(counts)
+  compareCountMatrix(counts, celda.mod)
+  
+  ## Checking if max.cells and min.cluster.size will work
+  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@params$K)) {
+  stop(paste0("Cannot distribute ", max.cells, " cells among ", 
+              celda.mod@params$K, " clusters while maintaining a minumum of ", 
+              min.cluster.size, 
+              " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
+  }
+  
+  ## Select a subset of cells to sample if greater than 'max.cells'
+  total.cells.to.remove = ncol(counts) - max.cells
+  z.include = rep(TRUE, ncol(counts))
+  if(total.cells.to.remove > 0) {
+    z.ta = tabulate(celda.mod@clusters$z, celda.mod@params$K)
+    
+    ## Number of cells that can be sampled from each cluster without 
+    ## going below the minimum threshold
+    cluster.cells.to.sample = z.ta - min.cluster.size          
+    cluster.cells.to.sample[cluster.cells.to.sample < 0] = 0
+    
+    ## Number of cells to sample after exluding smaller clusters
+    ## Rounding can cause number to be off by a few, so ceiling is 
+    ## used with a second round of subtraction
+    cluster.n.to.sample = ceiling((cluster.cells.to.sample / sum(cluster.cells.to.sample)) * total.cells.to.remove)
+    diff = sum(cluster.n.to.sample) - total.cells.to.remove 
+    cluster.n.to.sample[which.max(cluster.n.to.sample)] = cluster.n.to.sample[which.max(cluster.n.to.sample)] - diff
+    
+    ## Perform sampling for each cluster
+    for(i in which(cluster.n.to.sample > 0)) {
+      z.include[sample(which(celda.mod@clusters$z == i), cluster.n.to.sample[i])] = FALSE
+    }
+  }   
+  cell.ix = which(z.include)
+  norm = t(normalizeCounts(counts[,cell.ix], normalize="proportion", 
+                         transformation.fun=sqrt))
+  return(list(norm=norm, cell.ix=cell.ix))
+}
 
 
 #' @title Probability map for a celda_C model

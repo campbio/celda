@@ -6,7 +6,9 @@ output:
   BiocStyle::html_document:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Analyzing single-cell RNA-seq count data with Celda} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{Analyzing single-cell RNA-seq count data with Celda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
   
 # Introduction
@@ -22,7 +24,7 @@ library(celda)
 
 Complete list of help files are accessible using the help command with a `package` option.
 
-```{r, eval=FALSE}
+```{r}
 help(package=celda)
 ```
 
@@ -30,7 +32,7 @@ To see the latest updates and releases or to post a bug, see our GitHub page at 
 
 <br>
 
-```{r,eval=T, warning = FALSE, echo = FALSE, message = FALSE}
+```{r, eval=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 library(celda)
 ```
 
@@ -180,7 +182,7 @@ gene.ix = which(rownames(sim_counts$counts) %in% genes)
 norm.counts = normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
 
-```{r, eval = FALSE, fig.width = 8, fig.height = 8}
+```{r, fig.width = 8, fig.height = 8}
 plotHeatmap(counts = norm.counts, z = clusters(celda.model)$z, y = clusters(celda.model)$y, feature.ix = gene.ix, show.names.feature = TRUE)
 ```
 # Differential Expression Analysis
@@ -189,7 +191,7 @@ Celda employs the MAST package [(McDavid A, 2018)](https://bioconductor.org/pack
 
 If you wish to compare one cell subpopulation compared to all others, leave c2 as NULL: 
 
-```{r,message=FALSE}
+```{r, message=FALSE}
 diffexp.clust1 = differentialExpression(counts = sim_counts$counts, 
                                             celda.mod = celda.model, 
                                             c1 = 1, c2 = NULL)
@@ -215,8 +217,8 @@ diffexp.gene.ix = which(rownames(sim_counts$counts) %in% diffexp.clust1vs2$Gene)
 
 norm.counts = normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
-```{r, eval = FALSE}
-plotHeatmap(counts = norm.counts[,celda.model$z %in% c(1,2)], 
+```{r}
+plotHeatmap(counts = norm.counts[, clusters(celda.model)$z %in% c(1,2)], 
             z = clusters(celda.model)$z[clusters(celda.model)$z %in% c(1,2)], 
             y = clusters(celda.model)$y, feature.ix = diffexp.gene.ix, 
             show.names.feature = TRUE)
@@ -229,7 +231,7 @@ In the previous example, the best K and L was already known. However, the optima
 
 Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. The `resamplePerplexity` function "perturbs" the original counts matrix by resampling the counts of each cell according to its normalized probability distribution. Perplexity is calculated on the resampled matrix and the procedure is repeated `resample` times. These results can be visualized with `plotGridSearchPerplexity`. The major goal is to pick the lowest K and L combination with relatively good perplexity. In general, visual inspection of the plot can be used to select the number of modules (L) or cell populations (K) where the rate of decrease in the perplexity starts to drop off.
 
-```{r, eval = FALSE, message = FALSE}
+```{r, message = FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
                        params.test = list(K = 3:7, L = 8:12),
                        cores = 1,
@@ -243,7 +245,7 @@ cgs = celdaGridSearch(sim_counts$counts,
 
 `resamplePerplexity` calculates the perplexity of each model's cluster assignments, as well as resamplings of that count matrix. The result of this function can be visualized with `plotGridSearchPerplexity` for determination of the optimal K/L values.
 
-```{r, eval = FALSE}
+```{r}
 cgs = resamplePerplexity(counts = sim_counts$counts,
                           celda.list = cgs,
                           resample = 5)
@@ -262,7 +264,7 @@ celda.model = subsetCeldaList(celda.list = cgs, params = list(K = 5, L = 10))
 
 If the "best.only" parameter is set to FALSE in the `celdaGridSearch`, then the `selectBestModel` function can be used to select the chains with the lowest log likelihoods within each combination of parameters. Alternatively, users can use select a specific chain by specifying the index within the `subsetCeldaList` function.
 
-```{r, message=FALSE, eval=FALSE}
+```{r, message=FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
                        params.test = list(K = 3:7, L = 8:12),
                        cores = 1,

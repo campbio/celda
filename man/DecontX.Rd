@@ -27,6 +27,9 @@ DecontX(counts, z = NULL, batch = NULL, max.iter = 200,
 
 \item{seed}{Integer. Passed to set.seed(). Default to be 1234567. If NULL, no calls to `set.seed()` are made.}
 }
+\value{
+A list object which contains the decontaminated count matrix and related parameters
+}
 \description{
 This function updates decontamination on dataset with multiple batches
 }

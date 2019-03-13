@@ -93,12 +93,12 @@ NumericVector cG_CalcGibbsProbY(const int index,
   // If statements determine whether to add or subtract counts from each probability
   for (i = 0; i < L; i++) {
 	for(j = 0; j < L; j++) {
-	  if(i == j & i != current_y) {
+	  if((i == j) & (i != current_y)) {
 		probs[i] += lg_gamma[nGbyTS[j] + 1];
 		probs[i] += nTSbyC_prob2[j];
 		probs[i] += lg_delta[nGbyTS[j] + 1];
 		probs[i] -= lgamma(nbyTS[j] + nbyG[index0] + ((nGbyTS[j] + 1) * delta));
-	  } else if (j == current_y & i != current_y) {
+	  } else if ((j == current_y) & (i != current_y)) {
 		probs[i] += lg_gamma[nGbyTS[j] - 1];;
 		probs[i] += nTSbyC_prob1[j];		  
 		probs[i] += lg_delta[nGbyTS[j] - 1];

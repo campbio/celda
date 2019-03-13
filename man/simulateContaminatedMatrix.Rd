@@ -24,6 +24,10 @@ simulateContaminatedMatrix(C = 300, G = 100, K = 3,
 
 \item{seed}{Integer. Passed to set.seed(). Default to be 12345. If NULL, no calls to `set.seed()` are made.}
 }
+\value{
+A list object containing the real expression matrix and contamination
+expression matrix as well as other parameters used in the simulation.
+}
 \description{
 This function generates a list containing two count matrices -- one for real expression, the other one for contamination, as well as other parameters 
 used in the simulation which can be useful for running decontamination

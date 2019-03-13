@@ -230,6 +230,30 @@ test_that(desc = "Testing celdaTsne with celda_G including a subset of cells",{
   expect_true(!is.null(plot.obj))
 })
 
+#celdaUmap
+test_that(desc = "Testing celdaUmap with celda_G when model class is changed, should error",{
+  model_X <- model_G
+  class(model_X) <- "celda_X"
+  expect_error(celdaUmap(counts=celdaG.sim$counts, celda.mod=model_X), "unable to find")
+})
+
+test_that(desc = "Testing celdaUmap with celda_C including all cells",{
+  umap = celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts))
+  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], rep(1,ncol(celdaG.sim$counts)))
+  expect_true(ncol(umap) == 2 & nrow(umap) == ncol(celdaG.sim$counts))
+  expect_true(!is.null(plot.obj))
+  
+  umap = celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts), modules=1:2)
+  expect_error(umap <- celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts), modules=1000:1005))
+})
+
+test_that(desc = "Testing celdaUmap with celda_G including a subset of cells",{
+  umap = celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=100)
+  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], rep(1, ncol(celdaG.sim$counts)))
+    expect_true(ncol(umap) == 2 & nrow(umap) == ncol(celdaG.sim$counts) && sum(!is.na(umap[,1])) == 100)
+  expect_true(!is.null(plot.obj))
+})
+
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup with celda_G", {
   res = featureModuleLookup(celdaG.sim$counts, model_G, "Gene_1")

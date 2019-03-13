@@ -15,11 +15,11 @@
 To install the most recent release of celda (used in the preprint version of the celda paper) via devtools:
 ```
 library(devtools)
-install_github("compbiomed/celda@v0.6")
+install_github("campbio/celda@v0.6")
 ```
 The most up-to-date (but potentially less stable) version of celda can similarly be installed with:
 ```
-install_github("compbiomed/celda")
+install_github("campbio/celda@devel")
 ```
 
 **NOTE** On OSX, devtools::install_github() requires installation of **libgit2.** This can be installed via homebrew:
@@ -37,11 +37,34 @@ An analysis example using celda with RNASeq via vignette('celda-analysis')
 ### Decontamination with DecontX
 Highly expressed genes from various cells clusters will be expressed at low levels in other clusters in droplet-based systems due to contamination. DecontX will decompose an observed count matrix into a decontaminated expression matrix and a contamination matrix. The only other parameter needed is a vector of cell cluster labels. 
 
+To simulate two 300 (gene) x 100 (cell) count matrices from 3 different cell types with total reads per cell ranged from 5000 to 40000: one matrix being ture expression matrix (rmat), the other matrix being contamination count matrix (cmat)
 ```
-new.counts = DecontX( counts = counts, z = cell.label) 
+sim.con = simulateContaminatedMatrix( C = 100, G = 300, K = 3, N.Range= c(5000, 40000), seed = 9124) 
+true.contamination.percentage = colSums( sim.con$cmat ) / colSums( sim.con$cmat + sim.con$rmat ) 
+str(sim.con)   
+# rmat: simulated true expression (gene by cell) count matrix
+# cmat: simulated contamination (gene by cell) count matrix 
+# N.by.C: total transcripts per cell 
+# z: cell type label 
+
+```
+Use DecontX to decompose the observed (contaminated) count matrix back into true expression matrix and a contamination matrix with specified cell label
+```
+observed.mat = sim.con$rmat + sim.con$cmat 
+cell.label = sim.con$z
+new.counts = DecontX( counts = observed.mat, z = cell.label,  max.iter = 200, seed = 123) 
+str(new.counts) 
 # Decontaminated matrix: new.counts$res.list$est.rmat
 # Percentage of contamination per cell: new.counts$res.list$est.conp
+
 ```
+DecontX Performance check 
+```
+estimated.contamination.percentage = new.counts$res.list$est.conp
+plot( true.contamination.percentage, estimated.contamination.percentage) ; abline(0,1) 
+``` 
+
+
 
 ## New Features and announcements
 The v0.4 release of celda represents a useable implementation of the various celda clustering models.

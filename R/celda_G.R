@@ -192,7 +192,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   ix <- sample(1:nG)
   for(i in ix) {
     probs[,i] = cG_CalcGibbsProbY(index=i, counts=counts, nTSbyC=n.TS.by.C, nbyTS=n.by.TS, nGbyTS=nG.by.TS, nbyG=n.by.G, y=y, L=L, nG=nG, lg_beta=lgbeta, lg_gamma=lggamma, lg_delta=lgdelta, delta=delta)
-    if(any(is.na(probs[,i]))) browser()
+    #if(any(is.na(probs[,i]))) browser()
 	## Sample next state and add back counts
 	if(isTRUE(do.sample)) {
 	  prev.y = y[i]
@@ -603,33 +603,71 @@ setMethod("celdaTsne",
                     initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
                     seed=12345, ...) {
   
-            if(max.cells > ncol(counts)) {
-              max.cells = ncol(counts)
-            }
             
-            fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, 
-                                 type="counts")
-              
-            modules.to.use = 1:nrow(fm$counts$cell)
-            if (!is.null(modules)) {
-          	if (!all(modules %in% modules.to.use)) {
-          	  stop("'modules' must be a vector of numbers between 1 and ", 
-          	       modules.to.use, ".")
-          	}
-          	modules.to.use = modules 
-            }
-             
-            cell.ix = sample(1:ncol(counts), max.cells)
-            norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], 
-                                     normalize="proportion", 
-                                     transformation.fun=sqrt))
-          
-            res = calculateTsne(norm, do.pca=FALSE, perplexity=perplexity, 
+            prepared.count.info =  prepareCountsForDimReduction.celda_G(counts, celda.mod, max.cells, 
+                                                                        min.cluster.size, modules) 
+            res = calculateTsne(prepared.count.info$norm, do.pca=FALSE, perplexity=perplexity, 
                                 max.iter=max.iter, seed=seed)
             rownames(res) = colnames(counts)
             colnames(res) = c("tsne_1", "tsne_2")
             return(res)
           })
+
+
+#' @title umap for celda_G
+#' @description Embeds cells in two dimensions using umap based on a `celda_G` model. umap is run on module probabilities to reduce the number of features instead of using PCA. Module probabilities square-root trasformed before applying tSNE. 
+#' 
+#' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
+#' @param celda.mod Celda object of class `celda_CG`. 
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
+#' @param umap.config Object of class `umap.config`. Configures parameters for umap. Default `umap::umap.defaults`
+#' @seealso `celda_G()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
+#' @examples
+#' umap.res = celdaUmap(celda.G.sim$counts, celda.G.mod)
+#' @return A two column matrix of t-SNE coordinates
+#' @export
+setMethod("celdaUmap",
+          signature(celda.mod = "celda_G"),
+          function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                   modules=NULL, umap.config=umap::umap.defaults) {
+            prepared.count.info = prepareCountsForDimReduction.celda_G(counts, celda.mod,
+                                                                       max.cells, min.cluster.size,
+                                                                       modules)
+            umap.res = calculateUmap(prepared.count.info$norm, umap.config)
+            final = matrix(NA, nrow=ncol(counts), ncol=2)
+            final[prepared.count.info$cell.ix, ] = umap.res
+            rownames(final) = colnames(counts)
+            colnames(final) = c("umap_1", "umap_2")
+            return(final)
+          })
+
+
+prepareCountsForDimReduction.celda_G = function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+                                                modules=NULL) {
+  if(max.cells > ncol(counts)) {
+              max.cells = ncol(counts)
+            }
+            
+  fm = factorizeMatrix(counts=counts, celda.mod=celda.mod, 
+                       type="counts")
+    
+  modules.to.use = 1:nrow(fm$counts$cell)
+  if (!is.null(modules)) {
+  if (!all(modules %in% modules.to.use)) {
+    stop("'modules' must be a vector of numbers between 1 and ", 
+         modules.to.use, ".")
+  }
+  modules.to.use = modules 
+  }
+   
+  cell.ix = sample(1:ncol(counts), max.cells)
+  norm = t(normalizeCounts(fm$counts$cell[modules.to.use,cell.ix], 
+                           normalize="proportion", 
+                           transformation.fun=sqrt))
+  return(list(norm=norm, cell.ix=cell.ix))
+}
 
 
 #' @title Lookup the module of a feature
