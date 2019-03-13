@@ -105,7 +105,8 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     n.by.G = p$n.by.G
     
     ## Create initial model with initial.K and predifined y labels
-    model.initial = .celda_CG(counts, sample.label=s, K=initial.K, L=L, z.initialize="split", y.initialize="predefined", nchains=1, y.init=overall.y, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=TRUE, seed=seed, reorder=FALSE)
+    logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
+    model.initial = .celda_CG(counts, sample.label=s, K=initial.K, L=L, z.initialize="split", y.initialize="predefined", nchains=1, y.init=overall.y, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=FALSE)
     current.K = length(unique(model.initial@clusters$z)) + 1
     overall.z = model.initial@clusters$z
     res.list = list(model.initial)
@@ -115,9 +116,9 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
       temp.model = .celda_CG(counts, sample.label=s, K=current.K, L=L, y.init=overall.y, z.init=temp.split$z, nchains=1, z.initialize="predefined", y.initialize="predefined", split.on.last=FALSE, stop.iter=5, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=FALSE)
       
       ## Calculate new decomposed counts matrix with new module labels
-      overall.y = temp.model@clusters$y
-      p = cG.reDecomposeCounts(counts, overall.y, previous.y, counts.y, n.by.G, L = L)
-      counts.y = p$n.TS.by.C
+      #overall.y = temp.model@clusters$y
+      #p = cG.reDecomposeCounts(counts, overall.y, previous.y, counts.y, n.by.G, L = L)
+      #counts.y = p$n.TS.by.C
 
       ## If the number of clusters is still "current.K", then keep the reordering, otherwise keep the previous configuration
       if(length(unique(temp.model@clusters$z)) == current.K) {
@@ -146,6 +147,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
   } else {
     
     ## Create initial model with initial.K 
+    logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
     model.initial = .celda_C(counts, sample.label=s, K=initial.K, z.initialize="split", nchains=1, alpha=alpha, beta=beta, verbose=FALSE, seed=seed, reorder=FALSE)
     current.K = length(unique(model.initial@clusters$z)) + 1
     overall.z = model.initial@clusters$z
