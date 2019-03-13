@@ -540,7 +540,7 @@ setMethod("perplexity",
             
             eta.prob = log(eta) * nG.by.TS
             gene.by.cell.prob = log(phi %*% psi) 
-            log.px = sum(eta.prob) + sum(gene.by.cell.prob * new.counts)
+            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
             
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)
