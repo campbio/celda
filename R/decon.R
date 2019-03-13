@@ -9,10 +9,10 @@
 #' @param delta Numeric / Numeric vector. Concentration parameter for Theta. If input as a single numeric value, symmetric values for beta distribution are specified; if input as a vector of lenght 2, the two values will be the shape1 and shape2 paramters of the beta distribution respectively
 #' @param seed Integer. Passed to set.seed(). Default to be 12345. If NULL, no calls to `set.seed()` are made.
 #' @examples 
-#' contamination.sim =  simulateObservedMatrix(  K=3,  delta=c(1,9)) 
-#' contamination.sim =  simulateObservedMatrix(  K=3,  delta = 1) 
+#' contamination.sim =  simulateContaminatedMatrix(  K=3,  delta=c(1,9)) 
+#' contamination.sim =  simulateContaminatedMatrix(  K=3,  delta = 1) 
 #' @export
-simulateObservedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta = 0.5, delta=c(1,2),  seed=12345) {
+simulateContaminatedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), beta = 0.5, delta=c(1,2),  seed=12345) {
   
     if (!is.null(seed)) {
       set.seed(seed) 

@@ -3,28 +3,28 @@
   context("Testing Deconx")
 
 
-  Decon.sim = simulateObservedMatrix(K=10, delta=c(1,5), seed = 123)
+  Decon.sim = simulateContaminatedMatrix(K=10, delta=c(1,5), seed = 123)
   model_DecontXoneBatch = DecontXoneBatch( Decon.sim$rmat + Decon.sim$cmat, z= Decon.sim$z, max.iter=2, seed=1234567) 
   model_DecontXoneBatch.iter1 = DecontXoneBatch( Decon.sim$rmat + Decon.sim$cmat, z= Decon.sim$z, max.iter=1, seed=1234567)
 
   model_DecontXoneBatchbg = DecontX( Decon.sim$rmat+Decon.sim$cmat, max.iter=2, seed=1234567) 
 
-  Decon.sim2 = simulateObservedMatrix(K=10, delta=c(1,5), seed = 74) 
+  Decon.sim2 = simulateContaminatedMatrix(K=10, delta=c(1,5), seed = 74) 
   batch_DecontX = DecontX( cbind( Decon.sim$rmat+Decon.sim$cmat, Decon.sim2$rmat+Decon.sim2$cmat ) ,z=c( Decon.sim$z, Decon.sim2$z) , batch = rep( 1:2, each = ncol(Decon.sim$rmat) )  , max.iter=2, seed=1234567)  
   batch_DecontX.bg = DecontX( cbind( Decon.sim$rmat+Decon.sim$cmat, Decon.sim2$rmat+Decon.sim2$cmat ) , batch = rep( 1:2, each = ncol(Decon.sim$rmat) )  , max.iter=2, seed=1234567)  
 
 
-  # simulateObservedMatrix
-  test_that( desc = "Testing simulateObservedMatrix", { 
+  # simulateContaminatedMatrix
+  test_that( desc = "Testing simulateContaminatedMatrix", { 
     expect_equivalent( object= colSums(Decon.sim$rmat) + colSums(Decon.sim$cmat),  expected=Decon.sim$N.by.C)
     expect_equal( object=dim(Decon.sim$phi), expected=dim(Decon.sim$eta) ) 
     expect_equal( typeof(Decon.sim$rmat), "integer")
     expect_equal( typeof(Decon.sim$cmat), "integer")
     
-    Decon.sim.SingleDelta = simulateObservedMatrix(K=10, delta=1)
+    Decon.sim.SingleDelta = simulateContaminatedMatrix(K=10, delta=1)
     expect_equivalent( object=colSums(Decon.sim.SingleDelta$rmat) + colSums(Decon.sim.SingleDelta$cmat), expected=Decon.sim.SingleDelta$N.by.C)
 
-    Decon.sim.KTooLarge = simulateObservedMatrix(K=101, C=10)
+    Decon.sim.KTooLarge = simulateContaminatedMatrix(K=101, C=10)
     expect_equal( unique(Decon.sim.KTooLarge$z), 1:ncol(Decon.sim.KTooLarge$eta) )
 
     } )
