@@ -13,9 +13,9 @@
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
-#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.
-#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
+#' @param y.initialize Chararacter. One of 'random', 'split', or 'predefined'. With 'random', features are randomly assigned to a modules. With 'split', features will be split into sqrt(L) modules and then each module will be subsequently split into another sqrt(L) modules. With 'predefined', values in `y.init` will be used to initialize `y`. Default 'split'.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from `1:L`. `y.init` can only be used when `initialize = 'random'`. Default NULL.
+#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class `celda_G` with the feature module clusters stored in `y`.
@@ -25,19 +25,19 @@
 #' @export
 celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
+					seed=12345, nchains=3, y.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
 					y.init=NULL, logfile=NULL, verbose=TRUE) {
   
   validateCounts(counts)
   return(.celda_G(counts, L, beta, delta, gamma, stop.iter, max.iter, split.on.iter,
-                  split.on.last, seed, nchains, initialize, count.checksum,
-                  y.init, logfile, verbose))
+                  split.on.last, seed, nchains, y.initialize, count.checksum,
+                  y.init, logfile, verbose, reorder=TRUE))
 }
 
 .celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 					stop.iter=10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-					seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL, 
-					y.init=NULL, logfile=NULL, verbose=TRUE) {
+					seed=12345, nchains=3, y.initialize=c("split", "random", "predefined"), count.checksum=NULL, 
+					y.init=NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_G: Clustering genes.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -49,7 +49,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   if(is.null(count.checksum)) {
     count.checksum = digest::digest(counts, algo="md5")
   }
-  initialize = match.arg(initialize)
+  y.initialize = match.arg(y.initialize)
    
   all.seeds = seed:(seed + nchains - 1)
 
@@ -64,14 +64,17 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	## Randomly select y or y to supplied initial values
 	## Initialize cluster labels
     current.seed = all.seeds[i]	
-    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+    logMessages(date(), ".. Initializing 'y' in chain", i, "with", paste0("'", y.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
 
-    if(initialize == "random") {
-	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
-	} else {
-	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=100, seed=seed)
-	}  
-	y.best = y  
+    if(y.initialize == "predefined") {
+      if(is.null(y.init)) stop("'y.init' needs to specified when initilize.y == 'given'.")
+      y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)  
+    } else if(y.initialize == "split") {
+      y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
+    } else {
+      y = initialize.cluster(L, nrow(counts), initial = NULL, fixed = NULL, seed=current.seed)  
+    } 
+    y.best = y  
 
 	## Calculate counts one time up front
 	p = cG.decomposeCounts(counts=counts, y=y, L=L)
@@ -83,9 +86,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
 	nG = p$nG
 	rm(p)
 
-	if (!is.null(seed)) {
-	  set.seed(seed)
-	}
+	setSeed(seed)
   
 	## Calculate initial log likelihood
 	ll <- cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=L, beta=beta, delta=delta, gamma=gamma)
@@ -160,7 +161,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
                                          count.checksum=count.checksum, seed=current.seed),
                              completeLogLik=ll, finalLogLik=ll.best, 
                              names=names)
-  best.result = reorder.celda_G(counts = counts, res = best.result) 
+  if(isTRUE(reorder)) best.result = reorder.celda_G(counts = counts, res = best.result) 
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
@@ -192,7 +193,6 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
   ix <- sample(1:nG)
   for(i in ix) {
     probs[,i] = cG_CalcGibbsProbY(index=i, counts=counts, nTSbyC=n.TS.by.C, nbyTS=n.by.TS, nGbyTS=nG.by.TS, nbyG=n.by.G, y=y, L=L, nG=nG, lg_beta=lgbeta, lg_gamma=lggamma, lg_delta=lgdelta, delta=delta)
-    #if(any(is.na(probs[,i]))) browser()
 	## Sample next state and add back counts
 	if(isTRUE(do.sample)) {
 	  prev.y = y[i]
@@ -235,9 +235,7 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
                                  L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  setSeed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
   y = sample(1:L, size=G, prob=eta, replace=TRUE)
@@ -307,7 +305,7 @@ setMethod("factorizeMatrix",
            function(counts, celda.mod, 
                     type=c("counts", "proportion", "posterior")) {
             counts = processCounts(counts)
-            compareCountMatrix(counts, celda.mod)
+            #compareCountMatrix(counts, celda.mod)
             
             L = celda.mod@params$L
             y = celda.mod@clusters$y
@@ -440,6 +438,9 @@ logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
 # @param L Integer. Number of feature modules.  
 cG.decomposeCounts = function(counts, y, L) {
 
+  if(any(y > L)) {
+    stop("Entries in the module clusters 'y' are greater than L.")
+  }
   n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
   n.by.G = as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
   n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
@@ -518,7 +519,7 @@ setMethod("perplexity",
           signature(celda.mod = "celda_G"),
           function(counts, celda.mod, new.counts=NULL) {
             counts = processCounts(counts)
-            compareCountMatrix(counts, celda.mod)
+            #compareCountMatrix(counts, celda.mod)
           
             if(is.null(new.counts)) {
               new.counts = counts
@@ -538,7 +539,7 @@ setMethod("perplexity",
             
             eta.prob = log(eta) * nG.by.TS
             gene.by.cell.prob = log(phi %*% psi) 
-            log.px = sum(eta.prob) + sum(gene.by.cell.prob * new.counts)
+            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
             
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)

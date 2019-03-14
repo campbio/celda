@@ -22,7 +22,12 @@ SEXP _rowSumByGroup(SEXP R_x, SEXP R_group)
   if (LENGTH(R_group) != nr) {
     error("The length of the grouping argument must match the number of rows in the matrix");
   }
-
+  for (i = 0; i < nr; i++) {
+    if(group[i] == NA_INTEGER) {
+      error("Labels in group and pgroup must not be NA.");
+    }
+  }  
+  
   // Allocate a variable for the return matrix
   SEXP R_ans;
   PROTECT(R_ans = allocMatrix(INTSXP, nl, nc));
@@ -62,6 +67,11 @@ SEXP _colSumByGroup(SEXP R_x, SEXP R_group)
   if (LENGTH(R_group) != nc) {
     error("The length of the grouping argument must match the number of columns in the matrix");
   }
+  for (i = 0; i < nc; i++) {
+    if(group[i] == NA_INTEGER) {
+      error("Labels in group and pgroup must not be NA.");
+    }
+  }  
   
   // Allocate a variable for the return matrix
   SEXP R_ans;
@@ -116,7 +126,12 @@ SEXP _rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
   if(length(R_group) != length(R_pgroup) || length(R_group) != nr) {
     error("group label and previous group label must be the same length as the number of rows in x.");
   }
-  
+  for (i = 0; i < nr; i++) {
+    if(group[i] == NA_INTEGER || pgroup[i] == NA_INTEGER) {
+      error("Labels in group and pgroup must not be NA.");
+    }
+  }  
+
   int g_ix;
   int pg_ix;
   for (i = 0; i < nr; i++) {
@@ -162,6 +177,11 @@ SEXP _colSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
   if(length(R_group) != length(R_pgroup) || length(R_group) != nc) {
     error("group label and previous group label must be the same length as the number of columns in x.");
   }
+  for (i = 0; i < nc; i++) {
+    if(group[i] == NA_INTEGER || pgroup[i] == NA_INTEGER) {
+      error("Labels in group and pgroup must not be NA.");
+    }
+  }  
   
   // Sum the totals for each element of the 'group' variable,
   // But only where the group label is different than the previous label

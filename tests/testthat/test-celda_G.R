@@ -37,7 +37,8 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, 
                                 model = "celda_G", nchains = 2, 
                                 params.test=list(L=c(5,10)), 
-                                max.iter = 1, verbose = FALSE, best.only=FALSE)
+                                max.iter = 1, verbose = FALSE, 
+                                best.only = FALSE, perplexity = FALSE)
   
   expect_error(celdaGridSearch(counts=celdaG.sim$counts, 
                                model="celda_G", params.test=list(L=10, M = 4), 

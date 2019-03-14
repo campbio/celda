@@ -27,9 +27,7 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
   }  
 
   ## Randomly sample remaining values
-  if (!is.null(seed)) {
-    set.seed(seed)
-  }
+  setSeed(seed)
   z.na = which(is.na(z))
   if(length(z.na) > 0) {
     z[z.na] = sample(z.not.used, length(z.na), replace=TRUE)
@@ -50,123 +48,204 @@ initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, se
 }
 
 
-recursive.splitZ = function(counts, s, K, alpha, beta, min.cell = 3, seed=12345) {
-  current.K = 2
-  overall.z = rep(1, ncol(counts))
-  cluster.splits = matrix(NA, nrow=ncol(counts), ncol=K)
-  cluster.split.flag = rep(TRUE, K)
+
+
+initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=12345) {
+  s = rep(1, ncol(counts))
+  if(is.null(K.subcluster)) K.subcluster = ceiling(sqrt(K))
+  
+  ## Initialize the model with K.subcluster clusters
+  res = .celda_C(counts, K=K.subcluster, max.iter=20, z.initialize="random", alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
+  overall.z = as.integer(as.factor(res@clusters$z))
+  current.K = max(overall.z)
+  
+  while(current.K < K) {
     
-  while(current.K <= K) {
+    ## Determine which clusters are split-able
+    K.remaining = K - current.K
+    K.per.cluster = min(ceiling(K / current.K), K.subcluster)
+    K.to.use = ifelse(K.per.cluster < 2, 2, K.per.cluster)
 
-    z.ta = tabulate(overall.z, K)
-    z.to.split = which(z.ta > min.cell)
-
-    ## Split each cluster <= current.K and number of cells > min.cell
+    z.ta = tabulate(overall.z, max(overall.z))
+    z.to.split = sample(which(z.ta > min.cell & z.ta > K.to.use))
+    
+    ## Cycle through each splitable cluster and split it up into K.sublcusters
     for(i in z.to.split) {
-      if(isTRUE(cluster.split.flag[i])) {
-        ix = which(overall.z == i)
-        res = suppressMessages(.celda_C(counts[,ix], K=2, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchains=1, seed=seed, verbose=FALSE, initialize="random"))
-        cluster.splits[cbind(ix, i)] = res@clusters$z
-        cluster.split.flag[i] = FALSE
+      
+      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.to.use, z.initialize="random", alpha=alpha, beta=beta, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
+      temp.z = as.integer(as.factor(clustLabel@clusters$z))
+      
+      ## Reassign clusters with label > 1
+      split.ix = temp.z > 1
+      ix = overall.z == i
+      new.z = overall.z[ix]
+      new.z[split.ix] = current.K + temp.z[split.ix] - 1
+      
+      overall.z[ix] = new.z
+      current.K = max(overall.z)
+
+      ## Ensure that the maximum number of clusters does not get too large'      
+      if(current.K > K + 10) {
+        break()
       }
     }
-
-    ## Calculate likelihood for each cluster split
-    temp.z = matrix(overall.z, nrow=ncol(counts), ncol=length(z.to.split))
-  	ll = vector(mode="numeric", length=ncol(temp.z))    
-  	for(i in 1:ncol(temp.z)) {
-  	  temp.z[cluster.splits[,i] == 2,i] = current.K 
-  	  ll[i] = logLikelihood.celda_C(counts, "celda_C", s, temp.z[,i], current.K, alpha, beta)	  
-  	}  
-
-    ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
-    best.ix = which.max(ll)
-  	overall.z = temp.z[,best.ix]  
-  	cluster.splits[,z.to.split[best.ix]] = NA
-    cluster.split.flag[z.to.split[best.ix]] = TRUE
-    	
-	  current.K = current.K + 1
   }
   
-  return(overall.z)
-}  
+  ## Decompose counts for likelihood calculation
+  p = cC.decomposeCounts(counts, s, overall.z, current.K)
+  nS = p$nS
+  nG = p$nG
+  nM = p$nM
+  m.CP.by.S = p$m.CP.by.S
+  n.G.by.CP = p$n.G.by.CP
+  n.CP = p$n.CP
+  n.by.C = p$n.by.C
 
-
-recursive.splitY = function(counts, L, beta, delta, gamma, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=100, seed=12345) {
-
-  ## Decrease number cells into cell populations to save time
-  ## If z and K are supplied from previous cell clustering, then each cluster will be split into K.subclusters
-  if(!is.null(z) & !is.null(K) & !is.null(K.subclusters)) {
-    if(K * K.subclusters > max.cells) {
-      K.subclusters = round(max.cells / K)
-    }
-
-	z.ta = tabulate(z, K)
-	z.non.empty = which(z.ta > 0)
-	temp.z = rep(0, length(z))
-	current.top.z = 0
-	for(i in z.non.empty) { 
-	  ix = z == i
-	  if(z.ta[i] <= K.subclusters) {
-		temp.z[ix] = (current.top.z + 1):(current.top.z + z.ta[i])
-	  } else {
-		clustLabel = suppressMessages(.celda_C(counts[,z == i], K=K.subclusters, max.iter=5, stop.iter=1, algorithm="EM", nchains=1, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, initialize="random"))
-		temp.z[ix] = clustLabel@clusters$z + current.top.z 
-	  }
-	  current.top.z = max(temp.z, na.rm=TRUE)
-	}
-  ## If z or K are not supplied from previous cell clustering, then each cluster will be split into 'max.cells' subclusters
-  } else {
-	if(ncol(counts) > max.cells) {
-	  res = .celda_C(counts, K=max.cells, stop.iter = 1, split.on.iter=-1, split.on.last=FALSE, nchains=3, seed=seed, verbose=FALSE)
-	  temp.z = res@clusters$z
-	} else {
-	  temp.z = 1:ncol(counts)
-	}
-  }
-  
-  ## Make collapsed count matrix based on z labels
-  counts = colSumByGroup(counts, as.integer(as.factor(temp.z)), length(unique(temp.z)))
-  
-  ## Perform splitting for y labels
-  current.L = 2
-  overall.y = rep(1, nrow(counts))
-  cluster.splits = matrix(NA, nrow=nrow(counts), ncol=L)
-  cluster.split.flag = rep(TRUE, L)
+  ## Remove clusters 1-by-1 until K is reached
+  while(current.K > K) {
+    ## Find second best assignment give current assignments for each cell
+    probs = cC.calcEMProbZ(counts, s=s, z=overall.z, K=current.K, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, nG=nG, nM=nM, alpha=alpha, beta=beta, do.sample=FALSE)
+    z.prob = t(probs$probs)
+    z.prob[cbind(1:nrow(z.prob), overall.z)] = NA
+    z.second = apply(z.prob, 1, which.max)
     
-  while(current.L <= L) {
+    z.ta = tabulate(overall.z, current.K)
+    z.non.empty = which(z.ta > 0)
 
-    y.ta = tabulate(overall.y, L)
-    y.to.split = which(y.ta > min.feature)
+    ## Find worst cluster by logLik to remove
+    previous.z = overall.z
+    ll.shuffle = rep(NA, current.K)
+    for(i in z.non.empty) {
+      ix = overall.z == i
+      new.z = overall.z
+      new.z[ix] = z.second[ix]
 
-    ## Split each cluster <= current.L and number of features > min.feature
-    for(i in y.to.split) {
-      if(isTRUE(cluster.split.flag[i])) {
-        ix = which(overall.y == i)
-        res = suppressMessages(.celda_G(counts[ix,], L=2, max.iter = 5, split.on.iter=-1, split.on.last=FALSE, nchains=1, seed=seed, verbose=FALSE, initialize="random"))
-        cluster.splits[cbind(ix, i)] = res@clusters$y
-        cluster.split.flag[i] = FALSE
-      }
-    }
+      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, current.K)
+      n.G.by.CP = p$n.G.by.CP
+      m.CP.by.S = p$m.CP.by.S
+      ll.shuffle[i] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, new.z, current.K, nS, nG, alpha, beta) 
+      previous.z = new.z
+    } 
+    
+    ## Remove the cluster which had the the largest likelihood after removal
+    z.to.remove = which.max(ll.shuffle)
 
-    ## Calculate likelihood for each cluster split
-    temp.y = matrix(overall.y, nrow=nrow(counts), ncol=length(y.to.split))
-	  ll = vector(mode="numeric", length=ncol(temp.y))    
-	  for(i in 1:ncol(temp.y)) {
-	    temp.y[cluster.splits[,i] == 2,i] = current.L
-	    ll[i] = logLikelihood.celda_G(counts=counts, y=temp.y[,i], 
-	                                  L=current.L, beta=beta, delta=delta, 
-	                                  gamma=gamma)
-	}  
+    ix = overall.z == z.to.remove
+    overall.z[ix] = z.second[ix]
+    
+    p = cC.reDecomposeCounts(counts, s, overall.z, previous.z, n.G.by.CP, current.K)
+    n.G.by.CP = p$n.G.by.CP[,-z.to.remove,drop=FALSE]
+    m.CP.by.S = p$m.CP.by.S[-z.to.remove,,drop=FALSE]
+    overall.z = as.integer(as.factor(overall.z))        
+    current.K = current.K - 1
+  }  
+  return(overall.z)
+}
 
-    ## Choose best split. Reset flags so the old cluster will be re-evaluated for splitting
-    best.ix = which.max(ll)
-  	overall.y = temp.y[,best.ix]  
-  	cluster.splits[,y.to.split[best.ix]] = NA
-    cluster.split.flag[y.to.split[best.ix]] = TRUE
-    	
-	  current.L = current.L + 1
+
+
+
+
+initialize.splitY = function(counts, L, L.subcluster=NULL, temp.K=100, beta=1, delta=1, gamma=1, min.feature = 3, seed=12345) {
+
+  if(is.null(L.subcluster)) L.subcluster = ceiling(sqrt(L))
+  
+  ## Collapse cells to managable number of clusters
+  if(!is.null(temp.K) && ncol(counts) > temp.K) {
+    z = initialize.splitZ(counts, K=temp.K, seed=seed)  
+    counts = colSumByGroup(counts, z, length(unique(z)))
   }
   
+  ## Initialize the model with K.subcluster clusters
+  res = .celda_G(counts, L=L.subcluster, max.iter=10, y.initialize="random", beta=beta, delta=delta, gamma=gamma, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
+  overall.y = as.integer(as.factor(res@clusters$y))
+  current.L = max(overall.y)
+  
+  while(current.L < L) {
+    ## Determine which clusters are split-able
+    y.ta = tabulate(overall.y, max(overall.y))
+    y.to.split = sample(which(y.ta > min.feature & y.ta > L.subcluster))
+    
+    ## Cycle through each splitable cluster and split it up into L.sublcusters
+    for(i in y.to.split) {
+      
+      clustLabel = .celda_G(counts[overall.y == i,,drop=FALSE], L=L.subcluster, y.initialize="random", beta=beta, delta=delta, gamma=gamma, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
+      temp.y = as.integer(as.factor(clustLabel@clusters$y))
+      
+      ## Reassign clusters with label > 1
+      split.ix = temp.y > 1
+      ix = overall.y == i
+      new.y = overall.y[ix]
+      new.y[split.ix] = current.L + temp.y[split.ix] - 1
+      
+      overall.y[ix] = new.y
+      current.L = max(overall.y)
+
+      ## Ensure that the maximum number of clusters does not get too large
+      if(current.L > L + 10) {
+        break()
+      }
+    }
+  }
+  
+  ## Decompose counts for likelihood calculation
+  p = cG.decomposeCounts(counts=counts, y=overall.y, L=current.L)
+  n.TS.by.C = p$n.TS.by.C
+  n.by.G = p$n.by.G
+  n.by.TS = p$n.by.TS
+  nG.by.TS = p$nG.by.TS
+  nM = p$nM
+  nG = p$nG
+  rm(p)
+
+  # Pre-compute lgamma values
+  lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
+  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
+  lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
+  
+  ## Remove clusters 1-by-1 until L is reached
+  while(current.L > L) {
+
+    ## Find second best assignment give current assignments for each cell
+    probs = cG.calcGibbsProbY(counts=counts, y=overall.y, L=current.L, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta, do.sample=FALSE)
+    y.prob = t(probs$probs)
+    y.prob[cbind(1:nrow(y.prob), overall.y)] = NA
+    y.second = apply(y.prob, 1, which.max)
+    
+    y.ta = tabulate(overall.y, current.L)
+    y.non.empty = which(y.ta > 0)
+    
+    ## Find worst cluster by logLik to remove
+    previous.y = overall.y
+    ll.shuffle = rep(NA, current.L)
+    for(i in y.non.empty) {
+      ix = overall.y == i
+      new.y = overall.y
+      new.y[ix] = y.second[ix]
+      
+      ## Move arounds counts for likelihood calculation
+      p = cG.reDecomposeCounts(counts, new.y, previous.y, n.TS.by.C, n.by.G, current.L)
+      n.TS.by.C = p$n.TS.by.C
+      nG.by.TS = p$nG.by.TS
+      n.by.TS = p$n.by.TS
+      ll.shuffle[i] = cG.calcLL(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, current.L, beta, delta, gamma) 
+      previous.y = new.y
+    } 
+    
+    ## Remove the cluster which had the the largest likelihood after removal
+    y.to.remove = which.max(ll.shuffle)
+    
+    ix = overall.y == y.to.remove
+    overall.y[ix] = y.second[ix]
+
+    ## Move around counts and remove module
+    p = cG.reDecomposeCounts(counts, overall.y, previous.y, n.TS.by.C, n.by.G, current.L)
+    n.TS.by.C = p$n.TS.by.C[-y.to.remove,,drop=FALSE]
+    nG.by.TS = p$nG.by.TS[-y.to.remove]
+    n.by.TS = p$n.by.TS[-y.to.remove]
+    overall.y = as.integer(as.factor(overall.y))    
+    current.L = current.L - 1
+  }  
   return(overall.y)
-} 
+}
+
