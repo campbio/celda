@@ -39,7 +39,8 @@ Imports:
     vcd,
     ggpubr,
     stringi,
-    SummarizedExperiment
+    SummarizedExperiment,
+    MCMCprecision
 Suggests:
     testthat,
     knitr,
