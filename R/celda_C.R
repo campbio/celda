@@ -532,7 +532,7 @@ setMethod("clusterProbability",
 setMethod("perplexity",
           signature(celda.mod = "celda_C"),
           function(counts, celda.mod, new.counts=NULL) {
-            compareCountMatrix(counts, celda.mod)
+            
             if (!("celda_C" %in% class(celda.mod))) { 
               stop("The celda.mod provided was not of class celda_C.")
             }
