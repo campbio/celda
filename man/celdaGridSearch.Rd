@@ -6,7 +6,8 @@
 \usage{
 celdaGridSearch(counts, model, params.test, params.fixed = NULL,
   max.iter = 200, nchains = 3, cores = 1, best.only = TRUE,
-  seed = 12345, verbose = TRUE, logfile.prefix = "Celda")
+  seed = 12345, perplexity = TRUE, verbose = TRUE,
+  logfile.prefix = "Celda")
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -26,6 +27,8 @@ celdaGridSearch(counts, model, params.test, params.fixed = NULL,
 \item{best.only}{Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE.}
 
 \item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+
+\item{perplexity}{Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain execution. Default TRUE.}
 
