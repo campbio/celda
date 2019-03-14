@@ -533,15 +533,15 @@ setMethod("perplexity",
             
             factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
                                          type=c("posterior", "counts"))
-            phi <- factorized$posterior$module
-            psi <- factorized$posterior$cell
+            psi <- factorized$posterior$module
+            phi <- factorized$posterior$cell
             eta <- factorized$posterior$gene.distribution
             nG.by.TS = factorized$counts$gene.distribution
             
             eta.prob = log(eta) * nG.by.TS
-            gene.by.cell.prob = log(phi %*% psi) 
-            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
-            
+#            gene.by.cell.prob = log(psi %*% phi) 
+#            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
+            log.px = perplexityG_logPx(new.counts, phi, psi, celda.mod@clusters$y, celda.mod@params$L)# + sum(eta.prob) 
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)
           })
