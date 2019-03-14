@@ -8,8 +8,10 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
   stop.iter = 10, max.iter = 200, split.on.iter = 10,
   split.on.last = TRUE, seed = 12345, nchains = 3,
-  initialize = c("random", "split"), count.checksum = NULL,
-  z.init = NULL, y.init = NULL, logfile = NULL, verbose = TRUE)
+  z.initialize = c("split", "random", "predefined"),
+  y.initialize = c("split", "random", "predefined"),
+  count.checksum = NULL, z.init = NULL, y.init = NULL,
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -42,7 +44,9 @@ celda_CG(counts, sample.label = NULL, K, L, alpha = 1, beta = 1,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.}
+\item{z.initialize}{Chararacter. One of 'random', 'split', or 'predefined'. With 'random', cells are randomly assigned to a populations. With 'split', cells will be split into sqrt(K) populations and then each popluation will be subsequently split into another sqrt(K) populations. With 'predefined', values in `z.init` will be used to initialize `z`. Default 'split'.}
+
+\item{y.initialize}{Chararacter. One of 'random', 'split', or 'predefined'. With 'random', features are randomly assigned to a modules. With 'split', features will be split into sqrt(L) modules and then each module will be subsequently split into another sqrt(L) modules. With 'predefined', values in `y.init` will be used to initialize `y`. Default 'split'.}
 
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 

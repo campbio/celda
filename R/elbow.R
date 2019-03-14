@@ -17,7 +17,6 @@ secondDerivativeEstimate = function(v) {
   return(res)
 }  
 
-#' @export
 curveElbow = function(var, perplexity, pval.cutoff = 0.05) {
   
   len = length(perplexity)
