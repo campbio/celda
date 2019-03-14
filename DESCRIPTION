@@ -52,7 +52,8 @@ Suggests:
     Rtsne,
     covr,
     M3DExampleData,
-    BiocManager
+    BiocManager,
+    BiocStyle
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
