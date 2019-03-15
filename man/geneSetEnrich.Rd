@@ -29,8 +29,6 @@ Identify and return significantly-enriched terms for each gene
  identified modules using the enrichR package.
 }
 \examples{
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("M3DExampleData")
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
 #subset 100 genes for fast clustering

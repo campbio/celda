@@ -39,7 +39,7 @@ Highly expressed genes from various cells clusters will be expressed at low leve
 
 To simulate two 300 (gene) x 100 (cell) count matrices from 3 different cell types with total reads per cell ranged from 5000 to 40000: one matrix being ture expression matrix (rmat), the other matrix being contamination count matrix (cmat)
 ```
-sim.con = simulateObservedMatrix( C = 100, G = 300, K = 3, N.Range= c(5000, 40000), seed = 9124) 
+sim.con = simulateContaminatedMatrix( C = 100, G = 300, K = 3, N.Range= c(5000, 40000), seed = 9124) 
 true.contamination.percentage = colSums( sim.con$cmat ) / colSums( sim.con$cmat + sim.con$rmat ) 
 str(sim.con)   
 # rmat: simulated true expression (gene by cell) count matrix
@@ -52,7 +52,7 @@ Use DecontX to decompose the observed (contaminated) count matrix back into true
 ```
 observed.mat = sim.con$rmat + sim.con$cmat 
 cell.label = sim.con$z
-new.counts = DecontX( omat = observed.mat, z = cell.label,  max.iter = 200, seed = 123) 
+new.counts = DecontX( counts = observed.mat, z = cell.label,  max.iter = 200, seed = 123) 
 str(new.counts) 
 # Decontaminated matrix: new.counts$res.list$est.rmat
 # Percentage of contamination per cell: new.counts$res.list$est.conp
