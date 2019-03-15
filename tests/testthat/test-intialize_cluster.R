@@ -1,12 +1,12 @@
-test_that(desc = "Test 'split' initialization for all models", {
+test_that(desc = "Test 'random' initialization for all models", {
   sim.res = simulateCells(model="celda_CG")
   model_CG <- celda_CG(sim.res$counts, sim.res$sample.label, K=sim.res$K, L=sim.res$L, 
-                       initialize="split", max.iter=5, split.on.last=FALSE, 
+                       z.initialize="random", y.initialize="random", max.iter=5, split.on.last=FALSE, 
                        split.on.iter=-1)
   expect_true(is(model_CG, "celda_CG"))
-  model_G <- celda_G(sim.res$counts, L=sim.res$L, initialize="split", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
+  model_G <- celda_G(sim.res$counts, L=sim.res$L, y.initialize="random", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
   expect_true(is(model_G, "celda_G"))
-  model_C <- celda_C(sim.res$counts, sim.res$sample.label, K=sim.res$K, initialize="split", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
+  model_C <- celda_C(sim.res$counts, sim.res$sample.label, K=sim.res$K, z.initialize="random", max.iter=5, split.on.last=FALSE, split.on.iter=-1)
   expect_true(is(model_C, "celda_C"))
 })
 
@@ -38,18 +38,3 @@ test_that(desc = "Testing initialize.cluster for random initialization", {
 })
 
 
-
-test_that(desc = "Testing additional recursive.splitY error checking", {
-  L = 10
-  sim.res = simulateCells(model="celda_G", L=L)
-  z = initialize.cluster(10, ncol(sim.res$counts))
-  y = recursive.splitY(sim.res$counts, sim.res$L, beta=1, delta=1, gamma=1, z=z, K=15, K.subclusters=15, min.feature=3, max.cells=50, seed=12345)
-  expect_true(length(y) == nrow(sim.res$counts) & length(unique(y)) == L)
-
-  z[z == 1] = 2
-  z[1] = 1
-  y = recursive.splitY(sim.res$counts, sim.res$L, beta=1, delta=1, gamma=1, z=z, K=15, K.subclusters=15, min.feature=3, max.cells=50, seed=12345)
-  expect_true(length(y) == nrow(sim.res$counts) & length(unique(y)) == L)  
-  y = recursive.splitY(sim.res$counts, sim.res$L, beta=1, delta=1, gamma=1, z=NULL, K=NULL, K.subclusters=NULL, min.feature=3, max.cells=1000, seed=12345)
-  expect_true(length(y) == nrow(sim.res$counts) & length(unique(y)) == L)  
-})

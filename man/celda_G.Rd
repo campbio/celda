@@ -6,7 +6,7 @@
 \usage{
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
   max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
-  seed = 12345, nchains = 3, initialize = c("random", "split"),
+  seed = 12345, nchains = 3, y.initialize = c("split", "random"),
   count.checksum = NULL, y.init = NULL, logfile = NULL,
   verbose = TRUE)
 }
@@ -33,7 +33,7 @@ celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_G()` until the specified L is reached. Default 'random'.}
+\item{y.initialize}{Chararacter. One of 'random', 'split', or 'predefined'. With 'random', features are randomly assigned to a modules. With 'split', features will be split into sqrt(L) modules and then each module will be subsequently split into another sqrt(L) modules. With 'predefined', values in `y.init` will be used to initialize `y`. Default 'split'.}
 
 \item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
