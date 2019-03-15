@@ -229,7 +229,7 @@ In the previous example, the best K and L was already known. However, the optima
 
 Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. The `resamplePerplexity` function "perturbs" the original counts matrix by resampling the counts of each cell according to its normalized probability distribution. Perplexity is calculated on the resampled matrix and the procedure is repeated `resample` times. These results can be visualized with `plotGridSearchPerplexity`. The major goal is to pick the lowest K and L combination with relatively good perplexity. In general, visual inspection of the plot can be used to select the number of modules (L) or cell populations (K) where the rate of decrease in the perplexity starts to drop off.
 
-```{r, eval = FALSE, message = FALSE}
+```{r, eval = TRUE, message = FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
                        params.test = list(K = 3:7, L = 8:12),
                        cores = 1,
@@ -243,7 +243,7 @@ cgs = celdaGridSearch(sim_counts$counts,
 
 `resamplePerplexity` calculates the perplexity of each model's cluster assignments, as well as resamplings of that count matrix. The result of this function can be visualized with `plotGridSearchPerplexity` for determination of the optimal K/L values.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 cgs = resamplePerplexity(counts = sim_counts$counts,
                           celda.list = cgs,
                           resample = 5)
