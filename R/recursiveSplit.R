@@ -61,6 +61,7 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Only used if `y.init` is set. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Only used if `y.init` is set. Default 1. 
 #' @param min.cell Integer. Only attempt to split cell populations with at least this many cells.
+#' @param reorder Logical. Whether to reorder cell populations using hierarchical clustering after each model has been created. If FALSE, cell populations numbers will correspond to the split which created the cell populations (i.e. 'K15' was created at split 15, 'K16' was created at split 16, etc.). Default TRUE.
 #' @param perplexity Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
@@ -81,11 +82,15 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
 #' plotGridSearchPerplexity(cell.split) 
 #' celda.mod = subsetCeldaList(cell.split, list(K=5, L=10))
 #' @export
-recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, y.init=NULL, alpha=1, beta=1, delta=1, gamma=1, min.cell = 3, perplexity=TRUE, seed=12345, logfile=NULL, verbose=TRUE) {
+recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, y.init=NULL, alpha=1, beta=1, delta=1, gamma=1, min.cell = 3, reorder=TRUE, perplexity=TRUE, seed=12345, logfile=NULL, verbose=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting recursive cell population splitting.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
+
+  ## Global flag to determine whether the cell populations and modules of each new model should be reordered by hierachical clustering  
+  ## Could be added as an argument
+  reorder=TRUE  
   
   start.time = Sys.time()
   counts = processCounts(counts)
@@ -106,14 +111,14 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     
     ## Create initial model with initial.K and predifined y labels
     logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
-    model.initial = .celda_CG(counts, sample.label=s, K=initial.K, L=L, z.initialize="split", y.initialize="predefined", nchains=1, y.init=overall.y, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=FALSE)
+    model.initial = .celda_CG(counts, sample.label=s, K=initial.K, L=L, z.initialize="split", y.initialize="predefined", nchains=1, y.init=overall.y, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=reorder)
     current.K = length(unique(model.initial@clusters$z)) + 1
     overall.z = model.initial@clusters$z
     res.list = list(model.initial)
     while(current.K <= max.K) {
       previous.y = overall.y
       temp.split = singleSplitZ(counts.y, overall.z, s, current.K, min.cell=3, alpha=alpha, beta=beta, seed=seed)
-      temp.model = .celda_CG(counts, sample.label=s, K=current.K, L=L, y.init=overall.y, z.init=temp.split$z, nchains=1, z.initialize="predefined", y.initialize="predefined", split.on.last=FALSE, stop.iter=5, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=FALSE)
+      temp.model = .celda_CG(counts, sample.label=s, K=current.K, L=L, y.init=overall.y, z.init=temp.split$z, nchains=1, z.initialize="predefined", y.initialize="predefined", split.on.last=FALSE, stop.iter=5, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=reorder)
       
       ## Calculate new decomposed counts matrix with new module labels
       #overall.y = temp.model@clusters$y
@@ -148,14 +153,14 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     
     ## Create initial model with initial.K 
     logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
-    model.initial = .celda_C(counts, sample.label=s, K=initial.K, z.initialize="split", nchains=1, alpha=alpha, beta=beta, verbose=FALSE, seed=seed, reorder=FALSE)
+    model.initial = .celda_C(counts, sample.label=s, K=initial.K, z.initialize="split", nchains=1, alpha=alpha, beta=beta, verbose=FALSE, seed=seed, reorder=reorder)
     current.K = length(unique(model.initial@clusters$z)) + 1
     overall.z = model.initial@clusters$z
     res.list = list(model.initial)
     while(current.K <= max.K) {
       
       temp.split = singleSplitZ(counts, overall.z, s, current.K, min.cell=3, alpha=alpha, beta=beta, seed=seed)
-      temp.model = .celda_C(counts, sample.label=s, K=current.K, nchains=1, z.initialize="random", alpha=alpha, beta=beta, stop.iter=5, split.on.last=FALSE, verbose=FALSE, z.init=temp.split$z, seed=seed, reorder=FALSE)    
+      temp.model = .celda_C(counts, sample.label=s, K=current.K, nchains=1, z.initialize="random", alpha=alpha, beta=beta, stop.iter=5, split.on.last=FALSE, verbose=FALSE, z.init=temp.split$z, seed=seed, reorder=reorder)    
 
       if(length(unique(temp.model@clusters$z)) == current.K) {
         overall.z = temp.model@clusters$z
@@ -209,6 +214,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
 #' @param min.feature Integer. Only attempt to split modules with at least this many features.
+#' @param reorder Logical. Whether to reorder modules using hierarchical clustering after each model has been created. If FALSE, module numbers will correspond to the split which created the module (i.e. 'L15' was created at split 15, 'L16' was created at split 16, etc.). Default TRUE.
 #' @param perplexity Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
@@ -225,12 +231,12 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 #' ## Select model for downstream analysis
 #' celda.mod = subsetCeldaList(module.split, list(L=10))
 #' @export
-recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, beta=1, delta=1, gamma=1, min.feature=3, perplexity=TRUE, seed=12345, verbose=TRUE, logfile=NULL) {
+recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, beta=1, delta=1, gamma=1, min.feature=3, reorder=TRUE, perplexity=TRUE, seed=12345, verbose=TRUE, logfile=NULL) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting recursive module splitting.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-  
+
   counts = processCounts(counts)
   count.checksum = digest::digest(counts, algo="md5")   
   names = list(row=rownames(counts), column=colnames(counts))
@@ -281,7 +287,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     # Allow features to cluster further
     previous.y = overall.y
     temp.split = singleSplitY(new.counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
-    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", y.init=temp.split$y, reorder=FALSE)
+    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", y.init=temp.split$y, reorder=reorder)
     overall.y = temp.model@clusters$y
   
     # Adjust decomposed count matrices
