@@ -120,12 +120,14 @@ cD.calcEMbgDecontamination = function(counts, cellDist, bgDist, theta, beta, del
     log.Pc = log( t(bgDist)  + 1e-20) + log( 1-theta + 2e-20) 
 
     Pr = exp( log.Pr) / (exp(log.Pr) + exp( log.Pc) ) 
+    Pc = 1- Pr 
+    delta.v2 = MCMCprecision::fit_dirichlet( matrix( c( Pr, Pc) , ncol = 2 ) )$alpha
 
-  est.rmat = t(Pr) * counts
+    est.rmat = t(Pr) * counts
 
-  # Update paramters 
-  theta = (colSums(est.rmat) + delta) / (colSums(counts) + 2*delta) 
-  cellDist = normalizeCounts(est.rmat, normalize="proportion", pseudocount.normalize =beta) 
+    # Update paramters 
+    theta = (colSums(est.rmat) + delta.v2[1] ) / (colSums(counts) + sum(delta.v2)  ) 
+    cellDist = normalizeCounts(est.rmat, normalize="proportion", pseudocount.normalize =beta) 
 
     return( list("est.rmat"=est.rmat, "theta"=theta, "cellDist"=cellDist) ) 
 }
