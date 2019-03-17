@@ -113,7 +113,7 @@ cD.calcEMDecontamination = function(counts, phi, eta, theta,  z, K, beta, delta 
 
 # This function updates decontamination using background distribution 
 # 
-cD.calcEMbgDecontamination = function(counts, cellDist, bgDist, theta, beta, delta){
+cD.calcEMbgDecontamination = function(counts, cellDist, bgDist, theta, beta){
 
     meanN.by.C = apply(counts, 2, mean) 
     log.Pr = log( t(cellDist) + 1e-20) + log( theta + 1e-20) # + log( t(counts) / meanN.by.C )   # better when without panelty 
@@ -129,7 +129,7 @@ cD.calcEMbgDecontamination = function(counts, cellDist, bgDist, theta, beta, del
     theta = (colSums(est.rmat) + delta.v2[1] ) / (colSums(counts) + sum(delta.v2)  ) 
     cellDist = normalizeCounts(est.rmat, normalize="proportion", pseudocount.normalize =beta) 
 
-    return( list("est.rmat"=est.rmat, "theta"=theta, "cellDist"=cellDist) ) 
+    return( list("est.rmat"=est.rmat, "theta"=theta, "cellDist"=cellDist, "delta"=delta.v2 ) ) 
 }
 
 
@@ -283,10 +283,11 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
         while (iter <=  max.iter &  num.iter.without.improvement <= stop.iter  ) { 
 
 
-            next.decon = cD.calcEMbgDecontamination(counts=counts, cellDist=cellDist, bgDist=bgDist, theta=theta, beta=beta, delta=delta)  
+            next.decon = cD.calcEMbgDecontamination(counts=counts, cellDist=cellDist, bgDist=bgDist, theta=theta, beta=beta)  
 
             theta = next.decon$theta
             cellDist = next.decon$cellDist
+            delta = next.decon$delta 
 
 
             ## Calculate log-likelihood
@@ -336,7 +337,7 @@ checkParameters.decon = function(proportionPrior, distributionPrior) {
 }
 
 
-# Make sure provided rmat is the right type
+# Make sure provided count matrix is the right type
 checkCounts.decon = function(counts) {
     if ( sum(is.na(counts)) >0   ) {
         stop("Missing value in 'counts' matrix.") 
