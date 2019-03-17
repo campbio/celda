@@ -69,6 +69,8 @@ initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.
     z.ta = tabulate(overall.z, max(overall.z))
     z.to.split = sample(which(z.ta > min.cell & z.ta > K.to.use))
     
+    if(length(z.to.split) == 0) break()
+    
     ## Cycle through each splitable cluster and split it up into K.sublcusters
     for(i in z.to.split) {
       
@@ -138,7 +140,8 @@ initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.
     m.CP.by.S = p$m.CP.by.S[-z.to.remove,,drop=FALSE]
     overall.z = as.integer(as.factor(overall.z))        
     current.K = current.K - 1
-  }  
+    
+  } 
   return(overall.z)
 }
 
@@ -165,7 +168,9 @@ initialize.splitY = function(counts, L, L.subcluster=NULL, temp.K=100, beta=1, d
     ## Determine which clusters are split-able
     y.ta = tabulate(overall.y, max(overall.y))
     y.to.split = sample(which(y.ta > min.feature & y.ta > L.subcluster))
-    
+
+    if(length(y.to.split) == 0) break()
+
     ## Cycle through each splitable cluster and split it up into L.sublcusters
     for(i in y.to.split) {
       
