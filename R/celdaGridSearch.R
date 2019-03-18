@@ -15,6 +15,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @param cores Integer. The number of cores to use for parallel estimation of chains. Default 1.
 #' @param best.only Logical. Whether to return only the chain with the highest log likelihood per combination of parameters or return all chains. Default TRUE. 
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param perplexity Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.
 #' @param verbose Logical. Whether to print log messages during celda chain execution. Default TRUE. 
 #' @param logfile.prefix Character. Prefix for log files from worker threads and main process. Default "Celda". 
 #' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
@@ -29,7 +30,7 @@ available_models = c("celda_C", "celda_G", "celda_CG")
 #' @export
 celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
                            max.iter=200, nchains=3, cores=1,
-                           best.only=TRUE, seed=12345, verbose=TRUE, 
+                           best.only=TRUE, seed=12345, perplexity=TRUE, verbose=TRUE, 
                            logfile.prefix="Celda") {
   
   ## Check parameters
@@ -110,6 +111,11 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   
   if (isTRUE(best.only)) {
     celda.res = selectBestModel(celda.res) 
+  }
+
+  if(isTRUE(perplexity)) {
+    logMessages(date(), ".. Calculating perplexity", append=TRUE, verbose=verbose, logfile=NULL)
+    celda.res = resamplePerplexity(counts, celda.res)
   }
   
   end.time = Sys.time()

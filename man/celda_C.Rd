@@ -7,7 +7,7 @@
 celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stop.iter = 10, max.iter = 200,
   split.on.iter = 10, split.on.last = TRUE, seed = 12345,
-  nchains = 3, initialize = c("random", "split"),
+  nchains = 3, z.initialize = c("split", "random", "predefined"),
   count.checksum = NULL, z.init = NULL, logfile = NULL,
   verbose = TRUE)
 }
@@ -36,7 +36,7 @@ celda_C(counts, sample.label = NULL, K, alpha = 1, beta = 1,
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{initialize}{Chararacter. One of 'random' or 'split'. With 'random', cells are randomly assigned to a clusters. With 'split' cell clusters will be recurssively split into two clusters using `celda_C` until the specified K is reached. Default 'random'.}
+\item{z.initialize}{Chararacter. One of 'random', 'split', or 'predefined'. With 'random', cells are randomly assigned to a populations. With 'split', cells will be split into sqrt(K) populations and then each popluation will be subsequently split into another sqrt(K) populations. With 'predefined', values in `z.init` will be used to initialize `z`. Default 'split'.}
 
 \item{count.checksum}{"Character. An MD5 checksum for the `counts` matrix. Default NULL.}
 
