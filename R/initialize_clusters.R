@@ -69,6 +69,11 @@ initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.
     z.ta = tabulate(overall.z, max(overall.z))
     z.to.split = sample(which(z.ta > min.cell & z.ta > K.to.use))
     
+    # break the while loop if z.to.split is empty
+    if (length(z.to.split) == 0) {
+      break()
+    }
+    
     ## Cycle through each splitable cluster and split it up into K.sublcusters
     for(i in z.to.split) {
       
