@@ -37,7 +37,8 @@ test_that(desc = "Testing celdaGridSearch with celda_G", {
   celdaG.res <- celdaGridSearch(counts = celdaG.sim$counts, 
                                 model = "celda_G", nchains = 2, 
                                 params.test=list(L=c(5,10)), 
-                                max.iter = 1, verbose = FALSE, best.only=FALSE)
+                                max.iter = 1, verbose = FALSE, 
+                                best.only = FALSE, perplexity = FALSE)
   
   expect_error(celdaGridSearch(counts=celdaG.sim$counts, 
                                model="celda_G", params.test=list(L=10, M = 4), 
@@ -227,6 +228,30 @@ test_that(desc = "Testing celdaTsne with celda_G including a subset of cells",{
   tsne = celdaTsne(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=100)
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], rep(1, ncol(celdaG.sim$counts)))
     expect_true(ncol(tsne) == 2 & nrow(tsne) == ncol(celdaG.sim$counts) && sum(!is.na(tsne[,1])) == 100)
+  expect_true(!is.null(plot.obj))
+})
+
+#celdaUmap
+test_that(desc = "Testing celdaUmap with celda_G when model class is changed, should error",{
+  model_X <- model_G
+  class(model_X) <- "celda_X"
+  expect_error(celdaUmap(counts=celdaG.sim$counts, celda.mod=model_X), "unable to find")
+})
+
+test_that(desc = "Testing celdaUmap with celda_C including all cells",{
+  umap = celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts))
+  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], rep(1,ncol(celdaG.sim$counts)))
+  expect_true(ncol(umap) == 2 & nrow(umap) == ncol(celdaG.sim$counts))
+  expect_true(!is.null(plot.obj))
+  
+  umap = celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts), modules=1:2)
+  expect_error(umap <- celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=ncol(celdaG.sim$counts), modules=1000:1005))
+})
+
+test_that(desc = "Testing celdaUmap with celda_G including a subset of cells",{
+  umap = celdaUmap(counts=celdaG.sim$counts, celda.mod=model_G, max.cells=100)
+  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], rep(1, ncol(celdaG.sim$counts)))
+    expect_true(ncol(umap) == 2 & nrow(umap) == ncol(celdaG.sim$counts) && sum(!is.na(umap[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
 

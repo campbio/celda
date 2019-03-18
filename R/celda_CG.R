@@ -17,10 +17,11 @@
 #' @param split.on.last Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population or feature module should be reassigned and another cell population or feature module should be split into two clusters. If a split occurs, then 'stop.iter' will be reset. Default TRUE.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.  
-#' @param initialize Chararacter. One of 'random' or 'split'. With 'random', cells and features are randomly assigned to a clusters. With 'split' cell and feature clusters will be recurssively split into two clusters using `celda_C` and `celda_G`, respectively, until the specified K and L is reached. Default 'random'.
-#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
+#' @param z.initialize Chararacter. One of 'random', 'split', or 'predefined'. With 'random', cells are randomly assigned to a populations. With 'split', cells will be split into sqrt(K) populations and then each popluation will be subsequently split into another sqrt(K) populations. With 'predefined', values in `z.init` will be used to initialize `z`. Default 'split'.
+#' @param y.initialize Chararacter. One of 'random', 'split', or 'predefined'. With 'random', features are randomly assigned to a modules. With 'split', features will be split into sqrt(L) modules and then each module will be subsequently split into another sqrt(L) modules. With 'predefined', values in `y.init` will be used to initialize `y`. Default 'split'.
 #' @param z.init Integer vector. Sets initial starting values of z. If NULL, starting values for each cell will be randomly sampled from 1:K. 'z.init' can only be used when `initialize' = 'random'`. Default NULL.
 #' @param y.init Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from 1:L. 'y.init' can only be used when `initialize = 'random'`. Default NULL.
+#' @param count.checksum Character. An MD5 checksum for the `counts` matrix. Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @return An object of class `celda_CG` with the cell populations clusters stored in in `z` and feature module clusters stored in `y`.
@@ -33,21 +34,21 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
+                    seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), y.initialize=c("split", "random", "predefined"), count.checksum=NULL,
                     z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
   validateCounts(counts)
   return(.celda_CG(counts, sample.label, K, L, alpha, beta, delta, gamma,
                    algorithm, stop.iter, max.iter, split.on.iter, split.on.last,
-                   seed, nchains, initialize, count.checksum, z.init, y.init,
-                   logfile, verbose))
+                   seed, nchains, z.initialize, y.initialize, count.checksum, z.init, y.init,
+                   logfile, verbose, reorder=TRUE))
 }
 
 .celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
                     algorithm = c("EM", "Gibbs"), 
                     stop.iter = 10, max.iter=200, split.on.iter=10, split.on.last=TRUE,
-                    seed=12345, nchains=3, initialize=c("random", "split"), count.checksum=NULL,
-                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE) {
+                    seed=12345, nchains=3, z.initialize=c("split", "random", "predefined"), y.initialize=c("split", "random", "predefined"), count.checksum=NULL,
+                    z.init = NULL, y.init = NULL, logfile=NULL, verbose=TRUE, reorder=TRUE) {
 
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting Celda_CG: Clustering cells and genes.", logfile=logfile, append=TRUE, verbose=verbose)
@@ -64,7 +65,8 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   
   algorithm <- match.arg(algorithm)
   algorithm.fun <- ifelse(algorithm == "Gibbs", "cC.calcGibbsProbZ", "cC.calcEMProbZ")
-  initialize = match.arg(initialize)
+  z.initialize = match.arg(z.initialize)
+  y.initialize = match.arg(y.initialize)
   
   all.seeds = seed:(seed + nchains - 1)
 
@@ -77,17 +79,26 @@ celda_CG = function(counts, sample.label=NULL, K, L,
   
 	## Initialize cluster labels
     current.seed = all.seeds[i]	
-    logMessages(date(), ".. Initializing chain", i, "with", paste0("'",initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
-
-    if(initialize == "random") {
+    logMessages(date(), ".. Initializing 'z' in chain", i, "with", paste0("'", z.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+    logMessages(date(), ".. Initializing 'y' in chain", i, "with", paste0("'", y.initialize, "' (seed=", current.seed, ")"), logfile=logfile, append=TRUE, verbose=verbose)
+    
+    if(z.initialize == "predefined") {
+      if(is.null(z.init)) stop("'z.init' needs to specified when initilize.z == 'given'.")
   	  z = initialize.cluster(K, ncol(counts), initial = z.init, fixed = NULL, seed=current.seed)
-	  y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)
-	} else {
-	  z = recursive.splitZ(counts, s, K=K, alpha=alpha, beta=beta)
-	  y = recursive.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, z=z, 
-	                       K=K, K.subclusters=10, min.feature=3, max.cells=100,
-	                       seed=seed)
-	}  
+	  } else if(z.initialize == "split") {
+	    z = initialize.splitZ(counts, K=K, alpha=alpha, beta=beta, seed=seed)
+	  } else {
+	    z = initialize.cluster(K, ncol(counts), initial = NULL, fixed = NULL, seed=current.seed)
+	  } 
+    if(y.initialize == "predefined") {
+      if(is.null(y.init)) stop("'y.init' needs to specified when initilize.y == 'given'.")
+      y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=current.seed)  
+    } else if(y.initialize == "split") {
+      y = initialize.splitY(counts, L, beta=beta, delta=delta, gamma=gamma, seed=seed)
+    } else {
+      y = initialize.cluster(L, nrow(counts), initial = NULL, fixed = NULL, seed=current.seed)  
+    } 
+    
 	z.best = z
 	y.best = y  
   
@@ -110,9 +121,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
 
 
-	if (!is.null(current.seed)) {
-	  set.seed(current.seed)
-	}
+	setSeed(current.seed)
 	iter = 1L
 	num.iter.without.improvement = 0L
 	do.cell.split = TRUE
@@ -138,32 +147,6 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 			      
 	  ## Perform split on i-th iteration defined by split.on.iter
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
-	  if(K > 2 & iter != max.iter & 
-	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
-	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
-		  logMessages(date(), " .... Determining if any cell clusters should be split.", 
-		              logfile=logfile, append=TRUE, sep="", verbose=verbose)
-		  res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
-		                   nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, 
-		                   gamma, z.prob=t(next.z$probs),  max.clusters.to.try=K, 
-		                   min.cell=3)
-		  logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
-
-		  # Reset convergence counter if a split occured
-		  if(!isTRUE(all.equal(z, res$z))) {
-			num.iter.without.improvement = 0L
-			do.cell.split = TRUE
-		  } else {
-			do.cell.split = FALSE
-		  }
-
-		  ## Re-calculate variables
-		  z = res$z      
-		  m.CP.by.S = res$m.CP.by.S
-		  n.TS.by.CP = res$n.TS.by.CP
-		  n.CP = res$n.CP
-		  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
-	  }  
 	  if(L > 2 & iter != max.iter & 
 	    (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
 	    (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.gene.split)))) {
@@ -185,8 +168,34 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.by.TS = res$n.by.TS
 		  nG.by.TS = res$nG.by.TS
 		  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)	  
-  	  }
-  	          
+  	}
+	  if(K > 2 & iter != max.iter & 
+	     (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
+	      (split.on.iter > 0 & iter %% split.on.iter == 0 & isTRUE(do.cell.split)))) {
+	    logMessages(date(), " .... Determining if any cell clusters should be split.", 
+	                logfile=logfile, append=TRUE, sep="", verbose=verbose)
+	    res = cCG.splitZ(counts, m.CP.by.S, n.TS.by.C, n.TS.by.CP, n.by.G, n.by.TS, 
+	                     nG.by.TS, n.CP, s, z, K, L, nS, nG, alpha, beta, delta, 
+	                     gamma, z.prob=t(next.z$probs),  max.clusters.to.try=K, 
+	                     min.cell=3)
+	    logMessages(res$message, logfile=logfile, append=TRUE, verbose=verbose)
+	    
+	    # Reset convergence counter if a split occured
+	    if(!isTRUE(all.equal(z, res$z))) {
+	      num.iter.without.improvement = 0L
+	      do.cell.split = TRUE
+	    } else {
+	      do.cell.split = FALSE
+	    }
+	    
+	    ## Re-calculate variables
+	    z = res$z      
+	    m.CP.by.S = res$m.CP.by.S
+	    n.TS.by.CP = res$n.TS.by.CP
+	    n.CP = res$n.CP
+	    n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+	  }  
+	  
 
 	  ## Calculate complete likelihood
 	  temp.ll = cCG.calcLL(K=K, L=L, m.CP.by.S=m.CP.by.S, n.TS.by.CP=n.TS.by.CP, n.by.G=n.by.G, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, nS=nS, nG=nG, alpha=alpha, beta=beta, delta=delta, gamma=gamma)
@@ -233,7 +242,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
                              finalLogLik=ll.best,
                   				   sample.label=sample.label, 
                   				   names=names)
-  best.result = reorder.celda_CG(counts = counts, res = best.result)
+  if(isTRUE(reorder)) best.result = reorder.celda_CG(counts = counts, res = best.result)
   
   end.time = Sys.time()
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
@@ -273,9 +282,7 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
                                   G=100, K=5, L=10, alpha=1, beta=1, gamma=5, 
                                   delta=1, seed=12345, ...) {
 
-  if (!is.null(seed)) { 
-    set.seed(seed)
-  }
+  setSeed(seed)
 
   ## Number of cells per sample
   nC = sample(C.Range[1]:C.Range[2], size=S, replace=TRUE)
@@ -658,9 +665,10 @@ setMethod("perplexity",
             
             eta.prob = log(eta) * nG.by.TS
             gene.by.pop.prob = log(psi %*% phi)
-            inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, s]  
+            inner.log.prob = eigenMatMultInt(gene.by.pop.prob, new.counts) + theta[, s]  
+            #inner.log.prob = (t(gene.by.pop.prob) %*% new.counts) + theta[, s]  
             
-            log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) + sum(eta.prob)
+            log.px = sum(apply(inner.log.prob, 2, matrixStats::logSumExp)) # + sum(eta.prob)
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)
           })
@@ -763,7 +771,7 @@ setMethod("celdaTsne",
 #' @param umap.config Object of class `umap.config`. Configures parameters for umap. Default `umap::umap.defaults`
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()` for displaying expression
 #' @examples
-#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+#' umap.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
 setMethod("celdaUmap",

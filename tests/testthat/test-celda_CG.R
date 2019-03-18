@@ -78,7 +78,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
   
   expect_warning(celdaGridSearch(counts=celdaCG.sim$counts, 
-                                 model="celda_CG", max.iter=1,
+                                 model="celda_CG", max.iter=1, perplexity = FALSE,
                                  params.test=list(K=5, L=10, nchains = 2)),
                                  "Parameter 'nchains' should not be used within the params.test list")
   
@@ -88,7 +88,7 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                                  params.test=list(K=5, L=10), 
                                  params.fixed=list(sample.label=celdaCG.sim$sample.label), 
                                  max.iter = 1, verbose = FALSE, 
-                                 best.only=FALSE)
+                                 best.only=FALSE, perplexity = FALSE)
   expect_true(is(celdaCG.res, "celdaList"))
   expect_error(plotGridSearchPerplexity(celdaCG.res))
   expect_equal(names(runParams(celdaCG.res)), 
@@ -340,6 +340,32 @@ test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@clusters$z)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@clusters$z) && sum(!is.na(tsne[,1])) == 100)
+  expect_true(!is.null(plot.obj))
+})
+
+# celdaUmap
+test_that(desc = "Testing celdaUmap with celda_CG when model class is changed, should error",{
+  model_X <- model_CG
+  class(model_X) <- "celda_X"
+  expect_error(celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_X),
+               "unable to find")
+})
+
+test_that(desc = "Testing celdaUmap.celda_CG with all cells",{
+  umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@clusters$z))
+  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], model_CG@clusters$z)
+  expect_true(ncol(umap) == 2 & nrow(umap) == length(model_CG@clusters$z))
+  expect_true(!is.null(plot.obj))
+  
+  umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
+  expect_error(umap <- celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1000:1005))
+})
+
+test_that(desc = "Testing celdaUmap.celda_CG with subset of cells",{
+  expect_success(expect_error(umap <- celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
+  umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=100, min.cluster.size=10)
+  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], model_CG@clusters$z)
+  expect_true(ncol(umap) == 2 & nrow(umap) == length(model_CG@clusters$z) && sum(!is.na(umap[,1])) == 100)
   expect_true(!is.null(plot.obj))
 })
 
