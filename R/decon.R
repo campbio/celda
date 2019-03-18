@@ -53,10 +53,12 @@ simulateContaminatedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), be
     eta = normalizeCounts(counts=n.G.by.K, normalize="proportion") 
 
     cell.cmat = sapply(1:C, function(i) stats::rmultinom(1, size=cN.byC[i], prob=eta[,z[i]] )  )
-    rownames(cell.cmat) = paste0("Gene_", 1:G) 
-    colnames(cell.cmat) = paste0("Cell_", 1:C)
+    cell.omat = cell.rmat + cell.cmat 
 
-    return(list("rmat"=cell.rmat, "cmat"=cell.cmat, "N.by.C"=N.byC, "z"=z, "eta"=eta , "phi"=t(phi)  ) ) 
+    rownames(cell.omat) = paste0("Gene_", 1:G) 
+    colnames(cell.omat) = paste0("Cell_", 1:C)
+
+    return(list("nativeCounts"=cell.rmat, "observedCounts"=cell.omat, "N.by.C"=N.byC, "z"=z, "eta"=eta , "phi"=t(phi)  ) ) 
 
 }
 
@@ -228,7 +230,9 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
     if( decon.method == "clustering") {
 
         ## Initialization
-        theta  = stats::runif(nC, min = 0.1, max = 0.5)  
+        delta.init = delta 
+        #theta  = stats::runif(nC, min = 0.1, max = 0.5)  
+        theta = rbeta( n = nC, shape1 = delta.init, shape2 = delta.init ) 
         est.rmat = t (t(counts) * theta )       
         phi =   colSumByGroup.numeric(est.rmat, z, K)
         eta =   rowSums(phi) - phi 
@@ -269,7 +273,8 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
     if ( decon.method == "background") {
 
         # Initialization
-        theta = runif( nC, min =0.1, max=0.5) 
+        delta.init = delta 
+        theta = rbeta( n = nC, shape1 = delta.init,  shape2 = delta.init ) 
         est.rmat = t( t(counts) *theta) 
         bgDist = rowSums( counts ) / sum( counts) 
         bgDist = matrix( rep( bgDist, nC), ncol=nC) 
@@ -313,7 +318,7 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
     if ( !is.null(batch) ) {  logMessages("batch: ",  batch, logfile=logfile, append=TRUE, verbose=verbose)    }
     logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
 
-    run.params = list("beta"=beta, "delta"=delta, "iteration"=iter-1L, "seed"=seed)
+    run.params = list("beta"=beta, "delta.init"=delta.init, "iteration"=iter-1L, "seed"=seed)
 
     res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta , "delta"=delta)
     if( decon.method=="clustering" ) {
