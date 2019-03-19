@@ -7,6 +7,9 @@
 \usage{
 \S4method{celdaPerplexity}{celdaList}(celda.mod)
 }
+\arguments{
+\item{celda.mod}{A celda model object of class "celda_C", "celda_G", or "celda_CG".}
+}
 \value{
 List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
 }
