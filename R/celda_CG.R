@@ -29,6 +29,7 @@
 #' @examples
 #' celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
 #'                      sample.label=celda.CG.sim$sample.label, nchains=1)
+#' @import Rcpp RcppEigen
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
@@ -863,6 +864,7 @@ prepareCountsForDimReduction.celda_CG =  function(counts, celda.mod, max.cells=2
 #' @examples
 #' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
+#' @import gridExtra
 #' @seealso `celda_CG()` for clustering features and cells
 #' @export 
 setMethod("celdaProbabilityMap",
