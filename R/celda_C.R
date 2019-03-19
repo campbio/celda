@@ -535,6 +535,7 @@ setMethod("clusterProbability",
 #' @seealso `celda_C()` for clustering cells
 #' @examples
 #' perplexity = perplexity(celda.C.sim$counts, celda.C.mod)
+#' @import matrixStats
 #' @export
 setMethod("perplexity",
           signature(celda.mod = "celda_C"),
