@@ -421,6 +421,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @description Calculates the log likelihood for user-provided cell population clusters using the `celda_C()` model.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param model An object of class celda_C.
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param z Numeric vector. Denotes cell population labels. 
 #' @param K Integer. Number of cell populations. 
@@ -430,12 +431,18 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
-#' loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
+#' loglik = logLikelihood.celda_C(celda.C.sim$counts, 
 #'                        sample.label=celda.C.sim$sample.label,
 #'                        z=celda.C.sim$z, K=celda.C.sim$K,
 #'                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
+#'                        
+#' loglik = logLikelihood(celda.C.sim$counts, model="celda_C",
+#'                        sample.label=celda.C.sim$sample.label,
+#'                        z=celda.C.sim$z, K=celda.C.sim$K,
+#'                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
+#'                        
 #' @export
-logLikelihood.celda_C = function(counts, model, sample.label, z, K, 
+logLikelihood.celda_C = function(counts, sample.label, z, K, 
                                  alpha, beta) {
   if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
@@ -533,7 +540,7 @@ setMethod("clusterProbability",
 setMethod("perplexity",
           signature(celda.mod = "celda_C"),
           function(counts, celda.mod, new.counts=NULL) {
-            compareCountMatrix(counts, celda.mod)
+            
             if (!("celda_C" %in% class(celda.mod))) { 
               stop("The celda.mod provided was not of class celda_C.")
             }
@@ -606,6 +613,7 @@ setMethod("celdaHeatmap",
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
+#' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
@@ -642,10 +650,8 @@ setMethod("celdaTsne",
 #' @param celda.mod Celda object of class `celda_C`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
-#' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
-#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
-#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
+#' @param modules Integer vector. Determines which features modules to use for UMAP. If NULL, all modules will be used. Default NULL.
+#' @param umap.config An object of class "umap.config" specifying parameters to the UMAP algorithm.
 #' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying expression
 #' @examples

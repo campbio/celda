@@ -78,15 +78,15 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
   
   expect_warning(celdaGridSearch(counts=celdaCG.sim$counts, 
-                                 model="celda_CG", max.iter=1, perplexity = FALSE,
-                                 params.test=list(K=5, L=10, nchains = 2)),
+                                 model="celda_CG", max.iter=1, perplexity = FALSE, 
+                                 params.test=list(K=5, L=10, nchains = 2), params.fixed=list(z.initialize="random", y.initialize="random")),
                                  "Parameter 'nchains' should not be used within the params.test list")
   
   
   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, 
                                  model="celda_CG", nchains = 2, 
                                  params.test=list(K=5, L=10), 
-                                 params.fixed=list(sample.label=celdaCG.sim$sample.label), 
+                                 params.fixed=list(sample.label=celdaCG.sim$sample.label, z.initialize="random", y.initialize="random"), 
                                  max.iter = 1, verbose = FALSE, 
                                  best.only=FALSE, perplexity = FALSE)
   expect_true(is(celdaCG.res, "celdaList"))

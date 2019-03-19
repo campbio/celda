@@ -26,8 +26,6 @@ celdaTsne(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
 \item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
-
-\item{...}{Additional parameters.}
 }
 \value{
 Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.

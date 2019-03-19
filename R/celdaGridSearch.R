@@ -185,7 +185,7 @@ selectBestModel = function(celda.list) {
   if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
   
   log_likelihood = NULL
-  group = setdiff(colnames(celda.list@run.params), c("index", "chain", "log_likelihood"))
+  group = setdiff(colnames(celda.list@run.params), c("index", "chain", "log_likelihood", "mean_perplexity"))
   dt = data.table::as.data.table(celda.list@run.params)
   new.run.params = as.data.frame(dt[,.SD[which.max(log_likelihood)], by=group])
   new.run.params = new.run.params[,colnames(celda.list@run.params)]
