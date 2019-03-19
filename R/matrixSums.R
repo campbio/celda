@@ -42,3 +42,10 @@ colSumByGroup.numeric <- function(x, group, K) {
   res <- .Call("_colSumByGroup_numeric", x, group)
   return(res)
 }
+
+#' @useDynLib celda _perplexityG
+perplexityG_logPx <- function(x, phi, psi, group, L) {
+  group <- factor(group, levels=1:L)
+  res <- .Call("_perplexityG", x, phi, psi, group)
+  return(res)
+}

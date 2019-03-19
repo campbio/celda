@@ -9,7 +9,7 @@ perplexity(counts, celda.mod, new.counts = NULL)
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_C", "celda_G" or "celda_CG".}
+\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
 
 \item{new.counts}{A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.}
 }

@@ -22,18 +22,19 @@ resamplePerplexity <- function(counts, celda.list, resample=5, seed=12345) {
   if (!isTRUE(is.numeric(resample))) stop("Provided resample parameter was not numeric.")
   
   setSeed(seed)
-  countsList = lapply(1:resample,
-                      function(i){
-                        resampleCountMatrix(counts)
-                      })
-  
+
   perp.res = matrix(NA, nrow=length(celda.list@res.list), ncol=resample)
-  for(i in 1:length(celda.list@res.list)) {
-    for(j in 1:resample) {
-      perp.res[i,j] = perplexity(counts, celda.list@res.list[[i]], countsList[[j]])
+  for(j in 1:resample) {
+    new.counts = resampleCountMatrix(counts)
+    for(i in 1:length(celda.list@res.list)) {      
+      perp.res[i,j] = perplexity(counts, celda.list@res.list[[i]], new.counts)
     }
   }
   celda.list@perplexity = perp.res
+  
+  ## Add mean perplexity to run.params
+  perp.mean = apply(perp.res, 1, mean)
+  celda.list@run.params$mean_perplexity=perp.mean
   
   return(celda.list)
 }
@@ -86,14 +87,25 @@ plotGridSearchPerplexity.celda_CG = function(celda.list) {
   l.means.by.k$K = as.factor(l.means.by.k$K)
   l.means.by.k$L = as.factor(l.means.by.k$L)
   
-  plot = ggplot2::ggplot(df, ggplot2::aes_string(x="K", y="perplexity")) +
-  		ggplot2::geom_jitter(height=0, width=0.1, ggplot2::aes_string(color="L")) +
-        ggplot2::scale_color_discrete(name="L") +
-        ggplot2::geom_path(data=l.means.by.k, 
-                           ggplot2::aes_string(x="K", y="mean_perplexity", group="L", color="L")) +
-        ggplot2::ylab("Perplexity") +
-        ggplot2::xlab("K") +
-        ggplot2::theme_bw()
+  if(nlevels(df$K) > 1) {
+    plot = ggplot2::ggplot(df, ggplot2::aes_string(x="K", y="perplexity")) +
+      ggplot2::geom_jitter(height=0, width=0.1, ggplot2::aes_string(color="L")) +
+      ggplot2::scale_color_discrete(name="L") +
+      ggplot2::geom_path(data=l.means.by.k, 
+                         ggplot2::aes_string(x="K", y="mean_perplexity", group="L", color="L")) +
+      ggplot2::ylab("Perplexity") +
+      ggplot2::xlab("K") +
+      ggplot2::theme_bw()
+  } else {
+    plot = ggplot2::ggplot(df, ggplot2::aes_string(x="L", y="perplexity")) +
+      ggplot2::geom_jitter(height=0, width=0.1, ggplot2::aes_string(color="K")) +
+      ggplot2::scale_color_discrete(name="K") +
+      ggplot2::geom_path(data=l.means.by.k, 
+                         ggplot2::aes_string(x="L", y="mean_perplexity", group="K", color="K")) +
+      ggplot2::ylab("Perplexity") +
+      ggplot2::xlab("L") +
+      ggplot2::theme_bw()
+  }
   
   return(plot)
 }
