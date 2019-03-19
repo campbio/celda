@@ -9,7 +9,9 @@ celdaHeatmap(counts, celda.mod, feature.ix, ...)
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
 
-\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+\item{celda.mod}{A celda model object of class "celda_C", "celda_G", or "celda_CG".}
+
+\item{feature.ix}{Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.}
 
 \item{...}{Additional parameters.}
 }

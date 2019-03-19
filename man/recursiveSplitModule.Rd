@@ -5,8 +5,9 @@
 \title{Recursive module splitting}
 \usage{
 recursiveSplitModule(counts, initial.L = 10, max.L = 100,
-  temp.K = 100, z.init = NULL, beta = 1, delta = 1, gamma = 1,
-  min.feature = 3, perplexity = TRUE, seed = 12345, verbose = TRUE,
+  temp.K = 100, z.init = NULL, sample.label = NULL, alpha = 1,
+  beta = 1, delta = 1, gamma = 1, min.feature = 3,
+  reorder = TRUE, perplexity = TRUE, seed = 12345, verbose = TRUE,
   logfile = NULL)
 }
 \arguments{
@@ -16,7 +17,13 @@ recursiveSplitModule(counts, initial.L = 10, max.L = 100,
 
 \item{max.L}{Integer. Maximum number of modules to try.}
 
-\item{z.init}{Integer vector. Collapse cells to cell populations based on labels in `z.init` and then perform module splitting. If NULL, no collapasing will be performed unless `temp.z` is specified. Default NULL.}
+\item{temp.K}{Integer. Number of temporary cell populations to identify and use in module splitting. Only used if `z.init=NULL` Collapsing cells to a relatively smaller number of cell popluations will increase the speed of module clustering and tend to produce better modules. This number should be larger than the number of true cell populations expected in the dataset. Default 100.}
+
+\item{z.init}{Integer vector. Collapse cells to cell populations based on labels in `z.init` and then perform module splitting. If NULL, no collapasing will be performed unless `temp.K` is specified. Default NULL.}
+
+\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix. Only used if `z.init` is set.}
+
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Only used if `z.init` is set. Default 1.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
 
@@ -26,6 +33,8 @@ recursiveSplitModule(counts, initial.L = 10, max.L = 100,
 
 \item{min.feature}{Integer. Only attempt to split modules with at least this many features.}
 
+\item{reorder}{Logical. Whether to reorder modules using hierarchical clustering after each model has been created. If FALSE, module numbers will correspond to the split which created the module (i.e. 'L15' was created at split 15, 'L16' was created at split 16, etc.). Default TRUE.}
+
 \item{perplexity}{Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.}
 
 \item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
@@ -33,11 +42,9 @@ recursiveSplitModule(counts, initial.L = 10, max.L = 100,
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 
 \item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
-
-\item{temp.z}{Integer. Number of temporary cell populations to identify and use in module splitting. Only used if `z.init=NULL` Collapsing cells to a relatively smaller number of cell popluations will increase the speed of module clustering and tend to produce better modules. This number should be larger than the number of true cell populations expected in the dataset. Default 100.}
 }
 \value{
-Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
+Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters. The models in the list will be of class `celda_G` if `z.init=NULL` or `celda_CG` if `z.init` is set.
 }
 \description{
 Uses the `celda_G` model to cluster features into modules for a range of possible L's. The module labels of the previous "L-1" model are used as the initial values in the current model with L modules. The best split of an existing module is found to create the L-th module. This procedure is much faster than randomly initializing each model with a different L.
