@@ -9,8 +9,6 @@ logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{model}{An object of class celda_C.}
-
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
 \item{z}{Numeric vector. Denotes cell population labels.}
@@ -20,6 +18,8 @@ logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
+
+\item{model}{An object of class celda_C.}
 
 \item{...}{Additional parameters.}
 }
