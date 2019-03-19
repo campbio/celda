@@ -23,7 +23,6 @@ Imports:
     graphics,
     matrixStats,
     doParallel,
-    cluster,
     digest,
     gridExtra,
     methods,
@@ -35,8 +34,6 @@ Imports:
     RcppEigen,
     umap,
     enrichR,
-    vcd,
-    ggpubr,
     stringi,
     SummarizedExperiment,
     MCMCprecision
