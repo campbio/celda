@@ -6,6 +6,11 @@
 \usage{
 appendCeldaList(list1, list2)
 }
+\arguments{
+\item{list1}{A celda_list object}
+
+\item{list2}{A celda_list object to be joined with list_1}
+}
 \value{
 A celdaList object. This object contains all resList entries and runParam records from both lists.
 }
