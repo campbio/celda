@@ -526,7 +526,7 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @return The log likelihood for the given cluster assignments
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
+#' loglik = logLikelihood(celda.CG.sim$counts, 
 #'                        sample.label=celda.CG.sim$sample.label,
 #'                        z=celda.CG.sim$z, y=celda.CG.sim$y,
 #'                        K=celda.CG.sim$K, L=celda.CG.sim$L,

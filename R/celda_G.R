@@ -419,7 +419,7 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log-likelihood for the given cluster assignments
 #' @seealso `celda_G()` for clustering features
 #' @examples
-#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
+#' loglik = logLikelihood(celda.G.sim$counts, 
 #'                        y=celda.G.sim$y, L=celda.G.sim$L,
 #'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
 #'                        gamma=celda.G.sim$gamma)

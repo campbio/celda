@@ -430,12 +430,12 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
-#' loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
+#' loglik = logLikelihood(celda.C.sim$counts, 
 #'                        sample.label=celda.C.sim$sample.label,
 #'                        z=celda.C.sim$z, K=celda.C.sim$K,
 #'                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
 #' @export
-logLikelihood.celda_C = function(counts, model, sample.label, z, K, 
+logLikelihood.celda_C = function(counts, sample.label, z, K, 
                                  alpha, beta) {
   if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
   sample.label = processSampleLabels(sample.label, ncol(counts))
