@@ -419,10 +419,16 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log-likelihood for the given cluster assignments
 #' @seealso `celda_G()` for clustering features
 #' @examples
-#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
+#' loglik = logLikelihood.celda_G(celda.G.sim$counts, 
 #'                        y=celda.G.sim$y, L=celda.G.sim$L,
 #'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
 #'                        gamma=celda.G.sim$gamma)
+#'                        
+#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G",
+#'                        y=celda.G.sim$y, L=celda.G.sim$L,
+#'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
+#'                        gamma=celda.G.sim$gamma)
+#'                        
 #' @export
 logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
   if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
@@ -533,15 +539,15 @@ setMethod("perplexity",
             
             factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
                                          type=c("posterior", "counts"))
-            phi <- factorized$posterior$module
-            psi <- factorized$posterior$cell
+            psi <- factorized$posterior$module
+            phi <- factorized$posterior$cell
             eta <- factorized$posterior$gene.distribution
             nG.by.TS = factorized$counts$gene.distribution
             
             eta.prob = log(eta) * nG.by.TS
-            gene.by.cell.prob = log(phi %*% psi) 
-            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
-            
+#            gene.by.cell.prob = log(psi %*% phi) 
+#            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
+            log.px = perplexityG_logPx(new.counts, phi, psi, celda.mod@clusters$y, celda.mod@params$L)# + sum(eta.prob) 
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)
           })
