@@ -98,17 +98,12 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
                sample=levels(sample.label))
 
   if(!is.null(y.init)) {
+    ## Create collapsed module matrix 
     L = length(unique(y.init))
     logMessages(date(), ".. Collapsing to", L, "modules", append=TRUE, verbose=verbose, logfile=logfile)      
-    y.init = initialize.cluster(L, nrow(counts), initial = y.init, seed=seed)  
-    new.counts = rowSumByGroup(counts, y.init, L)
+    overall.y = initialize.cluster(L, nrow(counts), initial = y.init, seed=seed)  
+    counts.y = rowSumByGroup(counts, overall.y, L)
 
-    ## Create collapsed module matrix 
-    overall.y = initialize.cluster(L, nrow(counts), initial = y.init, fixed = NULL, seed=seed)
-    p = cG.decomposeCounts(counts, overall.y, L)
-    counts.y = p$n.TS.by.C
-    n.by.G = p$n.by.G
-    
     ## Create initial model with initial.K and predifined y labels
     logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
     model.initial = .celda_CG(counts, sample.label=s, K=initial.K, L=L, z.initialize="split", y.initialize="predefined", nchains=1, y.init=overall.y, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=reorder)
@@ -155,7 +150,6 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     temp.y = as.integer(as.factor(temp.y))
     L = length(unique(temp.y)) ## Recalculate in case some modules are empty
     counts.y = rowSumByGroup(counts, temp.y, L)
-
         
     ## Create initial model with initial.K 
     logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
@@ -277,95 +271,134 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 #' ## Select model for downstream analysis
 #' celda.mod = subsetCeldaList(module.split, list(L=10))
 #' @export
-recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, beta=1, delta=1, gamma=1, min.feature=3, reorder=TRUE, perplexity=TRUE, seed=12345, verbose=TRUE, logfile=NULL) {
+recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.init=NULL, sample.label=NULL, alpha=1, beta=1, delta=1, gamma=1, min.feature=3, reorder=TRUE, perplexity=TRUE, seed=12345, verbose=TRUE, logfile=NULL) {
   
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=FALSE, verbose=verbose)  
   logMessages("Starting recursive module splitting.", logfile=logfile, append=TRUE, verbose=verbose)
   logMessages("--------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose)  
-
+  start.time = Sys.time()
+  
   counts = processCounts(counts)
   count.checksum = digest::digest(counts, algo="md5")   
   names = list(row=rownames(counts), column=colnames(counts))
+  sample.label = processSampleLabels(sample.label, num.cells = ncol(counts))
+  s = as.integer(sample.label)
   
-  start.time = Sys.time()
-  s = rep(1, ncol(counts))
-  if(!is.null(z.init) | (!is.null(temp.K))) {
+  if(!is.null(z.init)) {
+    ## Create collapsed module matrix
+    K = length(unique(z.init))
+    logMessages(date(), ".. Collapsing to", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)      
+    overall.z = initialize.cluster(K, ncol(counts), initial = z.init, seed=seed)  
+    counts.z = colSumByGroup(counts, overall.z, K)
     
-    if(is.null(z.init)) {
-      K = temp.K
-      logMessages(date(), ".. Collapsing to", K, "temporary cell populations", append=TRUE, verbose=verbose, logfile=logfile)
-      z = initialize.splitZ(counts, K=K, min.cell = 3, seed=seed)  
-    } else {
-      K = length(unique(z.init))
-      logMessages(date(), ".. Collapsing to", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)      
-      z = initialize.cluster(K, ncol(counts), initial = z.init, seed=seed)  
+    ## Create initial model with initial.L and predifined z labels
+    logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
+    model.initial = .celda_CG(counts, sample.label=s, L=initial.L, K=K, z.initialize="predefined", y.initialize="split", nchains=1, z.init=overall.z, alpha=alpha, beta=beta, gamma=gamma, delta=delta, verbose=FALSE, seed=seed, reorder=reorder)
+    current.L = length(unique(model.initial@clusters$y)) + 1
+    overall.y = model.initial@clusters$y
+    
+    res.list = list(model.initial)
+    while(current.L <= max.L) {
+      
+      # Allow features to cluster further with celda_CG
+      temp.split = singleSplitY(counts.z, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
+      temp.model = .celda_CG(counts, L=current.L, K=K, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", z.initialize="predefined", y.init=temp.split$y, z.init=overall.z, reorder=reorder)
+      overall.y = temp.model@clusters$y
+      
+      ## Add new model to results list and increment L
+      logMessages(date(), ".. Created module", current.L, "| logLik:", temp.model@finalLogLik, append=TRUE, verbose=verbose, logfile=NULL)
+      res.list = c(res.list, list(temp.model))
+      current.L = current.L + 1
     }
-    new.counts = colSumByGroup(counts, z, length(unique(z)))
-  } else {
-    new.counts = counts
-  }
-  
-  logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
-  model.initial = .celda_G(new.counts, L=initial.L, max.iter=20, nchains=1, verbose=FALSE, seed=seed)
-
-  ## Create decomposed counts for this initial model
-  overall.y = model.initial@clusters$y
-  current.L = length(unique(overall.y)) + 1  
-  
-  ## Decomposed counts for full count matrix
-  p = cG.decomposeCounts(counts, overall.y, current.L)
-  n.TS.by.C = p$n.TS.by.C
-  n.by.TS = p$n.by.TS
-  nG.by.TS = p$nG.by.TS  
-  n.by.G = p$n.by.G
-  nG = p$nG
-  nM = p$nM
-
-  ## Fix initial model to contain correct LogLik with full counts matrix
-  model.initial@finalLogLik = cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=current.L, beta=beta, delta=delta, gamma=gamma)
-  model.initial@completeLogLik = model.initial@finalLogLik
-  model.initial@params$count.checksum = count.checksum
-  model.initial@names = names
-
-  ## Perform splitting for y labels
-  res.list = list(model.initial)
-  while(current.L <= max.L) {
     
-    # Allow features to cluster further
-    previous.y = overall.y
-    temp.split = singleSplitY(new.counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
-    temp.model = .celda_G(new.counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", y.init=temp.split$y, reorder=reorder)
-    overall.y = temp.model@clusters$y
-  
-    # Adjust decomposed count matrices
-    p = cG.reDecomposeCounts(counts, overall.y, previous.y, n.TS.by.C, n.by.G, L = current.L)
+    runK = sapply(res.list, function(mod) { mod@params$K })
+    runL = sapply(res.list, function(mod) { mod@params$L })
+    run.params = data.frame(index=seq.int(1, length(res.list)), L=runL, K=runK, stringsAsFactors=FALSE)
+    
+  } else if(!is.null(temp.K)) {
+    K = temp.K
+    logMessages(date(), ".. Collapsing to", K, "temporary cell populations", append=TRUE, verbose=verbose, logfile=logfile)
+    z = initialize.splitZ(counts, K=K, min.cell = 3, seed=seed)  
+    counts.z = colSumByGroup(counts, z, length(unique(z)))
+
+    logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
+    model.initial = .celda_G(counts.z, L=initial.L, nchains=1, verbose=FALSE, seed=seed)
+
+    current.L = length(unique(model.initial@clusters$y)) + 1
+    overall.y = model.initial@clusters$y
+    
+    ## Decomposed counts for full count matrix
+    p = cG.decomposeCounts(counts, overall.y, current.L)
     n.TS.by.C = p$n.TS.by.C
     n.by.TS = p$n.by.TS
-    nG.by.TS = p$nG.by.TS 
-    previous.y = overall.y
-
-    ## Create the final model object with correct info on full counts matrix  
-    temp.model@finalLogLik = cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=current.L, beta=beta, delta=delta, gamma=gamma)
-    temp.model@completeLogLik = temp.model@finalLogLik
-    temp.model@params$count.checksum = count.checksum
-    temp.model@names = names
+    nG.by.TS = p$nG.by.TS  
+    n.by.G = p$n.by.G
+    nG = p$nG
+    nM = p$nM
     
-    ## Add extra row/column for next round of L
-    n.TS.by.C = rbind(n.TS.by.C, rep(0L, ncol(n.TS.by.C)))
-    n.by.TS = c(n.by.TS, 0L)    
-    nG.by.TS = c(nG.by.TS, 0L)
+    res.list = list(model.initial)
+    while(current.L <= max.L) {
+      # Allow features to cluster further
+      previous.y = overall.y
+      temp.split = singleSplitY(counts.z, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
+      temp.model = .celda_G(counts.z, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", y.init=temp.split$y, reorder=reorder)
+      overall.y = temp.model@clusters$y
+      
+      # Adjust decomposed count matrices
+      p = cG.reDecomposeCounts(counts, overall.y, previous.y, n.TS.by.C, n.by.G, L = current.L)
+      n.TS.by.C = p$n.TS.by.C
+      n.by.TS = p$n.by.TS
+      nG.by.TS = p$nG.by.TS 
+      previous.y = overall.y
+      
+      ## Create the final model object with correct info on full counts matrix  
+      temp.model@finalLogLik = cG.calcLL(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, n.by.G=n.by.G, nG.by.TS=nG.by.TS, nM=nM, nG=nG, L=current.L, beta=beta, delta=delta, gamma=gamma)
+      temp.model@completeLogLik = temp.model@finalLogLik
+      temp.model@params$count.checksum = count.checksum
+      temp.model@names = names
+      
+      ## Add extra row/column for next round of L
+      n.TS.by.C = rbind(n.TS.by.C, rep(0L, ncol(n.TS.by.C)))
+      n.by.TS = c(n.by.TS, 0L)    
+      nG.by.TS = c(nG.by.TS, 0L)
+      
+      ## Add new model to results list and increment L
+      logMessages(date(), ".. Created module", current.L, "| logLik:", temp.model@finalLogLik, append=TRUE, verbose=verbose, logfile=NULL)
+      res.list = c(res.list, list(temp.model))
+      current.L = current.L + 1
+    }
     
-    ## Add new model to results list and increment L
-    logMessages(date(), ".. Created module", current.L, "| logLik:", temp.model@finalLogLik, append=TRUE, verbose=verbose, logfile=NULL)
-    res.list = c(res.list, list(temp.model))
-    current.L = current.L + 1
+    runL = sapply(res.list, function(mod) { mod@params$L })
+    run.params = data.frame(index=seq.int(1, length(res.list)), L=runL, stringsAsFactors=FALSE)
+    
+  } else {
+    logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
+    model.initial = .celda_G(counts, L=initial.L, max.iter=20, nchains=1, verbose=FALSE, seed=seed)
+    overall.y = model.initial@clusters$y
+    current.L = length(unique(overall.y)) + 1  
+    
+    ## Perform splitting for y labels
+    res.list = list(model.initial)
+    while(current.L <= max.L) {
+      # Allow features to cluster further
+      previous.y = overall.y
+      temp.split = singleSplitY(counts, overall.y, current.L, min.feature=3, beta=beta, delta=delta, gamma=gamma, seed=seed)
+      temp.model = .celda_G(counts, L=current.L, stop.iter=5, split.on.iter=-1, split.on.last=FALSE, nchains=1, verbose=FALSE, y.initialize="predefined", y.init=temp.split$y, reorder=reorder)
+      overall.y = temp.model@clusters$y
+      
+      ## Add new model to results list and increment L
+      logMessages(date(), ".. Created module", current.L, "| logLik:", temp.model@finalLogLik, append=TRUE, verbose=verbose, logfile=NULL)
+      res.list = c(res.list, list(temp.model))
+      current.L = current.L + 1
+    }
+    
+    runL = sapply(res.list, function(mod) { mod@params$L })
+    run.params = data.frame(index=seq.int(1, length(res.list)), L=runL, stringsAsFactors=FALSE)
   }
   
   ## Summarize paramters of different models
   logliks = sapply(res.list, function(mod) { mod@finalLogLik })
-  runL = sapply(res.list, function(mod) { mod@params$L })
-  run.params = data.frame(index=seq.int(1, length(res.list)), L=runL, log_likelihood=logliks, stringsAsFactors=FALSE)
-  
+  run.params = data.frame(run.params, log_likelihood=logliks, stringsAsFactors=FALSE)
   
   celda.res = methods::new("celdaList", run.params=run.params, res.list=res.list, 
                            count.checksum=count.checksum)
