@@ -55,9 +55,10 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param initial.K Integer. Minimum number of cell populations to try. 
 #' @param max.K Integer. Maximum number of cell populations to try.
-#' @param y.init Integer vector. Module labels for features. Cells will be clusteredusing the `celda_CG` model based on the modules specified in `y.init` rather than the counts of individual features. While the feature module labels will be initialized to `y.init`, they will be allowed to move within each model with a new K.
+#' @param temp.L Integer. Number of temporary modules to identify and use in cell splitting. Only used if `y.init=NULL`. Collapsing features to a relatively smaller number of modules will increase the speed of clustering and tend to produce better cell populations. This number should be larger than the number of true modules expected in the dataset. Default NULL.
+#' @param y.init Integer vector. Module labels for features. Cells will be clustered using the `celda_CG` model based on the modules specified in `y.init` rather than the counts of individual features. While the features will be initialized to the module labels in `y.init`, the labels will be allowed to move within each new model with a different K.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. 
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell (if `y.init` is not used) or to each module in each cell population (if `y.init` is set). Default 1. 
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell (if `y.init` is NULL) or to each module in each cell population (if `y.init` is set). Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Only used if `y.init` is set. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Only used if `y.init` is set. Default 1. 
 #' @param min.cell Integer. Only attempt to split cell populations with at least this many cells.
@@ -66,7 +67,7 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
-#' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
+#' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters. The models in the list will be of class `celda_C` if `y.init=NULL` or `celda_CG` if `z.init` is set.
 #' @seealso `recursiveSplitModule()` for recursive splitting of cell populations. 
 #' @examples
 #' ## Create models that range from K=3 to K=10 by recursively splitting cell populations into two to produce `celda_C` cell clustering models
@@ -248,8 +249,10 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. 
 #' @param initial.L Integer. Minimum number of modules to try. 
 #' @param max.L Integer. Maximum number of modules to try.
-#' @param temp.z Integer. Number of temporary cell populations to identify and use in module splitting. Only used if `z.init=NULL` Collapsing cells to a relatively smaller number of cell popluations will increase the speed of module clustering and tend to produce better modules. This number should be larger than the number of true cell populations expected in the dataset. Default 100.
-#' @param z.init Integer vector. Collapse cells to cell populations based on labels in `z.init` and then perform module splitting. If NULL, no collapasing will be performed unless `temp.z` is specified. Default NULL.
+#' @param temp.K Integer. Number of temporary cell populations to identify and use in module splitting. Only used if `z.init=NULL` Collapsing cells to a relatively smaller number of cell popluations will increase the speed of module clustering and tend to produce better modules. This number should be larger than the number of true cell populations expected in the dataset. Default 100.
+#' @param z.init Integer vector. Collapse cells to cell populations based on labels in `z.init` and then perform module splitting. If NULL, no collapasing will be performed unless `temp.K` is specified. Default NULL.
+#' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix. Only used if `z.init` is set. 
+#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Only used if `z.init` is set. Default 1.  
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1. 
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1. 
@@ -259,7 +262,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages. Default TRUE. 
 #' @param logfile Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
-#' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters
+#' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters. The models in the list will be of class `celda_G` if `z.init=NULL` or `celda_CG` if `z.init` is set.
 #' @seealso `recursiveSplitCell()` for recursive splitting of cell populations. 
 #' @examples
 #' ## Create models that range from L=3 to L=20 by recursively splitting modules into two
