@@ -11,7 +11,7 @@ singleSplitZ = function(counts, z, s, K, min.cell=3, alpha=1, beta=1, seed) {
       ix = z == i
       new.z = z
       new.z[ix] = ifelse(clustLabel@clusters$z == 2, i, K)
-      ll = logLikelihood.celda_C(counts, "celda_C", s, new.z, K, alpha, beta)
+      ll = logLikelihood.celda_C(counts, s, new.z, K, alpha, beta)
       
       if(ll > best.ll) {
         best.z = new.z
@@ -157,7 +157,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     model.initial = .celda_C(counts.y, sample.label=s, K=initial.K, z.initialize="split", nchains=1, alpha=alpha, beta=beta, verbose=FALSE, seed=seed, reorder=reorder)
     current.K = length(unique(model.initial@clusters$z)) + 1
     overall.z = model.initial@clusters$z
-    ll = logLikelihood.celda_C(counts, "celda_C", s, overall.z, current.K, alpha, beta) 
+    ll = logLikelihood.celda_C(counts, s, overall.z, current.K, alpha, beta) 
     model.initial@params$count.checksum = count.checksum
     model.initial@completeLogLik = ll
     model.initial@finalLogLik = ll
@@ -177,7 +177,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
       }
       
       ## Need to change below line to use decompose counts to save time
-      ll = logLikelihood.celda_C(counts, "celda_C", s, overall.z, current.K, alpha, beta)  
+      ll = logLikelihood.celda_C(counts, s, overall.z, current.K, alpha, beta)  
       temp.model = methods::new("celda_C", clusters=list(z=overall.z),
                                   params=list(K=current.K,  alpha=alpha, beta=beta, seed=seed, count.checksum=count.checksum),
                                   finalLogLik=ll, sample.label=sample.label, names=names)
@@ -207,7 +207,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
         overall.z = temp.model@clusters$z
       } else {
         overall.z = temp.split$z            
-        ll = logLikelihood.celda_C(counts, "celda_C", s, overall.z, current.K, alpha, beta)  
+        ll = logLikelihood.celda_C(counts, s, overall.z, current.K, alpha, beta)  
         temp.model = methods::new("celda_C", clusters=list(z=overall.z),
                                   params=list(K=current.K,  alpha=alpha, beta=beta, seed=seed, count.checksum=count.checksum),
                                   finalLogLik=ll, sample.label=sample.label, names=names)
