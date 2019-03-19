@@ -80,6 +80,7 @@ setGeneric("bestLogLikelihood",
            function(celda.mod){ standardGeneric("bestLogLikelihood") })
 #' @title Get the log-likelihood 
 #' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+#' @param celda.mod A celda model object of class celda_C, celda_G, or celda_CG.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
 #' @examples
 #' bestLogLikelihood(celda.CG.mod)
@@ -203,6 +204,7 @@ setGeneric("celdaPerplexity",
            function(celda.mod){ standardGeneric("celdaPerplexity") })
 #' @title Get perplexity for every model in a celdaList
 #' @description Returns perplexity for each model in a celdaList as calculated by `perplexity().`
+#' @param celda.mod A celda model object of class "celda_C", "celda_G", or "celda_CG".
 #' @return List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
 #' @examples
 #' celda.CG.grid.model.perplexities = celdaPerplexity(celda.CG.grid.search.res)
@@ -375,7 +377,8 @@ setGeneric("celdaProbabilityMap",
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class `celda_CG`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
-#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100.
+#' @param initial.dims integer. The number of dimensions that should be retained in the initial PCA step. Default 20.
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
@@ -407,7 +410,7 @@ setGeneric("celdaTsne",
 #' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
 #' @examples 
-#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+#' tsne.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 setGeneric("celdaUmap",
            signature = "celda.mod",

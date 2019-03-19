@@ -7,6 +7,9 @@
 \usage{
 \S4method{bestLogLikelihood}{celdaModel}(celda.mod)
 }
+\arguments{
+\item{celda.mod}{A celda model object of class celda_C, celda_G, or celda_CG.}
+}
 \value{
 Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
 }
