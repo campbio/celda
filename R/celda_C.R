@@ -24,6 +24,7 @@
 #' celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
 #'                     sample.label=celda.C.sim$sample.label)
 #' @import Rcpp RcppEigen
+#' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
