@@ -343,7 +343,8 @@ violinPlot = function(counts, celda.mod, features, plot_dots = F){
   m = reshape2::melt(df, id.vars = c("cluster"))
   colnames(m) = c("Cluster","Feature","Expression")
   color_pal = distinct_colors(length(unique(cluster)))
-  p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill=Cluster)) + 
+ if(plot_dots == T){
+   p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill=Cluster)) + 
     ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=TRUE, scale = "width") + 
     ggplot2::geom_jitter(height = 0, size = 0.1) +
     ggplot2::scale_fill_manual(values = color_pal) + 
