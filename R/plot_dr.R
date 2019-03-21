@@ -146,6 +146,7 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
     var_label = "Probability"
   }
   
+  rownames(matrix) <- gsub("L","",rownames(matrix))
   if(!is.null(modules)){
     if(length(rownames(matrix)[rownames(matrix) %in% modules]) < 1){
       stop("All modules selected do not exist in the model.")
@@ -154,6 +155,7 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
     matrix = matrix[which(rownames(matrix) %in% modules), , drop=FALSE]
     matrix = matrix[match(rownames(matrix), modules), , drop=FALSE]
   }
+  rownames(matrix) <- paste0("L",rownames(matrix))
   plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
