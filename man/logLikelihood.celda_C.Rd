@@ -9,8 +9,6 @@ logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
 
-\item{model}{An object of class celda_C.}
-
 \item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
 
 \item{z}{Numeric vector. Denotes cell population labels.}

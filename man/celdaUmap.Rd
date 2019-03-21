@@ -29,5 +29,5 @@ Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and 
 Embeds cells in two dimensions using umap.
 }
 \examples{
-tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+tsne.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
 }

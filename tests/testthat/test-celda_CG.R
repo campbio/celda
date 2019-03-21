@@ -290,9 +290,9 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
   expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG@clusters$z),specific_clusters = c(1,2,3))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"))),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = 1:2)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"), rescale = FALSE)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = 1:2, rescale = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
   expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
@@ -426,7 +426,7 @@ test_that(desc = "Invoking error from distinct_colors function",{
   expect_error(distinct_colors(n = 3, hues = "xx"), "Only color names listed in the 'color' function can be used in 'hues'")
 })
 
-test_that(desc = "Invoking error from distinct_colors function",{
+test_that(desc = "Invoking error from sample labels function",{
   expect_error(processSampleLabels("Sample_1", ncol(celdaCG.sim$counts)), "'sample.label' must be the same length as the number of columns in the 'counts' matrix.")
 })
 

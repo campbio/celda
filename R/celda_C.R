@@ -23,6 +23,8 @@
 #' @examples
 #' celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
 #'                     sample.label=celda.C.sim$sample.label)
+#' @import Rcpp RcppEigen
+#' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
 celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   					        algorithm = c("EM", "Gibbs"), 
@@ -420,8 +422,7 @@ cC.calcLL = function(m.CP.by.S, n.G.by.CP, s, z, K, nS, nG, alpha, beta) {
 #' @title Calculate Celda_C log likelihood
 #' @description Calculates the log likelihood for user-provided cell population clusters using the `celda_C()` model.
 #' 
-#' @param counts Integer matrix. Rows represent features and columns represent cells. 
-#' @param model An object of class celda_C.
+#' @param counts Integer matrix. Rows represent features and columns represent cells.
 #' @param sample.label Vector or factor. Denotes the sample label for each cell (column) in the count matrix.
 #' @param z Numeric vector. Denotes cell population labels. 
 #' @param K Integer. Number of cell populations. 
@@ -535,7 +536,7 @@ setMethod("clusterProbability",
 #' @seealso `celda_C()` for clustering cells
 #' @examples
 #' perplexity = perplexity(celda.C.sim$counts, celda.C.mod)
-#' @import matrixStats
+#' @rawNamespace import(matrixStats, except = c(count))
 #' @export
 setMethod("perplexity",
           signature(celda.mod = "celda_C"),

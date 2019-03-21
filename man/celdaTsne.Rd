@@ -17,6 +17,8 @@ celdaTsne(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
 
 \item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
+\item{initial.dims}{integer. The number of dimensions that should be retained in the initial PCA step. Default 20.}
+
 \item{modules}{Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
 
 \item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
