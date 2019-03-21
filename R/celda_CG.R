@@ -30,6 +30,7 @@
 #' celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
 #'                      sample.label=celda.CG.sim$sample.label, nchains=1)
 #' @import Rcpp RcppEigen
+#' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
