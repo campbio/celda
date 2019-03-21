@@ -19,8 +19,6 @@ logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
 
-\item{model}{An object of class celda_C.}
-
 \item{...}{Additional parameters.}
 }
 \value{
