@@ -152,7 +152,7 @@ plotDimReduceCluster(dim1 = tsne[,1],
                      dim2 = tsne[,2], 
                      cluster = clusters(celda.model)$z)
 
-plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2], 
+plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2], modules = 1:3,
                    celda.mod = celda.model, counts = sim_counts$counts, rescale = TRUE)
 
 plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2],
