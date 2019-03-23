@@ -47,7 +47,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   ## Error checking and variable processing
   counts = processCounts(counts)
   if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
+    count.checksum = createCountChecksum(counts)
   }
   y.initialize = match.arg(y.initialize)
    
@@ -277,10 +277,11 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
   ## Peform reordering on final Z and Y assigments:
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
+  count.checksum = createCountChecksum(cell.counts)
   result = methods::new("celda_G", clusters=list(y=y), 
                         params=list(L=L, beta=beta, delta=delta, gamma=gamma,
                                     seed=seed,
-                                    count.checksum=digest::digest(cell.counts, algo="md5")),
+                                    count.checksum=count.checksum),
                         names=names)
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
