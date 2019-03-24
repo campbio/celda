@@ -156,13 +156,13 @@ recodeClusterY = function(celda.mod, from, to) {
 #'                     error.on.mismatch=FALSE)
 #' @export
 compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
-  if (methods::.hasSlot(celda.mod, "y")) {
+  if ("y" %in% names(celda.mod@clusters)) {
     if (nrow(counts) != length(celda.mod@clusters$y)) {
       stop(paste0("The provided celda object was generated from a counts matrix with a different number of features than the one provided."))
     }  
   }
   
-  if (methods::.hasSlot(celda.mod, "z")) {  
+  if ("z" %in% names(celda.mod@clusters)){  
     if (ncol(counts) != length(celda.mod@clusters$z)) {
       stop(paste0("The provided celda object was generated from a counts matrix with a different number of cells than the one provided."))
     }
@@ -170,7 +170,7 @@ compareCountMatrix = function(counts, celda.mod, error.on.mismatch=TRUE) {
   
   celda.checksum = celda.mod@params$count.checksum
   counts = processCounts(counts)  # Checksums are generated in celdaGridSearch and model functions after processing
-  count.md5 = digest::digest(counts, algo="md5")
+  count.md5 = createCountChecksum(counts)
   res = isTRUE(count.md5 == celda.checksum)
   if (res) return(TRUE)
   if (!res && error.on.mismatch) stop("There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
@@ -257,6 +257,13 @@ validateCounts = function(counts) {
   }
 }
 
+# Wrapper function, creates checksum for matrix.
+# Feature names, cell names are not taken into account.
+createCountChecksum = function(counts){
+  rownames(counts) <- NULL
+  colnames(counts) <- NULL
+  count.checksum = digest::digest(counts, algo="md5")
+}
 
 ## Generate n random deviates from the Dirichlet function with shape parameters alpha
 ## Adapted from gtools v3.5
