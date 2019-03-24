@@ -4,10 +4,12 @@
 \alias{plotGridSearchPerplexity}
 \title{Visualize perplexity of every model in a celda_list, by unique K/L combinations}
 \usage{
-plotGridSearchPerplexity(celda.list)
+plotGridSearchPerplexity(celda.list, sep = 1)
 }
 \arguments{
 \item{celda.list}{Object of class 'celda_list'.}
+
+\item{sep}{Numeric. Breaks in the x axis of the resulting plot.}
 }
 \value{
 A ggplot plot object showing perplexity as a function of clustering parameters.
