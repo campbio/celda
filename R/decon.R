@@ -77,8 +77,9 @@ decon.calcLL = function(counts, z,  phi, eta, theta){
 # This function calculates the log-likelihood of background distribution decontamination
 #
 # bgDist Numeric matrix. Rows represent feature and columns are the times that the background-distribution has been replicated. 
-bg.calcLL = function(counts, cellDist, bgDist, theta){
-    ll = sum( t(counts) * log( theta * t(cellDist) + (1-theta) * t(bgDist) + 1e-20) ) 
+bg.calcLL = function(counts, global.z, cb.z, phi, eta,theta){
+    #ll = sum( t(counts) * log( theta * t(cellDist) + (1-theta) * t(bgDist) + 1e-20) ) 
+    ll = sum( t(counts) * log( theta * t(phi)[cb.z,] + (1-theta) * t(eta)[global.z,] +1e-20 )) 
     return(ll) 
 }
 
@@ -113,23 +114,25 @@ cD.calcEMDecontamination = function(counts, phi, eta, theta,  z, K, beta, delta 
 
 # This function updates decontamination using background distribution 
 # 
-cD.calcEMbgDecontamination = function(counts, cellDist, bgDist, theta, beta){
+cD.calcEMbgDecontamination = function(counts, global.z, cb.z, tr.z, phi, eta, theta, beta){
 
-    meanN.by.C = apply(counts, 2, mean) 
-    log.Pr = log( t(cellDist) + 1e-20) + log( theta + 1e-20) # + log( t(counts) / meanN.by.C )   # better when without panelty 
-    log.Pc = log( t(bgDist)  + 1e-20) + log( 1-theta + 2e-20) 
+    log.Pr = log( t(phi)[ cb.z,] + 1e-20) + log( theta + 1e-20 )  
+    log.Pc = log( t(eta)[ global.z,] + 1e-20) + log(1-theta + 1e-20) 
 
     Pr = exp( log.Pr) / (exp(log.Pr) + exp( log.Pc) ) 
     Pc = 1- Pr 
     delta.v2 = MCMCprecision::fit_dirichlet( matrix( c( Pr, Pc) , ncol = 2 ) )$alpha
 
     est.rmat = t(Pr) * counts
+    phi.unnormalized = colSumByGroup.numeric( est.rmat, cb.z, max(cb.z) ) 
+    eta.unnormalized = rowSums(phi.unnormalized) - colSumByGroup.numeric( phi.unnormalized, tr.z, max(tr.z) ) 
 
     ## Update paramters 
     theta = (colSums(est.rmat) + delta.v2[1] ) / (colSums(counts) + sum(delta.v2)  ) 
-    cellDist = normalizeCounts(est.rmat, normalize="proportion", pseudocount.normalize =beta) 
+    phi = normalizeCounts(phi.unnormalized, normalize="proportion",  pseudocount.normalize =beta ) 
+    eta = normalizeCounts(eta.unnormalized, normalize="proportion",  pseudocount.normalize =beta ) 
 
-    return( list("est.rmat"=est.rmat, "theta"=theta, "cellDist"=cellDist, "delta"=delta.v2 ) ) 
+    return( list("est.rmat"=est.rmat, "theta"=theta, "phi"=phi, "eta"=eta, "delta"=delta.v2 ) ) 
 }
 
 
@@ -227,7 +230,6 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
 
         ## Initialization
         delta.init = delta 
-        #theta  = stats::runif(nC, min = 0.1, max = 0.5)  
         theta = rbeta( n = nC, shape1 = delta.init, shape2 = delta.init ) 
         est.rmat = t (t(counts) * theta )       
         phi =   colSumByGroup.numeric(est.rmat, z, K)
@@ -268,31 +270,42 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
 
     if ( decon.method == "background") {
 
+        ## Initialize cell label
+        initial.label = decontx.initializeZ(counts=counts) 
+        global.z = initial.label$global.z
+        cb.z = initial.label$cb.z
+        tr.z = initial.label$tr.z
+
+
         ## Initialization
         delta.init = delta 
-        theta = rbeta( n = nC, shape1 = delta.init,  shape2 = delta.init ) 
+        theta = runif( n = nC, min = 0.1, max = 0.5 ) 
+        #theta = rbeta( n = nC, shape1 = delta.init,  shape2 = delta.init ) 
         est.rmat = t( t(counts) *theta) 
-        bgDist = rowSums( counts ) / sum( counts) 
-        bgDist = matrix( rep( bgDist, nC), ncol=nC) 
-        cellDist = normalizeCounts( est.rmat, normalize="proportion", pseudocount.normalize=beta) 
+
+        phi = colSumByGroup.numeric( est.rmat, cb.z, max(cb.z)  ) 
+        eta = rowSums(phi) - colSumByGroup.numeric( phi,  tr.z,  max(tr.z)  ) 
+        phi = normalizeCounts( phi, normalize="proportion", pseudocount.normalize =beta ) 
+        eta = normalizeCounts( eta, normalize="proportion", pseudocount.normalize = beta) 
         ll =c()
 
 
-        ll.round = bg.calcLL(counts=counts, cellDist=cellDist, bgDist=bgDist, theta=theta)  
+        ll.round = bg.calcLL(counts = counts, global.z = global.z, cb.z = cb.z, phi = phi, eta = eta, theta = theta ) 
 
         ## EM updates
         while (iter <=  max.iter &  num.iter.without.improvement <= stop.iter  ) { 
 
 
-            next.decon = cD.calcEMbgDecontamination(counts=counts, cellDist=cellDist, bgDist=bgDist, theta=theta, beta=beta)  
+            next.decon = cD.calcEMbgDecontamination(counts=counts, global.z=global.z, cb.z=cb.z, tr.z=tr.z,  phi=phi, eta=eta, theta=theta, beta=beta)  
 
             theta = next.decon$theta
-            cellDist = next.decon$cellDist
-            delta = next.decon$delta 
+            phi = next.decon$phi
+            eta = next.decon$eta 
+            delta = next.decon$delta
 
 
             ## Calculate log-likelihood
-            ll.temp = bg.calcLL(counts=counts, cellDist=cellDist, bgDist=bgDist, theta=theta) 
+            ll.temp = bg.calcLL(counts = counts, global.z = global.z, cb.z = cb.z, phi = phi, eta = eta, theta = theta) 
             ll  = c(ll, ll.temp) 
             ll.round = c( ll.round, round( ll.temp, 2) )
 
@@ -387,6 +400,7 @@ decontx.initializeZ = function( counts, K=10, min.cell=3, seed=1111) {
     if( nC<100 )  K = ceiling(sqrt( nC )) 
 
     global.z = initialize.splitZ(counts, K=K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=seed) 
+    global.K = max( global.z) 
 
     local.z = rep(NA, nC) 
     for( k in 1:global.K) { 
@@ -395,5 +409,10 @@ decontx.initializeZ = function( counts, K=10, min.cell=3, seed=1111) {
         local.z[ global.z ==k ] = initialize.splitZ( local.counts, K=local.K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=seed)    
     }
 
-    return( list( "global.z"=global.z, "local.z"=local.z  )  )
+    cb.z  = interaction( global.z, local.z, lex.order=TRUE)   # combined z label  
+    tr.z = as.integer( sub("\\..*", "", levels(cb.z), perl=TRUE) )  # transitional z label
+    cb.z = as.integer( plyr::mapvalues( cb.z, from=levels(cb.z), to=1:length(levels(cb.z)))  )
+
+
+    return( list( "global.z"=global.z, "local.z"=local.z, "tr.z"=tr.z, "cb.z"=cb.z  )  )
 } 
