@@ -182,7 +182,6 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' }
 #' @export 
 plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL, label_clusters = FALSE, label_size = 3.5){
-  `%>%` <- dplyr::`%>%`
   df = data.frame(dim1, dim2, cluster)
   colnames(df) = c(xlab, ylab, "Cluster")
   na.ix = is.na(dim1) | is.na(dim2)
@@ -199,8 +198,17 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     ggplot2::scale_color_manual(values = cluster_colors) +
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
   if(label_clusters == T){
-    centroid <- df %>% dplyr::group_by(Cluster) %>% 
-      dplyr::summarise(Dimension_1 = median(x = Dimension_1), Dimension_2 = median(x = Dimension_2))
+    
+    centroid.list <- lapply(1:length(unique(cluster)), function(x){
+      df.sub <- df[df$Cluster == x,]
+      median.1 <- median(df.sub$Dimension_1)
+      median.2 <- median(df.sub$Dimension_2)
+      cbind(median.1,median.2,x)
+    })
+    centroid <- do.call(rbind,centroid.list)
+    centroid <- as.data.frame(centroid)
+    
+    colnames(centroid) <- c("Dimension_1","Dimension_2","Cluster")
     g <- g + ggplot2::geom_point(data = centroid, mapping = ggplot2::aes(x = Dimension_1, y= Dimension_2), size = 0, alpha = 0) + 
       ggrepel::geom_text_repel(data = centroid, mapping = ggplot2::aes(label = Cluster), size = label_size)
   }
