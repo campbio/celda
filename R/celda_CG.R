@@ -59,7 +59,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 
   counts = processCounts(counts)
   if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
+    count.checksum = createCountChecksum(counts)
   }
     
   sample.label = processSampleLabels(sample.label, ncol(counts))
@@ -347,11 +347,12 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
+  count.checksum = createCountChecksum(cell.counts)
   result = methods::new("celda_CG", 
                         clusters=list(z=z, y=y),
                         params=list(K=K, L=L, alpha=alpha, beta=beta, delta=delta, 
                                     gamma=gamma, seed=seed,
-                                    count.checksum=digest::digest(cell.counts, algo="md5")),
+                                    count.checksum=count.checksum),
             				    sample.label=cell.sample.label, names=names)
   
   result = reorder.celda_CG(counts = cell.counts, res = result)

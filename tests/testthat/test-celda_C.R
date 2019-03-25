@@ -140,7 +140,7 @@ test_that(desc = "Testing CompareCountMatrix with celda_C", {
   
   less.cells <- celdaC.sim$counts[,1:100]
   expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_C),
-               "There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
+               "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
   
   counts.matrix.error <- matrix(data = 1, nrow = nrow(celdaC.sim$counts), ncol = ncol(celdaC.sim$counts))
   expect_false(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_C, error.on.mismatch = FALSE))

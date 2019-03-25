@@ -166,7 +166,7 @@ DecontX = function( counts, z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=
             if( !is.null(z) ) { z.BATCH = z[ batch == BATCH ]  }  else { z.BATCH = z } 
             res.BATCH = DecontXoneBatch( counts = counts.BATCH, z = z.BATCH, batch = BATCH  ,max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed ) 
 
-            est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.rmat
+            est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.nativeCounts
             est.conp[ batch == BATCH ] = res.BATCH$res.list$est.conp 
             theta[  batch == BATCH ] = res.BATCH$res.list$theta 
 
@@ -179,7 +179,7 @@ DecontX = function( counts, z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=
       
         run.params = res.BATCH$run.params 
         method = res.BATCH$method 
-        res.list = list( "logLikelihood"=logLikelihood, "est.rmat"=est.rmat,"est.conp"= est.conp,  "theta"=theta ) 
+        res.list = list( "logLikelihood"=logLikelihood, "est.nativeCounts"=est.rmat,"est.conp"= est.conp,  "theta"=theta ) 
 
         return( list("run.params"=run.params, "res.list"=res.list, "method"=method )  ) 
     } 
@@ -314,13 +314,13 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
     if ( !is.null(batch) ) {  logMessages("batch: ",  batch, logfile=logfile, append=TRUE, verbose=verbose)    }
     logMessages("----------------------------------------------------------------------", logfile=logfile, append=TRUE, verbose=verbose) 
 
-    run.params = list("beta"=beta, "delta.init"=delta.init, "iteration"=iter-1L, "seed"=seed)
+    run.params = list("beta.init"=beta, "delta.init"=delta.init, "iteration"=iter-1L, "seed"=seed)
 
-    res.list = list("logLikelihood" = ll, "est.rmat"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta , "delta"=delta)
-    if( decon.method=="clustering" ) {
-        posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  ) 
-        res.list = append( res.list , posterior.params ) 
-  }
+    res.list = list("logLikelihood" = ll, "est.nativeCounts"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta , "delta"=delta)
+    #if( decon.method=="clustering" ) {
+    #    posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  ) 
+    #    res.list = append( res.list , posterior.params ) 
+    #}
   
     return(list("run.params"=run.params, "res.list"=res.list, "method"=decon.method  ))
 }

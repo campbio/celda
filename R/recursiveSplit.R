@@ -91,7 +91,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
 
   start.time = Sys.time()
   counts = processCounts(counts)
-  count.checksum = digest::digest(counts, algo="md5")
+  count.checksum = createCountChecksum(counts)
   
   sample.label = processSampleLabels(sample.label, num.cells = ncol(counts))
   s = as.integer(sample.label)
@@ -282,7 +282,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
   start.time = Sys.time()
   
   counts = processCounts(counts)
-  count.checksum = digest::digest(counts, algo="md5")   
+  count.checksum = createCountChecksum(counts)
   names = list(row=rownames(counts), column=colnames(counts))
   sample.label = processSampleLabels(sample.label, num.cells = ncol(counts))
   s = as.integer(sample.label)
