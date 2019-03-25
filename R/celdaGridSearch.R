@@ -76,7 +76,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   # later on, we can check on celda_* model objects which
   # count matrix was used.
   counts = processCounts(counts)
-  count.checksum = digest::digest(counts, algo="md5")
+  count.checksum = createCountChecksum(counts)
   
   ## Use DoParallel to loop through each combination of parameters
   cl = parallel::makeCluster(cores)

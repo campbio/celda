@@ -51,7 +51,7 @@ celda_C = function(counts, sample.label=NULL, K, alpha=1, beta=1,
   ## Error checking and variable processing
   counts = processCounts(counts)  
    if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
+     count.checksum = createCountChecksum(counts)
    }   
   
   sample.label = processSampleLabels(sample.label, ncol(counts))
@@ -312,9 +312,10 @@ simulateCells.celda_C = function(model, S=5, C.Range=c(50, 100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts) 
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
+  count.checksum = createCountChecksum(cell.counts)
   result = methods::new("celda_C", clusters=list(z=z),
                         params=list(alpha=alpha, beta=beta, seed=seed,
-                                    count.checksum=digest::digest(cell.counts, algo="md5"),
+                                    count.checksum=count.checksum,
                                     K=K),
                         sample.label=cell.sample.label, 
                         names=names)

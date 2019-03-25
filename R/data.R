@@ -30,10 +30,10 @@
 #' @title celda.CG.grid.search.res
 #' @format An object as returned from celdaGridSearch()
 #' @examples
-#' cgs = celdaGridSearch(celda.CG.sim$counts, model="celda_CG", 
-#'                       params.test=list(K=4:6, L=9:11), 
-#'                       params.fixed=list(sample.label=celda.CG.sim$sample.label),
-#'                       best.only=TRUE, nchains=1)
+#' celda.CG.grid.search.res = celdaGridSearch(celda.CG.sim$counts, model="celda_CG", 
+#'                          params.test=list(K=4:6, L=9:11), 
+#'                          params.fixed=list(sample.label=celda.CG.sim$sample.label),
+#'                          best.only=TRUE, nchains=1)
 "celda.CG.grid.search.res"
 
 
