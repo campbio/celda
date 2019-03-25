@@ -36,7 +36,8 @@ Imports:
     enrichR,
     stringi,
     SummarizedExperiment,
-    MCMCprecision
+    MCMCprecision,
+    dplyr
 Suggests:
     testthat,
     knitr,
