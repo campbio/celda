@@ -333,10 +333,13 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
 #' @title Feature Expression Violin Plot 
 #' @description Outputs a violin plot for feature expression data.
 #' 
-#' @param counts Integer matrix. Rows represent features and columns represent cells. 
+#' @param counts Integer matrix. Rows represent features and columns represent
+#'  cells.
 #' @param celda.mod Celda object of class "celda_G" or "celda_CG".
 #' @param features Character vector. Uses these genes for plotting.
-#' @param plot_dots "TRUE" or "FALSE". If "TRUE", the expression of features will be plotted as points in addition to the violin curve.
+#' @param plot_dots \strong{TRUE} or \strong{FALSE}. If \strong{TRUE}, the
+#'  expression of features will be plotted as points in addition to the violin
+#'  curve.
 #' @return Violin plot for each feature, grouped by celda cluster
 #' @examples
 #' violinPlot(counts = celda.CG.sim$counts,
