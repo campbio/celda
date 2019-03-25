@@ -5,8 +5,8 @@
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
 celdaTsne(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
-  initial.dims = 20, modules = NULL, perplexity = 20,
-  max.iter = 2500, seed = 12345, ...)
+  initial.dims = 20, modules = NULL, perplexity = 20, max.iter = 2500,
+  seed = 12345, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
@@ -17,6 +17,8 @@ celdaTsne(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
 
 \item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
+\item{initial.dims}{integer. The number of dimensions that should be retained in the initial PCA step. Default 20.}
+
 \item{modules}{Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
 
 \item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
@@ -24,8 +26,6 @@ celdaTsne(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
 \item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
 
 \item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
-
-\item{...}{Additional parameters.}
 
 \item{...}{Additional parameters.}
 }

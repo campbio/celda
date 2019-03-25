@@ -35,6 +35,6 @@ curveElbow = function(var, perplexity, pval.cutoff = 0.05) {
   perplexity.sde.mean = mean(perplexity.sde[ix], na.rm=TRUE)
   perplexity.sde.pval = pnorm(perplexity.sde, mean=perplexity.sde.mean, sd=perplexity.sde.sd, lower.tail = FALSE)  
   
-  #other = which(ix & perplexity.sde.pval < pval.cutoff)
-  return(list(elbow=var[elbow])) #, secondary=l[other]))
+  other = which(ix & perplexity.sde.pval < pval.cutoff)
+  return(list(elbow=var[elbow]))#, secondary=l[other]))
 }

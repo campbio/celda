@@ -8,12 +8,20 @@ setClass("celdaModel",
 
 #' @title Get parameter values provided for celda model creation
 #' @description Retrieves the K/L, model priors (e.g. alpha, beta), random seed, and count matrix checksum parameters provided during the creation of the provided celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @return List. Contains the model-specific parameters for the provided celda model object depending on its class.
 #' @examples
 #' params(celda.CG.mod)
 #' @export
 setGeneric("params",
            function(celda.mod){ standardGeneric("params") })
+#' @title Get parameter values provided for celda model creation
+#' @description Retrieves the K/L, model priors (e.g. alpha, beta), random seed, and count matrix checksum parameters provided during the creation of the provided celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @return List. Contains the model-specific parameters for the provided celda model object depending on its class.
+#' @examples
+#' params(celda.CG.mod)
+#' @export
 setMethod("params",
           signature=c(celda.mod="celdaModel"),
           function(celda.mod){  celda.mod@params  })
@@ -21,12 +29,20 @@ setMethod("params",
 
 #' @title Get feature, cell and sample names from a celda model
 #' @description Retrieves the row, column, and sample names used to generate a celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @return List. Contains row, column, and sample character vectors corresponding to the values provided when the celda model was generated.
 #' @examples
 #' matrixNames(celda.CG.mod)
 #' @export
 setGeneric("matrixNames",
            function(celda.mod){ standardGeneric("matrixNames") })
+#' @title Get feature, cell and sample names from a celda model
+#' @description Retrieves the row, column, and sample names used to generate a celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @return List. Contains row, column, and sample character vectors corresponding to the values provided when the celda model was generated.
+#' @examples
+#' matrixNames(celda.CG.mod)
+#' @export
 setMethod("matrixNames",
           signature=c(celda.mod="celdaModel"),
           function(celda.mod){  celda.mod@names  })
@@ -34,13 +50,20 @@ setMethod("matrixNames",
 
 #' @title Get log-likelihood history
 #' @description Retrieves the complete log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
-#' 
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to generate the model.
 #' @examples
 #' logLikelihoodHistory(celda.CG.mod)
 #' @export
 setGeneric("logLikelihoodHistory",
            function(celda.mod){ standardGeneric("logLikelihoodHistory") })
+#' @title Get log-likelihood history
+#' @description Retrieves the complete log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @return Numeric. The log-likelihood at each step of Gibbs sampling used to generate the model.
+#' @examples
+#' logLikelihoodHistory(celda.CG.mod)
+#' @export
 setMethod("logLikelihoodHistory",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@completeLogLik  })
@@ -49,11 +72,19 @@ setMethod("logLikelihoodHistory",
 #' @title Get the log-likelihood 
 #' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
+#' @param celda.mod A celda model object of class celda_C, celda_G, or celda_CG.
 #' @examples
 #' bestLogLikelihood(celda.CG.mod)
 #' @export
 setGeneric("bestLogLikelihood",
            function(celda.mod){ standardGeneric("bestLogLikelihood") })
+#' @title Get the log-likelihood 
+#' @description Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+#' @param celda.mod A celda model object of class celda_C, celda_G, or celda_CG.
+#' @return Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
+#' @examples
+#' bestLogLikelihood(celda.CG.mod)
+#' @export
 setMethod("bestLogLikelihood",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@finalLogLik  })
@@ -61,12 +92,20 @@ setMethod("bestLogLikelihood",
 
 #' @title Get clustering outcomes from a celda model
 #' @description Returns the z / y results corresponding to the cell / gene cluster labels determined by the provided celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @return List. Contains z (for celda_C and celda_CG models) and/or y (for celda_G and celda_CG models)
 #' @examples
 #' clusters(celda.CG.mod)
 #' @export
 setGeneric("clusters",
            function(celda.mod){ standardGeneric("clusters")})
+#' @title Get clustering outcomes from a celda model
+#' @description Returns the z / y results corresponding to the cell / gene cluster labels determined by the provided celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @return List. Contains z (for celda_C and celda_CG models) and/or y (for celda_G and celda_CG models)
+#' @examples
+#' clusters(celda.CG.mod)
+#' @export
 setMethod("clusters", signature=c(celda.mod="celdaModel"),
           function(celda.mod){
             return(celda.mod@clusters)
@@ -80,12 +119,20 @@ setClass("celda_C",
 
 #' @title Get sample labels from a celda model
 #' @description Returns the sample labels for the count matrix provided for generation of a given celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @return Character. Contains the sample labels provided at model creation time, or those automatically generated by celda.
 #' @examples
 #' sampleLabel(celda.CG.mod)
 #' @export
 setGeneric("sampleLabel",
            function(celda.mod){ standardGeneric("sampleLabel") })
+#' @title Get sample labels from a celda model
+#' @description Returns the sample labels for the count matrix provided for generation of a given celda model.
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
+#' @return Character. Contains the sample labels provided at model creation time, or those automatically generated by celda.
+#' @examples
+#' sampleLabel(celda.CG.mod)
+#' @export
 setMethod("sampleLabel",
            signature=c(celda.mod="celdaModel"),
            function(celda.mod){  celda.mod@sample.label  })
@@ -106,12 +153,20 @@ setClass("celdaList",
 
 #' @title Get run parameters provided to `celdaGridSearch()`
 #' @description Returns details on the clustering parameters, model priors, and seeds provided to `celdaGridSearch()` when the provided celdaList was created.
+#' @param celda.mod An object of class celdaList.
 #' @return Data Frame. Contains details on the various K/L parameters, chain parameters, and final log-likelihoods derived for each model in the provided celdaList.
 #' @examples
 #' runParams(celda.CG.grid.search.res)
 #' @export
 setGeneric("runParams",
            function(celda.mod){ standardGeneric("runParams") })
+#' @title Get run parameters provided to `celdaGridSearch()`
+#' @description Returns details on the clustering parameters, model priors, and seeds provided to `celdaGridSearch()` when the provided celdaList was created.
+#' @param celda.mod An object of class celdaList.
+#' @return Data Frame. Contains details on the various K/L parameters, chain parameters, and final log-likelihoods derived for each model in the provided celdaList.
+#' @examples
+#' runParams(celda.CG.grid.search.res)
+#' @export
 setMethod("runParams",
            signature=c(celda.mod="celdaList"),
            function(celda.mod){  celda.mod@run.params  })
@@ -119,12 +174,20 @@ setMethod("runParams",
 
 #' @title Get final celda models from a celdaList
 #' @description Returns all models generated during a `celdaGridSearch()` run.
+#' @param celda.mod An object of class celdaList.
 #' @return List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
 #' @examples
 #' celda.CG.grid.models = resList(celda.CG.grid.search.res)
 #' @export
 setGeneric("resList",
            function(celda.mod){ standardGeneric("resList") })
+#' @title Get final celda models from a celdaList
+#' @description Returns all models generated during a `celdaGridSearch()` run.
+#' @param celda.mod An object of class celdaList.
+#' @return List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
+#' @examples
+#' celda.CG.grid.models = resList(celda.CG.grid.search.res)
+#' @export
 setMethod("resList",
            signature=c(celda.mod="celdaList"),
            function(celda.mod){  celda.mod@res.list  })
@@ -132,12 +195,20 @@ setMethod("resList",
 
 #' @title Get perplexity for every model in a celdaList
 #' @description Returns perplexity for each model in a celdaList as calculated by `perplexity().`
+#' @param celda.mod A celda model object of class "celda_C", "celda_G", or "celda_CG".
 #' @return List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
 #' @examples
 #' celda.CG.grid.model.perplexities = celdaPerplexity(celda.CG.grid.search.res)
 #' @export
 setGeneric("celdaPerplexity",
            function(celda.mod){ standardGeneric("celdaPerplexity") })
+#' @title Get perplexity for every model in a celdaList
+#' @description Returns perplexity for each model in a celdaList as calculated by `perplexity().`
+#' @param celda.mod A celda model object of class "celda_C", "celda_G", or "celda_CG".
+#' @return List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
+#' @examples
+#' celda.CG.grid.model.perplexities = celdaPerplexity(celda.CG.grid.search.res)
+#' @export
 setMethod("celdaPerplexity",
            signature=c(celda.mod="celdaList"),
            function(celda.mod){  celda.mod@perplexity  })
@@ -146,6 +217,8 @@ setMethod("celdaPerplexity",
 #' @title Append two celdaList objects
 #' @description Returns a single celdaList representing the combination of two provided celdaList objects.
 #' @return A celdaList object. This object contains all resList entries and runParam records from both lists.
+#' @param list1 A celda_list object
+#' @param list2 A celda_list object to be joined with list_1
 #' @examples
 #' appended.list = appendCeldaList(celda.CG.grid.search.res, celda.CG.grid.search.res)
 #' @export
@@ -172,7 +245,8 @@ appendCeldaList = function(list1, list2) {
 #' Render a stylable heatmap of count data based on celda clustering results.
 #'
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`. 
-#' @param celda.mod Celda object of class "celda_C", "celda_G", or "celda_CG".
+#' @param celda.mod A celda model object of class "celda_C", "celda_G", or "celda_CG".
+#' @param feature.ix Integer vector. Select features for display in heatmap. If NULL, no subsetting will be performed. Default NULL.
 #' @param ... Additional parameters.
 #' @examples 
 #' celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
@@ -212,13 +286,14 @@ logLikelihood = function(counts, model, ...) {
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param log Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.  
+#' @param ... Additional parameters.
 #' @examples
 #' cluster.prob = clusterProbability(celda.CG.sim$counts, celda.CG.mod)
 #' @return A numeric vector of the cluster assignment probabilties
 #' @export
 setGeneric("clusterProbability", 
            signature="celda.mod",
-           function(counts, celda.mod, log=FALSE, modules=NULL, ...) {
+           function(counts, celda.mod, log=FALSE, ...) {
              standardGeneric("clusterProbability")
            })
 
@@ -229,7 +304,7 @@ setGeneric("clusterProbability",
 #' cluster assignments fit the data being clustered.
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
-#' @param celda.mod Celda object of class "celda_C", "celda_G" or "celda_CG".
+#' @param celda.mod Celda model. Options available in `celda::available.models`.
 #' @param new.counts A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @examples
@@ -302,12 +377,12 @@ setGeneric("celdaProbabilityMap",
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class `celda_CG`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
-#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100.
+#' @param initial.dims integer. The number of dimensions that should be retained in the initial PCA step. Default 20.
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
 #' @examples 
@@ -331,14 +406,11 @@ setGeneric("celdaTsne",
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
-#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
-#' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
-#' @param ... Additional parameters.
+#' @param umap.config An object of class "umap.config" specifying parameters to the UMAP algorithm.
 #' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
 #' @examples 
-#' tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+#' tsne.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
 #' @export
 setGeneric("celdaUmap",
            signature = "celda.mod",

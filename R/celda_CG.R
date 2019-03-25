@@ -29,6 +29,8 @@
 #' @examples
 #' celda.mod = celda_CG(celda.CG.sim$counts, K=celda.CG.sim$K, L=celda.CG.sim$L,
 #'                      sample.label=celda.CG.sim$sample.label, nchains=1)
+#' @import Rcpp RcppEigen
+#' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
 celda_CG = function(counts, sample.label=NULL, K, L,
                     alpha=1, beta=1, delta=1, gamma=1, 
@@ -57,7 +59,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 
   counts = processCounts(counts)
   if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
+    count.checksum = createCountChecksum(counts)
   }
     
   sample.label = processSampleLabels(sample.label, ncol(counts))
@@ -345,11 +347,12 @@ simulateCells.celda_CG = function(model, S=5, C.Range=c(50,100), N.Range=c(500,1
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts), 
                sample=unique(cell.sample.label))
+  count.checksum = createCountChecksum(cell.counts)
   result = methods::new("celda_CG", 
                         clusters=list(z=z, y=y),
                         params=list(K=K, L=L, alpha=alpha, beta=beta, delta=delta, 
                                     gamma=gamma, seed=seed,
-                                    count.checksum=digest::digest(cell.counts, algo="md5")),
+                                    count.checksum=count.checksum),
             				    sample.label=cell.sample.label, names=names)
   
   result = reorder.celda_CG(counts = cell.counts, res = result)
@@ -526,12 +529,20 @@ cCG.calcLL = function(K, L, m.CP.by.S, n.TS.by.CP, n.by.G, n.by.TS, nG.by.TS, nS
 #' @return The log likelihood for the given cluster assignments
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
+#' loglik = logLikelihood.celda_CG(celda.CG.sim$counts, 
 #'                        sample.label=celda.CG.sim$sample.label,
 #'                        z=celda.CG.sim$z, y=celda.CG.sim$y,
 #'                        K=celda.CG.sim$K, L=celda.CG.sim$L,
 #'                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
 #'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
+#'                        
+#' loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG",
+#'                        sample.label=celda.CG.sim$sample.label,
+#'                        z=celda.CG.sim$z, y=celda.CG.sim$y,
+#'                        K=celda.CG.sim$K, L=celda.CG.sim$L,
+#'                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
+#'                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
+#'                        
 #' @export
 logLikelihood.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta, delta, gamma) {  
   if (sum(z > K) > 0) stop("An entry in z contains a value greater than the provided K.")
@@ -636,7 +647,7 @@ setMethod("clusterProbability",
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
-#' @import matrixStats
+#' @rawNamespace import(matrixStats, except = c(count))
 #' @export
 setMethod("perplexity",
           signature(celda.mod = "celda_CG"),
@@ -732,6 +743,7 @@ setMethod("celdaHeatmap",
 #' @param celda.mod Celda object of class `celda_CG`. 
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param modules Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.
@@ -854,6 +866,7 @@ prepareCountsForDimReduction.celda_CG =  function(counts, celda.mod, max.cells=2
 #' @examples
 #' celdaProbabilityMap(celda.CG.sim$counts, celda.CG.mod)
 #' @return A grob containing the specified plots
+#' @import gridExtra
 #' @seealso `celda_CG()` for clustering features and cells
 #' @export 
 setMethod("celdaProbabilityMap",

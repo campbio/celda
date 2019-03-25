@@ -18,13 +18,7 @@ celdaUmap(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
 
 \item{modules}{Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
 
-\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
-
-\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
-
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
-
-\item{...}{Additional parameters.}
+\item{umap.config}{An object of class "umap.config" specifying parameters to the UMAP algorithm.}
 
 \item{...}{Additional parameters.}
 }
@@ -35,5 +29,5 @@ Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and 
 Embeds cells in two dimensions using umap.
 }
 \examples{
-tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+tsne.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
 }

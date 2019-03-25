@@ -76,7 +76,7 @@ celdaGridSearch = function(counts, model, params.test, params.fixed=NULL,
   # later on, we can check on celda_* model objects which
   # count matrix was used.
   counts = processCounts(counts)
-  count.checksum = digest::digest(counts, algo="md5")
+  count.checksum = createCountChecksum(counts)
   
   ## Use DoParallel to loop through each combination of parameters
   cl = parallel::makeCluster(cores)
@@ -185,7 +185,7 @@ selectBestModel = function(celda.list) {
   if (!methods::is(celda.list, "celdaList")) stop("celda.list parameter was not of class celdaList.")
   
   log_likelihood = NULL
-  group = setdiff(colnames(celda.list@run.params), c("index", "chain", "log_likelihood"))
+  group = setdiff(colnames(celda.list@run.params), c("index", "chain", "log_likelihood", "mean_perplexity"))
   dt = data.table::as.data.table(celda.list@run.params)
   new.run.params = as.data.frame(dt[,.SD[which.max(log_likelihood)], by=group])
   new.run.params = new.run.params[,colnames(celda.list@run.params)]

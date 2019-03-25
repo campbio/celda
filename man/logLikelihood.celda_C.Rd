@@ -4,7 +4,7 @@
 \alias{logLikelihood.celda_C}
 \title{Calculate Celda_C log likelihood}
 \usage{
-logLikelihood.celda_C(counts, model, sample.label, z, K, alpha, beta)
+logLikelihood.celda_C(counts, sample.label, z, K, alpha, beta)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
@@ -28,10 +28,16 @@ Numeric. The log likelihood for the given cluster assignments
 Calculates the log likelihood for user-provided cell population clusters using the `celda_C()` model.
 }
 \examples{
-loglik = logLikelihood(celda.C.sim$counts, model="celda_C", 
+loglik = logLikelihood.celda_C(celda.C.sim$counts, 
                        sample.label=celda.C.sim$sample.label,
                        z=celda.C.sim$z, K=celda.C.sim$K,
                        alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
+                       
+loglik = logLikelihood(celda.C.sim$counts, model="celda_C",
+                       sample.label=celda.C.sim$sample.label,
+                       z=celda.C.sim$z, K=celda.C.sim$K,
+                       alpha=celda.C.sim$alpha, beta=celda.C.sim$beta)
+                       
 }
 \seealso{
 `celda_C()` for clustering cells

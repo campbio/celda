@@ -47,7 +47,7 @@ celda_G = function(counts, L, beta=1, delta=1, gamma=1,
   ## Error checking and variable processing
   counts = processCounts(counts)
   if(is.null(count.checksum)) {
-    count.checksum = digest::digest(counts, algo="md5")
+    count.checksum = createCountChecksum(counts)
   }
   y.initialize = match.arg(y.initialize)
    
@@ -277,10 +277,11 @@ simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100,
   ## Peform reordering on final Z and Y assigments:
   cell.counts = processCounts(cell.counts)
   names = list(row=rownames(cell.counts), column=colnames(cell.counts))
+  count.checksum = createCountChecksum(cell.counts)
   result = methods::new("celda_G", clusters=list(y=y), 
                         params=list(L=L, beta=beta, delta=delta, gamma=gamma,
                                     seed=seed,
-                                    count.checksum=digest::digest(cell.counts, algo="md5")),
+                                    count.checksum=count.checksum),
                         names=names)
   result = reorder.celda_G(counts = cell.counts, res = result)  
   
@@ -418,10 +419,16 @@ cG.calcLL = function(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, L, beta, delt
 #' @return The log-likelihood for the given cluster assignments
 #' @seealso `celda_G()` for clustering features
 #' @examples
-#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G", 
+#' loglik = logLikelihood.celda_G(celda.G.sim$counts, 
 #'                        y=celda.G.sim$y, L=celda.G.sim$L,
 #'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
 #'                        gamma=celda.G.sim$gamma)
+#'                        
+#' loglik = logLikelihood(celda.G.sim$counts, model="celda_G",
+#'                        y=celda.G.sim$y, L=celda.G.sim$L,
+#'                        beta=celda.G.sim$beta, delta=celda.G.sim$delta,
+#'                        gamma=celda.G.sim$gamma)
+#'                        
 #' @export
 logLikelihood.celda_G = function(counts, y, L, beta, delta, gamma) {
   if (sum(y > L) > 0) stop("An entry in y contains a value greater than the provided L.")
@@ -532,15 +539,15 @@ setMethod("perplexity",
             
             factorized = factorizeMatrix(counts = counts, celda.mod = celda.mod, 
                                          type=c("posterior", "counts"))
-            phi <- factorized$posterior$module
-            psi <- factorized$posterior$cell
+            psi <- factorized$posterior$module
+            phi <- factorized$posterior$cell
             eta <- factorized$posterior$gene.distribution
             nG.by.TS = factorized$counts$gene.distribution
             
             eta.prob = log(eta) * nG.by.TS
-            gene.by.cell.prob = log(phi %*% psi) 
-            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
-            
+#            gene.by.cell.prob = log(psi %*% phi) 
+#            log.px = sum(gene.by.cell.prob * new.counts) # + sum(eta.prob) 
+            log.px = perplexityG_logPx(new.counts, phi, psi, celda.mod@clusters$y, celda.mod@params$L)# + sum(eta.prob) 
             perplexity = exp(-(log.px/sum(new.counts)))
             return(perplexity)
           })
@@ -588,6 +595,8 @@ setMethod("celdaHeatmap",
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class `celda_G`.  
 #' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(conts) > max.cells. Larger numbers of cells requires more memory. Default 10000.
+#' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
+#' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param modules Integer vector. Determines which feature modules to use for tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param max.iter Integer. Maximum number of iterations in tSNE generation. Default 2500.

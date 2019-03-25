@@ -78,15 +78,15 @@ test_that(desc = "Testing celdaGridSearch with celda_CG", {
                "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
   
   expect_warning(celdaGridSearch(counts=celdaCG.sim$counts, 
-                                 model="celda_CG", max.iter=1, perplexity = FALSE,
-                                 params.test=list(K=5, L=10, nchains = 2)),
+                                 model="celda_CG", max.iter=1, perplexity = FALSE, 
+                                 params.test=list(K=5, L=10, nchains = 2), params.fixed=list(z.initialize="random", y.initialize="random")),
                                  "Parameter 'nchains' should not be used within the params.test list")
   
   
   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts, 
                                  model="celda_CG", nchains = 2, 
                                  params.test=list(K=5, L=10), 
-                                 params.fixed=list(sample.label=celdaCG.sim$sample.label), 
+                                 params.fixed=list(sample.label=celdaCG.sim$sample.label, z.initialize="random", y.initialize="random"), 
                                  max.iter = 1, verbose = FALSE, 
                                  best.only=FALSE, perplexity = FALSE)
   expect_true(is(celdaCG.res, "celdaList"))
@@ -192,10 +192,10 @@ test_that(desc = "Testing CompareCountMatrix with celda_CG", {
   
   less.features <- celdaCG.sim$counts[1:50,]
   expect_error(compareCountMatrix(counts = less.features, celda.mod = model_CG),
-               "There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
+               "The provided celda object was generated from a counts matrix with a different number of features than the one provided.")
   less.cells <- celdaCG.sim$counts[,1:100]
   expect_error(compareCountMatrix(counts = less.cells, celda.mod = model_CG),
-               "There was a mismatch between the provided count matrix and the count matrix used to generate the provided celda result.")
+               "The provided celda object was generated from a counts matrix with a different number of cells than the one provided.")
   
   counts.matrix.error <- matrix(data = 1, nrow = nrow(celdaCG.sim$counts), ncol = ncol(celdaCG.sim$counts))
   expect_false(compareCountMatrix(counts = counts.matrix.error, celda.mod = model_CG, error.on.mismatch = FALSE))
@@ -290,9 +290,9 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
   celda.tsne <- celdaTsne(counts = celdaCG.sim$counts, max.iter = 50, celda.mod = model_CG, max.cells = 500)
   expect_equal(names(plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],cluster = as.factor(model_CG@clusters$z),specific_clusters = c(1,2,3))),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels", "guides"))
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"))),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = 1:2)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
-  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = c("L1", "L2"), rescale = FALSE)),
+  expect_equal(names(plotDimReduceModule(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2], counts = celdaCG.sim$counts, celda.mod = model_CG, modules = 1:2, rescale = FALSE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))    
   expect_equal(names(plotDimReduceFeature(dim1 = celda.tsne[,1],dim2 = celda.tsne[,2],counts = celdaCG.sim$counts,features = c("Gene_99"), exact.match = TRUE)),
                c("data", "layers", "scales", "mapping", "theme", "coordinates", "facet", "plot_env", "labels"))  
@@ -426,7 +426,7 @@ test_that(desc = "Invoking error from distinct_colors function",{
   expect_error(distinct_colors(n = 3, hues = "xx"), "Only color names listed in the 'color' function can be used in 'hues'")
 })
 
-test_that(desc = "Invoking error from distinct_colors function",{
+test_that(desc = "Invoking error from sample labels function",{
   expect_error(processSampleLabels("Sample_1", ncol(celdaCG.sim$counts)), "'sample.label' must be the same length as the number of columns in the 'counts' matrix.")
 })
 
