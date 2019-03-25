@@ -5,9 +5,9 @@
 \title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
 plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
-  exact.match = TRUE, trim = c(-2, 2), size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", color_low = "grey", color_mid = NULL,
-  color_high = "blue")
+  exact.match = TRUE, trim = c(-2, 2), size = 1,
+  xlab = "Dimension_1", ylab = "Dimension_2", color_low = "grey",
+  color_mid = NULL, color_high = "blue")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}

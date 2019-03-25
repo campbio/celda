@@ -4,8 +4,9 @@
 \alias{DecontX}
 \title{This function updates decontamination on dataset with multiple batches}
 \usage{
-DecontX(counts, z = NULL, batch = NULL, max.iter = 200, beta = 1e-06,
-  delta = 10, logfile = NULL, verbose = TRUE, seed = 1234567)
+DecontX(counts, z = NULL, batch = NULL, max.iter = 200,
+  beta = 1e-06, delta = 10, logfile = NULL, verbose = TRUE,
+  seed = 1234567)
 }
 \arguments{
 \item{counts}{Numeric/Integer matrix. Observed count matrix, rows represent features and columns represent cells.}
