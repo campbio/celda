@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/compbiomed/celda.svg?branch=master)](https://travis-ci.org/compbiomed/celda)
-[![Coverage Status](https://coveralls.io/repos/github/compbiomed/celda/badge.svg?branch=devel)](https://coveralls.io/github/compbiomed/celda?branch=devel)
+[![Build Status](https://travis-ci.org/campbio/celda.svg?branch=master)](https://travis-ci.org/campbio/celda)
+[![Coverage Status](https://coveralls.io/repos/github/campbio/celda/badge.svg?branch=master)](https://coveralls.io/github/campbio/celda?branch=master)
 
 # celda: CEllular Latent Dirichlet Allocation
 
@@ -66,6 +66,6 @@ plot( true.contamination.percentage, estimated.contamination.percentage) ; ablin
 
 ## New Features and announcements
 The v0.4 release of celda represents a useable implementation of the various celda clustering models.
-Please submit any usability issues or bugs to the issue tracker at https://github.com/compbiomed/celda
+Please submit any usability issues or bugs to the issue tracker at https://github.com/campbio/celda
 
 You can discuss celda, or ask the developers usage questions, in our [Google Group.](https://groups.google.com/forum/#!forum/celda-list)
