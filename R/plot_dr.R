@@ -159,6 +159,7 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
   plotDimReduceGrid(dim1,dim2,matrix,size,xlab,ylab,color_low,color_mid,color_high, var_label)
 }
 
+# Labeling code adapted from Seurat (https://github.com/satijalab/seurat)
 #' @title Plotting the cell labels on a dimensionality reduction plot
 #' @description Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by its given `cluster` label.
 #' 
@@ -169,6 +170,8 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
+#' @param label_clusters Logical. Whether the cluster labels are plotted. Default FALSE.
+#' @param label_size Numeric. Sets size of label if label_clusters is TRUE. Default 3.5.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
@@ -178,7 +181,7 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #'                      specific_clusters = c(1,2,3))
 #' }
 #' @export 
-plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL){
+plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL, label_clusters = FALSE, label_size = 3.5){
   df = data.frame(dim1, dim2, cluster)
   colnames(df) = c(xlab, ylab, "Cluster")
   na.ix = is.na(dim1) | is.na(dim2)
@@ -188,12 +191,28 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
   if(!is.null(specific_clusters)){
     cluster_colors[!levels(df[[3]]) %in% specific_clusters] = "gray92"
   }
-  ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
+  g <- ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
     ggplot2::geom_point(stat = "identity", size = size, 
                         ggplot2::aes_string(color = "Cluster")) +
     ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(color = "black")) +
     ggplot2::scale_color_manual(values = cluster_colors) +
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
+  if(label_clusters == T){
+    
+    centroid.list <- lapply(1:length(unique(cluster)), function(x){
+      df.sub <- df[df$Cluster == x,]
+      median.1 <- median(df.sub$Dimension_1)
+      median.2 <- median(df.sub$Dimension_2)
+      cbind(median.1,median.2,x)
+    })
+    centroid <- do.call(rbind,centroid.list)
+    centroid <- as.data.frame(centroid)
+    
+    colnames(centroid) <- c("Dimension_1","Dimension_2","Cluster")
+    g <- g + ggplot2::geom_point(data = centroid, mapping = ggplot2::aes(x = Dimension_1, y= Dimension_2), size = 0, alpha = 0) + 
+      ggrepel::geom_text_repel(data = centroid, mapping = ggplot2::aes(label = Cluster), size = label_size)
+  }
+  return(g)
 }
 
 

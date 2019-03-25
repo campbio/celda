@@ -4,11 +4,10 @@
 \alias{recursiveSplitModule}
 \title{Recursive module splitting}
 \usage{
-recursiveSplitModule(counts, initial.L = 10, max.L = 100,
-  temp.K = 100, z.init = NULL, sample.label = NULL, alpha = 1,
-  beta = 1, delta = 1, gamma = 1, min.feature = 3,
-  reorder = TRUE, perplexity = TRUE, seed = 12345, verbose = TRUE,
-  logfile = NULL)
+recursiveSplitModule(counts, initial.L = 10, max.L = 100, temp.K = 100,
+  z.init = NULL, sample.label = NULL, alpha = 1, beta = 1, delta = 1,
+  gamma = 1, min.feature = 3, reorder = TRUE, perplexity = TRUE,
+  seed = 12345, verbose = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}

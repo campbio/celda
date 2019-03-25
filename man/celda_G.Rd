@@ -7,8 +7,8 @@
 celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
   max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
   seed = 12345, nchains = 3, y.initialize = c("split", "random",
-  "predefined"), count.checksum = NULL, y.init = NULL,
-  logfile = NULL, verbose = TRUE)
+  "predefined"), count.checksum = NULL, y.init = NULL, logfile = NULL,
+  verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
