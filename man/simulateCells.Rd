@@ -10,6 +10,30 @@ simulateCells(model, ...)
 \item{model}{Character. Options available in `celda::available.models`.}
 
 \item{...}{Additional parameters.}
+
+\item{S}{Integer. Number of samples to simulate. Default 5. celda_C and celda_CG simulations only.}
+
+\item{C}{Integer. Number of cells to simulate. Default 100. celda_G simulations only.}
+
+\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution. Default c(50, 100). celda_C and celda_CG simulations only.}
+
+\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000).}
+
+\item{G}{Integer. The total number of features to be simulated. Default 100.}
+
+\item{K}{Integer. Number of cell populations. Default 5. celda_C and celda_CG simulations only.}
+
+\item{L}{Integer. Number of feature modules. Default 10.}
+
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1. celda_C and celda_CG simulations only.}
+
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
+
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. celda_G and celda_CG simulations only.}
+
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. celda_G and celda_CG simulations only.}
+
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
 }
 \value{
 List. Contains the simulated counts matrix, derived cell cluster assignments, the provided parameters, and estimated Dirichlet distribution parameters for the model.
