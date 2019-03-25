@@ -166,7 +166,7 @@ DecontX = function( counts, z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=
             if( !is.null(z) ) { z.BATCH = z[ batch == BATCH ]  }  else { z.BATCH = z } 
             res.BATCH = DecontXoneBatch( counts = counts.BATCH, z = z.BATCH, batch = BATCH  ,max.iter = max.iter, beta = beta, delta = delta, logfile=logfile, verbose=verbose, seed=seed ) 
 
-            est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.rmat
+            est.rmat[, batch == BATCH ] = res.BATCH$res.list$est.nativeCounts
             est.conp[ batch == BATCH ] = res.BATCH$res.list$est.conp 
             theta[  batch == BATCH ] = res.BATCH$res.list$theta 
 
@@ -179,7 +179,7 @@ DecontX = function( counts, z=NULL, batch=NULL,  max.iter=200, beta=1e-6, delta=
       
         run.params = res.BATCH$run.params 
         method = res.BATCH$method 
-        res.list = list( "logLikelihood"=logLikelihood, "est.rmat"=est.rmat,"est.conp"= est.conp,  "theta"=theta ) 
+        res.list = list( "logLikelihood"=logLikelihood, "est.nativeCounts"=est.rmat,"est.conp"= est.conp,  "theta"=theta ) 
 
         return( list("run.params"=run.params, "res.list"=res.list, "method"=method )  ) 
     } 
