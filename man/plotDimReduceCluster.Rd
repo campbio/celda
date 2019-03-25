@@ -5,7 +5,8 @@
 \title{Plotting the cell labels on a dimensionality reduction plot}
 \usage{
 plotDimReduceCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", specific_clusters = NULL)
+  ylab = "Dimension_2", specific_clusters = NULL, label_clusters = FALSE,
+  label_size = 3.5)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -21,6 +22,10 @@ plotDimReduceCluster(dim1, dim2, cluster, size = 1, xlab = "Dimension_1",
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{specific_clusters}{Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL.}
+
+\item{label_clusters}{Logical. Whether the cluster labels are plotted. Default FALSE.}
+
+\item{label_size}{Numeric. Sets size of label if label_clusters is TRUE. Default 3.5.}
 }
 \value{
 The plot as a ggplot object
