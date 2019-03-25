@@ -9,7 +9,7 @@
 
     model_DecontXoneBatchbg = DecontX( Decon.sim$observedCounts, max.iter=2, seed=1234567) 
 
-    Decon.sim2 = simulateContaminatedMatrix(K=10, delta=c(1,5), seed = 74) 
+    Decon.sim2 = simulateContaminatedMatrix(K=10, delta=5, seed = 74) 
     batch_DecontX = DecontX( cbind( Decon.sim$observedCounts, Decon.sim2$observedCounts ) ,z=c( Decon.sim$z, Decon.sim2$z) , batch = rep( 1:2, each = ncol(Decon.sim$observedCounts) )  , max.iter=2, seed=1234567)  
     batch_DecontX.bg = DecontX( cbind( Decon.sim$observedCounts, Decon.sim2$observedCounts ) , batch = rep( 1:2, each = ncol(Decon.sim$observedCounts) )  , max.iter=2, seed=1234567)  
 
