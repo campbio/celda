@@ -24,7 +24,7 @@ library(celda)
 
 Complete list of help files are accessible using the help command with a `package` option.
 
-```{r}
+```{r, eval=FALSE}
 help(package=celda)
 ```
 
@@ -43,7 +43,8 @@ Celda will take a matrix of counts where each row is a feature, each cell is a c
 In the function `simulateCells`, the K parameter designates the number of cell clusters, the L parameter determines the number of feature modules, the S parameter determines the number of samples in the simulated dataset, and the G parameter determines the number of features to be simulated.
 
 ```{r}
-sim_counts = simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 500)
+sim_counts = simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 200,
+    C.Range = c(30, 50))
 ```
 
 The `counts` variable contains the counts matrix.
@@ -191,6 +192,9 @@ Celda employs the MAST package [(McDavid A, 2018)](https://bioconductor.org/pack
 
 If you wish to compare one cell subpopulation compared to all others, leave c2 as NULL: 
 
+```{r, message = FALSE, echo = FALSE, warning = FALSE}
+library(SummarizedExperiment)
+```
 ```{r, message=FALSE}
 diffexp.clust1 = differentialExpression(counts = sim_counts$counts, 
                                             celda.mod = celda.model, 
@@ -233,8 +237,8 @@ Perplexity is a statistical measure of how well a probability model can predict 
 
 ```{r, eval = TRUE, message = FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
-                       params.test = list(K = 3:7, L = 8:12),
-                       cores = 1,
+                       params.test = list(K = 4:6, L = 8:10),
+                       cores = 4,
                        model = "celda_CG",
                        nchains = 2,
                        max.iter = 100,
@@ -266,8 +270,8 @@ If the "best.only" parameter is set to FALSE in the `celdaGridSearch`, then the 
 
 ```{r, message=FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
-                       params.test = list(K = 3:7, L = 8:12),
-                       cores = 1,
+                       params.test = list(K = 4:6, L = 8:10),
+                       cores = 4,
                        model = "celda_CG",
                        nchains = 2,
                        max.iter = 100,
