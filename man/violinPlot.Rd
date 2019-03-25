@@ -4,7 +4,7 @@
 \alias{violinPlot}
 \title{Feature Expression Violin Plot}
 \usage{
-violinPlot(counts, celda.mod, features)
+violinPlot(counts, celda.mod, features, plot_dots = F)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
