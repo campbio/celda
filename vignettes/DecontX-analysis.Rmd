@@ -38,7 +38,7 @@ DecontX will take a matrix of counts (referred as observed counts) where each ro
 In the function `simulateContaminatedMatrix`, the K parameter designates the number of cell clusters, the C parameter determines the number of cells, the G parameter determines the number of genes in the simulated dataset.
 
 ```
-sim_counts = simulateContaminatedMatric( G = 300, C = 100, K = 3 ) 
+sim_counts = simulateContaminatedMatrix( G = 300, C = 100, K = 3 ) 
 ```
 
 The `nativeCounts` is the natively expressed counts matrix, and `observedCounts` is the observed counts matrix that contains both contaminated and natively expressed transctripts. The `N.by.C` is the total number of observed transcripts per cell. The counts matrix which only contains contamianted transcripts can be obtained by subtracting the observed counts matrix from the observed counts matrix. 

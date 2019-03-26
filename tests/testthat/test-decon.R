@@ -1,6 +1,6 @@
     ## DecontXoneBatch 
     library(celda) 
-    context("Testing Deconx")
+    context("Testing DecontX")
 
 
     Decon.sim = simulateContaminatedMatrix(K=10, delta=c(1,5), seed = 123)
