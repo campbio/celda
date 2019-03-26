@@ -380,20 +380,4 @@ addLogLikelihood = function( ll.a, ll.b   ) {
 
 
 
-
-## Initialization of cell labels for DecontX when they are not given
-decontx.initializeZ = function( counts, K=10, min.cell=3, seed=1111) {
-    nC = ncol(counts) 
-    if( nC<100 )  K = ceiling(sqrt( nC )) 
-
-    global.z = initialize.splitZ(counts, K=K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=seed) 
-
-    local.z = rep(NA, nC) 
-    for( k in 1:global.K) { 
-        local.counts = counts[, global.z == k ] 
-        local.K = min( K, ceiling( sqrt(ncol(local.counts))   )   )
-        local.z[ global.z ==k ] = initialize.splitZ( local.counts, K=local.K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=seed)    
-    }
-
-    return( list( "global.z"=global.z, "local.z"=local.z  )  )
-} 
+ 
