@@ -227,14 +227,13 @@ cG.calcGibbsProbY = function(counts, n.TS.by.C, n.by.TS, nG.by.TS, n.by.G, y, L,
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1. 
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5. 
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, feature module clusters `y`, and input parameters.
 #' @seealso `celda_C()` for simulating cell subpopulations and `celda_CG()` for simulating feature modules and cell populations. 
 #' @examples
 #' celda.g.sim = simulateCells(model="celda_G")
 #' @export
 simulateCells.celda_G = function(model, C=100, N.Range=c(500,1000), G=100, 
-                                 L=10, beta=1, gamma=5, delta=1, seed=12345, ...) {
+                                 L=10, beta=1, gamma=5, delta=1, seed=12345) {
   setSeed(seed)
   eta = rdirichlet(1, rep(gamma, L))
   
