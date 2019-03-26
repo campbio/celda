@@ -355,7 +355,7 @@ violinPlot = function(counts, celda.mod, features, plot_dots = FALSE){
   colnames(m) = c("Cluster","Feature","Expression")
   color_pal = distinct_colors(length(unique(cluster)))
  if(plot_dots == TRUE){
-   p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill=Cluster)) + 
+   p <- ggplot2::ggplot(m, ggplot2::aes_string(x=Cluster, y=Expression, fill=Cluster)) + 
     ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=TRUE, scale = "width") + 
     ggplot2::geom_jitter(height = 0, size = 0.1) +
     ggplot2::scale_fill_manual(values = color_pal) + 
@@ -364,7 +364,7 @@ violinPlot = function(counts, celda.mod, features, plot_dots = FALSE){
 
     return(p)  
   }else{
-    p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill = Cluster)) + 
+    p <- ggplot2::ggplot(m, ggplot2::aes_string(x=Cluster, y=Expression, fill = Cluster)) + 
       ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=TRUE, scale = "width") + 
       ggplot2::scale_fill_manual(values = color_pal) + 
       ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = grid::unit(0,"lines"),
