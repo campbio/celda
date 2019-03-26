@@ -129,7 +129,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
         ll = logLikelihood.celda_CG(counts, s, overall.z, temp.model@clusters$y, current.K, L, alpha, beta, delta, gamma)
         temp.model = methods::new("celda_CG", 
                                   clusters=list(z=overall.z, y = temp.model@clusters$y),
-                                  params=list(K=current.K,  L=current.L,
+                                  params=list(K=current.K,  L=L,
                                               alpha=alpha, beta=beta, delta=delta, gamma=gamma,
                                               seed=seed, count.checksum=count.checksum),
                                   finalLogLik=ll, sample.label=sample.label, names=names)
