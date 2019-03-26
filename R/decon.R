@@ -409,7 +409,7 @@ decontx.initializeZ = function( counts, K=10, min.cell=3, seed=1111) {
         local.z[ global.z ==k ] = initialize.splitZ( local.counts, K=local.K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=seed)    
     }
 
-    cb.z  = interaction( global.z, local.z, lex.order=TRUE)   # combined z label  
+    cb.z  = interaction( global.z, local.z, lex.order=TRUE, drop=TRUE)   # combined z label  
     tr.z = as.integer( sub("\\..*", "", levels(cb.z), perl=TRUE) )  # transitional z label
     cb.z = as.integer( plyr::mapvalues( cb.z, from=levels(cb.z), to=1:length(levels(cb.z)))  )
 
