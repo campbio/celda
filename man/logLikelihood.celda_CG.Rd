@@ -37,20 +37,20 @@ The log likelihood for the given cluster assignments
 Calculates the log likelihood for user-provided cell population and feature module clusters using the `celda_CG()` model.
 }
 \examples{
-loglik = logLikelihood.celda_CG(celda.CG.sim$counts, 
+loglik = logLikelihood.celda_CG(celda.CG.sim$counts,
                        sample.label=celda.CG.sim$sample.label,
                        z=celda.CG.sim$z, y=celda.CG.sim$y,
                        K=celda.CG.sim$K, L=celda.CG.sim$L,
                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
-                       
+
 loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG",
                        sample.label=celda.CG.sim$sample.label,
                        z=celda.CG.sim$z, y=celda.CG.sim$y,
                        K=celda.CG.sim$K, L=celda.CG.sim$L,
                        alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
                        gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
-                       
+
 }
 \seealso{
 `celda_CG()` for clustering features and cells

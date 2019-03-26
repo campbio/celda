@@ -6,7 +6,7 @@
 \usage{
 simulateCells.celda_CG(model, S = 5, C.Range = c(50, 100),
   N.Range = c(500, 1000), G = 100, K = 5, L = 10, alpha = 1,
-  beta = 1, gamma = 5, delta = 1, seed = 12345)
+  beta = 1, gamma = 5, delta = 1, seed = 12345, ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::available.models`.}
@@ -32,6 +32,8 @@ simulateCells.celda_CG(model, S = 5, C.Range = c(50, 100),
 \item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
 
 \item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+
+\item{...}{Additional parameters.}
 }
 \value{
 List. Contains the simulated matrix `counts`, cell population clusters `z`, feature module clusters `y`, sample assignments `sample.label`, and input parameters.
