@@ -4,10 +4,10 @@
 \alias{recursiveSplitCell}
 \title{Recursive cell splitting}
 \usage{
-recursiveSplitCell(counts, sample.label = NULL, initial.K = 5, max.K = 25,
-  temp.L = NULL, y.init = NULL, alpha = 1, beta = 1, delta = 1,
-  gamma = 1, min.cell = 3, reorder = TRUE, perplexity = TRUE,
-  seed = 12345, logfile = NULL, verbose = TRUE)
+recursiveSplitCell(counts, sample.label = NULL, initial.K = 5,
+  max.K = 25, temp.L = NULL, y.init = NULL, alpha = 1, beta = 1,
+  delta = 1, gamma = 1, min.cell = 3, reorder = TRUE,
+  perplexity = TRUE, seed = 12345, logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}

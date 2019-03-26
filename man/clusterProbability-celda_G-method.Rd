@@ -5,7 +5,8 @@
 \alias{clusterProbability,celda_G-method}
 \title{Conditional probabilities for features in modules from a Celda_G model}
 \usage{
-\S4method{clusterProbability}{celda_G}(counts, celda.mod, log = FALSE, ...)
+\S4method{clusterProbability}{celda_G}(counts, celda.mod, log = FALSE,
+  ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
