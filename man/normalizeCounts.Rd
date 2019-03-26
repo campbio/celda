@@ -4,9 +4,9 @@
 \alias{normalizeCounts}
 \title{Normalization of count data}
 \usage{
-normalizeCounts(counts, normalize = c("proportion", "cpm", "median", "mean"),
-  transformation.fun = NULL, scale.fun = NULL, pseudocount.normalize = 0,
-  pseudocount.transform = 0)
+normalizeCounts(counts, normalize = c("proportion", "cpm", "median",
+  "mean"), transformation.fun = NULL, scale.fun = NULL,
+  pseudocount.normalize = 0, pseudocount.transform = 0)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells.}
