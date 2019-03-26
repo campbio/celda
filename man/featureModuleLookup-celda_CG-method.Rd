@@ -24,7 +24,7 @@ List. Each element contains the module of the provided feature.
 Finds the module assignments of given features in a `celda_G()` model
 }
 \examples{
-module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod, 
+module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod,
                              c("Gene_1", "Gene_XXX"))
 }
 \seealso{
