@@ -5,8 +5,8 @@
 \alias{factorizeMatrix,celda_CG-method}
 \title{Matrix factorization for results from celda_CG}
 \usage{
-\S4method{factorizeMatrix}{celda_CG}(counts, celda.mod,
-  type = c("counts", "proportion", "posterior"))
+\S4method{factorizeMatrix}{celda_CG}(counts, celda.mod, type = c("counts",
+  "proportion", "posterior"))
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}

@@ -5,8 +5,7 @@
 \alias{clusterProbability,celda_C-method}
 \title{Conditional probabilities for cells in subpopulations from a Celda_C model}
 \usage{
-\S4method{clusterProbability}{celda_C}(counts, celda.mod, log = FALSE,
-  ...)
+\S4method{clusterProbability}{celda_C}(counts, celda.mod, log = FALSE, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
