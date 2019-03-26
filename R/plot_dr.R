@@ -201,8 +201,8 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     
     centroid.list <- lapply(1:length(unique(cluster)), function(x){
       df.sub <- df[df$Cluster == x,]
-      median.1 <- median(df.sub$Dimension_1)
-      median.2 <- median(df.sub$Dimension_2)
+      median.1 <- stats::median(df.sub$Dimension_1)
+      median.2 <- stats::median(df.sub$Dimension_2)
       cbind(median.1,median.2,x)
     })
     centroid <- do.call(rbind,centroid.list)
