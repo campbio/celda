@@ -291,7 +291,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     ## Create collapsed module matrix
     K = length(unique(z.init))
     logMessages(date(), ".. Collapsing to", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)      
-    overall.z = initialize.cluster(K, ncol(counts), initial = z.init, seed=seed)  
+    overall.z = initialize.cluster(N=K, len=ncol(counts), initial=z.init, seed=seed)  
     counts.z = colSumByGroup(counts, overall.z, K)
     
     ## Create initial model with initial.L and predifined z labels

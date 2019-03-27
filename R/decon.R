@@ -329,10 +329,10 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
 
 ## Make sure provided parameters are the right type and value range 
 checkParameters.decon = function(proportionPrior, distributionPrior) {
-    if( length(proportionPrior) > 1 | proportionPrior <= 0   )  {
+    if( length(proportionPrior) > 1 | any(proportionPrior) <= 0   )  {
         stop("'delta' should be a single positive value.")
     }
-    if( length( distributionPrior) > 1 | distributionPrior <=0  ) {
+    if( length( distributionPrior) > 1 | any(distributionPrior) <=0  ) {
         stop("'beta' should be a single positive value.") 
     }
 }
