@@ -201,16 +201,16 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     
     centroid.list <- lapply(1:length(unique(cluster)), function(x){
       df.sub <- df[df$Cluster == x,]
-      median.1 <- median(df.sub$Dimension_1)
-      median.2 <- median(df.sub$Dimension_2)
+      median.1 <- stats::median(df.sub$Dimension_1)
+      median.2 <- stats::median(df.sub$Dimension_2)
       cbind(median.1,median.2,x)
     })
     centroid <- do.call(rbind,centroid.list)
     centroid <- as.data.frame(centroid)
     
     colnames(centroid) <- c("Dimension_1","Dimension_2","Cluster")
-    g <- g + ggplot2::geom_point(data = centroid, mapping = ggplot2::aes(x = Dimension_1, y= Dimension_2), size = 0, alpha = 0) + 
-      ggrepel::geom_text_repel(data = centroid, mapping = ggplot2::aes(label = Cluster), size = label_size)
+    g <- g + ggplot2::geom_point(data = centroid, mapping = ggplot2::aes_string(x = "Dimension_1", y= "Dimension_2"), size = 0, alpha = 0) + 
+      ggrepel::geom_text_repel(data = centroid, mapping = ggplot2::aes_string(label = "Cluster"), size = label_size)
   }
   return(g)
 }
