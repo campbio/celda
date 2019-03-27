@@ -197,7 +197,7 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(color = "black")) +
     ggplot2::scale_color_manual(values = cluster_colors) +
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
-  if(label_clusters == T){
+  if(label_clusters == TRUE){
     
     centroid.list <- lapply(1:length(unique(cluster)), function(x){
       df.sub <- df[df$Cluster == x,]

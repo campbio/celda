@@ -219,7 +219,7 @@ test_that(desc = "Testing celdaTsne with celda_C when model class is changed, sh
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells",{
   tsne = celdaTsne(counts=celdaC.sim$counts, celda.mod=model_C, max.cells=length(model_C@clusters$z), min.cluster.size=10)
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@clusters$z, label_clusters = T)
+  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_C@clusters$z, label_clusters = TRUE)
   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_C@clusters$z))
   expect_true(!is.null(plot.obj))
 })
