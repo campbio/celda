@@ -125,7 +125,7 @@ cD.calcEMbgDecontamination = function(counts, cellDist, bgDist, theta, beta){
 
     est.rmat = t(Pr) * counts
 
-    # Update paramters 
+    ## Update paramters 
     theta = (colSums(est.rmat) + delta.v2[1] ) / (colSums(counts) + sum(delta.v2)  ) 
     cellDist = normalizeCounts(est.rmat, normalize="proportion", pseudocount.normalize =beta) 
 
@@ -268,7 +268,7 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
 
     if ( decon.method == "background") {
 
-        # Initialization
+        ## Initialization
         delta.init = delta 
         theta = rbeta( n = nC, shape1 = delta.init,  shape2 = delta.init ) 
         est.rmat = t( t(counts) *theta) 
@@ -327,18 +327,18 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
 
 
 
-# Make sure provided parameters are the right type and value range 
+## Make sure provided parameters are the right type and value range 
 checkParameters.decon = function(proportionPrior, distributionPrior) {
-    if( length(proportionPrior) > 1 | proportionPrior <= 0   )  {
+    if( length(proportionPrior) > 1 | any(proportionPrior<= 0)   )  {
         stop("'delta' should be a single positive value.")
     }
-    if( length( distributionPrior) > 1 | distributionPrior <=0  ) {
+    if( length( distributionPrior) > 1 | any(distributionPrior<=0)  ) {
         stop("'beta' should be a single positive value.") 
     }
 }
 
 
-# Make sure provided count matrix is the right type
+## Make sure provided count matrix is the right type
 checkCounts.decon = function(counts) {
     if ( sum(is.na(counts)) >0   ) {
         stop("Missing value in 'counts' matrix.") 
@@ -346,7 +346,7 @@ checkCounts.decon = function(counts) {
 }
 
 
-# Make sure provided cell labels are the right type
+## Make sure provided cell labels are the right type
 processCellLabels = function(z, num.cells) {
     if ( length(z) != num.cells )  {
         stop("'z' must be of the same length as the number of cells in the 'counts' matrix.") 
@@ -362,7 +362,7 @@ processCellLabels = function(z, num.cells) {
 }
 
 
-# Add two (veried-length) vectors of logLikelihood 
+## Add two (veried-length) vectors of logLikelihood 
 addLogLikelihood = function( ll.a, ll.b   ) { 
     length.a = length(ll.a ) 
     length.b = length(ll.b) 
@@ -377,3 +377,7 @@ addLogLikelihood = function( ll.a, ll.b   ) {
   
     return( ll ) 
 }
+
+
+
+ 

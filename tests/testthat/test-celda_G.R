@@ -24,7 +24,7 @@ test_that(desc = "Testing simulateCells.celda_G error checking with low gamma", 
 })
 
 test_that(desc = "Testing simulateCells.celda_G, make sure all genes expressed", {
-  sim.cells.low <- simulateCells(model = "celda_G", G = 1000, C = 300, N.Range = c(0,10))
+  sim.cells.low <- simulateCells(model = "celda_G", G = 1000, C = 300, N.Range = c(1,10))
   expect_true(all(rowSums(sim.cells.low$counts) > 0))
 })
 

@@ -18,13 +18,13 @@ vignette: >
 
 The package can be loaded using the `library` command.
 
-```{r, eval=TRUE, message=FALSE}
+```{r, eval = TRUE, message = FALSE}
 library(celda)
 ```
 
 Complete list of help files are accessible using the help command with a `package` option.
 
-```{r}
+```{r, eval = FALSE}
 help(package=celda)
 ```
 
@@ -40,10 +40,11 @@ library(celda)
 
 Celda will take a matrix of counts where each row is a feature, each cell is a column, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of Celda, we will apply it to a simulated dataset.
 
-In the function `simulateCells`, the K parameter designates the number of cell clusters, the L parameter determines the number of feature modules, the S parameter determines the number of samples in the simulated dataset, and the G parameter determines the number of features to be simulated.
+In the function `simulateCells`, the *K parameter designates the number of cell clusters*, the *L parameter determines the number of feature modules*, the *S parameter determines the number of samples in the simulated dataset*, the *G parameter determines the number of features to be simulated*, and *C.Range specifies the lower and upper bounds of the number of cells to be generated in each sample*.
 
 ```{r}
-sim_counts = simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 500)
+sim_counts = simulateCells("celda_CG", K = 5, L = 10, S = 5, G = 200,
+    C.Range = c(30, 50))
 ```
 
 The `counts` variable contains the counts matrix.
@@ -152,7 +153,7 @@ plotDimReduceCluster(dim1 = tsne[,1],
                      dim2 = tsne[,2], 
                      cluster = clusters(celda.model)$z)
 
-plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2], modules = 1:3,
+plotDimReduceModule(dim1 = tsne[,1], dim2 = tsne[,2], 
                    celda.mod = celda.model, counts = sim_counts$counts, rescale = TRUE)
 
 plotDimReduceFeature(dim1 = tsne[,1], dim2 = tsne[,2],
@@ -191,6 +192,9 @@ Celda employs the MAST package [(McDavid A, 2018)](https://bioconductor.org/pack
 
 If you wish to compare one cell subpopulation compared to all others, leave c2 as NULL: 
 
+```{r, message = FALSE, echo = FALSE, warning = FALSE}
+library(SummarizedExperiment)
+```
 ```{r, message=FALSE}
 diffexp.clust1 = differentialExpression(counts = sim_counts$counts, 
                                             celda.mod = celda.model, 
@@ -217,24 +221,73 @@ diffexp.gene.ix = which(rownames(sim_counts$counts) %in% diffexp.clust1vs2$Gene)
 
 norm.counts = normalizeCounts(counts = sim_counts$counts, scale.fun = scale)
 ```
+
 ```{r}
-plotHeatmap(counts = norm.counts[, clusters(celda.model)$z %in% c(1,2)], 
-            z = clusters(celda.model)$z[clusters(celda.model)$z %in% c(1,2)], 
-            y = clusters(celda.model)$y, feature.ix = diffexp.gene.ix, 
-            show.names.feature = TRUE)
+plotHeatmap(counts = norm.counts[, clusters(celda.model)$z %in% c(1, 2)],
+    cluster.cell = TRUE,
+    z = clusters(celda.model)$z[clusters(celda.model)$z %in% c(1, 2)],
+    y = clusters(celda.model)$y,
+    feature.ix = diffexp.gene.ix,
+    show.names.feature = TRUE
+    )
 ```
 
 
 # Identifying the optimal number of cell subpopulations and feature modules
 
-In the previous example, the best K and L was already known. However, the optimal K and L for each new dataset will likely not be known beforehand and multiple choices of K and L may need to be tried and compared. Additionally, performing multiple random starts for each combination of K and L will increase the chances of finding the most optimal solution. Celda is able to run multiple combinations of K and L with multiple chains in parallel via the `celdaGridSearch` function. 
+In the previous example, the best K(the number of cell clusters) and L(the number of feature modules) was already known. However, the optimal K and L for each new dataset will likely not be known beforehand and multiple choices of K and L may need to be tried and compared. Celda offers two sets of functions to determine the optimum K and L, `recursiveSplitModule`/`recursiveSplitCell`, and `celdaGridSearch`.
 
-Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. The `resamplePerplexity` function "perturbs" the original counts matrix by resampling the counts of each cell according to its normalized probability distribution. Perplexity is calculated on the resampled matrix and the procedure is repeated `resample` times. These results can be visualized with `plotGridSearchPerplexity`. The major goal is to pick the lowest K and L combination with relatively good perplexity. In general, visual inspection of the plot can be used to select the number of modules (L) or cell populations (K) where the rate of decrease in the perplexity starts to drop off.
+## recursiveSplitModule/recursiveSplitCell
+
+Functions `recursiveSplitModule` and `recursiveSplitCell` offer a fast method to generate a Celda model with optimum K and L.
+
+First, `recursiveSplitModule` is used to determine the optimal L. `recursiveSplitModule` first splits features into however many modules are specified in `initial.L`. The module labels are then recursively split in a way that would generate the highest log likelihood, all the way up to `max.L`.
+
+```{r, message = FALSE}
+module.split = recursiveSplitModule(counts = sim_counts$counts, initial.L = 2, max.L = 15)
+```
+
+Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. The perplexity of each model can be visualized with `plotGridSearchPerplexity`. In general, visual inspection of the plot can be used to select the optimal number of modules (L) or cell populations (K) by identifying the "elbow" - where the rate of decrease in the perplexity starts to drop off.
+
+```{r}
+plotGridSearchPerplexity(celda.list = module.split)
+```
+
+In this example, the perplexity for L stops decreasing at L = 10, thus L = 10 would be a good choice.
+
+Once you have identified the optimal L (in this case, L is selected to be 10), the module labels are used for intialization in `recursiveSplitCell`. Similarly to `recursiveSplitModule`, cells are initially split into a small number of subpopulations, and the subpopulations are recursively split up by log-likelihood.
+
+```{r, message = FALSE}
+module.split.select = subsetCeldaList(module.split, params = list(L = 10))
+
+cell.split = recursiveSplitCell(counts = sim_counts$counts,
+                                initial.K = 3,
+                                max.K = 12,
+                                y.init = clusters(module.split.select)$y)
+```
+
+```{r}
+plotGridSearchPerplexity(celda.list = cell.split)
+```
+
+In this plot, the perplexity for K stops decreasing at K = 5, with a final K/L combination of K = 5, L = 10. Generally, this method can be used to pick a reasonable L and a potential range of K. However, manual review of specific selections of K is often be required to ensure results are biologically coherent.
+
+Once users have chosen the K/L parameters for further analysis, the `subsetCeldaList` function can be used to subset the celda_list object to a single model.
+
+```{r, eval = TRUE}
+celda.model = subsetCeldaList(celda.list = cell.split, params = list(K = 5, L = 10))
+```
+
+## celdaGridSearch
+
+Celda is able to run multiple combinations of K and L with multiple chains in parallel via the `celdaGridSearch` function. 
+
+The `resamplePerplexity` function "perturbs" the original counts matrix by resampling the counts of each cell according to its normalized probability distribution. Perplexity is calculated on the resampled matrix and the procedure is repeated `resample` times. These results can be visualized with `plotGridSearchPerplexity`. The major goal is to pick the lowest K and L combination with relatively good perplexity. In general, visual inspection of the plot can be used to select the number of modules (L) or cell populations (K) where the rate of decrease in the perplexity starts to drop off.
 
 ```{r, eval = TRUE, message = FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
-                       params.test = list(K = 3:7, L = 8:12),
-                       cores = 1,
+                       params.test = list(K = 4:6, L = 9:11),
+                       cores = 4,
                        model = "celda_CG",
                        nchains = 2,
                        max.iter = 100,
@@ -254,7 +307,8 @@ cgs = resamplePerplexity(counts = sim_counts$counts,
 ```{r, eval = TRUE, fig.width = 8, fig.height = 8, warning = FALSE, message = FALSE}
 plotGridSearchPerplexity(celda.list = cgs)
 ```
-In this example, the perplexity for L stops decreasing at L = 10 for the majority of K values. For the line corresponding to L = 10, the perplexity stops decreasing at K = 5. Thus L = 10 and K = 5 would be a good choice. Generally, this method can be used to pick a reasonable L and a potential range of K. However, manual review of specific selections of K is often be required to ensure results are biologically coherent.
+
+In this example, the perplexity for L stops decreasing at L = 10 for the majority of K values. For the line corresponding to L = 10, the perplexity stops decreasing at K = 5. Thus L = 10 and K = 5 would be a good choice. Again, manual review of specific selections of K is often be required to ensure results are biologically coherent.
 
 Once users have chosen the K/L parameters for further analysis, the `subsetCeldaList` function can be used to subset the celda_list object to a single model.
 
@@ -266,8 +320,8 @@ If the "best.only" parameter is set to FALSE in the `celdaGridSearch`, then the 
 
 ```{r, message=FALSE}
 cgs = celdaGridSearch(sim_counts$counts,
-                       params.test = list(K = 3:7, L = 8:12),
-                       cores = 1,
+                       params.test = list(K = 4:6, L = 9:11),
+                       cores = 4,
                        model = "celda_CG",
                        nchains = 2,
                        max.iter = 100,
@@ -281,6 +335,7 @@ cgs.K5.L10 = subsetCeldaList(celda.list = cgs, params = list(K = 5, L = 10))
 
 celda.model1 = selectBestModel(celda.list = cgs.K5.L10)
 ```
+
 
 # Miscellaneous utility functions
 

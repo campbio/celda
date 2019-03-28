@@ -31,9 +31,9 @@ curveElbow = function(var, perplexity, pval.cutoff = 0.05) {
   elbow = which.max(res)
   ix = var > var[elbow]
   perplexity.sde = secondDerivativeEstimate(perplexity)
-  perplexity.sde.sd = sd(perplexity.sde[ix], na.rm=TRUE)
-  perplexity.sde.mean = mean(perplexity.sde[ix], na.rm=TRUE)
-  perplexity.sde.pval = pnorm(perplexity.sde, mean=perplexity.sde.mean, sd=perplexity.sde.sd, lower.tail = FALSE)  
+  perplexity.sde.sd = stats::sd(perplexity.sde[ix], na.rm=TRUE)
+  perplexity.sde.mean = stats::mean(perplexity.sde[ix], na.rm=TRUE)
+  perplexity.sde.pval = stats::pnorm(perplexity.sde, mean=perplexity.sde.mean, sd=perplexity.sde.sd, lower.tail = FALSE)  
   
   other = which(ix & perplexity.sde.pval < pval.cutoff)
   return(list(elbow=var[elbow]))#, secondary=l[other]))
