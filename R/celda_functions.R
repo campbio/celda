@@ -348,7 +348,8 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
 violinPlot = function(counts, celda.mod, features, plot_dots = FALSE){
   cluster = clusters(celda.mod)$z
   data_feature = counts[match(features,rownames(counts)),,drop = FALSE]
-  df = data.frame(cluster,t(data_feature))
+  data_feature = as.data.frame(t(data_feature))
+  df = cbind(cluster,data_feature)
   df$cluster = as.factor(df$cluster)
   
   m = reshape2::melt(df, id.vars = c("cluster"))
