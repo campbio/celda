@@ -15,7 +15,6 @@
 #'  enriched terms for the corresponding module.
 #' @examples
 #' library(M3DExampleData)
-#' library(celda)
 #' counts <- M3DExampleData::Mmus_example_list$data
 #' #subset 100 genes for fast clustering
 #' counts <- counts[seq(1200, 2000), ]
