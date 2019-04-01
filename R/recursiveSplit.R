@@ -70,18 +70,18 @@ singleSplitY = function(counts, y, L, min.feature=3, beta=1, delta=1, gamma=1, s
 #' @return Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters. The models in the list will be of class `celda_C` if `y.init=NULL` or `celda_CG` if `z.init` is set.
 #' @seealso `recursiveSplitModule()` for recursive splitting of cell populations. 
 #' @examples
-#' ## Create models that range from K=3 to K=10 by recursively splitting cell populations into two to produce `celda_C` cell clustering models
-#' testZ = recursiveSplitCell(celda.C.sim$counts, initial.K = 3, max.K=10)
+#' ## Create models that range from K=3 to K=7 by recursively splitting cell populations into two to produce `celda_C` cell clustering models
+#' testZ = recursiveSplitCell(celda.C.sim$counts, initial.K = 3, max.K = 7)
 #'
 #' ## Alternatively, first identify features modules usinge `recursiveSplitModule()`
-#' module.split = recursiveSplitModule(celda.CG.sim$counts, initial.L = 3, max.L=20)
+#' module.split = recursiveSplitModule(celda.CG.sim$counts, initial.L = 3, max.L = 15)
 #' plotGridSearchPerplexity(module.split)
-#' module.split.select = subsetCeldaList(module.split, list(L=10))
+#' module.split.select = subsetCeldaList(module.split, list(L = 10))
 #'
 #' ## Then use module labels for initialization in `recursiveSplitCell()` to produce `celda_CG` bi-clustering models
-#' cell.split = recursiveSplitCell(celda.CG.sim$counts, initial.K = 3, max.K=20, y.init = clusters(module.split.select)$y)
+#' cell.split = recursiveSplitCell(celda.CG.sim$counts, initial.K = 3, max.K = 7, y.init = clusters(module.split.select)$y)
 #' plotGridSearchPerplexity(cell.split) 
-#' celda.mod = subsetCeldaList(cell.split, list(K=5, L=10))
+#' celda.mod = subsetCeldaList(cell.split, list(K = 5, L = 10))
 #' @export
 recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, temp.L=NULL, y.init=NULL, alpha=1, beta=1, delta=1, gamma=1, min.cell = 3, reorder=TRUE, perplexity=TRUE, seed=12345, logfile=NULL, verbose=TRUE) {
 
