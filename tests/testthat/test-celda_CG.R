@@ -217,7 +217,6 @@ test_that(desc = "Testing plotHeatmap with celda_CG", {
   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$z), "Length of y must match number of rows in counts matrix")
   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG@clusters$y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
