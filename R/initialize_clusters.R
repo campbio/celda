@@ -1,4 +1,4 @@
-.initialize.cluster <- function(N,
+.initializeCluster <- function(N,
     len,
     z = NULL,
     initial = NULL,
@@ -55,7 +55,7 @@
 }
 
 
-.initialize.splitZ <- function(counts,
+.initializeSplitZ <- function(counts,
     K,
     K.subcluster = NULL,
     alpha = 1,
@@ -210,7 +210,7 @@
 
 
 
-.initialize.splitY <- function(counts,
+.initializeSplitY <- function(counts,
     L,
     L.subcluster = NULL,
     temp.K = 100,
