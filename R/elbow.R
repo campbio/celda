@@ -1,6 +1,7 @@
 # https://stackoverflow.com/questions/35194048/using-r-how-to-calculate-the-distance-from-one-point-to-a-line
 # http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
-# Kimberling, C. "Triangle Centers and Central Triangles." Congr. Numer. 129, 1-295, 1998.
+# Kimberling, C. "Triangle Centers and Central Triangles." Congr.
+# Numer. 129, 1-295, 1998.
 .dist2d <- function(a, b, c) {
     v1 <- b - c
     v2 <- a - b
