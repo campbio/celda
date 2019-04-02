@@ -30,11 +30,9 @@ Identify and return significantly-enriched terms for each gene
 }
 \examples{
 library(M3DExampleData)
-library(celda)
 counts <- M3DExampleData::Mmus_example_list$data
 #subset 100 genes for fast clustering
-counts <- counts[sample(seq_len(nrow(counts)),
-    size = 100),]
+counts <- counts[seq(1200, 2000), ]
 #cluster genes into 10 modules for quick demo
 cm <- celda_G(counts = as.matrix(counts), L = 10, verbose = FALSE)
 gse <- geneSetEnrich(counts,
