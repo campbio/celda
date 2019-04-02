@@ -136,7 +136,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  n.TS.by.CP = next.y$n.TS.by.C
 	  nG.by.TS = next.y$nG.by.TS
 	  n.by.TS = next.y$n.by.TS
-	  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
+	  n.TS.by.C = .rowSumByGroupChange(counts, n.TS.by.C, next.y$y, y, L)
 	  y = next.y$y
 
 	  ## Gibbs or EM sampling for each cell
@@ -144,7 +144,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	  m.CP.by.S = next.z$m.CP.by.S
 	  n.TS.by.CP = next.z$n.G.by.CP
 	  n.CP = next.z$n.CP
-	  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
+	  n.G.by.CP = .colSumByGroupChange(counts, n.G.by.CP, next.z$z, z, K)
 	  z = next.z$z
 
 	  ## Perform split on i-th iteration defined by split.on.iter
@@ -169,7 +169,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 		  n.TS.by.CP = res$n.TS.by.CP
 		  n.by.TS = res$n.by.TS
 		  nG.by.TS = res$nG.by.TS
-		  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
+		  n.TS.by.C = .rowSumByGroup(counts, group=y, L=L)
   	}
 	  if(K > 2 & iter != max.iter &
 	     (((num.iter.without.improvement == stop.iter & !all(temp.ll > ll)) & isTRUE(split.on.last)) |
@@ -195,7 +195,7 @@ celda_CG = function(counts, sample.label=NULL, K, L,
 	    m.CP.by.S = res$m.CP.by.S
 	    n.TS.by.CP = res$n.TS.by.CP
 	    n.CP = res$n.CP
-	    n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+	    n.G.by.CP = .colSumByGroup(counts, group=z, K=K)
 	  }
 
 
@@ -565,14 +565,14 @@ logLikelihood.celda_CG = function(counts, sample.label, z, y, K, L, alpha, beta,
 cCG.decomposeCounts = function(counts, s, z, y, K, L) {
   nS = length(unique(s))
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
-  n.TS.by.CP = colSumByGroup(n.TS.by.C, group=z, K=K)
+  n.TS.by.C = .rowSumByGroup(counts, group=y, L=L)
+  n.TS.by.CP = .colSumByGroup(n.TS.by.C, group=z, K=K)
   n.CP = as.integer(colSums(n.TS.by.CP))
   n.by.G = as.integer(rowSums(counts))
   n.by.C = as.integer(colSums(counts))
-  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
+  n.by.TS = as.integer(.rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
   nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each module
-  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+  n.G.by.CP = .colSumByGroup(counts, group=z, K=K)
 
   nG = nrow(counts)
   nM = ncol(counts)

@@ -47,7 +47,7 @@ simulateContaminatedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), be
     
     
     ## sample contamination count matrix 
-    n.G.by.K = rowSums(cell.rmat) - colSumByGroup(cell.rmat, group=z, K=K) 
+    n.G.by.K = rowSums(cell.rmat) - .colSumByGroup(cell.rmat, group=z, K=K) 
     eta = normalizeCounts(counts=n.G.by.K, normalize="proportion") 
 
     cell.cmat = sapply(1:C, function(i) stats::rmultinom(1, size=cN.byC[i], prob=eta[,z[i]] )  )
@@ -99,7 +99,7 @@ cD.calcEMDecontamination = function(counts, phi, eta, theta,  z, K, beta, delta 
     delta.v2 = MCMCprecision::fit_dirichlet( matrix( c( Pr, Pc) , ncol = 2 ) )$alpha 
 
     est.rmat = t(Pr) * counts 
-    rn.G.by.K = colSumByGroup.numeric(est.rmat, z, K)  
+    rn.G.by.K = .colSumByGroup.numeric(est.rmat, z, K)  
     cn.G.by.K = rowSums(rn.G.by.K) - rn.G.by.K 
 
     ## Update parameters 
@@ -230,7 +230,7 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
         #theta  = stats::runif(nC, min = 0.1, max = 0.5)  
         theta = rbeta( n = nC, shape1 = delta.init, shape2 = delta.init ) 
         est.rmat = t (t(counts) * theta )       
-        phi =   colSumByGroup.numeric(est.rmat, z, K)
+        phi =   .colSumByGroup.numeric(est.rmat, z, K)
         eta =   rowSums(phi) - phi 
         phi = normalizeCounts(phi, normalize="proportion", pseudocount.normalize =beta )
         eta = normalizeCounts(eta, normalize="proportion", pseudocount.normalize = beta)

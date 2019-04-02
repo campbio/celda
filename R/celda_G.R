@@ -448,9 +448,9 @@ cG.decomposeCounts = function(counts, y, L) {
   if(any(y > L)) {
     stop("Entries in the module clusters 'y' are greater than L.")
   }
-  n.TS.by.C = rowSumByGroup(counts, group=y, L=L)
+  n.TS.by.C = .rowSumByGroup(counts, group=y, L=L)
   n.by.G = as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
-  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
+  n.by.TS = as.integer(.rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
   nG.by.TS = tabulate(y, L) + 1  ## Add pseudogene to each state
   nM = ncol(counts)
   nG = nrow(counts)
@@ -461,8 +461,8 @@ cG.decomposeCounts = function(counts, y, L) {
 
 cG.reDecomposeCounts = function(counts, y, previous.y, n.TS.by.C, n.by.G, L) {
   ## Recalculate counts based on new label
-  n.TS.by.C = rowSumByGroupChange(counts, n.TS.by.C, y, previous.y, L)
-  n.by.TS = as.integer(rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
+  n.TS.by.C = .rowSumByGroupChange(counts, n.TS.by.C, y, previous.y, L)
+  n.by.TS = as.integer(.rowSumByGroup(matrix(n.by.G,ncol=1), group=y, L=L))
   nG.by.TS = tabulate(y, L) + 1
 
   return(list(n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS))

@@ -103,7 +103,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     L = length(unique(y.init))
     logMessages(date(), ".. Collapsing to", L, "modules", append=TRUE, verbose=verbose, logfile=logfile)      
     overall.y = initialize.cluster(L, nrow(counts), initial = y.init, seed=seed)  
-    counts.y = rowSumByGroup(counts, overall.y, L)
+    counts.y = .rowSumByGroup(counts, overall.y, L)
 
     ## Create initial model with initial.K and predifined y labels
     logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
@@ -150,7 +150,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
     temp.y = initialize.splitY(counts, L=L, temp.K=max(100, max.K), min.feature = 3, seed=seed)  
     temp.y = as.integer(as.factor(temp.y))
     L = length(unique(temp.y)) ## Recalculate in case some modules are empty
-    counts.y = rowSumByGroup(counts, temp.y, L)
+    counts.y = .rowSumByGroup(counts, temp.y, L)
         
     ## Create initial model with initial.K 
     logMessages(date(), ".. Initializing with", initial.K, "populations", append=TRUE, verbose=verbose, logfile=logfile)
@@ -292,7 +292,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     K = length(unique(z.init))
     logMessages(date(), ".. Collapsing to", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)      
     overall.z = initialize.cluster(N=K, len=ncol(counts), initial=z.init, seed=seed)  
-    counts.z = colSumByGroup(counts, overall.z, K)
+    counts.z = .colSumByGroup(counts, overall.z, K)
     
     ## Create initial model with initial.L and predifined z labels
     logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
@@ -322,7 +322,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     K = temp.K
     logMessages(date(), ".. Collapsing to", K, "temporary cell populations", append=TRUE, verbose=verbose, logfile=logfile)
     z = initialize.splitZ(counts, K=K, min.cell = 3, seed=seed)  
-    counts.z = colSumByGroup(counts, z, length(unique(z)))
+    counts.z = .colSumByGroup(counts, z, length(unique(z)))
 
     logMessages(date(), ".. Initializing with", initial.L, "modules", append=TRUE, verbose=verbose, logfile=logfile)
     model.initial = .celda_G(counts.z, L=initial.L, nchains=1, verbose=FALSE, seed=seed)

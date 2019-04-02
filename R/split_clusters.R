@@ -211,7 +211,7 @@ cCG.splitY = function(counts, y, m.CP.by.S, n.G.by.CP, n.TS.by.C, n.TS.by.CP, n.
   }
   
   ## Decompose counts according to new/temp z labels
-  temp.n.G.by.CP = colSumByGroup(counts, group=temp.z, K=current.top.z)
+  temp.n.G.by.CP = .colSumByGroup(counts, group=temp.z, K=current.top.z)
 
   #########################
   ## Second, different y splits will be estimated and tested

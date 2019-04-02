@@ -468,7 +468,7 @@ cC.decomposeCounts = function(counts, s, z, K) {
   nM = ncol(counts)
 
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
-  n.G.by.CP = colSumByGroup(counts, group=z, K=K)
+  n.G.by.CP = .colSumByGroup(counts, group=z, K=K)
   n.CP = as.integer(colSums(n.G.by.CP))
   n.by.C = as.integer(colSums(counts))
 
@@ -478,7 +478,7 @@ cC.decomposeCounts = function(counts, s, z, K) {
 cC.reDecomposeCounts = function(counts, s, z, previous.z, n.G.by.CP, K) {
 
   ## Recalculate counts based on new label
-  n.G.by.CP = colSumByGroupChange(counts, n.G.by.CP, z, previous.z, K)
+  n.G.by.CP = .colSumByGroupChange(counts, n.G.by.CP, z, previous.z, K)
   nS = length(unique(s))
   m.CP.by.S = matrix(as.integer(table(factor(z, levels=1:K), s)), ncol=nS)
   n.CP = as.integer(colSums(n.G.by.CP))

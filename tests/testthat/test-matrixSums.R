@@ -10,16 +10,16 @@ label4 = label3
 label4[1:2] = 2
 label5 = as.factor(rep(1:5, each=2))
 
-test_that(desc = "Testing rowSumByGroup",{
+test_that(desc = "Testing .rowSumByGroup",{
   expect_error(.Call("_rowSumByGroup", mat, label1))
   expect_error(.Call("_rowSumByGroup", mat, label2))
   res <- .Call("_rowSumByGroup", mat, label3)
   expect_true(all(res == rowsum(mat, label3)))
-  res <- rowSumByGroup(mat, label3, 2)
+  res <- .rowSumByGroup(mat, label3, 2)
   expect_true(all(res == rowsum(mat, label3))) 
 })
 
-test_that(desc = "Testing rowSumByGroupChange",{
+test_that(desc = "Testing .rowSumByGroupChange",{
   res <- rowsum(mat, label3)
   expect_error(.Call("_rowSumByGroupChange", mat, res, label4, label1))
   expect_error(.Call("_rowSumByGroupChange", mat, res, label4, label2))
@@ -29,20 +29,20 @@ test_that(desc = "Testing rowSumByGroupChange",{
   res2 <- .Call("_rowSumByGroupChange", mat, res, label4, label3)
   expect_true(all(res2 == rowsum(mat, label4)))
   res <- rowsum(mat, label3)
-  res2 <- rowSumByGroupChange(mat, res, label4, label3, 2)
+  res2 <- .rowSumByGroupChange(mat, res, label4, label3, 2)
   expect_true(all(res2 == rowsum(mat, label4)))
 })
 
-test_that(desc = "Testing colSumByGroup",{
+test_that(desc = "Testing .colSumByGroup",{
   expect_error(.Call("_colSumByGroup", mat, label1))
   expect_error(.Call("_colSumByGroup", mat, label2))
   res <- .Call("_colSumByGroup", mat, label3)
   expect_true(all(res == t(rowsum(t(mat), label3))))
-  res <- colSumByGroup(mat, label3, 2)
+  res <- .colSumByGroup(mat, label3, 2)
   expect_true(all(res == t(rowsum(t(mat), label3))))
 })
 
-test_that(desc = "Testing colSumByGroupChange",{
+test_that(desc = "Testing .colSumByGroupChange",{
   res <- t(rowsum(t(mat), label3))
   expect_error(.Call("_colSumByGroupChange", mat, res, label4, label1))
   expect_error(.Call("_colSumByGroupChange", mat, res, label4, label2))
@@ -52,26 +52,26 @@ test_that(desc = "Testing colSumByGroupChange",{
   res2 <- .Call("_colSumByGroupChange", mat, res, label4, label3)
   expect_true(all(res2 == t(rowsum(t(mat), label4))))
   res <- t(rowsum(t(mat), label3))
-  res2 <- colSumByGroupChange(mat, res, label4, label3, 2)
+  res2 <- .colSumByGroupChange(mat, res, label4, label3, 2)
   expect_true(all(res2 == t(rowsum(t(mat), label4))))
 })
 
 storage.mode(mat) = "numeric"
-test_that(desc = "Testing rowSumByGroup.numeric",{
+test_that(desc = "Testing .rowSumByGroup.numeric",{
   expect_error(.Call("_rowSumByGroup_numeric", mat, label1))
   expect_error(.Call("_rowSumByGroup_numeric", mat, label2))
   res <- .Call("_rowSumByGroup_numeric", mat, label3)
   expect_true(all(res == rowsum(mat, label3)))
-  res <- rowSumByGroup.numeric(mat, label3, 2)
+  res <- .rowSumByGroup.numeric(mat, label3, 2)
   expect_true(all(res == rowsum(mat, label3)))
 })
 
-test_that(desc = "Testing colSumByGroup.numeric",{
+test_that(desc = "Testing .colSumByGroup.numeric",{
   expect_error(.Call("_colSumByGroup_numeric", mat, label1))
   expect_error(.Call("_colSumByGroup_numeric", mat, label2))
   res <- .Call("_colSumByGroup_numeric", mat, label3)
   expect_true(all(res == t(rowsum(t(mat), label3))))
-  res <- colSumByGroup.numeric(mat, label3, 2)
+  res <- .colSumByGroup.numeric(mat, label3, 2)
   expect_true(all(res == t(rowsum(t(mat), label3))))
 })
 
