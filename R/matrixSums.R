@@ -44,7 +44,7 @@
 }
 
 #' @useDynLib celda _perplexityG
-.perplexityG_logPx <- function(x, phi, psi, group, L) {
+.perplexityGLogPx <- function(x, phi, psi, group, L) {
     group <- factor(group, levels = seq(L))
     res <- .Call("_perplexityG", x, phi, psi, group)
     return(res)
