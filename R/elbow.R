@@ -18,30 +18,25 @@
     return(res)
 }
 
-.curveElbow <- function(var, perplexity, pval.cutoff = 0.05) {
+.curveElbow <- function(var, perplexity, pvalCutoff = 0.05) {
     len <- length(perplexity)
-
     a <- c(var[1], perplexity[1])
     b <- c(var[len], perplexity[len])
     res <- rep(NA, len)
     for (i in seq_along(var)) {
-        res[i] <- dist2d(c(var[i], perplexity[i]), a, b)
+        res[i] <- .dist2d(c(var[i], perplexity[i]), a, b)
     }
-
     elbow <- which.max(res)
     ix <- var > var[elbow]
-    perplexity.sde <- secondDerivativeEstimate(perplexity)
-    perplexity.sde.sd <- stats::sd(perplexity.sde[ix], na.rm = TRUE)
-    perplexity.sde.mean <-
-        stats::mean(perplexity.sde[ix], na.rm = TRUE)
-    perplexity.sde.pval <-
-        stats::pnorm(
-            perplexity.sde,
-            mean = perplexity.sde.mean,
-            sd = perplexity.sde.sd,
-            lower.tail = FALSE
-        )
-
-    other <- which(ix & perplexity.sde.pval < pval.cutoff)
-    return(list(elbow = var[elbow])) # , secondary=l[other]))
+    perplexitySde <- .secondDerivativeEstimate(perplexity)
+    perplexitySdeSd <- stats::sd(perplexitySde[ix], na.rm = TRUE)
+    perplexitySdeMean <-
+        stats::mean(perplexitySde[ix], na.rm = TRUE)
+    perplexitySdePval <-
+        stats::pnorm(perplexitySde,
+            mean = perplexitySdeMean,
+            sd = perplexitySdeSd,
+            lower.tail = FALSE)
+    other <- which(ix & perplexitySdePval < pvalCutoff)
+    return(list(elbow = var[elbow]))
 }
