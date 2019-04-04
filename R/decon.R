@@ -26,7 +26,7 @@ simulateContaminatedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), be
  
     z = sample(1:K, size=C, replace=TRUE) 
     if( length(unique(z)) < K) {
-        cat("Only", length(unique(z)), "clusters are simulated. Try to increase numebr of cells 'C' if more clusters are needed", "\n")  
+        warning("Only ", length(unique(z)), " clusters are simulated. Try to increase numebr of cells 'C' if more clusters are needed", "\n")  
         K = length(unique(z)) 
         z = plyr::mapvalues(z, unique(z), 1:length(unique(z)) )
     }
