@@ -1325,7 +1325,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
 #'  for displaying expression.
 #' @examples
 #' umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
-#' @return A two column matrix of t-SNE coordinates
+#' @return A two column matrix of umap coordinates
 #' @export
 setMethod("celdaUmap",
     signature(celdaMod = "celda_CG"), function(counts,
