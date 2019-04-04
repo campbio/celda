@@ -35,19 +35,6 @@ In the function `simulateContaminatedMatrix`, the K parameter designates the num
 sim_counts = simulateContaminatedMatrix( G = 300, C = 100, K = 3 ) 
 ```
 
-The `nativeCounts` is the natively expressed counts matrix, and `observedCounts` is the observed counts matrix that contains both contaminated and natively expressed transctripts. 
-```{r}
-sim_counts$nativeCounts[1:3,1:5] 
-sim_counts$observedCounts[1:3,1:5]
-```
-
-The `N.by.C` is the total number of observed transcripts per cell. 
-```{r}
-length(sim_counts$N.by.C)
-```
-
-The counts matrix which only contains contamianted transcripts can be obtained by subtracting the observed counts matrix from the observed counts matrix. 
-
 ```{r}
 contamination = sim_counts$observedCounts - sim_counts$nativeCounts 
 ```
@@ -80,12 +67,4 @@ plot( decontx.model$res.list$logLikelihood )
 `DecontX` estimates a contamination proportion for each cell. We compare the estimated contamination proportion with the real contamination proportion.
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
 plot( decontx.model$res.list$est.conp, colSums(contamination) / sim_counts$N.by.C,  col=sim_counts$z) ; abline( 0, 1) 
-```
-
-We can also compare the estimated gene expression vs the true native expression in each cluster. Here we show an example of the comparison the gene expressions of population1
-```{r, eval = TRUE, fig.width = 5, fig.height = 5}
-normalized.counts = normalizeCounts( decontx.model$res.list$est.nativeCounts, "proportion" ) 
-average.expression = t(rowsum( t(normalized.counts), group = sim_counts$z ) ) 
-average.expression = normalizeCounts( average.expression, "proportion" ) 
-plot(sim_counts$phi[, 1], average.expression[, 1], xlab="native expression", ylab="estimated average expression", main="gene expression in population1" ) 
 ```
