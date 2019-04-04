@@ -264,6 +264,6 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
             size = colsums[idx],
             prob = prob[, idx])
         },
-        numeric(1))
+        numeric(nrow(countMatrix)))
     return(resample)
 }
