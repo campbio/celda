@@ -49,80 +49,80 @@ test_that(desc = "Testing simulateCells.celda_CG, make sure all genes expressed"
   expect_true(all(rowSums(sim.cells.low$counts) > 0))
 })
 
-test_that(desc = "Testing celdaGridSearch with celda_CG", {
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts,
-                               model="celda_CG",
-                               max.iter=1, nchains=1,
-                               params.test=list(K=5, L=10, M = 3:4),
-                               params.fixed=list(sample.label=celdaCG.sim$sample.label),
-                               best.only=FALSE),
-               "The following elements in 'params.test' are not arguments of 'celda_CG': M")
-
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts,
-                               model="celda_CG", nchains = 1,
-                               max.iter=1,
-                               params.test=list(K=5, L=10,
-                                                sample.label = "Sample"),
-                               params.fixed=list(sample.label=celdaCG.sim$sample.label)),
-               "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
-
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts,
-                               model="celda_CG", nchains = 1, max.iter=1,
-                               params.test=list(),
-                               params.fixed=list(sample.label=celdaCG.sim$sample.label)),
-               "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_CG': K,L")
-
-  expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG",
-                               nchains = 1, max.iter=1, params.test=list(K=4:5, L=9:10),
-                               params.fixed=list(sample.label=celdaCG.sim$sample.label, xxx = "xxx")),
-               "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
-
-  expect_warning(celdaGridSearch(counts=celdaCG.sim$counts,
-                                 model="celda_CG", max.iter=1, perplexity = FALSE,
-                                 params.test=list(K=5, L=10, nchains = 2), params.fixed=list(z.initialize="random", y.initialize="random")),
-                                 "Parameter 'nchains' should not be used within the params.test list")
-
-
-  celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts,
-                                 model="celda_CG", nchains = 2,
-                                 params.test=list(K=5, L=10),
-                                 params.fixed=list(sample.label=celdaCG.sim$sample.label, z.initialize="random", y.initialize="random"),
-                                 max.iter = 1, verbose = FALSE,
-                                 best.only=FALSE, perplexity = FALSE)
-  expect_true(is(celdaCG.res, "celdaList"))
-  expect_error(plotGridSearchPerplexity(celdaCG.res))
-  expect_equal(names(runParams(celdaCG.res)),
-               c("index","chain","K","L","log_likelihood"))
-
-  celdaCG.res = resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample=2)
-  expect_is(celdaCG.res, "celdaList")
-  expect_error(resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample="2"))
-  expect_error(resamplePerplexity(celdaCG.sim$counts, "celdaCG.res", resample=2))
-
-  plot.obj = plotGridSearchPerplexity(celdaCG.res)
-  expect_is(plot.obj, "ggplot")
-
-  expect_error(subsetCeldaList(celda.list = "celda_list"),
-               "celda.list parameter was not of class celdaList.")
-  expect_error(subsetCeldaList(celdaCG.res, params = list(K = 7, L = 11)))
-  expect_error(subsetCeldaList(celdaCG.res, params = list(K = 5, M = 10)))
-
-  celdaCG.res.K5.L10 = subsetCeldaList(celdaCG.res, params=list(K = 5, L = 10))
-  model_CG = selectBestModel(celdaCG.res.K5.L10)
-
-  expect_error(selectBestModel("celda_list"),
-               "celda.list parameter was not of class celdaList.")
-  expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, model_CG, resample=2))
-  expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample='a'))
-
-  celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
-  expect_true(all(is(celdaCG.res.index1, "celda_CG") && !is(celdaCG.res.index1, "celda_list")))
-
-  res <- perplexity(celdaCG.sim$counts, model_CG)
-  res2 <- perplexity(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
-
-  expect_error(res <- perplexity(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))
-})
+# test_that(desc = "Testing celdaGridSearch with celda_CG", {
+#   expect_error(celdaGridSearch(counts=celdaCG.sim$counts,
+#                                model="celda_CG",
+#                                max.iter=1, nchains=1,
+#                                params.test=list(K=5, L=10, M = 3:4),
+#                                params.fixed=list(sample.label=celdaCG.sim$sample.label),
+#                                best.only=FALSE),
+#                "The following elements in 'params.test' are not arguments of 'celda_CG': M")
+# 
+#   expect_error(celdaGridSearch(counts=celdaCG.sim$counts,
+#                                model="celda_CG", nchains = 1,
+#                                max.iter=1,
+#                                params.test=list(K=5, L=10,
+#                                                 sample.label = "Sample"),
+#                                params.fixed=list(sample.label=celdaCG.sim$sample.label)),
+#                "Setting parameters such as 'z.init', 'y.init', and 'sample.label' in 'params.test' is not currently supported.")
+# 
+#   expect_error(celdaGridSearch(counts=celdaCG.sim$counts,
+#                                model="celda_CG", nchains = 1, max.iter=1,
+#                                params.test=list(),
+#                                params.fixed=list(sample.label=celdaCG.sim$sample.label)),
+#                "The following arguments are not in 'params.test' or 'params.fixed' but are required for 'celda_CG': K,L")
+# 
+#   expect_error(celdaGridSearch(counts=celdaCG.sim$counts, model="celda_CG",
+#                                nchains = 1, max.iter=1, params.test=list(K=4:5, L=9:10),
+#                                params.fixed=list(sample.label=celdaCG.sim$sample.label, xxx = "xxx")),
+#                "The following elements in 'params.fixed' are not arguments of 'celda_CG': xxx")
+# 
+#   expect_warning(celdaGridSearch(counts=celdaCG.sim$counts,
+#                                  model="celda_CG", max.iter=1, perplexity = FALSE,
+#                                  params.test=list(K=5, L=10, nchains = 2), params.fixed=list(z.initialize="random", y.initialize="random")),
+#                                  "Parameter 'nchains' should not be used within the params.test list")
+# 
+# 
+#   celdaCG.res <- celdaGridSearch(counts=celdaCG.sim$counts,
+#                                  model="celda_CG", nchains = 2,
+#                                  params.test=list(K=5, L=10),
+#                                  params.fixed=list(sample.label=celdaCG.sim$sample.label, z.initialize="random", y.initialize="random"),
+#                                  max.iter = 1, verbose = FALSE,
+#                                  best.only=FALSE, perplexity = FALSE)
+#   expect_true(is(celdaCG.res, "celdaList"))
+#   expect_error(plotGridSearchPerplexity(celdaCG.res))
+#   expect_equal(names(runParams(celdaCG.res)),
+#                c("index","chain","K","L","log_likelihood"))
+# 
+#   celdaCG.res = resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample=2)
+#   expect_is(celdaCG.res, "celdaList")
+#   expect_error(resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample="2"))
+#   expect_error(resamplePerplexity(celdaCG.sim$counts, "celdaCG.res", resample=2))
+# 
+#   plot.obj = plotGridSearchPerplexity(celdaCG.res)
+#   expect_is(plot.obj, "ggplot")
+# 
+#   expect_error(subsetCeldaList(celda.list = "celda_list"),
+#                "celda.list parameter was not of class celdaList.")
+#   expect_error(subsetCeldaList(celdaCG.res, params = list(K = 7, L = 11)))
+#   expect_error(subsetCeldaList(celdaCG.res, params = list(K = 5, M = 10)))
+# 
+#   celdaCG.res.K5.L10 = subsetCeldaList(celdaCG.res, params=list(K = 5, L = 10))
+#   model_CG = selectBestModel(celdaCG.res.K5.L10)
+# 
+#   expect_error(selectBestModel("celda_list"),
+#                "celda.list parameter was not of class celdaList.")
+#   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, model_CG, resample=2))
+#   expect_error(celdaCG.res <- resamplePerplexity(celdaCG.sim$counts, celdaCG.res, resample='a'))
+# 
+#   celdaCG.res.index1 = subsetCeldaList(celdaCG.res, params=list(index = 1))
+#   expect_true(all(is(celdaCG.res.index1, "celda_CG") && !is(celdaCG.res.index1, "celda_list")))
+# 
+#   res <- perplexity(celdaCG.sim$counts, model_CG)
+#   res2 <- perplexity(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts + 1)
+# 
+#   expect_error(res <- perplexity(celdaCG.sim$counts, model_CG, new.counts = celdaCG.sim$counts[-1,]))
+# })
 
 # Ensure logLikelihood calculates the expected values
 test_that(desc = "Testing logLikelihood.celda_CG", {
@@ -212,36 +212,36 @@ test_that(desc = "Testing topRank with celda_CG", {
 })
 
 # plotHeatmap
-test_that(desc = "Testing plotHeatmap with celda_CG", {
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$y, y = model_CG@clusters$y), "Length of z must match number of columns in counts matrix")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$z), "Length of y must match number of rows in counts matrix")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
-  expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG@clusters$y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
-  expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
-})
+# test_that(desc = "Testing plotHeatmap with celda_CG", {
+#   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$y, y = model_CG@clusters$y), "Length of z must match number of columns in counts matrix")
+#   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$z), "Length of y must match number of rows in counts matrix")
+#   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, scale.row = model_CG), "'scale.row' needs to be of class 'function'")
+#   expect_error(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, trim = 3), "'trim' should be a 2 element vector specifying the lower and upper boundaries")
+#   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, cell.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+#   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = NULL, y = model_CG@clusters$y, cell.ix = 1:10, color.scheme = "sequential")), c("tree_row", "tree_col", "gtable"))
+#   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+#   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = NULL, feature.ix = 1:10)), c("tree_row", "tree_col", "gtable"))
+#   expect_equal(names(plotHeatmap(counts = celdaCG.sim$counts, z = model_CG@clusters$z, y = model_CG@clusters$y, cell.ix = 1:10, color.scheme = "sequential", annotation.color = "default")), c("tree_row", "tree_col", "gtable"))
+# })
 
 #plotHeatmap with annotations
-test_that(desc = "Testing plotHeatmap with annotations", {
-  annot.cell <- as.data.frame(c(rep(x = 1, times = ncol(celdaCG.sim$counts) - 100),rep(x = 2, 100)))
-  annot.feature <- as.data.frame(c(rep(x = 1, times = nrow(celdaCG.sim$counts) - 100),rep(x = 2, 100)))
-
-  rownames(annot.cell) <- colnames(celdaCG.sim$counts)
-  colnames(annot.cell) <- "cell"
-  rownames(annot.feature) <- rownames(celdaCG.sim$counts)
-  colnames(annot.feature) <- "feature"
-  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG@clusters$z, y = model_CG@clusters$y)),
-               c("tree_row", "tree_col", "gtable"))
-
-  rownames(annot.cell) <- NULL
-  rownames(annot.feature) <- NULL
-  expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG@clusters$z, y = model_CG@clusters$y)),
-               c("tree_row", "tree_col", "gtable"))
-
-})
+# test_that(desc = "Testing plotHeatmap with annotations", {
+#   annot.cell <- as.data.frame(c(rep(x = 1, times = ncol(celdaCG.sim$counts) - 100),rep(x = 2, 100)))
+#   annot.feature <- as.data.frame(c(rep(x = 1, times = nrow(celdaCG.sim$counts) - 100),rep(x = 2, 100)))
+# 
+#   rownames(annot.cell) <- colnames(celdaCG.sim$counts)
+#   colnames(annot.cell) <- "cell"
+#   rownames(annot.feature) <- rownames(celdaCG.sim$counts)
+#   colnames(annot.feature) <- "feature"
+#   expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = annot.cell, annotation.feature = annot.feature, z = model_CG@clusters$z, y = model_CG@clusters$y)),
+#                c("tree_row", "tree_col", "gtable"))
+# 
+#   rownames(annot.cell) <- NULL
+#   rownames(annot.feature) <- NULL
+#   expect_equal(names(plotHeatmap(celda.mod = model_CG, counts = celdaCG.sim$counts, annotation.cell = as.matrix(annot.cell), annotation.feature = as.matrix(annot.feature), z = model_CG@clusters$z, y = model_CG@clusters$y)),
+#                c("tree_row", "tree_col", "gtable"))
+# 
+# })
 
 # celdaHeatmap
 test_that(desc = "Testing celdaHeatmap with celda_CG", {
@@ -259,15 +259,15 @@ test_that(desc = "Checking moduleHeatmap to see if it runs", {
 })
 
 # celdaProbabilityMap
-test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample level",{
-  plot.obj = celdaProbabilityMap(counts=celdaCG.sim$counts, celda.mod=model_CG, level="sample")
-  expect_true(!is.null(plot.obj))
-
-  ## Without a sample label
-  model_CG_2 = celda_CG(celdaCG.sim$counts, sample.label=NULL, K=celdaCG.sim$K, L=celdaCG.sim$L, max.iter=5, nchain=1)
-  plot.obj = celdaProbabilityMap(counts=celdaCG.sim$counts, celda.mod=model_CG_2, level="sample")
-  expect_true(!is.null(plot.obj))
-})
+# test_that(desc = "Testing celdaProbabiltyMap.celda_CG for sample level",{
+#   plot.obj = celdaProbabilityMap(counts=celdaCG.sim$counts, celda.mod=model_CG, level="sample")
+#   expect_true(!is.null(plot.obj))
+# 
+#   ## Without a sample label
+#   model_CG_2 = celda_CG(celdaCG.sim$counts, sample.label=NULL, K=celdaCG.sim$K, L=celdaCG.sim$L, max.iter=5, nchain=1)
+#   plot.obj = celdaProbabilityMap(counts=celdaCG.sim$counts, celda.mod=model_CG_2, level="sample")
+#   expect_true(!is.null(plot.obj))
+# })
 
 test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
   plot.obj = celdaProbabilityMap(counts=celdaCG.sim$counts, celda.mod=model_CG, level="cell.population")
@@ -275,15 +275,15 @@ test_that(desc = "Testing celdaProbabiltyMap.celda_CG for cell.population",{
 })
 
 # differentialExpression
-test_that(desc = "Testing differentialExpression for celda_CG", {
-  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5, only.pos = TRUE)),
-		c("data.table", "data.frame"))
-  expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 2:3, c2 = 4, log2fc.threshold = 0.5)),
-               c("data.table", "data.frame"))
-  expect_error(differentialExpression(counts = "counts", celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5),"'counts' should be a numeric count matrix")
-  expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = NULL, c1 = 3), "'celda.mod' should be an object of class celda_C or celda_CG")
-  expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = NULL, log2fc.threshold = 0.5, only.pos = TRUE))
-})
+# test_that(desc = "Testing differentialExpression for celda_CG", {
+#   expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5, only.pos = TRUE)),
+# 		c("data.table", "data.frame"))
+#   expect_equal(class(diffExp_K1 <- differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = 2:3, c2 = 4, log2fc.threshold = 0.5)),
+#                c("data.table", "data.frame"))
+#   expect_error(differentialExpression(counts = "counts", celda.mod = model_CG, c1 = 3, log2fc.threshold = 0.5),"'counts' should be a numeric count matrix")
+#   expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = NULL, c1 = 3), "'celda.mod' should be an object of class celda_C or celda_CG")
+#   expect_error(differentialExpression(counts = celdaCG.sim$counts, celda.mod = model_CG, c1 = NULL, log2fc.threshold = 0.5, only.pos = TRUE))
+# })
 
 # plotDimReduce
 test_that(desc = "Testing plotDimReduce* with celda_CG", {
@@ -327,15 +327,15 @@ test_that(desc = "Testing celdaTsne with celda_CG when model class is changed, s
                "unable to find")
 })
 
-test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
-  tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@clusters$z))
-  plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@clusters$z)
-  expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@clusters$z))
-  expect_true(!is.null(plot.obj))
-
-  tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
-  expect_error(tsne <- celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1000:1005))
-})
+# test_that(desc = "Testing celdaTsne.celda_CG with all cells",{
+#   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@clusters$z))
+#   plot.obj = plotDimReduceCluster(tsne[,1], tsne[,2], model_CG@clusters$z)
+#   expect_true(ncol(tsne) == 2 & nrow(tsne) == length(model_CG@clusters$z))
+#   expect_true(!is.null(plot.obj))
+# 
+#   tsne = celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
+#   expect_error(tsne <- celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1000:1005))
+# })
 
 test_that(desc = "Testing celdaTsne.celda_CG with subset of cells",{
   expect_success(expect_error(tsne <- celdaTsne(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
@@ -353,15 +353,15 @@ test_that(desc = "Testing celdaUmap with celda_CG when model class is changed, s
                "unable to find")
 })
 
-test_that(desc = "Testing celdaUmap.celda_CG with all cells",{
-  umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@clusters$z))
-  plot.obj = plotDimReduceCluster(umap[,1], umap[,2], model_CG@clusters$z)
-  expect_true(ncol(umap) == 2 & nrow(umap) == length(model_CG@clusters$z))
-  expect_true(!is.null(plot.obj))
-
-  umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
-  expect_error(umap <- celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1000:1005))
-})
+# test_that(desc = "Testing celdaUmap.celda_CG with all cells",{
+#   umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=length(model_CG@clusters$z))
+#   plot.obj = plotDimReduceCluster(umap[,1], umap[,2], model_CG@clusters$z)
+#   expect_true(ncol(umap) == 2 & nrow(umap) == length(model_CG@clusters$z))
+#   expect_true(!is.null(plot.obj))
+# 
+#   umap = celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1:2)
+#   expect_error(umap <- celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=ncol(celdaCG.sim$counts), modules=1000:1005))
+# })
 
 test_that(desc = "Testing celdaUmap.celda_CG with subset of cells",{
   expect_success(expect_error(umap <- celdaUmap(counts=celdaCG.sim$counts, celda.mod=model_CG, max.cells=50, min.cluster.size=50)))
