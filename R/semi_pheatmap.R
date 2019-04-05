@@ -26,7 +26,7 @@
     ...) {
     # Get height of colnames and length of rownames
     if (!is.null(coln[1]) |
-            (!is.na2(annotationRow) & annotationNamesRow)) {
+            (!.is.na2(annotationRow) & annotationNamesRow)) {
         if (!is.null(coln[1])) {
             t <- coln
         } else {
@@ -73,7 +73,7 @@
 
     gp <- list(fontSize = fontSize, ...)
     # Legend position
-    if (!is.na2(legend)) {
+    if (!.is.na2(legend)) {
         longestBreak <- which.max(nchar(names(legend)))
         longestBreak <- unit(1.1,
                 "grobwidth",
@@ -104,7 +104,7 @@
     # Column annotations
     textheight <- unit(fontSize, "bigpts")
 
-    if (!is.na2(annotationCol)) {
+    if (!.is.na2(annotationCol)) {
         # Column annotation height
         annotColHeight <-
             ncol(annotationCol) *
@@ -127,7 +127,7 @@
     }
 
     # Row annotations
-    if (!is.na2(annotationRow)) {
+    if (!.is.na2(annotationRow)) {
         # Row annotation width
         annotRowWidth <- ncol(annotationRow) *
             (textheight + unit(2, "bigpts")) +
@@ -212,7 +212,7 @@
     return(res)
 }
 
-findCoordinates <- function(n, gaps, m = seq(1,n)) {
+.findCoordinates <- function(n, gaps, m = seq(1,n)) {
     if (length(gaps) == 0) {
         return(list(
             coord = unit(m / n, "npc"),
@@ -234,7 +234,7 @@ findCoordinates <- function(n, gaps, m = seq(1,n)) {
     return(list(coord = coord, size = size))
 }
 
-drawDendrogram <- function(hc, gaps, horizontal = TRUE) {
+.drawDendrogram <- function(hc, gaps, horizontal = TRUE) {
     h <- hc$height / max(hc$height) / 1.05
     m <- hc$merge
     o <- hc$order
@@ -277,7 +277,7 @@ drawDendrogram <- function(hc, gaps, horizontal = TRUE) {
         y[seq(k, k + 3)] <- c$y
     }
 
-    x <- findCoordinates(n, gaps, x * n)$coord
+    x <- .findCoordinates(n, gaps, x * n)$coord
     y <- unit(y, "npc")
 
     if (!horizontal) {
@@ -290,7 +290,7 @@ drawDendrogram <- function(hc, gaps, horizontal = TRUE) {
     return(res)
 }
 
-drawMatrix <- function(matrix,
+.drawMatrix <- function(matrix,
     borderColor,
     gapsRows,
     gapsCols,
@@ -301,8 +301,8 @@ drawMatrix <- function(matrix,
     n <- nrow(matrix)
     m <- ncol(matrix)
 
-    coordX <- findCoordinates(m, gapsCols)
-    coordY <- findCoordinates(n, gapsRows)
+    coordX <- .findCoordinates(m, gapsCols)
+    coordY <- .findCoordinates(n, gapsRows)
 
     x <- coordX$coord -
         0.5 * coordX$size
@@ -331,8 +331,8 @@ drawMatrix <- function(matrix,
     return(res)
 }
 
-drawColnames <- function(coln, gaps, ...) {
-    coord <- findCoordinates(length(coln), gaps)
+.drawColnames <- function(coln, gaps, ...) {
+    coord <- .findCoordinates(length(coln), gaps)
     x <- coord$coord - 0.5 * coord$size
 
     res <- textGrob(coln,
@@ -347,8 +347,8 @@ drawColnames <- function(coln, gaps, ...) {
     return(res)
 }
 
-drawRownames <- function(rown, gaps, ...) {
-    coord <- findCoordinates(length(rown), gaps)
+.drawRownames <- function(rown, gaps, ...) {
+    coord <- .findCoordinates(length(rown), gaps)
     y <- unit(1, "npc") - (coord$coord - 0.5 * coord$size)
 
     res <- textGrob(rown,
@@ -361,7 +361,7 @@ drawRownames <- function(rown, gaps, ...) {
     return(res)
 }
 
-drawLegend <- function(color, breaks, legend, ...) {
+.drawLegend <- function(color, breaks, legend, ...) {
     height <- min(unit(1, "npc"), unit(150, "bigpts"))
 
     legendPos <- (legend - min(breaks)) / (max(breaks) - min(breaks))
@@ -391,7 +391,7 @@ drawLegend <- function(color, breaks, legend, ...) {
     return(res)
 }
 
-convertAnnotations <- function(annotation, annotationColors) {
+.convertAnnotations <- function(annotation, annotationColors) {
     new <- annotation
     for (i in 1:ncol(annotation)) {
         a <- annotation[, i]
@@ -413,7 +413,7 @@ convertAnnotations <- function(annotation, annotationColors) {
     return(as.matrix(new))
 }
 
-drawAnnotations <- function(convertedAnnotations,
+.drawAnnotations <- function(convertedAnnotations,
     borderColor,
     gaps,
     fontSize,
@@ -422,7 +422,7 @@ drawAnnotations <- function(convertedAnnotations,
     n <- ncol(convertedAnnotations)
     m <- nrow(convertedAnnotations)
 
-    coordX <- findCoordinates(m, gaps)
+    coordX <- .findCoordinates(m, gaps)
 
     x <- coordX$coord - 0.5 * coordX$size
 
@@ -455,7 +455,7 @@ drawAnnotations <- function(convertedAnnotations,
     return(res)
 }
 
-drawAnnotationNames <- function(annotations, fontSize, horizontal) {
+.drawAnnotationNames <- function(annotations, fontSize, horizontal) {
     n <- ncol(annotations)
 
     x <- unit(3, "bigpts")
@@ -489,7 +489,7 @@ drawAnnotationNames <- function(annotations, fontSize, horizontal) {
     return(res)
 }
 
-drawAnnotationLegend <- function(annotation,
+.drawAnnotationLegend <- function(annotation,
     annotationColors,
     borderColor,
     ...) {
@@ -570,7 +570,7 @@ drawAnnotationLegend <- function(annotation,
     return(res)
 }
 
-drawMain <- function(text, ...) {
+.drawMain <- function(text, ...) {
     res <- textGrob(text, gp = gpar(fontface = "bold", ...))
 
     return(res)
@@ -755,7 +755,7 @@ vplayout <- function(x, y) {
 
         # Draw title
         if (!is.na(main)) {
-            elem <- drawMain(main, fontSize = 1.3 * fontSize, ...)
+            elem <- .drawMain(main, fontSize = 1.3 * fontSize, ...)
             res <- gtable_add_grob(res,
                 elem,
                 t = 1,
@@ -765,8 +765,8 @@ vplayout <- function(x, y) {
         }
 
         # Draw tree for the columns
-        if (!is.na2(treeCol) & treeHeightCol != 0) {
-            elem <- drawDendrogram(treeCol, gapsCol, horizontal = TRUE)
+        if (!.is.na2(treeCol) & treeHeightCol != 0) {
+            elem <- .drawDendrogram(treeCol, gapsCol, horizontal = TRUE)
             res <- gtable_add_grob(res,
                 elem,
                 t = 2,
@@ -775,8 +775,8 @@ vplayout <- function(x, y) {
         }
 
         # Draw tree for the rows
-        if (!is.na2(treeRow) & treeHeightRow != 0) {
-            elem <- drawDendrogram(treeRow, gapsRow, horizontal = FALSE)
+        if (!.is.na2(treeRow) & treeHeightRow != 0) {
+            elem <- .drawDendrogram(treeRow, gapsRow, horizontal = FALSE)
             res <- gtable_add_grob(res,
                 elem,
                 t = 4,
@@ -785,7 +785,7 @@ vplayout <- function(x, y) {
         }
 
         # Draw matrix
-        elem <- drawMatrix(matrix,
+        elem <- .drawMatrix(matrix,
             borderColor,
             gapsRow,
             gapsCol,
@@ -806,7 +806,7 @@ vplayout <- function(x, y) {
                 gaps = gapsCol,
                 fontSize = fontSizeCol,
                 ...)
-            elem <- do.call(drawColnames, pars)
+            elem <- do.call(.drawColnames, pars)
             res <- gtable_add_grob(res,
                 elem,
                 t = 5,
@@ -820,7 +820,7 @@ vplayout <- function(x, y) {
             pars <- list(labelsRow,
                 gaps = gapsRow,
                 fontSize = fontSizeRow, ...)
-            elem <- do.call(drawRownames, pars)
+            elem <- do.call(.drawRownames, pars)
             res <- gtable_add_grob(res,
                 elem,
                 t = 4,
@@ -830,11 +830,11 @@ vplayout <- function(x, y) {
         }
 
         # Draw annotation tracks on cols
-        if (!is.na2(annotationCol)) {
+        if (!.is.na2(annotationCol)) {
             # Draw tracks
-            convertedAnnotation <- convertAnnotations(annotationCol,
+            convertedAnnotation <- .convertAnnotations(annotationCol,
                 annotationColors)
-            elem <- drawAnnotations(convertedAnnotation,
+            elem <- .drawAnnotations(convertedAnnotation,
                 borderColor,
                 gapsCol,
                 fontSize,
@@ -848,7 +848,7 @@ vplayout <- function(x, y) {
 
             # Draw names
             if (annotationNamesCol) {
-                elem <- drawAnnotationNames(annotationCol,
+                elem <- .drawAnnotationNames(annotationCol,
                     fontSize,
                     horizontal = TRUE)
                 res <- gtable_add_grob(res,
@@ -861,11 +861,11 @@ vplayout <- function(x, y) {
         }
 
         # Draw annotation tracks on rows
-        if (!is.na2(annotationRow)) {
+        if (!.is.na2(annotationRow)) {
             # Draw tracks
-            convertedAnnotation <- convertAnnotations(annotationRow,
+            convertedAnnotation <- .convertAnnotations(annotationRow,
                 annotationColors)
-            elem <- drawAnnotations(convertedAnnotation,
+            elem <- .drawAnnotations(convertedAnnotation,
                 borderColor,
                 gapsRow,
                 fontSize,
@@ -879,7 +879,7 @@ vplayout <- function(x, y) {
 
             # Draw names
             if (annotationNamesRow) {
-                elem <- drawAnnotationNames(annotationRow,
+                elem <- .drawAnnotationNames(annotationRow,
                     fontSize,
                     horizontal = FALSE)
                 res <- gtable_add_grob(res,
@@ -895,10 +895,10 @@ vplayout <- function(x, y) {
         annotation <- c(annotationCol[length(annotationCol):1],
             annotationRow[length(annotationRow):1])
         annotation <- annotation[unlist(lapply(annotation,
-            function(x) !is.na2(x)))]
+            function(x) !.is.na2(x)))]
 
         if (length(annotation) > 0 & annotationLegend) {
-            elem <- drawAnnotationLegend(annotation,
+            elem <- .drawAnnotationLegend(annotation,
                 annotationColors,
                 borderColor,
                 fontSize = fontSize,
@@ -915,8 +915,8 @@ vplayout <- function(x, y) {
         }
 
         # Draw legend
-        if (!is.na2(legend)) {
-            elem <- drawLegend(color, breaks, legend, fontSize = fontSize, ...)
+        if (!.is.na2(legend)) {
+            elem <- .drawLegend(color, breaks, legend, fontSize = fontSize, ...)
 
             t <- ifelse(is.null(labelsRow), 4, 3)
             res <- gtable_add_grob(res,
@@ -931,7 +931,7 @@ vplayout <- function(x, y) {
         return(res)
     }
 
-generateBreaks <- function(x, n, center = FALSE) {
+.generateBreaks <- function(x, n, center = FALSE) {
     if (center) {
         m <- max(abs(c(min(x,na.rm = TRUE),
             max(x, na.rm = TRUE))))
@@ -945,24 +945,24 @@ generateBreaks <- function(x, n, center = FALSE) {
     return(res)
 }
 
-scaleVecColours <- function(x, col = rainbow(10), breaks = NA) {
+.scaleVecColours <- function(x, col = rainbow(10), breaks = NA) {
     return(col[as.numeric(cut(x, breaks = breaks, include.lowest = TRUE))])
 }
 
-scaleColours <- function(mat,
+.scaleColours <- function(mat,
     col = rainbow(10),
     breaks = NA) {
     mat <- as.matrix(mat)
     return(matrix(
-        scaleVecColours(as.vector(mat), col = col, breaks = breaks),
+        .scaleVecColours(as.vector(mat), col = col, breaks = breaks),
             nrow(mat),
             ncol(mat),
             dimnames = list(rownames(mat), colnames(mat))))
 }
 
 ## changed the original clusterMat() in the pheatmap.r
-clusterMat <- function(mat, labels, distance, method) {
-    # this funciton is going to change the clusterMat() in pheatmap
+.clusterMat <- function(mat, labels, distance, method) {
+    # this funciton is going to change the .clusterMat() in pheatmap
 
     if (!(method %in% c("ward.D",
             "ward.D2",
@@ -1185,27 +1185,28 @@ clusterMat <- function(mat, labels, distance, method) {
     return(cum.hclust)
 }
 
-scaleRows <- function(x) {
+.scaleRows <- function(x) {
     m <- base::apply(x, 1, mean, na.rm = TRUE)
     s <- base::apply(x, 1, stats::sd, na.rm = TRUE)
     return((x - m) / s)
 }
 
-scaleMat <- function(mat, scale) {
+.scaleMat <- function(mat, scale) {
     if (!(scale %in% c("none", "row", "column"))) {
         stop("scale argument shoud take values: 'none', 'row' or 'column'")
     }
-    mat <-
-        switch(scale,
+    mat <- switch(scale,
             none = mat,
-            row = scaleRows(mat),
-            column = t(scaleRows(t(mat))))
+            row = .scaleRows(mat),
+            column = t(.scaleRows(t(mat))))
     return(mat)
 }
 
-generateAnnotationColours <-
-    function(annotation, annotationColors, drop) {
-        if (is.na2(annotationColors)) {
+generateAnnotationColours <- function(annotation,
+    annotationColors,
+    drop) {
+
+        if (.is.na2(annotationColors)) {
             annotationColors <- list()
         }
         count <- 0
@@ -1282,12 +1283,12 @@ kmeansPheatmap <- function(mat,
     pheatmap::pheatmap(mat2, ...)
 }
 
-findGaps <- function(tree, cutreeN) {
+.findGaps <- function(tree, cutreeN) {
     v <- stats::cutree(tree, cutreeN)[tree$order]
     gaps <- which((v[-1] - v[-length(v)]) != 0)
 }
 
-is.na2 <- function(x) {
+.is.na2 <- function(x) {
     if (is.list(x) | length(x) > 1) {
         return(FALSE)
     }
@@ -1298,7 +1299,7 @@ is.na2 <- function(x) {
     return(is.na(x))
 }
 
-identity2 <- function(x, ...) {
+.identity2 <- function(x, ...) {
     return(x)
 }
 
@@ -1516,7 +1517,7 @@ semiPheatmap <- function(mat,
     clusteringDistanceRows = "euclidean",
     clusteringDistanceCols = "euclidean",
     clusteringMethod = "complete",
-    clusteringCallback = identity2,
+    clusteringCallback = .identity2,
     cutreeRows = NA,
     cutreeCols = NA,
     treeHeightRow = ifelse(clusterRows, 50, 0),
@@ -1572,8 +1573,8 @@ semiPheatmap <- function(mat,
     }
 
 
-    if (is.na2(breaks)) {
-        breaks <- generateBreaks(mat, length(color), center = TRUE)
+    if (.is.na2(breaks)) {
+        breaks <- .generateBreaks(mat, length(color), center = TRUE)
     }
 
 
@@ -1629,7 +1630,7 @@ semiPheatmap <- function(mat,
             }
         }
 
-        treeRow <- clusterMat(mat,
+        treeRow <- .clusterMat(mat,
             rowLabel,
             distance = clusteringDistanceRows,
             method = clusteringMethod)
@@ -1639,7 +1640,7 @@ semiPheatmap <- function(mat,
         fmat <- fmat[treeRow$order, , drop = FALSE]
         labelsRow <- labelsRow[treeRow$order]
         if (!is.na(cutreeRows)) {
-            gapsRow <- findGaps(treeRow, cutreeRows)
+            gapsRow <- .findGaps(treeRow, cutreeRows)
         } else {
             gapsRow <- NULL
         }
@@ -1663,7 +1664,7 @@ semiPheatmap <- function(mat,
             }
         }
 
-        treeCol <- clusterMat(t(mat),
+        treeCol <- .clusterMat(t(mat),
             colLabel,
             distance = clusteringDistanceCols,
             method = clusteringMethod)
@@ -1674,7 +1675,7 @@ semiPheatmap <- function(mat,
         labelsCol <- labelsCol[treeCol$order]
 
         if (!is.na(cutreeCols)) {
-            gapsCol <- findGaps(treeCol, cutreeCols)
+            gapsCol <- .findGaps(treeCol, cutreeCols)
         } else {
             gapsCol <- NULL
         }
@@ -1686,25 +1687,25 @@ semiPheatmap <- function(mat,
     attr(fmat, "draw") <- fmatDraw
 
     # Colors and scales
-    if (!is.na2(legendBreaks) & !is.na2(legendLabels)) {
+    if (!.is.na2(legendBreaks) & !.is.na2(legendLabels)) {
         if (length(legendBreaks) != length(legendLabels)) {
             stop("Lengths of legendBreaks and legendLabels must be the same")
         }
     }
 
 
-    if (is.na2(breaks)) {
-        breaks <- generateBreaks(as.vector(mat), length(color))
+    if (.is.na2(breaks)) {
+        breaks <- .generateBreaks(as.vector(mat), length(color))
     }
-    if (legend & is.na2(legendBreaks)) {
+    if (legend & .is.na2(legendBreaks)) {
         legend <- grid.pretty(range(as.vector(breaks)))
         names(legend) <- legend
     }
-    else if (legend & !is.na2(legendBreaks)) {
+    else if (legend & !.is.na2(legendBreaks)) {
         legend <- legendBreaks[legendBreaks >= min(breaks) &
                 legendBreaks <= max(breaks)]
 
-        if (!is.na2(legendLabels)) {
+        if (!.is.na2(legendLabels)) {
             legendLabels <- legendLabels[legendBreaks >= min(breaks) &
                     legendBreaks <= max(breaks)]
             names(legend) <- legendLabels
@@ -1714,11 +1715,11 @@ semiPheatmap <- function(mat,
     } else {
         legend <- NA
     }
-    mat <- scaleColours(mat, col = color, breaks = breaks)
+    mat <- .scaleColours(mat, col = color, breaks = breaks)
 
     annotation <- c(annotationRow, annotationCol)
     annotation <- annotation[unlist(lapply(annotation,
-        function(x) !is.na2(x)))]
+        function(x) !.is.na2(x)))]
     if (length(annotation) != 0) {
         annotationColors <- generateAnnotationColours(annotation,
             annotationColors,
