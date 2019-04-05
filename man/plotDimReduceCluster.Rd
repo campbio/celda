@@ -6,7 +6,8 @@
 \usage{
 plotDimReduceCluster(dim1, dim2, cluster, size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2",
-  specific_clusters = NULL, label_clusters = FALSE, label_size = 3.5)
+  specific_clusters = NULL, label_clusters = FALSE,
+  cluster_label_map = NA, label_size = 3.5)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
@@ -25,6 +26,8 @@ plotDimReduceCluster(dim1, dim2, cluster, size = 1,
 
 \item{label_clusters}{Logical. Whether the cluster labels are plotted. Default FALSE.}
 
+\item{cluster_label_map}{Numeric vector. Mapping of cluster indices to cluster names as a named vector. Clusters without a label will be labeled with their cluster number. When NA, label clusters with cluster number. Default NA.}
+
 \item{label_size}{Numeric. Sets size of label if label_clusters is TRUE. Default 3.5.}
 }
 \value{
@@ -36,8 +39,5 @@ Create a scatterplot for each row of a normalized gene expression matrix where x
 \examples{
 \donttest{
 celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
-plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-                     cluster = as.factor(z(celda.CG.mod)),
-                     specific_clusters = c(1,2,3))
 }
 }

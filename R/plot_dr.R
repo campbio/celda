@@ -171,17 +171,21 @@ plotDimReduceModule = function(dim1, dim2, counts, celda.mod, modules = NULL, re
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specific_clusters Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL. 
 #' @param label_clusters Logical. Whether the cluster labels are plotted. Default FALSE.
+#' @param cluster_label_map Numeric vector. Mapping of cluster indices to cluster names as a named vector. Clusters without a label will be labeled with their cluster number. When NA, label clusters with cluster number. Default NA.
 #' @param label_size Numeric. Sets size of label if label_clusters is TRUE. Default 3.5.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
 #' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
-#' plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-#'                      cluster = as.factor(z(celda.CG.mod)),
-#'                      specific_clusters = c(1,2,3))
+ # plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
+ #                      cluster = as.factor(celda.CG.mod@clusters$z),
+ #                      specific_clusters = c(1,2,3), label_clusters=TRUE,
+ #                      cluster_label_map=c("T-cell"=1), label_size=5)
 #' }
 #' @export 
-plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", ylab = "Dimension_2", specific_clusters = NULL, label_clusters = FALSE, label_size = 3.5){
+plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension_1", 
+                                ylab = "Dimension_2", specific_clusters = NULL, 
+                                label_clusters = FALSE, cluster_label_map = NA, label_size = 3.5){
   df = data.frame(dim1, dim2, cluster)
   colnames(df) = c(xlab, ylab, "Cluster")
   na.ix = is.na(dim1) | is.na(dim2)
@@ -197,8 +201,8 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.background = ggplot2::element_blank(), axis.line = ggplot2::element_line(color = "black")) +
     ggplot2::scale_color_manual(values = cluster_colors) +
     ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 1)))
+  
   if(label_clusters == T){
-    
     centroid.list <- lapply(1:length(unique(cluster)), function(x){
       df.sub <- df[df$Cluster == x,]
       median.1 <- stats::median(df.sub$Dimension_1)
@@ -208,9 +212,23 @@ plotDimReduceCluster = function(dim1, dim2, cluster, size = 1, xlab = "Dimension
     centroid <- do.call(rbind,centroid.list)
     centroid <- as.data.frame(centroid)
     
-    colnames(centroid) <- c("Dimension_1","Dimension_2","Cluster")
+    if (!is.na(cluster_label_map)) {
+      centroid$ClusterLabel <- sapply(centroid$x,
+                                      function(cluster) {
+                                        if (cluster %in% cluster_label_map) {
+                                          return(names(cluster_label_map)[cluster])
+                                        } else {
+                                          return(cluster)
+                                        }
+                                      })
+    } else {
+      centroid$ClusterLabel <- centroid$x
+    }
+    
+    colnames(centroid) <- c("Dimension_1","Dimension_2","Cluster", "ClusterLabel")
+    print(centroid)
     g <- g + ggplot2::geom_point(data = centroid, mapping = ggplot2::aes_string(x = "Dimension_1", y= "Dimension_2"), size = 0, alpha = 0) + 
-      ggrepel::geom_text_repel(data = centroid, mapping = ggplot2::aes_string(label = "Cluster"), size = label_size)
+      ggrepel::geom_text_repel(data = centroid, mapping = ggplot2::aes_string(label = "ClusterLabel"), size = label_size)
   }
   return(g)
 }
