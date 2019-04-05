@@ -1202,7 +1202,7 @@ vplayout <- function(x, y) {
     return(mat)
 }
 
-generateAnnotationColours <- function(annotation,
+.generateAnnotationColours <- function(annotation,
     annotationColors,
     drop) {
 
@@ -1223,8 +1223,6 @@ generateAnnotationColours <- function(annotation,
         }
 
         factorColors <- scales::dscale(factor(seq(1,count)), hue_pal(l = 75))
-
-        set.seed(3453)
 
         contCounter <- 2
         for (i in 1:length(annotation)) {
@@ -1271,7 +1269,6 @@ kmeansPheatmap <- function(mat,
     }
 
     # Cluster data
-    set.seed(1245678)
     km <- stats::kmeans(mat, k, iter.max = 100)
     mat2 <- km$centers
 
@@ -1721,7 +1718,7 @@ semiPheatmap <- function(mat,
     annotation <- annotation[unlist(lapply(annotation,
         function(x) !.is.na2(x)))]
     if (length(annotation) != 0) {
-        annotationColors <- generateAnnotationColours(annotation,
+        annotationColors <- .generateAnnotationColours(annotation,
             annotationColors,
             drop = dropLevels)
     } else {
