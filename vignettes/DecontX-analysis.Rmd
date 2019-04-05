@@ -60,7 +60,7 @@ decontx.model = DecontX( counts = sim_counts$observedCounts, z = sim_counts$z )
 ```
 
 ## Check convergance
-Use log-likelihood to check converagance 
+Use log-likelihood to check convergance 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
 plot( decontx.model$res.list$logLikelihood ) 
 ```
@@ -70,5 +70,3 @@ plot( decontx.model$res.list$logLikelihood )
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
 plot( decontx.model$res.list$est.conp, colSums(contamination) / sim_counts$N.by.C,  col=sim_counts$z) ; abline( 0, 1) 
 ```
-
-
