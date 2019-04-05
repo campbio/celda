@@ -138,28 +138,28 @@ plotHeatmap <- function(counts,
     ## Set annotation colors
     if (!is.null(z)) {
         K <- sort(unique(z))
-        K.col <- distinctColors(length(K))
-        names(K.col) <- K
+        kCol <- distinctColors(length(K))
+        names(kCol) <- K
 
         if (!is.null(annotationColor)) {
             if (!("cell" %in% names(annotationColor))) {
-                annotationColor <- c(list(cell = K.col), annotationColor)
+                annotationColor <- c(list(cell = kCol), annotationColor)
             }
         } else {
-            annotationColor <- list(cell = K.col)
+            annotationColor <- list(cell = kCol)
         }
     }
 
     if (!is.null(y)) {
         L <- sort(unique(y))
-        L.col <- distinctColors(length(L))
-        names(L.col) <- L
+        lCol <- distinctColors(length(L))
+        names(lCol) <- L
         if (!is.null(annotationColor)) {
             if (!("module" %in% names(annotationColor))) {
-                annotationColor <- c(list(module = L.col), annotationColor)
+                annotationColor <- c(list(module = lCol), annotationColor)
             }
         } else {
-            annotationColor <- list(module = L.col)
+            annotationColor <- list(module = lCol)
         }
     }
 
@@ -188,27 +188,22 @@ plotHeatmap <- function(counts,
     }
 
     ## Set color scheme and breaks
-    ubound.range <- max(counts, na.rm = TRUE)
-    lbound.range <- min(counts, na.rm = TRUE)
+    uBoundRange <- max(counts, na.rm = TRUE)
+    lboundRange <- min(counts, na.rm = TRUE)
 
     if (colorScheme == "divergent") {
         if (colorSchemeSymmetric == TRUE) {
-            ubound.range <- max(abs(ubound.range), abs(lbound.range))
-            lbound.range <- -ubound.range
+            uBoundRange <- max(abs(uBoundRange), abs(lboundRange))
+            lboundRange <- -uBoundRange
         }
         if (is.null(col)) {
             col <- colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"),
                 space = "Lab")(100)
         }
-        col.len <- length(col)
+        colLen <- length(col)
         if (is.null(breaks)) {
-            breaks <- c(seq(
-                    lbound.range,
-                    colorSchemeCenter,
-                    length.out = round(col.len / 2) + 1),
-                seq(colorSchemeCenter + 1e-6,
-                    ubound.range,
-                    length.out = col.len - round(col.len / 2)))
+            breaks <- c(seq(lboundRange, colorSchemeCenter, length.out = round(colLen / 2) + 1),
+                seq(colorSchemeCenter + 1e-6, uBoundRange, length.out = colLen - round(colLen / 2)))
         }
 
     } else {
@@ -217,31 +212,31 @@ plotHeatmap <- function(counts,
             col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9,
                 name = "Blues")))(100)
         }
-        col.len <- length(col)
+        colLen <- length(col)
         if (is.null(breaks)) {
-            breaks <- seq(lbound.range, ubound.range, length.out = col.len)
+            breaks <- seq(lboundRange, uBoundRange, length.out = colLen)
         }
     }
 
-    sp <- semi_pheatmap(mat = counts,
+    sp <- semiPheatmap(mat = counts,
         color = col,
         breaks = breaks,
-        cluster_cols = clusterCell,
-        cluster_rows = clusterFeature,
-        annotation_row = annotationFeature,
-        annotation_col = annotationCell,
-        annotation_colors = annotationColor,
+        clusterCols = clusterCell,
+        clusterRows = clusterFeature,
+        annotationRow = annotationFeature,
+        annotationCol = annotationCell,
+        annotationColors = annotationColor,
         legend = legend,
-        annotation_legend = annotationLegend,
-        annotation_names_row = annotationNamesFeature,
-        annotation_names_col = annotationNamesCell,
-        show_rownames = showNamesFeature,
-        show_colnames = showNamesCell,
-        clustering_method = hclustMethod,
-        treeheight_row = treeheightFeature,
-        treeheight_col = treeheightCell,
-        row_label = y,
-        col_label = z,
+        annotationLegend = annotationLegend,
+        annotationNamesRow = annotationNamesFeature,
+        annotationNamesCol = annotationNamesCell,
+        showRownames = showNamesFeature,
+        showColnames = showNamesCell,
+        clusteringMethod = hclustMethod,
+        treeHeightRow = treeheightFeature,
+        treeHeightCol = treeheightCell,
+        rowLabel = y,
+        colLabel = z,
         silent = TRUE,
         ...)
 

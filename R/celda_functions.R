@@ -188,56 +188,55 @@ compareCountMatrix <- function(counts,
     celdaMod,
     errorOnMismatch = TRUE) {
 
-        if ("y" %in% names(celdaMod@clusters)) {
-            if (nrow(counts) != length(celdaMod@clusters$y)) {
-                stop("The provided celda object was generated from a counts
-                    matrix with a different number of features than the one
-                    provided.")
-            }
-        }
-
-        if ("z" %in% names(celdaMod@clusters)) {
-            if (ncol(counts) != length(celdaMod@clusters$z)) {
-                stop("The provided celda object was generated from a counts
-                    matrix with a different number of cells than the one
-                    provided.")
-            }
-        }
-        celda.checksum <- celdaMod@params$countChecksum
-        counts <-
-            processCounts(counts)
-        # Checksums are generated in celdaGridSearch and model after processing
-        count.md5 <- createCountChecksum(counts)
-        res <- isTRUE(count.md5 == celda.checksum)
-        if (res)
-            return(TRUE)
-        if (!res && errorOnMismatch) {
-            stop("There was a mismatch between the provided count matrix and
-                the count matrix used to generate the provided celda result.")
-        } else if (!res && !errorOnMismatch)
-            return(FALSE)
-    }
-
-.logMessages <-
-    function(...,
-        sep = " ",
-        logfile = NULL,
-        append = FALSE,
-        verbose = TRUE) {
-        if (isTRUE(verbose)) {
-            if (!is.null(logfile)) {
-                if (!is.character(logfile) || length(logfile) > 1) {
-                    stop("The log file parameter needs to be a single character
-                        string.")
-                }
-                cat(paste(..., "\n", sep = sep),
-                    file = logfile,
-                    append = append)
-            } else {
-                message(paste(..., sep = sep))
-            }
+    if ("y" %in% names(celdaMod@clusters)) {
+        if (nrow(counts) != length(celdaMod@clusters$y)) {
+            stop("The provided celda object was generated from a counts
+                matrix with a different number of features than the one
+                provided.")
         }
     }
+
+    if ("z" %in% names(celdaMod@clusters)) {
+        if (ncol(counts) != length(celdaMod@clusters$z)) {
+            stop("The provided celda object was generated from a counts
+                matrix with a different number of cells than the one
+                provided.")
+        }
+    }
+    celdaChecksum <- celdaMod@params$countChecksum
+    counts <- .processCounts(counts)
+    # Checksums are generated in celdaGridSearch and model after processing
+    count.md5 <- .createCountChecksum(counts)
+    res <- isTRUE(count.md5 == celdaChecksum)
+    if (res)
+        return(TRUE)
+    if (!res && errorOnMismatch) {
+        stop("There was a mismatch between the provided count matrix and
+            the count matrix used to generate the provided celda result.")
+    } else if (!res && !errorOnMismatch)
+        return(FALSE)
+}
+
+.logMessages <- function(...,
+    sep = " ",
+    logfile = NULL,
+    append = FALSE,
+    verbose = TRUE) {
+
+    if (isTRUE(verbose)) {
+        if (!is.null(logfile)) {
+            if (!is.character(logfile) || length(logfile) > 1) {
+                stop("The log file parameter needs to be a single character
+                    string.")
+            }
+            cat(paste(..., "\n", sep = sep),
+                file = logfile,
+                append = append)
+        } else {
+            message(paste(..., sep = sep))
+        }
+    }
+}
 
 #' @title Create a color palette
 #' @description Generate a palette of `n` distinct colors.
@@ -347,8 +346,8 @@ distinctColors <- function(n,
         sampleLabel <- as.factor(rep("Sample_1", numCells))
     } else {
         if (length(sampleLabel) != numCells) {
-            stop("'sampleLabel' must be the same length as the number of
-                columns in the 'counts' matrix.")
+            stop("'sampleLabel' must be the same length as the number of",
+             " columns in the 'counts' matrix.")
         }
     }
 
@@ -420,49 +419,50 @@ violinPlot <- function(counts,
     celdaMod,
     features,
     plotDots = FALSE) {
-        cluster <- clusters(celdaMod)$z
-        dataFeature <-
-            counts[match(features, rownames(counts)), , drop = FALSE]
-        dataFeature <- as.data.frame(t(dataFeature))
-        df <- cbind(cluster, dataFeature)
-        df$cluster <- as.factor(df$cluster)
-        m <- reshape2::melt(df, id.vars = c("cluster"))
-        colnames(m) <- c("Cluster", "Feature", "Expression")
-        colorPal <- distinctColors(length(unique(cluster)))
 
-        if (plotDots == TRUE) {
-            p <- ggplot2::ggplot(m,
-                    ggplot2::aes_string(
-                        x = "Cluster",
-                        y = "Expression",
-                        fill = "Cluster")) +
-                ggplot2::facet_wrap( ~ Feature) +
-                ggplot2::geom_violin(trim = TRUE, scale = "width") +
-                ggplot2::geom_jitter(height = 0, size = 0.1) +
-                ggplot2::scale_fill_manual(values = colorPal) +
-                ggplot2::theme(
-                    strip.background = ggplot2::element_blank(),
-                    panel.grid.major = ggplot2::element_blank(),
-                    panel.grid.minor = ggplot2::element_blank(),
-                    panel.spacing = grid::unit(0, "lines"),
-                    panel.background = ggplot2::element_blank(),
-                    axis.line = ggplot2::element_line(colour = "black"))
-            return(p)
-        } else {
-            p <- ggplot2::ggplot(m,
-                    ggplot2::aes_string(
-                        x = "Cluster",
-                        y = "Expression",
-                        fill = "Cluster")) +
-                ggplot2::facet_wrap( ~ Feature) +
-                ggplot2::geom_violin(trim = TRUE, scale = "width") +
-                ggplot2::scale_fill_manual(values = colorPal) +
-                ggplot2::theme(strip.background = ggplot2::element_blank(),
-                    panel.grid.major = ggplot2::element_blank(),
-                    panel.grid.minor = ggplot2::element_blank(),
-                    panel.spacing = grid::unit(0, "lines"),
-                    panel.background = ggplot2::element_blank(),
-                    axis.line = ggplot2::element_line(colour = "black"))
-            return(p)
-        }
+    cluster <- clusters(celdaMod)$z
+    dataFeature <- counts[match(features,
+        rownames(counts)), , drop = FALSE]
+    dataFeature <- as.data.frame(t(dataFeature))
+    df <- cbind(cluster, dataFeature)
+    df$cluster <- as.factor(df$cluster)
+    m <- reshape2::melt(df, id.vars = c("cluster"))
+    colnames(m) <- c("Cluster", "Feature", "Expression")
+    colorPal <- distinctColors(length(unique(cluster)))
+
+    if (plotDots == TRUE) {
+        p <- ggplot2::ggplot(m,
+                ggplot2::aes_string(
+                    x = "Cluster",
+                    y = "Expression",
+                    fill = "Cluster")) +
+            ggplot2::facet_wrap( ~ Feature) +
+            ggplot2::geom_violin(trim = TRUE, scale = "width") +
+            ggplot2::geom_jitter(height = 0, size = 0.1) +
+            ggplot2::scale_fill_manual(values = colorPal) +
+            ggplot2::theme(
+                strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = grid::unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black"))
+        return(p)
+    } else {
+        p <- ggplot2::ggplot(m,
+                ggplot2::aes_string(
+                    x = "Cluster",
+                    y = "Expression",
+                    fill = "Cluster")) +
+            ggplot2::facet_wrap( ~ Feature) +
+            ggplot2::geom_violin(trim = TRUE, scale = "width") +
+            ggplot2::scale_fill_manual(values = colorPal) +
+            ggplot2::theme(strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = grid::unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black"))
+        return(p)
     }
+}
