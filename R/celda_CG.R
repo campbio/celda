@@ -147,17 +147,17 @@ celda_CG <- function(counts,
     verbose = TRUE,
     reorder = TRUE) {
 
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = FALSE,
         verbose = verbose)
 
-    logMessages("Starting Celda_CG: Clustering cells and genes.",
+    .logMessages("Starting Celda_CG: Clustering cells and genes.",
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
 
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
@@ -189,7 +189,7 @@ celda_CG <- function(counts,
     for (i in seq_along(allSeeds)) {
         ## Initialize cluster labels
         currentSeed <- allSeeds[i]
-        logMessages(date(),
+        .logMessages(date(),
             ".. Initializing 'z' in chain",
             i,
             "with",
@@ -198,7 +198,7 @@ celda_CG <- function(counts,
             append = TRUE,
             verbose = verbose)
 
-        logMessages(date(),
+        .logMessages(date(),
             ".. Initializing 'y' in chain",
             i,
             "with",
@@ -355,7 +355,7 @@ celda_CG <- function(counts,
                     !all(tempLl > ll)) & isTRUE(splitOnLast)) |
                         (splitOnIter > 0 & iter %% splitOnIter == 0 &
                             isTRUE(doGeneSplit)))) {
-                logMessages(date(),
+                .logMessages(date(),
                     " .... Determining if any gene clusters should be split.",
                     logfile = logfile,
                     append = TRUE,
@@ -384,7 +384,7 @@ celda_CG <- function(counts,
                         yProb = t(nextY$probs),
                         maxClustersToTry = max(L / 2, 10),
                         minCell = 3)
-                logMessages(res$message,
+                .logMessages(res$message,
                     logfile = logfile,
                     append = TRUE,
                     verbose = verbose)
@@ -410,7 +410,7 @@ celda_CG <- function(counts,
                     !all(tempLl > ll)) & isTRUE(splitOnLast)) |
                         (splitOnIter > 0 & iter %% splitOnIter == 0 &
                             isTRUE(doCellSplit)))) {
-                logMessages(date(),
+                .logMessages(date(),
                     " .... Determining if any cell clusters should be split.",
                     logfile = logfile,
                     append = TRUE,
@@ -437,7 +437,7 @@ celda_CG <- function(counts,
                         zProb = t(nextZ$probs),
                         maxClustersToTry = K,
                         minCell = 3)
-                logMessages(res$message,
+                .logMessages(res$message,
                     logfile = logfile,
                     append = TRUE,
                     verbose = verbose)
@@ -482,7 +482,7 @@ celda_CG <- function(counts,
             }
             ll <- c(ll, tempLl)
 
-            logMessages(date(),
+            .logMessages(date(),
                 " .... Completed iteration: ",
                 iter,
                 " | logLik: ",
@@ -520,7 +520,7 @@ celda_CG <- function(counts,
             bestResult <- result
         }
 
-        logMessages(date(),
+        .logMessages(date(),
             ".. Finished chain",
             i,
             "with seed",
@@ -550,16 +550,16 @@ celda_CG <- function(counts,
     }
 
     endTime <- Sys.time()
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages("Completed Celda_CG. Total time:",
+    .logMessages("Completed Celda_CG. Total time:",
         format(difftime(endTime, startTime)),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages(paste(rep("-", 50), collapse = "",
+    .logMessages(paste(rep("-", 50), collapse = "",
         logfile = logfile,
         append = TRUE,
         verbose = verbose)

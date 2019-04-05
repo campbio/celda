@@ -110,24 +110,24 @@ celdaGridSearch <- function(counts,
     # Pre-generate a set of random seeds to be used for each chain
     allSeeds <- seq(seed, (seed + nchains - 1))
 
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = NULL,
         append = FALSE,
         verbose = verbose)
 
-    logMessages("Starting celdaGridSearch with",
+    .logMessages("Starting celdaGridSearch with",
         model,
         logfile = NULL,
         append = TRUE,
         verbose = verbose)
 
-    logMessages("Number of cores:",
+    .logMessages("Number of cores:",
         cores,
         logfile = NULL,
         append = TRUE,
         verbose = verbose)
 
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = NULL,
         append = TRUE,
         verbose = verbose)
@@ -195,7 +195,7 @@ celdaGridSearch <- function(counts,
     }
 
     if (isTRUE(perplexity)) {
-        logMessages(
+        .logMessages(
             date(),
             ".. Calculating perplexity",
             append = TRUE,
@@ -206,16 +206,16 @@ celdaGridSearch <- function(counts,
     }
 
     endTime <- Sys.time()
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = NULL,
         append = TRUE,
         verbose = verbose)
-    logMessages("Completed celdaGridSearch. Total time:",
+    .logMessages("Completed celdaGridSearch. Total time:",
         format(difftime(endTime, startTime)),
         logfile = NULL,
         append = TRUE,
         verbose = verbose)
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = NULL,
         append = TRUE,
         verbose = verbose)
