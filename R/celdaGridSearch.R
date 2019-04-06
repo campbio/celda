@@ -33,8 +33,10 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
-#' @param verbose Logical. Whether to print log messages during celda chain execution. Default TRUE.
-#' @param logfilePrefix Character. Prefix for log files from worker threads and main process. Default "Celda".
+#' @param verbose Logical. Whether to print log messages during celda chain
+#'  execution. Default TRUE.
+#' @param logfilePrefix Character. Prefix for log files from worker threads
+#'  and main process. Default "Celda".
 #' @return Object of class `celdaList`, which contains results for all model
 #'  parameter combinations and summaries of the run parameters
 #' @seealso `celda_G()` for feature clustering, `celda_C()` for clustering of
