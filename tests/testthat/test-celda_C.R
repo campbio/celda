@@ -156,7 +156,6 @@ test_that(desc = "Testing celda_C with Gibbs sampling", {
     expect_is(res, "celda_C")
 })
 
-
 # normalizeCounts
 test_that(desc = paste0("Making sure normalizeCounts doesn't change dimensions",
     " of counts matrix"), {
@@ -235,7 +234,6 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
             " upper boundaries"))
 })
 
-
 # plotHeatmap with annotationCell
 test_that(desc = "Testing plotHeatmap with celda_C, including annotations", {
     annot <- as.data.frame(c(rep(x = 1,
@@ -267,14 +265,12 @@ test_that(desc = "Testing plotHeatmap with celda_C, including annotations", {
     )
 })
 
-
 # celdaHeatmap
 test_that(desc = "Testing celdaHeatmap with celda_C", {
     expect_equal(names(celdaHeatmap(celdaMod = modelC,
         counts = celdaCCim$counts)),
         c("tree_row", "tree_col", "gtable"))
 })
-
 
 # celdaProbabilityMap
 test_that(desc = "Testing celdaProbabiltyMap.celda_C for sample level", {
@@ -294,7 +290,6 @@ test_that(desc = "Testing celdaProbabiltyMap.celda_C for sample level", {
         level = "sample")
     expect_true(!is.null(plotObj))
 })
-
 
 # differentialExpression
 test_that(desc = "Testing differentialExpression with celda_C", {
@@ -326,7 +321,6 @@ test_that(desc = "Testing differentialExpression with celda_C", {
         only.pos = TRUE))
 })
 
-
 test_that(desc = paste0("Testing celdaTsne with celda_C when model class is",
     "changed, should error"), {
         modelX <- modelC
@@ -350,7 +344,6 @@ test_that(desc = "Testing celdaTsne with celda_C including all cells", {
     expect_true(ncol(tsne) == 2 & nrow(tsne) == length(modelC@clusters$z))
     expect_true(!is.null(plotObj))
 })
-
 
 test_that(desc = "Testing celdaTsne with celda_C including a subset of cells", {
     expect_success(expect_error(tsne <- celdaTsne(counts = celdaCCim$counts,
@@ -407,12 +400,10 @@ test_that(desc = "Testing celdaUmap with celda_C including a subset of cells", {
     expect_true(!is.null(plotObj))
 })
 
-
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup with celda_C", {
     expect_error(featureModuleLookup(celdaCCim$counts, modelC, "test_feat"))
 })
-
 
 # .cCSplitZ
 test_that(desc = "Testing error checking for .cCSplitZ", {
@@ -436,7 +427,6 @@ test_that(desc = "Testing error checking for .cCSplitZ", {
         min.cell = 1000)
     expect_true(grepl("Cluster sizes too small", res$message))
 })
-
 
 test_that(desc = "Testing perplexity.celda_C", {
     expect_true(is.numeric(perplexity(celdaCCim$counts, modelC)))

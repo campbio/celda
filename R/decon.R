@@ -318,24 +318,24 @@ decontX <- function(counts,
     numIterWithoutImprovement <- 0L
     stopIter <- 3L
 
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages("Start DecontX. Decontamination",
+    .logMessages("Start DecontX. Decontamination",
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
 
     if (!is.null(batch)) {
-        logMessages("batch: ",
+        .logMessages("batch: ",
             batch,
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
     }
 
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
@@ -450,23 +450,23 @@ decontX <- function(counts,
     resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
 
     endTime <- Sys.time()
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages("Completed DecontX. Total time:",
+    .logMessages("Completed DecontX. Total time:",
         format(difftime(endTime, startTime)),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
     if (!is.null(batch)) {
-        logMessages("batch: ",
+        .logMessages("batch: ",
             batch,
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
     }
-    logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
