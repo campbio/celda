@@ -1,4 +1,4 @@
-.sampleLL <- function(llProbs) {
+.sampleLl <- function(llProbs) {
     probsSub <- exp(llProbs - max(llProbs))
     probsNorm <- probsSub / sum(probsSub)
     probsSelect <- sample.int(

@@ -313,7 +313,7 @@ celda_CG <- function(counts,
             nTSByCP <- nextY$nTSByC
             nGByTS <- nextY$nGByTS
             nByTS <- nextY$nByTS
-            nTSByC <- ..rowSumByGroupChange(counts, nTSByC, nextY$y, y, L)
+            nTSByC <- .rowSumByGroupChange(counts, nTSByC, nextY$y, y, L)
             y <- nextY$y
 
             ## Gibbs or EM sampling for each cell
@@ -905,7 +905,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 
     etaLl <- a + b + c + d
 
-    final <- thetaLl + phiLl + psiLl + eta.ll
+    final <- thetaLl + phiLl + psiLl + etaLl
     return(final)
 }
 
@@ -1106,8 +1106,8 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
         yProb <- t(nextY$probs)
 
         if (!isTRUE(log)) {
-            zProb <- normalizeLogProbs(zProb)
-            yProb <- normalizeLogProbs(yProb)
+            zProb <- .normalizeLogProbs(zProb)
+            yProb <- .normalizeLogProbs(yProb)
         }
 
         return(list(zProbability = zProb, yProbability = yProb))
@@ -1261,11 +1261,10 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_CG"),
 #'  Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no
 #'  calls to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()`
 #'  for displaying expression
 #' @examples
-#' tsne.res <- celdaTsne(celdaCGSim$counts, celdaCGMod)
+#' tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
 setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
@@ -1277,23 +1276,20 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
-        seed = 12345,
-        ...) {
+        seed = 12345) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
             celdaMod,
             maxCells,
             minClusterSize,
-            initialDims,
-            modules,
-            ...)
+            modules)
         norm <- preparedCountInfo$norm
-        res <- calculateTsne(norm,
+        res <- .calculateTsne(norm,
             doPca = FALSE,
             perplexity = perplexity,
             maxIter = maxIter,
-            seed = seed
-        )
+            seed = seed,
+            initialDims = initialDims)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
         final[preparedCountInfo$cellIx, ] <- res
         rownames(final) <- colnames(counts)
@@ -1339,7 +1335,6 @@ setMethod("celdaUmap",
             celdaMod,
             maxCells,
             minClusterSize,
-            initialDims,
             modules)
         umapRes <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
@@ -1354,9 +1349,7 @@ setMethod("celdaUmap",
     celdaMod,
     maxCells = 25000,
     minClusterSize = 100,
-    initialDims = 20,
-    modules = NULL,
-    ...) {
+    modules = NULL) {
 
     ## Checking if maxCells and minClusterSize will work
     if ((maxCells < ncol(counts)) &

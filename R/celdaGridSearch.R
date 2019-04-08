@@ -67,7 +67,16 @@ celdaGridSearch <- function(counts,
     logfilePrefix = "Celda") {
 
     ## Check parameters
-    validateCounts(counts)
+    .validateCounts(counts)
+
+    modelParams <- as.list(formals(model))
+    if (!all(names(paramsTest) %in% names(modelParams))) {
+        badParams <- setdiff(names(paramsTest), names(modelParams))
+        stop("The following elements in 'paramsTest' are not arguments of '",
+            model,
+            "': ",
+            paste(badParams, collapse = ","))
+    }
 
     if (!is.null(paramsFixed) &&
             !all(names(paramsFixed) %in% names(modelParams))) {
@@ -139,8 +148,8 @@ celdaGridSearch <- function(counts,
     # An MD5 checksum of the count matrix. Passed to models so
     # later on, we can check on celda_* model objects which
     # count matrix was used.
-    counts <- processCounts(counts)
-    countChecksum <- createCountChecksum(counts)
+    counts <- .processCounts(counts)
+    countChecksum <- .createCountChecksum(counts)
 
     ## Use DoParallel to loop through each combination of parameters
     cl <- parallel::makeCluster(cores)

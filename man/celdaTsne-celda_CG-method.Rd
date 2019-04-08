@@ -7,7 +7,7 @@
 \usage{
 \S4method{celdaTsne}{celda_CG}(counts, celdaMod, maxCells = 25000,
   minClusterSize = 100, initialDims = 20, modules = NULL,
-  perplexity = 20, maxIter = 2500, seed = 12345, ...)
+  perplexity = 20, maxIter = 2500, seed = 12345)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -37,8 +37,6 @@ Default 2500.}
 
 \item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no
 calls to `set.seed()` are made.}
-
-\item{...}{Additional parameters.}
 }
 \value{
 A two column matrix of t-SNE coordinates
@@ -50,7 +48,7 @@ Embeds cells in two dimensions using tSNE based on a `celda_CG`
  applying tSNE.
 }
 \examples{
-tsne.res <- celdaTsne(celdaCGSim$counts, celdaCGMod)
+tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 }
 \seealso{
 `celda_CG()` for clustering features and cells  and `celdaHeatmap()`

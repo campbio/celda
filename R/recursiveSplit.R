@@ -187,7 +187,7 @@ recursiveSplitCell <- function(counts,
         verbose = verbose)
 
     startTime <- Sys.time()
-    counts <- processCounts(counts)
+    counts <- .processCounts(counts)
     countChecksum <- .processCounts(counts)
 
     sampleLabel <- .processSampleLabels(sampleLabel, numCells = ncol(counts))
@@ -206,7 +206,7 @@ recursiveSplitCell <- function(counts,
             append = TRUE,
             verbose = verbose,
             logfile = logfile)
-        overallY <- initializeCluster(L, nrow(counts), initial = yInit,
+        overallY <- .initializeCluster(L, nrow(counts), initial = yInit,
             seed = seed)
         countsY <- .rowSumByGroup(counts, overallY, L)
 
@@ -238,7 +238,7 @@ recursiveSplitCell <- function(counts,
         resList <- list(modelInitial)
         while (currentK <= maxK) {
             previousY <- overallY
-            tempSplit <- singleSplitZ(countsY,
+            tempSplit <- .singleSplitZ(countsY,
                 overallZ,
                 s,
                 currentK,
@@ -269,9 +269,9 @@ recursiveSplitCell <- function(counts,
 
             # Calculate new decomposed counts matrix with new module labels
             # overallY = tempModel@clusters$y
-            # p = cG.reDecomposeCounts(counts, overallY, previousY, countsY,
-            # n.by.G, L = L)
-            # countsY = p$n.TS.by.C
+            # p = .cGReDecomposeCounts(counts, overallY, previousY, countsY,
+            # nByG, L = L)
+            # countsY = p$nTSByC
 
             # If the number of clusters is still "currentK", then keep the
             # reordering, otherwise keep the previous configuration
@@ -380,7 +380,7 @@ recursiveSplitCell <- function(counts,
         resList <- list(modelInitial)
         while (currentK <= maxK) {
             # Find next best split, then seed a new celda_C run with that split
-            tempSplit <- singleSplitZ(countsY,
+            tempSplit <- .singleSplitZ(countsY,
                 overallZ,
                 s,
                 currentK,
@@ -473,7 +473,7 @@ recursiveSplitCell <- function(counts,
         overallZ <- modelInitial@clusters$z
         resList <- list(modelInitial)
         while (currentK <= maxK) {
-            tempSplit <- singleSplitZ(counts,
+            tempSplit <- .singleSplitZ(counts,
                 overallZ,
                 s,
                 currentK,
@@ -681,7 +681,7 @@ recursiveSplitModule <- function(counts,
         verbose = verbose)
     startTime <- Sys.time()
 
-    counts <- processCounts(counts)
+    counts <- .processCounts(counts)
     countChecksum <- .processCounts(counts)
     names <-
         list(row = rownames(counts), column = colnames(counts))
@@ -701,13 +701,13 @@ recursiveSplitModule <- function(counts,
             verbose = verbose,
             logfile = logfile
         )
-        overallZ <- initialize.cluster(
+        overallZ <- .initializeCluster(
             N = K,
             len = ncol(counts),
             initial = zInit,
             seed = seed
         )
-        counts.z <- .colSumByGroup(counts, overallZ, K)
+        countsZ <- .colSumByGroup(counts, overallZ, K)
 
         # Create initial model with initialL and predifined z labels
         .logMessages(
@@ -736,16 +736,16 @@ recursiveSplitModule <- function(counts,
             seed = seed,
             reorder = reorder
         )
-        current.L <- length(unique(modelInitial@clusters$y)) + 1
+        currentL <- length(unique(modelInitial@clusters$y)) + 1
         overallY <- modelInitial@clusters$y
 
         resList <- list(modelInitial)
-        while (current.L <= maxL) {
+        while (currentL <= maxL) {
             # Allow features to cluster further with celda_CG
-            tempSplit <- singleSplitY(
-                counts.z,
+            tempSplit <- .singleSplitY(
+                countsZ,
                 overallY,
-                current.L,
+                currentL,
                 minFeature = 3,
                 beta = beta,
                 delta = delta,
@@ -754,7 +754,7 @@ recursiveSplitModule <- function(counts,
             )
             tempModel <- .celda_CG(
                 counts,
-                L = current.L,
+                L = currentL,
                 K = K,
                 stopIter = 5,
                 splitOnIter = -1,
@@ -773,7 +773,7 @@ recursiveSplitModule <- function(counts,
             .logMessages(
                 date(),
                 ".. Created module",
-                current.L,
+                currentL,
                 "| logLik:",
                 tempModel@finalLogLik,
                 append = TRUE,
@@ -781,7 +781,7 @@ recursiveSplitModule <- function(counts,
                 logfile = NULL
             )
             resList <- c(resList, list(tempModel))
-            current.L <- current.L + 1
+            currentL <- currentL + 1
         }
 
         runK <- sapply(resList, function(mod) {
@@ -807,11 +807,11 @@ recursiveSplitModule <- function(counts,
             verbose = verbose,
             logfile = logfile
         )
-        z <- initialize.splitZ(counts,
+        z <- .initializeSplitZ(counts,
             K = K,
             minCell = 3,
             seed = seed)
-        counts.z <- .colSumByGroup(counts, z, length(unique(z)))
+        countsZ <- .colSumByGroup(counts, z, length(unique(z)))
 
         .logMessages(
             date(),
@@ -823,33 +823,33 @@ recursiveSplitModule <- function(counts,
             logfile = logfile
         )
         modelInitial <- .celda_G(
-            counts.z,
+            countsZ,
             L = initialL,
             nchains = 1,
             verbose = FALSE,
             seed = seed
         )
 
-        current.L <- length(unique(modelInitial@clusters$y)) + 1
+        currentL <- length(unique(modelInitial@clusters$y)) + 1
         overallY <- modelInitial@clusters$y
 
         ## Decomposed counts for full count matrix
-        p <- cG.decomposeCounts(counts, overallY, current.L)
-        n.TS.by.C <- p$n.TS.by.C
-        n.by.TS <- p$n.by.TS
-        nG.by.TS <- p$nG.by.TS
-        n.by.G <- p$n.by.G
+        p <- .cGDecomposeCounts(counts, overallY, currentL)
+        nTSByC <- p$nTSByC
+        nByTS <- p$nByTS
+        nGByTS <- p$nGByTS
+        nByG <- p$nByG
         nG <- p$nG
         nM <- p$nM
 
         resList <- list(modelInitial)
-        while (current.L <= maxL) {
+        while (currentL <= maxL) {
             # Allow features to cluster further
             previousY <- overallY
             tempSplit <- .singleSplitY(
-                counts.z,
+                countsZ,
                 overallY,
-                current.L,
+                currentL,
                 minFeature = 3,
                 beta = beta,
                 delta = delta,
@@ -857,8 +857,8 @@ recursiveSplitModule <- function(counts,
                 seed = seed
             )
             tempModel <- .celda_G(
-                counts.z,
-                L = current.L,
+                countsZ,
+                L = currentL,
                 stopIter = 5,
                 splitOnIter = -1,
                 splitOnLast = FALSE,
@@ -871,27 +871,27 @@ recursiveSplitModule <- function(counts,
             overallY <- tempModel@clusters$y
 
             # Adjust decomposed count matrices
-            p <- cG.reDecomposeCounts(counts,
+            p <- .cGReDecomposeCounts(counts,
                 overallY,
                 previousY,
-                n.TS.by.C,
-                n.by.G,
-                L = current.L)
-            n.TS.by.C <- p$n.TS.by.C
-            n.by.TS <- p$n.by.TS
-            nG.by.TS <- p$nG.by.TS
+                nTSByC,
+                nByG,
+                L = currentL)
+            nTSByC <- p$nTSByC
+            nByTS <- p$nByTS
+            nGByTS <- p$nGByTS
             previousY <- overallY
 
             ## Create the final model object with correct info on full counts
             ## matrix
-            tempModel@finalLogLik <- cG.calcLL(
-                n.TS.by.C = n.TS.by.C,
-                n.by.TS = n.by.TS,
-                n.by.G = n.by.G,
-                nG.by.TS = nG.by.TS,
+            tempModel@finalLogLik <- .cGCalcLL(
+                nTSByC = nTSByC,
+                nByTS = nByTS,
+                nByG = nByG,
+                nGByTS = nGByTS,
                 nM = nM,
                 nG = nG,
-                L = current.L,
+                L = currentL,
                 beta = beta,
                 delta = delta,
                 gamma = gamma
@@ -901,15 +901,15 @@ recursiveSplitModule <- function(counts,
             tempModel@names <- names
 
             ## Add extra row/column for next round of L
-            n.TS.by.C <- rbind(n.TS.by.C, rep(0L, ncol(n.TS.by.C)))
-            n.by.TS <- c(n.by.TS, 0L)
-            nG.by.TS <- c(nG.by.TS, 0L)
+            nTSByC <- rbind(nTSByC, rep(0L, ncol(nTSByC)))
+            nByTS <- c(nByTS, 0L)
+            nGByTS <- c(nGByTS, 0L)
 
             ## Add new model to results list and increment L
             .logMessages(
                 date(),
                 ".. Created module",
-                current.L,
+                currentL,
                 "| logLik:",
                 tempModel@finalLogLik,
                 append = TRUE,
@@ -917,7 +917,7 @@ recursiveSplitModule <- function(counts,
                 logfile = NULL
             )
             resList <- c(resList, list(tempModel))
-            current.L <- current.L + 1
+            currentL <- currentL + 1
         }
 
         runL <- sapply(resList, function(mod) {
@@ -941,23 +941,23 @@ recursiveSplitModule <- function(counts,
         modelInitial <- .celda_G(
             counts,
             L = initialL,
-            max.iter = 20,
+            maxIter = 20,
             nchains = 1,
             verbose = FALSE,
             seed = seed
         )
         overallY <- modelInitial@clusters$y
-        current.L <- length(unique(overallY)) + 1
+        currentL <- length(unique(overallY)) + 1
 
         ## Perform splitting for y labels
         resList <- list(modelInitial)
-        while (current.L <= maxL) {
+        while (currentL <= maxL) {
             # Allow features to cluster further
             previousY <- overallY
-            tempSplit <- singleSplitY(
+            tempSplit <- .singleSplitY(
                 counts,
                 overallY,
-                current.L,
+                currentL,
                 minFeature = 3,
                 beta = beta,
                 delta = delta,
@@ -966,7 +966,7 @@ recursiveSplitModule <- function(counts,
             )
             tempModel <- .celda_G(
                 counts,
-                L = current.L,
+                L = currentL,
                 stopIter = 5,
                 splitOnIter = -1,
                 splitOnLast = FALSE,
@@ -982,7 +982,7 @@ recursiveSplitModule <- function(counts,
             .logMessages(
                 date(),
                 ".. Created module",
-                current.L,
+                currentL,
                 "| logLik:",
                 tempModel@finalLogLik,
                 append = TRUE,
@@ -990,7 +990,7 @@ recursiveSplitModule <- function(counts,
                 logfile = NULL
             )
             resList <- c(resList, list(tempModel))
-            current.L <- current.L + 1
+            currentL <- currentL + 1
         }
 
         runL <- sapply(resList, function(mod) {

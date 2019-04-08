@@ -447,7 +447,7 @@ celda_C <- function(counts,
         ## Sample next state and add back counts
         prevZ <- z[i]
         if (isTRUE(doSample))
-            z[i] <- sample.ll(probs[, i])
+            z[i] <- .sampleLl(probs[, i])
 
         if (prevZ != z[i]) {
             nGByCP[, prevZ] <- nGByCP[, prevZ] - counts[, i]
@@ -549,8 +549,8 @@ simulateCells.celda_C <- function(model,
 
     .setSeed(seed)
 
-    phi <- rdirichlet(K, rep(beta, G))
-    theta <- rdirichlet(S, rep(alpha, K))
+    phi <- .rdirichlet(K, rep(beta, G))
+    theta <- .rdirichlet(S, rep(alpha, K))
 
     ## Select the number of cells per sample
     nC <- sample(seq(CRange[1], CRange[2]), size = S, replace = TRUE)
@@ -868,7 +868,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_C"),
         zProb <- t(nextZ$probs)
 
         if (!isTRUE(log)) {
-            zProb <- normalizeLogProbs(zProb)
+            zProb <- .normalizeLogProbs(zProb)
         }
 
         return(list(zProbability = zProb))
@@ -988,7 +988,6 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 #'  Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
 #'  to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression
 #' @examples
@@ -1004,8 +1003,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
-        seed = 12345,
-        ...) {
+        seed = 12345) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
             celdaMod,
@@ -1013,7 +1011,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
             minClusterSize,
             modules)
 
-        res <- calculateTsne(preparedCountInfo$norm,
+        res <- .calculateTsne(preparedCountInfo$norm,
             perplexity = perplexity,
             maxIter = maxIter,
             seed = seed,
@@ -1065,7 +1063,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
             maxCells,
             minClusterSize,
             modules)
-        res <- calculateUmap(preparedCountInfo$norm, umapConfig)
+        res <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
         final[preparedCountInfo$cellIx,] <- res
         rownames(final) <- colnames(counts)
@@ -1185,7 +1183,7 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_C"),
             sampNorm <- normalizeCounts(samp,
                 normalize = "proportion",
                 transformationFun = sqrt,
-                scale.fun = base::scale)
+                scaleFun = base::scale)
             g2 <- plotHeatmap(sampNorm,
                 colorScheme = "divergent",
                 clusterCell = FALSE,

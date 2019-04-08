@@ -5,7 +5,7 @@
 \title{Embeds cells in two dimensions using umap.}
 \usage{
 celdaUmap(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
-  modules = NULL, umapConfig = umap::umap.defaults)
+  initialDims = 20, modules = NULL, umapConfig = umap::umap.defaults)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -20,6 +20,10 @@ requires more memory. Default 25000.}
 
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
 threshold. Default 100.}
+
+\item{initialDims}{Integer. PCA will be used to reduce the dimentionality
+of the dataset. The top 'initialDims' principal components will be used
+for umap. Default 20.}
 
 \item{modules}{Integer vector. Determines which features modules to use for
 tSNE. If NULL, all modules will be used. Default NULL.}

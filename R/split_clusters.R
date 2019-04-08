@@ -380,7 +380,7 @@
     }
 
     ## Decompose counts according to new/temp z labels
-    tempNGByCP <- colSumByGroup(counts, group = tempZ, K = currentTopZ)
+    tempNGByCP <- .colSumByGroup(counts, group = tempZ, K = currentTopZ)
 
     #########################
     ## Second, different y splits will be estimated and tested

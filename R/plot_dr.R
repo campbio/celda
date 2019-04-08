@@ -57,8 +57,8 @@ plotDimReduceGrid <- function(dim1,
     ggplot2::ggplot(m,
         ggplot2::aes_string(x = xlab, y = ylab)) +
         ggplot2::geom_point(stat = "identity",
-        size = size,
-        ggplot2::aes_string(color = varLabel)) +
+            size = size,
+            ggplot2::aes_string(color = varLabel)) +
         ggplot2::facet_wrap( ~ facet) +
         ggplot2::theme_bw() +
         ggplot2::scale_colour_gradient2(low = colorLow,
@@ -72,7 +72,7 @@ plotDimReduceGrid <- function(dim1,
             panel.spacing = unit(0, "lines"),
             panel.background = ggplot2::element_blank(),
             axis.line = ggplot2::element_line(colour = "black"))
-    }
+}
 
 
 #' @title Plotting feature expression on a dimensionality reduction plot
@@ -131,8 +131,8 @@ plotDimReduceFeature <- function(dim1,
     colorHigh = "blue") {
     if (isTRUE(normalize)) {
         counts <- normalizeCounts(counts,
-                transformationFun = sqrt,
-                scaleFun = base::scale)
+            transformationFun = sqrt,
+            scaleFun = base::scale)
     }
 
     if (is.null(features)) {
@@ -141,13 +141,13 @@ plotDimReduceFeature <- function(dim1,
 
     if (!is.null(trim)) {
         if (length(trim) != 2) {
-            stop("'trim' should be a 2 element vector
-                specifying the lower and upper boundaries")
+            stop("'trim' should be a 2 element vector",
+                "specifying the lower and upper boundaries")
         }
         trim <- sort(trim)
         counts[counts < trim[1]] <- trim[1]
         counts[counts > trim[2]] <- trim[2]
-    }
+        }
 
     varLabel <- "Expression"
     if (!isTRUE(exactMatch)) {
@@ -163,29 +163,29 @@ plotDimReduceFeature <- function(dim1,
         counts <- counts[featuresIndices, , drop = FALSE]
         if (length(notFound) > 0) {
             if (length(notFound) == length(features)) {
-                stop("None of the provided features had
-                    matching rownames in the provided counts matrix.")
+                stop("None of the provided features had",
+                    "matching rownames in the provided counts matrix.")
             }
-            warning(paste0("The following features were not
-                        present in the provided count matrix: ",
-                        paste(notFound,
-                            sep = "",
-                            collapse = ",")))
-        }
+            warning("The following features were not",
+                "present in the provided count matrix: ",
+                paste(notFound,
+                    sep = "",
+                    collapse = ","))
+            }
     } else {
         featuresNotFound <- setdiff(features,
             intersect(features, rownames(counts)))
         if (length(featuresNotFound) > 0) {
             if (length(featuresNotFound) == length(features)) {
-                stop("None of the provided features had matching
-                    rownames in the provided counts matrix.")
+                stop("None of the provided features had matching",
+                    "rownames in the provided counts matrix.")
             }
-            warning(paste0("The following features were not present in
-                    the provided count matrix: ",
-                    paste(featuresNotFound,
-                        sep = "",
-                        collapse = ",")))
-        }
+            warning("The following features were not present in",
+                "the provided count matrix: ",
+                paste(featuresNotFound,
+                    sep = "",
+                    collapse = ","))
+            }
         featuresFound <- setdiff(features, featuresNotFound)
         counts <- counts[featuresFound, , drop = FALSE]
     }
@@ -199,7 +199,7 @@ plotDimReduceFeature <- function(dim1,
         colorMid,
         colorHigh,
         varLabel)
-    }
+}
 
 
 #' @title Plotting the Celda module probability on a
@@ -218,7 +218,7 @@ plotDimReduceFeature <- function(dim1,
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG".
 #' @param modules Character vector. Module(s) from celda model to be plotted.
 #' @param rescale Logical.
-#'  Whether rows of the matrix should be rescaled to [0,1]. Default TRUE.
+#'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -259,9 +259,9 @@ plotDimReduceModule <-
         matrix <- factorized$proportions$cell
 
         if (rescale == TRUE) {
-            for (x in 1:nrow(matrix)) {
-                matrix[x,] <- matrix[x,] - min(matrix[x,])
-                matrix[x,] <- matrix[x,] / max(matrix[x,])
+            for (x in seq(nrow(matrix))) {
+                matrix[x, ] <- matrix[x, ] - min(matrix[x, ])
+                matrix[x, ] <- matrix[x, ] / max(matrix[x, ])
                 varLabel <- "Scaled_Probability"
             }
         } else {
@@ -358,7 +358,7 @@ plotDimReduceCluster <-function(dim1,
                 ggplot2::guide_legend(override.aes = list(size = 1)))
 
     if (labelClusters == TRUE) {
-        centroidList <- lapply(1:length(unique(cluster)), function(x) {
+        centroidList <- lapply(seq(length(unique(cluster))), function(x) {
             df.sub <- df[df$Cluster == x,]
             median.1 <- stats::median(df.sub$Dimension_1)
             median.2 <- stats::median(df.sub$Dimension_2)
@@ -369,16 +369,16 @@ plotDimReduceCluster <-function(dim1,
 
         colnames(centroid) <- c("Dimension_1", "Dimension_2", "Cluster")
         g <- g + ggplot2::geom_point(data = centroid,
-                    mapping = ggplot2::aes_string(x = "Dimension_1",
-                        y = "Dimension_2"),
-                    size = 0,
-                    alpha = 0) +
-                ggrepel::geom_text_repel(data = centroid,
-                    mapping = ggplot2::aes_string(label = "Cluster"),
-                    size = labelSize)
-        }
-        return(g)
+            mapping = ggplot2::aes_string(x = "Dimension_1",
+                y = "Dimension_2"),
+            size = 0,
+            alpha = 0) +
+            ggrepel::geom_text_repel(data = centroid,
+                mapping = ggplot2::aes_string(label = "Cluster"),
+                size = labelSize)
     }
+    return(g)
+}
 
 
 # Run the t-SNE algorithm for dimensionality reduction
@@ -398,25 +398,25 @@ plotDimReduceCluster <-function(dim1,
     doPCA = FALSE,
     initialDims = 20) {
 
-        .setSeed(seed)
-        res <- Rtsne::Rtsne(
-            norm,
-            pca = doPCA,
-            max_iter = maxIter,
-            perplexity = perplexity,
-            check_duplicates = FALSE,
-            is_distance = FALSE,
-            initial_dims = initialDims)$Y
+    .setSeed(seed)
+    res <- Rtsne::Rtsne(
+        norm,
+        pca = doPCA,
+        max_iter = maxIter,
+        perplexity = perplexity,
+        check_duplicates = FALSE,
+        is_distance = FALSE,
+        initial_dims = initialDims)$Y
 
-        return(res)
-    }
+    return(res)
+}
 
 
 # Run the umap algorithm for dimensionality reduction
 # @param norm Normalized count matrix.
-# @param umap.config An object of class umap.config,
+# @param umapConfig An object of class umap.config,
 # containing configuration parameters to be passed to umap.
 # Default umap::umap.defualts.
-.calculateUmap <- function(norm, umap.config = umap::umap.defaults) {
-    return(umap::umap(norm, umap.config)$layout)
+.calculateUmap <- function(norm, umapConfig = umap::umap.defaults) {
+    return(umap::umap(norm, umapConfig)$layout)
 }

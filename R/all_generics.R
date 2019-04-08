@@ -542,6 +542,9 @@ setGeneric("celdaTsne",
 #'  requires more memory. Default 25000.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
+#' @param initialDims Integer. PCA will be used to reduce the dimentionality
+#'  of the dataset. The top 'initialDims' principal components will be used
+#'  for umap. Default 20.
 #' @param modules Integer vector. Determines which features modules to use for
 #'  tSNE. If NULL, all modules will be used. Default NULL.
 #' @param umapConfig An object of class "umapConfig" specifying parameters to
@@ -558,6 +561,7 @@ setGeneric("celdaUmap",
         celdaMod,
         maxCells = 25000,
         minClusterSize = 100,
+        initialDims = 20,
         modules = NULL,
         umapConfig = umap::umap.defaults) {
         standardGeneric("celdaUmap")

@@ -93,7 +93,7 @@ moduleHeatmap <- function(counts,
     cellIndices <- rev(cellIndices)
     if (normalize) {
       normCounts <- normalizeCounts(counts, normalize = "proportion",
-          transformation.fun = sqrt)
+          transformationFun = sqrt)
     } else {
         normCounts <- counts
     }
@@ -112,7 +112,7 @@ moduleHeatmap <- function(counts,
     if (class(celdaMod)[1] == "celda_CG") {
         if (methods::.hasSlot(celdaMod, "clusters")) {
             cell <-
-              distinct_colors(length(unique(celdaMod@clusters$z)))[
+              distinctColors(length(unique(celdaMod@clusters$z)))[
                   sort(unique(celdaMod@clusters$z[cellIx]))]
             names(cell) <- sort(unique(celdaMod@clusters$z[cellIx]))
             anno_cell_colors <- list(cell = cell)

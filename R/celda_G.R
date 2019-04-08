@@ -481,7 +481,7 @@ simulateCells.celda_G <- function(model,
     ...) {
 
     .setSeed(seed)
-    eta <- rdirichlet(1, rep(gamma, L))
+    eta <- .rdirichlet(1, rep(gamma, L))
 
     y <- sample(seq(L),
         size = G,
@@ -495,10 +495,10 @@ simulateCells.celda_G <- function(model,
     psi <- matrix(0, nrow = G, ncol = L)
     for (i in seq(L)) {
         ind <- y == i
-        psi[ind, i] <- rdirichlet(1, rep(delta, sum(ind)))
+        psi[ind, i] <- .rdirichlet(1, rep(delta, sum(ind)))
     }
 
-    phi <- rdirichlet(C, rep(beta, L))
+    phi <- .rdirichlet(C, rep(beta, L))
 
     ## Select number of transcripts per cell
     nN <- sample(seq(NRange[1], NRange[2]), size = C, replace = TRUE)
@@ -837,7 +837,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_G"),
         yProb <- t(nextY$probs)
 
         if (!isTRUE(log)) {
-            yProb <- normalizeLogProbs(yProb)
+            yProb <- .normalizeLogProbs(yProb)
         }
 
         return(list(yProbability = yProb))
@@ -960,7 +960,6 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
 #'  Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
 #'  to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for
 #'  displaying expression
 #' @examples
@@ -976,15 +975,14 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
-        seed = 12345,
-        ...) {
+        seed = 12345) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
             celdaMod,
             maxCells,
             minClusterSize,
             modules)
-        res <- calculateTsne(preparedCountInfo$norm,
+        res <- .calculateTsne(preparedCountInfo$norm,
             doPca = FALSE,
             perplexity = perplexity,
             maxIter = maxIter,
@@ -1032,7 +1030,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
             maxCells,
             minClusterSize,
             modules)
-        umapRes <- calculateUmap(preparedCountInfo$norm, umapConfig)
+        umapRes <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
         final[preparedCountInfo$cellIx,] <- umapRes
         rownames(final) <- colnames(counts)

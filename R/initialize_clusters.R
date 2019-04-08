@@ -224,8 +224,8 @@
 
     # Collapse cells to managable number of clusters
     if (!is.null(tempK) && ncol(counts) > tempK) {
-        z <- initialize.splitZ(counts, K = tempK, seed = seed)
-        counts <- colSumByGroup(counts, z, length(unique(z)))
+        z <- .initializeSplitZ(counts, K = tempK, seed = seed)
+        counts <- .colSumByGroup(counts, z, length(unique(z)))
     }
 
     # Initialize the model with KSubcluster clusters
