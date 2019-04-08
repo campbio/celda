@@ -743,7 +743,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
-#' loglik <- logLikelihoodCeldaC(celdaCSim$counts,
+#' loglik <- logLikelihood.celda_C(celdaCSim$counts,
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     z = celdaCSim$z,
 #'     K = celdaCSim$K,
@@ -758,7 +758,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #'     alpha = celdaCSim$alpha,
 #'     beta = celdaCSim$beta)
 #' @export
-logLikelihoodCeldaC <- function(counts, sampleLabel, z, K, alpha, beta) {
+logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 
     if (sum(z > K) > 0) {
         stop("An entry in z contains a value greater than the provided K.")

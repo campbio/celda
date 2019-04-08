@@ -933,7 +933,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #' @return The log likelihood for the given cluster assignments
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' loglik <- logLikelihoodCeldaCG(celdaCGSim$counts,
+#' loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
 #'     sampleLabel = celdaCGSim$sampleLabel,
 #'     z = celdaCGSim$z,
 #'     y = celdaCGSim$y,
@@ -956,7 +956,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #'     gamma = celdaCGSim$gamma,
 #'     delta = celdaCGSim$delta)
 #' @export
-logLikelihoodCeldaCG <- function(counts,
+logLikelihood.celda_CG <- function(counts,
     sampleLabel,
     z,
     y,

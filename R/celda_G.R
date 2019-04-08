@@ -713,7 +713,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
 #' @return The log-likelihood for the given cluster assignments.
 #' @seealso `celda_G()` for clustering features
 #' @examples
-#' loglik <- logLikelihoodCeldaG(celdaGSim$counts,
+#' loglik <- logLikelihood.celda_G(celdaGSim$counts,
 #'     y = celdaGSim$y,
 #'     L = celdaGSim$L,
 #'     beta = celdaGSim$beta,
@@ -728,7 +728,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
 #'     delta = celdaGSim$delta,
 #'     gamma = celdaGSim$gamma)
 #' @export
-logLikelihoodCeldaG <- function(counts, y, L, beta, delta, gamma) {
+logLikelihood.celda_G <- function(counts, y, L, beta, delta, gamma) {
     if (sum(y > L) > 0) {
         stop("An entry in y contains a value greater than the provided L.")
     }
