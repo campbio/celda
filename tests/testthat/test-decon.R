@@ -21,8 +21,8 @@
         expect_equal( typeof(Decon.sim$observedCounts), "integer")
     
 
-        Decon.sim.KTooLarge = simulateContaminatedMatrix(K=101, C=10)
-        expect_equal( unique(Decon.sim.KTooLarge$z), 1:ncol(Decon.sim.KTooLarge$eta) )
+        expect_warning(simulateContaminatedMatrix(K=101, C=10) ) 
+        #expect_equal( unique(Decon.sim.KTooLarge$z), 1:ncol(Decon.sim.KTooLarge$eta) )
 
     } )
 

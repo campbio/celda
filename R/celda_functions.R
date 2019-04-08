@@ -348,14 +348,15 @@ featureModuleTable = function(counts, celda.mod, output.file = NULL){
 violinPlot = function(counts, celda.mod, features, plot_dots = FALSE){
   cluster = clusters(celda.mod)$z
   data_feature = counts[match(features,rownames(counts)),,drop = FALSE]
-  df = data.frame(cluster,t(data_feature))
+  data_feature = as.data.frame(t(data_feature))
+  df = cbind(cluster,data_feature)
   df$cluster = as.factor(df$cluster)
   
   m = reshape2::melt(df, id.vars = c("cluster"))
   colnames(m) = c("Cluster","Feature","Expression")
   color_pal = distinct_colors(length(unique(cluster)))
  if(plot_dots == TRUE){
-   p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill=Cluster)) + 
+   p <- ggplot2::ggplot(m, ggplot2::aes_string(x="Cluster", y="Expression", fill="Cluster")) + 
     ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=TRUE, scale = "width") + 
     ggplot2::geom_jitter(height = 0, size = 0.1) +
     ggplot2::scale_fill_manual(values = color_pal) + 
@@ -364,7 +365,7 @@ violinPlot = function(counts, celda.mod, features, plot_dots = FALSE){
 
     return(p)  
   }else{
-    p <- ggplot2::ggplot(m, ggplot2::aes(x=Cluster, y=Expression, fill = Cluster)) + 
+    p <- ggplot2::ggplot(m, ggplot2::aes_string(x="Cluster", y="Expression", fill = "Cluster")) + 
       ggplot2::facet_wrap(~Feature) + ggplot2::geom_violin(trim=TRUE, scale = "width") + 
       ggplot2::scale_fill_manual(values = color_pal) + 
       ggplot2::theme(strip.background = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), panel.spacing = grid::unit(0,"lines"),

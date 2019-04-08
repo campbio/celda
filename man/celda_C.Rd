@@ -53,7 +53,7 @@ An object of class `celda_C` with the cell population clusters stored in in `z`.
 Clusters the columns of a count matrix containing single-cell data into K subpopulations.
 }
 \examples{
-celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K, 
+celda.mod = celda_C(celda.C.sim$counts, K=celda.C.sim$K,
                     sample.label=celda.C.sim$sample.label)
 }
 \seealso{

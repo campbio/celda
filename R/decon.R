@@ -26,7 +26,7 @@ simulateContaminatedMatrix = function(C=300, G=100, K=3, N.Range=c(500,1000), be
  
     z = sample(1:K, size=C, replace=TRUE) 
     if( length(unique(z)) < K) {
-        cat("Only", length(unique(z)), "clusters are simulated. Try to increase numebr of cells 'C' if more clusters are needed", "\n")  
+        warning("Only ", length(unique(z)), " clusters are simulated. Try to increase numebr of cells 'C' if more clusters are needed", "\n")  
         K = length(unique(z)) 
         z = plyr::mapvalues(z, unique(z), 1:length(unique(z)) )
     }
@@ -363,10 +363,10 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
 
 ## Make sure provided parameters are the right type and value range 
 checkParameters.decon = function(proportionPrior, distributionPrior) {
-    if( length(proportionPrior) > 1 | proportionPrior <= 0   )  {
+    if( length(proportionPrior) > 1 | any(proportionPrior <= 0)   )  {
         stop("'delta' should be a single positive value.")
     }
-    if( length( distributionPrior) > 1 | distributionPrior <=0  ) {
+    if( length( distributionPrior) > 1 | any(distributionPrior <=0)  ) {
         stop("'beta' should be a single positive value.") 
     }
 }
@@ -437,3 +437,4 @@ decontx.initializeZ = function( counts, K=10, min.cell=3, seed=1111) {
 
     return( list( "global.z"=global.z, "local.z"=local.z, "tr.z"=tr.z, "cb.z"=cb.z  )  )
 } 
+ 

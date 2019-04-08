@@ -129,7 +129,7 @@ recursiveSplitCell = function(counts, sample.label=NULL, initial.K=5, max.K=25, 
         ll = logLikelihood.celda_CG(counts, s, overall.z, temp.model@clusters$y, current.K, L, alpha, beta, delta, gamma)
         temp.model = methods::new("celda_CG", 
                                   clusters=list(z=overall.z, y = temp.model@clusters$y),
-                                  params=list(K=current.K,  L=current.L,
+                                  params=list(K=current.K,  L=L,
                                               alpha=alpha, beta=beta, delta=delta, gamma=gamma,
                                               seed=seed, count.checksum=count.checksum),
                                   finalLogLik=ll, sample.label=sample.label, names=names)
@@ -291,7 +291,7 @@ recursiveSplitModule = function(counts, initial.L=10, max.L=100, temp.K=100, z.i
     ## Create collapsed module matrix
     K = length(unique(z.init))
     logMessages(date(), ".. Collapsing to", K, "cell populations", append=TRUE, verbose=verbose, logfile=logfile)      
-    overall.z = initialize.cluster(K, ncol(counts), initial = z.init, seed=seed)  
+    overall.z = initialize.cluster(N=K, len=ncol(counts), initial=z.init, seed=seed)  
     counts.z = colSumByGroup(counts, overall.z, K)
     
     ## Create initial model with initial.L and predifined z labels
