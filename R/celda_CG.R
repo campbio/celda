@@ -559,7 +559,7 @@ celda_CG <- function(counts,
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    .logMessages(paste(rep("-", 50), collapse = "",
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)

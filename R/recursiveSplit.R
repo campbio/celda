@@ -173,15 +173,15 @@ recursiveSplitCell <- function(counts,
     logfile = NULL,
     verbose = TRUE) {
 
-    logMessages(paste(rep("=", 50), collapse = ""),
+    .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = FALSE,
         verbose = verbose)
-    logMessages("Starting recursive cell population splitting.",
+    .logMessages("Starting recursive cell population splitting.",
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages(paste(rep("=", 50), collapse = ""),
+    .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
@@ -199,7 +199,7 @@ recursiveSplitCell <- function(counts,
     if (!is.null(yInit)) {
         # Create collapsed module matrix
         L <- length(unique(yInit))
-        logMessages(date(),
+        .logMessages(date(),
             ".. Collapsing to",
             L,
             "modules",
@@ -211,7 +211,7 @@ recursiveSplitCell <- function(counts,
         countsY <- .rowSumByGroup(counts, overallY, L)
 
         # Create initial model with initialK and predifined y labels
-        logMessages(date(),
+        .logMessages(date(),
             ".. Initializing with",
             initialK,
             "populations",
@@ -308,7 +308,7 @@ recursiveSplitCell <- function(counts,
             }
 
             resList <- c(resList, list(tempModel))
-            logMessages(date(),
+            .logMessages(date(),
                 ".. Current cell population",
                 currentK,
                 "| logLik:",
@@ -332,7 +332,7 @@ recursiveSplitCell <- function(counts,
             stringsAsFactors = FALSE)
     } else if (!is.null(tempL)) {
         L <- tempL
-        logMessages(date(),
+        .logMessages(date(),
             ".. Collapsing to",
             L,
             "temporary modules",
@@ -350,7 +350,7 @@ recursiveSplitCell <- function(counts,
         countsY <- .rowSumByGroup(counts, tempY, L)
 
         # Create initial model with initialK
-        logMessages(date(),
+        .logMessages(date(),
             ".. Initializing with",
             initialK,
             "populations",
@@ -429,7 +429,7 @@ recursiveSplitCell <- function(counts,
             )
 
             resList <- c(resList, list(tempModel))
-            logMessages(date(),
+            .logMessages(date(),
                 ".. Current cell population",
                 currentK,
                 "| logLik:",
@@ -450,7 +450,7 @@ recursiveSplitCell <- function(counts,
         )
     } else {
         # Create initial model with initialK
-        logMessages(date(),
+        .logMessages(date(),
             ".. Initializing with",
             initialK,
             "populations",
@@ -519,7 +519,7 @@ recursiveSplitCell <- function(counts,
             }
 
             resList <- c(resList, list(tempModel))
-            logMessages(date(),
+            .logMessages(date(),
                 ".. Current cell population",
                 currentK,
                 "| logLik:",
@@ -555,7 +555,7 @@ recursiveSplitCell <- function(counts,
     )
 
     if (isTRUE(perplexity)) {
-        logMessages(date(),
+        .logMessages(date(),
             ".. Calculating perplexity",
             append = TRUE,
             verbose = verbose,
@@ -564,20 +564,20 @@ recursiveSplitCell <- function(counts,
         celdaRes <- resamplePerplexity(counts, celdaRes)
     }
     endTime <- Sys.time()
-    logMessages(
+    .logMessages(
         paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose
     )
-    logMessages(
+    .logMessages(
         "Completed recursive cell population splitting. Total time:",
         format(difftime(endTime, startTime)),
         logfile = logfile,
         append = TRUE,
         verbose = verbose
     )
-    logMessages(
+    .logMessages(
         paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
@@ -667,15 +667,15 @@ recursiveSplitModule <- function(counts,
     seed = 12345,
     verbose = TRUE,
     logfile = NULL) {
-    logMessages(paste(rep("=", 50), collapse = ""),
+    .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = FALSE,
         verbose = verbose)
-    logMessages("Starting recursive module splitting.",
+    .logMessages("Starting recursive module splitting.",
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages(paste(rep("=", 50), collapse = ""),
+    .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
@@ -692,7 +692,7 @@ recursiveSplitModule <- function(counts,
     if (!is.null(zInit)) {
         # Create collapsed module matrix
         K <- length(unique(zInit))
-        logMessages(
+        .logMessages(
             date(),
             ".. Collapsing to",
             K,
@@ -710,7 +710,7 @@ recursiveSplitModule <- function(counts,
         counts.z <- .colSumByGroup(counts, overallZ, K)
 
         # Create initial model with initialL and predifined z labels
-        logMessages(
+        .logMessages(
             date(),
             ".. Initializing with",
             initialL,
@@ -770,7 +770,7 @@ recursiveSplitModule <- function(counts,
             overallY <- tempModel@clusters$y
 
             ## Add new model to results list and increment L
-            logMessages(
+            .logMessages(
                 date(),
                 ".. Created module",
                 current.L,
@@ -798,7 +798,7 @@ recursiveSplitModule <- function(counts,
         )
     } else if (!is.null(tempK)) {
         K <- tempK
-        logMessages(
+        .logMessages(
             date(),
             ".. Collapsing to",
             K,
@@ -813,7 +813,7 @@ recursiveSplitModule <- function(counts,
             seed = seed)
         counts.z <- .colSumByGroup(counts, z, length(unique(z)))
 
-        logMessages(
+        .logMessages(
             date(),
             ".. Initializing with",
             initialL,
@@ -906,7 +906,7 @@ recursiveSplitModule <- function(counts,
             nG.by.TS <- c(nG.by.TS, 0L)
 
             ## Add new model to results list and increment L
-            logMessages(
+            .logMessages(
                 date(),
                 ".. Created module",
                 current.L,
@@ -929,7 +929,7 @@ recursiveSplitModule <- function(counts,
             stringsAsFactors = FALSE
         )
     } else {
-        logMessages(
+        .logMessages(
             date(),
             ".. Initializing with",
             initialL,
@@ -979,7 +979,7 @@ recursiveSplitModule <- function(counts,
             overallY <- tempModel@clusters$y
 
             ## Add new model to results list and increment L
-            logMessages(
+            .logMessages(
                 date(),
                 ".. Created module",
                 current.L,
@@ -1019,7 +1019,7 @@ recursiveSplitModule <- function(counts,
     )
 
     if (isTRUE(perplexity)) {
-        logMessages(
+        .logMessages(
             date(),
             ".. Calculating perplexity",
             append = TRUE,
@@ -1030,16 +1030,16 @@ recursiveSplitModule <- function(counts,
     }
 
     endTime <- Sys.time()
-    logMessages(paste(rep("=", 50), collapse = ""),
+    .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages("Completed recursive module splitting. Total time:",
+    .logMessages("Completed recursive module splitting. Total time:",
         format(difftime(endTime, startTime)),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    logMessages(paste(rep("=", 50), collapse = ""),
+    .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)

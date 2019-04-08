@@ -4,43 +4,44 @@
 \alias{differentialExpression}
 \title{Differential expression for cell subpopulations using MAST}
 \usage{
-differentialExpression(counts, celda.mod, c1, c2 = NULL,
-  only.pos = FALSE, log2fc.threshold = NULL, fdr.threshold = 1)
+differentialExpression(counts, celdaMod, c1, c2 = NULL,
+  onlyPos = FALSE, log2fcThreshold = NULL, fdrThreshold = 1)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent 
-cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_C` or `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
 
-\item{c1}{Integer vector. Cell populations to include in group 1 for the 
+\item{c1}{Integer vector. Cell populations to include in group 1 for the
 differential expression analysis.}
 
-\item{c2}{Integer vector. Cell populations to include in group 2 for the 
-differential expression analysis. If NULL, the clusters in the c1 group are 
+\item{c2}{Integer vector. Cell populations to include in group 2 for the
+differential expression analysis. If NULL, the clusters in the c1 group are
 compared to all other clusters. Default NULL.}
 
-\item{only.pos}{Logical. Whether to only return markers with positive log2 
+\item{onlyPos}{Logical. Whether to only return markers with positive log2
 fold change. Default FALSE.}
 
-\item{log2fc.threshold}{Numeric. A number greater than 0 that specifies the 
-absolute log2 fold change threshold. Only features with absolute value above 
-this threshold will be returned. If NULL, this filter will not be applied. 
-Default NULL.}
+\item{log2fcThreshold}{Numeric. A number greater than 0 that specifies the
+absolute log2 fold change threshold. Only features with absolute value
+above this threshold will be returned. If NULL, this filter will not be
+applied. Default NULL.}
 
-\item{fdr.threshold}{Numeric. A number between 0 and 1 that specifies the 
-false discovery rate (FDR) threshold. Only features below this threshold 
+\item{fdrThreshold}{Numeric. A number between 0 and 1 that specifies the
+false discovery rate (FDR) threshold. Only features below this threshold
 will be returned. Default 1.}
 }
 \value{
-Data frame containing MAST results including statistics such as 
+Data frame containing MAST results including statistics such as
  p-value, log2 fold change, and FDR.
 }
 \description{
-Uses MAST to find differentially expressed features for 
+Uses MAST to find differentially expressed features for
  specified cell subpopulations.
 }
 \examples{
-cluster.diffexp.res = differentialExpression(celda.CG.sim$counts, 
-    celda.CG.mod, c1=c(1,2))
+clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
+    celdaCGMod, c1 = c(1, 2))
 }

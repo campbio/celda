@@ -4,21 +4,25 @@
 \alias{recodeClusterZ}
 \title{Recode cell cluster labels}
 \usage{
-recodeClusterZ(celda.mod, from, to)
+recodeClusterZ(celdaMod, from, to)
 }
 \arguments{
-\item{celda.mod}{Celda object of class `celda_C` or `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
 
-\item{from}{Numeric vector. Unique values in the range of 1:K that correspond to the original cluster labels in `celda.mod`.}
+\item{from}{Numeric vector. Unique values in the range of 1:K that
+correspond to the original cluster labels in `celdaMod`.}
 
-\item{to}{Numeric vector. Unique values in the range of 1:K that correspond to the new cluster labels.}
+\item{to}{Numeric vector. Unique values in the range of 1:K that correspond
+to the new cluster labels.}
 }
 \value{
-Celda object with cell subpopulation clusters, with class corresponding to that of `celda.mod`.
+Celda object with cell subpopulation clusters, with class
+ corresponding to that of `celdaMod`.
 }
 \description{
-Recode cell subpopulaton clusters using a mapping in the `from` and `to` arguments.
+Recode cell subpopulaton clusters using a mapping in the `from`
+ and `to` arguments.
 }
 \examples{
-celda.mod.reordered.z = recodeClusterZ(celda.CG.mod, c(1, 3), c(3, 1))
+celdaMod.reordered.z <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
 }

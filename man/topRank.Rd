@@ -25,15 +25,15 @@ Default TRUE.}
 }
 \value{
 List. The `index` variable provides the top `n` row (feature) indices
- contributing the most to each column (cell). The `names` variable provides 
+ contributing the most to each column (cell). The `names` variable provides
  the rownames corresponding to these indexes.
 }
 \description{
-topRank() can quickly identify the top `n` rows for each column of a matrix.
-For example, this can be useful for identifying the top `n` features per 
-cell.
+topRank() can quickly identify the top `n` rows for each column
+ of a matrix. For example, this can be useful for identifying the top `n`
+ features per cell.
 }
 \examples{
-top.ranks.per.cell <- topRank(sample.cells, n = 5)
-top.feature.names.for.cell <- top.ranks.per.cell$names[1]
+topRanksPerCell <- topRank(sampleCells, n = 5)
+topFeatureNamesForCell <- topRanksPerCell$names[1]
 }
