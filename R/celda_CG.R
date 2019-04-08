@@ -211,20 +211,20 @@ celda_CG <- function(counts,
             if (is.null(zInit)) {
                 stop("'zInit' needs to specified when initilize.z == 'given'.")
             }
-            z <- initialize.cluster(K,
+            z <- .initializeCluster(K,
                 ncol(counts),
                 initial = zInit,
                 fixed = NULL,
                 seed = currentSeed)
         } else if (zInitialize == "split") {
-            z <- initialize.splitZ(
+            z <- .initializeSplitZ(
                 counts,
                 K = K,
                 alpha = alpha,
                 beta = beta,
                 seed = seed)
         } else {
-            z <- initialize.cluster(K,
+            z <- .initializeCluster(K,
                 ncol(counts),
                 initial = NULL,
                 fixed = NULL,
@@ -235,20 +235,20 @@ celda_CG <- function(counts,
             if (is.null(yInit)) {
                 stop("'yInit' needs to specified when initilize.y == 'given'.")
             }
-            y <- initialize.cluster(L,
+            y <- .initializeCluster(L,
                     nrow(counts),
                     initial = yInit,
                     fixed = NULL,
                     seed = currentSeed)
         } else if (yInitialize == "split") {
-            y <- initialize.splitY(counts,
+            y <- .initializeSplitY(counts,
                     L,
                     beta = beta,
                     delta = delta,
                     gamma = gamma,
                     seed = seed)
         } else {
-            y <- initialize.cluster(L,
+            y <- .initializeCluster(L,
                     nrow(counts),
                     initial = NULL,
                     fixed = NULL,

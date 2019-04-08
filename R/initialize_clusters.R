@@ -34,7 +34,7 @@
     }
 
     # Randomly sample remaining values
-    setSeed(seed)
+    .setSeed(seed)
     zNa <- which(is.na(z))
     if (length(zNa) > 0) {
         z[zNa] <- sample(zNotUsed, length(zNa), replace = TRUE)

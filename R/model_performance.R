@@ -33,7 +33,7 @@ resamplePerplexity <- function(counts,
         stop("Provided resample parameter was not numeric.")
     }
 
-    setSeed(seed)
+    .setSeed(seed)
 
     perpRes <- matrix(NA, nrow = length(celdaList@res.list), ncol = resample)
     for (j in seq(resample)) {
