@@ -13,7 +13,7 @@
                 stop("'initial' needs to be a vector of length 'len'
                     containing N unique values.")
         }
-        z <- as.numeric(as.factor(initial))
+        z <- as.integer(as.factor(initial))
     } else {
         z <- rep(NA, len)
     }
@@ -47,7 +47,7 @@
         if (ta[1] == 1) {
             stop("'len' is not long enough to accomodate 'N' unique values")
         }
-        ix <- which(z == as.numeric(names(ta))[1] & !fixedIx)
+        ix <- which(z == as.integer(names(ta))[1] & !fixedIx)
         z[sample(ix, 1)] <- i
     }
 

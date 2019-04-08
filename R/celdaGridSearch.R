@@ -269,7 +269,7 @@ subsetCeldaList <- function(celdaList, params) {
     }
 
     ## Subset 'runParams' based on items in 'params'
-    new.runParams <- celdaList@runParams
+    newRunParams <- celdaList@runParams
     for (i in names(params)) {
         newRunParams <-
             subset(newRunParams, newRunParams[, i] %in% params[[i]])

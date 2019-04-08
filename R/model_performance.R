@@ -35,11 +35,11 @@ resamplePerplexity <- function(counts,
 
     .setSeed(seed)
 
-    perpRes <- matrix(NA, nrow = length(celdaList@res.list), ncol = resample)
+    perpRes <- matrix(NA, nrow = length(celdaList@resList), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
-        for (i in seq(length(celdaList@res.list))) {
-            perpRes[i, j] <- perplexity(counts, celdaList@res.list[[i]],
+        for (i in seq(length(celdaList@resList))) {
+            perpRes[i, j] <- perplexity(counts, celdaList@resList[[i]],
               newCounts)
         }
     }
@@ -69,7 +69,7 @@ resamplePerplexity <- function(counts,
 #' @export
 plotGridSearchPerplexity <- function(celdaList, sep = 1) {
     do.call(paste0("plotGridSearchPerplexity.",
-            as.character(class(celdaList@res.list[[1]]))),
+            as.character(class(celdaList@resList[[1]]))),
         args = list(celdaList, sep))
 }
 
@@ -249,7 +249,7 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
 # then samples across all cells.
 # This is primarily used to evaluate the stability of the perplexity for
 # a given K/L combination.
-# @param celda.mod A single celda run (usually from the _res.list_ property
+# @param celda.mod A single celda run (usually from the _resList_ property
 # of a celdaList).
 # @return The perplexity for the provided chain as an mpfr number.
 .resampleCountMatrix <- function(countMatrix) {
@@ -259,7 +259,6 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
         stats::rmultinom(n = 1,
             size = colsums[idx],
             prob = prob[, idx])
-        },
-        numeric(nrow(countMatrix)))
+        }, integer(nrow(countMatrix)))
     return(resample)
 }

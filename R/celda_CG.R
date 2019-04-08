@@ -175,7 +175,7 @@ celda_CG <- function(counts,
     algorithm <- match.arg(algorithm)
     algorithmFun <- ifelse(algorithm == "Gibbs",
         ".cCCalcGibbsProbZ",
-        "cC.calcEMProbZ")
+        ".cCCalcEMProbZ")
     zInitialize <- match.arg(zInitialize)
     yInitialize <- match.arg(yInitialize)
 
@@ -533,8 +533,8 @@ celda_CG <- function(counts,
     ## Peform reordering on final Z and Y assigments:
     bestResult <- methods::new("celda_CG",
         clusters = list(z = zBest, y = yBest),
-        params = list(K = K,
-            L = L,
+        params = list(K = as.integer(K),
+            L = as.integer(L),
             alpha = alpha,
             beta = beta,
             delta = delta,
@@ -664,7 +664,7 @@ simulateCells.celda_CG <- function(model,
     ## Select transcript distribution for each cell
     cellCounts <- matrix(0, nrow = G, ncol = nCSum)
     for (i in seq(nCSum)) {
-        transcriptionalStateDist <- as.numeric(stats::rmultinom(1,
+        transcriptionalStateDist <- as.integer(stats::rmultinom(1,
             size = nN[i], prob = phi[z[i], ]))
         for (j in seq(L)) {
             if (transcriptionalStateDist[j] > 0) {
@@ -698,8 +698,8 @@ simulateCells.celda_CG <- function(model,
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_CG",
         clusters = list(z = z, y = y),
-        params = list(K = K,
-            L = L,
+        params = list(K = as.integer(K),
+            L = as.integer(L),
             alpha = alpha,
             beta = beta,
             delta = delta,

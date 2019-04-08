@@ -208,6 +208,7 @@
     zSplit <- matrix(NA,
         nrow = length(z),
         ncol = length(zToSplit) * maxClustersToTry)
+    zSplitLl = rep(NA, ncol = length(zToSplit) * maxClustersToTry)
     zSplitLl[1] <- .cCGCalcLL(K,
         L,
         mCPByS,
@@ -423,6 +424,7 @@
     ySplit <- matrix(NA,
         nrow = length(y),
         ncol = length(yToSplit) * maxClustersToTry)
+    ySplitLl = rep(NA, ncol = length(yToSplit) * maxClustersToTry)
     ySplitLl[1] <- .cCGCalcLL(K,
         L,
         mCPByS,

@@ -387,7 +387,7 @@ plotDimReduceCluster <-function(dim1,
 # @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
 # @param seed Integer. Seed for random number generation. Defaults to 12345.
 # If NULL, no calls to `set.seed()` are made.
-# @param doPCA Logical. Whether to perform
+# @param doPca Logical. Whether to perform
 # dimensionality reduction with PCA before tSNE.
 # @param initialDims Integer.Number of dimensions from PCA to use as
 # input in tSNE.
@@ -395,13 +395,13 @@ plotDimReduceCluster <-function(dim1,
     perplexity = 20,
     maxIter = 2500,
     seed = 12345,
-    doPCA = FALSE,
+    doPca = FALSE,
     initialDims = 20) {
 
     .setSeed(seed)
     res <- Rtsne::Rtsne(
         norm,
-        pca = doPCA,
+        pca = doPca,
         max_iter = maxIter,
         perplexity = perplexity,
         check_duplicates = FALSE,

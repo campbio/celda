@@ -188,7 +188,7 @@ recursiveSplitCell <- function(counts,
 
     startTime <- Sys.time()
     counts <- .processCounts(counts)
-    countChecksum <- .processCounts(counts)
+    countChecksum <- .createCountChecksum(counts)
 
     sampleLabel <- .processSampleLabels(sampleLabel, numCells = ncol(counts))
     s <- as.integer(sampleLabel)
@@ -543,7 +543,7 @@ recursiveSplitCell <- function(counts,
     # Summarize paramters of different models
     logliks <- vapply(resList, function(mod) {
         mod@finalLogLik
-    }, integer(1))
+    }, double(1))
     runParams <- data.frame(runParams,
         log_likelihood = logliks,
         stringsAsFactors = FALSE)
@@ -682,7 +682,7 @@ recursiveSplitModule <- function(counts,
     startTime <- Sys.time()
 
     counts <- .processCounts(counts)
-    countChecksum <- .processCounts(counts)
+    countChecksum <- .createCountChecksum(counts)
     names <-
         list(row = rownames(counts), column = colnames(counts))
     sampleLabel <- .processSampleLabels(sampleLabel,
