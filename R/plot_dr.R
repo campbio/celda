@@ -22,11 +22,11 @@
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
-#'     celdaMod = celda.CG.mod)
-#' plotDimReduceGrid(celda.tsne[, 1],
-#'     celda.tsne[, 2],
-#'     matrix = celda.CG.sim$counts,
+#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
+#'     celdaMod = celdaCGMod)
+#' plotDimReduceGrid(celdaTsne[, 1],
+#'     celdaTsne[, 2],
+#'     matrix = celdaCGSim$counts,
 #'     xlab = "Dimension1",
 #'     ylab = "Dimension 2",
 #'     varLabel = "tsne",
@@ -46,9 +46,10 @@ plotDimReduceGrid <- function(dim1,
     colorMid,
     colorHigh,
     varLabel) {
+
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
-    na.ix <- is.na(dim1) | is.na(dim2)
-    df <- df[!na.ix,]
+    naIx <- is.na(dim1) | is.na(dim2)
+    df <- df[!naIx,]
 
     m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
     colnames(m) <- c(xlab, ylab, "facet", varLabel)
@@ -72,6 +73,7 @@ plotDimReduceGrid <- function(dim1,
             panel.background = ggplot2::element_blank(),
             axis.line = ggplot2::element_line(colour = "black"))
     }
+
 
 #' @title Plotting feature expression on a dimensionality reduction plot
 #' @description Create a scatterplot for each row of a normalized gene
@@ -105,11 +107,11 @@ plotDimReduceGrid <- function(dim1,
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
-#'     celdaMod = celda.CG.mod)
-#' plotDimReduceFeature(dim1 = celda.tsne[, 1],
-#'     dim2 = celda.tsne[, 2],
-#'     counts = celda.CG.sim$counts,
+#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
+#'     celdaMod = celdaCGMod)
+#' plotDimReduceFeature(dim1 = celdaTsne[, 1],
+#'     dim2 = celdaTsne[, 2],
+#'     counts = celdaCGSim$counts,
 #'     features = c("Gene_99"),
 #'     exactMatch = TRUE)
 #' }
@@ -129,8 +131,8 @@ plotDimReduceFeature <- function(dim1,
     colorHigh = "blue") {
     if (isTRUE(normalize)) {
         counts <- normalizeCounts(counts,
-                transformation.fun = sqrt,
-                scale.fun = base::scale)
+                transformationFun = sqrt,
+                scaleFun = base::scale)
     }
 
     if (is.null(features)) {
@@ -149,24 +151,24 @@ plotDimReduceFeature <- function(dim1,
 
     varLabel <- "Expression"
     if (!isTRUE(exactMatch)) {
-        features.indices <- c()
-        not.found <- c()
+        featuresIndices <- c()
+        notFound <- c()
         for (gene in features) {
-            features.indices <-
-                c(features.indices, grep(gene, rownames(counts)))
+            featuresIndices <-
+                c(featuresIndices, grep(gene, rownames(counts)))
             if (length(grep(gene, rownames(counts))) == 0) {
-                not.found <- c(not.found, gene)
+                notFound <- c(notFound, gene)
             }
         }
-        counts <- counts[features.indices, , drop = FALSE]
-        if (length(not.found) > 0) {
-            if (length(not.found) == length(features)) {
+        counts <- counts[featuresIndices, , drop = FALSE]
+        if (length(notFound) > 0) {
+            if (length(notFound) == length(features)) {
                 stop("None of the provided features had
                     matching rownames in the provided counts matrix.")
             }
             warning(paste0("The following features were not
                         present in the provided count matrix: ",
-                        paste(not.found,
+                        paste(notFound,
                             sep = "",
                             collapse = ",")))
         }
@@ -184,8 +186,8 @@ plotDimReduceFeature <- function(dim1,
                         sep = "",
                         collapse = ",")))
         }
-        features.found <- setdiff(features, featuresNotFound)
-        counts <- counts[features.found, , drop = FALSE]
+        featuresFound <- setdiff(features, featuresNotFound)
+        counts <- counts[featuresFound, , drop = FALSE]
     }
     plotDimReduceGrid(dim1,
         dim2,
@@ -198,6 +200,7 @@ plotDimReduceFeature <- function(dim1,
         colorHigh,
         varLabel)
     }
+
 
 #' @title Plotting the Celda module probability on a
 #'  dimensionality reduction plot
@@ -230,12 +233,12 @@ plotDimReduceFeature <- function(dim1,
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
-#'     celdaMod = celda.CG.mod)
+#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
+#'     celdaMod = celdaCGMod)
 #' plotDimReduceModule(
-#'   dim1 = celda.tsne[, 1], dim2 = celda.tsne[, 2],
-#'   counts = celda.CG.sim$counts, celdaMod = celda.CG.mod,
-#'   modules = c("L1", "L2"))
+#'     dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
+#'     counts = celdaCGSim$counts, celdaMod = celdaCGMod,
+#'     modules = c("L1", "L2"))
 #' }
 #' @export
 plotDimReduceModule <-
@@ -289,6 +292,7 @@ plotDimReduceModule <-
             varLabel)
     }
 
+
 # Labeling code adapted from Seurat (https://github.com/satijalab/seurat)
 #' @title Plotting the cell labels on a dimensionality reduction plot
 #' @description Create a scatterplot for each row of a normalized
@@ -314,11 +318,11 @@ plotDimReduceModule <-
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
-#' celda.tsne <- celdaTsne(counts = celda.CG.sim$counts,
-#'     celdaMod = celda.CG.mod)
-#' plotDimReduceCluster(dim1 = celda.tsne[, 1],
-#'     dim2 = celda.tsne[, 2],
-#'     cluster = as.factor(z(celda.CG.mod)),
+#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
+#'     celdaMod = celdaCGMod)
+#' plotDimReduceCluster(dim1 = celdaTsne[, 1],
+#'     dim2 = celdaTsne[, 2],
+#'     cluster = as.factor(z(celdaCGMod)),
 #'     specificClusters = c(1, 2, 3))
 #' }
 #' @export
@@ -333,8 +337,8 @@ plotDimReduceCluster <-function(dim1,
     labelSize = 3.5) {
     df <- data.frame(dim1, dim2, cluster)
     colnames(df) <- c(xlab, ylab, "Cluster")
-    na.ix <- is.na(dim1) | is.na(dim2)
-    df <- df[!na.ix,]
+    naIx <- is.na(dim1) | is.na(dim2)
+    df <- df[!naIx, ]
     df[3] <- as.factor(df[[3]])
     clusterColors <- distinctColors(nlevels(as.factor(cluster)))
     if (!is.null(specificClusters)) {
@@ -376,6 +380,7 @@ plotDimReduceCluster <-function(dim1,
         return(g)
     }
 
+
 # Run the t-SNE algorithm for dimensionality reduction
 # @param norm Normalized count matrix.
 # @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
@@ -393,7 +398,7 @@ plotDimReduceCluster <-function(dim1,
     doPCA = FALSE,
     initialDims = 20) {
 
-        setSeed(seed)
+        .setSeed(seed)
         res <- Rtsne::Rtsne(
             norm,
             pca = doPCA,
@@ -405,6 +410,7 @@ plotDimReduceCluster <-function(dim1,
 
         return(res)
     }
+
 
 # Run the umap algorithm for dimensionality reduction
 # @param norm Normalized count matrix.
