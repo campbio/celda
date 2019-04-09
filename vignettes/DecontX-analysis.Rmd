@@ -72,5 +72,3 @@ plot(decontxModel$resList$estConp,
     colSums(contamination) / simCounts$NByC, col = simCounts$z)
 abline(0, 1)
 ```
-
-
