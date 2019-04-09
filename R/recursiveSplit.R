@@ -25,8 +25,7 @@
             ix <- z == i
             newZ <- z
             newZ[ix] <- ifelse(clustLabel@clusters$z == 2, i, K)
-            ll <-
-                logLikelihood.celda_C(counts, s, newZ, K, alpha, beta)
+            ll <- logLikelihood.celda_C(counts, s, newZ, K, alpha, beta)
 
             if (ll > bestLl) {
                 bestZ <- newZ
@@ -220,8 +219,8 @@ recursiveSplitCell <- function(counts,
             logfile = logfile)
         modelInitial <- .celda_CG(counts,
             sampleLabel = s,
-            K = initialK,
-            L = L,
+            K = as.integer(initialK),
+            L = as.integer(L),
             zInitialize = "split",
             yInitialize = "predefined",
             nchains = 1,
@@ -249,8 +248,8 @@ recursiveSplitCell <- function(counts,
             )
             tempModel <- .celda_CG(counts,
                 sampleLabel = s,
-                K = currentK,
-                L = L,
+                K = as.integer(currentK),
+                L = as.integer(L),
                 yInit = overallY,
                 zInit = tempSplit$z,
                 nchains = 1,
@@ -270,7 +269,7 @@ recursiveSplitCell <- function(counts,
             # Calculate new decomposed counts matrix with new module labels
             # overallY = tempModel@clusters$y
             # p = .cGReDecomposeCounts(counts, overallY, previousY, countsY,
-            # nByG, L = L)
+            # nByG, L = as.integer(L))
             # countsY = p$nTSByC
 
             # If the number of clusters is still "currentK", then keep the
@@ -292,8 +291,8 @@ recursiveSplitCell <- function(counts,
                 )
                 tempModel <- methods::new("celda_CG",
                     clusters = list(z = overallZ, y = tempModel@clusters$y),
-                    params = list(K = currentK,
-                        L = L,
+                    params = list(K = as.integer(currentK),
+                        L = as.integer(L),
                         alpha = alpha,
                         beta = beta,
                         delta = delta,
@@ -327,8 +326,8 @@ recursiveSplitCell <- function(counts,
             mod@params$L
         }, integer(1))
         runParams <- data.frame(index = seq.int(1, length(resList)),
-            L = runL,
-            K = runK,
+            L = as.integer(runL),
+            K = as.integer(runK),
             stringsAsFactors = FALSE)
     } else if (!is.null(tempL)) {
         L <- tempL
@@ -341,7 +340,7 @@ recursiveSplitCell <- function(counts,
             logfile = logfile
         )
         tempY <- .initializeSplitY(counts,
-            L = L,
+            L = as.integer(L),
             tempK = max(100, maxK),
             minFeature = 3,
             seed = seed)
@@ -360,7 +359,7 @@ recursiveSplitCell <- function(counts,
         )
         modelInitial <- .celda_C(countsY,
             sampleLabel = s,
-            K = initialK,
+            K = as.integer(initialK),
             zInitialize = "split",
             nchains = 1,
             alpha = alpha,
@@ -391,7 +390,7 @@ recursiveSplitCell <- function(counts,
             )
             tempModel <- .celda_C(countsY,
                 sampleLabel = s,
-                K = currentK,
+                K = as.integer(currentK),
                 nchains = 1,
                 zInitialize = "random",
                 alpha = alpha,
@@ -417,7 +416,7 @@ recursiveSplitCell <- function(counts,
                 alpha, beta)
             tempModel <- methods::new("celda_C",
                 clusters = list(z = overallZ),
-                params = list(K = currentK,
+                params = list(K = as.integer(currentK),
                     alpha = alpha,
                     beta = beta,
                     seed = seed,
@@ -445,7 +444,7 @@ recursiveSplitCell <- function(counts,
             mod@params$K
         }, integer(1))
         runParams <- data.frame(index = seq.int(1, length(resList)),
-            K = runK,
+            K = as.integer(runK),
             stringsAsFactors = FALSE
         )
     } else {
@@ -460,7 +459,7 @@ recursiveSplitCell <- function(counts,
         )
         modelInitial <- .celda_C(counts,
             sampleLabel = s,
-            K = initialK,
+            K = as.integer(initialK),
             zInitialize = "split",
             nchains = 1,
             alpha = alpha,
@@ -484,7 +483,7 @@ recursiveSplitCell <- function(counts,
             )
             tempModel <- .celda_C(counts,
                 sampleLabel = s,
-                K = currentK,
+                K = as.integer(currentK),
                 nchains = 1,
                 zInitialize = "random",
                 alpha = alpha,
@@ -506,7 +505,7 @@ recursiveSplitCell <- function(counts,
                         currentK, alpha, beta)
                 tempModel <- methods::new("celda_C",
                     clusters = list(z = overallZ),
-                    params = list(K = currentK,
+                    params = list(K = as.integer(currentK),
                         alpha = alpha,
                         beta = beta,
                         seed = seed,
@@ -535,7 +534,7 @@ recursiveSplitCell <- function(counts,
             mod@params$K
         }, integer(1))
         runParams <- data.frame(index = seq.int(1, length(resList)),
-            K = runK,
+            K = as.integer(runK),
             stringsAsFactors = FALSE
         )
     }
@@ -701,26 +700,21 @@ recursiveSplitModule <- function(counts,
             verbose = verbose,
             logfile = logfile
         )
-        overallZ <- .initializeCluster(
-            N = K,
+        overallZ <- .initializeCluster(N = K,
             len = ncol(counts),
             initial = zInit,
-            seed = seed
-        )
+            seed = seed)
         countsZ <- .colSumByGroup(counts, overallZ, K)
 
         # Create initial model with initialL and predifined z labels
-        .logMessages(
-            date(),
+        .logMessages(date(),
             ".. Initializing with",
             initialL,
             "modules",
             append = TRUE,
             verbose = verbose,
-            logfile = logfile
-        )
-        modelInitial <- .celda_CG(
-            counts,
+            logfile = logfile)
+        modelInitial <- .celda_CG(counts,
             sampleLabel = s,
             L = initialL,
             K = K,
@@ -734,8 +728,7 @@ recursiveSplitModule <- function(counts,
             delta = delta,
             verbose = FALSE,
             seed = seed,
-            reorder = reorder
-        )
+            reorder = reorder)
         currentL <- length(unique(modelInitial@clusters$y)) + 1
         overallY <- modelInitial@clusters$y
 
@@ -784,12 +777,12 @@ recursiveSplitModule <- function(counts,
             currentL <- currentL + 1
         }
 
-        runK <- sapply(resList, function(mod) {
+        runK <- vapply(resList, function(mod) {
             mod@params$K
-        })
-        runL <- sapply(resList, function(mod) {
+        }, integer(1))
+        runL <- vapply(resList, function(mod) {
             mod@params$L
-        })
+        }, integer(1))
         runParams <- data.frame(
             index = seq.int(1, length(resList)),
             L = runL,
@@ -920,9 +913,9 @@ recursiveSplitModule <- function(counts,
             currentL <- currentL + 1
         }
 
-        runL <- sapply(resList, function(mod) {
+        runL <- vapply(resList, function(mod) {
             mod@params$L
-        })
+        }, integer(1))
         runParams <- data.frame(
             index = seq.int(1, length(resList)),
             L = runL,
@@ -993,9 +986,9 @@ recursiveSplitModule <- function(counts,
             currentL <- currentL + 1
         }
 
-        runL <- sapply(resList, function(mod) {
+        runL <- vapply(resList, function(mod) {
             mod@params$L
-        })
+        }, integer(1))
         runParams <- data.frame(
             index = seq.int(1, length(resList)),
             L = runL,
@@ -1004,9 +997,9 @@ recursiveSplitModule <- function(counts,
     }
 
     ## Summarize paramters of different models
-    logliks <- sapply(resList, function(mod) {
+    logliks <- vapply(resList, function(mod) {
         mod@finalLogLik
-    })
+    }, double(1))
     runParams <- data.frame(runParams,
         log_likelihood = logliks,
         stringsAsFactors = FALSE)

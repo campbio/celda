@@ -588,12 +588,11 @@ simulateCells.celda_C <- function(model,
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_C",
         clusters = list(z = z),
-        params = list(
+        params = list(K = as.integer(K),
             alpha = alpha,
             beta = beta,
             seed = seed,
-            countChecksum = countChecksum,
-            K = K),
+            countChecksum = countChecksum),
         sampleLabel = cellSampleLabel,
         names = names)
     class(result) <- "celda_C"
