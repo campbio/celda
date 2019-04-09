@@ -52,9 +52,9 @@ test_that(desc = "Testing clusterProbability with celda_CG", {
 
     clustProb <- clusterProbability(counts = celdaCGSim$counts,
         modelCG, log = TRUE)
-    expect_true(all(round(rowSums(normalizeLogProbs(clustProb$zProbability)),
+    expect_true(all(round(rowSums(.normalizeLogProbs(clustProb$zProbability)),
         10) == 1) & nrow(clustProb$zProbability) == ncol(celdaCGSim$counts))
-    expect_true(all(round(rowSums(normalizeLogProbs(clustProb$yProbability)),
+    expect_true(all(round(rowSums(.normalizeLogProbs(clustProb$yProbability)),
         10) == 1) & nrow(clustProb$yProbability) == nrow(celdaCGSim$counts))
 })
 
@@ -228,8 +228,8 @@ test_that(desc = "Testing normalizeCounts with celda_CG", {
     expect_equal(rownames(normCounts), rownames(celdaCGSim$counts))
     expect_equal(colnames(normCounts), colnames(celdaCGSim$counts))
     expect_error(normalizeCounts(celdaCGSim$counts,
-        transformation.fun = "scale"),
-        "'transformation.fun' needs to be of class 'function'")
+        transformationFun = "scale"),
+        "'transformationFun' needs to be of class 'function'")
     expect_error(normalizeCounts(celdaCGSim$counts, scaleFun = "scale"),
         "'scaleFun' needs to be of class 'function'")
 })
@@ -272,11 +272,11 @@ test_that(desc = "Testing recodeClusterZ with celda_CG", {
 test_that(desc = "Testing CompareCountMatrix with celda_CG", {
     expect_true(compareCountMatrix(counts = celdaCGSim$counts,
         celdaMod = modelCG))
-    lessFeatures <- celdaCGSim$counts[1:50, ]
+    lessFeatures <- celdaCGSim$counts[seq(50), ]
     expect_error(compareCountMatrix(counts = lessFeatures, celdaMod = modelCG),
         paste0("The provided celda object was generated from a counts matrix",
             " with a different number of features than the one provided."))
-    lessCells <- celdaCGSim$counts[, 1:100]
+    lessCells <- celdaCGSim$counts[, seq(100)]
     expect_error(compareCountMatrix(counts = lessCells, celdaMod = modelCG),
         paste0("The provided celda object was generated from a counts matrix",
             " with a different number of cells than the one provided."))

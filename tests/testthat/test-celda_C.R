@@ -164,10 +164,10 @@ test_that(desc = paste0("Making sure normalizeCounts doesn't change dimensions",
         expect_equal(rownames(normCounts), rownames(celdaCCim$counts))
         expect_equal(colnames(normCounts), colnames(celdaCCim$counts))
         expect_error(normalizeCounts(celdaCCim$counts,
-            transformation.fun = "scale"),
-            "'transformation.fun' needs to be of class 'function'")
-        expect_error(normalizeCounts(celdaCCim$counts, scale.fun = "scale"),
-            "'scale.fun' needs to be of class 'function'")
+            transformationFun = "scale"),
+            "'transformationFun' needs to be of class 'function'")
+        expect_error(normalizeCounts(celdaCCim$counts, scaleFun = "scale"),
+            "'scaleFun' needs to be of class 'function'")
     })
 
 # recodeClusterZ
@@ -424,7 +424,7 @@ test_that(desc = "Testing error checking for .cCSplitZ", {
         alpha = 1,
         beta = 1,
         zProb = NULL,
-        min.cell = 1000)
+        minCell = 1000)
     expect_true(grepl("Cluster sizes too small", res$message))
 })
 

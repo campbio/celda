@@ -198,17 +198,17 @@ compareCountMatrix <- function(counts,
 
     if ("y" %in% names(celdaMod@clusters)) {
         if (nrow(counts) != length(celdaMod@clusters$y)) {
-            stop("The provided celda object was generated from a counts
-                matrix with a different number of features than the one
-                provided.")
+            stop("The provided celda object was generated from a counts",
+                " matrix with a different number of features than the one",
+                " provided.")
         }
     }
 
     if ("z" %in% names(celdaMod@clusters)) {
         if (ncol(counts) != length(celdaMod@clusters$z)) {
-            stop("The provided celda object was generated from a counts
-                matrix with a different number of cells than the one
-                provided.")
+            stop("The provided celda object was generated from a counts",
+                " matrix with a different number of cells than the one",
+                " provided.")
         }
     }
     celdaChecksum <- celdaMod@params$countChecksum
@@ -219,8 +219,8 @@ compareCountMatrix <- function(counts,
     if (res)
         return(TRUE)
     if (!res && errorOnMismatch) {
-        stop("There was a mismatch between the provided count matrix and
-            the count matrix used to generate the provided celda result.")
+        stop("There was a mismatch between the provided count matrix and",
+            " the count matrix used to generate the provided celda result.")
     } else if (!res && !errorOnMismatch)
         return(FALSE)
 }
@@ -235,8 +235,8 @@ compareCountMatrix <- function(counts,
     if (isTRUE(verbose)) {
         if (!is.null(logfile)) {
             if (!is.character(logfile) || length(logfile) > 1) {
-                stop("The log file parameter needs to be a single character
-                    string.")
+                stop("The log file parameter needs to be a single character",
+                    " string.")
             }
             cat(paste(..., "\n", sep = sep),
                 file = logfile,
@@ -276,8 +276,8 @@ distinctColors <- function(n,
     valueRange = c(0.7, 1)) {
 
     if (!(all(hues %in% grDevices::colors()))) {
-        stop("Only color names listed in the 'color' function can be used in
-            'hues'")
+        stop("Only color names listed in the 'color' function can be used in",
+            " 'hues'")
     }
     # Convert R colors to RGB and then to HSV color format
     huesHsv <- grDevices::rgb2hsv(grDevices::col2rgb(hues))
@@ -320,8 +320,8 @@ distinctColors <- function(n,
     countRowSum <- rowSums(counts)
     countColSum <- colSums(counts)
     if (sum(countRowSum == 0) > 1 | sum(countColSum == 0) > 1) {
-        stop("Each row and column of the count matrix must have at least
-            one count")
+        stop("Each row and column of the count matrix must have at least",
+            " one count")
     }
 }
 
