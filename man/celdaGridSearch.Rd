@@ -69,7 +69,7 @@ celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
     bestOnly = TRUE,
     nchains = 1,
-    cores = 4)
+    cores = 2)
 }
 \seealso{
 `celda_G()` for feature clustering, `celda_C()` for clustering of

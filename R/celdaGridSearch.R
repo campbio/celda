@@ -51,7 +51,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
 #'     bestOnly = TRUE,
 #'     nchains = 1,
-#'     cores = 4)
+#'     cores = 2)
 #' @import foreach
 #' @export
 celdaGridSearch <- function(counts,

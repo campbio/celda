@@ -18,6 +18,6 @@ celdaCGGridSearchRes = celdaGridSearch(celdaCGSim$counts,
     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
     bestOnly = TRUE,
     nchains = 1,
-    cores = 4)
+    cores = 2)
 }
 \keyword{datasets}

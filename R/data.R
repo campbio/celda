@@ -1,4 +1,4 @@
-#' A toy count matrix for use with celda. 
+#' A toy count matrix for use with celda.
 #'
 #' @title sampleCells
 #' @description A matrix of simulated gene counts.
@@ -9,18 +9,18 @@
 "sampleCells"
 
 #' An example simulated count matrix from the celda_CG model.
-#' 
+#'
 #' @title celdaCGSim
 #' @format A list of counts and properties as returned from simulateCells().
-#' @examples 
+#' @examples
 #' celdaCGSim = simulateCells("celda_CG")
 "celdaCGSim"
 
 #' celda_CG results generated from celdaCGSim
-#' 
+#'
 #' @title celdaCGmod
 #' @format A celda_CG object
-#' @examples 
+#' @examples
 #' celdaCGMod = celda_CG(celdaCGSim$counts,
 #'     K = celdaCGSim$K,
 #'     L = celdaCGSim$L,
@@ -37,39 +37,39 @@
 #'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
 #'     bestOnly = TRUE,
 #'     nchains = 1,
-#'     cores = 4)
+#'     cores = 2)
 "celdaCGGridSearchRes"
 
 
 #' An example simulated count matrix from the celda_C model.
-#' 
+#'
 #' @title celdaCSim
 #' @format A list of counts and properties as returned from simulateCells().
-#' @examples 
+#' @examples
 #' celdaCSim = simulateCells("celda_C")
 "celdaCSim"
 
 #' celda_C results generated from celdaCSim
-#' 
+#'
 #' @title celdaCMod
 #' @format A celda_C object
-#' @examples 
+#' @examples
 #' celdaCMod = celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
 "celdaCMod"
 
 #' An example simulated count matrix from the celda_G model.
-#' 
+#'
 #' @title celdaGSim
 #' @format A list of counts and properties as returned from simulateCells()
-#' @examples 
+#' @examples
 #' celdaGSim = simulateCells("celda_G")
 "celdaGSim"
 
 #' celda_G results generated from celdaGsim
-#' 
+#'
 #' @title celdaGMod
 #' @format A celda_G object
-#' @examples 
+#' @examples
 #' celdaGMod = celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 "celdaGMod"
 
