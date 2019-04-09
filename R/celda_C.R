@@ -50,7 +50,7 @@
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of K and multiple chains in parallel.
 #' @examples
-#' celdaMod <- celda_C(celdaCSim$counts,
+#' celdaCMod <- celda_C(celdaCSim$counts,
 #'     K = celdaCSim$K,
 #'     sampleLabel = celdaCSim$sampleLabel)
 #' @import Rcpp RcppEigen
@@ -357,7 +357,7 @@ celda_C <- function(counts,
 
     bestResult <- methods::new("celda_C",
         clusters = list(z = bestResult$z),
-        params = list(K = bestResult$K,
+        params = list(K = as.integer(bestResult$K),
             alpha = bestResult$alpha,
             beta = bestResult$beta,
             countChecksum = bestResult$countChecksum,
@@ -447,7 +447,7 @@ celda_C <- function(counts,
         ## Sample next state and add back counts
         prevZ <- z[i]
         if (isTRUE(doSample))
-            z[i] <- sample.ll(probs[, i])
+            z[i] <- .sampleLl(probs[, i])
 
         if (prevZ != z[i]) {
             nGByCP[, prevZ] <- nGByCP[, prevZ] - counts[, i]
@@ -534,7 +534,7 @@ celda_C <- function(counts,
 #'  simulating feature modules and cell populations.
 #' @examples
 #' celdaCSim <- simulateCells(model = "celda_C", K = 10)
-#' sim.counts <- celdaCSim$counts
+#' simCounts <- celdaCSim$counts
 #' @export
 simulateCells.celda_C <- function(model,
     S = 5,
@@ -549,8 +549,8 @@ simulateCells.celda_C <- function(model,
 
     .setSeed(seed)
 
-    phi <- rdirichlet(K, rep(beta, G))
-    theta <- rdirichlet(S, rep(alpha, K))
+    phi <- .rdirichlet(K, rep(beta, G))
+    theta <- .rdirichlet(S, rep(alpha, K))
 
     ## Select the number of cells per sample
     nC <- sample(seq(CRange[1], CRange[2]), size = S, replace = TRUE)
@@ -588,12 +588,11 @@ simulateCells.celda_C <- function(model,
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_C",
         clusters = list(z = z),
-        params = list(
+        params = list(K = as.integer(K),
             alpha = alpha,
             beta = beta,
             seed = seed,
-            countChecksum = countChecksum,
-            K = K),
+            countChecksum = countChecksum),
         sampleLabel = cellSampleLabel,
         names = names)
     class(result) <- "celda_C"
@@ -743,7 +742,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
-#' loglik <- logLikelihoodCeldaC(celdaCSim$counts,
+#' loglik <- logLikelihood.celda_C(celdaCSim$counts,
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     z = celdaCSim$z,
 #'     K = celdaCSim$K,
@@ -758,7 +757,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #'     alpha = celdaCSim$alpha,
 #'     beta = celdaCSim$beta)
 #' @export
-logLikelihoodCeldaC <- function(counts, sampleLabel, z, K, alpha, beta) {
+logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 
     if (sum(z > K) > 0) {
         stop("An entry in z contains a value greater than the provided K.")
@@ -868,7 +867,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_C"),
         zProb <- t(nextZ$probs)
 
         if (!isTRUE(log)) {
-            zProb <- normalizeLogProbs(zProb)
+            zProb <- .normalizeLogProbs(zProb)
         }
 
         return(list(zProbability = zProb))
@@ -988,7 +987,6 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 #'  Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
 #'  to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression
 #' @examples
@@ -1004,8 +1002,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
-        seed = 12345,
-        ...) {
+        seed = 12345) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
             celdaMod,
@@ -1013,7 +1010,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
             minClusterSize,
             modules)
 
-        res <- calculateTsne(preparedCountInfo$norm,
+        res <- .calculateTsne(preparedCountInfo$norm,
             perplexity = perplexity,
             maxIter = maxIter,
             seed = seed,
@@ -1065,7 +1062,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
             maxCells,
             minClusterSize,
             modules)
-        res <- calculateUmap(preparedCountInfo$norm, umapConfig)
+        res <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
         final[preparedCountInfo$cellIx,] <- res
         rownames(final) <- colnames(counts)
@@ -1185,7 +1182,7 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_C"),
             sampNorm <- normalizeCounts(samp,
                 normalize = "proportion",
                 transformationFun = sqrt,
-                scale.fun = base::scale)
+                scaleFun = base::scale)
             g2 <- plotHeatmap(sampNorm,
                 colorScheme = "divergent",
                 clusterCell = FALSE,

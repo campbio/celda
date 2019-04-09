@@ -305,7 +305,7 @@ The `resamplePerplexity` function "perturbs" the original counts matrix by resam
 
 ```{r, eval = TRUE, message = FALSE}
 cgs <- celdaGridSearch(simCounts$counts,
-    params.test = list(K = seq(4, 6), L = seq(9, 11)),
+    paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
     cores = 4,
     model = "celda_CG",
     nchains = 2,
@@ -338,7 +338,7 @@ If the "bestOnly" parameter is set to FALSE in the `celdaGridSearch`, then the `
 
 ```{r, message=FALSE}
 cgs <- celdaGridSearch(simCounts$counts,
-    params.test = list(K = seq(4, 6), L = seq(9, 11)),
+    paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
     cores = 4,
     model = "celda_CG",
     nchains = 2,

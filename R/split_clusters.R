@@ -208,6 +208,7 @@
     zSplit <- matrix(NA,
         nrow = length(z),
         ncol = length(zToSplit) * maxClustersToTry)
+    zSplitLl = rep(NA, ncol = length(zToSplit) * maxClustersToTry)
     zSplitLl[1] <- .cCGCalcLL(K,
         L,
         mCPByS,
@@ -380,7 +381,7 @@
     }
 
     ## Decompose counts according to new/temp z labels
-    tempNGByCP <- colSumByGroup(counts, group = tempZ, K = currentTopZ)
+    tempNGByCP <- .colSumByGroup(counts, group = tempZ, K = currentTopZ)
 
     #########################
     ## Second, different y splits will be estimated and tested
@@ -423,6 +424,7 @@
     ySplit <- matrix(NA,
         nrow = length(y),
         ncol = length(yToSplit) * maxClustersToTry)
+    ySplitLl = rep(NA, ncol = length(yToSplit) * maxClustersToTry)
     ySplitLl[1] <- .cCGCalcLL(K,
         L,
         mCPByS,

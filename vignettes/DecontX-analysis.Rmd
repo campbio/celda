@@ -59,8 +59,8 @@ DecontX uses bayesian method to estimate and remove contamination via varitaiona
 decontxModel <- decontX(counts = simCounts$observedCounts, z = simCounts$z)
 ```
 
-## Check convergance
-Use log-likelihood to check converagance 
+## Check convergence
+Use log-likelihood to check convergence 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
 plot(decontxModel$resList$logLikelihood)
 ```

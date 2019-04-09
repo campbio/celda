@@ -1257,29 +1257,6 @@ vplayout <- function(x, y) {
     }
 
 
-kmeansPheatmap <- function(mat,
-    k = min(nrow(mat), 150),
-    sdLimit = NA,
-    ...) {
-
-    # Filter data
-    if (!is.na(sdLimit)) {
-        s <- base::apply(mat, 1, stats::sd)
-        mat <- mat[s > sdLimit, ]
-    }
-
-    # Cluster data
-    km <- stats::kmeans(mat, k, iter.max = 100)
-    mat2 <- km$centers
-
-    # Compose rownames
-    t <- table(km$cluster)
-    rownames(mat2) <- sprintf("cl%s_size_%d", names(t), t)
-
-    # Draw heatmap
-    pheatmap::pheatmap(mat2, ...)
-}
-
 .findGaps <- function(tree, cutreeN) {
     v <- stats::cutree(tree, cutreeN)[tree$order]
     gaps <- which((v[-1] - v[-length(v)]) != 0)
@@ -1300,85 +1277,92 @@ kmeansPheatmap <- function(mat,
     return(x)
 }
 
-#' A function to draw clustered heatmaps.
+#' @title A function to draw clustered heatmaps.
+#' @description A function to draw clustered heatmaps where one has better
+#'  control over some graphical parameters such as cell size, etc.
 #'
-#' A function to draw clustered heatmaps where one has better control over some graphical
-#' parameters such as cell size, etc.
-#'
-#' The function also allows to aggregate the rows using kmeans clustering. This is
-#' advisable if number of rows is so big that R cannot handle their hierarchical
-#' clustering anymore, roughly more than 1000. Instead of showing all the rows
-#' separately one can cluster the rows in advance and show only the cluster centers.
-#' The number of clusters can be tuned with parameter kmeansK.
-#'
+#' The function also allows to aggregate the rows using kmeans clustering.
+#'  This is advisable if number of rows is so big that R cannot handle their
+#'  hierarchical clustering anymore, roughly more than 1000. Instead of showing
+#'  all the rows separately one can cluster the rows in advance and show only
+#'  the cluster centers. The number of clusters can be tuned with parameter
+#'  kmeansK.
 #' @param mat numeric matrix of the values to be plotted.
 #' @param color vector of colors used in heatmap.
-#' @param kmeansK the number of kmeans clusters to make, if we want to agggregate the
-#' rows before drawing heatmap. If NA then the rows are not aggregated.
-#' @param breaks Numeric vector. A sequence of numbers that covers the range of values in the normalized `counts`. Values in the normalized `matrix` are assigned to each bin in `breaks`. Each break is assigned to a unique color from `col`. If NULL, then breaks are calculated automatically. Default NULL.
-#' @param borderColor color of cell borders on heatmap, use NA if no border should be
-#' drawn.
-#' @param cellWidth individual cell width in points. If left as NA, then the values
-#' depend on the size of plotting window.
-#' @param cellHeight individual cell height in points. If left as NA,
-#' then the values depend on the size of plotting window.
-#' @param scale character indicating if the values should be centered and scaled in
-#' either the row direction or the column direction, or none. Corresponding values are
-#' \code{"row"}, \code{"column"} and \code{"none"}
-#' @param clusterRows boolean values determining if rows should be clustered or \code{hclust} object,
-#' @param clusterCols boolean values determining if columns should be clustered or \code{hclust} object.
-#' @param clusteringDistanceRows distance measure used in clustering rows. Possible
-#' values are \code{"correlation"} for Pearson correlation and all the distances
-#' supported by \code{\link{dist}}, such as \code{"euclidean"}, etc. If the value is none
-#' of the above it is assumed that a distance matrix is provided.
-#' @param clusteringDistanceCols distance measure used in clustering columns. Possible
-#' values the same as for clusteringDistanceRows.
+#' @param kmeansK the number of kmeans clusters to make, if we want to
+#'  agggregate the rows before drawing heatmap. If NA then the rows are not
+#'  aggregated.
+#' @param breaks Numeric vector. A sequence of numbers that covers the range
+#'  of values in the normalized `counts`. Values in the normalized `matrix` are
+#'  assigned to each bin in `breaks`. Each break is assigned to a unique color
+#'  from `col`. If NULL, then breaks are calculated automatically. Default NULL.
+#' @param borderColor color of cell borders on heatmap, use NA if no border
+#'  should be drawn.
+#' @param cellWidth individual cell width in points. If left as NA, then the
+#'  values depend on the size of plotting window.
+#' @param cellHeight individual cell height in points. If left as NA, then the
+#'  values depend on the size of plotting window.
+#' @param scale character indicating if the values should be centered and
+#'  scaled in either the row direction or the column direction, or none.
+#'  Corresponding values are \code{"row"}, \code{"column"} and \code{"none"}.
+#' @param clusterRows boolean values determining if rows should be clustered or
+#'  \code{hclust} object,
+#' @param clusterCols boolean values determining if columns should be clustered
+#'  or \code{hclust} object.
+#' @param clusteringDistanceRows distance measure used in clustering rows.
+#'  Possible values are \code{"correlation"} for Pearson correlation and all
+#'  the distances supported by \code{\link{dist}}, such as \code{"euclidean"},
+#'  etc. If the value is none of the above it is assumed that a distance matrix
+#'  is provided.
+#' @param clusteringDistanceCols distance measure used in clustering columns.
+#'  Possible values the same as for clusteringDistanceRows.
 #' @param clusteringMethod clustering method used. Accepts the same values as
-#' \code{\link{hclust}}.
+#'  \code{\link{hclust}}.
 #' @param clusteringCallback callback function to modify the clustering. Is
-#' called with two parameters: original \code{hclust} object and the matrix
-#' used for clustering. Must return a \code{hclust} object.
+#'  called with two parameters: original \code{hclust} object and the matrix
+#'  used for clustering. Must return a \code{hclust} object.
 #' @param cutreeRows number of clusters the rows are divided into, based on the
 #'  hierarchical clustering (using cutree), if rows are not clustered, the
-#' argument is ignored
+#'  argument is ignored
 #' @param cutreeCols similar to \code{cutreeRows}, but for columns
 #' @param treeHeightRow the height of a tree for rows, if these are clustered.
-#' Default value 50 points.
-#' @param treeHeightCol the height of a tree for columns, if these are clustered.
-#' Default value 50 points.
+#'  Default value 50 points.
+#' @param treeHeightCol the height of a tree for columns, if these are
+#'  clustered. Default value 50 points.
 #' @param legend logical to determine if legend should be drawn or not.
 #' @param legendBreaks vector of breakpoints for the legend.
 #' @param legendLabels vector of labels for the \code{legendBreaks}.
 #' @param annotationRow data frame that specifies the annotations shown on left
 #'  side of the heatmap. Each row defines the features for a specific row. The
-#' rows in the data and in the annotation are matched using corresponding row
+#'  rows in the data and in the annotation are matched using corresponding row
 #'  names. Note that color schemes takes into account if variable is continuous
 #'  or discrete.
 #' @param annotationCol similar to annotationRow, but for columns.
-#' @param annotation deprecated parameter that currently sets the annotationCol if it is missing
+#' @param annotation deprecated parameter that currently sets the annotationCol
+#'  if it is missing.
 #' @param annotationColors list for specifying annotationRow and
-#' annotationCol track colors manually. It is  possible to define the colors
-#' for only some of the features. Check examples for  details.
+#'  annotationCol track colors manually. It is  possible to define the colors
+#'  for only some of the features. Check examples for  details.
 #' @param annotationLegend boolean value showing if the legend for annotation
-#' tracks should be drawn.
-#' @param annotationNamesRow boolean value showing if the names for row annotation
-#' tracks should be drawn.
-#' @param annotationNamesCol boolean value showing if the names for column annotation
-#' tracks should be drawn.
+#'  tracks should be drawn.
+#' @param annotationNamesRow boolean value showing if the names for row
+#'  annotation tracks should be drawn.
+#' @param annotationNamesCol boolean value showing if the names for column
+#'  annotation tracks should be drawn.
 #' @param dropLevels logical to determine if unused levels are also shown in
-#' the legend
+#'  the legend.
 #' @param showRownames boolean specifying if column names are be shown.
 #' @param showColnames boolean specifying if column names are be shown.
 #' @param main the title of the plot
 #' @param fontSize base fontsize for the plot
 #' @param fontSizeRow fontsize for rownames (Default: fontsize)
 #' @param fontSizeCol fontsize for colnames (Default: fontsize)
-#' @param displayNumbers logical determining if the numeric values are also printed to
-#' the cells. If this is a matrix (with same dimensions as original matrix), the contents
-#' of the matrix are shown instead of original values.
-#' @param numberFormat format strings (C printf style) of the numbers shown in cells.
-#' For example "\code{\%.2f}" shows 2 decimal places and "\code{\%.1e}" shows exponential
-#' notation (see more in \code{\link{sprintf}}).
+#' @param displayNumbers logical determining if the numeric values are also
+#'  printed to the cells. If this is a matrix (with same dimensions as original
+#'  matrix), the contents of the matrix are shown instead of original values.
+#' @param numberFormat format strings (C printf style) of the numbers shown in
+#'  cells. For example "\code{\%.2f}" shows 2 decimal places and "\code{\%.1e}"
+#'  shows exponential notation (see more in \code{\link{sprintf}}).
 #' @param numberColor color of the text
 #' @param fontSizeNumber fontsize of the numbers displayed in cells
 #' @param gapsRow vector of row indices that show shere to put gaps into
@@ -1388,33 +1372,34 @@ kmeansPheatmap <- function(mat,
 #' @param labelsRow custom labels for rows that are used instead of rownames.
 #' @param labelsCol similar to labelsRow, but for columns.
 #' @param fileName file path where to save the picture. Filetype is decided by
-#' the extension in the path. Currently following formats are supported: png, pdf, tiff,
-#'  bmp, jpeg. Even if the plot does not fit into the plotting window, the file size is
-#' calculated so that the plot would fit there, unless specified otherwise.
+#'  the extension in the path. Currently following formats are supported: png,
+#'  pdf, tiff, bmp, jpeg. Even if the plot does not fit into the plotting
+#'  window, the file size is calculated so that the plot would fit there,
+#'  unless specified otherwise.
 #' @param width manual option for determining the output file width in inches.
 #' @param height manual option for determining the output file height in inches.
 #' @param silent do not draw the plot (useful when using the gtable output)
 #' @param rowLabel row cluster labels for semi-clustering
 #' @param colLabel column cluster labels for semi-clustering
-#' @param \dots graphical parameters for the text used in plot. Parameters passed to
-#' \code{\link{grid.text}}, see \code{\link{gpar}}.
-#'
+#' @param \dots graphical parameters for the text used in plot. Parameters
+#'  passed to \code{\link{grid.text}}, see \code{\link{gpar}}.
 #' @return
 #' Invisibly a list of components
 #' \itemize{
-#'     \item \code{treeRow} the clustering of rows as \code{\link{hclust}} object
-#'     \item \code{treeCol} the clustering of columns as \code{\link{hclust}} object
-#'     \item \code{kmeans} the kmeans clustering of rows if parameter \code{kmeansK} was
-#' specified
+#'     \item \code{treeRow} the clustering of rows as \code{\link{hclust}}
+#'       object
+#'     \item \code{treeCol} the clustering of columns as \code{\link{hclust}}
+#'       object
+#'     \item \code{kmeans} the kmeans clustering of rows if parameter
+#'       \code{kmeansK} was specified
 #' }
-#'
 #' @author  Raivo Kolde <rkolde@@gmail.com>
 #' #@examples
 #' # Create test matrix
 #' test = matrix(rnorm(200), 20, 10)
-#' test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
-#' test[11:20, seq(2, 10, 2)] = test[11:20, seq(2, 10, 2)] + 2
-#' test[15:20, seq(2, 10, 2)] = test[15:20, seq(2, 10, 2)] + 4
+#' test[seq(10), seq(1, 10, 2)] = test[seq(10), seq(1, 10, 2)] + 3
+#' test[seq(11, 20), seq(2, 10, 2)] = test[seq(11, 20), seq(2, 10, 2)] + 2
+#' test[seq(15, 20), seq(2, 10, 2)] = test[seq(15, 20), seq(2, 10, 2)] + 4
 #' colnames(test) = paste("Test", 1:10, sep = "")
 #' rownames(test) = paste("Gene", 1:20, sep = "")
 #'
@@ -1422,53 +1407,58 @@ kmeansPheatmap <- function(mat,
 #' pheatmap(test)
 #' pheatmap(test, kmeansK = 2)
 #' pheatmap(test, scale = "row", clusteringDistanceRows = "correlation")
-#' pheatmap(test, color = colorRampPalette(c("navy", "white", "firebrick3"))(50))
+#' pheatmap(test, color = colorRampPalette(c("navy",
+#'     "white", "firebrick3"))(50))
 #' pheatmap(test, cluster_row = FALSE)
 #' pheatmap(test, legend = FALSE)
 #'
 #' # Show text within cells
 #' pheatmap(test, displayNumbers = TRUE)
 #' pheatmap(test, displayNumbers = TRUE, numberFormat = "\%.1e")
-#' pheatmap(test, displayNumbers = matrix(ifelse(test > 5, "*", ""), nrow(test)))
-#' pheatmap(test, cluster_row = FALSE, legendBreaks = -1:4, legendLabels = c("0",
-#' "1e-4", "1e-3", "1e-2", "1e-1", "1"))
+#' pheatmap(test, displayNumbers = matrix(ifelse(test > 5,
+#'     "*", ""), nrow(test)))
+#' pheatmap(test, cluster_row = FALSE,
+#'     legendBreaks = seq(-1, 4), legendLabels = c("0",
+#'     "1e-4", "1e-3", "1e-2", "1e-1", "1"))
 #'
 #' # Fix cell sizes and save to file with correct size
 #' pheatmap(test, cellWidth = 15, cellHeight = 12, main = "Example heatmap")
-#' pheatmap(test, cellWidth = 15, cellHeight = 12, fontSize = 8, fileName = "test.pdf")
+#' pheatmap(test, cellWidth = 15, cellHeight = 12, fontSize = 8,
+#'     fileName = "test.pdf")
 #'
 #' # Generate annotations for rows and columns
-#' annotationCol = data.frame(
-#'                     CellType = factor(rep(c("CT1", "CT2"), 5)),
-#'                     Time = 1:5)
-#' rownames(annotationCol) = paste("Test", 1:10, sep = "")
+#' annotationCol = data.frame(CellType = factor(rep(c("CT1", "CT2"), 5)),
+#'     Time = seq(5))
+#' rownames(annotationCol) = paste("Test", seq(10), sep = "")
 #'
 #' annotationRow = data.frame(GeneClass = factor(rep(c("Path1",
-#'         "Path2",
-#'         "Path3"),
-#'     c(10, 4, 6))))
-#' rownames(annotationRow) = paste("Gene", 1:20, sep = "")
+#'    "Path2",
+#'    "Path3"),
+#'    c(10, 4, 6))))
+#' rownames(annotationRow) = paste("Gene", seq(20), sep = "")
 #'
 #' # Display row and color annotations
 #' pheatmap(test, annotationCol = annotationCol)
 #' pheatmap(test, annotationCol = annotationCol, annotationLegend = FALSE)
 #' pheatmap(test, annotationCol = annotationCol, annotationRow = annotationRow)
 #'
-#'
 #' # Specify colors
 #' ann_colors = list(Time = c("white", "firebrick"),
 #'     CellType = c(CT1 = "#1B9E77", CT2 = "#D95F02"),
 #'     GeneClass = c(Path1 = "#7570B3", Path2 = "#E7298A", Path3 = "#66A61E"))
 #'
-#' pheatmap(test, annotationCol = annotationCol, annotationColors = ann_colors, main = "Title")
+#' pheatmap(test, annotationCol = annotationCol, annotationColors = ann_colors,
+#'     main = "Title")
 #' pheatmap(test, annotationCol = annotationCol, annotationRow = annotationRow,
-#'          annotationColors = ann_colors)
-#' pheatmap(test, annotationCol = annotationCol, annotationColors = ann_colors[2])
+#'     annotationColors = ann_colors)
+#' pheatmap(test, annotationCol = annotationCol,
+#'     annotationColors = ann_colors[2])
 #'
 #' # Gaps in heatmaps
-#' pheatmap(test, annotationCol = annotationCol, clusterRows = FALSE, gapsRow = c(10, 14))
-#' pheatmap(test, annotationCol = annotationCol, clusterRows = FALSE, gapsRow = c(10, 14),
-#'          cutreeCol = 2)
+#' pheatmap(test, annotationCol = annotationCol, clusterRows = FALSE,
+#'     gapsRow = c(10, 14))
+#' pheatmap(test, annotationCol = annotationCol, clusterRows = FALSE,
+#'     gapsRow = c(10, 14), cutreeCol = 2)
 #'
 #' # Show custom strings as row/col names
 #' labelsRow = c("", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -1485,7 +1475,7 @@ kmeansPheatmap <- function(mat,
 #'
 #' # Modify ordering of the clusters using clustering callback option
 #' callback = function(hc, mat){
-#'     sv = svd(t(mat))$v[,1]
+#'     sv = svd(t(mat))$v[, 1]
 #'     dend = reorder(as.dendrogram(hc), wts = sv)
 #'     as.hclust(dend)
 #' }

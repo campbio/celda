@@ -175,7 +175,7 @@ celda_CG <- function(counts,
     algorithm <- match.arg(algorithm)
     algorithmFun <- ifelse(algorithm == "Gibbs",
         ".cCCalcGibbsProbZ",
-        "cC.calcEMProbZ")
+        ".cCCalcEMProbZ")
     zInitialize <- match.arg(zInitialize)
     yInitialize <- match.arg(yInitialize)
 
@@ -211,20 +211,20 @@ celda_CG <- function(counts,
             if (is.null(zInit)) {
                 stop("'zInit' needs to specified when initilize.z == 'given'.")
             }
-            z <- initialize.cluster(K,
+            z <- .initializeCluster(K,
                 ncol(counts),
                 initial = zInit,
                 fixed = NULL,
                 seed = currentSeed)
         } else if (zInitialize == "split") {
-            z <- initialize.splitZ(
+            z <- .initializeSplitZ(
                 counts,
                 K = K,
                 alpha = alpha,
                 beta = beta,
                 seed = seed)
         } else {
-            z <- initialize.cluster(K,
+            z <- .initializeCluster(K,
                 ncol(counts),
                 initial = NULL,
                 fixed = NULL,
@@ -235,20 +235,20 @@ celda_CG <- function(counts,
             if (is.null(yInit)) {
                 stop("'yInit' needs to specified when initilize.y == 'given'.")
             }
-            y <- initialize.cluster(L,
+            y <- .initializeCluster(L,
                     nrow(counts),
                     initial = yInit,
                     fixed = NULL,
                     seed = currentSeed)
         } else if (yInitialize == "split") {
-            y <- initialize.splitY(counts,
+            y <- .initializeSplitY(counts,
                     L,
                     beta = beta,
                     delta = delta,
                     gamma = gamma,
                     seed = seed)
         } else {
-            y <- initialize.cluster(L,
+            y <- .initializeCluster(L,
                     nrow(counts),
                     initial = NULL,
                     fixed = NULL,
@@ -313,7 +313,7 @@ celda_CG <- function(counts,
             nTSByCP <- nextY$nTSByC
             nGByTS <- nextY$nGByTS
             nByTS <- nextY$nByTS
-            nTSByC <- ..rowSumByGroupChange(counts, nTSByC, nextY$y, y, L)
+            nTSByC <- .rowSumByGroupChange(counts, nTSByC, nextY$y, y, L)
             y <- nextY$y
 
             ## Gibbs or EM sampling for each cell
@@ -533,8 +533,8 @@ celda_CG <- function(counts,
     ## Peform reordering on final Z and Y assigments:
     bestResult <- methods::new("celda_CG",
         clusters = list(z = zBest, y = yBest),
-        params = list(K = K,
-            L = L,
+        params = list(K = as.integer(K),
+            L = as.integer(L),
             alpha = alpha,
             beta = beta,
             delta = delta,
@@ -559,7 +559,7 @@ celda_CG <- function(counts,
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
-    .logMessages(paste(rep("-", 50), collapse = "",
+    .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
         verbose = verbose)
@@ -600,7 +600,7 @@ celda_CG <- function(counts,
 #' @seealso `celda_C()` for simulating cell subpopulations and `celda_G()` for
 #'  simulating feature modules.
 #' @examples
-#' celdaSim <- simulateCells(model = "celda_CG")
+#' celdaCGSim <- simulateCells(model = "celda_CG")
 #' @export
 simulateCells.celda_CG <- function(model,
     S = 5,
@@ -664,7 +664,7 @@ simulateCells.celda_CG <- function(model,
     ## Select transcript distribution for each cell
     cellCounts <- matrix(0, nrow = G, ncol = nCSum)
     for (i in seq(nCSum)) {
-        transcriptionalStateDist <- as.numeric(stats::rmultinom(1,
+        transcriptionalStateDist <- as.integer(stats::rmultinom(1,
             size = nN[i], prob = phi[z[i], ]))
         for (j in seq(L)) {
             if (transcriptionalStateDist[j] > 0) {
@@ -698,8 +698,8 @@ simulateCells.celda_CG <- function(model,
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_CG",
         clusters = list(z = z, y = y),
-        params = list(K = K,
-            L = L,
+        params = list(K = as.integer(K),
+            L = as.integer(L),
             alpha = alpha,
             beta = beta,
             delta = delta,
@@ -905,7 +905,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 
     etaLl <- a + b + c + d
 
-    final <- thetaLl + phiLl + psiLl + eta.ll
+    final <- thetaLl + phiLl + psiLl + etaLl
     return(final)
 }
 
@@ -933,7 +933,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #' @return The log likelihood for the given cluster assignments
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
-#' loglik <- logLikelihoodCeldaCG(celdaCGSim$counts,
+#' loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
 #'     sampleLabel = celdaCGSim$sampleLabel,
 #'     z = celdaCGSim$z,
 #'     y = celdaCGSim$y,
@@ -956,7 +956,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #'     gamma = celdaCGSim$gamma,
 #'     delta = celdaCGSim$delta)
 #' @export
-logLikelihoodCeldaCG <- function(counts,
+logLikelihood.celda_CG <- function(counts,
     sampleLabel,
     z,
     y,
@@ -1106,8 +1106,8 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
         yProb <- t(nextY$probs)
 
         if (!isTRUE(log)) {
-            zProb <- normalizeLogProbs(zProb)
-            yProb <- normalizeLogProbs(yProb)
+            zProb <- .normalizeLogProbs(zProb)
+            yProb <- .normalizeLogProbs(yProb)
         }
 
         return(list(zProbability = zProb, yProbability = yProb))
@@ -1261,11 +1261,10 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_CG"),
 #'  Default 2500.
 #' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no
 #'  calls to `set.seed()` are made.
-#' @param ... Additional parameters.
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()`
 #'  for displaying expression
 #' @examples
-#' tsne.res <- celdaTsne(celdaCGSim$counts, celdaCGMod)
+#' tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
 setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
@@ -1277,23 +1276,20 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
-        seed = 12345,
-        ...) {
+        seed = 12345) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
             celdaMod,
             maxCells,
             minClusterSize,
-            initialDims,
-            modules,
-            ...)
+            modules)
         norm <- preparedCountInfo$norm
-        res <- calculateTsne(norm,
+        res <- .calculateTsne(norm,
             doPca = FALSE,
             perplexity = perplexity,
             maxIter = maxIter,
-            seed = seed
-        )
+            seed = seed,
+            initialDims = initialDims)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
         final[preparedCountInfo$cellIx, ] <- res
         rownames(final) <- colnames(counts)
@@ -1339,7 +1335,6 @@ setMethod("celdaUmap",
             celdaMod,
             maxCells,
             minClusterSize,
-            initialDims,
             modules)
         umapRes <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
@@ -1354,9 +1349,7 @@ setMethod("celdaUmap",
     celdaMod,
     maxCells = 25000,
     minClusterSize = 100,
-    initialDims = 20,
-    modules = NULL,
-    ...) {
+    modules = NULL) {
 
     ## Checking if maxCells and minClusterSize will work
     if ((maxCells < ncol(counts)) &

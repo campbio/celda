@@ -32,9 +32,8 @@ Calculates the perplexity of each model's cluster assignments
  quality of a given K/L choice.
 }
 \examples{
-celda.CG.grid.search.res <- resamplePerplexity(
-  celda.CG.sim$counts,
-  celda.CG.grid.search.res
-)
-plotGridSearchPerplexity(celda.CG.grid.search.res)
+celdaCGGridSearchRes <- resamplePerplexity(
+  celdaCGSim$counts,
+  celdaCGGridSearchRes)
+plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

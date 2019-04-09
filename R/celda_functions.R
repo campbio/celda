@@ -1,4 +1,4 @@
-.sampleLL <- function(llProbs) {
+.sampleLl <- function(llProbs) {
     probsSub <- exp(llProbs - max(llProbs))
     probsNorm <- probsSub / sum(probsSub)
     probsSelect <- sample.int(
@@ -10,32 +10,38 @@
     return(probsSelect)
 }
 
+
 .cosineDist <- function(x) {
     x <- t(x)
     y <- (1 - .cosine(x)) / 2
     return(stats::as.dist(y))
 }
 
+
 .cosine <- function(x) {
     y <- x %*% t(x) / (sqrt(rowSums(x ^ 2) %*% t(rowSums(x ^ 2))))
     return(y)
 }
+
 
 .spearmanDist <- function(x) {
     y <- (1 - stats::cor(x, method = "spearman")) / 2
     return(stats::as.dist(y))
 }
 
+
 .hellingerDist <- function(x) {
     y <- stats::dist(t(sqrt(x)), method = "euclidean") * 1 / sqrt(2)
     return(y)
 }
+
 
 .normalizeLogProbs <- function(llProbs) {
     llProbs <- exp(sweep(llProbs, 1, base::apply(llProbs, 1, max), "-"))
     probs <- sweep(llProbs, 1, rowSums(llProbs), "/")
     return(probs)
 }
+
 
 # This is a wrapper around set.seed called throughout the modeling
 # functions to allow the user to disable seed setting within celda.
@@ -47,6 +53,7 @@
         set.seed(seed)
     }
 }
+
 
 #' @title Normalization of count data
 #' @description Performs normalization, transformation, and/or scaling of a
@@ -84,13 +91,14 @@ normalizeCounts <- function(counts,
     scaleFun = NULL,
     pseudocountNormalize = 0,
     pseudocountTransform = 0) {
+
     normalize <- match.arg(normalize)
     if (!is.null(transformationFun) &&
             !is.function(transformationFun)) {
         stop("'transformationFun' needs to be of class 'function'")
     }
     if (!is.null(scaleFun) && !is.function(scaleFun)) {
-        stop("'scale.fun' needs to be of class 'function'")
+        stop("'scaleFun' needs to be of class 'function'")
     }
     # Perform normalization
     if (normalize == "proportion") {
@@ -107,8 +115,7 @@ normalizeCounts <- function(counts,
         )
     }
     if (!is.null(transformationFun)) {
-        norm <-
-            do.call(transformationFun,
+        norm <- do.call(transformationFun,
                 list(norm + pseudocountTransform))
     }
     if (!is.null(scaleFun)) {
@@ -118,6 +125,7 @@ normalizeCounts <- function(counts,
     rownames(norm) <- rownames(counts)
     return(norm)
 }
+
 
 #' @title Recode cell cluster labels
 #' @description Recode cell subpopulaton clusters using a mapping in the `from`
@@ -144,6 +152,7 @@ recodeClusterZ <- function(celdaMod, from, to) {
     return(celdaMod)
 }
 
+
 #' @title Recode feature module clusters
 #' @description Recode feature module clusters using a mapping in the
 #'  `from` and `to` arguments.
@@ -169,6 +178,7 @@ recodeClusterY <- function(celdaMod, from, to) {
     return(celdaMod)
 }
 
+
 #' @title Check count matrix consistency
 #' @description Checks if the counts matrix is the same one used to generate
 #'  the celda model object by comparing dimensions and MD5 checksum.
@@ -180,9 +190,7 @@ recodeClusterY <- function(celdaMod, from, to) {
 #' @return Returns TRUE if provided count matrix matches the one used in the
 #'  celda object and/or `errorOnMismatch = FALSE`, FALSE otherwise.
 #' @examples
-#' compareCountMatrix(celdaCGSim$counts, celdaCGMod,
-#'   errorOnMismatch = FALSE
-#' )
+#' compareCountMatrix(celdaCGSim$counts, celdaCGMod, errorOnMismatch = FALSE)
 #' @export
 compareCountMatrix <- function(counts,
     celdaMod,
@@ -190,17 +198,17 @@ compareCountMatrix <- function(counts,
 
     if ("y" %in% names(celdaMod@clusters)) {
         if (nrow(counts) != length(celdaMod@clusters$y)) {
-            stop("The provided celda object was generated from a counts
-                matrix with a different number of features than the one
-                provided.")
+            stop("The provided celda object was generated from a counts",
+                " matrix with a different number of features than the one",
+                " provided.")
         }
     }
 
     if ("z" %in% names(celdaMod@clusters)) {
         if (ncol(counts) != length(celdaMod@clusters$z)) {
-            stop("The provided celda object was generated from a counts
-                matrix with a different number of cells than the one
-                provided.")
+            stop("The provided celda object was generated from a counts",
+                " matrix with a different number of cells than the one",
+                " provided.")
         }
     }
     celdaChecksum <- celdaMod@params$countChecksum
@@ -211,11 +219,12 @@ compareCountMatrix <- function(counts,
     if (res)
         return(TRUE)
     if (!res && errorOnMismatch) {
-        stop("There was a mismatch between the provided count matrix and
-            the count matrix used to generate the provided celda result.")
+        stop("There was a mismatch between the provided count matrix and",
+            " the count matrix used to generate the provided celda result.")
     } else if (!res && !errorOnMismatch)
         return(FALSE)
 }
+
 
 .logMessages <- function(...,
     sep = " ",
@@ -226,8 +235,8 @@ compareCountMatrix <- function(counts,
     if (isTRUE(verbose)) {
         if (!is.null(logfile)) {
             if (!is.character(logfile) || length(logfile) > 1) {
-                stop("The log file parameter needs to be a single character
-                    string.")
+                stop("The log file parameter needs to be a single character",
+                    " string.")
             }
             cat(paste(..., "\n", sep = sep),
                 file = logfile,
@@ -237,6 +246,7 @@ compareCountMatrix <- function(counts,
         }
     }
 }
+
 
 #' @title Create a color palette
 #' @description Generate a palette of `n` distinct colors.
@@ -266,8 +276,8 @@ distinctColors <- function(n,
     valueRange = c(0.7, 1)) {
 
     if (!(all(hues %in% grDevices::colors()))) {
-        stop("Only color names listed in the 'color' function can be used in
-            'hues'")
+        stop("Only color names listed in the 'color' function can be used in",
+            " 'hues'")
     }
     # Convert R colors to RGB and then to HSV color format
     huesHsv <- grDevices::rgb2hsv(grDevices::col2rgb(hues))
@@ -285,13 +295,14 @@ distinctColors <- function(n,
         length = numVs)
     # Create all combination of hues with saturation/value pairs
     list <- lapply(1:numVs, function(x) {
-        rbind(huesHsv[1,], s[x], v[x])
+        rbind(huesHsv[1, ], s[x], v[x])
     })
     newHsv <- do.call(cbind, list)
     # Convert to hex
-    col <- grDevices::hsv(newHsv[1,], newHsv[2,], newHsv[3,])
-    return(col[1:n])
+    col <- grDevices::hsv(newHsv[1, ], newHsv[2, ], newHsv[3, ])
+    return(col[seq(n)])
 }
+
 
 .processCounts <- function(counts) {
     if (typeof(counts) != "integer") {
@@ -301,6 +312,7 @@ distinctColors <- function(n,
     return(counts)
 }
 
+
 # Perform some simple checks on the counts matrix, to ensure celda modeling
 # expectations are met
 .validateCounts <- function(counts) {
@@ -308,10 +320,11 @@ distinctColors <- function(n,
     countRowSum <- rowSums(counts)
     countColSum <- colSums(counts)
     if (sum(countRowSum == 0) > 1 | sum(countColSum == 0) > 1) {
-        stop("Each row and column of the count matrix must have at least
-            one count")
+        stop("Each row and column of the count matrix must have at least",
+            " one count")
     }
 }
+
 
 # Wrapper function, creates checksum for matrix.
 # Feature names, cell names are not taken into account.
@@ -320,6 +333,7 @@ distinctColors <- function(n,
     colnames(counts) <- NULL
     countChecksum <- digest::digest(counts, algo = "md5")
 }
+
 
 # Generate n random deviates from the Dirichlet function with shape parameters
 # alpha. Adapted from gtools v3.5
@@ -331,13 +345,14 @@ distinctColors <- function(n,
     # Check for case where all sampled entries are zero due to round off
     # One entry will be randomly chosen to be one
     isZero <- rowSums(x) == 0
-    assignment <- sample(1:l, size = sum(isZero), replace = TRUE)
+    assignment <- sample(seq(l), size = sum(isZero), replace = TRUE)
     x[cbind(which(isZero), assignment)] <- 1
     # Normalize
     sm <- x %*% rep(1, l)
     y <- x / as.vector(sm)
     return(y)
 }
+
 
 # Make sure provided sample labels are the right type,
 # or generate some if none were provided
@@ -356,6 +371,7 @@ distinctColors <- function(n,
     }
     return(sampleLabel)
 }
+
 
 #' @title Outputting a feature module table
 #' @description Creates a table that contains the list of features in
@@ -378,7 +394,7 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
     allGenes <-
         topRank(factorize.matrix$proportions$module, n = nrow(counts))
     res <- as.data.frame(stringi::stri_list2matrix(allGenes$names))
-    res <- apply(res, 1:2, function(x) {
+    res <- apply(res, c(1, 2), function(x) {
         if (is.na(x)) {
             return("")
         } else {
@@ -398,11 +414,11 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
             row.names = FALSE,
             quote = FALSE)
     }
-    }
+}
+
 
 #' @title Feature Expression Violin Plot
 #' @description Outputs a violin plot for feature expression data.
-#'
 #' @param counts Integer matrix. Rows represent features and columns represent
 #'  cells.
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG".

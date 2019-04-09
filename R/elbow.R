@@ -1,4 +1,5 @@
-# https://stackoverflow.com/questions/35194048/using-r-how-to-calculate-the-distance-from-one-point-to-a-line
+# https://stackoverflow.com/questions/35194048/using-r-how-to-calculate
+#-the-distance-from-one-point-to-a-line
 # http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
 # Kimberling, C. "Triangle Centers and Central Triangles." Congr.
 # Numer. 129, 1-295, 1998.
@@ -9,14 +10,16 @@
     d <- abs(det(m)) / sqrt(sum(v1 * v1))
 }
 
+
 .secondDerivativeEstimate <- function(v) {
     nv <- length(v)
     res <- rep(NA, nv)
-    for (i in 2:(nv - 1)) {
+    for (i in seq(2, nv - 1)) {
         res[i] <- v[i + 1] + v[i - 1] - (2 * v[i])
     }
     return(res)
 }
+
 
 .curveElbow <- function(var, perplexity, pvalCutoff = 0.05) {
     len <- length(perplexity)

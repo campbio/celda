@@ -30,14 +30,14 @@
 
 
 #' @useDynLib celda _rowSumByGroup_numeric
-.rowSumByGroup.numeric <- function(x, group, L) {
+.rowSumByGroupNumeric <- function(x, group, L) {
     group <- factor(group, levels = seq(L))
     res <- .Call("_rowSumByGroup_numeric", x, group)
     return(res)
 }
 
 #' @useDynLib celda _colSumByGroup_numeric
-.colSumByGroup.numeric <- function(x, group, K) {
+.colSumByGroupNumeric <- function(x, group, K) {
     group <- factor(group, levels = seq(K))
     res <- .Call("_colSumByGroup_numeric", x, group)
     return(res)

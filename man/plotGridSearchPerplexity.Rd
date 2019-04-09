@@ -9,7 +9,7 @@ plotGridSearchPerplexity(celdaList, sep = 1)
 \arguments{
 \item{celdaList}{Object of class 'celdaList'.}
 
-\item{sep}{Numeric. Breaks in the x axis of the resulting plo.t}
+\item{sep}{Numeric. Breaks in the x axis of the resulting plo.t.}
 }
 \value{
 A ggplot plot object showing perplexity as a function of clustering
@@ -21,9 +21,8 @@ Visualize perplexity of every model in a celdaList, by unique
 }
 \examples{
 ## Run various combinations of parameters with 'celdaGridSearch'
-celda.CG.grid.search.res <- resamplePerplexity(
-  celda.CG.sim$counts,
-  celda.CG.grid.search.res
-)
-plotGridSearchPerplexity(celda.CG.grid.search.res)
+celdaCGGridSearchRes <- resamplePerplexity(
+  celdaCGSim$counts,
+  celdaCGGridSearchRes)
+plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

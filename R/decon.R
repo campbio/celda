@@ -34,9 +34,9 @@ simulateContaminatedMatrix <- function(C = 300,
     .setSeed(seed)
 
     if (length(delta) == 1) {
-        cpByC <- rbeta(n = C, shape1 = delta, shape2 = delta)
+        cpByC <- stats::rbeta(n = C, shape1 = delta, shape2 = delta)
     } else {
-        cpByC <- rbeta(n = C, shape1 = delta[1], shape2 = delta[2])
+        cpByC <- stats::rbeta(n = C, shape1 = delta[1], shape2 = delta[2])
     }
 
     z <- sample(seq(K), size = C, replace = TRUE)
@@ -53,7 +53,7 @@ simulateContaminatedMatrix <- function(C = 300,
         size = C,
         replace = TRUE)
     cNbyC <- vapply(seq(C), function(i) {
-        rbinom(n = 1, size = NbyC[i], p = cpByC[i])
+        stats::rbinom(n = 1, size = NbyC[i], p = cpByC[i])
     }, integer(1))
     rNbyC <- NbyC - cNbyC
 
@@ -243,7 +243,7 @@ decontX <- function(counts,
             }
             resBat <- .decontXoneBatch(counts = countsBat,
                 z = zBat,
-                batch = Bat,
+                batch = bat,
                 maxIter = maxIter,
                 beta = beta,
                 delta = delta,
@@ -345,7 +345,7 @@ decontX <- function(counts,
         ## Initialization
         deltaInit <- delta
         # theta  = stats::runif(nC, min = 0.1, max = 0.5)
-        theta <- rbeta(n = nC,
+        theta <- stats::rbeta(n = nC,
             shape1 = deltaInit,
             shape2 = deltaInit)
         estRmat <- t(t(counts) * theta)
@@ -402,7 +402,7 @@ decontX <- function(counts,
     if (deconMethod == "background") {
         ## Initialization
         deltaInit <- delta
-        theta <- rbeta(n = nC,
+        theta <- stats::rbeta(n = nC,
             shape1 = deltaInit,
             shape2 = deltaInit)
         estRmat <- t(t(counts) * theta)

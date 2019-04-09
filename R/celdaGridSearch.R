@@ -45,12 +45,13 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #'  can get the best model for each combination of parameters.
 #' @examples
 #' ## Run various combinations of parameters with 'celdaGridSearch'
-#' cgs <- celdaGridSearch(celdaCGSim$counts,
+#' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
 #'     model = "celda_CG",
 #'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
 #'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
 #'     bestOnly = TRUE,
-#'     nchains = 1)
+#'     nchains = 1,
+#'     cores = 2)
 #' @import foreach
 #' @export
 celdaGridSearch <- function(counts,
@@ -67,7 +68,16 @@ celdaGridSearch <- function(counts,
     logfilePrefix = "Celda") {
 
     ## Check parameters
-    validateCounts(counts)
+    .validateCounts(counts)
+
+    modelParams <- as.list(formals(model))
+    if (!all(names(paramsTest) %in% names(modelParams))) {
+        badParams <- setdiff(names(paramsTest), names(modelParams))
+        stop("The following elements in 'paramsTest' are not arguments of '",
+            model,
+            "': ",
+            paste(badParams, collapse = ","))
+    }
 
     if (!is.null(paramsFixed) &&
             !all(names(paramsFixed) %in% names(modelParams))) {
@@ -139,8 +149,8 @@ celdaGridSearch <- function(counts,
     # An MD5 checksum of the count matrix. Passed to models so
     # later on, we can check on celda_* model objects which
     # count matrix was used.
-    counts <- processCounts(counts)
-    countChecksum <- createCountChecksum(counts)
+    counts <- .processCounts(counts)
+    countChecksum <- .createCountChecksum(counts)
 
     ## Use DoParallel to loop through each combination of parameters
     cl <- parallel::makeCluster(cores)
@@ -260,7 +270,7 @@ subsetCeldaList <- function(celdaList, params) {
     }
 
     ## Subset 'runParams' based on items in 'params'
-    new.runParams <- celdaList@runParams
+    newRunParams <- celdaList@runParams
     for (i in names(params)) {
         newRunParams <-
             subset(newRunParams, newRunParams[, i] %in% params[[i]])
