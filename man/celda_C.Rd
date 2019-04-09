@@ -81,7 +81,7 @@ Clusters the columns of a count matrix containing single-cell
  data into K subpopulations.
 }
 \examples{
-celdaMod <- celda_C(celdaCSim$counts,
+celdaCMod <- celda_C(celdaCSim$counts,
     K = celdaCSim$K,
     sampleLabel = celdaCSim$sampleLabel)
 }

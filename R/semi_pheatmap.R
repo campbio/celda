@@ -1257,29 +1257,6 @@ vplayout <- function(x, y) {
     }
 
 
-kmeansPheatmap <- function(mat,
-    k = min(nrow(mat), 150),
-    sdLimit = NA,
-    ...) {
-
-    # Filter data
-    if (!is.na(sdLimit)) {
-        s <- base::apply(mat, 1, stats::sd)
-        mat <- mat[s > sdLimit, ]
-    }
-
-    # Cluster data
-    km <- stats::kmeans(mat, k, iter.max = 100)
-    mat2 <- km$centers
-
-    # Compose rownames
-    t <- table(km$cluster)
-    rownames(mat2) <- sprintf("cl%s_size_%d", names(t), t)
-
-    # Draw heatmap
-    pheatmap::pheatmap(mat2, ...)
-}
-
 .findGaps <- function(tree, cutreeN) {
     v <- stats::cutree(tree, cutreeN)[tree$order]
     gaps <- which((v[-1] - v[-length(v)]) != 0)

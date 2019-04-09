@@ -138,21 +138,21 @@
 #' @seealso `recursiveSplitModule()` for recursive splitting of cell
 #'  populations.
 #' @examples
-#' ## Create models that range from K = 3 to K = 10 by recursively splitting
+#' ## Create models that range from K = 3 to K = 7 by recursively splitting
 #' ## cell populations into two to produce `celda_C` cell clustering models
-#' testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 10)
+#' testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
 #'
 #' ## Alternatively, first identify features modules using
 #' ## `recursiveSplitModule()`
 #' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-#'     initialL = 3, maxL = 20)
+#'     initialL = 3, maxL = 15)
 #' plotGridSearchPerplexity(moduleSplit)
 #' moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
 #'
 #' ## Then use module labels for initialization in `recursiveSplitCell()` to
 #' ## produce `celda_CG` bi-clustering models
 #' cellSplit <- recursiveSplitCell(celdaCGSim$counts,
-#'     initialK = 3, maxK = 20, yInit = clusters(moduleSplitSelect)$y)
+#'     initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y)
 #' plotGridSearchPerplexity(cellSplit)
 #' celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
 #' @export

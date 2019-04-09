@@ -55,7 +55,7 @@ Generates a simulated counts matrix, cell subpopulation
  generative process of the celda_CG model.
 }
 \examples{
-celdaSim <- simulateCells(model = "celda_CG")
+celdaCGSim <- simulateCells(model = "celda_CG")
 }
 \seealso{
 `celda_C()` for simulating cell subpopulations and `celda_G()` for

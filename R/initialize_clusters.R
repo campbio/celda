@@ -91,9 +91,11 @@
         KToUse <- ifelse(KPerCluster < 2, 2, KPerCluster)
 
         zTa <- tabulate(overallZ, max(overallZ))
-        zToSplit <- sample(which(zTa > minCell & zTa > KToUse))
-
-        if (length(zToSplit) == 0) {
+        
+        zToSplit <- which(zTa > minCell & zTa > KToUse)
+        if (length(zToSplit) > 1) {
+            zToSplit <- sample(zToSplit)
+        } else if (length(zToSplit) == 0) {
             break()
         }
 

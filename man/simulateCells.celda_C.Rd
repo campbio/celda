@@ -47,7 +47,7 @@ Generates a simulated counts matrix, cell subpopulation
 }
 \examples{
 celdaCSim <- simulateCells(model = "celda_C", K = 10)
-sim.counts <- celdaCSim$counts
+simCounts <- celdaCSim$counts
 }
 \seealso{
 `celda_G()` for simulating feature modules and `celda_CG()` for
