@@ -21,7 +21,7 @@ test_that(desc = "Testing celda_G model with numeric input matrix", {
 
 test_that(desc = "Testing clusterProbability with celda_G", {
     expect_true(ncol(clusterProbability(celdaGSim$counts,
-        modelG)$y.probability) == celdaGSim$L)
+        modelG)$yProbability) == celdaGSim$L)
 })
 
 test_that(desc = paste0("Testing simulateCells.celda_G error checking with",
@@ -244,14 +244,14 @@ test_that(desc = "Testing plotHeatmap with celda_G", {
 #         counts = celdaGSim$counts,
 #         annotationFeature = annot,
 #         y = modelG@clusters$y)),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 # 
 #     rownames(annot) <- NULL
 #     expect_equal(names(plotHeatmap(celdaMod = modelG,
 #         counts = celdaGSim$counts,
 #         annotationFeature = as.matrix(annot),
 #         y = modelG@clusters$y)),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 # 
 #     rownames(annot) <- rev(rownames(celdaGSim$counts))
 #     expect_error(plotHeatmap(celdaMod = modelG,
@@ -266,7 +266,7 @@ test_that(desc = "Testing plotHeatmap with celda_G", {
 test_that(desc = "Testing celdaHeatmap with celda_G", {
     expect_equal(names(celdaHeatmap(celdaMod = modelG,
         counts = celdaGSim$counts)),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
 })
 
 # moduleHeatmap
@@ -275,13 +275,13 @@ test_that(desc = "Testing moduleHeatmap with celda_G", {
         celdaMod = modelG,
         topCells = 300,
         featureModule = c(1, 2))),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
     expect_equal(names(moduleHeatmap(celdaGSim$counts,
         celdaMod = modelG,
         topFeatures = 15,
         topCells = 15,
         normalize = FALSE)),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
 
     expect_error(moduleHeatmap("counts", celdaMod = modelG),
         "'counts' should be a numeric count matrix")
@@ -413,7 +413,7 @@ test_that(desc = "Testing featureModuleLookup with celda_G", {
     res <- featureModuleLookup(celdaGSim$counts, modelG, "Gene_1")
     expect_true(res == modelG@clusters$y[1])
     res <- featureModuleLookup(celdaGSim$counts,
-        modelG, "Gene_2", exact.match = FALSE)
+        modelG, "Gene_2", exactMatch = FALSE)
     expect_true(length(res) == 11)
     res <- featureModuleLookup(celdaGSim$counts, modelG, "XXXXXXX")
     expect_true(grepl("No feature", res))

@@ -489,7 +489,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
     expect_equal(names(plotDimReduceCluster(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         cluster = as.factor(modelCG@clusters$z),
-        specific_clusters = c(1, 2, 3))),
+        specificClusters = c(1, 2, 3))),
         c("data",
             "layers",
             "scales",
@@ -504,8 +504,8 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
         dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         cluster = as.factor(modelCG@clusters$z),
-        specific_clusters = c(1, 2, 3),
-        label_clusters = TRUE)),
+        specificClusters = c(1, 2, 3),
+        labelClusters = TRUE)),
         c("data",
             "layers",
             "scales",
@@ -686,10 +686,10 @@ test_that(desc = paste0("Testing celdaUmap with celda_CG when model class is",
 # })
 
 test_that(desc = "Testing celdaUmap.celda_CG with subset of cells", {
-    expect_success(expect_error(umap <- celdaUmap(counts = celdaCGSim$counts,
-        celdaMod = modelCG,
-        maxCells = 50,
-        minClusterSize = 50)))
+    # expect_success(expect_error(umap <- celdaUmap(counts = celdaCGSim$counts,
+    #     celdaMod = modelCG,
+    #     maxCells = 50,
+    #     minClusterSize = 50)))
     umap <- celdaUmap(counts = celdaCGSim$counts,
         celdaMod = modelCG,
         maxCells = 100,
@@ -808,7 +808,7 @@ test_that(desc = "Testing perplexity.celda_CG", {
 })
 
 test_that(desc = "Testing featureModuleTable", {
-    table <- featureModuleTable(celdaCGSim$counts, modelCG, output.file = NULL)
+    table <- featureModuleTable(celdaCGSim$counts, modelCG, outputFile = NULL)
     expect_equal(ncol(table), 10)
 })
 
@@ -848,6 +848,6 @@ test_that(desc = "Invoking error from .logMessages function", {
 test_that(desc = paste0("miscellaneous distance fxns that are not directly",
     " used within celda, but will be tested"), {
         x <- data.frame(x = seq(2, 4), y = seq(1, 3))
-        expect_equal(class(hellingerDist(x)), "dist")
-        expect_equal(class(spearmanDist(x)), "dist")
+        expect_equal(class(.hellingerDist(x)), "dist")
+        expect_equal(class(.spearmanDist(x)), "dist")
     })
