@@ -50,7 +50,7 @@
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of K and multiple chains in parallel.
 #' @examples
-#' celdaMod <- celda_C(celdaCSim$counts,
+#' celdaCMod <- celda_C(celdaCSim$counts,
 #'     K = celdaCSim$K,
 #'     sampleLabel = celdaCSim$sampleLabel)
 #' @import Rcpp RcppEigen
@@ -534,7 +534,7 @@ celda_C <- function(counts,
 #'  simulating feature modules and cell populations.
 #' @examples
 #' celdaCSim <- simulateCells(model = "celda_C", K = 10)
-#' sim.counts <- celdaCSim$counts
+#' simCounts <- celdaCSim$counts
 #' @export
 simulateCells.celda_C <- function(model,
     S = 5,

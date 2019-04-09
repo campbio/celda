@@ -600,7 +600,7 @@ celda_CG <- function(counts,
 #' @seealso `celda_C()` for simulating cell subpopulations and `celda_G()` for
 #'  simulating feature modules.
 #' @examples
-#' celdaSim <- simulateCells(model = "celda_CG")
+#' celdaCGSim <- simulateCells(model = "celda_CG")
 #' @export
 simulateCells.celda_CG <- function(model,
     S = 5,
