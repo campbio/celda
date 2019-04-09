@@ -83,7 +83,7 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #         bestOnly = FALSE),
 #         paste0("The following elements in 'paramsTest' are not arguments of",
 #             " 'celda_CG': M"))
-# 
+#
 #     expect_error(celdaGridSearch(counts = celdaCGSim$counts,
 #         model = "celda_CG",
 #         nchains = 1,
@@ -92,7 +92,7 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #         paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel)),
 #         paste0("Setting parameters such as 'zInit', 'yInit', and",
 #             " 'sampleLabel' in 'paramsTest' is not currently supported."))
-# 
+#
 #     expect_error(celdaGridSearch(counts = celdaCGSim$counts,
 #         model = "celda_CG",
 #         nchains = 1,
@@ -101,7 +101,7 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #         paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel)),
 #         paste0("The following arguments are not in 'paramsTest' or",
 #             " 'paramsFixed' but are required for 'celda_CG': K,L"))
-# 
+#
 #     expect_error(celdaGridSearch(counts = celdaCGSim$counts,
 #         model = "celda_CG",
 #         nchains = 1,
@@ -111,7 +111,7 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #             xxx = "xxx")),
 #         paste0("The following elements in 'paramsFixed' are not arguments",
 #             " of 'celda_CG': xxx"))
-# 
+#
 #     expect_warning(celdaGridSearch(counts = celdaCGSim$counts,
 #         model = "celda_CG",
 #         maxIter = 1,
@@ -120,7 +120,7 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #         paramsFixed = list(zInitialize = "random", yInitialize = "random")),
 #         paste0("Parameter 'nchains' should not be used within the",
 #             " paramsTest list"))
-# 
+#
 #     celdaCGres <- celdaGridSearch(counts = celdaCGSim$counts,
 #         model = "celda_CG",
 #         nchains = 2,
@@ -136,7 +136,7 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #     expect_error(plotGridSearchPerplexity(celdaCGres))
 #     expect_equal(names(runParams(celdaCGres)),
 #         c("index", "chain", "K", "L", "log_likelihood"))
-# 
+#
 #     celdaCGres <- resamplePerplexity(celdaCGSim$counts,
 #         celdaCGres, resample = 2)
 #     expect_is(celdaCGres, "celdaList")
@@ -144,33 +144,33 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #         celdaCGres, resample = "2"))
 #     expect_error(resamplePerplexity(celdaCGSim$counts,
 #         "celdaCGres", resample = 2))
-# 
+#
 #     plotObj <- plotGridSearchPerplexity(celdaCGres)
 #     expect_is(plotObj, "ggplot")
-# 
+#
 #     expect_error(subsetCeldaList(celdaList = "celdaList"),
 #         "celdaList parameter was not of class celdaList.")
 #     expect_error(subsetCeldaList(celdaCGres, params = list(K = 7, L = 11)))
 #     expect_error(subsetCeldaList(celdaCGres, params = list(K = 5, M = 10)))
-# 
+#
 #     celdaCGresK5L10 <- subsetCeldaList(celdaCGres, params = list(K = 5, L = 10))
 #     modelCG <- selectBestModel(celdaCGresK5L10)
-# 
+#
 #     expect_error(selectBestModel("celdaList"),
 #         "celdaList parameter was not of class celdaList.")
 #     expect_error(celdaCGres <- resamplePerplexity(celdaCGSim$counts,
 #         modelCG, resample = 2))
 #     expect_error(celdaCGres <- resamplePerplexity(celdaCGSim$counts,
 #         celdaCGres, resample = "a"))
-# 
+#
 #     celdaCGresIndex1 <- subsetCeldaList(celdaCGres, params = list(index = 1))
 #     expect_true(all(is(celdaCGresIndex1, "celda_CG") &&
 #             !is(celdaCGresIndex1, "celdaList")))
-# 
+#
 #     res <- perplexity(celdaCGSim$counts, modelCG)
 #     res2 <- perplexity(celdaCGSim$counts,
 #         modelCG, newCounts = celdaCGSim$counts + 1)
-# 
+#
 #     expect_error(res <- perplexity(celdaCGSim$counts,
 #         modelCG, newCounts = celdaCGSim$counts[-1, ]))
 # })
@@ -327,30 +327,30 @@ test_that(desc = "Testing topRank with celda_CG", {
 #         z = modelCG@clusters$z,
 #         y = modelCG@clusters$y,
 #         cellIx = seq(10))),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 #     expect_equal(names(plotHeatmap(counts = celdaCGSim$counts,
 #         z = NULL,
 #         y = modelCG@clusters$y,
 #         cellIx = seq(10),
 #         colorScheme = "sequential")),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 #     expect_equal(names(plotHeatmap(counts = celdaCGSim$counts,
 #         z = modelCG@clusters$z,
 #         y = modelCG@clusters$y,
 #         featureIx = seq(10))),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 #     expect_equal(names(plotHeatmap(counts = celdaCGSim$counts,
 #         z = modelCG@clusters$z,
 #         y = NULL,
 #         featureIx = seq(10))),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 #     expect_equal(names(plotHeatmap(counts = celdaCGSim$counts,
 #         z = modelCG@clusters$z,
 #         y = modelCG@clusters$y,
 #         cellIx = seq(10),
 #         colorScheme = "sequential",
 #         annotationColor = "default")),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 # })
 
 # plotHeatmap with annotations
@@ -361,7 +361,7 @@ test_that(desc = "Testing topRank with celda_CG", {
 #     annotFeature <- as.data.frame(c(rep(x = 1,
 #         times = nrow(celdaCGSim$counts) - 100),
 #         rep(x = 2, 100)))
-# 
+#
 #     rownames(annotCell) <- colnames(celdaCGSim$counts)
 #     colnames(annotCell) <- "cell"
 #     rownames(annotFeature) <- rownames(celdaCGSim$counts)
@@ -372,8 +372,8 @@ test_that(desc = "Testing topRank with celda_CG", {
 #         annotationFeature = annotFeature,
 #         z = modelCG@clusters$z,
 #         y = modelCG@clusters$y)),
-#         c("tree_row", "tree_col", "gtable"))
-# 
+#         c("treeRow", "treeCol", "gtable"))
+#
 #     rownames(annotCell) <- NULL
 #     rownames(annotFeature) <- NULL
 #     expect_equal(names(plotHeatmap(celdaMod = modelCG,
@@ -382,14 +382,14 @@ test_that(desc = "Testing topRank with celda_CG", {
 #         annotationFeature = as.matrix(annotFeature),
 #         z = modelCG@clusters$z,
 #         y = modelCG@clusters$y)),
-#         c("tree_row", "tree_col", "gtable"))
+#         c("treeRow", "treeCol", "gtable"))
 # })
 
 # celdaHeatmap
 test_that(desc = "Testing celdaHeatmap with celda_CG", {
     expect_equal(names(celdaHeatmap(celdaMod = modelCG,
         counts = celdaCGSim$counts)),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
 })
 
 # moduleHeatmap
@@ -398,19 +398,19 @@ test_that(desc = "Checking moduleHeatmap to see if it runs", {
         celdaMod = modelCG,
         featureModule = c(2, 3),
         topCells = 500)),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
     expect_equal(names(moduleHeatmap(celdaCGSim$counts,
         celdaMod = modelCG,
         topFeatures = 15,
         topCells = 15,
         normalize = FALSE)),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
     expect_equal(names(moduleHeatmap(celdaCGSim$counts,
         celdaMod = modelCG,
         topFeatures = 15,
         topCells = NULL,
         normalize = FALSE)),
-        c("tree_row", "tree_col", "gtable"))
+        c("treeRow", "treeCol", "gtable"))
     expect_error(moduleHeatmap(counts = "counts",
         celdaMod = modelCG,
         featureModule = c(2, 3)),
@@ -427,7 +427,7 @@ test_that(desc = "Checking moduleHeatmap to see if it runs", {
 #         celdaMod = modelCG,
 #         level = "sample")
 #     expect_true(!is.null(plotObj))
-# 
+#
 #     ## Without a sample label
 #     modelCG2 <- celda_CG(celdaCGSim$counts,
 #         sampleLabel = NULL,
@@ -632,7 +632,7 @@ test_that(desc = paste0("Testing celdaTsne with celda_CG when model class",
 #     plotObj <- plotDimReduceCluster(tsne[, 1], tsne[, 2], modelCG@clusters$z)
 #     expect_true(ncol(tsne) == 2 & nrow(tsne) == length(modelCG@clusters$z))
 #     expect_true(!is.null(plotObj))
-# 
+#
 #     tsne <- celdaTsne(counts = celdaCGSim$counts,
 #         celdaMod = modelCG,
 #         maxCells = ncol(celdaCGSim$counts),
@@ -674,7 +674,7 @@ test_that(desc = paste0("Testing celdaUmap with celda_CG when model class is",
 #     plotObj <- plotDimReduceCluster(umap[, 1], umap[, 2], modelCG@clusters$z)
 #     expect_true(ncol(umap) == 2 & nrow(umap) == length(modelCG@clusters$z))
 #     expect_true(!is.null(plotObj))
-# 
+#
 #     umap <- celdaUmap(counts = celdaCGSim$counts,
 #         celdaMod = modelCG,
 #         maxCells = ncol(celdaCGSim$counts),

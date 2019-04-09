@@ -37,7 +37,8 @@ Imports:
     stringi,
     SummarizedExperiment,
     MCMCprecision,
-    ggrepel
+    ggrepel,
+    Rtsne
 Suggests:
     testthat,
     knitr,
@@ -46,7 +47,6 @@ Suggests:
     corrplot,
     Matrix,
     biomaRt,
-    Rtsne,
     covr,
     M3DExampleData,
     BiocManager,

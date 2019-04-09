@@ -59,7 +59,7 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #         bestOnly = FALSE),
 #         paste0("The following elements in 'paramsTest' are not arguments of",
 #             " 'celda_C': M"))
-# 
+#
 #     expect_error(celdaGridSearch(counts = celdaCCim$counts,
 #         model = "celda_C",
 #         nchains = 1,
@@ -68,7 +68,7 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel)),
 #         paste0("Setting parameters such as 'z.init', 'y.init', and",
 #             "'sampleLabel' in 'paramsTest' is not currently supported."))
-# 
+#
 #     expect_error(celdaGridSearch(counts = celdaCCim$counts,
 #         model = "celda_C",
 #         nchains = 1,
@@ -77,7 +77,7 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel)),
 #         paste0("The following arguments are not in 'paramsTest' or",
 #             " 'paramsFixed' but are required for 'celda_C': K"))
-# 
+#
 #     expect_error(celdaGridSearch(counts = celdaCCim$counts,
 #         model = "celda_C",
 #         nchains = 1,
@@ -87,12 +87,12 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #             xxx = "xxx")),
 #         paste0("The following elements in 'paramsFixed' are not arguments",
 #             "of 'celda_C': xxx"))
-# 
+#
 #     expect_true(class(celdaCRes)[1] == "celdaList")
 #     expect_equal(names(runParams(celdaCRes)),
 #         c("index", "chain", "K", "log_likelihood"))
 #     expect_error(plotGridSearchPerplexity(celdaCRes))
-# 
+#
 #     celdaCRes <- resamplePerplexity(celdaCCim$counts, celdaCRes, resample = 2)
 #     expect_equal(is.null(celdaCRes@perplexity), FALSE)
 #     expect_true(is(celdaCRes, "celdaList"))
@@ -100,23 +100,23 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #         celdaCRes, resample = "2"))
 #     expect_error(resamplePerplexity(celdaCCim$counts,
 #         "celdaCRes", resample = 2))
-# 
+#
 #     plotObj <- plotGridSearchPerplexity(celdaCRes)
 #     expect_is(plotObj, "ggplot")
-# 
+#
 #     celdaCResIndex1 <- subsetCeldaList(celdaCRes, params = list(index = 1))
 #     expect_true(all(is(celdaCResIndex1, "celda_C") &&
 #             !is(celdaCResIndex1, "celda_list")))
-# 
+#
 #     expect_error(subsetCeldaList(celdaCRes, params = list(K = 11)))
 #     expect_error(subsetCeldaList(celdaCRes, params = list(K = 5, M = 10)))
-# 
+#
 #     celdaCResK5 <- subsetCeldaList(celdaCRes, params = list(K = 5))
 #     modelC2 <- selectBestModel(celdaCResK5)
 #     res <- perplexity(celdaCCim$counts, modelC)
 #     res2 <- perplexity(celdaCCim$counts, modelC,
 #         newCounts = celdaCCim$counts + 1)
-# 
+#
 #     expect_error(res <- perplexity.celda_C(celdaCCim$counts,
 #         modelC,
 #         newCounts = celdaCCim$counts[-1, ]))
@@ -239,7 +239,7 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 #     annot <- as.data.frame(c(rep(x = 1,
 #         times = ncol(celdaCCim$counts) - 100),
 #         rep(x = 2, 100)))
-# 
+#
 #     rownames(annot) <- colnames(celdaCCim$counts)
 #     expect_equal(names(plotHeatmap(
 #         celdaMod = modelC,
@@ -247,14 +247,14 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 #         annotationCell = annot,
 #         z = modelC@clusters$z)),
 #         c("tree_row", "tree_col", "gtable"))
-# 
+#
 #     rownames(annot) <- NULL
 #     expect_equal(names(plotHeatmap(celdaMod = modelC,
 #         counts = celdaCCim$counts,
 #         annotation.feature = as.matrix(annot),
 #         z = modelC@clusters$z)),
 #         c("tree_row", "tree_col", "gtable"))
-# 
+#
 #     rownames(annot) <- rev(colnames(celdaCCim$counts))
 #     expect_error(plotHeatmap(celdaMod = modelC,
 #         counts = celdaCCim$counts,
@@ -278,7 +278,7 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 #         celdaMod = modelC,
 #         level = "sample")
 #     expect_true(!is.null(plotObj))
-# 
+#
 #     ## Without a sample label
 #     modelC <- celda_C(celdaCCim$counts,
 #         sampleLabel = NULL,

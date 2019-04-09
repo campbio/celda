@@ -98,7 +98,7 @@ normalizeCounts <- function(counts,
         stop("'transformationFun' needs to be of class 'function'")
     }
     if (!is.null(scaleFun) && !is.function(scaleFun)) {
-        stop("'scale.fun' needs to be of class 'function'")
+        stop("'scaleFun' needs to be of class 'function'")
     }
     # Perform normalization
     if (normalize == "proportion") {

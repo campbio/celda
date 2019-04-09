@@ -131,8 +131,8 @@ plotHeatmap <- function(counts,
 
     if (!is.null(trim)) {
         if (length(trim) != 2) {
-            stop("'trim' should be a 2 element vector specifying the lower
-                and upper boundaries")
+            stop("'trim' should be a 2 element vector specifying the lower",
+                " and upper boundaries")
         }
         trim <- sort(trim)
         counts[counts < trim[1]] <- trim[1]
