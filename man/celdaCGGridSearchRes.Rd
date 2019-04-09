@@ -15,8 +15,9 @@ Example results of celdaGridSearch on celdaCGSim
 celdaCGGridSearchRes = celdaGridSearch(celdaCGSim$counts,
     model = "celda_CG",
     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-    paramsFixed = list(sampleLabel = celdaCGsim$sampleLabel),
+    paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
     bestOnly = TRUE,
-    nchains = 1)
+    nchains = 1,
+    cores = 4)
 }
 \keyword{datasets}
