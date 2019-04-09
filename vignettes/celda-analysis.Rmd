@@ -346,8 +346,8 @@ cgs <- celdaGridSearch(simCounts$counts,
     bestOnly = FALSE)
 
 cgs <- resamplePerplexity(counts = simCounts$counts,
-  celdaList = cgs,
-  resample = 2)
+    celdaList = cgs,
+    resample = 2)
 
 cgsK5L10 <- subsetCeldaList(celdaList = cgs, params = list(K = 5, L = 10))
 
@@ -365,7 +365,7 @@ Celda also contains several utility functions for the users' convenience.
 
 ```{r}
 featureModuleLookup(counts = simCounts$counts, celdaMod = celdaModel,
-  feature = c("Gene_99"))
+    feature = c("Gene_99"))
 ```
 
 ## recodeClusterZ, recodeClusterY
