@@ -26,6 +26,10 @@ install_github("campbio/celda@devel")
 ```
 brew install libgit2
 ```
+**NOTE** If you install celda in Rstudio and get an error:could not find tools necessary to compile a package, you can try this:
+```
+options(buildtools.check = function(action) TRUE)
+```
 
 ## Examples and vignettes
 
