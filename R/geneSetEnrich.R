@@ -39,15 +39,16 @@ geneSetEnrich <- function(counts, celdaModel, databases, fdr = 0.05) {
 
     #iterate over each module, get genes in that module, add to list
     for (i in seq_len(celdaModel@params$L)) {
-        modules[[i]] <- as.character(genes[genes$module == i, 'gene'])
+        modules[[i]] <- as.character(genes[genes$module == i, "gene"])
     }
 
     #enrichment analysis
     enrichment <- lapply(modules, function(module) {
-        invisible(capture.output(table <- enrichR::enrichr(genes = module,
+        invisible(utils::capture.output(table <- enrichR::enrichr(
+            genes = module,
             databases = databases)))
         table <- Reduce(f = rbind, x = table)
-        table[table$Adjusted.P.value < fdr, 'Term']
+        table[table$Adjusted.P.value < fdr, "Term"]
     })
 
     #return results as a list

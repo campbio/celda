@@ -1,0 +1,3 @@
+Changes in version 0.99.22:
+
+    o   New package celda, for bi-clustering of single-cell 'omics data.

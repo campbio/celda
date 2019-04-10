@@ -12,7 +12,8 @@ fastNormPropSqrt(R_counts, R_alpha)
 \item{R_alpha}{A double value to be added to the matrix as a pseudocount}
 }
 \value{
-A numeric matrix where the columns have been normalized to proportions
+A numeric matrix where the columns have been normalized to
+ proportions
 }
 \description{
 Fast normalization for numeric matrix
