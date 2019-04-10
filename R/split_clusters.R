@@ -208,7 +208,7 @@
     zSplit <- matrix(NA,
         nrow = length(z),
         ncol = length(zToSplit) * maxClustersToTry)
-    zSplitLl = rep(NA, ncol = length(zToSplit) * maxClustersToTry)
+    zSplitLl <- rep(NA, ncol = length(zToSplit) * maxClustersToTry)
     zSplitLl[1] <- .cCGCalcLL(K,
         L,
         mCPByS,
@@ -406,7 +406,7 @@
     ## Loop through each split-able Z and perform split
     clustSplit <- vector("list", L)
     for (i in yToSplit) {
-        clustLabel <- .celda_G(tempNGByCP[y == i,],
+        clustLabel <- .celda_G(tempNGByCP[y == i, ],
             L = 2,
             yInitialize = "random",
             maxIter = 5,
@@ -424,7 +424,7 @@
     ySplit <- matrix(NA,
         nrow = length(y),
         ncol = length(yToSplit) * maxClustersToTry)
-    ySplitLl = rep(NA, ncol = length(yToSplit) * maxClustersToTry)
+    ySplitLl <- rep(NA, ncol = length(yToSplit) * maxClustersToTry)
     ySplitLl[1] <- .cCGCalcLL(K,
         L,
         mCPByS,
@@ -581,7 +581,7 @@
     ## Loop through each split-able y and find best split
     clustSplit <- vector("list", L)
     for (i in yToSplit) {
-        clustLabel <- .celda_G(counts[y == i,],
+        clustLabel <- .celda_G(counts[y == i, ],
             L = 2,
             yInitialize = "random",
             maxIter = 5,

@@ -212,7 +212,7 @@
     return(res)
 }
 
-.findCoordinates <- function(n, gaps, m = seq(1,n)) {
+.findCoordinates <- function(n, gaps, m = seq(1, n)) {
     if (length(gaps) == 0) {
         return(list(
             coord = unit(m / n, "npc"),
@@ -227,7 +227,9 @@
         (unit(1, "npc") - length(gaps) * unit("0", "bigpts"))
 
     gaps2 <- base::apply(sapply(gaps,
-        function(gap, x) {x > gap},
+        function(gap, x) {
+            x > gap
+        },
         m), 1, sum)
     coord <- m * size + (gaps2 * unit("0", "bigpts"))
 
@@ -247,10 +249,10 @@
         nrow = 2 * n - 1,
         ncol = 2,
         dimnames = list(NULL, c("x", "y")))
-    dist[seq(1,n), 1] <- 1 / n / 2 + (1 / n) *
-        (match(seq(1,n), o) - 1)
+    dist[seq(1, n), 1] <- 1 / n / 2 + (1 / n) *
+        (match(seq(1, n), o) - 1)
 
-    for (i in seq(1,nrow(m))) {
+    for (i in seq(1, nrow(m))) {
         dist[n + i, 1] <- (dist[m[i, 1], 1] + dist[m[i, 2], 1]) / 2
         dist[n + i, 2] <- h[i]
     }
@@ -264,9 +266,9 @@
 
     x <- rep(NA, nrow(m) * 4)
     y <- rep(NA, nrow(m) * 4)
-    id <- rep(1:nrow(m), rep(4, nrow(m)))
+    id <- rep(seq(nrow(m)), rep(4, nrow(m)))
 
-    for (i in seq(1,nrow(m))) {
+    for (i in seq(1, nrow(m))) {
         c <- drawConnection(dist[m[i, 1], 1],
             dist[m[i, 2], 1],
             dist[m[i, 1], 2],
@@ -933,7 +935,7 @@ vplayout <- function(x, y) {
 
 .generateBreaks <- function(x, n, center = FALSE) {
     if (center) {
-        m <- max(abs(c(min(x,na.rm = TRUE),
+        m <- max(abs(c(min(x, na.rm = TRUE),
             max(x, na.rm = TRUE))))
         res <- seq(-m, m, length.out = n + 1)
     } else {
@@ -1036,7 +1038,8 @@ vplayout <- function(x, y) {
             class.pos <- which(labels == x)
 
             if (length(class.pos) == 1) {
-                # if only 1 row in the group return a manually made "hclust" object
+                # if only 1 row in the group return a manually made "hclust"
+                # object
                 sub.hclust <- as.list(1:7)
                 names(sub.hclust) <- c("merge",
                     "height",
@@ -1053,7 +1056,7 @@ vplayout <- function(x, y) {
                 return(sub.hclust)
             } else if (length(class.pos) > 1) {
                 # if >1 rows return the "hclust" object
-                return(stats::hclust(dis(mat = mat[class.pos,],
+                return(stats::hclust(dis(mat = mat[class.pos, ],
                     distance = distance),
                     method = method))
             }
@@ -1073,7 +1076,7 @@ vplayout <- function(x, y) {
                 if (hclust1$merge[1, 1] == 0 &
                         hclust2$merge[1, 1] == 0) {
                     # both groups have only 1 row
-                    hclustCom <- as.list(seq(1,7))
+                    hclustCom <- as.list(seq(1, 7))
                     names(hclustCom) <-
                         c("merge",
                         "height",
@@ -1084,7 +1087,7 @@ vplayout <- function(x, y) {
                         "dist.method")
 
                     class(hclustCom) <- "hclust"
-                    hclustCom$merge <- matrix(c(-1,-2), nrow = 1)
+                    hclustCom$merge <- matrix(c(-1, -2), nrow = 1)
                     # check for different matrix whether 1 should be good
                     hclustCom$height <- 1
                     hclustCom$order <- c(1, 2)
@@ -1148,7 +1151,7 @@ vplayout <- function(x, y) {
 
                         #nodes in the hclust1 group
                         row.1 <- dim(hclust1$merge)[1]
-                        hclustCom <- as.list(seq(1,7))
+                        hclustCom <- as.list(seq(1, 7))
                         names(hclustCom) <-
                             c("merge",
                                 "height",
@@ -1160,7 +1163,7 @@ vplayout <- function(x, y) {
                         class(hclustCom) <- "hclust"
                         hclustCom$merge <- hclust1$merge
                         hclustCom$merge <- rbind(hclustCom$merge,
-                            c(row.1,- (row.1 + 2)))
+                            c(row.1, - (row.1 + 2)))
                         hclustCom$height <- c(hclust1$height,
                             max(hclust1$height) + 1)
                         hclustCom$order <- c(hclust1$order,
@@ -1222,7 +1225,7 @@ vplayout <- function(x, y) {
             }
         }
 
-        factorColors <- scales::dscale(factor(seq(1,count)), hue_pal(l = 75))
+        factorColors <- scales::dscale(factor(seq(1, count)), hue_pal(l = 75))
 
         contCounter <- 2
         for (i in 1:length(annotation)) {

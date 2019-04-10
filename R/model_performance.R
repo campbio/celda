@@ -100,7 +100,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
     ix1 <- rep(seq(nrow(celdaList@perplexity)),
         each = ncol(celdaList@perplexity))
     ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
-    df <- data.frame(celdaList@runParams[ix1,],
+    df <- data.frame(celdaList@runParams[ix1, ],
         perplexity = celdaList@perplexity[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
     df$L <- as.factor(df$L)
@@ -122,7 +122,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
           ggplot2::ylab("Perplexity") +
           ggplot2::xlab("K") +
           ggplot2::scale_x_discrete(breaks = seq(
-              min(celdaList@runParams$K), max(celdaList@runParams$K), sep )) +
+              min(celdaList@runParams$K), max(celdaList@runParams$K), sep)) +
           ggplot2::theme_bw()
     } else {
         plot <-
@@ -131,7 +131,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
               ggplot2::aes_string(color = "K")) +
           ggplot2::scale_color_discrete(name = "K") +
           ggplot2::geom_path(data = lMeansByK,
-            ggplot2::aes_string( x = "L", y = "mean_perplexity", group = "K",
+            ggplot2::aes_string(x = "L", y = "mean_perplexity", group = "K",
                 color = "K")) +
           ggplot2::ylab("Perplexity") +
           ggplot2::xlab("L") +
@@ -170,7 +170,7 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
     ix1 <- rep(seq(nrow(celdaList@perplexity)),
         each = ncol(celdaList@perplexity))
     ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
-    df <- data.frame(celdaList@runParams[ix1,],
+    df <- data.frame(celdaList@runParams[ix1, ],
         perplexity = celdaList@perplexity[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
 
@@ -218,7 +218,7 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
     ix1 <- rep(seq(nrow(celdaList@perplexity)),
         each = ncol(celdaList@perplexity))
     ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
-    df <- data.frame(celdaList@runParams[ix1,],
+    df <- data.frame(celdaList@runParams[ix1, ],
         perplexity = celdaList@perplexity[cbind(ix1, ix2)])
     df$L <- as.factor(df$L)
 

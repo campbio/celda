@@ -452,7 +452,7 @@ violinPlot <- function(counts,
                     x = "Cluster",
                     y = "Expression",
                     fill = "Cluster")) +
-            ggplot2::facet_wrap( ~ Feature) +
+            ggplot2::facet_wrap(~ Feature) +
             ggplot2::geom_violin(trim = TRUE, scale = "width") +
             ggplot2::geom_jitter(height = 0, size = 0.1) +
             ggplot2::scale_fill_manual(values = colorPal) +
@@ -470,7 +470,7 @@ violinPlot <- function(counts,
                     x = "Cluster",
                     y = "Expression",
                     fill = "Cluster")) +
-            ggplot2::facet_wrap( ~ Feature) +
+            ggplot2::facet_wrap(~ Feature) +
             ggplot2::geom_violin(trim = TRUE, scale = "width") +
             ggplot2::scale_fill_manual(values = colorPal) +
             ggplot2::theme(strip.background = ggplot2::element_blank(),

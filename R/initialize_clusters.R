@@ -91,12 +91,12 @@
         KToUse <- ifelse(KPerCluster < 2, 2, KPerCluster)
 
         zTa <- tabulate(overallZ, max(overallZ))
-        
+
         zToSplit <- which(zTa > minCell & zTa > KToUse)
         if (length(zToSplit) > 1) {
             zToSplit <- sample(zToSplit)
         } else if (length(zToSplit) == 0) {
-            break()
+            break
         }
 
         # Cycle through each splitable cluster and split it up into
@@ -124,7 +124,7 @@
 
             # Ensure that the maximum number of clusters does not get too large'
             if (currentK > K + 10) {
-                break()
+                break
             }
         }
     }
@@ -253,10 +253,11 @@
         yToSplit <- sample(which(yTa > minFeature & yTa > LSubcluster))
 
         if (length(yToSplit) == 0) {
-            break()
+            break
         }
 
-        # Cycle through each splitable cluster and split it up into L.sublcusters
+        # Cycle through each splitable cluster and split it up into
+        # LSublcusters
         for (i in yToSplit) {
             clustLabel <- .celda_G(
                 counts[overallY == i, , drop = FALSE],
@@ -283,7 +284,7 @@
 
             # Ensure that the maximum number of clusters does not get too large
             if (currentL > L + 10) {
-                break()
+                break
             }
         }
     }

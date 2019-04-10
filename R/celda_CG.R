@@ -405,7 +405,7 @@ celda_CG <- function(counts,
                 nTSByC <- .rowSumByGroup(counts, group = y, L = L)
             }
 
-	    if (K > 2 & iter != maxIter &
+            if (K > 2 & iter != maxIter &
                 (((numIterWithoutImprovement == stopIter &
                     !all(tempLl > ll)) & isTRUE(splitOnLast)) |
                         (splitOnIter > 0 & iter %% splitOnIter == 0 &
@@ -1166,7 +1166,7 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
 
         log.px <- sum(apply(innerLogProb, 2, matrixStats::logSumExp))
         # + sum(etaProb)
-        perplexity <- exp(-(log.px / sum(newCounts)))
+        perplexity <- exp(- (log.px / sum(newCounts)))
         return(perplexity)
     })
 

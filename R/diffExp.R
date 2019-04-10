@@ -106,7 +106,7 @@ differentialExpression <- function(counts,
         fcHurdleSig <- merge(fcHurdle[fdr < fdrThreshold &
                 abs(coef) > log2fcThreshold],
             data.table::as.data.table(GenomicRanges::mcols(sca)),
-            by = 'primerid')
+            by = "primerid")
         if (onlyPos) {
             fcHurdleSig <- fcHurdleSig[which(fcHurdleSig$log2fc > 0), ]
         }

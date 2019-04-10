@@ -277,8 +277,8 @@ subsetCeldaList <- function(celdaList, params) {
 
         if (nrow(newRunParams) == 0) {
             stop("No runs matched the criteria given in 'params'. Check",
-                " 'runParams(celdaList)' for complete list of parameters used to",
-                " generate 'celdaList'.")
+                " 'runParams(celdaList)' for complete list of parameters used",
+                " to generate 'celdaList'.")
         }
     }
 

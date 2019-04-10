@@ -49,7 +49,7 @@ plotDimReduceGrid <- function(dim1,
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
     naIx <- is.na(dim1) | is.na(dim2)
-    df <- df[!naIx,]
+    df <- df[!naIx, ]
 
     m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
     colnames(m) <- c(xlab, ylab, "facet", varLabel)
@@ -59,7 +59,7 @@ plotDimReduceGrid <- function(dim1,
         ggplot2::geom_point(stat = "identity",
             size = size,
             ggplot2::aes_string(color = varLabel)) +
-        ggplot2::facet_wrap( ~ facet) +
+        ggplot2::facet_wrap(~ facet) +
         ggplot2::theme_bw() +
         ggplot2::scale_colour_gradient2(low = colorLow,
             high = colorHigh,
@@ -326,7 +326,7 @@ plotDimReduceModule <-
 #'     specificClusters = c(1, 2, 3))
 #' }
 #' @export
-plotDimReduceCluster <-function(dim1,
+plotDimReduceCluster <- function(dim1,
     dim2,
     cluster,
     size = 1,
@@ -359,7 +359,7 @@ plotDimReduceCluster <-function(dim1,
 
     if (labelClusters == TRUE) {
         centroidList <- lapply(seq(length(unique(cluster))), function(x) {
-            df.sub <- df[df$Cluster == x,]
+            df.sub <- df[df$Cluster == x, ]
             median.1 <- stats::median(df.sub$Dimension_1)
             median.2 <- stats::median(df.sub$Dimension_2)
             cbind(median.1, median.2, x)
@@ -391,7 +391,7 @@ plotDimReduceCluster <-function(dim1,
 # dimensionality reduction with PCA before tSNE.
 # @param initialDims Integer.Number of dimensions from PCA to use as
 # input in tSNE.
-.calculateTsne <-function(norm,
+.calculateTsne <- function(norm,
     perplexity = 20,
     maxIter = 2500,
     seed = 12345,

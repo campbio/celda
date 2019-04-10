@@ -217,7 +217,8 @@ celda_G <- function(counts,
             nByTS <- nextY$nByTS
             y <- nextY$y
 
-            ## Perform split on i-th iteration of no improvement in log likelihood
+            ## Perform split on i-th iteration of no improvement in log
+            ## likelihood
             tempLl <- .cGCalcLL(nTSByC = nTSByC,
                     nByTS = nByTS,
                     nByG = nByG,
@@ -424,11 +425,11 @@ celda_G <- function(counts,
             y[i] <- .sampleLl(probs[, i])
 
             if (prevY != y[i]) {
-                nTSByC[prevY,] <- nTSByC[prevY,] - counts[i,]
+                nTSByC[prevY, ] <- nTSByC[prevY,] - counts[i, ]
                 nGByTS[prevY] <- nGByTS[prevY] - 1L
                 nByTS[prevY] <- nByTS[prevY] - nByG[i]
 
-                nTSByC[y[i],] <- nTSByC[y[i],] + counts[i,]
+                nTSByC[y[i], ] <- nTSByC[y[i],] + counts[i, ]
                 nGByTS[y[i]] <- nGByTS[y[i]] + 1L
                 nByTS[y[i]] <- nByTS[y[i]] + nByG[i]
             }
@@ -506,7 +507,7 @@ simulateCells.celda_G <- function(model,
     ## Select transcript distribution for each cell
     cellCounts <- matrix(0, nrow = G, ncol = C)
     for (i in seq(C)) {
-        cellDist <- stats::rmultinom(1, size = nN[i], prob = phi[i,])
+        cellDist <- stats::rmultinom(1, size = nN[i], prob = phi[i, ])
         for (j in seq(L)) {
             cellCounts[, i] <- cellCounts[, i] + stats::rmultinom(1,
                 size = cellDist[j], prob = psi[, j])
@@ -888,7 +889,7 @@ setMethod("perplexity", signature(celdaMod = "celda_G"),
             psi,
             celdaMod@clusters$y,
             celdaMod@params$L) # + sum(etaProb)
-        perplexity <- exp(-(logPx / sum(newCounts)))
+        perplexity <- exp(- (logPx / sum(newCounts)))
         return(perplexity)
     })
 
@@ -1032,7 +1033,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
             modules)
         umapRes <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-        final[preparedCountInfo$cellIx,] <- umapRes
+        final[preparedCountInfo$cellIx, ] <- umapRes
         rownames(final) <- colnames(counts)
         colnames(final) <- c("umap_1", "umap_2")
         return(final)

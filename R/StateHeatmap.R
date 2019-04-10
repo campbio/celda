@@ -60,7 +60,7 @@ moduleHeatmap <- function(counts,
         topRanked <- topRank(matrix = factorizedMatrix$proportions$module,
             n = topFeatures)
     } else {
-        topRanked <- topRank( matrix = factorizedMatrix$proportions$module,
+        topRanked <- topRank(matrix = factorizedMatrix$proportions$module,
             n = nrow(factorizedMatrix$proportions$module))
     }
 

@@ -234,8 +234,9 @@ celda_C <- function(counts,
             nCP <- nextZ$nCP
             z <- nextZ$z
 
-            ## Perform split on i-th iteration of no improvement in log likelihood
-            tempLl <-.cCCalcLL(mCPByS = mCPByS,
+            ## Perform split on i-th iteration of no improvement in log
+            ## likelihood
+            tempLl <- .cCCalcLL(mCPByS = mCPByS,
                     nGByCP = nGByCP,
                     s = s,
                     K = K,
@@ -244,7 +245,7 @@ celda_C <- function(counts,
                     alpha = alpha,
                     beta = beta)
 
-            if (K > 2 &iter != maxIter &
+            if (K > 2 & iter != maxIter &
                 ((((numIterWithoutImprovement == stopIter &
                     !all(tempLl > ll))) & isTRUE(splitOnLast)) |
                         (splitOnIter > 0 & iter %% splitOnIter == 0 &
@@ -560,7 +561,7 @@ simulateCells.celda_C <- function(model,
     z <- unlist(lapply(seq(S), function(i) {
         sample(seq(K),
             size = nC[i],
-            prob = theta[i,],
+            prob = theta[i, ],
             replace = TRUE)
     }))
 
@@ -919,7 +920,7 @@ setMethod("perplexity", signature(celdaMod = "celda_C"),
         inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
         logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
 
-        perplexity <- exp(-(logPx / sum(newCounts)))
+        perplexity <- exp(- (logPx / sum(newCounts)))
         return(perplexity)
     })
 
@@ -1064,7 +1065,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
             modules)
         res <- .calculateUmap(preparedCountInfo$norm, umapConfig)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-        final[preparedCountInfo$cellIx,] <- res
+        final[preparedCountInfo$cellIx, ] <- res
         rownames(final) <- colnames(counts)
         colnames(final) <- c("umap_1", "umap_2")
         return(final)
