@@ -15,7 +15,6 @@ Imports:
     foreach,
     ggplot2,
     RColorBrewer,
-    pheatmap,
     grid,
     scales,
     gtable,

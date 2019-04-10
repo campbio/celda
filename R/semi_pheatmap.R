@@ -1002,9 +1002,10 @@ vplayout <- function(x, y) {
                 "binary",
                 "minkowski")) &
                 !methods::is(distance, "dist")) {
-            stop("distance has to be a dissimilarity structure as produced by
-                dist or one measure  form the list: 'correlation', 'euclidean',
-                'maximum', 'manhattan', 'canberra', 'binary', 'minkowski'")
+            stop("distance has to be a dissimilarity structure as produced by",
+                " dist or one measure  form the list: 'correlation',",
+                " 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary',",
+                " 'minkowski'")
         }
 
         if (distance[1] == "correlation") {
@@ -1040,7 +1041,7 @@ vplayout <- function(x, y) {
             if (length(class.pos) == 1) {
                 # if only 1 row in the group return a manually made "hclust"
                 # object
-                sub.hclust <- as.list(1:7)
+                sub.hclust <- as.list(seq(7))
                 names(sub.hclust) <- c("merge",
                     "height",
                     "order",
@@ -1076,7 +1077,7 @@ vplayout <- function(x, y) {
                 if (hclust1$merge[1, 1] == 0 &
                         hclust2$merge[1, 1] == 0) {
                     # both groups have only 1 row
-                    hclustCom <- as.list(seq(1, 7))
+                    hclustCom <- as.list(seq(7))
                     names(hclustCom) <-
                         c("merge",
                         "height",
@@ -1550,16 +1551,16 @@ semiPheatmap <- function(mat,
         labelsRow <- rownames(mat)
     }
     if (is.null(labelsRow) & is.null(rownames(mat))) {
-        labelsRow <- 1:nrow(mat)
-        rownames(mat) <- 1:nrow(mat)
+        labelsRow <- seq(nrow(mat))
+        rownames(mat) <- seq(nrow(mat))
     }
 
     if (is.null(labelsCol) & !is.null(colnames(mat))) {
         labelsCol <- colnames(mat)
     }
     if (is.null(labelsCol) & is.null(colnames(mat))) {
-        labelsCol <- 1:ncol(mat)
-        colnames(mat) <- 1:ncol(mat)
+        labelsCol <- seq(ncol(mat))
+        colnames(mat) <- seq(ncol(mat))
     }
 
 
