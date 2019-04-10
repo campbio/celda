@@ -311,13 +311,13 @@ setMethod("celdaPerplexity",
 #' @export
 appendCeldaList <- function(list1, list2) {
     if (!is.element("celdaList", class(list1)) |
-        !is.element("celdaList", class(list2))) {
+            !is.element("celdaList", class(list2))) {
         stop("Both parameters to appendCeldaList must be of class celdaList.")
     }
     if (!(list1@countChecksum == list2@countChecksum)) {
-      warning("Provided lists have different countChecksums and may have been",
-          " generated from different count matrices. Using checksum from first",
-          " list...")
+        warning("Provided lists have different countChecksums and may have",
+            " been generated from different count matrices. Using checksum",
+            " from first list...")
     }
     newList <- methods::new(
         "celdaList",
@@ -377,7 +377,7 @@ setGeneric("celdaHeatmap",
 #'
 logLikelihood <- function(counts, model, ...) {
     do.call(paste0("logLikelihood.", model),
-      args = list(counts = counts, ...))
+        args = list(counts = counts, ...))
 }
 
 

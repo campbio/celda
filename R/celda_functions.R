@@ -91,7 +91,7 @@ normalizeCounts <- function(counts,
     scaleFun = NULL,
     pseudocountNormalize = 0,
     pseudocountTransform = 0) {
-
+    
     normalize <- match.arg(normalize)
     if (!is.null(transformationFun) &&
             !is.function(transformationFun)) {
@@ -116,7 +116,7 @@ normalizeCounts <- function(counts,
     }
     if (!is.null(transformationFun)) {
         norm <- do.call(transformationFun,
-                list(norm + pseudocountTransform))
+            list(norm + pseudocountTransform))
     }
     if (!is.null(scaleFun)) {
         norm <- t(base::apply(norm, 1, scaleFun))
@@ -195,7 +195,7 @@ recodeClusterY <- function(celdaMod, from, to) {
 compareCountMatrix <- function(counts,
     celdaMod,
     errorOnMismatch = TRUE) {
-
+    
     if ("y" %in% names(celdaMod@clusters)) {
         if (nrow(counts) != length(celdaMod@clusters$y)) {
             stop("The provided celda object was generated from a counts",
@@ -203,7 +203,7 @@ compareCountMatrix <- function(counts,
                 " provided.")
         }
     }
-
+    
     if ("z" %in% names(celdaMod@clusters)) {
         if (ncol(counts) != length(celdaMod@clusters$z)) {
             stop("The provided celda object was generated from a counts",
@@ -231,7 +231,7 @@ compareCountMatrix <- function(counts,
     logfile = NULL,
     append = FALSE,
     verbose = TRUE) {
-
+    
     if (isTRUE(verbose)) {
         if (!is.null(logfile)) {
             if (!is.character(logfile) || length(logfile) > 1) {
@@ -274,7 +274,7 @@ distinctColors <- function(n,
         "magenta"),
     saturationRange = c(0.7, 1),
     valueRange = c(0.7, 1)) {
-
+    
     if (!(all(hues %in% grDevices::colors()))) {
         stop("Only color names listed in the 'color' function can be used in",
             " 'hues'")
@@ -362,10 +362,10 @@ distinctColors <- function(n,
     } else {
         if (length(sampleLabel) != numCells) {
             stop("'sampleLabel' must be the same length as the number of",
-             " columns in the 'counts' matrix.")
+                " columns in the 'counts' matrix.")
         }
     }
-
+    
     if (!is.factor(sampleLabel)) {
         sampleLabel <- as.factor(sampleLabel)
     }
@@ -435,7 +435,7 @@ violinPlot <- function(counts,
     celdaMod,
     features,
     plotDots = FALSE) {
-
+    
     cluster <- clusters(celdaMod)$z
     dataFeature <- counts[match(features,
         rownames(counts)), , drop = FALSE]
@@ -445,13 +445,13 @@ violinPlot <- function(counts,
     m <- reshape2::melt(df, id.vars = c("cluster"))
     colnames(m) <- c("Cluster", "Feature", "Expression")
     colorPal <- distinctColors(length(unique(cluster)))
-
+    
     if (plotDots == TRUE) {
         p <- ggplot2::ggplot(m,
-                ggplot2::aes_string(
-                    x = "Cluster",
-                    y = "Expression",
-                    fill = "Cluster")) +
+            ggplot2::aes_string(
+                x = "Cluster",
+                y = "Expression",
+                fill = "Cluster")) +
             ggplot2::facet_wrap(~ Feature) +
             ggplot2::geom_violin(trim = TRUE, scale = "width") +
             ggplot2::geom_jitter(height = 0, size = 0.1) +
@@ -466,10 +466,10 @@ violinPlot <- function(counts,
         return(p)
     } else {
         p <- ggplot2::ggplot(m,
-                ggplot2::aes_string(
-                    x = "Cluster",
-                    y = "Expression",
-                    fill = "Cluster")) +
+            ggplot2::aes_string(
+                x = "Cluster",
+                y = "Expression",
+                fill = "Cluster")) +
             ggplot2::facet_wrap(~ Feature) +
             ggplot2::geom_violin(trim = TRUE, scale = "width") +
             ggplot2::scale_fill_manual(values = colorPal) +
