@@ -13,7 +13,7 @@ vignette: >
 
 
 # Introduction 
-DecontX is a Bayesian hierarchical model to estimate and remove cross-contamination from ambient RNA in single-cell RNA-seq count data generated from droplet-based sequencing devices.DecontX will take the count matrix with/without the cell labels and estimate the contamination level and deliver a decontaminted count matrix for downstream analysis. 
+DecontX is a Bayesian hierarchical model to estimate and remove cross-contamination from ambient RNA in single-cell RNA-seq count data generated from droplet-based sequencing devices. DecontX will take the count matrix with/without the cell labels and estimate the contamination level and deliver a decontaminted count matrix for downstream analysis. 
 
 In this vignette we will demonstrate how to use DecontX to estimate and remove contamination.  
 
@@ -32,43 +32,43 @@ DecontX will take a matrix of counts (referred as observed counts) where each ro
 In the function `simulateContaminatedMatrix`, the K parameter designates the number of cell clusters, the C parameter determines the number of cells, the G parameter determines the number of genes in the simulated dataset.
 
 ```{r}
-sim_counts = simulateContaminatedMatrix( G = 300, C = 100, K = 3 ) 
+simCounts <- simulateContaminatedMatrix(G = 300, C = 100, K = 3)
 ```
 
-The `nativeCounts` is the natively expressed counts matrix, and `observedCounts` is the observed counts matrix that contains both contaminated and natively expressed transctripts. The `N.by.C` is the total number of observed transcripts per cell. The counts matrix which only contains contamianted transcripts can be obtained by subtracting the observed counts matrix from the observed counts matrix. 
+The `nativeCounts` is the natively expressed counts matrix, and `observedCounts` is the observed counts matrix that contains both contaminated and natively expressed transctripts. The `NByC` is the total number of observed transcripts per cell. The counts matrix which only contains contamianted transcripts can be obtained by subtracting the observed counts matrix from the observed counts matrix. 
 
 ```{r}
-contamination = sim_counts$observedCounts - sim_counts$nativeCounts 
+contamination <- simCounts$observedCounts - simCounts$nativeCounts
 ```
 
 The `z` variable contains the population label for each cell
 ```{r}
-table(sim_counts$z) 
+table(simCounts$z)
 ```
 
 The `phi` and `eta` variables contain the expression distributions and contamination distributions for each population, respectively. Each column corresponds to a population, each row represents a gene. The sum of the rows equal to 1. 
 ```{r}
-colSums( sim_counts$phi ) 
-colSums( sim_counts$eta )
+colSums(simCounts$phi)
+colSums(simCounts$eta)
 ```
 
 
 # Decontamination using DecontX
 DecontX uses bayesian method to estimate and remove contamination via varitaional inference. 
 ```{r, warning = FALSE, message = FALSE}
-decontx.model = DecontX( counts = sim_counts$observedCounts, z = sim_counts$z ) 
+decontxModel <- decontX(counts = simCounts$observedCounts, z = simCounts$z)
 ```
 
-## Check convergance
-Use log-likelihood to check converagance 
+## Check convergence
+Use log-likelihood to check convergence 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
-plot( decontx.model$res.list$logLikelihood ) 
+plot(decontxModel$resList$logLikelihood)
 ```
 
 ## Evaluate model performance 
-`DecontX` estimates a contamination proportion for each cell. We compare the estimated contamination proportion with the real contamination proportion.
+`decontX` estimates a contamination proportion for each cell. We compare the estimated contamination proportion with the real contamination proportion.
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
-plot( decontx.model$res.list$est.conp, colSums(contamination) / sim_counts$N.by.C,  col=sim_counts$z) ; abline( 0, 1) 
+plot(decontxModel$resList$estConp,
+    colSums(contamination) / simCounts$NByC, col = simCounts$z)
+abline(0, 1)
 ```
-
-

@@ -7,37 +7,46 @@
 logLikelihood.celda_G(counts, y, L, beta, delta, gamma)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells.}
 
 \item{y}{Numeric vector. Denotes feature module labels.}
 
 \item{L}{Integer. Number of feature modules.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
+each feature module in each cell. Default 1.}
 
-\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to
+each feature in each module. Default 1.}
 
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to
+the number of features in each module. Default 1.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-The log-likelihood for the given cluster assignments
+The log-likelihood for the given cluster assignments.
 }
 \description{
-Calculates the log likelihood for user-provided feature module clusters using the `celda_G()` model.
+Calculates the log likelihood for user-provided feature module
+ clusters using the `celda_G()` model.
 }
 \examples{
-loglik = logLikelihood.celda_G(celda.G.sim$counts,
-                       y=celda.G.sim$y, L=celda.G.sim$L,
-                       beta=celda.G.sim$beta, delta=celda.G.sim$delta,
-                       gamma=celda.G.sim$gamma)
+loglik <- logLikelihood.celda_G(celdaGSim$counts,
+    y = celdaGSim$y,
+    L = celdaGSim$L,
+    beta = celdaGSim$beta,
+    delta = celdaGSim$delta,
+    gamma = celdaGSim$gamma)
 
-loglik = logLikelihood(celda.G.sim$counts, model="celda_G",
-                       y=celda.G.sim$y, L=celda.G.sim$L,
-                       beta=celda.G.sim$beta, delta=celda.G.sim$delta,
-                       gamma=celda.G.sim$gamma)
-
+loglik <- logLikelihood(celdaGSim$counts,
+    model = "celda_G",
+    y = celdaGSim$y,
+    L = celdaGSim$L,
+    beta = celdaGSim$beta,
+    delta = celdaGSim$delta,
+    gamma = celdaGSim$gamma)
 }
 \seealso{
 `celda_G()` for clustering features

@@ -4,42 +4,52 @@
 \alias{simulateCells.celda_C}
 \title{Simulate cells from the celda_C model}
 \usage{
-simulateCells.celda_C(model, S = 5, C.Range = c(50, 100),
-  N.Range = c(500, 1000), G = 100, K = 5, alpha = 1, beta = 1,
+simulateCells.celda_C(model, S = 5, CRange = c(50, 100),
+  NRange = c(500, 1000), G = 100, K = 5, alpha = 1, beta = 1,
   seed = 12345, ...)
 }
 \arguments{
-\item{model}{Character. Options available in `celda::available.models`.}
+\item{model}{Character. Options available in `celda::availableModels`.}
 
 \item{S}{Integer. Number of samples to simulate. Default 5.}
 
-\item{C.Range}{Vector of length 2 given the range (min,max) of number of cells for each sample to be randomly generated from the uniform distribution. Default c(50, 100).}
+\item{CRange}{Vector of length 2 given the range (min, max) of number of
+cells for each sample to be randomly generated from the uniform
+distribution. Default c(50, 100).}
 
-\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 1000).}
+\item{NRange}{Integer vector. A vector of length 2 that specifies the lower
+and upper bounds of the number of counts generated for each cell. Default
+c(500, 1000).}
 
 \item{G}{Integer. The total number of features to be simulated. Default 100.}
 
 \item{K}{Integer. Number of cell populations. Default 5.}
 
-\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount
+to each cell population in each sample. Default 1.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell population. Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
+each feature in each cell population. Default 1.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no
+calls to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-List. Contains the simulated matrix `counts`, cell population clusters `z`, sample assignments `sample.label`, and input parameters.
+List. Contains the simulated matrix `counts`, cell population
+ clusters `z`, sample assignments `sampleLabel`, and input parameters.
 }
 \description{
-Generates a simulated counts matrix, cell subpopulation clusters, and sample labels
-according to the generative process of the celda_C model.
+Generates a simulated counts matrix, cell subpopulation
+ clusters, and sample labels according to the generative process of the
+ celda_C model.
 }
 \examples{
-celda.c.sim = simulateCells(model="celda_C", K=10)
-sim.counts = celda.c.sim$counts
+celdaCSim <- simulateCells(model = "celda_C", K = 10)
+simCounts <- celdaCSim$counts
 }
 \seealso{
-`celda_G()` for simulating feature modules and `celda_CG()` for simulating feature modules and cell populations.
+`celda_G()` for simulating feature modules and `celda_CG()` for
+ simulating feature modules and cell populations.
 }

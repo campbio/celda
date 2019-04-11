@@ -3,28 +3,36 @@
 \docType{methods}
 \name{clusterProbability,celda_C-method}
 \alias{clusterProbability,celda_C-method}
-\title{Conditional probabilities for cells in subpopulations from a Celda_C model}
+\title{Conditional probabilities for cells in subpopulations from a Celda_C
+ model}
 \usage{
-\S4method{clusterProbability}{celda_C}(counts, celda.mod, log = FALSE,
+\S4method{clusterProbability}{celda_C}(counts, celdaMod, log = FALSE,
   ...)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_C`.}
+\item{celdaMod}{Celda object of class `celda_C`.}
 
-\item{log}{Logical. If FALSE, then the normalized conditional probabilities will be returned. If TRUE, then the unnormalized log probabilities will be returned. Default FALSE.}
+\item{log}{Logical. If FALSE, then the normalized conditional probabilities
+will be returned. If TRUE, then the unnormalized log probabilities will be
+returned. Default FALSE.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-A list containging a matrix for the conditional cell subpopulation cluster probabilities.
+A list containging a matrix for the conditional cell subpopulation
+ cluster probabilities.
 }
 \description{
-Calculates the conditional probability of each cell belonging to each subpopulation given all other cell cluster assignments in a `celda_C()` result.
+Calculates the conditional probability of each cell belonging to
+ each subpopulation given all other cell cluster assignments in a `celda_C()`
+ result.
 }
 \examples{
-cluster.prob = clusterProbability(celda.C.sim$counts, celda.C.mod)
+clusterProb <- clusterProbability(celdaCSim$counts, celdaCMod)
 }
 \seealso{
 `celda_C()` for clustering cells
