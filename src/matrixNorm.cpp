@@ -17,6 +17,9 @@ SEXP fastNormProp(NumericMatrix R_counts, double R_alpha) {
   // Normalize cell counts to proportions after adding pseudocount  
   double alpha_tot = R_counts.nrow() * R_alpha;
   for (int i = 0; i < R_counts.ncol(); ++i) {
+    if (cs[i] + alpha_tot == 0) {
+      stop("Division by 0. Make sure colSums of counts does not contain 0 after rounding counts to integers.");
+    }
     res(_,i) = (R_counts(_,i) + R_alpha) / (cs[i] + alpha_tot);
   }
   
