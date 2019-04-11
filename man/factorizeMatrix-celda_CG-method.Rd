@@ -5,24 +5,40 @@
 \alias{factorizeMatrix,celda_CG-method}
 \title{Matrix factorization for results from celda_CG}
 \usage{
-\S4method{factorizeMatrix}{celda_CG}(counts, celda.mod,
-  type = c("counts", "proportion", "posterior"))
+\S4method{factorizeMatrix}{celda_CG}(counts, celdaMod, type = c("counts",
+  "proportion", "posterior"))
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda model. Options are "celda_C" or "celda_CG". Celda object of class "celda_CG".}
+\item{celdaMod}{Celda model. Options are "celda_C" or "celda_CG". Celda
+object of class "celda_CG".}
 
-\item{type}{Character vector. A vector containing one or more of "counts", "proportion", or "posterior". "counts" returns the raw number of counts for each factorized matrix. "proportions" returns the normalized probabilities for each factorized matrix, which are calculated by dividing the raw counts in each factorized matrix by the total counts in each column. "posterior" returns the posterior estimates. Default `c("counts", "proportion", "posterior")`.}
+\item{type}{Character vector. A vector containing one or more of "counts",
+"proportion", or "posterior". "counts" returns the raw number of counts for
+each factorized matrix. "proportions" returns the normalized probabilities
+for each factorized matrix, which are calculated by dividing the raw counts
+in each factorized matrix by the total counts in each column. "posterior"
+returns the posterior estimates. Default
+`c("counts", "proportion", "posterior")`.}
 }
 \value{
-A list with elements for `counts`, `proportions`, or `posterior` probabilities. Each element will be a list containing factorized matrices for `module`, `cell.population`, and `sample`. Additionally, the contribution of each module in each individual cell will be included in the `cell` element of `counts` and `proportions` elements.
+A list with elements for `counts`, `proportions`, or `posterior`
+ probabilities. Each element will be a list containing factorized matrices
+ for `module`, `cellPopulation`, and `sample`. Additionally, the
+ contribution of each module in each individual cell will be included in the
+ `cell` element of `counts` and `proportions` elements.
 }
 \description{
-Generates factorized matrices showing the contribution of each feature in each module, each module in each cell and/or cell population, and each cell population in each sample.
+Generates factorized matrices showing the contribution of each
+ feature in each module, each module in each cell and/or cell population,
+ and each cell population in each sample.
 }
 \examples{
-factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, "posterior")
+factorizedMatrices <- factorizeMatrix(celdaCGSim$counts,
+    celdaCGMod, "posterior")
 }
 \seealso{
 `celda_CG()` for clustering features and cells

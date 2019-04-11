@@ -4,41 +4,48 @@
 \alias{simulateCells.celda_G}
 \title{Simulate cells from the celda_G model}
 \usage{
-simulateCells.celda_G(model, C = 100, N.Range = c(500, 1000),
-  G = 100, L = 10, beta = 1, gamma = 5, delta = 1,
-  seed = 12345, ...)
+simulateCells.celda_G(model, C = 100, NRange = c(500, 1000), G = 100,
+  L = 10, beta = 1, gamma = 5, delta = 1, seed = 12345, ...)
 }
 \arguments{
-\item{model}{Character. Options available in `celda::available.models`.}
+\item{model}{Character. Options available in `celda::availableModels`.}
 
 \item{C}{Integer. Number of cells to simulate. Default 100.}
 
-\item{N.Range}{Integer vector. A vector of length 2 that specifies the lower and upper bounds of the number of counts generated for each cell. Default c(500, 5000).}
+\item{NRange}{Integer vector. A vector of length 2 that specifies the lower
+and upper bounds of the number of counts generated for each cell. Default
+c(500, 5000).}
 
 \item{G}{Integer. The total number of features to be simulated. Default 100.}
 
 \item{L}{Integer. Number of feature modules. Default 10.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
+each feature module in each cell. Default 1.}
 
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 5.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to
+the number of features in each module. Default 5.}
 
-\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to
+each feature in each module. Default 1.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
+to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-List. Contains the simulated matrix `counts`, feature module clusters `y`, and input parameters.
+List. Contains the simulated matrix `counts`, feature module clusters
+ `y`, and input parameters.
 }
 \description{
 Generates a simulated counts matrix and feature module clusters
-according to the generative process of the celda_G model.
+ according to the generative process of the celda_G model.
 }
 \examples{
-celda.g.sim = simulateCells(model="celda_G")
+celdaGSim <- simulateCells(model = "celda_G")
 }
 \seealso{
-`celda_C()` for simulating cell subpopulations and `celda_CG()` for simulating feature modules and cell populations.
+`celda_C()` for simulating cell subpopulations and `celda_CG()` for
+ simulating feature modules and cell populations.
 }

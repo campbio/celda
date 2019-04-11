@@ -10,22 +10,30 @@ topRank(matrix, n = 25, margin = 2, threshold = 0,
 \arguments{
 \item{matrix}{Numeric matrix.}
 
-\item{n}{Integer. Maximum number of items above `threshold` returned for each ranked row or column.}
+\item{n}{Integer. Maximum number of items above `threshold` returned for each
+ranked row or column.}
 
-\item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for columns. Default 2.}
+\item{margin}{Integer. Dimension of `matrix` to rank, with 1 for rows, 2 for
+columns. Default 2.}
 
-\item{threshold}{Numeric. Only return ranked rows or columns in the matrix that are above this threshold. If NULL, then no threshold will be applied. Default 0.}
+\item{threshold}{Numeric. Only return ranked rows or columns in the matrix
+that are above this threshold. If NULL, then no threshold will be applied.
+Default 1.}
 
-\item{decreasing}{Logical. Specifies if the rank should be decreasing. Default TRUE.}
+\item{decreasing}{Logical. Specifies if the rank should be decreasing.
+Default TRUE.}
 }
 \value{
-List. The `index` variable provides the top `n` row (feature) indices contributing the most to each column (cell). The `names` variable provides the rownames corresponding to these indexes.
+List. The `index` variable provides the top `n` row (feature) indices
+ contributing the most to each column (cell). The `names` variable provides
+ the rownames corresponding to these indexes.
 }
 \description{
-topRank() can quickly identify the top `n` rows for each column of a matrix.
-For example, this can be useful for identifying the top `n` features per cell.
+topRank() can quickly identify the top `n` rows for each column
+ of a matrix. For example, this can be useful for identifying the top `n`
+ features per cell.
 }
 \examples{
-top.ranks.per.cell = topRank(sample.cells, n=5)
-top.feature.names.for.cell = top.ranks.per.cell$names[1]
+topRanksPerCell <- topRank(sampleCells, n = 5)
+topFeatureNamesForCell <- topRanksPerCell$names[1]
 }

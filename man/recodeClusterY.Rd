@@ -4,21 +4,25 @@
 \alias{recodeClusterY}
 \title{Recode feature module clusters}
 \usage{
-recodeClusterY(celda.mod, from, to)
+recodeClusterY(celdaMod, from, to)
 }
 \arguments{
-\item{celda.mod}{Celda object of class `celda_G` or `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_G` or `celda_CG`.}
 
-\item{from}{Numeric vector. Unique values in the range of 1:L that correspond to the original cluster labels in `celda.mod`.}
+\item{from}{Numeric vector. Unique values in the range of 1:L that
+correspond to the original cluster labels in `celdaMod`.}
 
-\item{to}{Numeric vector. Unique values in the range of 1:L that correspond to the new cluster labels.}
+\item{to}{Numeric vector. Unique values in the range of 1:L that correspond
+to the new cluster labels.}
 }
 \value{
-Celda object with recoded feature module clusters, with class corresponding to that of `celda.mod`.
+Celda object with recoded feature module clusters, with class
+ corresponding to that of `celdaMod`.
 }
 \description{
-Recode feature module clusters using a mapping in the `from` and `to` arguments.
+Recode feature module clusters using a mapping in the
+ `from` and `to` arguments.
 }
 \examples{
-celda.mod.reordered.y = recodeClusterY(celda.CG.mod, c(1, 3), c(3, 1))
+celdaMod.reordered.y <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
 }

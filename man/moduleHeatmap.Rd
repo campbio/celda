@@ -2,35 +2,55 @@
 % Please edit documentation in R/StateHeatmap.R
 \name{moduleHeatmap}
 \alias{moduleHeatmap}
-\title{Heatmap for feature modules}
+\title{Heatmap for featureModules}
 \usage{
-moduleHeatmap(counts, celda.mod, feature.module = 1, top.cells = 100,
-  top.features = NULL, normalize = TRUE, scale.row = scale,
-  show_featurenames = TRUE)
+moduleHeatmap(counts, celdaMod, featureModule = 1, topCells = 100,
+  topFeatures = NULL, normalize = TRUE, scaleRow = scale,
+  showFeaturenames = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_G` or `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_G` or `celda_CG`.}
 
-\item{feature.module}{Integer Vector. The feature module(s) to display. Multiple modules can be included in a vector.}
+\item{featureModule}{Integer Vector. The featureModule(s) to display.
+Multiple modules can be included in a vector.}
 
-\item{top.cells}{Integer. Number of cells with the highest and lowest probabilities for this module to include in the heatmap. For example, if `top.cells` = 50, the 50 cells with the lowest probability and the 50 cells with the highest probability for that feature module will be included. If NULL, all cells will be plotted. Default 100.}
+\item{topCells}{Integer. Number of cells with the highest and lowest
+probabilities for this module to include in the heatmap. For example, if
+`topCells` = 50, the 50 cells with the lowest probability and the 50 cells
+with the highest probability for that featureModule will be included. If
+NULL, all cells will be plotted. Default 100.}
 
-\item{top.features}{Integer. Plot `top.features` with the highest probability in the feature module. If NULL, plot all features in the module. Default NULL.}
+\item{topFeatures}{Integer. Plot `topFeatures` with the highest probability
+in the featureModule. If NULL, plot all features in the module. Default
+NULL.}
 
-\item{normalize}{Logical. Whether to normalize the columns of `counts`. Default TRUE.}
+\item{normalize}{Logical. Whether to normalize the columns of `counts`.
+Default TRUE.}
 
-\item{scale.row}{Character. Which function to use to scale each individual row. Set to NULL to disable. Occurs after normalization and log transformation. For example, `scale` will Z-score transform each row. Default `scale`.}
+\item{scaleRow}{Character. Which function to use to scale each individual
+row. Set to NULL to disable. Occurs after normalization and log
+transformation. For example, `scale` will Z-score transform each row.
+Default `scale`.}
 
-\item{show_featurenames}{Logical. Wheter feature names should be displayed. Default TRUE.}
+\item{showFeaturenames}{Logical. Wheter feature names should be displayed.
+Default TRUE.}
 }
 \value{
-A list containing row and column dendrograms as well as a gtable for grob plotting
+A list containing row and column dendrograms as well as a gtable for
+ grob plotting
 }
 \description{
-Renders a heatmap for selected feature modules. Cells are ordered from those with the lowest probability of the module on the left to the highest probability on the right. If more than one module is used, then cells will be ordered by the probabilities of the first module only. Features are ordered from those with the highest probability in the module on the top to the lowest probability on the bottom.
+Renders a heatmap for selected featureModules. Cells are
+ ordered from those with the lowest probability of the module on the left to
+ the highest probability on the right. If more than one module is used, then
+ cells will be ordered by the probabilities of the first module only.
+ Features are ordered from those with the highest probability in the module
+ on the top to the lowest probability on the bottom.
 }
 \examples{
-moduleHeatmap(celda.CG.sim$counts, celda.CG.mod)
+moduleHeatmap(celdaCGSim$counts, celdaCGMod)
 }
