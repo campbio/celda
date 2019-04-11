@@ -19,7 +19,7 @@ library(devtools)
 install_github("campbio/celda")
 ```
 
-**NOTE** On OSX, devtools::install_github() requires installation of **libgit2.** This can be installed via homebrew:
+**NOTE** On OSX, `devtools::install_github()` requires installation of **libgit2.** This can be installed via homebrew:
 ```
 brew install libgit2
 ```
