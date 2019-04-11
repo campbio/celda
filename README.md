@@ -19,13 +19,13 @@ library(devtools)
 install_github("campbio/celda")
 ```
 
-For R3.5 users, please install from the R_3_5 branch:
+For R3.5 users, please install from the R_3_5 branch. This version of celda is identical to the most recent release of celda except it works on R3.5.
 ```
 library(devtools)
 install_github("campbio/celda@R_3_5")
 ```
 
-For backward compatibility with results (`celda_CG` and `celda_list` objects) generated from older versions of celda, please install from the mirror branch 20190409_master:
+There has recently been a major update to variable/function names in the celda package. For backward compatibility with results (`celda_CG` and `celda_list` objects) generated from older versions of celda, please install from the mirror branch `20190409_master` which is the release before package reformatting:
 ```
 library(devtools)
 install_github("campbio/celda@20190409_master")
