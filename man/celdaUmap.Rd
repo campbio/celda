@@ -4,30 +4,42 @@
 \alias{celdaUmap}
 \title{Embeds cells in two dimensions using umap.}
 \usage{
-celdaUmap(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
-  modules = NULL, umap.config = umap::umap.defaults)
+celdaUmap(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
+  initialDims = 20, modules = NULL, umapConfig = umap::umap.defaults)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_CG`.}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
+\item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
+randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
+requires more memory. Default 25000.}
 
-\item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
+\item{minClusterSize}{Integer. Do not subsample cell clusters below this
+threshold. Default 100.}
 
-\item{modules}{Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
+\item{initialDims}{Integer. PCA will be used to reduce the dimentionality
+of the dataset. The top 'initialDims' principal components will be used
+for umap. Default 20.}
 
-\item{umap.config}{An object of class "umap.config" specifying parameters to the UMAP algorithm.}
+\item{modules}{Integer vector. Determines which features modules to use for
+tSNE. If NULL, all modules will be used. Default NULL.}
+
+\item{umapConfig}{An object of class "umapConfig" specifying parameters to
+the UMAP algorithm.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
+Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
+ the "X" and "Y" coordinates in the data's t-SNE represetation.
 }
 \description{
 Embeds cells in two dimensions using umap.
 }
 \examples{
-tsne.res = celdaUmap(celda.CG.sim$counts, celda.CG.mod)
+tsneRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 }

@@ -5,27 +5,34 @@
 \alias{featureModuleLookup,celda_CG-method}
 \title{Lookup the module of a feature}
 \usage{
-\S4method{featureModuleLookup}{celda_CG}(counts, celda.mod, feature,
-  exact.match = TRUE)
+\S4method{featureModuleLookup}{celda_CG}(counts, celdaMod, feature,
+  exactMatch = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Model of class `celda_CG`.}
+\item{celdaMod}{Model of class `celda_CG`.}
 
-\item{feature}{Character vector. The module assignemnts will be found for feature names in this vector.}
+\item{feature}{Character vector. The module assignemnts will be found for
+feature names in this vector.}
 
-\item{exact.match}{Logical. Whether an exact match or a partial match using `grep()` is used to look up the feature in the rownames of the counts matrix. Default TRUE.}
+\item{exactMatch}{Logical. Whether an exact match or a partial match using
+`grep()` is used to look up the feature in the rownames of the counts
+matrix. Default TRUE.}
 }
 \value{
 List. Each element contains the module of the provided feature.
 }
 \description{
-Finds the module assignments of given features in a `celda_G()` model
+Finds the module assignments of given features in a `celda_G()`
+ model
 }
 \examples{
-module = featureModuleLookup(celda.CG.sim$counts, celda.CG.mod,
-                             c("Gene_1", "Gene_XXX"))
+module <- featureModuleLookup(celdaCGSim$counts,
+    celdaCGMod,
+    c("Gene_1", "Gene_XXX"))
 }
 \seealso{
 `celda_CG()` for clustering features and cells

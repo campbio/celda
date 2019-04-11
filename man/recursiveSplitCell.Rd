@@ -4,64 +4,107 @@
 \alias{recursiveSplitCell}
 \title{Recursive cell splitting}
 \usage{
-recursiveSplitCell(counts, sample.label = NULL, initial.K = 5,
-  max.K = 25, temp.L = NULL, y.init = NULL, alpha = 1, beta = 1,
-  delta = 1, gamma = 1, min.cell = 3, reorder = TRUE,
+recursiveSplitCell(counts, sampleLabel = NULL, initialK = 5,
+  maxK = 25, tempL = NULL, yInit = NULL, alpha = 1, beta = 1,
+  delta = 1, gamma = 1, minCell = 3, reorder = TRUE,
   perplexity = TRUE, seed = 12345, logfile = NULL, verbose = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells.}
 
-\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
+\item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
+(column) in the count matrix.}
 
-\item{initial.K}{Integer. Minimum number of cell populations to try.}
+\item{initialK}{Integer. Minimum number of cell populations to try.}
 
-\item{max.K}{Integer. Maximum number of cell populations to try.}
+\item{maxK}{Integer. Maximum number of cell populations to try.}
 
-\item{temp.L}{Integer. Number of temporary modules to identify and use in cell splitting. Only used if `y.init=NULL`. Collapsing features to a relatively smaller number of modules will increase the speed of clustering and tend to produce better cell populations. This number should be larger than the number of true modules expected in the dataset. Default NULL.}
+\item{tempL}{Integer. Number of temporary modules to identify and use in cell
+splitting. Only used if `yInit = NULL`. Collapsing features to a relatively
+smaller number of modules will increase the speed of clustering and tend to
+produce better cell populations. This number should be larger than the
+number of true modules expected in the dataset. Default NULL.}
 
-\item{y.init}{Integer vector. Module labels for features. Cells will be clustered using the `celda_CG` model based on the modules specified in `y.init` rather than the counts of individual features. While the features will be initialized to the module labels in `y.init`, the labels will be allowed to move within each new model with a different K.}
+\item{yInit}{Integer vector. Module labels for features. Cells will be
+clustered using the `celda_CG` model based on the modules specified in
+`yInit` rather than the counts of individual features. While the features
+will be initialized to the module labels in `yInit`, the labels will be
+allowed to move within each new model with a different K.}
 
-\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount
+to each cell population in each sample. Default 1.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature in each cell (if `y.init` is NULL) or to each module in each cell population (if `y.init` is set). Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
+each feature in each cell (if `yInit` is NULL) or to each module in each
+cell population (if `yInit` is set). Default 1.}
 
-\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Only used if `y.init` is set. Default 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount
+to each feature in each module. Only used if `yInit` is set. Default 1.}
 
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Only used if `y.init` is set. Default 1.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount
+to the number of features in each module. Only used if `yInit` is set.
+Default 1.}
 
-\item{min.cell}{Integer. Only attempt to split cell populations with at least this many cells.}
+\item{minCell}{Integer. Only attempt to split cell populations with at
+least this many cells.}
 
-\item{reorder}{Logical. Whether to reorder cell populations using hierarchical clustering after each model has been created. If FALSE, cell populations numbers will correspond to the split which created the cell populations (i.e. 'K15' was created at split 15, 'K16' was created at split 16, etc.). Default TRUE.}
+\item{reorder}{Logical. Whether to reorder cell populations using
+hierarchical clustering after each model has been created. If FALSE, cell
+populations numbers will correspond to the split which created the cell
+populations (i.e. 'K15' was created at split 15, 'K16' was created at split
+16, etc.). Default TRUE.}
 
-\item{perplexity}{Logical. Whether to calculate perplexity for each model. If FALSE, then perplexity can be calculated later with `resamplePerplexity()`. Default TRUE.}
+\item{perplexity}{Logical. Whether to calculate perplexity for each model.
+If FALSE, then perplexity can be calculated later with
+`resamplePerplexity()`. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no
+calls to `set.seed()` are made.}
 
-\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+\item{logfile}{Character. Messages will be redirected to a file named
+`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-Object of class `celda_list`, which contains results for all model parameter combinations and summaries of the run parameters. The models in the list will be of class `celda_C` if `y.init=NULL` or `celda_CG` if `z.init` is set.
+Object of class `celda_list`, which contains results for all model
+ parameter combinations and summaries of the run parameters. The models in
+ the list will be of class `celda_C` if `yInit = NULL` or `celda_CG` if
+ `zInit` is set.
 }
 \description{
-Uses the `celda_C` model to cluster cells into population for range of possible K's. The cell population labels of the previous "K-1" model are used as the initial values in the current model with K cell populations. The best split of an existing cell population is found to create the K-th cluster. This procedure is much faster than randomly initializing each model with a different K. If module labels for each feature are given in 'y.init', the `celda_CG` model will be used to split cell populations based on those modules instead of individual features. Module labels will also be updated during sampling and thus may end up slightly different than `y.init`.
+Uses the `celda_C` model to cluster cells into population for
+ range of possible K's. The cell population labels of the previous "K-1"
+ model are used as the initial values in the current model with K cell
+ populations. The best split of an existing cell population is found to
+ create the K-th cluster. This procedure is much faster than randomly
+ initializing each model with a different K. If module labels for each
+ feature are given in 'yInit', the `celda_CG` model will be used to split
+ cell populations based on those modules instead of individual features.
+ Module labels will also be updated during sampling and thus may end up
+ slightly different than `yInit`.
 }
 \examples{
-## Create models that range from K=3 to K=10 by recursively splitting cell populations into two to produce `celda_C` cell clustering models
-testZ = recursiveSplitCell(celda.C.sim$counts, initial.K = 3, max.K=10)
+## Create models that range from K = 3 to K = 7 by recursively splitting
+## cell populations into two to produce `celda_C` cell clustering models
+testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
 
-## Alternatively, first identify features modules usinge `recursiveSplitModule()`
-module.split = recursiveSplitModule(celda.CG.sim$counts, initial.L = 3, max.L=20)
-plotGridSearchPerplexity(module.split)
-module.split.select = subsetCeldaList(module.split, list(L=10))
+## Alternatively, first identify features modules using
+## `recursiveSplitModule()`
+moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
+    initialL = 3, maxL = 15)
+plotGridSearchPerplexity(moduleSplit)
+moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
 
-## Then use module labels for initialization in `recursiveSplitCell()` to produce `celda_CG` bi-clustering models
-cell.split = recursiveSplitCell(celda.CG.sim$counts, initial.K = 3, max.K=20, y.init = clusters(module.split.select)$y)
-plotGridSearchPerplexity(cell.split) 
-celda.mod = subsetCeldaList(cell.split, list(K=5, L=10))
+## Then use module labels for initialization in `recursiveSplitCell()` to
+## produce `celda_CG` bi-clustering models
+cellSplit <- recursiveSplitCell(celdaCGSim$counts,
+    initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y)
+plotGridSearchPerplexity(cellSplit)
+celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
 }
 \seealso{
-`recursiveSplitModule()` for recursive splitting of cell populations.
+`recursiveSplitModule()` for recursive splitting of cell
+ populations.
 }

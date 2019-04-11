@@ -4,54 +4,80 @@
 \alias{celda_G}
 \title{Feature clustering with Celda}
 \usage{
-celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stop.iter = 10,
-  max.iter = 200, split.on.iter = 10, split.on.last = TRUE,
-  seed = 12345, nchains = 3, y.initialize = c("split", "random",
-  "predefined"), count.checksum = NULL, y.init = NULL,
-  logfile = NULL, verbose = TRUE)
+celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stopIter = 10,
+  maxIter = 200, splitOnIter = 10, splitOnLast = TRUE,
+  seed = 12345, nchains = 3, yInitialize = c("split", "random",
+  "predefined"), countChecksum = NULL, yInit = NULL, logfile = NULL,
+  verbose = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells.}
 
 \item{L}{Integer. Number of feature modules.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell. Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
+each feature module in each cell. Default 1.}
 
-\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to
+each feature in each module. Default 1.}
 
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to
+the number of features in each module. Default 1.}
 
-\item{stop.iter}{Integer. Number of iterations without improvement in the log likelihood to stop inference. Default 10.}
+\item{stopIter}{Integer. Number of iterations without improvement in the
+log likelihood to stop inference. Default 10.}
 
-\item{max.iter}{Integer. Maximum number of iterations of Gibbs sampling to perform. Default 200.}
+\item{maxIter}{Integer. Maximum number of iterations of Gibbs sampling to
+perform. Default 200.}
 
-\item{split.on.iter}{Integer. On every `split.on.iter` iteration, a heuristic will be applied to determine if a feature module should be reassigned and another feature module should be split into two clusters. To disable splitting, set to -1. Default 10.}
+\item{splitOnIter}{Integer. On every `splitOnIter` iteration, a heuristic
+will be applied to determine if a feature module should be reassigned and
+another feature module should be split into two clusters. To disable
+splitting, set to -1. Default 10.}
 
-\item{split.on.last}{Integer. After `stop.iter` iterations have been performed without improvement, a heuristic will be applied to determine if a cell population should be reassigned and another cell population should be split into two clusters. If a split occurs, then `stop.iter` will be reset. Default TRUE.}
+\item{splitOnLast}{Integer. After `stopIter` iterations have been
+performed without improvement, a heuristic will be applied to determine if
+a cell population should be reassigned and another cell population should be
+split into two clusters. If a split occurs, then `stopIter` will be reset.
+Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
+to `set.seed()` are made.}
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{y.initialize}{Chararacter. One of 'random', 'split', or 'predefined'. With 'random', features are randomly assigned to a modules. With 'split', features will be split into sqrt(L) modules and then each module will be subsequently split into another sqrt(L) modules. With 'predefined', values in `y.init` will be used to initialize `y`. Default 'split'.}
+\item{yInitialize}{Chararacter. One of 'random', 'split', or 'predefined'.
+With 'random', features are randomly assigned to a modules. With 'split',
+features will be split into sqrt(L) modules and then each module will be
+subsequently split into another sqrt(L) modules. With 'predefined', values
+in `yInit` will be used to initialize `y`. Default 'split'.}
 
-\item{count.checksum}{Character. An MD5 checksum for the `counts` matrix. Default NULL.}
+\item{countChecksum}{Character. An MD5 checksum for the `counts` matrix.
+Default NULL.}
 
-\item{y.init}{Integer vector. Sets initial starting values of y. If NULL, starting values for each feature will be randomly sampled from `1:L`. `y.init` can only be used when `initialize = 'random'`. Default NULL.}
+\item{yInit}{Integer vector. Sets initial starting values of y. If NULL,
+starting values for each feature will be randomly sampled from `1:L`.
+`yInit` can only be used when `initialize = 'random'`. Default NULL.}
 
-\item{logfile}{Character. Messages will be redirected to a file named `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+\item{logfile}{Character. Messages will be redirected to a file named
+`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class `celda_G` with the feature module clusters stored in `y`.
+An object of class `celda_G` with the feature module clusters stored
+ in `y`.
 }
 \description{
-Clusters the rows of a count matrix containing single-cell data into L modules.
+Clusters the rows of a count matrix containing single-cell data
+ into L modules.
 }
 \examples{
-celda.mod = celda_G(celda.G.sim$counts, L=celda.G.sim$L)
+celdaMod <- celda_G(celdaGSim$counts, L = celdaGSim$L)
 }
 \seealso{
-`celda_C()` for cell clustering and `celda_CG()` for simultaneous clustering of features and cells. `celdaGridSearch()` can be used to run multiple values of L and multiple chains in parallel.
+`celda_C()` for cell clustering and `celda_CG()` for simultaneous
+ clustering of features and cells. `celdaGridSearch()` can be used to run
+ multiple values of L and multiple chains in parallel.
 }
