@@ -58,8 +58,8 @@ test_that(desc = "Testing clusterProbability with celda_CG", {
         10) == 1) & nrow(clustProb$yProbability) == nrow(celdaCGSim$counts))
 })
 
-test_that(desc = "Testing simulateCells.celda_CG error checking with low gamma",
-    {
+test_that(desc = paste0("Testing simulateCells.celda_CG error checking with",
+    " low gamma"), {
         expect_error(simulateCells(model = "celda_CG", gamma = 0.000001))
     })
 
@@ -153,7 +153,8 @@ test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
 #     expect_error(subsetCeldaList(celdaCGres, params = list(K = 7, L = 11)))
 #     expect_error(subsetCeldaList(celdaCGres, params = list(K = 5, M = 10)))
 #
-#     celdaCGresK5L10 <- subsetCeldaList(celdaCGres, params = list(K = 5, L = 10))
+#     celdaCGresK5L10 <- subsetCeldaList(celdaCGres,
+#          params = list(K = 5, L = 10))
 #     modelCG <- selectBestModel(celdaCGresK5L10)
 #
 #     expect_error(selectBestModel("celdaList"),
@@ -238,7 +239,7 @@ test_that(desc = "Testing normalizeCounts with celda_CG", {
 test_that(desc = "Testing recodeClusterY with celda_CG", {
     expect_error(recodeClusterY(celdaMod = modelCG,
         from = NULL,
-        to = ))
+        to =))
     expect_error(recodeClusterY(celdaMod = modelCG,
         from = c(1, 2, 3, 4, 5),
         to = c(1, 2, 4, 3, 6)))
@@ -255,7 +256,7 @@ test_that(desc = "Testing recodeClusterY with celda_CG", {
 test_that(desc = "Testing recodeClusterZ with celda_CG", {
     expect_error(recodeClusterZ(celdaMod = modelCG,
         from = NULL,
-        to = ))
+        to =))
     expect_error(recodeClusterZ(celdaMod = modelCG,
         from = c(1, 2, 3, 4, 5),
         to = c(1, 2, 3, 4, 6)))

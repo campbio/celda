@@ -25,16 +25,16 @@ resamplePerplexity <- function(counts,
     celdaList,
     resample = 5,
     seed = 12345) {
-    
+
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
     }
     if (!isTRUE(is.numeric(resample))) {
         stop("Provided resample parameter was not numeric.")
     }
-    
+
     .setSeed(seed)
-    
+
     perpRes <- matrix(NA, nrow = length(celdaList@resList), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
@@ -44,11 +44,11 @@ resamplePerplexity <- function(counts,
         }
     }
     celdaList@perplexity <- perpRes
-    
+
     ## Add mean perplexity to runParams
     perpMean <- apply(perpRes, 1, mean)
     celdaList@runParams$mean_perplexity <- perpMean
-    
+
     return(celdaList)
 }
 
@@ -96,7 +96,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
         stop("No perplexity measurements available. First run",
             " 'resamplePerplexity' with celdaList object.")
     }
-    
+
     ix1 <- rep(seq(nrow(celdaList@perplexity)),
         each = ncol(celdaList@perplexity))
     ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
@@ -104,13 +104,13 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
         perplexity = celdaList@perplexity[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
     df$L <- as.factor(df$L)
-    
+
     lMeansByK <- stats::aggregate(df$perplexity, by = list(df$K, df$L),
         FUN = mean)
     colnames(lMeansByK) <- c("K", "L", "mean_perplexity")
     lMeansByK$K <- as.factor(lMeansByK$K)
     lMeansByK$L <- as.factor(lMeansByK$L)
-    
+
     if (nlevels(df$K) > 1) {
         plot <- ggplot2::ggplot(df,
             ggplot2::aes_string(x = "K", y = "perplexity")) +
@@ -140,7 +140,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
                 max(celdaList@runParams$L), sep)) +
             ggplot2::theme_bw()
     }
-    
+
     return(plot)
 }
 
@@ -167,18 +167,18 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
         stop("No perplexity measurements available. First run",
             " 'resamplePerplexity' with celdaList object.")
     }
-    
+
     ix1 <- rep(seq(nrow(celdaList@perplexity)),
         each = ncol(celdaList@perplexity))
     ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
     df <- data.frame(celdaList@runParams[ix1, ],
         perplexity = celdaList@perplexity[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
-    
+
     meansByK <- stats::aggregate(df$perplexity, by = list(df$K), FUN = mean)
     colnames(meansByK) <- c("K", "mean_perplexity")
     meansByK$K <- as.factor(meansByK$K)
-    
+
     plot <-
         ggplot2::ggplot(df, ggplot2::aes_string(x = "K", y = "perplexity")) +
         ggplot2::geom_jitter(height = 0, width = 0.1) +
@@ -189,7 +189,7 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
         ggplot2::scale_x_discrete(breaks = seq(min(celdaList@runParams$K),
             max(celdaList@runParams$K), sep)) +
         ggplot2::theme_bw()
-    
+
     return(plot)
 }
 
@@ -215,19 +215,19 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
         stop("No perplexity measurements available. First run",
             " 'resamplePerplexity' with celdaList object.")
     }
-    
+
     ix1 <- rep(seq(nrow(celdaList@perplexity)),
         each = ncol(celdaList@perplexity))
     ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
     df <- data.frame(celdaList@runParams[ix1, ],
         perplexity = celdaList@perplexity[cbind(ix1, ix2)])
     df$L <- as.factor(df$L)
-    
-    
+
+
     meansByL <- stats::aggregate(df$perplexity, by = list(df$L), FUN = mean)
     colnames(meansByL) <- c("L", "mean_perplexity")
     meansByL$L <- as.factor(meansByL$L)
-    
+
     plot <-
         ggplot2::ggplot(df, ggplot2::aes_string(x = "L", y = "perplexity")) +
         ggplot2::geom_jitter(height = 0, width = 0.1) +
@@ -238,7 +238,7 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
         ggplot2::scale_x_discrete(breaks = seq(min(celdaList@runParams$L),
             max(celdaList@runParams$L), sep)) +
         ggplot2::theme_bw()
-    
+
     return(plot)
 }
 
