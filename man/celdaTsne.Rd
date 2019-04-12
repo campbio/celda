@@ -4,37 +4,47 @@
 \alias{celdaTsne}
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
-celdaTsne(counts, celda.mod, max.cells = 25000, min.cluster.size = 100,
-  initial.dims = 20, modules = NULL, perplexity = 20,
-  max.iter = 2500, seed = 12345, ...)
+celdaTsne(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
+  initialDims = 20, modules = NULL, perplexity = 20,
+  maxIter = 2500, seed = 12345, ...)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_CG`.}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
+\item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
+randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
+requires more memory. Default 25000.}
 
-\item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
+\item{minClusterSize}{Integer. Do not subsample cell clusters below this
+threshold. Default 100.}
 
-\item{initial.dims}{integer. The number of dimensions that should be retained in the initial PCA step. Default 20.}
+\item{initialDims}{integer. The number of dimensions that should be retained
+in the initial PCA step. Default 20.}
 
-\item{modules}{Integer vector. Determines which features modules to use for tSNE. If NULL, all modules will be used. Default NULL.}
+\item{modules}{Integer vector. Determines which features modules to use for
+tSNE. If NULL, all modules will be used. Default NULL.}
 
 \item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
 
-\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
+\item{maxIter}{Integer. Maximum number of iterations in tSNE generation.
+Default 2500.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
+\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
+to `set.seed()` are made.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-Numeric Matrix of dimension `ncol(counts)` x 2, colums representing the "X" and "Y" coordinates in the data's t-SNE represetation.
+Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
+ the "X" and "Y" coordinates in the data's t-SNE represetation.
 }
 \description{
 Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
-tsne.res = celdaTsne(celda.CG.sim$counts, celda.CG.mod)
+tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 }

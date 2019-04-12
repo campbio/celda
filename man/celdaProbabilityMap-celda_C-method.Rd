@@ -5,15 +5,19 @@
 \alias{celdaProbabilityMap,celda_C-method}
 \title{Probability map for a celda_C model}
 \usage{
-\S4method{celdaProbabilityMap}{celda_C}(counts, celda.mod,
+\S4method{celdaProbabilityMap}{celda_C}(counts, celdaMod,
   level = c("sample"), ...)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_C`.}
+\item{celdaMod}{Celda object of class `celda_C`.}
 
-\item{level}{Character. 'sample' will display the absolute probabilities and relative normalized abundance of each cell population in each sample. Default 'sample'.}
+\item{level}{Character. 'sample' will display the absolute probabilities and
+relative normalized abundance of each cell population in each sample.
+Default 'sample'.}
 
 \item{...}{Additional parameters.}
 }
@@ -21,10 +25,11 @@
 A grob containing the specified plots
 }
 \description{
-Renders probability and relative expression heatmaps to visualize the relationship between cell populations and samples.
+Renders probability and relative expression heatmaps to
+ visualize the relationship between cell populations and samples.
 }
 \examples{
-celdaProbabilityMap(celda.C.sim$counts, celda.C.mod)
+celdaProbabilityMap(celdaCSim$counts, celdaCMod)
 }
 \seealso{
 `celda_C()` for clustering cells

@@ -8,64 +8,43 @@
 1. Celda can simultaneously cluster genes into transcriptional states and cells into subpopulations
 2. Celda uses count-based Dirichlet-multinomial distributions so no additional normalization is required for 3' DGE single cell RNA-seq
 3. These types of models have shown good performance with sparse data.
+4. **Celda now includes DecontX, a computational algorithm for decontamination of droplet based scRNA-seq data.**
 
 
 ## Installation Instructions
 
-To install the most recent release of celda (used in the preprint version of the celda paper) via devtools:
+To install the most recent release of celda (R >= 3.6) via devtools:
 ```
 library(devtools)
-install_github("campbio/celda@v0.6")
-```
-The most up-to-date (but potentially less stable) version of celda can similarly be installed with:
-```
-install_github("campbio/celda@devel")
+install_github("campbio/celda")
 ```
 
-**NOTE** On OSX, devtools::install_github() requires installation of **libgit2.** This can be installed via homebrew:
+For R3.5 users, please install from the R_3_5 branch. This version of celda is identical to the most recent release of celda except it works on R3.5.
+```
+library(devtools)
+install_github("campbio/celda@R_3_5")
+```
+
+There has recently been a major update to variable/function names in the celda package. For backward compatibility with results (`celda_CG` and `celda_list` objects) generated from older versions of celda, please install from the mirror branch `20190409_master` which is the release before package reformatting:
+```
+library(devtools)
+install_github("campbio/celda@20190409_master")
+```
+
+**NOTE** On OSX, `devtools::install_github()` requires installation of **libgit2.** This can be installed via homebrew:
 ```
 brew install libgit2
+```
+**NOTE** If you are trying to install celda using Rstudio and get this error: "could not find tools necessary to compile a package", you can try this:
+```
+options(buildtools.check = function(action) TRUE)
 ```
 
 ## Examples and vignettes
 
-Vignettes are available in the package. 
+Uncompiled vignettes are available in the package. 
 
-An analysis example using celda with RNASeq via vignette('celda-analysis')
+Examples of doing single-cell RNA-seq data analysis using celda and DecontX is available in files vignettes/celda-analysis.Rmd and vignettes/DecontX-analysis.Rmd.
 
-
-### Decontamination with DecontX
-Highly expressed genes from various cells clusters will be expressed at low levels in other clusters in droplet-based systems due to contamination. DecontX will decompose an observed count matrix into a decontaminated expression matrix and a contamination matrix. The only other parameter needed is a vector of cell cluster labels. 
-
-To simulate two 300 (gene) x 100 (cell) count matrices from 3 different cell types with total reads per cell ranged from 5000 to 40000: one matrix being ture expression matrix (rmat), the other matrix being contamination count matrix (cmat)
-```
-sim.con = simulateContaminatedMatrix( C = 100, G = 300, K = 3, N.Range= c(5000, 40000), seed = 9124) 
-true.contamination.percentage = colSums( sim.con$cmat ) / colSums( sim.con$cmat + sim.con$rmat ) 
-str(sim.con)   
-# N.by.C: total transcripts per cell 
-# z: cell type label 
-
-```
-Use DecontX to decompose the observed (contaminated) count matrix back into true expression matrix and a contamination matrix with specified cell label
-```
-observedCounts = sim.con$observedCounts
-cell.label = sim.con$z
-new.counts = DecontX( counts = observedCounts, z = cell.label,  max.iter = 200, seed = 123) 
-str(new.counts) 
-# Decontaminated matrix: new.counts$res.list$est.rmat
-# Percentage of contamination per cell: new.counts$res.list$est.conp
-
-```
-DecontX Performance check 
-```
-estimated.contamination.percentage = new.counts$res.list$est.conp
-plot( true.contamination.percentage, estimated.contamination.percentage) ; abline(0,1) 
-``` 
-
-
-
-## New Features and announcements
-The v0.4 release of celda represents a useable implementation of the various celda clustering models.
-Please submit any usability issues or bugs to the issue tracker at https://github.com/campbio/celda
-
-You can discuss celda, or ask the developers usage questions, in our [Google Group.](https://groups.google.com/forum/#!forum/celda-list)
+## For developers
+Check out our [Wiki](https://github.com/campbio/celda/wiki) for [coding style guide](https://github.com/campbio/celda/wiki/Celda-Development-Coding-Style-Guide) if you want to contribute!

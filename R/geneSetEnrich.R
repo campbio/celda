@@ -17,7 +17,7 @@
 #' library(M3DExampleData)
 #' counts <- M3DExampleData::Mmus_example_list$data
 #' #subset 100 genes for fast clustering
-#' counts <- counts[sample(seq_len(nrow(counts)), size = 100), ]
+#' counts <- counts[1500:2000, ]
 #' #cluster genes into 10 modules for quick demo
 #' cm <- celda_G(counts = as.matrix(counts), L = 10, verbose = FALSE)
 #' gse <- geneSetEnrich(counts,
@@ -39,15 +39,16 @@ geneSetEnrich <- function(counts, celdaModel, databases, fdr = 0.05) {
 
     #iterate over each module, get genes in that module, add to list
     for (i in seq_len(celdaModel@params$L)) {
-        modules[[i]] <- as.character(genes[genes$module == i, 'gene'])
+        modules[[i]] <- as.character(genes[genes$module == i, "gene"])
     }
 
     #enrichment analysis
     enrichment <- lapply(modules, function(module) {
-        invisible(capture.output(table <- enrichR::enrichr(genes = module,
+        invisible(utils::capture.output(table <- enrichR::enrichr(
+            genes = module,
             databases = databases)))
         table <- Reduce(f = rbind, x = table)
-        table[table$Adjusted.P.value < fdr, 'Term']
+        table[table$Adjusted.P.value < fdr, "Term"]
     })
 
     #return results as a list
