@@ -317,10 +317,10 @@ DecontXoneBatch = function(counts, z=NULL, batch=NULL, max.iter=200, beta=1e-6, 
     run.params = list("beta.init"=beta, "delta.init"=delta.init, "iteration"=iter-1L, "seed"=seed)
 
     res.list = list("logLikelihood" = ll, "est.nativeCounts"=next.decon$est.rmat , "est.conp"= res.conp, "theta"=theta , "delta"=delta)
-    #if( decon.method=="clustering" ) {
-    #    posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  ) 
-    #    res.list = append( res.list , posterior.params ) 
-    #}
+    if( decon.method=="clustering" ) {
+        posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  ) 
+        res.list = append( res.list , posterior.params ) 
+    }
   
     return(list("run.params"=run.params, "res.list"=res.list, "method"=decon.method  ))
 }
