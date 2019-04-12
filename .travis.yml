@@ -22,4 +22,4 @@ r_github_packages:
 after_success:
   - R CMD INSTALL $PKG_TARBALL
   - Rscript -e 'covr::coveralls()'
-  - Rscript -e 'library(lintr); lint_package(linters = with_defaults(object_length_linter(length = 40L), object_name_linter = NULL, commented_code_linter = NULL, object_usage_linter = NULL))'
+  - Rscript -e 'library(lintr); lint_package(linters = with_defaults(object_length_linter(length = 40L), object_name_linter = NULL, commented_code_linter = NULL, object_usage_linter = NULL), exclusions = list("R/RcppExports.R"))'

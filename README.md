@@ -13,10 +13,22 @@
 
 ## Installation Instructions
 
-To install the most recent release of celda via devtools:
+To install the most recent release of celda (R >= 3.6) via devtools:
 ```
 library(devtools)
 install_github("campbio/celda")
+```
+
+For R3.5 users, please install from the R_3_5 branch. This version of celda is identical to the most recent release of celda except it works on R3.5.
+```
+library(devtools)
+install_github("campbio/celda@R_3_5")
+```
+
+There has recently been a major update to variable/function names in the celda package. For backward compatibility with results (`celda_CG` and `celda_list` objects) generated from older versions of celda, please install from the mirror branch `20190409_master` which is the release before package reformatting:
+```
+library(devtools)
+install_github("campbio/celda@20190409_master")
 ```
 
 **NOTE** On OSX, `devtools::install_github()` requires installation of **libgit2.** This can be installed via homebrew:

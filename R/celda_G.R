@@ -425,11 +425,11 @@ celda_G <- function(counts,
             y[i] <- .sampleLl(probs[, i])
 
             if (prevY != y[i]) {
-                nTSByC[prevY, ] <- nTSByC[prevY,] - counts[i, ]
+                nTSByC[prevY, ] <- nTSByC[prevY, ] - counts[i, ]
                 nGByTS[prevY] <- nGByTS[prevY] - 1L
                 nByTS[prevY] <- nByTS[prevY] - nByG[i]
 
-                nTSByC[y[i], ] <- nTSByC[y[i],] + counts[i, ]
+                nTSByC[y[i], ] <- nTSByC[y[i], ] + counts[i, ]
                 nGByTS[y[i]] <- nGByTS[y[i]] + 1L
                 nByTS[y[i]] <- nByTS[y[i]] + nByG[i]
             }

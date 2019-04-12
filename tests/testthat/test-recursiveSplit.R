@@ -2,7 +2,7 @@ library(celda)
 context("Testing recursiveSplits")
 
 # celdaCGSim <- simulateCells("celda_CG", K = 5, L = 10)
-# 
+#
 # test_that(desc = "Testing recursiveSplitModule", {
 #     moduleSplit <- recursiveSplitModule(
 #         celdaCGSim$counts,
@@ -27,7 +27,7 @@ context("Testing recursiveSplits")
 #     expect_true(is(moduleSplit, "celdaList"))
 #     plotGridSearchPerplexity(moduleSplit)
 # })
-# 
+#
 # test_that(desc = "Testing recursiveSplitCell", {
 #     cellSplit <- recursiveSplitCell(
 #         celdaCGSim$counts,
