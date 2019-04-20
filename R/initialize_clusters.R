@@ -82,7 +82,7 @@
 
     while (currentK < K) {
         # Determine which clusters are split-able
-        KRemaining <- K - currentK
+        # KRemaining <- K - currentK
         KPerCluster <- min(ceiling(K / currentK), KSubcluster)
         KToUse <- ifelse(KPerCluster < 2, 2, KPerCluster)
 

@@ -1264,6 +1264,7 @@ vplayout <- function(x, y) {
 .findGaps <- function(tree, cutreeN) {
     v <- stats::cutree(tree, cutreeN)[tree$order]
     gaps <- which((v[-1] - v[-length(v)]) != 0)
+    return(gaps)
 }
 
 .is.na2 <- function(x) {

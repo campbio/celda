@@ -47,7 +47,7 @@
 
     bestY <- y
     bestLl <- -Inf
-    previousY <- y
+    # previousY <- y
     for (i in yToSplit) {
         clustLabel <- .celda_G(counts[y == i, , drop = FALSE],
             L = 2,
@@ -226,7 +226,7 @@ recursiveSplitCell <- function(counts,
         overallZ <- modelInitial@clusters$z
         resList <- list(modelInitial)
         while (currentK <= maxK) {
-            previousY <- overallY
+            # previousY <- overallY
             tempSplit <- .singleSplitZ(countsY,
                 overallZ,
                 s,

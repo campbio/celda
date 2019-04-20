@@ -159,7 +159,7 @@ simulateContaminatedMatrix <- function(C = 300,
 
 # This function updates decontamination using background distribution
 .cDCalcEMbgDecontamination <- function(counts, cellDist, bgDist, theta, beta) {
-    meanNByC <- apply(counts, 2, mean)
+    # meanNByC <- apply(counts, 2, mean)
     logPr <- log(t(cellDist) + 1e-20) + log(theta + 1e-20) # +
     # log( t(counts) / meanNByC )   # better when without panelty
     logPc <- log(t(bgDist) + 1e-20) + log(1 - theta + 2e-20)
@@ -289,7 +289,7 @@ decontX <- function(counts,
     .checkCountsDecon(counts)
     .checkParametersDecon(proportionPrior = delta, distributionPrior = beta)
 
-    nG <- nrow(counts)
+    # nG <- nrow(counts)
     nC <- ncol(counts)
     K <- length(unique(z))
 

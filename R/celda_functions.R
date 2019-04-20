@@ -320,6 +320,7 @@ distinctColors <- function(n,
     rownames(counts) <- NULL
     colnames(counts) <- NULL
     countChecksum <- digest::digest(counts, algo = "md5")
+    return(countChecksum)
 }
 
 
