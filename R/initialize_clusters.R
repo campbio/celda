@@ -253,8 +253,16 @@
         # Cycle through each splitable cluster and split it up into
         # LSublcusters
         for (i in yToSplit) {
+            # make sure the colSums of subset counts is not 0
+            countsY <- counts[overallY == i, , drop = FALSE]
+            countsY <- countsY[, !(colSums(countsY) == 0)]
+
+            if (ncol(countsY) == 0) {
+                next
+            }
+
             clustLabel <- .celda_G(
-                counts[overallY == i, , drop = FALSE],
+                countsY,
                 L = LSubcluster,
                 yInitialize = "random",
                 beta = beta,
