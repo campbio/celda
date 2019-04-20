@@ -9,8 +9,8 @@
         initValues <- sort(unique(initial))
         if (length(unique(initial)) != N || length(initial) != len ||
             !all(initValues %in% seq(N))) {
-                stop("'initial' needs to be a vector of length 'len'
-                    containing N unique values.")
+                stop("'initial' needs to be a vector of length 'len'",
+                    " containing N unique values.")
         }
         z <- as.integer(as.factor(initial))
     } else {
@@ -21,8 +21,8 @@
     if (!is.null(fixed)) {
         fixedValues <- sort(unique(fixed))
         if (length(fixed) != len || !all(fixedValues %in% seq(N))) {
-            stop("'fixed' to be a vector of length 'len' where each entry is
-                one of N unique values or NA.")
+            stop("'fixed' to be a vector of length 'len' where each entry is",
+                " one of N unique values or NA.")
         }
         fixedIx <- !is.na(fixed)
         z[fixedIx] <- fixed[fixedIx]
