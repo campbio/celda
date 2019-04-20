@@ -263,8 +263,7 @@
                 maxIter = 20,
                 splitOnIter = -1,
                 splitOnLast = FALSE,
-                verbose = FALSE
-            )
+                verbose = FALSE)
             tempY <- as.integer(as.factor(clustLabel@clusters$y))
 
             # Reassign clusters with label > 1
