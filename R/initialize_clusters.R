@@ -2,8 +2,7 @@
     len,
     z = NULL,
     initial = NULL,
-    fixed = NULL,
-    seed = 12345) {
+    fixed = NULL) {
 
     # If initial values are given, then they will not be randomly initialized
     if (!is.null(initial)) {
@@ -34,7 +33,6 @@
     }
 
     # Randomly sample remaining values
-    .setSeed(seed)
     zNa <- which(is.na(z))
     if (length(zNa) > 0) {
         z[zNa] <- sample(zNotUsed, length(zNa), replace = TRUE)
@@ -60,8 +58,7 @@
     KSubcluster = NULL,
     alpha = 1,
     beta = 1,
-    minCell = 3,
-    seed = 12345) {
+    minCell = 3) {
 
     s <- rep(1, ncol(counts))
     if (is.null(KSubcluster))
@@ -78,7 +75,6 @@
         splitOnIter = -1,
         splitOnLast = FALSE,
         verbose = FALSE,
-        seed = seed,
         reorder = FALSE
     )
     overallZ <- as.integer(as.factor(res@clusters$z))
@@ -218,15 +214,14 @@
     beta = 1,
     delta = 1,
     gamma = 1,
-    minFeature = 3,
-    seed = 12345) {
+    minFeature = 3) {
 
     if (is.null(LSubcluster))
         LSubcluster <- ceiling(sqrt(L))
 
     # Collapse cells to managable number of clusters
     if (!is.null(tempK) && ncol(counts) > tempK) {
-        z <- .initializeSplitZ(counts, K = tempK, seed = seed)
+        z <- .initializeSplitZ(counts, K = tempK)
         counts <- .colSumByGroup(counts, z, length(unique(z)))
     }
 
@@ -241,7 +236,6 @@
         splitOnIter = -1,
         splitOnLast = FALSE,
         verbose = FALSE,
-        seed = seed,
         reorder = FALSE
     )
     overallY <- as.integer(as.factor(res@clusters$y))

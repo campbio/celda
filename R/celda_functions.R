@@ -43,18 +43,6 @@
 }
 
 
-# This is a wrapper around set.seed called throughout the modeling
-# functions to allow the user to disable seed setting within celda.
-# This way, power users could set a seed externally to celda and
-# have greater control (and more responsibility) over their
-# reproducibility. See issue #37 in campbio/celda
-.setSeed <- function(seed) {
-    if (!is.null(seed)) {
-        set.seed(seed)
-    }
-}
-
-
 #' @title Normalization of count data
 #' @description Performs normalization, transformation, and/or scaling of a
 #'  counts matrix

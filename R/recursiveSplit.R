@@ -4,8 +4,7 @@
     K,
     minCell = 3,
     alpha = 1,
-    beta = 1,
-    seed) {
+    beta = 1) {
 
     zTa <- tabulate(z, K)
     zToSplit <- which(zTa > minCell)
@@ -18,9 +17,8 @@
             zInitialize = "random",
             splitOnIter = -1,
             splitOnLast = FALSE,
-            verbose = FALSE,
-            seed = seed
-        )
+            verbose = FALSE)
+
         if (length(unique(clustLabel@clusters$z)) == 2) {
             ix <- z == i
             newZ <- z
@@ -42,8 +40,7 @@
     minFeature = 3,
     beta = 1,
     delta = 1,
-    gamma = 1,
-    seed) {
+    gamma = 1) {
 
     yTa <- tabulate(y, L)
     yToSplit <- which(yTa > minFeature)
@@ -58,9 +55,7 @@
             splitOnIter = -1,
             splitOnLast = FALSE,
             nchains = 1,
-            verbose = FALSE,
-            seed = seed
-        )
+            verbose = FALSE)
 
         if (length(unique(clustLabel@clusters$y)) == 2) {
             ix <- y == i
@@ -125,8 +120,6 @@
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no
-#'  calls to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
@@ -168,7 +161,6 @@ recursiveSplitCell <- function(counts,
     minCell = 3,
     reorder = TRUE,
     perplexity = TRUE,
-    seed = 12345,
     logfile = NULL,
     verbose = TRUE) {
 
@@ -205,8 +197,7 @@ recursiveSplitCell <- function(counts,
             append = TRUE,
             verbose = verbose,
             logfile = logfile)
-        overallY <- .initializeCluster(L, nrow(counts), initial = yInit,
-            seed = seed)
+        overallY <- .initializeCluster(L, nrow(counts), initial = yInit)
         countsY <- .rowSumByGroup(counts, overallY, L)
 
         # Create initial model with initialK and predifined y labels
@@ -230,7 +221,6 @@ recursiveSplitCell <- function(counts,
             gamma = gamma,
             delta = delta,
             verbose = FALSE,
-            seed = seed,
             reorder = reorder)
         currentK <- length(unique(modelInitial@clusters$z)) + 1
         overallZ <- modelInitial@clusters$z
@@ -243,9 +233,7 @@ recursiveSplitCell <- function(counts,
                 currentK,
                 minCell = 3,
                 alpha = alpha,
-                beta = beta,
-                seed = seed
-            )
+                beta = beta)
             tempModel <- .celda_CG(counts,
                 sampleLabel = s,
                 K = as.integer(currentK),
@@ -262,9 +250,7 @@ recursiveSplitCell <- function(counts,
                 gamma = gamma,
                 delta = delta,
                 verbose = FALSE,
-                seed = seed,
-                reorder = reorder
-            )
+                reorder = reorder)
 
             # Calculate new decomposed counts matrix with new module labels
             # overallY = tempModel@clusters$y
@@ -297,7 +283,6 @@ recursiveSplitCell <- function(counts,
                         beta = beta,
                         delta = delta,
                         gamma = gamma,
-                        seed = seed,
                         countChecksum = countChecksum
                     ),
                     finalLogLik = ll,
@@ -342,8 +327,7 @@ recursiveSplitCell <- function(counts,
         tempY <- .initializeSplitY(counts,
             L = as.integer(L),
             tempK = max(100, maxK),
-            minFeature = 3,
-            seed = seed)
+            minFeature = 3)
         tempY <- as.integer(as.factor(tempY))
         L <- length(unique(tempY)) # Recalculate in case some modules are empty
         countsY <- .rowSumByGroup(counts, tempY, L)
@@ -365,9 +349,7 @@ recursiveSplitCell <- function(counts,
             alpha = alpha,
             beta = beta,
             verbose = FALSE,
-            seed = seed,
-            reorder = reorder
-        )
+            reorder = reorder)
         currentK <- length(unique(modelInitial@clusters$z)) + 1
         overallZ <- modelInitial@clusters$z
         ll <- logLikelihood.celda_C(counts, s, overallZ, currentK,
@@ -378,16 +360,14 @@ recursiveSplitCell <- function(counts,
 
         resList <- list(modelInitial)
         while (currentK <= maxK) {
-            # Find next best split, then seed a new celda_C run with that split
+            # Find next best split, then do a new celda_C run with that split
             tempSplit <- .singleSplitZ(countsY,
                 overallZ,
                 s,
                 currentK,
                 minCell = 3,
                 alpha = alpha,
-                beta = beta,
-                seed = seed
-            )
+                beta = beta)
             tempModel <- .celda_C(countsY,
                 sampleLabel = s,
                 K = as.integer(currentK),
@@ -399,9 +379,7 @@ recursiveSplitCell <- function(counts,
                 splitOnLast = FALSE,
                 verbose = FALSE,
                 zInit = tempSplit$z,
-                seed = seed,
-                reorder = reorder
-            )
+                reorder = reorder)
 
             # Handle rare cases where a population has no cells after running
             # the model
@@ -419,9 +397,7 @@ recursiveSplitCell <- function(counts,
                 params = list(K = as.integer(currentK),
                     alpha = alpha,
                     beta = beta,
-                    seed = seed,
-                    countChecksum = countChecksum
-                ),
+                    countChecksum = countChecksum),
                 finalLogLik = ll,
                 sampleLabel = sampleLabel,
                 names = names
@@ -455,8 +431,7 @@ recursiveSplitCell <- function(counts,
             "populations",
             append = TRUE,
             verbose = verbose,
-            logfile = logfile
-        )
+            logfile = logfile)
         modelInitial <- .celda_C(counts,
             sampleLabel = s,
             K = as.integer(initialK),
@@ -465,9 +440,7 @@ recursiveSplitCell <- function(counts,
             alpha = alpha,
             beta = beta,
             verbose = FALSE,
-            seed = seed,
-            reorder = reorder
-        )
+            reorder = reorder)
         currentK <- length(unique(modelInitial@clusters$z)) + 1
         overallZ <- modelInitial@clusters$z
         resList <- list(modelInitial)
@@ -478,9 +451,7 @@ recursiveSplitCell <- function(counts,
                 currentK,
                 minCell = 3,
                 alpha = alpha,
-                beta = beta,
-                seed = seed
-            )
+                beta = beta)
             tempModel <- .celda_C(counts,
                 sampleLabel = s,
                 K = as.integer(currentK),
@@ -492,9 +463,7 @@ recursiveSplitCell <- function(counts,
                 splitOnLast = FALSE,
                 verbose = FALSE,
                 zInit = tempSplit$z,
-                seed = seed,
-                reorder = reorder
-            )
+                reorder = reorder)
 
             if (length(unique(tempModel@clusters$z)) == currentK) {
                 overallZ <- tempModel@clusters$z
@@ -508,9 +477,7 @@ recursiveSplitCell <- function(counts,
                     params = list(K = as.integer(currentK),
                         alpha = alpha,
                         beta = beta,
-                        seed = seed,
-                        countChecksum = countChecksum
-                    ),
+                        countChecksum = countChecksum),
                     finalLogLik = ll,
                     sampleLabel = sampleLabel,
                     names = names
@@ -628,8 +595,6 @@ recursiveSplitCell <- function(counts,
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-#'  to `set.seed()` are made.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
@@ -663,9 +628,9 @@ recursiveSplitModule <- function(counts,
     minFeature = 3,
     reorder = TRUE,
     perplexity = TRUE,
-    seed = 12345,
     verbose = TRUE,
     logfile = NULL) {
+
     .logMessages(paste(rep("=", 50), collapse = ""),
         logfile = logfile,
         append = FALSE,
@@ -702,8 +667,7 @@ recursiveSplitModule <- function(counts,
         )
         overallZ <- .initializeCluster(N = K,
             len = ncol(counts),
-            initial = zInit,
-            seed = seed)
+            initial = zInit)
         countsZ <- .colSumByGroup(counts, overallZ, K)
 
         # Create initial model with initialL and predifined z labels
@@ -727,7 +691,6 @@ recursiveSplitModule <- function(counts,
             gamma = gamma,
             delta = delta,
             verbose = FALSE,
-            seed = seed,
             reorder = reorder)
         currentL <- length(unique(modelInitial@clusters$y)) + 1
         overallY <- modelInitial@clusters$y
@@ -742,9 +705,7 @@ recursiveSplitModule <- function(counts,
                 minFeature = 3,
                 beta = beta,
                 delta = delta,
-                gamma = gamma,
-                seed = seed
-            )
+                gamma = gamma)
             tempModel <- .celda_CG(
                 counts,
                 L = currentL,
@@ -802,8 +763,7 @@ recursiveSplitModule <- function(counts,
         )
         z <- .initializeSplitZ(counts,
             K = K,
-            minCell = 3,
-            seed = seed)
+            minCell = 3)
         countsZ <- .colSumByGroup(counts, z, length(unique(z)))
 
         .logMessages(
@@ -819,9 +779,7 @@ recursiveSplitModule <- function(counts,
             countsZ,
             L = initialL,
             nchains = 1,
-            verbose = FALSE,
-            seed = seed
-        )
+            verbose = FALSE)
 
         currentL <- length(unique(modelInitial@clusters$y)) + 1
         overallY <- modelInitial@clusters$y
@@ -846,9 +804,7 @@ recursiveSplitModule <- function(counts,
                 minFeature = 3,
                 beta = beta,
                 delta = delta,
-                gamma = gamma,
-                seed = seed
-            )
+                gamma = gamma)
             tempModel <- .celda_G(
                 countsZ,
                 L = currentL,
@@ -936,9 +892,7 @@ recursiveSplitModule <- function(counts,
             L = initialL,
             maxIter = 20,
             nchains = 1,
-            verbose = FALSE,
-            seed = seed
-        )
+            verbose = FALSE)
         overallY <- modelInitial@clusters$y
         currentL <- length(unique(overallY)) + 1
 
@@ -954,9 +908,7 @@ recursiveSplitModule <- function(counts,
                 minFeature = 3,
                 beta = beta,
                 delta = delta,
-                gamma = gamma,
-                seed = seed
-            )
+                gamma = gamma)
             tempModel <- .celda_G(
                 counts,
                 L = currentL,
