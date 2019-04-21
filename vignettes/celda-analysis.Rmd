@@ -38,11 +38,15 @@ library(celda)
 
 # Generation of a simulated single cell dataset
 
-Celda will take a matrix of counts where each row is a feature, each cell is a column, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of Celda, we will apply it to a simulated dataset.
+Celda will take a matrix of counts where each row is a feature, each column is a cell, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of Celda, we will apply it to a simulated dataset.
 
 In the function `simulateCells`, the *K parameter designates the number of cell clusters*, the *L parameter determines the number of feature modules*, the *S parameter determines the number of samples in the simulated dataset*, the *G parameter determines the number of features to be simulated*, and *CRange specifies the lower and upper bounds of the number of cells to be generated in each sample*.
 
+Many functions in Celda make use of stochastic algorithms or procedures which require the use of random number generator (RNG) for simulation or sampling. Explicit calls to `set.seed` is needed for reproducibility.
+
 ```{r}
+# For reproducibility, explicit call to set.seed is needed
+set.seed(12345)
 simCounts <- simulateCells("celda_CG",
     K = 5, L = 10, S = 5, G = 200, CRange = c(30, 50))
 ```
