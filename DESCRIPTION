@@ -11,6 +11,7 @@ Depends:
     R (>= 3.6)
 VignetteBuilder: knitr
 Imports:
+    stats,
     plyr,
     foreach,
     ggplot2,
@@ -53,7 +54,7 @@ Suggests:
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 6.1.1
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian

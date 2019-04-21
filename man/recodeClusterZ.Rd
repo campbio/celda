@@ -9,10 +9,10 @@ recodeClusterZ(celdaMod, from, to)
 \arguments{
 \item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
 
-\item{from}{Numeric vector. Unique values in the range of 1:K that
+\item{from}{Numeric vector. Unique values in the range of seq(K) that
 correspond to the original cluster labels in `celdaMod`.}
 
-\item{to}{Numeric vector. Unique values in the range of 1:K that correspond
+\item{to}{Numeric vector. Unique values in the range of seq(K) that correspond
 to the new cluster labels.}
 }
 \value{
