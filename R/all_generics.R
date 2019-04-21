@@ -2,7 +2,7 @@ setClass(
     "celdaModel",
     representation(
         params = "list",
-        # K, L, model priors, seed, checksum
+        # K, L, model priors, checksum
         names = "list",
         completeLogLik = "numeric",
         finalLogLik = "numeric",
@@ -12,7 +12,7 @@ setClass(
 
 
 #' @title Get parameter values provided for celdaModel creation
-#' @description Retrieves the K/L, model priors (e.g. alpha, beta), random seed,
+#' @description Retrieves the K/L, model priors (e.g. alpha, beta),
 #'  and count matrix checksum parameters provided during the creation of the
 #'  provided celdaModel.
 #' @param celdaMod celdaModel. Options available in `celda::availableModels`.
@@ -26,7 +26,7 @@ setGeneric("params",
         standardGeneric("params")
     })
 #' @title Get parameter values provided for celdaModel creation
-#' @description Retrieves the K/L, model priors (e.g. alpha, beta), random seed,
+#' @description Retrieves the K/L, model priors (e.g. alpha, beta),
 #'  and count matrix checksum parameters provided during the creation of the
 #'  provided celdaModel.
 #' @param celdaMod celdaModel. Options available in `celda::availableModels`.
@@ -208,8 +208,8 @@ setClass(
 
 
 #' @title Get run parameters provided to `celdaGridSearch()`
-#' @description Returns details on the clustering parameters, model priors, and
-#'  seeds provided to `celdaGridSearch()` when the provided celdaList was
+#' @description Returns details on the clustering parameters, and model priors
+#'  provided to `celdaGridSearch()` when the provided celdaList was
 #'  created.
 #' @param celdaMod An object of class celdaList.
 #' @return Data Frame. Contains details on the various K/L parameters, chain
@@ -223,8 +223,8 @@ setGeneric("runParams",
         standardGeneric("runParams")
     })
 #' @title Get run parameters provided to `celdaGridSearch()`
-#' @description Returns details on the clustering parameters, model priors, and
-#'  seeds provided to `celdaGridSearch()` when the provided celdaList was
+#' @description Returns details on the clustering parameters, and model priors
+#'  provided to `celdaGridSearch()` when the provided celdaList was
 #'  created.
 #' @param celdaMod An object of class celdaList.
 #' @return Data Frame. Contains details on the various K/L parameters, chain
@@ -506,8 +506,6 @@ setGeneric("celdaProbabilityMap",
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-#'  to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
 #'  the "X" and "Y" coordinates in the data's t-SNE represetation.
@@ -524,7 +522,6 @@ setGeneric("celdaTsne",
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
-        seed = 12345,
         ...) {
         # counts = processCounts(counts)
         # compareCountMatrix(counts, celdaMod)

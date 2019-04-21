@@ -2,16 +2,15 @@
     len,
     z = NULL,
     initial = NULL,
-    fixed = NULL,
-    seed = 12345) {
+    fixed = NULL) {
 
     # If initial values are given, then they will not be randomly initialized
     if (!is.null(initial)) {
         initValues <- sort(unique(initial))
         if (length(unique(initial)) != N || length(initial) != len ||
             !all(initValues %in% seq(N))) {
-                stop("'initial' needs to be a vector of length 'len'
-                    containing N unique values.")
+                stop("'initial' needs to be a vector of length 'len'",
+                    " containing N unique values.")
         }
         z <- as.integer(as.factor(initial))
     } else {
@@ -22,8 +21,8 @@
     if (!is.null(fixed)) {
         fixedValues <- sort(unique(fixed))
         if (length(fixed) != len || !all(fixedValues %in% seq(N))) {
-            stop("'fixed' to be a vector of length 'len' where each entry is
-                one of N unique values or NA.")
+            stop("'fixed' to be a vector of length 'len' where each entry is",
+                " one of N unique values or NA.")
         }
         fixedIx <- !is.na(fixed)
         z[fixedIx] <- fixed[fixedIx]
@@ -34,7 +33,6 @@
     }
 
     # Randomly sample remaining values
-    .setSeed(seed)
     zNa <- which(is.na(z))
     if (length(zNa) > 0) {
         z[zNa] <- sample(zNotUsed, length(zNa), replace = TRUE)
@@ -60,8 +58,7 @@
     KSubcluster = NULL,
     alpha = 1,
     beta = 1,
-    minCell = 3,
-    seed = 12345) {
+    minCell = 3) {
 
     s <- rep(1, ncol(counts))
     if (is.null(KSubcluster))
@@ -78,7 +75,6 @@
         splitOnIter = -1,
         splitOnLast = FALSE,
         verbose = FALSE,
-        seed = seed,
         reorder = FALSE
     )
     overallZ <- as.integer(as.factor(res@clusters$z))
@@ -86,7 +82,7 @@
 
     while (currentK < K) {
         # Determine which clusters are split-able
-        KRemaining <- K - currentK
+        # KRemaining <- K - currentK
         KPerCluster <- min(ceiling(K / currentK), KSubcluster)
         KToUse <- ifelse(KPerCluster < 2, 2, KPerCluster)
 
@@ -218,15 +214,14 @@
     beta = 1,
     delta = 1,
     gamma = 1,
-    minFeature = 3,
-    seed = 12345) {
+    minFeature = 3) {
 
     if (is.null(LSubcluster))
         LSubcluster <- ceiling(sqrt(L))
 
     # Collapse cells to managable number of clusters
     if (!is.null(tempK) && ncol(counts) > tempK) {
-        z <- .initializeSplitZ(counts, K = tempK, seed = seed)
+        z <- .initializeSplitZ(counts, K = tempK)
         counts <- .colSumByGroup(counts, z, length(unique(z)))
     }
 
@@ -241,7 +236,6 @@
         splitOnIter = -1,
         splitOnLast = FALSE,
         verbose = FALSE,
-        seed = seed,
         reorder = FALSE
     )
     overallY <- as.integer(as.factor(res@clusters$y))
@@ -259,8 +253,16 @@
         # Cycle through each splitable cluster and split it up into
         # LSublcusters
         for (i in yToSplit) {
+            # make sure the colSums of subset counts is not 0
+            countsY <- counts[overallY == i, , drop = FALSE]
+            countsY <- countsY[, !(colSums(countsY) == 0)]
+
+            if (ncol(countsY) == 0) {
+                next
+            }
+
             clustLabel <- .celda_G(
-                counts[overallY == i, , drop = FALSE],
+                countsY,
                 L = LSubcluster,
                 yInitialize = "random",
                 beta = beta,
@@ -269,8 +271,7 @@
                 maxIter = 20,
                 splitOnIter = -1,
                 splitOnLast = FALSE,
-                verbose = FALSE
-            )
+                verbose = FALSE)
             tempY <- as.integer(as.factor(clustLabel@clusters$y))
 
             # Reassign clusters with label > 1
