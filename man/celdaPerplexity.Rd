@@ -19,5 +19,6 @@ Returns perplexity for each model in a celdaList as calculated
  by `perplexity().`
 }
 \examples{
+data(celdaCGGridSearchRes)
 celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
 }

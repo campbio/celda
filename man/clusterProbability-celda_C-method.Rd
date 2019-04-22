@@ -32,6 +32,7 @@ Calculates the conditional probability of each cell belonging to
  result.
 }
 \examples{
+data(celdaCSim, celdaCMod)
 clusterProb <- clusterProbability(celdaCSim$counts, celdaCMod)
 }
 \seealso{

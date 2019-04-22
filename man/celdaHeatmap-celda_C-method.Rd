@@ -27,6 +27,7 @@ Renders an expression heatmap to visualize `celda_C()` results.
  Features to include in the heatmap must be supplied.
 }
 \examples{
+data(celdaCSim, celdaCMod)
 celdaHeatmap(celdaCSim$counts, celdaCMod)
 }
 \seealso{

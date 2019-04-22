@@ -58,6 +58,7 @@ Run Celda with different combinations of parameters and
  from each chain will be sent to a log file but not be displayed in stdout.
 }
 \examples{
+data(celdaCGSim)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
     model = "celda_CG",

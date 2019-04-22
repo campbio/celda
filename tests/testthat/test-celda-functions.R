@@ -1,6 +1,7 @@
 library(celda)
 context("Testing miscellaneous celda functions")
 
+data(celdaCGGridSearchRes)
 celdaCGSim <- simulateCells("celda_CG", K = 5, L = 10)
 modelCG <- celda_CG(
     counts = celdaCGSim$counts,
@@ -20,7 +21,6 @@ test_that(desc = "Testing compareCountMatrix with numeric matrix input", {
 })
 
 test_that(desc = "Testing appendCeldaList", {
-    data(celdaCGGridSearchRes)
     expect_error(
         appendCeldaList(celdaCGGridSearchRes, matrix(0)),
         "Both parameters to appendCeldaList must be of class celdaList."

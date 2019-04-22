@@ -43,5 +43,6 @@ Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
 Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 }

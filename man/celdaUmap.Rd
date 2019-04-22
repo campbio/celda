@@ -41,5 +41,6 @@ Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
 Embeds cells in two dimensions using umap.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 tsneRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 }

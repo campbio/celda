@@ -96,6 +96,7 @@ Clusters the rows and columns of a count matrix containing
  single-cell data into L modules and K subpopulations, respectively.
 }
 \examples{
+data(celdaCGSim)
 celdaMod <- celda_CG(celdaCGSim$counts,
     K = celdaCGSim$K,
     L = celdaCGSim$L,

@@ -18,5 +18,6 @@ Retrieves the final log-likelihood from all iterations of Gibbs
  sampling used to generate a celdaModel.
 }
 \examples{
+data(celdaCGMod)
 bestLogLikelihood(celdaCGMod)
 }
