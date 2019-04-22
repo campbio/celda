@@ -119,9 +119,9 @@ normalizeCounts <- function(counts,
 #' @description Recode cell subpopulaton clusters using a mapping in the `from`
 #'  and `to` arguments.
 #' @param celdaMod Celda object of class `celda_C` or `celda_CG`.
-#' @param from Numeric vector. Unique values in the range of 1:K that
+#' @param from Numeric vector. Unique values in the range of seq(K) that
 #'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of 1:K that correspond
+#' @param to Numeric vector. Unique values in the range of seq(K) that correspond
 #'  to the new cluster labels.
 #' @return Celda object with cell subpopulation clusters, with class
 #'  corresponding to that of `celdaMod`.
@@ -145,9 +145,9 @@ recodeClusterZ <- function(celdaMod, from, to) {
 #' @description Recode feature module clusters using a mapping in the
 #'  `from` and `to` arguments.
 #' @param celdaMod Celda object of class `celda_G` or `celda_CG`.
-#' @param from Numeric vector. Unique values in the range of 1:L that
+#' @param from Numeric vector. Unique values in the range of seq(L) that
 #'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of 1:L that correspond
+#' @param to Numeric vector. Unique values in the range of seq(L) that correspond
 #'  to the new cluster labels.
 #' @return Celda object with recoded feature module clusters, with class
 #'  corresponding to that of `celdaMod`.
@@ -282,7 +282,7 @@ distinctColors <- function(n,
         to = valueRange[1],
         length = numVs)
     # Create all combination of hues with saturation/value pairs
-    list <- lapply(1:numVs, function(x) {
+    list <- lapply(seq(numVs), function(x) {
         rbind(huesHsv[1, ], s[x], v[x])
     })
     newHsv <- do.call(cbind, list)

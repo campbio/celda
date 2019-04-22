@@ -50,7 +50,7 @@ topRank <- function(matrix,
     # Convert to list if apply converted to a matrix because all
     # elements had the same length
     if (is.matrix(topIx)) {
-        topIx <- lapply(1:ncol(topIx), function(i)
+        topIx <- lapply(seq(ncol(topIx)), function(i)
             topIx[, i])
         names(topIx) <- dimnames(matrix)[[margin]]
     }
@@ -61,7 +61,7 @@ topRank <- function(matrix,
     topNames <- NULL
     namesToParse <- dimnames(matrix)[[oppositeMargin]]
     if (!is.null(namesToParse) & all(!is.na(topIx))) {
-        topNames <- lapply(1:length(topIx),
+        topNames <- lapply(seq(length(topIx)),
             function(i) {
                 ifelse(is.na(topIx[[i]]), NA, namesToParse[topIx[[i]]])
             })

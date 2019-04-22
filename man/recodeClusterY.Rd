@@ -9,10 +9,10 @@ recodeClusterY(celdaMod, from, to)
 \arguments{
 \item{celdaMod}{Celda object of class `celda_G` or `celda_CG`.}
 
-\item{from}{Numeric vector. Unique values in the range of 1:L that
+\item{from}{Numeric vector. Unique values in the range of seq(L) that
 correspond to the original cluster labels in `celdaMod`.}
 
-\item{to}{Numeric vector. Unique values in the range of 1:L that correspond
+\item{to}{Numeric vector. Unique values in the range of seq(L) that correspond
 to the new cluster labels.}
 }
 \value{
