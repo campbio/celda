@@ -402,15 +402,11 @@ decontX <- function(counts,
     if (deconMethod == "background") {
         ## Initialization
         deltaInit <- delta
-        theta <- stats::rbeta(n = nC,
-            shape1 = deltaInit,
-            shape2 = deltaInit)
+        theta <- stats::rbeta(n = nC, shape1 = deltaInit, shape2 = deltaInit)
         estRmat <- t(t(counts) * theta)
         bgDist <- rowSums(counts) / sum(counts)
         bgDist <- matrix(rep(bgDist, nC), ncol = nC)
-        cellDist <- normalizeCounts(estRmat,
-            normalize = "proportion",
-            pseudocountNormalize = beta)
+        cellDist <- normalizeCounts(estRmat, normalize = "proportion", pseudocountNormalize = beta)
         ll <- c()
 
         llRound <- .bgCalcLL(counts = counts,
