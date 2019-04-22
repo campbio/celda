@@ -60,6 +60,7 @@
 #'  cells. `celdaGridSearch()` can be used to run multiple values of K/L and
 #'  multiple chains in parallel.
 #' @examples
+#' data(celdaCGSim)
 #' celdaMod <- celda_CG(celdaCGSim$counts,
 #'     K = celdaCGSim$K,
 #'     L = celdaCGSim$L,
@@ -729,6 +730,7 @@ simulateCells.celda_CG <- function(model,
 #'  `cell` element of `counts` and `proportions` elements.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' factorizedMatrices <- factorizeMatrix(celdaCGSim$counts,
 #'     celdaCGMod, "posterior")
 #' @export
@@ -909,6 +911,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #' @return The log likelihood for the given cluster assignments
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim)
 #' loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
 #'     sampleLabel = celdaCGSim$sampleLabel,
 #'     z = celdaCGSim$z,
@@ -1030,6 +1033,7 @@ logLikelihood.celda_CG <- function(counts,
 #'  cluster probabilities.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
@@ -1102,6 +1106,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
 #' @rawNamespace import(matrixStats, except = c(count))
 #' @export
@@ -1195,6 +1200,7 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells and `celdaTsne()`
 #'  for generating 2-dimensional coordinates.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' celdaHeatmap(celdaCGSim$counts, celdaCGMod)
 #' @return A list containing dendrograms and the heatmap grob
 #' @export
@@ -1238,6 +1244,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()`
 #'  for displaying expression
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
@@ -1292,6 +1299,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells and `celdaHeatmap()`
 #'  for displaying expression.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 #' @return A two column matrix of umap coordinates
 #' @export
@@ -1401,6 +1409,7 @@ setMethod("celdaUmap",
 #'  of each cell population in each sample. Default 'cellPopulation'.
 #' @param ... Additional parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
 #' @return A grob containing the specified plots
 #' @import gridExtra
@@ -1514,6 +1523,7 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_CG"),
 #' @return List. Each element contains the module of the provided feature.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' module <- featureModuleLookup(celdaCGSim$counts,
 #'     celdaCGMod,
 #'     c("Gene_1", "Gene_XXX"))

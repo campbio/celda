@@ -130,6 +130,7 @@
 #' @seealso `recursiveSplitModule()` for recursive splitting of cell
 #'  populations.
 #' @examples
+#' data(celdaCGSim, celdaCSim)
 #' ## Create models that range from K = 3 to K = 7 by recursively splitting
 #' ## cell populations into two to produce `celda_C` cell clustering models
 #' testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
@@ -604,6 +605,7 @@ recursiveSplitCell <- function(counts,
 #'  `zInit` is set.
 #' @seealso `recursiveSplitCell()` for recursive splitting of cell populations.
 #' @examples
+#' data(celdaCGSim)
 #' ## Create models that range from L=3 to L=20 by recursively splitting modules
 #' ## into two
 #' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,

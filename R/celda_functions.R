@@ -69,8 +69,9 @@
 #'  can be useful before applying a log transformation. Default  0.
 #' @return Numeric Matrix. A normalized matrix.
 #' @examples
-#'  normalized.counts <- normalizeCounts(celdaCGSim$counts, "proportion",
-#'  pseudocountNormalize = 1)
+#'  data(celdaCGSim)
+#'  normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
+#'      pseudocountNormalize = 1)
 #' @export
 normalizeCounts <- function(counts,
     normalize = c("proportion", "cpm",
@@ -126,7 +127,8 @@ normalizeCounts <- function(counts,
 #' @return Celda object with cell subpopulation clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
-#' celdaMod.reordered.z <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+#' data(celdaCGMod)
+#' celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterZ <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
@@ -152,7 +154,8 @@ recodeClusterZ <- function(celdaMod, from, to) {
 #' @return Celda object with recoded feature module clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
-#' celdaMod.reordered.y <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
+#' data(celdaCGMod)
+#' celdaModReorderedY <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
@@ -178,6 +181,7 @@ recodeClusterY <- function(celdaMod, from, to) {
 #' @return Returns TRUE if provided count matrix matches the one used in the
 #'  celda object and/or `errorOnMismatch = FALSE`, FALSE otherwise.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' compareCountMatrix(celdaCGSim$counts, celdaCGMod, errorOnMismatch = FALSE)
 #' @export
 compareCountMatrix <- function(counts,
@@ -372,6 +376,7 @@ distinctColors <- function(n,
 #'  not be created. Default NULL.
 #' @return Matrix. Contains a list of features per each column (feature module)
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
 #' \donttest{
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod,
@@ -417,6 +422,7 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
 #'  curve.
 #' @return Violin plot for each feature, grouped by celda cluster
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' violinPlot(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod, features = "Gene_1")
 #' @export

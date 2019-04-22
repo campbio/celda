@@ -16,6 +16,7 @@
 #'  contributing the most to each column (cell). The `names` variable provides
 #'  the rownames corresponding to these indexes.
 #' @examples
+#' data(sampleCells)
 #' topRanksPerCell <- topRank(sampleCells, n = 5)
 #' topFeatureNamesForCell <- topRanksPerCell$names[1]
 #' @export

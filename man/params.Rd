@@ -19,5 +19,6 @@ Retrieves the K/L, model priors (e.g. alpha, beta),
  provided celdaModel.
 }
 \examples{
+data(celdaCGMod)
 params(celdaCGMod)
 }

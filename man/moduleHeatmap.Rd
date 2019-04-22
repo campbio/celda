@@ -52,5 +52,6 @@ Renders a heatmap for selected featureModules. Cells are
  on the top to the lowest probability on the bottom.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 moduleHeatmap(celdaCGSim$counts, celdaCGMod)
 }

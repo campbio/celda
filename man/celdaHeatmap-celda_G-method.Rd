@@ -27,6 +27,7 @@ Renders an expression heatmap to visualize `celda_CG()` results.
  The top `nfeatures` for each module will be included in the heatmap.
 }
 \examples{
+data(celdaGSim, celdaGMod)
 celdaHeatmap(celdaGSim$counts, celdaGMod)
 }
 \seealso{

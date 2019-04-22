@@ -48,6 +48,7 @@
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of K and multiple chains in parallel.
 #' @examples
+#' data(celdaCSim)
 #' celdaCMod <- celda_C(celdaCSim$counts,
 #'     K = celdaCSim$K,
 #'     sampleLabel = celdaCSim$sampleLabel)
@@ -606,6 +607,7 @@ simulateCells.celda_C <- function(model,
 #'  returns the posterior estimates. Default
 #'  `c("counts", "proportion", "posterior")`.
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' factorizedMatrices <- factorizeMatrix(celdaCSim$counts,
 #'     celdaCMod, "posterior")
 #' @return A list with elements for `counts`, `proportions`, or `posterior`
@@ -723,6 +725,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim)
 #' loglik <- logLikelihood.celda_C(celdaCSim$counts,
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     z = celdaCSim$z,
@@ -818,6 +821,7 @@ logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 #'  cluster probabilities.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' clusterProb <- clusterProbability(celdaCSim$counts, celdaCMod)
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_C"),
@@ -867,6 +871,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_C"),
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' perplexity <- perplexity(celdaCSim$counts, celdaCMod)
 #' @rawNamespace import(matrixStats, except = c(count))
 #' @export
@@ -933,6 +938,7 @@ setMethod("perplexity", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells and `celdaTsne()` for generating
 #'  2-dimensional coordinates
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' celdaHeatmap(celdaCSim$counts, celdaCMod)
 #' @return list A list containing dendrograms and the heatmap grob
 #' @export
@@ -969,6 +975,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' tsneRes <- celdaTsne(celdaCSim$counts, celdaCMod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
@@ -1023,6 +1030,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression.
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' umapRes <- celdaUmap(celdaCSim$counts, celdaCMod)
 #' @return A two column matrix of umap coordinates
 #' @export
@@ -1120,6 +1128,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 #' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' celdaProbabilityMap(celdaCSim$counts, celdaCMod)
 #' @return A grob containing the specified plots
 #' @export

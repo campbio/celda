@@ -24,5 +24,6 @@ Recode cell subpopulaton clusters using a mapping in the `from`
  and `to` arguments.
 }
 \examples{
-celdaMod.reordered.z <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+data(celdaCGMod)
+celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
 }

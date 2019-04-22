@@ -18,5 +18,6 @@ List. Contains one celdaModel object for each of the parameters
 Returns all models generated during a `celdaGridSearch()` run.
 }
 \examples{
+data(celdaCGGridSearchRes)
 celdaCGGridModels <- resList(celdaCGGridSearchRes)
 }

@@ -44,6 +44,7 @@ Performs normalization, transformation, and/or scaling of a
  counts matrix
 }
 \examples{
- normalized.counts <- normalizeCounts(celdaCGSim$counts, "proportion",
- pseudocountNormalize = 1)
+ data(celdaCGSim)
+ normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
+     pseudocountNormalize = 1)
 }

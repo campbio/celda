@@ -33,6 +33,7 @@ Generates factorized matrices showing the contribution of each
  feature in each module and each module in each cell.
 }
 \examples{
+data(celdaGSim, celdaGMod)
 factorizedMatrices <- factorizeMatrix(celdaGSim$counts,
     celdaGMod, "posterior")
 }
