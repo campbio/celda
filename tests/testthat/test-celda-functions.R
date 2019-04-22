@@ -20,18 +20,19 @@ test_that(desc = "Testing compareCountMatrix with numeric matrix input", {
 })
 
 test_that(desc = "Testing appendCeldaList", {
-    egList <- celda::celdaCGGridSearchRes
+    data(celdaCGGridSearchRes)
     expect_error(
-        appendCeldaList(egList, matrix(0)),
+        appendCeldaList(celdaCGGridSearchRes, matrix(0)),
         "Both parameters to appendCeldaList must be of class celdaList."
     )
-    modifiedEgList <- egList
+    modifiedEgList <- celdaCGGridSearchRes
     modifiedEgList@countChecksum <- "abcd12345"
     expect_warning(
-        appendCeldaList(egList, modifiedEgList),
+        appendCeldaList(celdaCGGridSearchRes, modifiedEgList),
         paste0("Provided lists have different countChecksums and may have",
         " been generated from different count matrices. Using checksum",
         " from first list..."))
-    expect_equal(length(egList@resList) * 2,
-        length(appendCeldaList(egList, egList)@resList))
+    expect_equal(length(celdaCGGridSearchRes@resList) * 2,
+        length(appendCeldaList(celdaCGGridSearchRes,
+            celdaCGGridSearchRes)@resList))
 })
