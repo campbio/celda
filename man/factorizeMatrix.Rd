@@ -2,25 +2,37 @@
 % Please edit documentation in R/all_generics.R
 \name{factorizeMatrix}
 \alias{factorizeMatrix}
-\title{Generate factorized matrices showing each feature's influence on cell / gene clustering}
+\title{Generate factorized matrices showing each feature's influence on cell
+ / gene clustering}
 \usage{
-factorizeMatrix(counts, celda.mod, type = c("counts", "proportion",
+factorizeMatrix(counts, celdaMod, type = c("counts", "proportion",
   "posterior"))
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+\item{celdaMod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 
-\item{type}{A character vector containing one or more of "counts", "proportions", or "posterior". "counts" returns the raw number of counts for each entry in each matrix. "proportions" returns the counts matrix where each vector is normalized to a probability distribution. "posterior" returns the posterior estimates which include the addition of the Dirichlet concentration parameter (essentially as a pseudocount).}
+\item{type}{A character vector containing one or more of "counts",
+"proportions", or "posterior". "counts" returns the raw number of counts for
+each entry in each matrix. "proportions" returns the counts matrix where
+each vector is normalized to a probability distribution. "posterior" returns
+the posterior estimates which include the addition of the Dirichlet
+concentration parameter (essentially as a pseudocount).}
 }
 \value{
 A list of lists of the types of factorized matrices specified
 }
 \description{
-Generate factorized matrices showing each feature's influence on cell / gene clustering
+Generate factorized matrices showing each feature's influence on cell
+ / gene clustering
 }
 \examples{
-factorized.matrices = factorizeMatrix(celda.CG.sim$counts, celda.CG.mod, 
-                                      "posterior")
+data(celdaCGSim, celdaCGMod)
+factorizedMatrices <- factorizeMatrix(
+    celdaCGSim$counts, celdaCGMod,
+    "posterior"
+)
 }

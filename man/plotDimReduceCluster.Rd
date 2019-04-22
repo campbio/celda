@@ -6,12 +6,14 @@
 \usage{
 plotDimReduceCluster(dim1, dim2, cluster, size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2",
-  specific_clusters = NULL, label_clusters = FALSE, label_size = 3.5)
+  specificClusters = NULL, labelClusters = FALSE, labelSize = 3.5)
 }
 \arguments{
-\item{dim1}{Numeric vector. First dimension from data dimensionality reduction output.}
+\item{dim1}{Numeric vector. First dimension from data
+dimensionality reduction output.}
 
-\item{dim2}{Numeric vector. Second dimension from data dimensionality reduction output.}
+\item{dim2}{Numeric vector. Second dimension from data
+dimensionality reduction output.}
 
 \item{cluster}{Integer vector. Contains cluster labels for each cell.}
 
@@ -21,23 +23,34 @@ plotDimReduceCluster(dim1, dim2, cluster, size = 1,
 
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
-\item{specific_clusters}{Numeric vector. Only color cells in the specified clusters. All other cells will be grey. If NULL, all clusters will be colored. Default NULL.}
+\item{specificClusters}{Numeric vector.
+Only color cells in the specified clusters.
+All other cells will be grey.
+If NULL, all clusters will be colored. Default NULL.}
 
-\item{label_clusters}{Logical. Whether the cluster labels are plotted. Default FALSE.}
+\item{labelClusters}{Logical. Whether the cluster labels are plotted.
+Default FALSE.}
 
-\item{label_size}{Numeric. Sets size of label if label_clusters is TRUE. Default 3.5.}
+\item{labelSize}{Numeric. Sets size of label if labelClusters is TRUE.
+Default 3.5.}
 }
 \value{
 The plot as a ggplot object
 }
 \description{
-Create a scatterplot for each row of a normalized gene expression matrix where x and y axis are from a data dimensionality reduction tool. The cells are colored by its given `cluster` label.
+Create a scatterplot for each row of a normalized
+ gene expression matrix where x and y axis are from a
+ data dimensionality reduction tool.
+ The cells are colored by its given `cluster` label.
 }
 \examples{
 \donttest{
-celda.tsne <- celdaTsne(counts = celda.CG.sim$counts, celda.mod = celda.CG.mod)
-plotDimReduceCluster(dim1 = celda.tsne[,1], dim2 = celda.tsne[,2],
-                     cluster = as.factor(z(celda.CG.mod)),
-                     specific_clusters = c(1,2,3))
+data(celdaCGSim, celdaCGMod)
+celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
+    celdaMod = celdaCGMod)
+plotDimReduceCluster(dim1 = celdaTsne[, 1],
+    dim2 = celdaTsne[, 2],
+    cluster = as.factor(z(celdaCGMod)),
+    specificClusters = c(1, 2, 3))
 }
 }

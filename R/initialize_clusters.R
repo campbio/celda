@@ -1,260 +1,386 @@
+.initializeCluster <- function(N,
+    len,
+    z = NULL,
+    initial = NULL,
+    fixed = NULL) {
 
-initialize.cluster = function(N, len, z = NULL, initial = NULL, fixed = NULL, seed=12345) {
-
-  ## If initial values are given, then they will not be randomly initialized
-  if(!is.null(initial)) {
-    init.values = sort(unique(initial))
-    if(length(unique(initial)) != N || length(initial) != len || !all(init.values %in% 1:N)) {
-      stop("'initial' needs to be a vector of length 'len' containing N unique values.")
+    # If initial values are given, then they will not be randomly initialized
+    if (!is.null(initial)) {
+        initValues <- sort(unique(initial))
+        if (length(unique(initial)) != N || length(initial) != len ||
+            !all(initValues %in% seq(N))) {
+                stop("'initial' needs to be a vector of length 'len'",
+                    " containing N unique values.")
+        }
+        z <- as.integer(as.factor(initial))
+    } else {
+        z <- rep(NA, len)
     }
-    z = as.numeric(as.factor(initial))
-  } else {
-    z = rep(NA, len)
-  }
 
-  ## Set any values that need to be fixed during sampling
-  if(!is.null(fixed)) {
-    fixed.values = sort(unique(fixed))
-    if(length(fixed) != len || !all(fixed.values %in% 1:N)) {
-      stop("'fixed' to be a vector of length 'len' where each entry is one of N unique values or NA.")
+    # Set any values that need to be fixed during sampling
+    if (!is.null(fixed)) {
+        fixedValues <- sort(unique(fixed))
+        if (length(fixed) != len || !all(fixedValues %in% seq(N))) {
+            stop("'fixed' to be a vector of length 'len' where each entry is",
+                " one of N unique values or NA.")
+        }
+        fixedIx <- !is.na(fixed)
+        z[fixedIx] <- fixed[fixedIx]
+        zNotUsed <- setdiff(seq(N), unique(fixed[fixedIx]))
+    } else {
+        zNotUsed <- seq(N)
+        fixedIx <- rep(FALSE, len)
     }
-    fixed.ix = !is.na(fixed)
-    z[fixed.ix] = fixed[fixed.ix]
-    z.not.used = setdiff(1:N, unique(fixed[fixed.ix]))
-  } else {
-    z.not.used = 1:N
-    fixed.ix = rep(FALSE, len)
-  }
 
-  ## Randomly sample remaining values
-  setSeed(seed)
-  z.na = which(is.na(z))
-  if(length(z.na) > 0) {
-    z[z.na] = sample(z.not.used, length(z.na), replace=TRUE)
-  }
-
-  ## Check to ensure each value is in the vector at least once
-  missing = setdiff(1:N, z)
-  for(i in missing) {
-    ta = sort(table(z[!fixed.ix]), decreasing = TRUE)
-    if(ta[1] == 1) {
-      stop("'len' is not long enough to accomodate 'N' unique values")
+    # Randomly sample remaining values
+    zNa <- which(is.na(z))
+    if (length(zNa) > 0) {
+        z[zNa] <- sample(zNotUsed, length(zNa), replace = TRUE)
     }
-    ix = which(z == as.numeric(names(ta))[1] & !fixed.ix)
-    z[sample(ix, 1)] = i
-  }
 
-  return(z)
+    # Check to ensure each value is in the vector at least once
+    missing <- setdiff(seq(N), z)
+    for (i in missing) {
+        ta <- sort(table(z[!fixedIx]), decreasing = TRUE)
+        if (ta[1] == 1) {
+            stop("'len' is not long enough to accomodate 'N' unique values")
+        }
+        ix <- which(z == as.integer(names(ta))[1] & !fixedIx)
+        z[sample(ix, 1)] <- i
+    }
+
+    return(z)
 }
 
 
+.initializeSplitZ <- function(counts,
+    K,
+    KSubcluster = NULL,
+    alpha = 1,
+    beta = 1,
+    minCell = 3) {
 
+    s <- rep(1, ncol(counts))
+    if (is.null(KSubcluster))
+        KSubcluster <- ceiling(sqrt(K))
 
-initialize.splitZ = function(counts, K, K.subcluster=NULL, alpha=1, beta=1, min.cell = 3, seed=12345) {
-  s = rep(1, ncol(counts))
-  if(is.null(K.subcluster)) K.subcluster = ceiling(sqrt(K))
+    # Initialize the model with KSubcluster clusters
+    res <- .celda_C(
+        counts,
+        K = KSubcluster,
+        maxIter = 20,
+        zInitialize = "random",
+        alpha = alpha,
+        beta = beta,
+        splitOnIter = -1,
+        splitOnLast = FALSE,
+        verbose = FALSE,
+        reorder = FALSE
+    )
+    overallZ <- as.integer(as.factor(res@clusters$z))
+    currentK <- max(overallZ)
 
-  ## Initialize the model with K.subcluster clusters
-  res = .celda_C(counts, K=K.subcluster, max.iter=20, z.initialize="random", alpha=alpha, beta=beta, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
-  overall.z = as.integer(as.factor(res@clusters$z))
-  current.K = max(overall.z)
+    while (currentK < K) {
+        # Determine which clusters are split-able
+        # KRemaining <- K - currentK
+        KPerCluster <- min(ceiling(K / currentK), KSubcluster)
+        KToUse <- ifelse(KPerCluster < 2, 2, KPerCluster)
 
-  while(current.K < K) {
+        zTa <- tabulate(overallZ, max(overallZ))
 
-    ## Determine which clusters are split-able
-    K.remaining = K - current.K
-    K.per.cluster = min(ceiling(K / current.K), K.subcluster)
-    K.to.use = ifelse(K.per.cluster < 2, 2, K.per.cluster)
+        zToSplit <- which(zTa > minCell & zTa > KToUse)
+        if (length(zToSplit) > 1) {
+            zToSplit <- sample(zToSplit)
+        } else if (length(zToSplit) == 0) {
+            break
+        }
 
-    z.ta = tabulate(overall.z, max(overall.z))
-    z.to.split = which(z.ta > min.cell & z.ta > K.to.use)
-    if (length(z.to.split) > 1) {
-        z.to.split = sample(z.to.split)
+        # Cycle through each splitable cluster and split it up into
+        # K.sublcusters
+        for (i in zToSplit) {
+            clustLabel <- .celda_C(counts[, overallZ == i, drop = FALSE],
+                K = KToUse,
+                zInitialize = "random",
+                alpha = alpha,
+                beta = beta,
+                maxIter = 20,
+                splitOnIter = -1,
+                splitOnLast = FALSE,
+                verbose = FALSE)
+            tempZ <- as.integer(as.factor(clustLabel@clusters$z))
+
+            # Reassign clusters with label > 1
+            splitIx <- tempZ > 1
+            ix <- overallZ == i
+            newZ <- overallZ[ix]
+            newZ[splitIx] <- currentK + tempZ[splitIx] - 1
+
+            overallZ[ix] <- newZ
+            currentK <- max(overallZ)
+
+            # Ensure that the maximum number of clusters does not get too large'
+            if (currentK > K + 10) {
+                break
+            }
+        }
     }
 
+    # Decompose counts for likelihood calculation
+    p <- .cCDecomposeCounts(counts, s, overallZ, currentK)
+    nS <- p$nS
+    nG <- p$nG
+    nM <- p$nM
+    mCPByS <- p$mCPByS
+    nGByCP <- p$nGByCP
+    nCP <- p$nCP
+    nByC <- p$nByC
 
-    if(length(z.to.split) == 0) break()
+    # Remove clusters 1-by-1 until K is reached
+    while (currentK > K) {
+        # Find second best assignment give current assignments for each cell
+        probs <- .cCCalcEMProbZ(counts,
+                s = s,
+                z = overallZ,
+                K = currentK,
+                mCPByS = mCPByS,
+                nGByCP = nGByCP,
+                nByC = nByC,
+                nCP = nCP,
+                nG = nG,
+                nM = nM,
+                alpha = alpha,
+                beta = beta,
+                doSample = FALSE)
+        zProb <- t(probs$probs)
+        zProb[cbind(seq(nrow(zProb)), overallZ)] <- NA
+        zSecond <- apply(zProb, 1, which.max)
 
-    ## Cycle through each splitable cluster and split it up into K.sublcusters
-    for(i in z.to.split) {
+        zTa <- tabulate(overallZ, currentK)
+        zNonEmpty <- which(zTa > 0)
 
-      clustLabel = .celda_C(counts[,overall.z == i,drop=FALSE], K=K.to.use, z.initialize="random", alpha=alpha, beta=beta, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
-      temp.z = as.integer(as.factor(clustLabel@clusters$z))
+        # Find worst cluster by logLik to remove
+        previousZ <- overallZ
+        llShuffle <- rep(NA, currentK)
+        for (i in zNonEmpty) {
+            ix <- overallZ == i
+            newZ <- overallZ
+            newZ[ix] <- zSecond[ix]
 
-      ## Reassign clusters with label > 1
-      split.ix = temp.z > 1
-      ix = overall.z == i
-      new.z = overall.z[ix]
-      new.z[split.ix] = current.K + temp.z[split.ix] - 1
+            p <- .cCReDecomposeCounts(counts,
+                s,
+                newZ,
+                previousZ,
+                nGByCP,
+                currentK)
+            nGByCP <- p$nGByCP
+            mCPByS <- p$mCPByS
+            llShuffle[i] <- .cCCalcLL(mCPByS,
+                    nGByCP,
+                    s,
+                    newZ,
+                    currentK,
+                    nS,
+                    nG,
+                    alpha,
+                    beta)
+            previousZ <- newZ
+        }
 
-      overall.z[ix] = new.z
-      current.K = max(overall.z)
+        # Remove the cluster which had the the largest likelihood after removal
+        zToRemove <- which.max(llShuffle)
 
-      ## Ensure that the maximum number of clusters does not get too large'
-      if(current.K > K + 10) {
-        break()
-      }
+        ix <- overallZ == zToRemove
+        overallZ[ix] <- zSecond[ix]
+
+        p <- .cCReDecomposeCounts(counts,
+            s,
+            overallZ,
+            previousZ,
+            nGByCP,
+            currentK)
+        nGByCP <- p$nGByCP[, -zToRemove, drop = FALSE]
+        mCPByS <- p$mCPByS[-zToRemove, , drop = FALSE]
+        overallZ <- as.integer(as.factor(overallZ))
+        currentK <- currentK - 1
     }
-  }
-
-  ## Decompose counts for likelihood calculation
-  p = cC.decomposeCounts(counts, s, overall.z, current.K)
-  nS = p$nS
-  nG = p$nG
-  nM = p$nM
-  m.CP.by.S = p$m.CP.by.S
-  n.G.by.CP = p$n.G.by.CP
-  n.CP = p$n.CP
-  n.by.C = p$n.by.C
-
-  ## Remove clusters 1-by-1 until K is reached
-  while(current.K > K) {
-    ## Find second best assignment give current assignments for each cell
-    probs = cC.calcEMProbZ(counts, s=s, z=overall.z, K=current.K, m.CP.by.S=m.CP.by.S, n.G.by.CP=n.G.by.CP, n.by.C=n.by.C, n.CP=n.CP, nG=nG, nM=nM, alpha=alpha, beta=beta, do.sample=FALSE)
-    z.prob = t(probs$probs)
-    z.prob[cbind(1:nrow(z.prob), overall.z)] = NA
-    z.second = apply(z.prob, 1, which.max)
-
-    z.ta = tabulate(overall.z, current.K)
-    z.non.empty = which(z.ta > 0)
-
-    ## Find worst cluster by logLik to remove
-    previous.z = overall.z
-    ll.shuffle = rep(NA, current.K)
-    for(i in z.non.empty) {
-      ix = overall.z == i
-      new.z = overall.z
-      new.z[ix] = z.second[ix]
-
-      p = cC.reDecomposeCounts(counts, s, new.z, previous.z, n.G.by.CP, current.K)
-      n.G.by.CP = p$n.G.by.CP
-      m.CP.by.S = p$m.CP.by.S
-      ll.shuffle[i] = cC.calcLL(m.CP.by.S, n.G.by.CP, s, new.z, current.K, nS, nG, alpha, beta)
-      previous.z = new.z
-    }
-
-    ## Remove the cluster which had the the largest likelihood after removal
-    z.to.remove = which.max(ll.shuffle)
-
-    ix = overall.z == z.to.remove
-    overall.z[ix] = z.second[ix]
-
-    p = cC.reDecomposeCounts(counts, s, overall.z, previous.z, n.G.by.CP, current.K)
-    n.G.by.CP = p$n.G.by.CP[,-z.to.remove,drop=FALSE]
-    m.CP.by.S = p$m.CP.by.S[-z.to.remove,,drop=FALSE]
-    overall.z = as.integer(as.factor(overall.z))
-    current.K = current.K - 1
-
-  }
-  return(overall.z)
+    return(overallZ)
 }
 
 
+.initializeSplitY <- function(counts,
+    L,
+    LSubcluster = NULL,
+    tempK = 100,
+    beta = 1,
+    delta = 1,
+    gamma = 1,
+    minFeature = 3) {
 
+    if (is.null(LSubcluster))
+        LSubcluster <- ceiling(sqrt(L))
 
-
-initialize.splitY = function(counts, L, L.subcluster=NULL, temp.K=100, beta=1, delta=1, gamma=1, min.feature = 3, seed=12345) {
-
-  if(is.null(L.subcluster)) L.subcluster = ceiling(sqrt(L))
-
-  ## Collapse cells to managable number of clusters
-  if(!is.null(temp.K) && ncol(counts) > temp.K) {
-    z = initialize.splitZ(counts, K=temp.K, seed=seed)
-    counts = colSumByGroup(counts, z, length(unique(z)))
-  }
-
-  ## Initialize the model with K.subcluster clusters
-  res = .celda_G(counts, L=L.subcluster, max.iter=10, y.initialize="random", beta=beta, delta=delta, gamma=gamma, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE, seed=seed, reorder=FALSE)
-  overall.y = as.integer(as.factor(res@clusters$y))
-  current.L = max(overall.y)
-
-  while(current.L < L) {
-    ## Determine which clusters are split-able
-    y.ta = tabulate(overall.y, max(overall.y))
-    y.to.split = sample(which(y.ta > min.feature & y.ta > L.subcluster))
-
-    if(length(y.to.split) == 0) break()
-
-    ## Cycle through each splitable cluster and split it up into L.sublcusters
-    for(i in y.to.split) {
-
-      clustLabel = .celda_G(counts[overall.y == i,,drop=FALSE], L=L.subcluster, y.initialize="random", beta=beta, delta=delta, gamma=gamma, max.iter=20, split.on.iter=-1, split.on.last=FALSE, verbose=FALSE)
-      temp.y = as.integer(as.factor(clustLabel@clusters$y))
-
-      ## Reassign clusters with label > 1
-      split.ix = temp.y > 1
-      ix = overall.y == i
-      new.y = overall.y[ix]
-      new.y[split.ix] = current.L + temp.y[split.ix] - 1
-
-      overall.y[ix] = new.y
-      current.L = max(overall.y)
-
-      ## Ensure that the maximum number of clusters does not get too large
-      if(current.L > L + 10) {
-        break()
-      }
-    }
-  }
-
-  ## Decompose counts for likelihood calculation
-  p = cG.decomposeCounts(counts=counts, y=overall.y, L=current.L)
-  n.TS.by.C = p$n.TS.by.C
-  n.by.G = p$n.by.G
-  n.by.TS = p$n.by.TS
-  nG.by.TS = p$nG.by.TS
-  nM = p$nM
-  nG = p$nG
-  rm(p)
-
-  # Pre-compute lgamma values
-  lgbeta = lgamma((0:max(.colSums(counts, nrow(counts), ncol(counts)))) + beta)
-  lggamma = lgamma(0:(nrow(counts)+L) + gamma)
-  lgdelta = c(NA, lgamma((1:(nrow(counts)+L) * delta)))
-
-  ## Remove clusters 1-by-1 until L is reached
-  while(current.L > L) {
-
-    ## Find second best assignment give current assignments for each cell
-    probs = cG.calcGibbsProbY(counts=counts, y=overall.y, L=current.L, n.TS.by.C=n.TS.by.C, n.by.TS=n.by.TS, nG.by.TS=nG.by.TS, n.by.G=n.by.G, nG=nG, beta=beta, delta=delta, gamma=gamma, lgbeta=lgbeta, lggamma=lggamma, lgdelta=lgdelta, do.sample=FALSE)
-    y.prob = t(probs$probs)
-    y.prob[cbind(1:nrow(y.prob), overall.y)] = NA
-    y.second = apply(y.prob, 1, which.max)
-
-    y.ta = tabulate(overall.y, current.L)
-    y.non.empty = which(y.ta > 0)
-
-    ## Find worst cluster by logLik to remove
-    previous.y = overall.y
-    ll.shuffle = rep(NA, current.L)
-    for(i in y.non.empty) {
-      ix = overall.y == i
-      new.y = overall.y
-      new.y[ix] = y.second[ix]
-
-      ## Move arounds counts for likelihood calculation
-      p = cG.reDecomposeCounts(counts, new.y, previous.y, n.TS.by.C, n.by.G, current.L)
-      n.TS.by.C = p$n.TS.by.C
-      nG.by.TS = p$nG.by.TS
-      n.by.TS = p$n.by.TS
-      ll.shuffle[i] = cG.calcLL(n.TS.by.C, n.by.TS, n.by.G, nG.by.TS, nM, nG, current.L, beta, delta, gamma)
-      previous.y = new.y
+    # Collapse cells to managable number of clusters
+    if (!is.null(tempK) && ncol(counts) > tempK) {
+        z <- .initializeSplitZ(counts, K = tempK)
+        counts <- .colSumByGroup(counts, z, length(unique(z)))
     }
 
-    ## Remove the cluster which had the the largest likelihood after removal
-    y.to.remove = which.max(ll.shuffle)
+    # Initialize the model with KSubcluster clusters
+    res <- .celda_G(counts,
+        L = LSubcluster,
+        maxIter = 10,
+        yInitialize = "random",
+        beta = beta,
+        delta = delta,
+        gamma = gamma,
+        splitOnIter = -1,
+        splitOnLast = FALSE,
+        verbose = FALSE,
+        reorder = FALSE
+    )
+    overallY <- as.integer(as.factor(res@clusters$y))
+    currentL <- max(overallY)
 
-    ix = overall.y == y.to.remove
-    overall.y[ix] = y.second[ix]
+    while (currentL < L) {
+        # Determine which clusters are split-able
+        yTa <- tabulate(overallY, max(overallY))
+        yToSplit <- sample(which(yTa > minFeature & yTa > LSubcluster))
 
-    ## Move around counts and remove module
-    p = cG.reDecomposeCounts(counts, overall.y, previous.y, n.TS.by.C, n.by.G, current.L)
-    n.TS.by.C = p$n.TS.by.C[-y.to.remove,,drop=FALSE]
-    nG.by.TS = p$nG.by.TS[-y.to.remove]
-    n.by.TS = p$n.by.TS[-y.to.remove]
-    overall.y = as.integer(as.factor(overall.y))
-    current.L = current.L - 1
-  }
-  return(overall.y)
+        if (length(yToSplit) == 0) {
+            break
+        }
+
+        # Cycle through each splitable cluster and split it up into
+        # LSublcusters
+        for (i in yToSplit) {
+            # make sure the colSums of subset counts is not 0
+            countsY <- counts[overallY == i, , drop = FALSE]
+            countsY <- countsY[, !(colSums(countsY) == 0)]
+
+            if (ncol(countsY) == 0) {
+                next
+            }
+
+            clustLabel <- .celda_G(
+                countsY,
+                L = LSubcluster,
+                yInitialize = "random",
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                maxIter = 20,
+                splitOnIter = -1,
+                splitOnLast = FALSE,
+                verbose = FALSE)
+            tempY <- as.integer(as.factor(clustLabel@clusters$y))
+
+            # Reassign clusters with label > 1
+            splitIx <- tempY > 1
+            ix <- overallY == i
+            newY <- overallY[ix]
+            newY[splitIx] <- currentL + tempY[splitIx] - 1
+
+            overallY[ix] <- newY
+            currentL <- max(overallY)
+
+            # Ensure that the maximum number of clusters does not get too large
+            if (currentL > L + 10) {
+                break
+            }
+        }
+    }
+
+    ## Decompose counts for likelihood calculation
+    p <- .cGDecomposeCounts(counts = counts, y = overallY, L = currentL)
+    nTSByC <- p$nTSByC
+    nByG <- p$nByG
+    nByTS <- p$nByTS
+    nGByTS <- p$nGByTS
+    nM <- p$nM
+    nG <- p$nG
+    rm(p)
+
+    # Pre-compute lgamma values
+    lgbeta <- lgamma((seq(0, max(.colSums(counts, nrow(counts),
+        ncol(counts))))) + beta)
+    lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
+    lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
+
+    # Remove clusters 1-by-1 until L is reached
+    while (currentL > L) {
+        # Find second best assignment give current assignments for each cell
+        probs <- .cGCalcGibbsProbY(
+            counts = counts,
+            y = overallY,
+            L = currentL,
+            nTSByC = nTSByC,
+            nByTS = nByTS,
+            nGByTS = nGByTS,
+            nByG = nByG,
+            nG = nG,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            lgbeta = lgbeta,
+            lggamma = lggamma,
+            lgdelta = lgdelta,
+            doSample = FALSE)
+        yProb <- t(probs$probs)
+        yProb[cbind(seq(nrow(yProb)), overallY)] <- NA
+        ySecond <- apply(yProb, 1, which.max)
+
+        yTa <- tabulate(overallY, currentL)
+        yNonEmpty <- which(yTa > 0)
+
+        # Find worst cluster by logLik to remove
+        previousY <- overallY
+        llShuffle <- rep(NA, currentL)
+        for (i in yNonEmpty) {
+            ix <- overallY == i
+            newY <- overallY
+            newY[ix] <- ySecond[ix]
+
+            # Move arounds counts for likelihood calculation
+            p <- .cGReDecomposeCounts(counts,
+                    newY,
+                    previousY,
+                    nTSByC,
+                    nByG,
+                    currentL)
+            nTSByC <- p$nTSByC
+            nGByTS <- p$nGByTS
+            nByTS <- p$nByTS
+            llShuffle[i] <- .cGCalcLL(nTSByC,
+                    nByTS,
+                    nByG,
+                    nGByTS,
+                    nM,
+                    nG,
+                    currentL,
+                    beta,
+                    delta,
+                    gamma)
+            previousY <- newY
+        }
+
+        # Remove the cluster which had the the largest likelihood after removal
+        yToRemove <- which.max(llShuffle)
+
+        ix <- overallY == yToRemove
+        overallY[ix] <- ySecond[ix]
+
+        # Move around counts and remove module
+        p <- .cGReDecomposeCounts(counts,
+            overallY,
+            previousY,
+            nTSByC,
+            nByG,
+            currentL)
+        nTSByC <- p$nTSByC[-yToRemove, , drop = FALSE]
+        nGByTS <- p$nGByTS[-yToRemove]
+        nByTS <- p$nByTS[-yToRemove]
+        overallY <- as.integer(as.factor(overallY))
+        currentL <- currentL - 1
+    }
+    return(overallY)
 }
-

@@ -4,21 +4,29 @@
 \alias{selectBestModel}
 \title{Select best chain within each combination of parameters}
 \usage{
-selectBestModel(celda.list)
+selectBestModel(celdaList)
 }
 \arguments{
-\item{celda.list}{Object of class `celda_list`. An object containing celda models returned from `celdaGridSearch()`.}
+\item{celdaList}{Object of class `celdaList`. An object containing celda
+models returned from `celdaGridSearch()`.}
 }
 \value{
-A new `celda_list` object containing one model with the best log likelihood for each set of parameters. If only one set of parameters is in the `celda_list`, the best model will be returned directly instead of a `celda_list` object.
+A new `celdaList` object containing one model with the best log
+ likelihood for each set of parameters. If only one set of parameters is in
+ the `celdaList`, the best model will be returned directly instead of a
+ `celdaList` object.
 }
 \description{
-Select the chain with the best log likelihood for each combination of tested parameters from a `celda_list` object gererated by `celdaGridSearch()`.
+Select the chain with the best log likelihood for each
+ combination of tested parameters from a `celdaList` object gererated by
+ `celdaGridSearch()`.
 }
 \examples{
-## Returns same result as running celdaGridSearch with "best.only = TRUE"
-cgs.best = selectBestModel(celda.CG.grid.search.res)
+data(celdaCGGridSearchRes)
+## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
+cgsBest <- selectBestModel(celdaCGGridSearchRes)
 }
 \seealso{
-`celdaGridSearch()` can run Celda with multiple parameters and chains in parallel. `subsetCeldaList()` can subset the `celda_list` object.
+`celdaGridSearch()` can run Celda with multiple parameters and
+ chains in parallel. `subsetCeldaList()` can subset the `celdaList` object.
 }

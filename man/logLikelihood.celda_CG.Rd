@@ -4,13 +4,15 @@
 \alias{logLikelihood.celda_CG}
 \title{Calculate Celda_CG log likelihood}
 \usage{
-logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta,
-  delta, gamma)
+logLikelihood.celda_CG(counts, sampleLabel, z, y, K, L, alpha, beta, delta,
+  gamma)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells.}
 
-\item{sample.label}{Vector or factor. Denotes the sample label for each cell (column) in the count matrix.}
+\item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
+(column) in the count matrix.}
 
 \item{z}{Numeric vector. Denotes cell population labels.}
 
@@ -20,13 +22,17 @@ logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta,
 
 \item{L}{Integer. Number of feature modules.}
 
-\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount to each cell population in each sample. Default 1.}
+\item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount
+to each cell population in each sample. Default 1.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to each feature module in each cell population. Default 1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
+each feature module in each cell population. Default 1.}
 
-\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to each feature in each module. Default 1.}
+\item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to
+each feature in each module. Default 1.}
 
-\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to the number of features in each module. Default 1.}
+\item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to
+the number of features in each module. Default 1.}
 
 \item{...}{Additional parameters.}
 }
@@ -34,23 +40,33 @@ logLikelihood.celda_CG(counts, sample.label, z, y, K, L, alpha, beta,
 The log likelihood for the given cluster assignments
 }
 \description{
-Calculates the log likelihood for user-provided cell population and feature module clusters using the `celda_CG()` model.
+Calculates the log likelihood for user-provided cell population
+ and feature module clusters using the `celda_CG()` model.
 }
 \examples{
-loglik = logLikelihood.celda_CG(celda.CG.sim$counts,
-                       sample.label=celda.CG.sim$sample.label,
-                       z=celda.CG.sim$z, y=celda.CG.sim$y,
-                       K=celda.CG.sim$K, L=celda.CG.sim$L,
-                       alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
-                       gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
+data(celdaCGSim)
+loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
+    sampleLabel = celdaCGSim$sampleLabel,
+    z = celdaCGSim$z,
+    y = celdaCGSim$y,
+    K = celdaCGSim$K,
+    L = celdaCGSim$L,
+    alpha = celdaCGSim$alpha,
+    beta = celdaCGSim$beta,
+    gamma = celdaCGSim$gamma,
+    delta = celdaCGSim$delta)
 
-loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG",
-                       sample.label=celda.CG.sim$sample.label,
-                       z=celda.CG.sim$z, y=celda.CG.sim$y,
-                       K=celda.CG.sim$K, L=celda.CG.sim$L,
-                       alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
-                       gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
-
+loglik <- logLikelihood(celdaCGSim$counts,
+    model = "celda_CG",
+    sampleLabel = celdaCGSim$sampleLabel,
+    z = celdaCGSim$z,
+    y = celdaCGSim$y,
+    K = celdaCGSim$K,
+    L = celdaCGSim$L,
+    alpha = celdaCGSim$alpha,
+    beta = celdaCGSim$beta,
+    gamma = celdaCGSim$gamma,
+    delta = celdaCGSim$delta)
 }
 \seealso{
 `celda_CG()` for clustering features and cells

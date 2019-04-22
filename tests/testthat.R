@@ -1,4 +1,3 @@
-Sys.setenv("R_TESTS" ="")
+Sys.setenv("R_TESTS" = "")
 library(testthat)
 test_check("celda")
-

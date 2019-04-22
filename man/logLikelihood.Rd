@@ -2,28 +2,34 @@
 % Please edit documentation in R/all_generics.R
 \name{logLikelihood}
 \alias{logLikelihood}
-\title{Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model.}
+\title{Calculate LogLikelihood}
 \usage{
 logLikelihood(counts, model, ...)
 }
 \arguments{
-\item{counts}{The counts matrix used to generate the provided cluster assignments.}
+\item{counts}{The counts matrix used to generate the provided cluster
+assignments.}
 
-\item{model}{Celda model. Options available in `celda::available.models`.}
+\item{model}{celdaModel. Options available in `celda::availableModels`.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-The log-likelihood of the provided cluster assignment for the provided counts matrix.
+The log-likelihood of the provided cluster assignment for the
+ provided counts matrix.
 }
 \description{
-Calculate a log-likelihood for a user-provided cluster assignment and count matrix, per the desired celda model.
+Calculate a log-likelihood for a user-provided cluster
+ assignment and count matrix, per the desired celdaModel.
 }
 \examples{
-loglik = logLikelihood(celda.CG.sim$counts, model="celda_CG", 
-                       sample.label=celda.CG.sim$sample.label,
-                       z=celda.CG.sim$z, y=celda.CG.sim$y,
-                       K=celda.CG.sim$K, L=celda.CG.sim$L,
-                       alpha=celda.CG.sim$alpha, beta=celda.CG.sim$beta,
-                       gamma=celda.CG.sim$gamma, delta=celda.CG.sim$delta)
+data(celdaCGSim)
+loglik <- logLikelihood(celdaCGSim$counts,
+    model = "celda_CG",
+    sampleLabel = celdaCGSim$sampleLabel,
+    z = celdaCGSim$z, y = celdaCGSim$y,
+    K = celdaCGSim$K, L = celdaCGSim$L,
+    alpha = celdaCGSim$alpha, beta = celdaCGSim$beta,
+    gamma = celdaCGSim$gamma, delta = celdaCGSim$delta
+)
 }

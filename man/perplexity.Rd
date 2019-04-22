@@ -2,24 +2,28 @@
 % Please edit documentation in R/all_generics.R
 \name{perplexity}
 \alias{perplexity}
-\title{Calculate the perplexity from a single celda model}
+\title{Calculate the perplexity from a single celdaModel}
 \usage{
-perplexity(counts, celda.mod, new.counts = NULL)
+perplexity(counts, celdaMod, newCounts = NULL)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
 
-\item{new.counts}{A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.}
+\item{newCounts}{A newCounts matrix used to calculate perplexity. If NULL,
+perplexity will be calculated for the 'counts' matrix. Default NULL.}
 }
 \value{
 Numeric. The perplexity for the provided count data and model.
 }
 \description{
-Perplexity can be seen as a measure of how well a provided set of 
-cluster assignments fit the data being clustered.
+Perplexity can be seen as a measure of how well a provided set
+ of cluster assignments fit the data being clustered.
 }
 \examples{
-perplexity = perplexity(celda.CG.sim$counts, celda.CG.mod)
+data(celdaCGSim, celdaCGMod)
+perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
 }

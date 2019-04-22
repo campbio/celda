@@ -4,17 +4,20 @@
 \alias{bestLogLikelihood}
 \title{Get the log-likelihood}
 \usage{
-bestLogLikelihood(celda.mod)
+bestLogLikelihood(celdaMod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class celda_C, celda_G, or celda_CG.}
+\item{celdaMod}{A celdaModel object of class celda_C, celda_G, or celda_CG.}
 }
 \value{
-Numeric. The log-likelihood at the final step of Gibbs sampling used to generate the model.
+Numeric. The log-likelihood at the final step of Gibbs sampling used
+ to generate the model.
 }
 \description{
-Retrieves the final log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+Retrieves the final log-likelihood from all iterations of Gibbs
+ sampling used to generate a celdaModel.
 }
 \examples{
-bestLogLikelihood(celda.CG.mod)
+data(celdaCGMod)
+bestLogLikelihood(celdaCGMod)
 }

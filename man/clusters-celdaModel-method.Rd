@@ -3,19 +3,22 @@
 \docType{methods}
 \name{clusters,celdaModel-method}
 \alias{clusters,celdaModel-method}
-\title{Get clustering outcomes from a celda model}
+\title{Get clustering outcomes from a celdaModel}
 \usage{
-\S4method{clusters}{celdaModel}(celda.mod)
+\S4method{clusters}{celdaModel}(celdaMod)
 }
 \arguments{
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
 }
 \value{
-List. Contains z (for celda_C and celda_CG models) and/or y (for celda_G and celda_CG models)
+List. Contains z (for celda_C and celdaCGModels) and/or y
+ (for celda_G and celdaCGModels)
 }
 \description{
-Returns the z / y results corresponding to the cell / gene cluster labels determined by the provided celda model.
+Returns the z / y results corresponding to the cell / gene
+ cluster labels determined by the provided celdaModel.
 }
 \examples{
-clusters(celda.CG.mod)
+data(celdaCGMod)
+clusters(celdaCGMod)
 }

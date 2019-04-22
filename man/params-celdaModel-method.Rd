@@ -3,19 +3,23 @@
 \docType{methods}
 \name{params,celdaModel-method}
 \alias{params,celdaModel-method}
-\title{Get parameter values provided for celda model creation}
+\title{Get parameter values provided for celdaModel creation}
 \usage{
-\S4method{params}{celdaModel}(celda.mod)
+\S4method{params}{celdaModel}(celdaMod)
 }
 \arguments{
-\item{celda.mod}{Celda model. Options available in `celda::available.models`.}
+\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
 }
 \value{
-List. Contains the model-specific parameters for the provided celda model object depending on its class.
+List. Contains the model-specific parameters for the provided celda
+ model object depending on its class.
 }
 \description{
-Retrieves the K/L, model priors (e.g. alpha, beta), random seed, and count matrix checksum parameters provided during the creation of the provided celda model.
+Retrieves the K/L, model priors (e.g. alpha, beta),
+ and count matrix checksum parameters provided during the creation of the
+ provided celdaModel.
 }
 \examples{
-params(celda.CG.mod)
+data(celdaCGMod)
+params(celdaCGMod)
 }

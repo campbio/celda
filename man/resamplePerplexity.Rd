@@ -2,29 +2,36 @@
 % Please edit documentation in R/model_performance.R
 \name{resamplePerplexity}
 \alias{resamplePerplexity}
-\title{Calculate and visualize perplexity of all models in a celda_list, with count resampling}
+\title{Calculate and visualize perplexity of all models in a celdaList, with
+ count resampling}
 \usage{
-resamplePerplexity(counts, celda.list, resample = 5, seed = 12345)
+resamplePerplexity(counts, celdaList, resample = 5)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celda.mod`.}
 
-\item{celda.list}{Object of class 'celda_list'.}
+\item{celdaList}{Object of class 'celdaList'.}
 
-\item{resample}{Integer. The number of times to resample the counts matrix for evaluating perplexity. Default 5.}
-
-\item{seed}{Parameter to set.seed() for random number generation. Default 12345.If NULL, no calls to `set.seed()` are made.}
+\item{resample}{Integer. The number of times to resample the counts matrix
+for evaluating perplexity. Default 5.}
 }
 \value{
-celda_list. Returns the provided `celda.list` with a `perplexity` property, detailing the perplexity of all K/L combinations that appeared in the celda_list's models.
+celdaList. Returns the provided `celdaList` with a `perplexity`
+ property, detailing the perplexity of all K/L combinations that appeared in
+ the celdaList's models.
 }
 \description{
-Calculates the erplexity of each model's cluster assignments given the provided count matrix,
-as well as resamplings of that count matrix, providing a distribution of perplexities and a better sense of the 
-quality of a given K/L choice.
+Calculates the perplexity of each model's cluster assignments
+ given the provided countMatrix, as well as resamplings of that count
+ matrix, providing a distribution of perplexities and a better sense of the
+ quality of a given K/L choice.
 }
 \examples{
-celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
-                                              celda.CG.grid.search.res)
-plotGridSearchPerplexity(celda.CG.grid.search.res)
+data(celdaCGSim, celdaCGGridSearchRes)
+celdaCGGridSearchRes <- resamplePerplexity(
+  celdaCGSim$counts,
+  celdaCGGridSearchRes)
+plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

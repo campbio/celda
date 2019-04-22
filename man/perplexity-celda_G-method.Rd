@@ -5,23 +5,28 @@
 \alias{perplexity,celda_G-method}
 \title{Calculate the perplexity on new data with a celda_G model}
 \usage{
-\S4method{perplexity}{celda_G}(counts, celda.mod, new.counts = NULL)
+\S4method{perplexity}{celda_G}(counts, celdaMod, newCounts = NULL)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class "celda_C"}
+\item{celdaMod}{Celda object of class "celda_C"}
 
-\item{new.counts}{A new counts matrix used to calculate perplexity. If NULL, perplexity will be calculated for the 'counts' matrix. Default NULL.}
+\item{newCounts}{A new counts matrix used to calculate perplexity. If NULL,
+perplexity will be calculated for the 'counts' matrix. Default NULL.}
 }
 \value{
 Numeric. The perplexity for the provided count data and model.
 }
 \description{
-Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model.
+Perplexity is a statistical measure of how well a probability
+ model can predict new data. Lower perplexity indicates a better model.
 }
 \examples{
-perplexity = perplexity(celda.G.sim$counts, celda.G.mod)
+data(celdaGSim, celdaGMod)
+perplexity <- perplexity(celdaGSim$counts, celdaGMod)
 }
 \seealso{
 `celda_G()` for clustering features

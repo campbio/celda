@@ -4,17 +4,17 @@
 \alias{violinPlot}
 \title{Feature Expression Violin Plot}
 \usage{
-violinPlot(counts, celda.mod, features, plot_dots = FALSE)
+violinPlot(counts, celdaMod, features, plotDots = FALSE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
 cells.}
 
-\item{celda.mod}{Celda object of class "celda_G" or "celda_CG".}
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
 
 \item{features}{Character vector. Uses these genes for plotting.}
 
-\item{plot_dots}{\strong{TRUE} or \strong{FALSE}. If \strong{TRUE}, the
+\item{plotDots}{\strong{TRUE} or \strong{FALSE}. If \strong{TRUE}, the
 expression of features will be plotted as points in addition to the violin
 curve.}
 }
@@ -25,6 +25,7 @@ Violin plot for each feature, grouped by celda cluster
 Outputs a violin plot for feature expression data.
 }
 \examples{
-violinPlot(counts = celda.CG.sim$counts,
-           celda.mod = celda.CG.mod, features = "Gene_1")
+data(celdaCGSim, celdaCGMod)
+violinPlot(counts = celdaCGSim$counts,
+    celdaMod = celdaCGMod, features = "Gene_1")
 }

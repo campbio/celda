@@ -5,14 +5,17 @@
 \alias{celdaHeatmap,celda_CG-method}
 \title{Heatmap for celda_CG}
 \usage{
-\S4method{celdaHeatmap}{celda_CG}(counts, celda.mod, nfeatures = 25, ...)
+\S4method{celdaHeatmap}{celda_CG}(counts, celdaMod, nfeatures = 25, ...)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate.
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_CG`.}
+\item{celdaMod}{Celda object of class `celda_CG`.}
 
-\item{nfeatures}{Integer. Maximum number of features to select for each module. Default 25.}
+\item{nfeatures}{Integer. Maximum number of features to select for each
+module. Default 25.}
 
 \item{...}{Additional parameters.}
 }
@@ -20,11 +23,14 @@
 A list containing dendrograms and the heatmap grob
 }
 \description{
-Renders an expression heatmap to visualize `celda_CG()` results. The top `nfeatures` for each module will be included in the heatmap.
+Renders an expression heatmap to visualize `celda_CG()` results.
+ The top `nfeatures` for each module will be included in the heatmap.
 }
 \examples{
-celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
+data(celdaCGSim, celdaCGMod)
+celdaHeatmap(celdaCGSim$counts, celdaCGMod)
 }
 \seealso{
-`celda_CG()` for clustering features and cells and `celdaTsne()` for generating 2-dimensional coordinates
+`celda_CG()` for clustering features and cells and `celdaTsne()`
+ for generating 2-dimensional coordinates.
 }

@@ -5,17 +5,21 @@
 \alias{celdaPerplexity,celdaList-method}
 \title{Get perplexity for every model in a celdaList}
 \usage{
-\S4method{celdaPerplexity}{celdaList}(celda.mod)
+\S4method{celdaPerplexity}{celdaList}(celdaMod)
 }
 \arguments{
-\item{celda.mod}{A celda model object of class "celda_C", "celda_G", or "celda_CG".}
+\item{celdaMod}{A celdaModel object of class "celda_C", "celda_G", or
+"celda_CG".}
 }
 \value{
-List. Contains one celdaModel object for each of the parameters specified in the `runParams()` of the provided celda list.
+List. Contains one celdaModel object for each of the parameters
+ specified in the `runParams()` of the provided celda list.
 }
 \description{
-Returns perplexity for each model in a celdaList as calculated by `perplexity().`
+Returns perplexity for each model in a celdaList as calculated
+ by `perplexity().`
 }
 \examples{
-celda.CG.grid.model.perplexities = celdaPerplexity(celda.CG.grid.search.res)
+data(celdaCGGridSearchRes)
+celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
 }

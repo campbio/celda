@@ -4,25 +4,29 @@
 \alias{featureModuleTable}
 \title{Outputting a feature module table}
 \usage{
-featureModuleTable(counts, celda.mod, output.file = NULL)
+featureModuleTable(counts, celdaMod, outputFile = NULL)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells.}
 
-\item{celda.mod}{Celda object of class "celda_G" or "celda_CG".}
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
 
-\item{output.file}{File name for feature module table. If NULL, file will not be created. Default NULL.}
+\item{outputFile}{File name for feature module table. If NULL, file will
+not be created. Default NULL.}
 }
 \value{
 Matrix. Contains a list of features per each column (feature module)
 }
 \description{
-Creates a table that contains the list of features in each feature module
+Creates a table that contains the list of features in
+ each feature module.
 }
 \examples{
-featureModuleTable(celda.CG.sim$counts, celda.CG.mod, output.file = NULL) 
-
+data(celdaCGSim, celdaCGMod)
+featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
 \donttest{
-featureModuleTable(celda.CG.sim$counts, celda.CG.mod, output.file = "Celda_Output.txt") 
+featureModuleTable(celdaCGSim$counts, celdaCGMod,
+ outputFile = "Celda_Output.txt")
 }
 }
