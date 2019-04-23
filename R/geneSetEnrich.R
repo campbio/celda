@@ -23,6 +23,7 @@
 #' gse <- geneSetEnrich(counts,
 #'     cm,
 #'     databases = c('GO_Biological_Process_2018','GO_Molecular_Function_2018'))
+#' @importFrom enrichR enrichr
 #' @export
 geneSetEnrich <- function(counts, celdaModel, databases, fdr = 0.05) {
     #check for correct celda object

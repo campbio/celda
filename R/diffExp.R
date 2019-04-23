@@ -23,7 +23,6 @@
 #'  p-value, log2 fold change, and FDR.
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
-#' library(SummarizedExperiment)
 #' clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
 #'     celdaCGMod, c1 = c(1, 2))
 #' @export
