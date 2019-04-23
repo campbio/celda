@@ -39,6 +39,7 @@ Embeds cells in two dimensions using umap based on a `celda_CG`
  applying tSNE.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 }
 \seealso{

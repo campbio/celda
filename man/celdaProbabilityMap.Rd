@@ -25,5 +25,6 @@ influences each cell cluster. This can also be useful for identifying
 features which may be redundant or unassociated with cell clustering.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
 }

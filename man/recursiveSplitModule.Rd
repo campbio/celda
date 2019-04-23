@@ -7,7 +7,7 @@
 recursiveSplitModule(counts, initialL = 10, maxL = 100, tempK = 100,
   zInit = NULL, sampleLabel = NULL, alpha = 1, beta = 1,
   delta = 1, gamma = 1, minFeature = 3, reorder = TRUE,
-  perplexity = TRUE, seed = 12345, verbose = TRUE, logfile = NULL)
+  perplexity = TRUE, verbose = TRUE, logfile = NULL)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -56,9 +56,6 @@ split 15, 'L16' was created at split 16, etc.). Default TRUE.}
 If FALSE, then perplexity can be calculated later with
 `resamplePerplexity()`. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-to `set.seed()` are made.}
-
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
@@ -79,6 +76,7 @@ Uses the `celda_G` model to cluster features into modules for
  different L.
 }
 \examples{
+data(celdaCGSim)
 ## Create models that range from L=3 to L=20 by recursively splitting modules
 ## into two
 moduleSplit <- recursiveSplitModule(celdaCGSim$counts,

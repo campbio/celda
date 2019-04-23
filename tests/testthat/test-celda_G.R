@@ -38,11 +38,11 @@ test_that(desc = paste0("Testing simulateCells.celda_G, make sure all genes",
         expect_true(all(rowSums(simCellsLow$counts) > 0))
     })
 
-test_that(desc = "Testing LogLikelihood functions", {
-    expect_true(all(is.numeric(logLikelihoodHistory(celdaMod = modelG))))
-    expect_equal(max(logLikelihoodHistory(celdaMod = modelG)),
-        bestLogLikelihood(modelG))
-})
+# test_that(desc = "Testing LogLikelihood functions", {
+#     expect_true(all(is.numeric(logLikelihoodHistory(celdaMod = modelG))))
+#     expect_equal(max(logLikelihoodHistory(celdaMod = modelG)),
+#         bestLogLikelihood(modelG))
+# })
 
 # test_that(desc = "Testing celdaGridSearch with celda_G", {
 #     celdaGRes <- celdaGridSearch(counts = celdaGSim$counts,

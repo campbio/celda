@@ -16,10 +16,11 @@ Data Frame. Contains details on the various K/L parameters, chain
  celdaList.
 }
 \description{
-Returns details on the clustering parameters, model priors, and
- seeds provided to `celdaGridSearch()` when the provided celdaList was
+Returns details on the clustering parameters, and model priors
+ provided to `celdaGridSearch()` when the provided celdaList was
  created.
 }
 \examples{
+data(celdaCGGridSearchRes)
 runParams(celdaCGGridSearchRes)
 }
