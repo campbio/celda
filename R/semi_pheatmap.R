@@ -1493,7 +1493,6 @@ vplayout <- function(x, y) {
 #' }
 #'
 #' pheatmap(test, clusteringCallback = callback)
-#' @export
 semiPheatmap <- function(mat,
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
     kmeansK = NA,
