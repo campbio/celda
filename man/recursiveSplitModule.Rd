@@ -76,6 +76,7 @@ Uses the `celda_G` model to cluster features into modules for
  different L.
 }
 \examples{
+data(celdaCGSim)
 ## Create models that range from L=3 to L=20 by recursively splitting modules
 ## into two
 moduleSplit <- recursiveSplitModule(celdaCGSim$counts,

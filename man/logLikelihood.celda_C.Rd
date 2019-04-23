@@ -33,6 +33,7 @@ Calculates the log likelihood for user-provided cell population
  clusters using the `celda_C()` model.
 }
 \examples{
+data(celdaCSim)
 loglik <- logLikelihood.celda_C(celdaCSim$counts,
     sampleLabel = celdaCSim$sampleLabel,
     z = celdaCSim$z,

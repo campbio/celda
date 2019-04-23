@@ -200,6 +200,7 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @return A list object which contains the decontaminated count matrix and
 #'  related parameters.
 #' @examples
+#' data(contaminationSim)
 #' deconC <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
 #'  z = contaminationSim$z, maxIter = 3)
 #' deconBg <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,

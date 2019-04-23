@@ -21,6 +21,7 @@
 #' @title celdaCGmod
 #' @format A celda_CG object
 #' @examples
+#' data(celdaCGSim)
 #' celdaCGMod = celda_CG(celdaCGSim$counts,
 #'     K = celdaCGSim$K,
 #'     L = celdaCGSim$L,
@@ -31,6 +32,7 @@
 #' @title celdaCGGridSearchRes
 #' @format An object as returned from celdaGridSearch()
 #' @examples
+#' data(celdaCGSim)
 #' celdaCGGridSearchRes = celdaGridSearch(celdaCGSim$counts,
 #'     model = "celda_CG",
 #'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
@@ -54,6 +56,7 @@
 #' @title celdaCMod
 #' @format A celda_C object
 #' @examples
+#' data(celdaCSim)
 #' celdaCMod = celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
 "celdaCMod"
 
@@ -70,6 +73,7 @@
 #' @title celdaGMod
 #' @format A celda_G object
 #' @examples
+#' data(celdaGSim)
 #' celdaGMod = celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 "celdaGMod"
 

@@ -22,6 +22,7 @@
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceGrid(celdaTsne[, 1],
@@ -107,6 +108,7 @@ plotDimReduceGrid <- function(dim1,
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceFeature(dim1 = celdaTsne[, 1],
@@ -233,6 +235,7 @@ plotDimReduceFeature <- function(dim1,
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceModule(
@@ -318,6 +321,7 @@ plotDimReduceModule <-
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceCluster(dim1 = celdaTsne[, 1],

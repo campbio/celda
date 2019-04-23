@@ -12,6 +12,7 @@ celdaCGGridSearchRes
 Example results of celdaGridSearch on celdaCGSim
 }
 \examples{
+data(celdaCGSim)
 celdaCGGridSearchRes = celdaGridSearch(celdaCGSim$counts,
     model = "celda_CG",
     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),

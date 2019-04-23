@@ -83,6 +83,7 @@ Uses the `celda_C` model to cluster cells into population for
  slightly different than `yInit`.
 }
 \examples{
+data(celdaCGSim, celdaCSim)
 ## Create models that range from K = 3 to K = 7 by recursively splitting
 ## cell populations into two to produce `celda_C` cell clustering models
 testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)

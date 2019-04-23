@@ -58,6 +58,7 @@ Create a scatterplot for each row of a normalized gene
 }
 \examples{
 \donttest{
+data(celdaCGSim, celdaCGMod)
 celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
     celdaMod = celdaCGMod)
 plotDimReduceFeature(dim1 = celdaTsne[, 1],

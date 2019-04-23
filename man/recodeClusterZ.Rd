@@ -9,10 +9,10 @@ recodeClusterZ(celdaMod, from, to)
 \arguments{
 \item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
 
-\item{from}{Numeric vector. Unique values in the range of 1:K that
+\item{from}{Numeric vector. Unique values in the range of seq(K) that
 correspond to the original cluster labels in `celdaMod`.}
 
-\item{to}{Numeric vector. Unique values in the range of 1:K that correspond
+\item{to}{Numeric vector. Unique values in the range of seq(K) that correspond
 to the new cluster labels.}
 }
 \value{
@@ -24,5 +24,6 @@ Recode cell subpopulaton clusters using a mapping in the `from`
  and `to` arguments.
 }
 \examples{
-celdaMod.reordered.z <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+data(celdaCGMod)
+celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
 }

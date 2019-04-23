@@ -69,8 +69,9 @@
 #'  can be useful before applying a log transformation. Default  0.
 #' @return Numeric Matrix. A normalized matrix.
 #' @examples
-#'  normalized.counts <- normalizeCounts(celdaCGSim$counts, "proportion",
-#'  pseudocountNormalize = 1)
+#'  data(celdaCGSim)
+#'  normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
+#'      pseudocountNormalize = 1)
 #' @export
 normalizeCounts <- function(counts,
     normalize = c("proportion", "cpm",
@@ -119,14 +120,15 @@ normalizeCounts <- function(counts,
 #' @description Recode cell subpopulaton clusters using a mapping in the `from`
 #'  and `to` arguments.
 #' @param celdaMod Celda object of class `celda_C` or `celda_CG`.
-#' @param from Numeric vector. Unique values in the range of 1:K that
+#' @param from Numeric vector. Unique values in the range of seq(K) that
 #'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of 1:K that correspond
+#' @param to Numeric vector. Unique values in the range of seq(K) that correspond
 #'  to the new cluster labels.
 #' @return Celda object with cell subpopulation clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
-#' celdaMod.reordered.z <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+#' data(celdaCGMod)
+#' celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterZ <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
@@ -145,14 +147,15 @@ recodeClusterZ <- function(celdaMod, from, to) {
 #' @description Recode feature module clusters using a mapping in the
 #'  `from` and `to` arguments.
 #' @param celdaMod Celda object of class `celda_G` or `celda_CG`.
-#' @param from Numeric vector. Unique values in the range of 1:L that
+#' @param from Numeric vector. Unique values in the range of seq(L) that
 #'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of 1:L that correspond
+#' @param to Numeric vector. Unique values in the range of seq(L) that correspond
 #'  to the new cluster labels.
 #' @return Celda object with recoded feature module clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
-#' celdaMod.reordered.y <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
+#' data(celdaCGMod)
+#' celdaModReorderedY <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
@@ -178,6 +181,7 @@ recodeClusterY <- function(celdaMod, from, to) {
 #' @return Returns TRUE if provided count matrix matches the one used in the
 #'  celda object and/or `errorOnMismatch = FALSE`, FALSE otherwise.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' compareCountMatrix(celdaCGSim$counts, celdaCGMod, errorOnMismatch = FALSE)
 #' @export
 compareCountMatrix <- function(counts,
@@ -282,7 +286,7 @@ distinctColors <- function(n,
         to = valueRange[1],
         length = numVs)
     # Create all combination of hues with saturation/value pairs
-    list <- lapply(1:numVs, function(x) {
+    list <- lapply(seq(numVs), function(x) {
         rbind(huesHsv[1, ], s[x], v[x])
     })
     newHsv <- do.call(cbind, list)
@@ -372,6 +376,7 @@ distinctColors <- function(n,
 #'  not be created. Default NULL.
 #' @return Matrix. Contains a list of features per each column (feature module)
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
 #' \donttest{
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod,
@@ -417,6 +422,7 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
 #'  curve.
 #' @return Violin plot for each feature, grouped by celda cluster
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' violinPlot(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod, features = "Gene_1")
 #' @export

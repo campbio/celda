@@ -30,6 +30,7 @@ Generate factorized matrices showing each feature's influence on cell
  / gene clustering
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 factorizedMatrices <- factorizeMatrix(
     celdaCGSim$counts, celdaCGMod,
     "posterior"

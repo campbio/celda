@@ -43,6 +43,7 @@
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of L and multiple chains in parallel.
 #' @examples
+#' data(celdaGSim)
 #' celdaMod <- celda_G(celdaGSim$counts, L = celdaGSim$L)
 #' @export
 celda_G <- function(counts,
@@ -551,6 +552,7 @@ simulateCells.celda_G <- function(model,
 #'  for `module` and `cell`.
 #' @seealso `celda_G()` for clustering features
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' factorizedMatrices <- factorizeMatrix(celdaGSim$counts,
 #'     celdaGMod, "posterior")
 #' @export
@@ -693,6 +695,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
 #' @return The log-likelihood for the given cluster assignments.
 #' @seealso `celda_G()` for clustering features
 #' @examples
+#' data(celdaGSim)
 #' loglik <- logLikelihood.celda_G(celdaGSim$counts,
 #'     y = celdaGSim$y,
 #'     L = celdaGSim$L,
@@ -784,6 +787,7 @@ logLikelihood.celda_G <- function(counts, y, L, beta, delta, gamma) {
 #'  probabilities.
 #' @seealso `celda_G()` for clustering features
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' clusterProb <- clusterProbability(celdaGSim$counts, celdaGMod)
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_G"),
@@ -836,6 +840,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_G"),
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @seealso `celda_G()` for clustering features
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' perplexity <- perplexity(celdaGSim$counts, celdaGMod)
 #' @export
 setMethod("perplexity", signature(celdaMod = "celda_G"),
@@ -902,6 +907,7 @@ setMethod("perplexity", signature(celdaMod = "celda_G"),
 #' @seealso `celda_G()` for clustering features and `celdaTsne()` for
 #'  generating 2-dimensional coordinates.
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' celdaHeatmap(celdaGSim$counts, celdaGMod)
 #' @return list A list containing the dendrograms and the heatmap grob.
 #' @export
@@ -941,6 +947,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
 #' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for
 #'  displaying expression
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' tsneRes <- celdaTsne(celdaGSim$counts, celdaGMod)
 #' @return A two column matrix of t-SNE coordinates.
 #' @export
@@ -990,6 +997,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
 #' @seealso `celda_G()` for clustering features and cells  and `celdaHeatmap()`
 #'  for displaying expression
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' umapRes <- celdaUmap(celdaGSim$counts, celdaGMod)
 #' @return A two column matrix of umap coordinates
 #' @export
@@ -1062,6 +1070,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
 #' @return List. Each element contains the module of the provided feature.
 #' @seealso `celda_G()` for clustering features
 #' @examples
+#' data(celdaGSim, celdaGMod)
 #' module <- featureModuleLookup(celdaGSim$counts,
 #'     celdaGMod,
 #'     c("Gene_1", "Gene_XXX"))
