@@ -1,8 +1,3 @@
-#' @title available models
-#' @export
-availableModels <- c("celda_C", "celda_G", "celda_CG")
-
-
 #' @title Run Celda in parallel with multiple parameters
 #' @description Run Celda with different combinations of parameters and
 #'  multiple chains in parallel. The variable `availableModels` contains the
