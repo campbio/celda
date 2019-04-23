@@ -1,21 +1,21 @@
 ---
-title: "Estimate and remove cross-contamination from ambient RNA for scRNA-seq data with DecontX"
+title: "Estimate and remove cross-contamination from ambient RNA for scRNA-seq data with decontX"
 author: "Shiyi Yang, Sean Corbett, Yusuke Koga, Zhe Wang, W. Evan Johnson, Masanao Yajima, Joshua D. Campbell"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA for scRNA-seq data with DecontX}
+  %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA for scRNA-seq data with decontX}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 
 # Introduction 
-DecontX is a Bayesian hierarchical model to estimate and remove cross-contamination from ambient RNA in single-cell RNA-seq count data generated from droplet-based sequencing devices. DecontX will take the count matrix with/without the cell labels and estimate the contamination level and deliver a decontaminted count matrix for downstream analysis. 
+decontX is a Bayesian hierarchical model to estimate and remove cross-contamination from ambient RNA in single-cell RNA-seq count data generated from droplet-based sequencing devices. DecontX will take the count matrix with/without the cell labels and estimate the contamination level and deliver a decontaminted count matrix for downstream analysis. 
 
-In this vignette we will demonstrate how to use DecontX to estimate and remove contamination.  
+In this vignette we will demonstrate how to use decontX to estimate and remove contamination.  
 
 
 The package can be loaded using the `library` command.
@@ -27,7 +27,7 @@ To see the latest updates and releases or to post a bug, see our GitHub page at 
 
 
 # Generation of a cross-contaminated dataset 
-DecontX will take a matrix of counts (referred as observed counts) where each row is a feature, each column is a cell, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of DecontX, we will apply it to a simulated dataset.
+decontX will take a matrix of counts (referred as observed counts) where each row is a feature, each column is a cell, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of DecontX, we will apply it to a simulated dataset.
 
 In the function `simulateContaminatedMatrix`, the K parameter designates the number of cell clusters, the C parameter determines the number of cells, the G parameter determines the number of genes in the simulated dataset.
 
@@ -53,8 +53,8 @@ colSums(simCounts$eta)
 ```
 
 
-# Decontamination using DecontX
-DecontX uses bayesian method to estimate and remove contamination via varitaional inference. 
+# Decontamination using decontX
+decontX uses bayesian method to estimate and remove contamination via varitaional inference. 
 ```{r, warning = FALSE, message = FALSE}
 decontxModel <- decontX(counts = simCounts$observedCounts, z = simCounts$z)
 ```
