@@ -454,7 +454,7 @@ celda_G <- function(counts,
 #' @examples
 #' celdaGSim <- simulateCells(model = "celda_G")
 #' @export
-simulateCells.celda_G <- function(model,
+simulateCellscelda_G <- function(model,
     C = 100,
     NRange = c(500, 1000),
     G = 100,
@@ -696,7 +696,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
 #' @seealso `celda_G()` for clustering features
 #' @examples
 #' data(celdaGSim)
-#' loglik <- logLikelihood.celda_G(celdaGSim$counts,
+#' loglik <- logLikelihoodcelda_G(celdaGSim$counts,
 #'     y = celdaGSim$y,
 #'     L = celdaGSim$L,
 #'     beta = celdaGSim$beta,
@@ -711,7 +711,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
 #'     delta = celdaGSim$delta,
 #'     gamma = celdaGSim$gamma)
 #' @export
-logLikelihood.celda_G <- function(counts, y, L, beta, delta, gamma) {
+logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
     if (sum(y > L) > 0) {
         stop("An entry in y contains a value greater than the provided L.")
     }

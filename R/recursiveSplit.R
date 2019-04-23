@@ -23,7 +23,7 @@
             ix <- z == i
             newZ <- z
             newZ[ix] <- ifelse(clustLabel@clusters$z == 2, i, K)
-            ll <- logLikelihood.celda_C(counts, s, newZ, K, alpha, beta)
+            ll <- logLikelihoodcelda_C(counts, s, newZ, K, alpha, beta)
 
             if (ll > bestLl) {
                 bestZ <- newZ
@@ -61,7 +61,7 @@
             ix <- y == i
             newY <- y
             newY[ix] <- ifelse(clustLabel@clusters$y == 2, i, L)
-            ll <- logLikelihood.celda_G(counts, newY, L, beta, delta, gamma)
+            ll <- logLikelihoodcelda_G(counts, newY, L, beta, delta, gamma)
 
             if (ll > bestLl) {
                 bestY <- newY
@@ -265,7 +265,7 @@ recursiveSplitCell <- function(counts,
                 overallZ <- tempModel@clusters$z
             } else {
                 overallZ <- tempSplit$z
-                ll <- logLikelihood.celda_CG(counts,
+                ll <- logLikelihoodcelda_CG(counts,
                     s,
                     overallZ,
                     tempModel@clusters$y,
@@ -353,7 +353,7 @@ recursiveSplitCell <- function(counts,
             reorder = reorder)
         currentK <- length(unique(modelInitial@clusters$z)) + 1
         overallZ <- modelInitial@clusters$z
-        ll <- logLikelihood.celda_C(counts, s, overallZ, currentK,
+        ll <- logLikelihoodcelda_C(counts, s, overallZ, currentK,
             alpha, beta)
         modelInitial@params$countChecksum <- countChecksum
         modelInitial@completeLogLik <- ll
@@ -391,7 +391,7 @@ recursiveSplitCell <- function(counts,
             }
 
             # Need to change below line to use decompose counts to save time
-            ll <- logLikelihood.celda_C(counts, s, overallZ, currentK,
+            ll <- logLikelihoodcelda_C(counts, s, overallZ, currentK,
                 alpha, beta)
             tempModel <- methods::new("celda_C",
                 clusters = list(z = overallZ),
@@ -471,7 +471,7 @@ recursiveSplitCell <- function(counts,
             } else {
                 overallZ <- tempSplit$z
                 ll <-
-                    logLikelihood.celda_C(counts, s, overallZ,
+                    logLikelihoodcelda_C(counts, s, overallZ,
                         currentK, alpha, beta)
                 tempModel <- methods::new("celda_C",
                     clusters = list(z = overallZ),

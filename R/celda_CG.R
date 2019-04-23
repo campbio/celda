@@ -584,7 +584,7 @@ celda_CG <- function(counts,
 #' @examples
 #' celdaCGSim <- simulateCells(model = "celda_CG")
 #' @export
-simulateCells.celda_CG <- function(model,
+simulateCellscelda_CG <- function(model,
     S = 5,
     CRange = c(50, 100),
     NRange = c(500, 1000),
@@ -912,7 +912,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' data(celdaCGSim)
-#' loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
+#' loglik <- logLikelihoodcelda_CG(celdaCGSim$counts,
 #'     sampleLabel = celdaCGSim$sampleLabel,
 #'     z = celdaCGSim$z,
 #'     y = celdaCGSim$y,
@@ -935,7 +935,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #'     gamma = celdaCGSim$gamma,
 #'     delta = celdaCGSim$delta)
 #' @export
-logLikelihood.celda_CG <- function(counts,
+logLikelihoodcelda_CG <- function(counts,
     sampleLabel,
     z,
     y,

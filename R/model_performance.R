@@ -65,7 +65,7 @@ resamplePerplexity <- function(counts,
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
 plotGridSearchPerplexity <- function(celdaList, sep = 1) {
-    do.call(paste0("plotGridSearchPerplexity.",
+    do.call(paste0("plotGridSearchPerplexity",
         as.character(class(celdaList@resList[[1]]))),
         args = list(celdaList, sep))
 }
@@ -86,7 +86,7 @@ plotGridSearchPerplexity <- function(celdaList, sep = 1) {
 #' )
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
+plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
     if (!all(c("K", "L") %in% colnames(celdaList@runParams))) {
         stop("celdaList@runParams needs K and L columns.")
     }
@@ -158,7 +158,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
 #' )
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
+plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
     if (!all(c("K") %in% colnames(celdaList@runParams))) {
         stop("runParams(celdaList) needs the column K.")
     }
@@ -207,7 +207,7 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
 #'   celdaCGGridSearchRes)
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
+plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
     if (!all(c("L") %in% colnames(celdaList@runParams))) {
         stop("celdaList@runParams needs the column L.")
     }

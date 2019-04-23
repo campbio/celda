@@ -522,7 +522,7 @@ celda_C <- function(counts,
 #' celdaCSim <- simulateCells(model = "celda_C", K = 10)
 #' simCounts <- celdaCSim$counts
 #' @export
-simulateCells.celda_C <- function(model,
+simulateCellscelda_C <- function(model,
     S = 5,
     CRange = c(50, 100),
     NRange = c(500, 1000),
@@ -726,7 +726,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells
 #' @examples
 #' data(celdaCSim)
-#' loglik <- logLikelihood.celda_C(celdaCSim$counts,
+#' loglik <- logLikelihoodcelda_C(celdaCSim$counts,
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     z = celdaCSim$z,
 #'     K = celdaCSim$K,
@@ -741,7 +741,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #'     alpha = celdaCSim$alpha,
 #'     beta = celdaCSim$beta)
 #' @export
-logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
+logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 
     if (sum(z > K) > 0) {
         stop("An entry in z contains a value greater than the provided K.")

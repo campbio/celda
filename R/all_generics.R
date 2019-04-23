@@ -397,7 +397,7 @@ setGeneric("celdaHeatmap",
 #'
 #'
 logLikelihood <- function(counts, model, ...) {
-    do.call(paste0("logLikelihood.", model),
+    do.call(paste0("logLikelihood", model),
         args = list(counts = counts, ...))
 }
 
@@ -461,7 +461,7 @@ setGeneric("perplexity",
 #' dim(celdaCGSim$counts)
 #' @export
 simulateCells <- function(model, ...) {
-    do.call(paste0("simulateCells.", model), args = list(...))
+    do.call(paste0("simulateCells", model), args = list(...))
 }
 
 
