@@ -552,7 +552,7 @@
                 width = 2 * textHeight,
                 gp = gpar(col = borderColor, fill = NA))
 
-            txt <- rev(range(grid.pretty(range(annotation[[i]],
+            txt <- rev(range(grid::grid.pretty(range(annotation[[i]],
                 na.rm = TRUE))))
 
             yy <- y - c(1, 7) * textHeight
@@ -966,6 +966,7 @@ vplayout <- function(x, y) {
 }
 
 ## changed the original clusterMat() in the pheatmap.r
+#' @importFrom scales hue_pal
 .clusterMat <- function(mat, labels, distance, method) {
     # this funciton is going to change the .clusterMat() in pheatmap
 
@@ -1237,7 +1238,8 @@ vplayout <- function(x, y) {
             }
         }
 
-        factorColors <- scales::dscale(factor(seq(1, count)), hue_pal(l = 75))
+        factorColors <- scales::dscale(factor(seq(1, count)),
+            scales::hue_pal(l = 75))
 
         contCounter <- 2
         for (i in seq(length(annotation))) {
@@ -1497,6 +1499,7 @@ vplayout <- function(x, y) {
 #' }
 #'
 #' pheatmap(test, clusteringCallback = callback)
+#' @importFrom grid grid.pretty
 #' @importFrom RColorBrewer brewer.pal
 semiPheatmap <- function(mat,
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
@@ -1692,7 +1695,7 @@ semiPheatmap <- function(mat,
         breaks <- .generateBreaks(as.vector(mat), length(color))
     }
     if (legend & .is.na2(legendBreaks)) {
-        legend <- grid.pretty(range(as.vector(breaks)))
+        legend <- grid::grid.pretty(range(as.vector(breaks)))
         names(legend) <- legend
     }
     else if (legend & !.is.na2(legendBreaks)) {

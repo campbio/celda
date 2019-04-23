@@ -78,6 +78,10 @@ differentialExpression <- function(counts,
         ngeneson = rep("", (length(cells1) + length(cells2))),
         stringsAsFactors = FALSE)
 
+    # explicitly load library SummarizedExperiment due to MAST package
+    # dependency error
+    library(SummarizedExperiment)
+    
     sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
     cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
     SummarizedExperiment::colData(sca)$cngeneson <- scale(cdr2)
