@@ -30,6 +30,7 @@
 #' @return A list containing row and column dendrograms as well as a gtable for
 #'  grob plotting
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' moduleHeatmap(celdaCGSim$counts, celdaCGMod)
 #' @export
 moduleHeatmap <- function(counts,

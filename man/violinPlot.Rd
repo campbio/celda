@@ -25,6 +25,7 @@ Violin plot for each feature, grouped by celda cluster
 Outputs a violin plot for feature expression data.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 violinPlot(counts = celdaCGSim$counts,
     celdaMod = celdaCGMod, features = "Gene_1")
 }

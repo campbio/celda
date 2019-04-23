@@ -226,11 +226,11 @@
     size <- (1 / n) *
         (unit(1, "npc") - length(gaps) * unit("0", "bigpts"))
 
-    gaps2 <- base::apply(sapply(gaps,
+    gaps2 <- base::apply(vapply(gaps,
         function(gap, x) {
             x > gap
         },
-        m), 1, sum)
+        integer(n), m), 1, sum)
     coord <- m * size + (gaps2 * unit("0", "bigpts"))
 
     return(list(coord = coord, size = size))
@@ -395,7 +395,7 @@
 
 .convertAnnotations <- function(annotation, annotationColors) {
     new <- annotation
-    for (i in 1:ncol(annotation)) {
+    for (i in seq(ncol(annotation))) {
         a <- annotation[, i]
         b <- annotationColors[[colnames(annotation)[i]]]
         if (is.character(a) | is.factor(a)) {
@@ -514,7 +514,7 @@
         if (is.character(annotation[[i]]) |
                 is.factor(annotation[[i]])) {
             n <- length(annotationColors[[i]])
-            yy <- y - (1:n - 1) * 2 * textHeight
+            yy <- y - (seq(n) - 1) * 2 * textHeight
 
             res[[paste(i, "r")]] <- rectGrob(x = unit(0, "npc"),
                 y = yy,
@@ -1034,7 +1034,7 @@ vplayout <- function(x, y) {
         cum.hclust <- group.hclust
     } else {
         #  matrix has more than 1 groups
-        group.hclust <- sapply(class.label, function(x) {
+        group.hclust <- vapply(class.label, function(x) {
             # get the positions of class label
             class.pos <- which(labels == x)
 
@@ -1061,7 +1061,14 @@ vplayout <- function(x, y) {
                     distance = distance),
                     method = method))
             }
-        })
+        },
+            list("merge" = 0,
+                "height" = 0,
+                "order" = 0,
+                "labels" = 0,
+                "method" = 0,
+                "call" = 0,
+                "dist.method" = 0))
         # the length(group.hclust) is the [#group] == nGroup   ,
         # group.hclust[[i]] to get each "hclust"
 
@@ -1127,7 +1134,7 @@ vplayout <- function(x, y) {
 
                         # nodes in the hclust2 group
                         row.2 <- dim(hclust2$merge)[1]
-                        hclustCom <- as.list(1:7)
+                        hclustCom <- as.list(seq(7))
                         names(hclustCom) <- c("merge",
                                 "height",
                                 "order",
@@ -1214,7 +1221,7 @@ vplayout <- function(x, y) {
             annotationColors <- list()
         }
         count <- 0
-        for (i in 1:length(annotation)) {
+        for (i in seq(length(annotation))) {
             annotation[[i]] <- annotation[[i]][!is.na(annotation[[i]])]
             if (is.character(annotation[[i]]) |
                     is.factor(annotation[[i]])) {
@@ -1229,7 +1236,7 @@ vplayout <- function(x, y) {
         factorColors <- scales::dscale(factor(seq(1, count)), hue_pal(l = 75))
 
         contCounter <- 2
-        for (i in 1:length(annotation)) {
+        for (i in seq(length(annotation))) {
             if (!(names(annotation)[i] %in% names(annotationColors))) {
                 if (is.character(annotation[[i]]) |
                         is.factor(annotation[[i]])) {
@@ -1239,7 +1246,7 @@ vplayout <- function(x, y) {
                         n <- length(levels(annotation[[i]]))
                     }
 
-                    ind <- sample(1:length(factorColors), n)
+                    ind <- sample(seq_along(factorColors), n)
                     annotationColors[[names(annotation)[i]]] <-
                         factorColors[ind]
                     l <- levels(as.factor(annotation[[i]]))
@@ -1252,7 +1259,7 @@ vplayout <- function(x, y) {
                     factorColors <- factorColors[-ind]
                 } else {
                     annotationColors[[names(annotation)[i]]] <-
-                        brewer_pal("seq", contCounter)(5)[1:4]
+                        brewer_pal("seq", contCounter)(5)[seq(4)]
                     contCounter <- contCounter + 1
                 }
             }
@@ -1264,6 +1271,7 @@ vplayout <- function(x, y) {
 .findGaps <- function(tree, cutreeN) {
     v <- stats::cutree(tree, cutreeN)[tree$order]
     gaps <- which((v[-1] - v[-length(v)]) != 0)
+    return(gaps)
 }
 
 .is.na2 <- function(x) {
@@ -1404,8 +1412,8 @@ vplayout <- function(x, y) {
 #' test[seq(10), seq(1, 10, 2)] = test[seq(10), seq(1, 10, 2)] + 3
 #' test[seq(11, 20), seq(2, 10, 2)] = test[seq(11, 20), seq(2, 10, 2)] + 2
 #' test[seq(15, 20), seq(2, 10, 2)] = test[seq(15, 20), seq(2, 10, 2)] + 4
-#' colnames(test) = paste("Test", 1:10, sep = "")
-#' rownames(test) = paste("Gene", 1:20, sep = "")
+#' colnames(test) = paste("Test", seq(10), sep = "")
+#' rownames(test) = paste("Gene", seq(20), sep = "")
 #'
 #' # Draw heatmaps
 #' pheatmap(test)

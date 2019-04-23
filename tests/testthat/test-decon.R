@@ -2,31 +2,26 @@
 library(celda)
 context("Testing Deconx")
 
-deconSim <- simulateContaminatedMatrix(K = 10, delta = c(1, 5), seed = 123)
+deconSim <- simulateContaminatedMatrix(K = 10, delta = c(1, 5))
 modelDecontXoneBatch <- .decontXoneBatch(deconSim$observedCounts,
         z = deconSim$z,
-        maxIter = 2,
-        seed = 1234567)
+        maxIter = 2)
 modelDecontXoneBatchIter1 <- .decontXoneBatch(deconSim$observedCounts,
         z = deconSim$z,
-        maxIter = 1,
-        seed = 1234567)
+        maxIter = 1)
 modelDecontXoneBatchbg <- decontX(deconSim$observedCounts,
-        maxIter = 2,
-        seed = 1234567)
+        maxIter = 2)
 
-deconSim2 <- simulateContaminatedMatrix(K = 10, delta = 5, seed = 74)
+deconSim2 <- simulateContaminatedMatrix(K = 10, delta = 5)
 batchDecontX <- decontX(cbind(deconSim$observedCounts,
     deconSim2$observedCounts),
         z = c(deconSim$z, deconSim2$z),
         batch = rep(seq(2), each = ncol(deconSim$observedCounts)),
-        maxIter = 2,
-        seed = 1234567)
+        maxIter = 2)
 batchDecontXBg <- decontX(cbind(deconSim$observedCounts,
     deconSim2$observedCounts),
         batch = rep(seq(2), each = ncol(deconSim$observedCounts)),
-        maxIter = 2,
-        seed = 1234567)
+        maxIter = 2)
 
 ## simulateContaminatedMatrix
 test_that(desc = "Testing simulateContaminatedMatrix", {

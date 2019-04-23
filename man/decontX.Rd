@@ -5,8 +5,7 @@
 \title{Decontaminate count matrix}
 \usage{
 decontX(counts, z = NULL, batch = NULL, maxIter = 200,
-  beta = 1e-06, delta = 10, logfile = NULL, verbose = TRUE,
-  seed = 1234567)
+  beta = 1e-06, delta = 10, logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Numeric/Integer matrix. Observed count matrix, rows represent
@@ -28,9 +27,6 @@ to be 10.}
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
-
-\item{seed}{Integer. Passed to set.seed(). Default to be 1234567. If NULL,
-no calls to `set.seed()` are made.}
 }
 \value{
 A list object which contains the decontaminated count matrix and
@@ -41,6 +37,7 @@ This function updates decontamination on dataset with multiple
  batches.
 }
 \examples{
+data(contaminationSim)
 deconC <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
  z = contaminationSim$z, maxIter = 3)
 deconBg <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,

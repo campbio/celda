@@ -20,6 +20,7 @@ Visualize perplexity of every model in a celdaList, by unique
  K/L combinations
 }
 \examples{
+data(celdaCGSim, celdaCGGridSearchRes)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,

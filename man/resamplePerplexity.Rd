@@ -5,7 +5,7 @@
 \title{Calculate and visualize perplexity of all models in a celdaList, with
  count resampling}
 \usage{
-resamplePerplexity(counts, celdaList, resample = 5, seed = 12345)
+resamplePerplexity(counts, celdaList, resample = 5)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -16,9 +16,6 @@ cells. This matrix should be the same as the one used to generate
 
 \item{resample}{Integer. The number of times to resample the counts matrix
 for evaluating perplexity. Default 5.}
-
-\item{seed}{Parameter to set.seed() for random number generation. Default
-12345.If NULL, no calls to `set.seed()` are made.}
 }
 \value{
 celdaList. Returns the provided `celdaList` with a `perplexity`
@@ -32,6 +29,7 @@ Calculates the perplexity of each model's cluster assignments
  quality of a given K/L choice.
 }
 \examples{
+data(celdaCGSim, celdaCGGridSearchRes)
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
   celdaCGGridSearchRes)

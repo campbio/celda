@@ -24,5 +24,6 @@ Checks if the counts matrix is the same one used to generate
  the celda model object by comparing dimensions and MD5 checksum.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 compareCountMatrix(celdaCGSim$counts, celdaCGMod, errorOnMismatch = FALSE)
 }

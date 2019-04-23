@@ -15,8 +15,6 @@
 #'  input as a single numeric value, symmetric values for beta distribution are
 #'  specified; if input as a vector of lenght 2, the two values will be the
 #'  shape1 and shape2 paramters of the beta distribution respectively.
-#' @param seed Integer. Passed to set.seed(). Default to be 12345. If NULL, no
-#'  calls to `set.seed()` are made.
 #' @return A list object containing the real expression matrix and contamination
 #'  expression matrix as well as other parameters used in the simulation.
 #' @examples
@@ -28,10 +26,7 @@ simulateContaminatedMatrix <- function(C = 300,
     K = 3,
     NRange = c(500, 1000),
     beta = 0.5,
-    delta = c(1, 2),
-    seed = 12345) {
-
-    .setSeed(seed)
+    delta = c(1, 2)) {
 
     if (length(delta) == 1) {
         cpByC <- stats::rbeta(n = C, shape1 = delta, shape2 = delta)
@@ -164,7 +159,7 @@ simulateContaminatedMatrix <- function(C = 300,
 
 # This function updates decontamination using background distribution
 .cDCalcEMbgDecontamination <- function(counts, cellDist, bgDist, theta, beta) {
-    meanNByC <- apply(counts, 2, mean)
+    # meanNByC <- apply(counts, 2, mean)
     logPr <- log(t(cellDist) + 1e-20) + log(theta + 1e-20) # +
     # log( t(counts) / meanNByC )   # better when without panelty
     logPc <- log(t(bgDist) + 1e-20) + log(1 - theta + 2e-20)
@@ -202,11 +197,10 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @param seed Integer. Passed to set.seed(). Default to be 1234567. If NULL,
-#'  no calls to `set.seed()` are made.
 #' @return A list object which contains the decontaminated count matrix and
 #'  related parameters.
 #' @examples
+#' data(contaminationSim)
 #' deconC <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
 #'  z = contaminationSim$z, maxIter = 3)
 #' deconBg <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
@@ -219,8 +213,7 @@ decontX <- function(counts,
     beta = 1e-6,
     delta = 10,
     logfile = NULL,
-    verbose = TRUE,
-    seed = 1234567) {
+    verbose = TRUE) {
 
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
@@ -248,8 +241,7 @@ decontX <- function(counts,
                 beta = beta,
                 delta = delta,
                 logfile = logfile,
-                verbose = verbose,
-                seed = seed)
+                verbose = verbose)
 
             estRmat[, batch == bat] <- resBat$resList$estNativeCounts
             estConp[batch == bat] <- resBat$resList$estConp
@@ -281,8 +273,7 @@ decontX <- function(counts,
         beta = beta,
         delta = delta,
         logfile = logfile,
-        verbose = verbose,
-        seed = seed))
+        verbose = verbose))
 }
 
 
@@ -294,13 +285,12 @@ decontX <- function(counts,
     beta = 1e-6,
     delta = 10,
     logfile = NULL,
-    verbose = TRUE,
-    seed = 1234567) {
+    verbose = TRUE) {
 
     .checkCountsDecon(counts)
     .checkParametersDecon(proportionPrior = delta, distributionPrior = beta)
 
-    nG <- nrow(counts)
+    # nG <- nrow(counts)
     nC <- ncol(counts)
     K <- length(unique(z))
 
@@ -310,9 +300,6 @@ decontX <- function(counts,
         deconMethod <- "clustering"
         z <- .processCellLabels(z, numCells = nC)
     }
-
-    ## Set seed for initialization
-    .setSeed(seed)
 
     iter <- 1L
     numIterWithoutImprovement <- 0L
@@ -473,8 +460,7 @@ decontX <- function(counts,
 
     runParams <- list("betaInit" = beta,
         "deltaInit" = deltaInit,
-        "iteration" = iter - 1L,
-        "seed" = seed)
+        "iteration" = iter - 1L)
 
     resList <- list("logLikelihood" = ll,
         "estNativeCounts" = nextDecon$estRmat,
