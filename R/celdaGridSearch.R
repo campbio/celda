@@ -324,6 +324,8 @@ selectBestModel <- function(celdaList) {
 #' @title Celda models
 #' @description List of available Celda models with correpsonding descriptions.
 #' @export
+#' @examples
+#' celda()
 #' @return None
 celda <- function() {
     message("celda_C: Clusters the columns of a count matrix containing",

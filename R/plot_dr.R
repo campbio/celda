@@ -319,7 +319,7 @@ plotDimReduceModule <-
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceCluster(dim1 = celdaTsne[, 1],
 #'     dim2 = celdaTsne[, 2],
-#'     cluster = as.factor(z(celdaCGMod)),
+#'     cluster = as.factor(clusters(celdaCGMod)$z),
 #'     specificClusters = c(1, 2, 3))
 #' @export
 plotDimReduceCluster <- function(dim1,
