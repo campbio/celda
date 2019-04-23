@@ -46,7 +46,7 @@
 #'     bestOnly = TRUE,
 #'     nchains = 1,
 #'     cores = 2)
-#' @importFrom foreach foreach
+#' @import foreach
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
 #' @export
