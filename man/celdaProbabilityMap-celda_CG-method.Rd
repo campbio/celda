@@ -32,6 +32,7 @@ Renders probability and relative expression heatmaps to
  populations and samples.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
 }
 \seealso{

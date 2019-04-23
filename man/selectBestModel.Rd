@@ -22,6 +22,7 @@ Select the chain with the best log likelihood for each
  `celdaGridSearch()`.
 }
 \examples{
+data(celdaCGGridSearchRes)
 ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 cgsBest <- selectBestModel(celdaCGGridSearchRes)
 }

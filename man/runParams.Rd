@@ -20,5 +20,6 @@ Returns details on the clustering parameters, and model priors
  created.
 }
 \examples{
+data(celdaCGGridSearchRes)
 runParams(celdaCGGridSearchRes)
 }

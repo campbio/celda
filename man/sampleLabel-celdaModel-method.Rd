@@ -19,5 +19,6 @@ Returns the sampleLabels for the count matrix provided for
  generation of a given celdaModel.
 }
 \examples{
+data(celdaCGMod)
 sampleLabel(celdaCGMod)
 }

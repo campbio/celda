@@ -14,6 +14,7 @@
 #'  property, detailing the perplexity of all K/L combinations that appeared in
 #'  the celdaList's models.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)
@@ -56,6 +57,7 @@ resamplePerplexity <- function(counts,
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
@@ -77,6 +79,7 @@ plotGridSearchPerplexity <- function(celdaList, sep = 1) {
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes
@@ -148,6 +151,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'   parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes
@@ -197,6 +201,7 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'   parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)

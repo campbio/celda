@@ -27,5 +27,6 @@ Render a stylable heatmap of count data based on celda
  clustering results.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 celdaHeatmap(celdaCGSim$counts, celdaCGMod)
 }

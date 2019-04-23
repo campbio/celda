@@ -71,6 +71,7 @@ Clusters the rows of a count matrix containing single-cell data
  into L modules.
 }
 \examples{
+data(celdaGSim)
 celdaMod <- celda_G(celdaGSim$counts, L = celdaGSim$L)
 }
 \seealso{

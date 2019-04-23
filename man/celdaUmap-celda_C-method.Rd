@@ -40,6 +40,7 @@ Embeds cells in two dimensions using umap based on a `celda_C`
  before applying umap.
 }
 \examples{
+data(celdaCSim, celdaCMod)
 umapRes <- celdaUmap(celdaCSim$counts, celdaCMod)
 }
 \seealso{

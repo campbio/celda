@@ -24,5 +24,6 @@ Perplexity can be seen as a measure of how well a provided set
  of cluster assignments fit the data being clustered.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
 }

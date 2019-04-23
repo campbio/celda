@@ -23,6 +23,7 @@ Creates a table that contains the list of features in
  each feature module.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
 \donttest{
 featureModuleTable(celdaCGSim$counts, celdaCGMod,

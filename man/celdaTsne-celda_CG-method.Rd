@@ -45,6 +45,7 @@ Embeds cells in two dimensions using tSNE based on a `celda_CG`
  applying tSNE.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 }
 \seealso{

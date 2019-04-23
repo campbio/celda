@@ -42,6 +42,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #'  `subsetCeldaList()` can subset the `celdaList` object. `selectBestModel()`
 #'  can get the best model for each combination of parameters.
 #' @examples
+#' data(celdaCGSim)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
 #'     model = "celda_CG",
@@ -242,6 +243,7 @@ celdaGridSearch <- function(counts,
 #'  chains in parallel. `selectBestModel()` can get the best model for each
 #'  combination of parameters.
 #' @examples
+#' data(celdaCGGridSearchRes)
 #' resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(K = 5,
 #'     L = 10))
 #' @export
@@ -296,6 +298,7 @@ subsetCeldaList <- function(celdaList, params) {
 #' @seealso `celdaGridSearch()` can run Celda with multiple parameters and
 #'  chains in parallel. `subsetCeldaList()` can subset the `celdaList` object.
 #' @examples
+#' data(celdaCGGridSearchRes)
 #' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 #' cgsBest <- selectBestModel(celdaCGGridSearchRes)
 #' @import data.table
