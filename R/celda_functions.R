@@ -378,10 +378,6 @@ distinctColors <- function(n,
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
-#' \donttest{
-#' featureModuleTable(celdaCGSim$counts, celdaCGMod,
-#'  outputFile = "Celda_Output.txt")
-#' }
 #' @export
 featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
     factorize.matrix <- factorizeMatrix(counts, celdaMod)

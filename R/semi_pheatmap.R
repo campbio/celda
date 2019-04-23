@@ -1493,15 +1493,6 @@ vplayout <- function(x, y) {
 #' }
 #'
 #' pheatmap(test, clusteringCallback = callback)
-#'
-#' dontrun{
-#' # Same using dendsort package
-#' library(dendsort)
-#'
-#' callback = function(hc, ...){dendsort(hc)}
-#' pheatmap(test, clusteringCallback = callback)
-#' }
-#'
 #' @export
 semiPheatmap <- function(mat,
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),

@@ -21,7 +21,6 @@
 #' @param varLabel Character vector. Title for the color legend.
 #' @return The plot as a ggplot object
 #' @examples
-#' \donttest{
 #' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
@@ -35,7 +34,6 @@
 #'     colorLow = "grey",
 #'     colorMid = NULL,
 #'     colorHigh = "blue")
-#' }
 #' @export
 plotDimReduceGrid <- function(dim1,
     dim2,
@@ -107,7 +105,6 @@ plotDimReduceGrid <- function(dim1,
 #'  will be used to signify the highest values on the scale. Default 'blue'.
 #' @return The plot as a ggplot object
 #' @examples
-#' \donttest{
 #' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
@@ -116,7 +113,6 @@ plotDimReduceGrid <- function(dim1,
 #'     counts = celdaCGSim$counts,
 #'     features = c("Gene_99"),
 #'     exactMatch = TRUE)
-#' }
 #' @export
 plotDimReduceFeature <- function(dim1,
     dim2,
@@ -234,7 +230,6 @@ plotDimReduceFeature <- function(dim1,
 #'  Default 'blue'.
 #' @return The plot as a ggplot object
 #' @examples
-#' \donttest{
 #' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
@@ -242,7 +237,6 @@ plotDimReduceFeature <- function(dim1,
 #'     dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
 #'     counts = celdaCGSim$counts, celdaMod = celdaCGMod,
 #'     modules = c("L1", "L2"))
-#' }
 #' @export
 plotDimReduceModule <-
     function(dim1,
@@ -320,7 +314,6 @@ plotDimReduceModule <-
 #'  Default 3.5.
 #' @return The plot as a ggplot object
 #' @examples
-#' \donttest{
 #' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
@@ -328,7 +321,6 @@ plotDimReduceModule <-
 #'     dim2 = celdaTsne[, 2],
 #'     cluster = as.factor(z(celdaCGMod)),
 #'     specificClusters = c(1, 2, 3))
-#' }
 #' @export
 plotDimReduceCluster <- function(dim1,
     dim2,

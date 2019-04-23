@@ -44,7 +44,6 @@ Creates a scatterplot given two dimensions from a data
  dimensionality reduction tool (e.g tSNE) output.
 }
 \examples{
-\donttest{
 data(celdaCGSim, celdaCGMod)
 celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
     celdaMod = celdaCGMod)
@@ -58,5 +57,4 @@ plotDimReduceGrid(celdaTsne[, 1],
     colorLow = "grey",
     colorMid = NULL,
     colorHigh = "blue")
-}
 }
