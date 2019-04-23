@@ -26,7 +26,10 @@ simulateContaminatedMatrix <- function(C = 300,
     K = 3,
     NRange = c(500, 1000),
     beta = 0.5,
-    delta = c(1, 2)) {
+    delta = c(1, 2), 
+    seed = 428) {
+
+    set.seed(seed) 
 
     if (length(delta) == 1) {
         cpByC <- stats::rbeta(n = C, shape1 = delta, shape2 = delta)
