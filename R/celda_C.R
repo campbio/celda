@@ -521,6 +521,7 @@ celda_C <- function(counts,
 #' @examples
 #' celdaCSim <- simulateCells(model = "celda_C", K = 10)
 #' simCounts <- celdaCSim$counts
+#' @import stats
 #' @export
 simulateCellscelda_C <- function(model,
     S = 5,
@@ -873,7 +874,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_C"),
 #' @examples
 #' data(celdaCSim, celdaCMod)
 #' perplexity <- perplexity(celdaCSim$counts, celdaCMod)
-#' @rawNamespace import(matrixStats, except = c(count))
+#' @importFrom matrixStats logSumExp
 #' @export
 setMethod("perplexity", signature(celdaMod = "celda_C"),
     function(counts, celdaMod, newCounts = NULL) {
@@ -1131,6 +1132,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 #' data(celdaCSim, celdaCMod)
 #' celdaProbabilityMap(celdaCSim$counts, celdaCMod)
 #' @return A grob containing the specified plots
+#' @importFrom gridExtra grid.arrange
 #' @export
 setMethod("celdaProbabilityMap", signature(celdaMod = "celda_C"),
     function(counts, celdaMod, level = c("sample"), ...) {

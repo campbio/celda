@@ -46,7 +46,9 @@
 #'     bestOnly = TRUE,
 #'     nchains = 1,
 #'     cores = 2)
-#' @import foreach
+#' @importFrom foreach foreach
+#' @importFrom doParallel registerDoParallel
+#' @importFrom methods is
 #' @export
 celdaGridSearch <- function(counts,
     model,
@@ -296,7 +298,7 @@ subsetCeldaList <- function(celdaList, params) {
 #' data(celdaCGGridSearchRes)
 #' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 #' cgsBest <- selectBestModel(celdaCGGridSearchRes)
-#' @import data.table
+#' @importFrom data.table as.data.table
 #' @export
 selectBestModel <- function(celdaList) {
     if (!methods::is(celdaList, "celdaList"))

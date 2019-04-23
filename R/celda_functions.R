@@ -129,6 +129,7 @@ normalizeCounts <- function(counts,
 #' @examples
 #' data(celdaCGMod)
 #' celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+#' @importFrom plyr mapvalues
 #' @export
 recodeClusterZ <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
@@ -254,6 +255,9 @@ compareCountMatrix <- function(counts,
 #' @return A vector of distinct colors that have been converted to HEX from HSV.
 #' @examples
 #' colorPal <- distinctColors(6) # can be used in plotting functions
+#' @importFrom grDevices colors
+#' @importFrom grDevices rgb2hsv
+#' @importFrom grDevices hsv
 #' @export
 distinctColors <- function(n,
     hues = c("red",
@@ -320,6 +324,7 @@ distinctColors <- function(n,
 
 # Wrapper function, creates checksum for matrix.
 # Feature names, cell names are not taken into account.
+#' @importFrom digest digest
 .createCountChecksum <- function(counts) {
     rownames(counts) <- NULL
     colnames(counts) <- NULL
@@ -378,6 +383,7 @@ distinctColors <- function(n,
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
+#' @importFrom stringi stri_list2matrix
 #' @export
 featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
     factorize.matrix <- factorizeMatrix(counts, celdaMod)
@@ -421,6 +427,9 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
 #' data(celdaCGSim, celdaCGMod)
 #' violinPlot(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod, features = "Gene_1")
+#' @import ggplot2
+#' @importFrom grid unit
+#' @importFrom reshape2 melt
 #' @export
 violinPlot <- function(counts,
     celdaMod,

@@ -28,7 +28,7 @@ Imports:
     methods,
     reshape2,
     MAST,
-    GenomicRanges,
+    S4Vectors,
     data.table,
     Rcpp,
     RcppEigen,
@@ -38,8 +38,7 @@ Imports:
     SummarizedExperiment,
     MCMCprecision,
     ggrepel,
-    Rtsne,
-    S4Vectors
+    Rtsne
 Suggests:
     testthat,
     knitr,

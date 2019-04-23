@@ -32,6 +32,7 @@
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' moduleHeatmap(celdaCGSim$counts, celdaCGMod)
+#' @importFrom methods .hasSlot
 #' @export
 moduleHeatmap <- function(counts,
     celdaMod,

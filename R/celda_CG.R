@@ -1108,7 +1108,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
-#' @rawNamespace import(matrixStats, except = c(count))
+#' @importFrom matrixStats logSumExp
 #' @export
 setMethod("perplexity", signature(celdaMod = "celda_CG"),
     function(counts, celdaMod, newCounts = NULL) {
@@ -1412,7 +1412,9 @@ setMethod("celdaUmap",
 #' data(celdaCGSim, celdaCGMod)
 #' celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
 #' @return A grob containing the specified plots
-#' @import gridExtra
+#' @importFrom gridExtra grid.arrange
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom grDevices colorRampPalette
 #' @seealso `celda_CG()` for clustering features and cells
 #' @export
 setMethod("celdaProbabilityMap", signature(celdaMod = "celda_CG"),

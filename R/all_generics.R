@@ -327,6 +327,7 @@ setMethod("celdaPerplexity",
 #' data(celdaCGGridSearchRes)
 #' appendedList <- appendCeldaList(celdaCGGridSearchRes,
 #'     celdaCGGridSearchRes)
+#' @importFrom methods new
 #' @export
 appendCeldaList <- function(list1, list2) {
     if (!is.element("celdaList", class(list1)) |
@@ -579,6 +580,7 @@ setGeneric("celdaTsne",
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' tsneRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
+#' @importFrom umap umap.defaults
 #' @export
 setGeneric("celdaUmap",
     signature = "celdaMod",

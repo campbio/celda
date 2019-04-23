@@ -26,9 +26,14 @@
 #' clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
 #'     celdaCGMod, c1 = c(1, 2))
 #' @export
-#' @import data.table plyr
-#' @rawNamespace import(MAST, except = c(combine))
-#' @rawNamespace import(SummarizedExperiment, except = c(shift, rowRanges))
+#' @importFrom data.table as.data.table
+#' @importFrom MAST FromMatrix
+#' @importFrom MAST zlm
+#' @importFrom MAST summary
+#' @importFrom S4Vectors mcols
+#' @importFrom SummarizedExperiment assay
+#' @importFrom SummarizedExperiment colData
+#' @importFrom SummarizedExperiment assayNames
 differentialExpression <- function(counts,
     celdaMod,
     c1,

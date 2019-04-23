@@ -34,6 +34,7 @@
 #'     colorLow = "grey",
 #'     colorMid = NULL,
 #'     colorHigh = "blue")
+#' @importFrom reshape2 melt
 #' @export
 plotDimReduceGrid <- function(dim1,
     dim2,
@@ -321,6 +322,7 @@ plotDimReduceModule <-
 #'     dim2 = celdaTsne[, 2],
 #'     cluster = as.factor(clusters(celdaCGMod)$z),
 #'     specificClusters = c(1, 2, 3))
+#' @importFrom ggrepel geom_text_repel
 #' @export
 plotDimReduceCluster <- function(dim1,
     dim2,
@@ -385,6 +387,7 @@ plotDimReduceCluster <- function(dim1,
 # dimensionality reduction with PCA before tSNE.
 # @param initialDims Integer.Number of dimensions from PCA to use as
 # input in tSNE.
+#' @importFrom Rtsne Rtsne
 .calculateTsne <- function(norm,
     perplexity = 20,
     maxIter = 2500,
@@ -409,6 +412,7 @@ plotDimReduceCluster <- function(dim1,
 # @param umapConfig An object of class umap.config,
 # containing configuration parameters to be passed to umap.
 # Default umap::umap.defualts.
+#' @importFrom umap umap
 .calculateUmap <- function(norm, umapConfig = umap::umap.defaults) {
     return(umap::umap(norm, umapConfig)$layout)
 }
