@@ -30,6 +30,7 @@ Finds the module assignments of given features in a `celda_G()`
  model.
 }
 \examples{
+data(celdaGSim, celdaGMod)
 module <- featureModuleLookup(celdaGSim$counts,
     celdaGMod,
     c("Gene_1", "Gene_XXX"))

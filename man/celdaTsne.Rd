@@ -6,7 +6,7 @@
 \usage{
 celdaTsne(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
   initialDims = 20, modules = NULL, perplexity = 20,
-  maxIter = 2500, seed = 12345, ...)
+  maxIter = 2500, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -33,9 +33,6 @@ tSNE. If NULL, all modules will be used. Default NULL.}
 \item{maxIter}{Integer. Maximum number of iterations in tSNE generation.
 Default 2500.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-to `set.seed()` are made.}
-
 \item{...}{Additional parameters.}
 }
 \value{
@@ -46,5 +43,6 @@ Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
 Embeds cells in two dimensions using tSNE based on celda_CG results.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 }

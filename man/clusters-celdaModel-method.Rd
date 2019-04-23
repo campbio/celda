@@ -19,5 +19,6 @@ Returns the z / y results corresponding to the cell / gene
  cluster labels determined by the provided celdaModel.
 }
 \examples{
+data(celdaCGMod)
 clusters(celdaCGMod)
 }

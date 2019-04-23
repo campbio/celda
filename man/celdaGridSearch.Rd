@@ -6,8 +6,7 @@
 \usage{
 celdaGridSearch(counts, model, paramsTest, paramsFixed = NULL,
   maxIter = 200, nchains = 3, cores = 1, bestOnly = TRUE,
-  seed = 12345, perplexity = TRUE, verbose = TRUE,
-  logfilePrefix = "Celda")
+  perplexity = TRUE, verbose = TRUE, logfilePrefix = "Celda")
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -35,9 +34,6 @@ chains. Default 1.}
 log likelihood per combination of parameters or return all chains. Default
 TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no
-calls to `set.seed()` are made.}
-
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
 `resamplePerplexity()`. Default TRUE.}
@@ -62,6 +58,7 @@ Run Celda with different combinations of parameters and
  from each chain will be sent to a log file but not be displayed in stdout.
 }
 \examples{
+data(celdaCGSim)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
     model = "celda_CG",

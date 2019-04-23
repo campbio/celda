@@ -20,6 +20,7 @@ Returns a single celdaList representing the combination of two
  provided celdaList objects.
 }
 \examples{
+data(celdaCGGridSearchRes)
 appendedList <- appendCeldaList(celdaCGGridSearchRes,
     celdaCGGridSearchRes)
 }

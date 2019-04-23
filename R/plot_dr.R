@@ -22,6 +22,7 @@
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceGrid(celdaTsne[, 1],
@@ -107,6 +108,7 @@ plotDimReduceGrid <- function(dim1,
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceFeature(dim1 = celdaTsne[, 1],
@@ -233,6 +235,7 @@ plotDimReduceFeature <- function(dim1,
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceModule(
@@ -318,6 +321,7 @@ plotDimReduceModule <-
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
+#' data(celdaCGSim, celdaCGMod)
 #' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod)
 #' plotDimReduceCluster(dim1 = celdaTsne[, 1],
@@ -385,8 +389,6 @@ plotDimReduceCluster <- function(dim1,
 # @param norm Normalized count matrix.
 # @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
 # @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
-# @param seed Integer. Seed for random number generation. Defaults to 12345.
-# If NULL, no calls to `set.seed()` are made.
 # @param doPca Logical. Whether to perform
 # dimensionality reduction with PCA before tSNE.
 # @param initialDims Integer.Number of dimensions from PCA to use as
@@ -394,11 +396,9 @@ plotDimReduceCluster <- function(dim1,
 .calculateTsne <- function(norm,
     perplexity = 20,
     maxIter = 2500,
-    seed = 12345,
     doPca = FALSE,
     initialDims = 20) {
 
-    .setSeed(seed)
     res <- Rtsne::Rtsne(
         norm,
         pca = doPca,

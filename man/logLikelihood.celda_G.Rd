@@ -33,6 +33,7 @@ Calculates the log likelihood for user-provided feature module
  clusters using the `celda_G()` model.
 }
 \examples{
+data(celdaGSim)
 loglik <- logLikelihood.celda_G(celdaGSim$counts,
     y = celdaGSim$y,
     L = celdaGSim$L,
