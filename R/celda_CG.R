@@ -1172,7 +1172,7 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
     # Reorder L
     if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
 
-        clusters(res)$y <- as.integer(as.factor(clusters(res)$y))
+        res@clusters$y <- as.integer(as.factor(clusters(res)$y))
         fm <- factorizeMatrix(counts = counts,
                 celdaMod = res,
                 type = "posterior")
