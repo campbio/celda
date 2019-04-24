@@ -80,7 +80,7 @@ differentialExpression <- function(counts,
 
     # explicitly load library SummarizedExperiment due to MAST package
     # dependency error
-    library(SummarizedExperiment)
+    requireNamespace(SummarizedExperiment)
 
     sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
     cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
@@ -114,7 +114,7 @@ differentialExpression <- function(counts,
     } else {
         fcHurdleSig <- merge(fcHurdle[fdr < fdrThreshold &
                 abs(coef) > log2fcThreshold],
-            data.table::as.data.table(GenomicRanges::mcols(sca)),
+            data.table::as.data.table(S4Vectors::mcols(sca)),
             by = "primerid")
         if (onlyPos) {
             fcHurdleSig <- fcHurdleSig[which(fcHurdleSig$log2fc > 0), ]
