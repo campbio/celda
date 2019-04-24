@@ -36,16 +36,6 @@
 #'  cells, and `celda_CG()` for simultaneous clustering of features and cells.
 #'  `subsetCeldaList()` can subset the `celdaList` object. `selectBestModel()`
 #'  can get the best model for each combination of parameters.
-#' @examples
-#' data(celdaCGSim)
-#' ## Run various combinations of parameters with 'celdaGridSearch'
-#' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
-#'     model = "celda_CG",
-#'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-#'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-#'     bestOnly = TRUE,
-#'     nchains = 1,
-#'     cores = 2)
 #' @import foreach
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
