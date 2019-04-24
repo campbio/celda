@@ -355,9 +355,9 @@ recursiveSplitCell <- function(counts,
         overallZ <- clusters(modelInitial)$z
         ll <- logLikelihoodcelda_C(counts, s, overallZ, currentK,
             alpha, beta)
-        params(modelInitial)$countChecksum <- countChecksum
-        logLikelihoodHistory(modelInitial) <- ll
-        bestLogLikelihood(modelInitial) <- ll
+        modelInitial@params$countChecksum <- countChecksum
+        modelInitial@completeLogLik <- ll
+        modelInitial@finalLogLik <- ll
 
         resList <- list(modelInitial)
         while (currentK <= maxK) {
@@ -835,7 +835,7 @@ recursiveSplitModule <- function(counts,
 
             ## Create the final model object with correct info on full counts
             ## matrix
-            bestLogLikelihood(tempModel) <- .cGCalcLL(
+            tempModel@finalLogLik <- .cGCalcLL(
                 nTSByC = nTSByC,
                 nByTS = nByTS,
                 nByG = nByG,
@@ -847,9 +847,9 @@ recursiveSplitModule <- function(counts,
                 delta = delta,
                 gamma = gamma
             )
-            logLikelihoodHistory(tempModel) <- bestLogLikelihood(tempModel)
-            params(tempModel)$countChecksum <- countChecksum
-            matrixNames(tempModel) <- names
+            tempModel@completeLogLik <- bestLogLikelihood(tempModel)
+            tempModel@params$countChecksum <- countChecksum
+            tempModel@names <- names
 
             ## Add extra row/column for next round of L
             nTSByC <- rbind(nTSByC, rep(0L, ncol(nTSByC)))

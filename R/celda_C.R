@@ -913,7 +913,7 @@ setMethod("perplexity", signature(celdaMod = "celda_C"),
 
 .reorderCelda_C <- function(counts, res) {
     if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
-        clusters(res)$z <- as.integer(as.factor(clusters(res)$z))
+        res@clusters$z <- as.integer(as.factor(clusters(res)$z))
         fm <- factorizeMatrix(counts = counts, celdaMod = res)
         uniqueZ <- sort(unique(clusters(res)$z))
         d <- .cosineDist(fm$posterior$module[, uniqueZ])
