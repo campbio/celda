@@ -134,11 +134,11 @@ recodeClusterZ <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@clusters$z)) {
+    if (is.null(clusters(celdaMod)$z)) {
         stop("Provided celdaMod argument does not have a z attribute")
     }
-    celdaMod@clusters$z <-
-        plyr::mapvalues(celdaMod@clusters$z, from, to)
+    clusters(celdaMod)$z <-
+        plyr::mapvalues(clusters(celdaMod)$z, from, to)
     return(celdaMod)
 }
 
@@ -161,11 +161,11 @@ recodeClusterY <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@clusters$y)) {
+    if (is.null(clusters(celdaMod)$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    celdaMod@clusters$y <-
-        plyr::mapvalues(celdaMod@clusters$y, from, to)
+    clusters(celdaMod)$y <-
+        plyr::mapvalues(clusters(celdaMod)$y, from, to)
     return(celdaMod)
 }
 
@@ -188,22 +188,22 @@ compareCountMatrix <- function(counts,
     celdaMod,
     errorOnMismatch = TRUE) {
 
-    if ("y" %in% names(celdaMod@clusters)) {
-        if (nrow(counts) != length(celdaMod@clusters$y)) {
+    if ("y" %in% names(clusters(celdaMod))) {
+        if (nrow(counts) != length(clusters(celdaMod)$y)) {
             stop("The provided celda object was generated from a counts",
                 " matrix with a different number of features than the one",
                 " provided.")
         }
     }
 
-    if ("z" %in% names(celdaMod@clusters)) {
-        if (ncol(counts) != length(celdaMod@clusters$z)) {
+    if ("z" %in% names(clusters(celdaMod))) {
+        if (ncol(counts) != length(clusters(celdaMod)$z)) {
             stop("The provided celda object was generated from a counts",
                 " matrix with a different number of cells than the one",
                 " provided.")
         }
     }
-    celdaChecksum <- celdaMod@params$countChecksum
+    celdaChecksum <- params(celdaMod)$countChecksum
     counts <- .processCounts(counts)
     # Checksums are generated in celdaGridSearch and model after processing
     count.md5 <- .createCountChecksum(counts)

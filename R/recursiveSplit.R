@@ -19,10 +19,10 @@
             splitOnLast = FALSE,
             verbose = FALSE)
 
-        if (length(unique(clustLabel@clusters$z)) == 2) {
+        if (length(unique(clusters(clustLabel)$z)) == 2) {
             ix <- z == i
             newZ <- z
-            newZ[ix] <- ifelse(clustLabel@clusters$z == 2, i, K)
+            newZ[ix] <- ifelse(clusters(clustLabel)$z == 2, i, K)
             ll <- logLikelihood.celda_C(counts, s, newZ, K, alpha, beta)
 
             if (ll > bestLl) {
@@ -57,10 +57,10 @@
             nchains = 1,
             verbose = FALSE)
 
-        if (length(unique(clustLabel@clusters$y)) == 2) {
+        if (length(unique(clusters(clustLabel)$y)) == 2) {
             ix <- y == i
             newY <- y
-            newY[ix] <- ifelse(clustLabel@clusters$y == 2, i, L)
+            newY[ix] <- ifelse(clusters(clustLabel)$y == 2, i, L)
             ll <- logLikelihood.celda_G(counts, newY, L, beta, delta, gamma)
 
             if (ll > bestLl) {
@@ -223,8 +223,8 @@ recursiveSplitCell <- function(counts,
             delta = delta,
             verbose = FALSE,
             reorder = reorder)
-        currentK <- length(unique(modelInitial@clusters$z)) + 1
-        overallZ <- modelInitial@clusters$z
+        currentK <- length(unique(clusters(modelInitial)$z)) + 1
+        overallZ <- clusters(modelInitial)$z
         resList <- list(modelInitial)
         while (currentK <= maxK) {
             # previousY <- overallY
@@ -254,21 +254,21 @@ recursiveSplitCell <- function(counts,
                 reorder = reorder)
 
             # Calculate new decomposed counts matrix with new module labels
-            # overallY = tempModel@clusters$y
+            # overallY = clusters(tempModel)$y
             # p = .cGReDecomposeCounts(counts, overallY, previousY, countsY,
             # nByG, L = as.integer(L))
             # countsY = p$nTSByC
 
             # If the number of clusters is still "currentK", then keep the
             # reordering, otherwise keep the previous configuration
-            if (length(unique(tempModel@clusters$z)) == currentK) {
-                overallZ <- tempModel@clusters$z
+            if (length(unique(clusters(tempModel)$z)) == currentK) {
+                overallZ <- clusters(tempModel)$z
             } else {
                 overallZ <- tempSplit$z
                 ll <- logLikelihood.celda_CG(counts,
                     s,
                     overallZ,
-                    tempModel@clusters$y,
+                    clusters(tempModel)$y,
                     currentK,
                     L,
                     alpha,
@@ -277,7 +277,7 @@ recursiveSplitCell <- function(counts,
                     gamma
                 )
                 tempModel <- methods::new("celda_CG",
-                    clusters = list(z = overallZ, y = tempModel@clusters$y),
+                    clusters = list(z = overallZ, y = clusters(tempModel)$y),
                     params = list(K = as.integer(currentK),
                         L = as.integer(L),
                         alpha = alpha,
@@ -297,7 +297,7 @@ recursiveSplitCell <- function(counts,
                 ".. Current cell population",
                 currentK,
                 "| logLik:",
-                tempModel@finalLogLik,
+                bestLogLikelihood(tempModel),
                 append = TRUE,
                 verbose = verbose,
                 logfile = logfile
@@ -306,10 +306,10 @@ recursiveSplitCell <- function(counts,
         }
 
         runK <- vapply(resList, function(mod) {
-            mod@params$K
+            params(mod)$K
         }, integer(1))
         runL <- vapply(resList, function(mod) {
-            mod@params$L
+            params(mod)$L
         }, integer(1))
         runParams <- data.frame(index = seq.int(1, length(resList)),
             L = as.integer(runL),
@@ -351,13 +351,13 @@ recursiveSplitCell <- function(counts,
             beta = beta,
             verbose = FALSE,
             reorder = reorder)
-        currentK <- length(unique(modelInitial@clusters$z)) + 1
-        overallZ <- modelInitial@clusters$z
+        currentK <- length(unique(clusters(modelInitial)$z)) + 1
+        overallZ <- clusters(modelInitial)$z
         ll <- logLikelihood.celda_C(counts, s, overallZ, currentK,
             alpha, beta)
-        modelInitial@params$countChecksum <- countChecksum
-        modelInitial@completeLogLik <- ll
-        modelInitial@finalLogLik <- ll
+        params(modelInitial)$countChecksum <- countChecksum
+        logLikelihoodHistory(modelInitial) <- ll
+        bestLogLikelihood(modelInitial) <- ll
 
         resList <- list(modelInitial)
         while (currentK <= maxK) {
@@ -384,8 +384,8 @@ recursiveSplitCell <- function(counts,
 
             # Handle rare cases where a population has no cells after running
             # the model
-            if (length(unique(tempModel@clusters$z)) == currentK) {
-                overallZ <- tempModel@clusters$z
+            if (length(unique(clusters(tempModel)$z)) == currentK) {
+                overallZ <- clusters(tempModel)$z
             } else {
                 overallZ <- tempSplit$z
             }
@@ -409,7 +409,7 @@ recursiveSplitCell <- function(counts,
                 ".. Current cell population",
                 currentK,
                 "| logLik:",
-                tempModel@finalLogLik,
+                bestLogLikelihood(tempModel),
                 append = TRUE,
                 verbose = verbose,
                 logfile = logfile
@@ -418,7 +418,7 @@ recursiveSplitCell <- function(counts,
         }
 
         runK <- vapply(resList, function(mod) {
-            mod@params$K
+            params(mod)$K
         }, integer(1))
         runParams <- data.frame(index = seq.int(1, length(resList)),
             K = as.integer(runK),
@@ -442,8 +442,8 @@ recursiveSplitCell <- function(counts,
             beta = beta,
             verbose = FALSE,
             reorder = reorder)
-        currentK <- length(unique(modelInitial@clusters$z)) + 1
-        overallZ <- modelInitial@clusters$z
+        currentK <- length(unique(clusters(modelInitial)$z)) + 1
+        overallZ <- clusters(modelInitial)$z
         resList <- list(modelInitial)
         while (currentK <= maxK) {
             tempSplit <- .singleSplitZ(counts,
@@ -466,8 +466,8 @@ recursiveSplitCell <- function(counts,
                 zInit = tempSplit$z,
                 reorder = reorder)
 
-            if (length(unique(tempModel@clusters$z)) == currentK) {
-                overallZ <- tempModel@clusters$z
+            if (length(unique(clusters(tempModel)$z)) == currentK) {
+                overallZ <- clusters(tempModel)$z
             } else {
                 overallZ <- tempSplit$z
                 ll <-
@@ -490,7 +490,7 @@ recursiveSplitCell <- function(counts,
                 ".. Current cell population",
                 currentK,
                 "| logLik:",
-                tempModel@finalLogLik,
+                bestLogLikelihood(tempModel),
                 append = TRUE,
                 verbose = verbose,
                 logfile = logfile
@@ -499,7 +499,7 @@ recursiveSplitCell <- function(counts,
         }
 
         runK <- vapply(resList, function(mod) {
-            mod@params$K
+            params(mod)$K
         }, integer(1))
         runParams <- data.frame(index = seq.int(1, length(resList)),
             K = as.integer(runK),
@@ -509,7 +509,7 @@ recursiveSplitCell <- function(counts,
 
     # Summarize paramters of different models
     logliks <- vapply(resList, function(mod) {
-        mod@finalLogLik
+        bestLogLikelihood(mod)
     }, double(1))
     runParams <- data.frame(runParams,
         log_likelihood = logliks,
@@ -694,8 +694,8 @@ recursiveSplitModule <- function(counts,
             delta = delta,
             verbose = FALSE,
             reorder = reorder)
-        currentL <- length(unique(modelInitial@clusters$y)) + 1
-        overallY <- modelInitial@clusters$y
+        currentL <- length(unique(clusters(modelInitial)$y)) + 1
+        overallY <- clusters(modelInitial)$y
 
         resList <- list(modelInitial)
         while (currentL <= maxL) {
@@ -723,7 +723,7 @@ recursiveSplitModule <- function(counts,
                 zInit = overallZ,
                 reorder = reorder
             )
-            overallY <- tempModel@clusters$y
+            overallY <- clusters(tempModel)$y
 
             ## Add new model to results list and increment L
             .logMessages(
@@ -731,7 +731,7 @@ recursiveSplitModule <- function(counts,
                 ".. Created module",
                 currentL,
                 "| logLik:",
-                tempModel@finalLogLik,
+                bestLogLikelihood(tempModel),
                 append = TRUE,
                 verbose = verbose,
                 logfile = NULL
@@ -741,10 +741,10 @@ recursiveSplitModule <- function(counts,
         }
 
         runK <- vapply(resList, function(mod) {
-            mod@params$K
+            params(mod)$K
         }, integer(1))
         runL <- vapply(resList, function(mod) {
-            mod@params$L
+            params(mod)$L
         }, integer(1))
         runParams <- data.frame(
             index = seq.int(1, length(resList)),
@@ -783,8 +783,8 @@ recursiveSplitModule <- function(counts,
             nchains = 1,
             verbose = FALSE)
 
-        currentL <- length(unique(modelInitial@clusters$y)) + 1
-        overallY <- modelInitial@clusters$y
+        currentL <- length(unique(clusters(modelInitial)$y)) + 1
+        overallY <- clusters(modelInitial)$y
 
         ## Decomposed counts for full count matrix
         p <- .cGDecomposeCounts(counts, overallY, currentL)
@@ -819,7 +819,7 @@ recursiveSplitModule <- function(counts,
                 yInit = tempSplit$y,
                 reorder = reorder
             )
-            overallY <- tempModel@clusters$y
+            overallY <- clusters(tempModel)$y
 
             # Adjust decomposed count matrices
             p <- .cGReDecomposeCounts(counts,
@@ -835,7 +835,7 @@ recursiveSplitModule <- function(counts,
 
             ## Create the final model object with correct info on full counts
             ## matrix
-            tempModel@finalLogLik <- .cGCalcLL(
+            bestLogLikelihood(tempModel) <- .cGCalcLL(
                 nTSByC = nTSByC,
                 nByTS = nByTS,
                 nByG = nByG,
@@ -847,9 +847,9 @@ recursiveSplitModule <- function(counts,
                 delta = delta,
                 gamma = gamma
             )
-            tempModel@completeLogLik <- tempModel@finalLogLik
-            tempModel@params$countChecksum <- countChecksum
-            tempModel@names <- names
+            logLikelihoodHistory(tempModel) <- bestLogLikelihood(tempModel)
+            params(tempModel)$countChecksum <- countChecksum
+            matrixNames(tempModel) <- names
 
             ## Add extra row/column for next round of L
             nTSByC <- rbind(nTSByC, rep(0L, ncol(nTSByC)))
@@ -862,7 +862,7 @@ recursiveSplitModule <- function(counts,
                 ".. Created module",
                 currentL,
                 "| logLik:",
-                tempModel@finalLogLik,
+                bestLogLikelihood(tempModel),
                 append = TRUE,
                 verbose = verbose,
                 logfile = NULL
@@ -872,7 +872,7 @@ recursiveSplitModule <- function(counts,
         }
 
         runL <- vapply(resList, function(mod) {
-            mod@params$L
+            params(mod)$L
         }, integer(1))
         runParams <- data.frame(
             index = seq.int(1, length(resList)),
@@ -895,7 +895,7 @@ recursiveSplitModule <- function(counts,
             maxIter = 20,
             nchains = 1,
             verbose = FALSE)
-        overallY <- modelInitial@clusters$y
+        overallY <- clusters(modelInitial)$y
         currentL <- length(unique(overallY)) + 1
 
         ## Perform splitting for y labels
@@ -923,7 +923,7 @@ recursiveSplitModule <- function(counts,
                 yInit = tempSplit$y,
                 reorder = reorder
             )
-            overallY <- tempModel@clusters$y
+            overallY <- clusters(tempModel)$y
 
             ## Add new model to results list and increment L
             .logMessages(
@@ -931,7 +931,7 @@ recursiveSplitModule <- function(counts,
                 ".. Created module",
                 currentL,
                 "| logLik:",
-                tempModel@finalLogLik,
+                bestLogLikelihood(tempModel),
                 append = TRUE,
                 verbose = verbose,
                 logfile = NULL
@@ -941,7 +941,7 @@ recursiveSplitModule <- function(counts,
         }
 
         runL <- vapply(resList, function(mod) {
-            mod@params$L
+            params(mod)$L
         }, integer(1))
         runParams <- data.frame(
             index = seq.int(1, length(resList)),
@@ -952,7 +952,7 @@ recursiveSplitModule <- function(counts,
 
     ## Summarize paramters of different models
     logliks <- vapply(resList, function(mod) {
-        mod@finalLogLik
+        bestLogLikelihood(mod)
     }, double(1))
     runParams <- data.frame(runParams,
         log_likelihood = logliks,

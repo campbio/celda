@@ -32,13 +32,13 @@ geneSetEnrich <- function(counts, celdaModel, databases, fdr = 0.05) {
     }
 
     #initialize list with one entry for each gene module
-    modules <- vector("list", length = celdaModel@params$L)
+    modules <- vector("list", length = params(celdaModel)$L)
 
     #create dataframe with gene-module associations
-    genes <- data.frame(gene = rownames(counts), module = celdaModel@clusters$y)
+    genes <- data.frame(gene = rownames(counts), module = clusters(celdaModel)$y)
 
     #iterate over each module, get genes in that module, add to list
-    for (i in seq_len(celdaModel@params$L)) {
+    for (i in seq_len(params(celdaModel)$L)) {
         modules[[i]] <- as.character(genes[genes$module == i, "gene"])
     }
 
