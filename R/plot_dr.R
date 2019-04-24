@@ -28,7 +28,7 @@
 #'     celdaTsne[, 2],
 #'     matrix = celdaCGSim$counts,
 #'     xlab = "Dimension1",
-#'     ylab = "Dimension 2",
+#'     ylab = "Dimension2",
 #'     varLabel = "tsne",
 #'     size = 1,
 #'     colorLow = "grey",
