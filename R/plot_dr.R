@@ -20,20 +20,6 @@
 #'   Default 'blue'.
 #' @param varLabel Character vector. Title for the color legend.
 #' @return The plot as a ggplot object
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceGrid(celdaTsne[, 1],
-#'     celdaTsne[, 2],
-#'     matrix = celdaCGSim$counts,
-#'     xlab = "Dimension1",
-#'     ylab = "Dimension2",
-#'     varLabel = "tsne",
-#'     size = 1,
-#'     colorLow = "grey",
-#'     colorMid = NULL,
-#'     colorHigh = "blue")
 #' @importFrom reshape2 melt
 #' @export
 plotDimReduceGrid <- function(dim1,
