@@ -91,15 +91,6 @@ plotDimReduceGrid <- function(dim1,
 #' @param colorHigh Character. A color available from `colors()`. The color
 #'  will be used to signify the highest values on the scale. Default 'blue'.
 #' @return The plot as a ggplot object
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceFeature(dim1 = celdaTsne[, 1],
-#'     dim2 = celdaTsne[, 2],
-#'     counts = celdaCGSim$counts,
-#'     features = c("Gene_99"),
-#'     exactMatch = TRUE)
 #' @export
 plotDimReduceFeature <- function(dim1,
     dim2,
@@ -217,14 +208,6 @@ plotDimReduceFeature <- function(dim1,
 #'  The color will be used to signify the highest values on the scale.
 #'  Default 'blue'.
 #' @return The plot as a ggplot object
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceModule(
-#'     dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-#'     counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-#'     modules = c("1", "2"))
 #' @export
 plotDimReduceModule <-
     function(dim1,
@@ -302,14 +285,6 @@ plotDimReduceModule <-
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
 #' @return The plot as a ggplot object
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceCluster(dim1 = celdaTsne[, 1],
-#'     dim2 = celdaTsne[, 2],
-#'     cluster = as.factor(clusters(celdaCGMod)$z),
-#'     specificClusters = c(1, 2, 3))
 #' @importFrom ggrepel geom_text_repel
 #' @export
 plotDimReduceCluster <- function(dim1,
