@@ -521,7 +521,7 @@ celda_C <- function(counts,
 #' @examples
 #' celdaCSim <- simulateCells(model = "celda_C", K = 10)
 #' simCounts <- celdaCSim$counts
-#' @import stats
+#' @rawNamespace import(stats, except = c(start, end))
 #' @export
 simulateCellscelda_C <- function(model,
     S = 5,

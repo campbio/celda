@@ -26,7 +26,7 @@
 #' clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
 #'     celdaCGMod, c1 = c(1, 2))
 #' @export
-#' @rawNamespace import(data.table, except = melt)
+#' @rawNamespace import(data.table, except = c(melt, shift))
 #' @importFrom MAST FromMatrix
 #' @importFrom MAST zlm
 #' @importFrom MAST summary
@@ -34,6 +34,7 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment assayNames
+#' @import SummarizedExperiment
 differentialExpression <- function(counts,
     celdaMod,
     c1,
@@ -80,7 +81,7 @@ differentialExpression <- function(counts,
 
     # explicitly load library SummarizedExperiment due to MAST package
     # dependency error
-    requireNamespace(SummarizedExperiment)
+    # requireNamespace(SummarizedExperiment)
 
     sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
     cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
