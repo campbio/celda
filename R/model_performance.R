@@ -34,8 +34,8 @@ resamplePerplexity <- function(counts,
     perpRes <- matrix(NA, nrow = length(resList (celdaList)), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
-        for (i in seq(length(resList (celdaList)))) {
-            perpRes[i, j] <- perplexity(counts, resList (celdaList)[[i]],
+        for (i in seq(length(resList(celdaList)))) {
+            perpRes[i, j] <- perplexity(counts, resList(celdaList)[[i]],
                 newCounts)
         }
     }
@@ -66,7 +66,7 @@ resamplePerplexity <- function(counts,
 #' @export
 plotGridSearchPerplexity <- function(celdaList, sep = 1) {
     do.call(paste0("plotGridSearchPerplexity",
-        as.character(class(resList (celdaList)[[1]]))),
+        as.character(class(resList(celdaList)[[1]]))),
         args = list(celdaList, sep))
 }
 
