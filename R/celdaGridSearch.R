@@ -39,6 +39,18 @@
 #' @import foreach
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
+#' @examples
+#' \donttest{
+#' data(celdaCGSim)
+#' #' ## Run various combinations of parameters with 'celdaGridSearch'
+#' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
+#'     model = "celda_CG",
+#'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+#'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+#'     bestOnly = TRUE,
+#'     nchains = 1,
+#'     cores = 2)
+#' }
 #' @export
 celdaGridSearch <- function(counts,
     model,
