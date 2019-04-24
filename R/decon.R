@@ -131,7 +131,6 @@ simulateContaminatedMatrix <- function(C = 300,
     theta,
     z,
     K,
-    beta,
     delta) {
 
     ## Notes: use fix-point iteration to update prior for theta, no need
@@ -151,10 +150,10 @@ simulateContaminatedMatrix <- function(C = 300,
     theta <- (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
     phi <- normalizeCounts(rnGByK,
         normalize = "proportion",
-        pseudocountNormalize = beta)
+        pseudocountNormalize = 1e-20)
     eta <- normalizeCounts(cnGByK,
         normalize = "proportion",
-        pseudocountNormalize = beta)
+        pseudocountNormalize = 1e-20)
 
     return(list("estRmat" = estRmat,
         "theta" = theta,
@@ -165,29 +164,27 @@ simulateContaminatedMatrix <- function(C = 300,
 
 
 # This function updates decontamination using background distribution
-.cDCalcEMbgDecontamination <- function(counts, cellDist, bgDist, theta, beta) {
-    meanNByC <- apply(counts, 2, mean)
-    logPr <- log(t(cellDist) + 1e-20) + log(theta + 1e-20) # +
-    # log( t(counts) / meanNByC )   # better when without panelty
-    logPc <- log(t(bgDist) + 1e-20) + log(1 - theta + 2e-20)
+.cDCalcEMbgDecontamination <- function(counts, globalZ, cbZ, trZ, phi, eta, theta){
 
-    Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
-    Pc <- 1 - Pr
-    deltaV2 <- MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
+    logPr = log( t(phi)[ cbZ,] + 1e-20) + log( theta + 1e-20 )
+    logPc = log( t(eta)[ globalZ,] + 1e-20) + log(1-theta + 1e-20)
 
-    estRmat <- t(Pr) * counts
+    Pr = exp( logPr) / (exp(logPr) + exp( logPc) )
+    Pc = 1- Pr
+    deltaV2 = MCMCprecision::fit_dirichlet( matrix( c( Pr, Pc) , ncol = 2 ) )$alpha
+
+    estRmat = t(Pr) * counts
+    phiUnnormalized = colSumByGroup.numeric( estRmat, cbZ, max(cbZ) )
+    etaUnnormalized = rowSums(phiUnnormalized) - colSumByGroup.numeric( phiUnnormalized, trZ, max(trZ) )
 
     ## Update paramters
-    theta <- (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
-    cellDist <- normalizeCounts(estRmat,
-        normalize = "proportion",
-        pseudocountNormalize = beta)
+    theta = (colSums(estRmat) + deltaV2[1] ) / (colSums(counts) + sum(deltaV2)  )
+    phi = normalizeCounts(phiUnnormalized, normalize="proportion",  pseudocountNormalize = 1e-20 )
+    eta = normalizeCounts(etaUnnormalized, normalize="proportion",  pseudocountNormalize = 1e-20 )
 
-    return(list("estRmat" = estRmat,
-        "theta" = theta,
-        "cellDist" = cellDist,
-        "delta" = deltaV2))
+    return( list("estRmat"=estRmat, "theta"=theta, "phi"=phi, "eta"=eta, "delta"=deltaV2 ) )
 }
+
 
 #' @title Decontaminate count matrix
 #' @description This function updates decontamination on dataset with multiple
@@ -198,7 +195,6 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param batch Integer vector. Cell batch labels. Default NULL.
 #' @param maxIter Integer. Maximum iterations of EM algorithm. Default to be
 #'  200.
-#' @param beta Numeric. Concentration parameter for Phi. Default to be 1e-6.
 #' @param delta Numeric. Symmetric concentration parameter for Theta. Default
 #'  to be 10.
 #' @param logfile Character. Messages will be redirected to a file named
@@ -218,7 +214,6 @@ decontX <- function(counts,
     z = NULL,
     batch = NULL,
     maxIter = 200,
-    beta = 1e-6,
     delta = 10,
     logfile = NULL,
     verbose = TRUE,
@@ -247,7 +242,6 @@ decontX <- function(counts,
                 z = zBat,
                 batch = bat,
                 maxIter = maxIter,
-                beta = beta,
                 delta = delta,
                 logfile = logfile,
                 verbose = verbose,
@@ -280,7 +274,6 @@ decontX <- function(counts,
     return(.decontXoneBatch(counts = counts,
         z = z,
         maxIter = maxIter,
-        beta = beta,
         delta = delta,
         logfile = logfile,
         verbose = verbose,
@@ -293,14 +286,13 @@ decontX <- function(counts,
     z = NULL,
     batch = NULL,
     maxIter = 200,
-    beta = 1e-6,
     delta = 10,
     logfile = NULL,
     verbose = TRUE,
     seed = 1234567) {
 
     .checkCountsDecon(counts)
-    .checkParametersDecon(proportionPrior = delta, distributionPrior = beta)
+    .checkParametersDecon(proportionPrior = delta) 
 
     nG <- nrow(counts)
     nC <- ncol(counts)
@@ -355,10 +347,10 @@ decontX <- function(counts,
         eta <- rowSums(phi) - phi
         phi <- normalizeCounts(phi,
             normalize = "proportion",
-            pseudocountNormalize = beta)
+            pseudocountNormalize = 1e-20)
         eta <- normalizeCounts(eta,
             normalize = "proportion",
-            pseudocountNormalize = beta)
+            pseudocountNormalize = 1e-20)
         ll <- c()
 
         llRound <- .deconCalcLL(counts = counts,
@@ -375,7 +367,6 @@ decontX <- function(counts,
                 theta = theta,
                 z = z,
                 K = K,
-                beta = beta,
                 delta = delta)
 
             theta <- nextDecon$theta
@@ -416,8 +407,8 @@ decontX <- function(counts,
 
         phi <- colSumByGroupNumeric(estRmat, cbZ, max(cbZ) )
         eta <- rowSums(phi) - colSumByGroupNumeric(phi, trZ, max(trZ))
-        phi <-  normalizeCounts( phi, normalize="proportion", pseudocount.normalize =beta )
-        eta <- normalizeCounts( eta, normalize="proportion", pseudocount.normalize = beta)  
+        phi <-  normalizeCounts( phi, normalize="proportion", pseudocount.normalize =1e-20 )
+        eta <- normalizeCounts( eta, normalize="proportion", pseudocount.normalize = 1e-20 )  
 
         ll <- c()
 
@@ -433,8 +424,7 @@ decontX <- function(counts,
             nextDecon <- .cDCalcEMbgDecontamination(counts = counts,
                 globalZ=globalZ, cbZ=cbZ, trZ=trZ,  phi=phi, 
                 eta=eta,
-                theta = theta,
-                beta = beta)
+                theta = theta)
 
             theta <- nextDecon$theta
             phi = nextDecon$phi
@@ -479,7 +469,7 @@ decontX <- function(counts,
         append = TRUE,
         verbose = verbose)
 
-    runParams <- list("betaInit" = beta,
+    runParams <- list(
         "deltaInit" = deltaInit,
         "iteration" = iter - 1L,
         "seed" = seed)
@@ -501,12 +491,9 @@ decontX <- function(counts,
 
 
 ## Make sure provided parameters are the right type and value range
-.checkParametersDecon <- function(proportionPrior, distributionPrior) {
+.checkParametersDecon <- function(proportionPrior) {
     if (length(proportionPrior) > 1 | any(proportionPrior <= 0)) {
         stop("'delta' should be a single positive value.")
-    }
-    if (length(distributionPrior) > 1 | any(distributionPrior <= 0)) {
-        stop("'beta' should be a single positive value.")
     }
 }
 
