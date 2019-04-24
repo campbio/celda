@@ -404,10 +404,10 @@ decontX <- function(counts,
     if (deconMethod == "background") {
 
         ## Initialize cell label
-        initialLabel = decontx.initializeZ(counts=counts)
-        globalZ = initialLabel$globalZ
-        cbZ = initialLabel$cbZ
-        trZ = initialLabel$trZ
+        initialLabel <- decontx.initializeZ(counts=counts)
+        globalZ <- initialLabel$globalZ
+        cbZ <- initialLabel$cbZ
+        trZ <- initialLabel$trZ
 
         ## Initialization
         deltaInit <- delta
@@ -416,8 +416,8 @@ decontX <- function(counts,
 
         phi <- colSumByGroupNumeric(estRmat, cbZ, max(cbZ) )
         eta <- rowSums(phi) - colSumByGroupNumeric(phi, trZ, max(trZ))
-        phi = normalizeCounts( phi, normalize="proportion", pseudocount.normalize =beta )
-        eta = normalizeCounts( eta, normalize="proportion", pseudocount.normalize = beta)  
+        phi <-  normalizeCounts( phi, normalize="proportion", pseudocount.normalize =beta )
+        eta <- normalizeCounts( eta, normalize="proportion", pseudocount.normalize = beta)  
 
         ll <- c()
 
@@ -431,20 +431,18 @@ decontX <- function(counts,
         ## EM updates
         while (iter <= maxIter & numIterWithoutImprovement <= stopIter) {
             nextDecon <- .cDCalcEMbgDecontamination(counts = counts,
-                cellDist = cellDist,
-                bgDist = bgDist,
+                globalZ=globalZ, cbZ=cbZ, trZ=trZ,  phi=phi, 
+                eta=eta,
                 theta = theta,
                 beta = beta)
 
             theta <- nextDecon$theta
-            cellDist <- nextDecon$cellDist
+            phi = nextDecon$phi
+            eta = nextDecon$eta
             delta <- nextDecon$delta
 
             ## Calculate log-likelihood
-            llTemp <- .bgCalcLL(counts = counts,
-                cellDist = cellDist,
-                bgDist = bgDist,
-                theta = theta)
+            llTemp <- .bgCalcLL(counts = counts, globalZ = globalZ, cbZ = cbZ, phi = phi, eta = eta, theta = theta)
             ll <- c(ll, llTemp)
             llRound <- c(llRound, round(llTemp, 2))
 
