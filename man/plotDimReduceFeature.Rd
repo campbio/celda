@@ -56,13 +56,3 @@ Create a scatterplot for each row of a normalized gene
  reduction tool. The cells are colored by expression of
  the specified feature.
 }
-\examples{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
-plotDimReduceFeature(dim1 = celdaTsne[, 1],
-    dim2 = celdaTsne[, 2],
-    counts = celdaCGSim$counts,
-    features = c("Gene_99"),
-    exactMatch = TRUE)
-}
