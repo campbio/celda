@@ -57,18 +57,22 @@ differentialExpression <- function(counts,
     compareCountMatrix(counts, celdaMod)
 
     if (is.null(c2)) {
-        c2 <- sort(setdiff(unique(celdaMod@clusters$z), c1))
+        c2 <- sort(setdiff(unique(clusters(celdaMod)$z), c1))
     }
     if (length(c1) > 1) {
-        cells1 <- celdaMod@names$column[which(celdaMod@clusters$z %in% c1)]
+        cells1 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z %in% c1)]
     } else {
-        cells1 <- celdaMod@names$column[which(celdaMod@clusters$z == c1)]
+        cells1 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z == c1)]
     }
 
     if (length(c2) > 1) {
-        cells2 <- celdaMod@names$column[which(celdaMod@clusters$z %in% c2)]
+        cells2 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z %in% c2)]
     } else {
-        cells2 <- celdaMod@names$column[which(celdaMod@clusters$z == c2)]
+        cells2 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z == c2)]
     }
 
     mat <- counts[, c(cells1, cells2)]

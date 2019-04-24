@@ -524,7 +524,7 @@ simulateCellscelda_G <- function(model,
     )
     result <- .reorderCeldaG(counts = cellCounts, res = result)
 
-    return(list(y = result@clusters$y,
+    return(list(y = clusters(result)$y,
         counts = .processCounts(cellCounts),
         L = L,
         beta = beta,
@@ -564,11 +564,11 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
         counts <- .processCounts(counts)
         # compareCountMatrix(counts, celdaMod)
 
-        L <- celdaMod@params$L
-        y <- celdaMod@clusters$y
-        beta <- celdaMod@params$beta
-        delta <- celdaMod@params$delta
-        gamma <- celdaMod@params$gamma
+        L <- params(celdaMod)$L
+        y <- clusters(celdaMod)$y
+        beta <- params(celdaMod)$beta
+        delta <- params(celdaMod)$delta
+        gamma <- params(celdaMod)$gamma
 
         p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
         nTSByC <- p$nTSByC
@@ -584,10 +584,10 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
         nGByTS[cbind(seq(nG), y)] <- nByG
 
         LNames <- paste0("L", seq(L))
-        colnames(nTSByC) <- celdaMod@names$column
+        colnames(nTSByC) <- matrixNames(celdaMod)$column
         rownames(nTSByC) <- LNames
         colnames(nGByTS) <- LNames
-        rownames(nGByTS) <- celdaMod@names$row
+        rownames(nGByTS) <- matrixNames(celdaMod)$row
         names(nGByTS) <- LNames
 
         countsList <- c()
@@ -792,11 +792,11 @@ logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_G"),
     function(counts, celdaMod, log = FALSE, ...) {
-        y <- celdaMod@clusters$y
-        L <- celdaMod@params$L
-        delta <- celdaMod@params$delta
-        beta <- celdaMod@params$beta
-        gamma <- celdaMod@params$gamma
+        y <- clusters(celdaMod)$y
+        L <- params(celdaMod)$L
+        delta <- params(celdaMod)$delta
+        beta <- params(celdaMod)$beta
+        gamma <- params(celdaMod)$gamma
 
         ## Calculate counts one time up front
         p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
@@ -871,18 +871,18 @@ setMethod("perplexity", signature(celdaMod = "celda_G"),
         logPx <- .perplexityGLogPx(newCounts,
             phi,
             psi,
-            celdaMod@clusters$y,
-            celdaMod@params$L) # + sum(etaProb)
+            clusters(celdaMod)$y,
+            params(celdaMod)$L) # + sum(etaProb)
         perplexity <- exp(- (logPx / sum(newCounts)))
         return(perplexity)
     })
 
 
 .reorderCeldaG <- function(counts, res) {
-    if (res@params$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
-        res@clusters$y <- as.integer(as.factor(res@clusters$y))
+    if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
+        clusters(res)$y <- as.integer(as.factor(clusters(res)$y))
         fm <- factorizeMatrix(counts = counts, celdaMod = res)
-        uniqueY <- sort(unique(res@clusters$y))
+        uniqueY <- sort(unique(clusters(res)$y))
         cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -919,7 +919,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
         norm <- normalizeCounts(counts,
             normalize = "proportion",
             transformationFun = sqrt)
-        plotHeatmap(norm[ix, ], y = celdaMod@clusters$y[ix], ...)
+        plotHeatmap(norm[ix, ], y = clusters(celdaMod)$y[ix], ...)
     })
 
 #' @title tSNE for celda_G
@@ -1087,7 +1087,7 @@ setMethod("featureModuleLookup", signature(celdaMod = "celda_G"),
         featList <- lapply(seq(length(feature)),
             function(x) {
                 if (feature[x] %in% rownames(counts)) {
-                    return(celdaMod@clusters$y[which(rownames(counts) ==
+                    return(clusters(celdaMod)$y[which(rownames(counts) ==
                             feature[x])])
                 } else {
                     return(paste0(

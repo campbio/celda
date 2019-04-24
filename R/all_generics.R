@@ -223,7 +223,7 @@ setClass(
 #' @description Returns details on the clustering parameters, and model priors
 #'  provided to `celdaGridSearch()` when the provided celdaList was
 #'  created.
-#' @param celdaMod An object of class celdaList.
+#' @param celdaList An object of class celdaList.
 #' @return Data Frame. Contains details on the various K/L parameters, chain
 #'  parameters, and final log-likelihoods derived for each model in the provided
 #'  celdaList.
@@ -232,14 +232,14 @@ setClass(
 #' runParams(celdaCGGridSearchRes)
 #' @export
 setGeneric("runParams",
-    function(celdaMod) {
+    function(celdaList) {
         standardGeneric("runParams")
     })
 #' @title Get run parameters provided to `celdaGridSearch()`
 #' @description Returns details on the clustering parameters, and model priors
 #'  provided to `celdaGridSearch()` when the provided celdaList was
 #'  created.
-#' @param celdaMod An object of class celdaList.
+#' @param celdaList An object of class celdaList.
 #' @return Data Frame. Contains details on the various K/L parameters, chain
 #'  parameters, and final log-likelihoods derived for each model in the provided
 #'  celdaList.
@@ -248,15 +248,15 @@ setGeneric("runParams",
 #' runParams(celdaCGGridSearchRes)
 #' @export
 setMethod("runParams",
-    signature = c(celdaMod = "celdaList"),
-    function(celdaMod) {
-        celdaMod@runParams
+    signature = c(celdaList = "celdaList"),
+    function(celdaList) {
+        celdaList@runParams
     })
 
 
 #' @title Get final celdaModels from a celdaList
 #' @description Returns all models generated during a `celdaGridSearch()` run.
-#' @param celdaMod An object of class celdaList.
+#' @param celdaList An object of class celdaList.
 #' @return List. Contains one celdaModel object for each of the parameters
 #'  specified in the `runParams()` of the provided celda list.
 #' @examples
@@ -264,12 +264,12 @@ setMethod("runParams",
 #' celdaCGGridModels <- resList(celdaCGGridSearchRes)
 #' @export
 setGeneric("resList",
-    function(celdaMod) {
+    function(celdaList) {
         standardGeneric("resList")
     })
 #' @title Get final celdaModels from a celdaList
 #' @description Returns all models generated during a `celdaGridSearch()` run.
-#' @param celdaMod An object of class celdaList.
+#' @param celdaList An object of class celdaList.
 #' @return List. Contains one celdaModel object for each of the parameters
 #'  specified in the `runParams()` of the provided celda list.
 #' @examples
@@ -277,17 +277,16 @@ setGeneric("resList",
 #' celdaCGGridModels <- resList(celdaCGGridSearchRes)
 #' @export
 setMethod("resList",
-    signature = c(celdaMod = "celdaList"),
-    function(celdaMod) {
-        celdaMod@resList
+    signature = c(celdaList = "celdaList"),
+    function(celdaList) {
+        celdaList@resList
     })
 
 
 #' @title Get perplexity for every model in a celdaList
 #' @description Returns perplexity for each model in a celdaList as calculated
 #'  by `perplexity().`
-#' @param celdaMod A celdaModel object of class "celda_C", "celda_G", or
-#'  "celda_CG".
+#' @param celdaList An object of class celdaList.
 #' @return List. Contains one celdaModel object for each of the parameters
 #'  specified in the `runParams()` of the provided celda list.
 #' @examples
@@ -295,14 +294,13 @@ setMethod("resList",
 #' celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
 #' @export
 setGeneric("celdaPerplexity",
-    function(celdaMod) {
+    function(celdaList) {
         standardGeneric("celdaPerplexity")
     })
 #' @title Get perplexity for every model in a celdaList
 #' @description Returns perplexity for each model in a celdaList as calculated
 #'  by `perplexity().`
-#' @param celdaMod A celdaModel object of class "celda_C", "celda_G", or
-#'  "celda_CG".
+#' @param celdaList An object of class celdaList.
 #' @return List. Contains one celdaModel object for each of the parameters
 #'  specified in the `runParams()` of the provided celda list.
 #' @examples
@@ -310,9 +308,9 @@ setGeneric("celdaPerplexity",
 #' celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
 #' @export
 setMethod("celdaPerplexity",
-    signature = c(celdaMod = "celdaList"),
-    function(celdaMod) {
-        celdaMod@perplexity
+    signature = c(celdaList = "celdaList"),
+    function(celdaList) {
+        celdaList@perplexity
     })
 
 
@@ -334,19 +332,50 @@ appendCeldaList <- function(list1, list2) {
             !is.element("celdaList", class(list2))) {
         stop("Both parameters to appendCeldaList must be of class celdaList.")
     }
-    if (!(list1@countChecksum == list2@countChecksum)) {
+    if (!(countChecksum(list1) == countChecksum(list2))) {
         warning("Provided lists have different countChecksums and may have",
             " been generated from different count matrices. Using checksum",
             " from first list...")
     }
     newList <- methods::new(
         "celdaList",
-        runParams = rbind(list1@runParams, list2@runParams),
-        resList = c(list1@resList, list2@resList),
-        countChecksum = list1@countChecksum,
+        runParams = rbind(runParams(list1), runParams(list2)),
+        resList = c(resList(list1), resList(list2)),
+        countChecksum = countChecksum(list1),
         perplexity = matrix(nrow = 0, ncol = 0))
     return(newList)
 }
+
+
+#' @title Get the MD5 hash of the count matrix from the celdaList
+#' @description Returns the MD5 hash of the count matrix used to generate the
+#'  celdaList.
+#' @param celdaList An object of class celdaList.
+#' @return A character string of length 32 containing the MD5 digest of
+#'  the count matrix.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' countChecksum <- countChecksum(celdaCGGridSearchRes)
+#' @export
+setGeneric("countChecksum",
+    function(celdaList) {
+        standardGeneric("countChecksum")
+    })
+#' @title Get the MD5 hash of the count matrix from the celdaList
+#' @description Returns the MD5 hash of the count matrix used to generate the
+#'  celdaList.
+#' @param celdaList An object of class celdaList.
+#' @return A character string of length 32 containing the MD5 digest of
+#'  the count matrix.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' countChecksum <- countChecksum(celdaCGGridSearchRes)
+#' @export
+setMethod("countChecksum",
+    signature = c(celdaList = "celdaList"),
+    function(celdaList) {
+        celdaList@countChecksum
+    })
 
 ################################################################################
 # Generics
