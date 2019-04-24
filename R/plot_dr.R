@@ -216,6 +216,7 @@ plotDimReduceFeature <- function(dim1,
 #'  This matrix should be the same as the one used to generate `celdaMod`.
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG".
 #' @param modules Character vector. Module(s) from celda model to be plotted.
+#' e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
@@ -237,7 +238,7 @@ plotDimReduceFeature <- function(dim1,
 #' plotDimReduceModule(
 #'     dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
 #'     counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-#'     modules = c("L1", "L2"))
+#'     modules = c("1", "2"))
 #' @export
 plotDimReduceModule <-
     function(dim1,
@@ -252,6 +253,7 @@ plotDimReduceModule <-
         colorLow = "grey",
         colorMid = NULL,
         colorHigh = "blue") {
+
         factorized <- factorizeMatrix(celdaMod = celdaMod,
             counts = counts)
         matrix <- factorized$proportions$cell

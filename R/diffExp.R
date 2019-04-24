@@ -26,7 +26,7 @@
 #' clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
 #'     celdaCGMod, c1 = c(1, 2))
 #' @export
-#' @importFrom data.table as.data.table
+#' @rawNamespace import(data.table, except = melt)
 #' @importFrom MAST FromMatrix
 #' @importFrom MAST zlm
 #' @importFrom MAST summary
@@ -81,7 +81,7 @@ differentialExpression <- function(counts,
     # explicitly load library SummarizedExperiment due to MAST package
     # dependency error
     library(SummarizedExperiment)
-    
+
     sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
     cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
     SummarizedExperiment::colData(sca)$cngeneson <- scale(cdr2)

@@ -585,6 +585,7 @@ vplayout <- function(x, y) {
 #' @importFrom gtable gtable_height
 #' @importFrom gtable gtable_width
 #' @importFrom gtable gtable_add_grob
+#' @import grDevices
 .heatmapMotor <- function(matrix,
         borderColor,
         cellWidth,
@@ -1218,6 +1219,7 @@ vplayout <- function(x, y) {
 }
 
 #' @importFrom scales dscale
+#' @importFrom scales brewer_pal
 .generateAnnotationColours <- function(annotation,
     annotationColors,
     drop) {
@@ -1265,7 +1267,7 @@ vplayout <- function(x, y) {
                     factorColors <- factorColors[-ind]
                 } else {
                     annotationColors[[names(annotation)[i]]] <-
-                        brewer_pal("seq", contCounter)(5)[seq(4)]
+                        scales::brewer_pal("seq", contCounter)(5)[seq(4)]
                     contCounter <- contCounter + 1
                 }
             }

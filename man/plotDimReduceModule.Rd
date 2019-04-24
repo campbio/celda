@@ -23,7 +23,8 @@ This matrix should be the same as the one used to generate `celdaMod`.}
 
 \item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
 
-\item{modules}{Character vector. Module(s) from celda model to be plotted.}
+\item{modules}{Character vector. Module(s) from celda model to be plotted.
+e.g. c("1", "2").}
 
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
@@ -61,5 +62,5 @@ celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 plotDimReduceModule(
     dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
     counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-    modules = c("L1", "L2"))
+    modules = c("1", "2"))
 }
