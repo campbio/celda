@@ -110,9 +110,11 @@ simulateContaminatedMatrix <- function(C = 300,
 # decontamination
 # bgDist Numeric matrix. Rows represent feature and columns are the times that
 # the background-distribution has been replicated.
-.bgCalcLL <- function(counts, cellDist, bgDist, theta) {
-    ll <- sum(t(counts) * log(theta * t(cellDist) +
-            (1 - theta) * t(bgDist) + 1e-20))
+.bgCalcLL <- function(counts, globalZ, cbZ, phi, eta, theta) {
+    #ll <- sum(t(counts) * log(theta * t(cellDist) +
+    #        (1 - theta) * t(bgDist) + 1e-20))
+    ll = sum( t(counts) * log( theta * t(phi)[cbZ,] + 
+           (1-theta) * t(eta)[globalZ,] +1e-20 ))
     return(ll)
 }
 
@@ -400,18 +402,30 @@ decontX <- function(counts,
     }
 
     if (deconMethod == "background") {
+
+        ## Initialize cell label
+        initialLabel = decontx.initializeZ(counts=counts)
+        globalZ = initialLabel$globalZ
+        cbZ = initialLabel$cbZ
+        trZ = initialLabel$trZ
+
         ## Initialization
         deltaInit <- delta
         theta <- stats::rbeta(n = nC, shape1 = deltaInit, shape2 = deltaInit)
         estRmat <- t(t(counts) * theta)
-        bgDist <- rowSums(counts) / sum(counts)
-        bgDist <- matrix(rep(bgDist, nC), ncol = nC)
-        cellDist <- normalizeCounts(estRmat, normalize = "proportion", pseudocountNormalize = beta)
+
+        phi <- colSumByGroupNumeric(estRmat, cbZ, max(cbZ) )
+        eta <- rowSums(phi) - colSumByGroupNumeric(phi, trZ, max(trZ))
+        phi = normalizeCounts( phi, normalize="proportion", pseudocount.normalize =beta )
+        eta = normalizeCounts( eta, normalize="proportion", pseudocount.normalize = beta)  
+
         ll <- c()
 
         llRound <- .bgCalcLL(counts = counts,
-            cellDist = cellDist,
-            bgDist = bgDist,
+            globalZ = globalZ,
+            cbZ = cbZ,
+            phi = phi,
+            eta = eta,
             theta = theta)
 
         ## EM updates
