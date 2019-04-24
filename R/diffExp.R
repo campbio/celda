@@ -34,6 +34,7 @@
 #' @importFrom SummarizedExperiment assay
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment assayNames
+#' @importFrom plyr .
 #' @import SummarizedExperiment
 differentialExpression <- function(counts,
     celdaMod,
