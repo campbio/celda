@@ -43,7 +43,7 @@ resamplePerplexity <- function(counts,
 
     ## Add mean perplexity to runParams
     perpMean <- apply(perpRes, 1, mean)
-    runParams(celdaList)$mean_perplexity <- perpMean
+    celdaList@runParams$mean_perplexity <- perpMean
 
     return(celdaList)
 }
