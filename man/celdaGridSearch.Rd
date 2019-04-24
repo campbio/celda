@@ -57,17 +57,6 @@ Run Celda with different combinations of parameters and
  as a list to the argument `paramsFixed`. When `verbose = TRUE`, output
  from each chain will be sent to a log file but not be displayed in stdout.
 }
-\examples{
-data(celdaCGSim)
-## Run various combinations of parameters with 'celdaGridSearch'
-celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
-    model = "celda_CG",
-    paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-    paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-    bestOnly = TRUE,
-    nchains = 1,
-    cores = 2)
-}
 \seealso{
 `celda_G()` for feature clustering, `celda_C()` for clustering of
  cells, and `celda_CG()` for simultaneous clustering of features and cells.

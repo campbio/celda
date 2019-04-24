@@ -43,14 +43,3 @@ Create a scatterplot for each row of a normalized
  data dimensionality reduction tool.
  The cells are colored by its given `cluster` label.
 }
-\examples{
-\donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
-plotDimReduceCluster(dim1 = celdaTsne[, 1],
-    dim2 = celdaTsne[, 2],
-    cluster = as.factor(z(celdaCGMod)),
-    specificClusters = c(1, 2, 3))
-}
-}

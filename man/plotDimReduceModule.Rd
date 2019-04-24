@@ -23,7 +23,8 @@ This matrix should be the same as the one used to generate `celdaMod`.}
 
 \item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
 
-\item{modules}{Character vector. Module(s) from celda model to be plotted.}
+\item{modules}{Character vector. Module(s) from celda model to be plotted.
+e.g. c("1", "2").}
 
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
@@ -53,15 +54,4 @@ Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a data
  dimensionality reduction tool.
  The cells are colored by the module probability(s).
-}
-\examples{
-\donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
-plotDimReduceModule(
-    dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-    counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-    modules = c("L1", "L2"))
-}
 }

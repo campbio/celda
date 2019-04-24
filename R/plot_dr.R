@@ -20,22 +20,7 @@
 #'   Default 'blue'.
 #' @param varLabel Character vector. Title for the color legend.
 #' @return The plot as a ggplot object
-#' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceGrid(celdaTsne[, 1],
-#'     celdaTsne[, 2],
-#'     matrix = celdaCGSim$counts,
-#'     xlab = "Dimension1",
-#'     ylab = "Dimension 2",
-#'     varLabel = "tsne",
-#'     size = 1,
-#'     colorLow = "grey",
-#'     colorMid = NULL,
-#'     colorHigh = "blue")
-#' }
+#' @importFrom reshape2 melt
 #' @export
 plotDimReduceGrid <- function(dim1,
     dim2,
@@ -106,17 +91,6 @@ plotDimReduceGrid <- function(dim1,
 #' @param colorHigh Character. A color available from `colors()`. The color
 #'  will be used to signify the highest values on the scale. Default 'blue'.
 #' @return The plot as a ggplot object
-#' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceFeature(dim1 = celdaTsne[, 1],
-#'     dim2 = celdaTsne[, 2],
-#'     counts = celdaCGSim$counts,
-#'     features = c("Gene_99"),
-#'     exactMatch = TRUE)
-#' }
 #' @export
 plotDimReduceFeature <- function(dim1,
     dim2,
@@ -219,6 +193,7 @@ plotDimReduceFeature <- function(dim1,
 #'  This matrix should be the same as the one used to generate `celdaMod`.
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG".
 #' @param modules Character vector. Module(s) from celda model to be plotted.
+#' e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
 #' @param size Numeric. Sets size of point on plot. Default 1.
@@ -233,16 +208,6 @@ plotDimReduceFeature <- function(dim1,
 #'  The color will be used to signify the highest values on the scale.
 #'  Default 'blue'.
 #' @return The plot as a ggplot object
-#' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceModule(
-#'     dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-#'     counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-#'     modules = c("L1", "L2"))
-#' }
 #' @export
 plotDimReduceModule <-
     function(dim1,
@@ -257,6 +222,7 @@ plotDimReduceModule <-
         colorLow = "grey",
         colorMid = NULL,
         colorHigh = "blue") {
+
         factorized <- factorizeMatrix(celdaMod = celdaMod,
             counts = counts)
         matrix <- factorized$proportions$cell
@@ -319,16 +285,7 @@ plotDimReduceModule <-
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
 #' @return The plot as a ggplot object
-#' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod)
-#' plotDimReduceCluster(dim1 = celdaTsne[, 1],
-#'     dim2 = celdaTsne[, 2],
-#'     cluster = as.factor(z(celdaCGMod)),
-#'     specificClusters = c(1, 2, 3))
-#' }
+#' @importFrom ggrepel geom_text_repel
 #' @export
 plotDimReduceCluster <- function(dim1,
     dim2,
@@ -393,6 +350,7 @@ plotDimReduceCluster <- function(dim1,
 # dimensionality reduction with PCA before tSNE.
 # @param initialDims Integer.Number of dimensions from PCA to use as
 # input in tSNE.
+#' @importFrom Rtsne Rtsne
 .calculateTsne <- function(norm,
     perplexity = 20,
     maxIter = 2500,
@@ -417,6 +375,7 @@ plotDimReduceCluster <- function(dim1,
 # @param umapConfig An object of class umap.config,
 # containing configuration parameters to be passed to umap.
 # Default umap::umap.defualts.
+#' @importFrom umap umap
 .calculateUmap <- function(norm, umapConfig = umap::umap.defaults) {
     return(umap::umap(norm, umapConfig)$layout)
 }
