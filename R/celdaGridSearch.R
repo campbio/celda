@@ -275,8 +275,8 @@ subsetCeldaList <- function(celdaList, params) {
     if (length(ix) == 1) {
         return(resList(celdaList)[[ix]])
     } else {
-        runParams(celdaList) <- as.data.frame(newRunParams)
-        resList(celdaList) <- resList(celdaList)[ix]
+        celdaList@runParams <- as.data.frame(newRunParams)
+        celdaList@resList <- resList(celdaList)[ix]
         return(celdaList)
     }
 }
@@ -316,8 +316,8 @@ selectBestModel <- function(celdaList) {
     if (nrow(newRunParams) == 1) {
         return(resList(celdaList)[[ix]])
     } else {
-        runParams(celdaList) <- as.data.frame(newRunParams)
-        resList(celdaList) <- resList(celdaList)[ix]
+        celdaList@runParams <- as.data.frame(newRunParams)
+        celdaList@resList <- resList(celdaList)[ix]
         return(celdaList)
     }
 }

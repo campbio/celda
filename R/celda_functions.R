@@ -138,8 +138,7 @@ recodeClusterZ <- function(celdaMod, from, to) {
     if (is.null(clusters(celdaMod)$z)) {
         stop("Provided celdaMod argument does not have a z attribute")
     }
-    clusters(celdaMod)$z <-
-        plyr::mapvalues(clusters(celdaMod)$z, from, to)
+    celdaMod@clusters$z <- plyr::mapvalues(clusters(celdaMod)$z, from, to)
     return(celdaMod)
 }
 
@@ -165,8 +164,7 @@ recodeClusterY <- function(celdaMod, from, to) {
     if (is.null(clusters(celdaMod)$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    clusters(celdaMod)$y <-
-        plyr::mapvalues(clusters(celdaMod)$y, from, to)
+    celdaMod@clusters$y <- plyr::mapvalues(clusters(celdaMod)$y, from, to)
     return(celdaMod)
 }
 
