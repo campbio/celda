@@ -584,7 +584,7 @@ celda_CG <- function(counts,
 #' @examples
 #' celdaCGSim <- simulateCells(model = "celda_CG")
 #' @export
-simulateCells.celda_CG <- function(model,
+simulateCellscelda_CG <- function(model,
     S = 5,
     CRange = c(50, 100),
     NRange = c(500, 1000),
@@ -690,8 +690,8 @@ simulateCells.celda_CG <- function(model,
 
     result <- .reorderCeldaCG(counts = cellCounts, res = result)
 
-    return(list(z = result@clusters$z,
-        y = result@clusters$y,
+    return(list(z = clusters(result)$z,
+        y = clusters(result)$y,
         sampleLabel = cellSampleLabel,
         counts = cellCounts,
         K = K,
@@ -742,15 +742,15 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
         counts <- .processCounts(counts)
         compareCountMatrix(counts, celdaMod)
 
-        K <- celdaMod@params$K
-        L <- celdaMod@params$L
-        z <- celdaMod@clusters$z
-        y <- celdaMod@clusters$y
-        alpha <- celdaMod@params$alpha
-        beta <- celdaMod@params$beta
-        delta <- celdaMod@params$delta
-        gamma <- celdaMod@params$gamma
-        sampleLabel <- celdaMod@sampleLabel
+        K <- params(celdaMod)$K
+        L <- params(celdaMod)$L
+        z <- clusters(celdaMod)$z
+        y <- clusters(celdaMod)$y
+        alpha <- params(celdaMod)$alpha
+        beta <- params(celdaMod)$beta
+        delta <- params(celdaMod)$delta
+        gamma <- params(celdaMod)$gamma
+        sampleLabel <- sampleLabel(celdaMod)
         s <- as.integer(sampleLabel)
 
         ## Calculate counts one time up front
@@ -771,12 +771,12 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 
         LNames <- paste0("L", seq(L))
         KNames <- paste0("K", seq(K))
-        colnames(nTSByC) <- celdaMod@names$column
+        colnames(nTSByC) <- matrixNames(celdaMod)$column
         rownames(nTSByC) <- LNames
         colnames(nGByTS) <- LNames
-        rownames(nGByTS) <- celdaMod@names$row
+        rownames(nGByTS) <- matrixNames(celdaMod)$row
         rownames(mCPByS) <- KNames
-        colnames(mCPByS) <- celdaMod@names$sample
+        colnames(mCPByS) <- matrixNames(celdaMod)$sample
         colnames(nTSByCP) <- KNames
         rownames(nTSByCP) <- LNames
 
@@ -912,7 +912,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
 #' data(celdaCGSim)
-#' loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
+#' loglik <- logLikelihoodcelda_CG(celdaCGSim$counts,
 #'     sampleLabel = celdaCGSim$sampleLabel,
 #'     z = celdaCGSim$z,
 #'     y = celdaCGSim$y,
@@ -935,7 +935,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #'     gamma = celdaCGSim$gamma,
 #'     delta = celdaCGSim$delta)
 #' @export
-logLikelihood.celda_CG <- function(counts,
+logLikelihoodcelda_CG <- function(counts,
     sampleLabel,
     z,
     y,
@@ -1038,15 +1038,15 @@ logLikelihood.celda_CG <- function(counts,
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
     function(counts, celdaMod, log = FALSE, ...) {
-        s <- as.integer(celdaMod@sampleLabel)
-        z <- celdaMod@clusters$z
-        K <- celdaMod@params$K
-        y <- celdaMod@clusters$y
-        L <- celdaMod@params$L
-        alpha <- celdaMod@params$alpha
-        delta <- celdaMod@params$delta
-        beta <- celdaMod@params$beta
-        gamma <- celdaMod@params$gamma
+        s <- as.integer(sampleLabel(celdaMod))
+        z <- clusters(celdaMod)$z
+        K <- params(celdaMod)$K
+        y <- clusters(celdaMod)$y
+        L <- params(celdaMod)$L
+        alpha <- params(celdaMod)$alpha
+        delta <- params(celdaMod)$delta
+        beta <- params(celdaMod)$beta
+        gamma <- params(celdaMod)$gamma
 
         p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
         lgbeta <- lgamma(seq(0, max(p$nCP)) + beta)
@@ -1108,7 +1108,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
-#' @rawNamespace import(matrixStats, except = c(count))
+#' @importFrom matrixStats logSumExp
 #' @export
 setMethod("perplexity", signature(celdaMod = "celda_CG"),
     function(counts, celdaMod, newCounts = NULL) {
@@ -1136,7 +1136,7 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
         theta <- log(factorized$posterior$sample)
         phi <- factorized$posterior$cellPopulation
         psi <- factorized$posterior$module
-        s <- as.integer(celdaMod@sampleLabel)
+        s <- as.integer(sampleLabel(celdaMod))
         eta <- factorized$posterior$geneDistribution
         nGByTS <- factorized$counts$geneDistribution
 
@@ -1154,13 +1154,13 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
 
 .reorderCeldaCG <- function(counts, res) {
     # Reorder K
-    if (res@params$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
+    if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
 
-        res@clusters$z <- as.integer(as.factor(res@clusters$z))
+        clusters(res)$z <- as.integer(as.factor(clusters(res)$z))
         fm <- factorizeMatrix(counts = counts,
             celdaMod = res,
             type = "posterior")
-        uniqueZ <- sort(unique(res@clusters$z))
+        uniqueZ <- sort(unique(clusters(res)$z))
         d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
         h <- stats::hclust(d, method = "complete")
 
@@ -1170,13 +1170,13 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
     }
 
     # Reorder L
-    if (res@params$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
+    if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
 
-        res@clusters$y <- as.integer(as.factor(res@clusters$y))
+        clusters(res)$y <- as.integer(as.factor(clusters(res)$y))
         fm <- factorizeMatrix(counts = counts,
                 celdaMod = res,
                 type = "posterior")
-        uniqueY <- sort(unique(res@clusters$y))
+        uniqueY <- sort(unique(clusters(res)$y))
         cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -1213,8 +1213,8 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_CG"),
                 normalize = "proportion",
                 transformationFun = sqrt)
         plotHeatmap(norm[ix, ],
-            z = celdaMod@clusters$z,
-            y = celdaMod@clusters$y[ix],
+            z = clusters(celdaMod)$z,
+            y = clusters(celdaMod)$y[ix],
             ...)
     })
 
@@ -1333,12 +1333,12 @@ setMethod("celdaUmap",
 
     ## Checking if maxCells and minClusterSize will work
     if ((maxCells < ncol(counts)) &
-        (maxCells / minClusterSize < celdaMod@params$K)) {
+        (maxCells / minClusterSize < params(celdaMod)$K)) {
 
         stop("Cannot distribute ",
             maxCells,
             " cells among ",
-            celdaMod@params$K,
+            params(celdaMod)$K,
             " clusters while maintaining a minumum of ",
             minClusterSize,
             " cells per cluster. Try increasing 'maxCells' or",
@@ -1363,7 +1363,7 @@ setMethod("celdaUmap",
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(celdaMod@clusters$z, celdaMod@params$K)
+        zTa <- tabulate(clusters(celdaMod)$z, params(celdaMod)$K)
 
         ## Number of cells that can be sampled from each cluster without
         ## going below the minimum threshold
@@ -1381,7 +1381,7 @@ setMethod("celdaUmap",
 
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
-            zInclude[sample(which(celdaMod@clusters$z == i),
+            zInclude[sample(which(clusters(celdaMod)$z == i),
                 clusterNToSample[i])] <- FALSE
         }
     }
@@ -1412,7 +1412,9 @@ setMethod("celdaUmap",
 #' data(celdaCGSim, celdaCGMod)
 #' celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
 #' @return A grob containing the specified plots
-#' @import gridExtra
+#' @importFrom gridExtra grid.arrange
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom grDevices colorRampPalette
 #' @seealso `celda_CG()` for clustering features and cells
 #' @export
 setMethod("celdaProbabilityMap", signature(celdaMod = "celda_CG"),
@@ -1423,8 +1425,8 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_CG"),
 
         level <- match.arg(level)
         factorized <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
-        zInclude <- which(tabulate(celdaMod@clusters$z, celdaMod@params$K) > 0)
-        yInclude <- which(tabulate(celdaMod@clusters$y, celdaMod@params$L) > 0)
+        zInclude <- which(tabulate(clusters(celdaMod)$z, params(celdaMod)$K) > 0)
+        yInclude <- which(tabulate(clusters(celdaMod)$y, params(celdaMod)$L) > 0)
 
         if (level == "cellPopulation") {
             pop <- factorized$proportions$cellPopulation[yInclude,
@@ -1541,7 +1543,7 @@ setMethod("featureModuleLookup", signature(celdaMod = "celda_CG"),
         }
         for (x in seq(length(feature))) {
             if (feature[x] %in% rownames(counts)) {
-                list[x] <- celdaMod@clusters$y[which(rownames(counts) ==
+                list[x] <- clusters(celdaMod)$y[which(rownames(counts) ==
                     feature[x])]
             } else {
                 list[x] <- paste0("No feature was identified matching '",

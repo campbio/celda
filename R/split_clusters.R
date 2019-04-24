@@ -52,7 +52,7 @@
             splitOnLast = FALSE,
             verbose = FALSE
         )
-        clustSplit[[i]] <- clustLabel@clusters$z
+        clustSplit[[i]] <- clusters(clustLabel)$z
     }
 
     ## Find second best assignment give current assignments for each cell
@@ -197,7 +197,7 @@
             splitOnIter = -1,
             splitOnLast = FALSE,
             verbose = FALSE)
-        clustSplit[[i]] <- clustLabel@clusters$z
+        clustSplit[[i]] <- clusters(clustLabel)$z
     }
 
     ## Find second best assignment give current assignments for each cell
@@ -375,7 +375,7 @@
                 splitOnIter = -1,
                 splitOnLast = FALSE,
                 verbose = FALSE)
-            tempZ[ix] <- clustLabel@clusters$z + currentTopZ
+            tempZ[ix] <- clusters(clustLabel)$z + currentTopZ
         }
         currentTopZ <- max(tempZ, na.rm = TRUE)
     }
@@ -413,7 +413,7 @@
             splitOnIter = -1,
             splitOnLast = FALSE,
             verbose = FALSE)
-        clustSplit[[i]] <- clustLabel@clusters$y
+        clustSplit[[i]] <- clusters(clustLabel)$y
     }
 
     ## Find second best assignment give current assignments for each cell
@@ -588,7 +588,7 @@
             splitOnIter = -1,
             splitOnLast = FALSE,
             verbose = FALSE)
-        clustSplit[[i]] <- clustLabel@clusters$y
+        clustSplit[[i]] <- clusters(clustLabel)$y
     }
 
     ## Find second best assignment give current assignments for each cell

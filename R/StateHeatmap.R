@@ -32,6 +32,7 @@
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' moduleHeatmap(celdaCGSim$counts, celdaCGMod)
+#' @importFrom methods .hasSlot
 #' @export
 moduleHeatmap <- function(counts,
     celdaMod,
@@ -106,25 +107,25 @@ moduleHeatmap <- function(counts,
     filteredNormCounts <-
         filteredNormCounts[rowSums(filteredNormCounts > 0) > 0, , drop = FALSE]
 
-    geneIx <- match(rownames(filteredNormCounts), celdaMod@names$row)
-    cellIx <- match(colnames(filteredNormCounts), celdaMod@names$column)
+    geneIx <- match(rownames(filteredNormCounts), matrixNames(celdaMod)$row)
+    cellIx <- match(colnames(filteredNormCounts), matrixNames(celdaMod)$column)
     zToPlot <- c()
     anno_cell_colors <- NULL
     if (class(celdaMod)[1] == "celda_CG") {
         if (methods::.hasSlot(celdaMod, "clusters")) {
             cell <-
-              distinctColors(length(unique(celdaMod@clusters$z)))[
-                  sort(unique(celdaMod@clusters$z[cellIx]))]
-            names(cell) <- sort(unique(celdaMod@clusters$z[cellIx]))
+              distinctColors(length(unique(clusters(celdaMod)$z)))[
+                  sort(unique(clusters(celdaMod)$z[cellIx]))]
+            names(cell) <- sort(unique(clusters(celdaMod)$z[cellIx]))
             anno_cell_colors <- list(cell = cell)
-            zToPlot <- celdaMod@clusters$z[cellIndices]
+            zToPlot <- clusters(celdaMod)$z[cellIndices]
         }
     }
 
     plotHeatmap(
         filteredNormCounts,
         z = zToPlot,
-        y = celdaMod@clusters$y[geneIx],
+        y = clusters(celdaMod)$y[geneIx],
         scaleRow = scaleRow,
         colorScheme = "divergent",
         showNamesFeature = showFeaturenames,

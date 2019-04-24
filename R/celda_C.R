@@ -521,8 +521,9 @@ celda_C <- function(counts,
 #' @examples
 #' celdaCSim <- simulateCells(model = "celda_C", K = 10)
 #' simCounts <- celdaCSim$counts
+#' @rawNamespace import(stats, except = c(start, end))
 #' @export
-simulateCells.celda_C <- function(model,
+simulateCellscelda_C <- function(model,
     S = 5,
     CRange = c(50, 100),
     NRange = c(500, 1000),
@@ -580,7 +581,7 @@ simulateCells.celda_C <- function(model,
     class(result) <- "celda_C"
     result <- .reorderCelda_C(counts = cellCounts, res = result)
 
-    return(list(z = result@clusters$z,
+    return(list(z = clusters(result)$z,
         counts = .processCounts(cellCounts),
         sampleLabel = cellSampleLabel,
         K = K,
@@ -623,11 +624,11 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
         counts <- .processCounts(counts)
         compareCountMatrix(counts, celdaMod)
 
-        K <- celdaMod@params$K
-        z <- celdaMod@clusters$z
-        alpha <- celdaMod@params$alpha
-        beta <- celdaMod@params$beta
-        sampleLabel <- celdaMod@sampleLabel
+        K <- params(celdaMod)$K
+        z <- clusters(celdaMod)$z
+        alpha <- params(celdaMod)$alpha
+        beta <- params(celdaMod)$beta
+        sampleLabel <- sampleLabel(celdaMod)
         s <- as.integer(sampleLabel)
 
         p <- .cCDecomposeCounts(counts, s, z, K)
@@ -635,10 +636,10 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
         nGByCP <- p$nGByCP
 
         KNames <- paste0("K", seq(K))
-        rownames(nGByCP) <- celdaMod@names$row
+        rownames(nGByCP) <- matrixNames(celdaMod)$row
         colnames(nGByCP) <- KNames
         rownames(mCPByS) <- KNames
-        colnames(mCPByS) <- celdaMod@names$sample
+        colnames(mCPByS) <- matrixNames(celdaMod)$sample
 
         countsList <- c()
         propList <- c()
@@ -726,7 +727,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells
 #' @examples
 #' data(celdaCSim)
-#' loglik <- logLikelihood.celda_C(celdaCSim$counts,
+#' loglik <- logLikelihoodcelda_C(celdaCSim$counts,
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     z = celdaCSim$z,
 #'     K = celdaCSim$K,
@@ -741,7 +742,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #'     alpha = celdaCSim$alpha,
 #'     beta = celdaCSim$beta)
 #' @export
-logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
+logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 
     if (sum(z > K) > 0) {
         stop("An entry in z contains a value greater than the provided K.")
@@ -826,13 +827,13 @@ logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_C"),
     function(counts, celdaMod, log = FALSE, ...) {
-        z <- celdaMod@clusters$z
-        sampleLabel <- celdaMod@sampleLabel
+        z <- clusters(celdaMod)$z
+        sampleLabel <- sampleLabel(celdaMod)
         s <- as.integer(sampleLabel)
 
-        K <- celdaMod@params$K
-        alpha <- celdaMod@params$alpha
-        beta <- celdaMod@params$beta
+        K <- params(celdaMod)$K
+        alpha <- params(celdaMod)$alpha
+        beta <- params(celdaMod)$beta
 
         p <- .cCDecomposeCounts(counts, s, z, K)
 
@@ -873,7 +874,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_C"),
 #' @examples
 #' data(celdaCSim, celdaCMod)
 #' perplexity <- perplexity(celdaCSim$counts, celdaCMod)
-#' @rawNamespace import(matrixStats, except = c(count))
+#' @importFrom matrixStats logSumExp
 #' @export
 setMethod("perplexity", signature(celdaMod = "celda_C"),
     function(counts, celdaMod, newCounts = NULL) {
@@ -899,7 +900,7 @@ setMethod("perplexity", signature(celdaMod = "celda_C"),
             type = "posterior")
         theta <- log(factorized$posterior$sample)
         phi <- log(factorized$posterior$module)
-        s <- as.integer(celdaMod@sampleLabel)
+        s <- as.integer(sampleLabel(celdaMod))
 
         # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
         inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
@@ -911,10 +912,10 @@ setMethod("perplexity", signature(celdaMod = "celda_C"),
 
 
 .reorderCelda_C <- function(counts, res) {
-    if (res@params$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
-        res@clusters$z <- as.integer(as.factor(res@clusters$z))
+    if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
+        clusters(res)$z <- as.integer(as.factor(clusters(res)$z))
         fm <- factorizeMatrix(counts = counts, celdaMod = res)
-        uniqueZ <- sort(unique(res@clusters$z))
+        uniqueZ <- sort(unique(clusters(res)$z))
         d <- .cosineDist(fm$posterior$module[, uniqueZ])
         h <- stats::hclust(d, method = "complete")
         res <- recodeClusterZ(res,
@@ -947,7 +948,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
         norm <- normalizeCounts(counts,
             normalize = "proportion",
             transformationFun = sqrt)
-        plotHeatmap(norm[featureIx, ], z = celdaMod@clusters$z, ...)
+        plotHeatmap(norm[featureIx, ], z = clusters(celdaMod)$z, ...)
     })
 
 
@@ -1067,12 +1068,12 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 
     ## Checking if maxCells and minClusterSize will work
     if ((maxCells < ncol(counts)) &
-            (maxCells / minClusterSize < celdaMod@params$K)) {
+            (maxCells / minClusterSize < params(celdaMod)$K)) {
 
         stop("Cannot distribute ",
             maxCells,
             " cells among ",
-            celdaMod@params$K,
+            params(celdaMod)$K,
             " clusters while maintaining a minumum of ",
             minClusterSize,
             " cells per cluster. Try increasing 'maxCells' or decreasing",
@@ -1084,7 +1085,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(celdaMod@clusters$z, celdaMod@params$K)
+        zTa <- tabulate(clusters(celdaMod)$z, params(celdaMod)$K)
 
         ## Number of cells that can be sampled from each cluster without
         ## going below the minimum threshold
@@ -1102,7 +1103,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
-            zInclude[sample(which(celdaMod@clusters$z == i),
+            zInclude[sample(which(clusters(celdaMod)$z == i),
                 clusterNToSample[i])] <- FALSE
         }
     }
@@ -1131,13 +1132,14 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 #' data(celdaCSim, celdaCMod)
 #' celdaProbabilityMap(celdaCSim$counts, celdaCMod)
 #' @return A grob containing the specified plots
+#' @importFrom gridExtra grid.arrange
 #' @export
 setMethod("celdaProbabilityMap", signature(celdaMod = "celda_C"),
     function(counts, celdaMod, level = c("sample"), ...) {
         counts <- .processCounts(counts)
         compareCountMatrix(counts, celdaMod)
 
-        zInclude <- which(tabulate(celdaMod@clusters$z, celdaMod@params$K) > 0)
+        zInclude <- which(tabulate(clusters(celdaMod)$z, params(celdaMod)$K) > 0)
 
         level <- match.arg(level)
         factorized <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
