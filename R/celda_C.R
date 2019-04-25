@@ -28,8 +28,6 @@
 #'  a cell population should be reassigned and another cell population should be
 #'  split into two clusters. If a split occurs, then `stopIter` will be reset.
 #'  Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-#'  to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
 #' @param zInitialize Chararacter. One of 'random', 'split', or 'predefined'.
 #'  With 'random', cells are randomly assigned to a populations. With 'split',
@@ -50,6 +48,7 @@
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of K and multiple chains in parallel.
 #' @examples
+#' data(celdaCSim)
 #' celdaCMod <- celda_C(celdaCSim$counts,
 #'     K = celdaCSim$K,
 #'     sampleLabel = celdaCSim$sampleLabel)
@@ -66,7 +65,6 @@ celda_C <- function(counts,
     maxIter = 200,
     splitOnIter = 10,
     splitOnLast = TRUE,
-    seed = 12345,
     nchains = 3,
     zInitialize = c("split", "random", "predefined"),
     countChecksum = NULL,
@@ -85,7 +83,6 @@ celda_C <- function(counts,
             maxIter,
             splitOnIter,
             splitOnLast,
-            seed,
             nchains,
             zInitialize,
             countChecksum,
@@ -105,7 +102,6 @@ celda_C <- function(counts,
     maxIter = 200,
     splitOnIter = 10,
     splitOnLast = TRUE,
-    seed = 12345,
     nchains = 3,
     zInitialize = c("split", "random", "predefined"),
     countChecksum = NULL,
@@ -150,17 +146,16 @@ celda_C <- function(counts,
         ".cCCalcEMProbZ")
     zInitialize <- match.arg(zInitialize)
 
-    allSeeds <- seq(seed, seed + nchains - 1)
+    allChains <- seq(nchains)
 
     bestResult <- NULL
-    for (i in seq_along(allSeeds)) {
+    for (i in allChains) {
         ## Initialize cluster labels
-        currentSeed <- allSeeds[i]
         .logMessages(date(),
             ".. Initializing 'z' in chain",
             i,
             "with",
-            paste0("'", zInitialize, "' (seed=", currentSeed, ")"),
+            paste0("'", zInitialize, "' "),
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
@@ -173,20 +168,17 @@ celda_C <- function(counts,
             z <- .initializeCluster(K,
                 ncol(counts),
                 initial = zInit,
-                fixed = NULL,
-                seed = currentSeed)
+                fixed = NULL)
         } else if (zInitialize == "split") {
             z <- .initializeSplitZ(counts,
                     K = K,
                     alpha = alpha,
-                    beta = beta,
-                    seed = seed)
+                    beta = beta)
         } else {
             z <- .initializeCluster(K,
                     ncol(counts),
                     initial = NULL,
-                    fixed = NULL,
-                    seed = currentSeed)
+                    fixed = NULL)
         }
 
         zBest <- z
@@ -210,7 +202,6 @@ celda_C <- function(counts,
                 alpha = alpha,
                 beta = beta)
 
-        .setSeed(seed)
         iter <- 1L
         numIterWithoutImprovement <- 0L
         doCellSplit <- TRUE
@@ -332,7 +323,6 @@ celda_C <- function(counts,
         result <- list(z = zBest,
             completeLogLik = ll,
             finalLogLik = llBest,
-            seed = currentSeed,
             K = K,
             sampleLabel = sampleLabel,
             alpha = alpha,
@@ -349,8 +339,6 @@ celda_C <- function(counts,
         .logMessages(date(),
             ".. Finished chain",
             i,
-            "with seed",
-            currentSeed,
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
@@ -361,8 +349,7 @@ celda_C <- function(counts,
         params = list(K = as.integer(bestResult$K),
             alpha = bestResult$alpha,
             beta = bestResult$beta,
-            countChecksum = bestResult$countChecksum,
-            seed = bestResult$seed),
+            countChecksum = bestResult$countChecksum),
         sampleLabel = bestResult$sampleLabel,
         completeLogLik = bestResult$completeLogLik,
         finalLogLik = bestResult$finalLogLik,
@@ -526,8 +513,6 @@ celda_C <- function(counts,
 #'  to each cell population in each sample. Default 1.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
 #'  each feature in each cell population. Default 1.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no
-#'  calls to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, cell population
 #'  clusters `z`, sample assignments `sampleLabel`, and input parameters.
@@ -545,10 +530,7 @@ simulateCells.celda_C <- function(model,
     K = 5,
     alpha = 1,
     beta = 1,
-    seed = 12345,
     ...) {
-
-    .setSeed(seed)
 
     phi <- .rdirichlet(K, rep(beta, G))
     theta <- .rdirichlet(S, rep(alpha, K))
@@ -592,7 +574,6 @@ simulateCells.celda_C <- function(model,
         params = list(K = as.integer(K),
             alpha = alpha,
             beta = beta,
-            seed = seed,
             countChecksum = countChecksum),
         sampleLabel = cellSampleLabel,
         names = names)
@@ -626,6 +607,7 @@ simulateCells.celda_C <- function(model,
 #'  returns the posterior estimates. Default
 #'  `c("counts", "proportion", "posterior")`.
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' factorizedMatrices <- factorizeMatrix(celdaCSim$counts,
 #'     celdaCMod, "posterior")
 #' @return A list with elements for `counts`, `proportions`, or `posterior`
@@ -743,6 +725,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim)
 #' loglik <- logLikelihood.celda_C(celdaCSim$counts,
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     z = celdaCSim$z,
@@ -838,6 +821,7 @@ logLikelihood.celda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
 #'  cluster probabilities.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' clusterProb <- clusterProbability(celdaCSim$counts, celdaCMod)
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_C"),
@@ -887,6 +871,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_C"),
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' perplexity <- perplexity(celdaCSim$counts, celdaCMod)
 #' @rawNamespace import(matrixStats, except = c(count))
 #' @export
@@ -953,6 +938,7 @@ setMethod("perplexity", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells and `celdaTsne()` for generating
 #'  2-dimensional coordinates
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' celdaHeatmap(celdaCSim$counts, celdaCMod)
 #' @return list A list containing dendrograms and the heatmap grob
 #' @export
@@ -986,11 +972,10 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-#'  to `set.seed()` are made.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' tsneRes <- celdaTsne(celdaCSim$counts, celdaCMod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
@@ -1002,8 +987,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         initialDims = 20,
         modules = NULL,
         perplexity = 20,
-        maxIter = 2500,
-        seed = 12345) {
+        maxIter = 2500) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
             celdaMod,
@@ -1014,7 +998,6 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         res <- .calculateTsne(preparedCountInfo$norm,
             perplexity = perplexity,
             maxIter = maxIter,
-            seed = seed,
             doPca = TRUE,
             initialDims = initialDims)
 
@@ -1047,6 +1030,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression.
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' umapRes <- celdaUmap(celdaCSim$counts, celdaCMod)
 #' @return A two column matrix of umap coordinates
 #' @export
@@ -1144,6 +1128,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 #' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
+#' data(celdaCSim, celdaCMod)
 #' celdaProbabilityMap(celdaCSim$counts, celdaCMod)
 #' @return A grob containing the specified plots
 #' @export

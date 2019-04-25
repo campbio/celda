@@ -28,6 +28,7 @@ This function will output the corresponding feature module for a
  specified list of genes from a celdaModel.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 featureModuleLookup(
     counts = celdaCGSim$counts,
     celdaMod = celdaCGMod, "Gene_1")

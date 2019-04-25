@@ -28,8 +28,6 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @param bestOnly Logical. Whether to return only the chain with the highest
 #'  log likelihood per combination of parameters or return all chains. Default
 #'  TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no
-#'  calls to `set.seed()` are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
@@ -44,6 +42,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #'  `subsetCeldaList()` can subset the `celdaList` object. `selectBestModel()`
 #'  can get the best model for each combination of parameters.
 #' @examples
+#' data(celdaCGSim)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
 #'     model = "celda_CG",
@@ -62,7 +61,6 @@ celdaGridSearch <- function(counts,
     nchains = 3,
     cores = 1,
     bestOnly = TRUE,
-    seed = 12345,
     perplexity = TRUE,
     verbose = TRUE,
     logfilePrefix = "Celda") {
@@ -119,9 +117,6 @@ celdaGridSearch <- function(counts,
         paramsTest))
     runParams <- cbind(index = seq_len(nrow(runParams)), runParams)
 
-    # Pre-generate a set of random seeds to be used for each chain
-    allSeeds <- seq(seed, (seed + nchains - 1))
-
     .logMessages(paste(rep("-", 50), collapse = ""),
         logfile = NULL,
         append = FALSE,
@@ -168,8 +163,6 @@ celdaGridSearch <- function(counts,
                 chainParams[[j]] <- current.run[[j]]
             }
             chainParams$counts <- counts
-            chainParams$seed <- allSeeds[ifelse(i %% nchains == 0,
-                nchains, i %% nchains)]
             chainParams$maxIter <- maxIter
             chainParams$nchain <- 1
             chainParams$countChecksum <- countChecksum
@@ -179,10 +172,7 @@ celdaGridSearch <- function(counts,
                 paste(paste(
                     colnames(runParams), runParams[i, ], sep = "-"
                 ), collapse = "_"),
-                "_Seed-",
-                chainParams$seed,
-                "_log.txt"
-            )
+                "_log.txt")
 
             ## Run model
             res <- do.call(model, c(chainParams, paramsFixed))
@@ -253,6 +243,7 @@ celdaGridSearch <- function(counts,
 #'  chains in parallel. `selectBestModel()` can get the best model for each
 #'  combination of parameters.
 #' @examples
+#' data(celdaCGGridSearchRes)
 #' resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(K = 5,
 #'     L = 10))
 #' @export
@@ -307,6 +298,7 @@ subsetCeldaList <- function(celdaList, params) {
 #' @seealso `celdaGridSearch()` can run Celda with multiple parameters and
 #'  chains in parallel. `subsetCeldaList()` can subset the `celdaList` object.
 #' @examples
+#' data(celdaCGGridSearchRes)
 #' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 #' cgsBest <- selectBestModel(celdaCGGridSearchRes)
 #' @import data.table

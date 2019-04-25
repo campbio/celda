@@ -7,7 +7,7 @@
 recursiveSplitCell(counts, sampleLabel = NULL, initialK = 5,
   maxK = 25, tempL = NULL, yInit = NULL, alpha = 1, beta = 1,
   delta = 1, gamma = 1, minCell = 3, reorder = TRUE,
-  perplexity = TRUE, seed = 12345, logfile = NULL, verbose = TRUE)
+  perplexity = TRUE, logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -59,9 +59,6 @@ populations (i.e. 'K15' was created at split 15, 'K16' was created at split
 If FALSE, then perplexity can be calculated later with
 `resamplePerplexity()`. Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no
-calls to `set.seed()` are made.}
-
 \item{logfile}{Character. Messages will be redirected to a file named
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
@@ -86,6 +83,7 @@ Uses the `celda_C` model to cluster cells into population for
  slightly different than `yInit`.
 }
 \examples{
+data(celdaCGSim, celdaCSim)
 ## Create models that range from K = 3 to K = 7 by recursively splitting
 ## cell populations into two to produce `celda_C` cell clustering models
 testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)

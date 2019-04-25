@@ -23,6 +23,7 @@ Calculate a log-likelihood for a user-provided cluster
  assignment and count matrix, per the desired celdaModel.
 }
 \examples{
+data(celdaCGSim)
 loglik <- logLikelihood(celdaCGSim$counts,
     model = "celda_CG",
     sampleLabel = celdaCGSim$sampleLabel,

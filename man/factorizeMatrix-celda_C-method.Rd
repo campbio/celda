@@ -33,6 +33,7 @@ Generates factorized matrices showing the contribution of each
  feature in each cell population or each cell population in each sample.
 }
 \examples{
+data(celdaCSim, celdaCMod)
 factorizedMatrices <- factorizeMatrix(celdaCSim$counts,
     celdaCMod, "posterior")
 }

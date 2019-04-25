@@ -15,10 +15,11 @@ List. Contains the model-specific parameters for the provided celda
  model object depending on its class.
 }
 \description{
-Retrieves the K/L, model priors (e.g. alpha, beta), random seed,
+Retrieves the K/L, model priors (e.g. alpha, beta),
  and count matrix checksum parameters provided during the creation of the
  provided celdaModel.
 }
 \examples{
+data(celdaCGMod)
 params(celdaCGMod)
 }

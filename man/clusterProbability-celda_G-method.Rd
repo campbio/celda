@@ -31,6 +31,7 @@ Calculates the conditional probability of each feature belonging
  result.
 }
 \examples{
+data(celdaGSim, celdaGMod)
 clusterProb <- clusterProbability(celdaGSim$counts, celdaGMod)
 }
 \seealso{

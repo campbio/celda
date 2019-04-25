@@ -42,6 +42,7 @@ Uses MAST to find differentially expressed features for
  specified cell subpopulations.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 library(SummarizedExperiment)
 clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
     celdaCGMod, c1 = c(1, 2))

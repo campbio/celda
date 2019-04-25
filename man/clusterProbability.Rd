@@ -26,5 +26,6 @@ Get the probability of the cluster assignments generated during
  a celda run.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
 }

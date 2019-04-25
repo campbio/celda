@@ -24,5 +24,6 @@ This function generates a list containing a simulated counts
  for those model's simulation functions as detailed below.
 }
 \examples{
+data(celdaCGSim)
 dim(celdaCGSim$counts)
 }

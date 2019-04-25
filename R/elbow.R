@@ -8,6 +8,7 @@
     v2 <- a - b
     m <- cbind(v1, v2)
     d <- abs(det(m)) / sqrt(sum(v1 * v1))
+    return(d)
 }
 
 
@@ -40,6 +41,6 @@
             mean = perplexitySdeMean,
             sd = perplexitySdeSd,
             lower.tail = FALSE)
-    other <- which(ix & perplexitySdePval < pvalCutoff)
+    # other <- which(ix & perplexitySdePval < pvalCutoff)
     return(list(elbow = var[elbow]))
 }

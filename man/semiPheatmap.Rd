@@ -202,8 +202,8 @@ test = matrix(rnorm(200), 20, 10)
 test[seq(10), seq(1, 10, 2)] = test[seq(10), seq(1, 10, 2)] + 3
 test[seq(11, 20), seq(2, 10, 2)] = test[seq(11, 20), seq(2, 10, 2)] + 2
 test[seq(15, 20), seq(2, 10, 2)] = test[seq(15, 20), seq(2, 10, 2)] + 4
-colnames(test) = paste("Test", 1:10, sep = "")
-rownames(test) = paste("Gene", 1:20, sep = "")
+colnames(test) = paste("Test", seq(10), sep = "")
+rownames(test) = paste("Gene", seq(20), sep = "")
 
 # Draw heatmaps
 pheatmap(test)

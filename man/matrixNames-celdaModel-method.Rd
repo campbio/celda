@@ -19,5 +19,6 @@ Retrieves the row, column, and sample names used to generate a
  celdaModel.
 }
 \examples{
+data(celdaCGMod)
 matrixNames(celdaCGMod)
 }

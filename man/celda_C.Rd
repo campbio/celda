@@ -6,7 +6,7 @@
 \usage{
 celda_C(counts, sampleLabel = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stopIter = 10, maxIter = 200,
-  splitOnIter = 10, splitOnLast = TRUE, seed = 12345, nchains = 3,
+  splitOnIter = 10, splitOnLast = TRUE, nchains = 3,
   zInitialize = c("split", "random", "predefined"),
   countChecksum = NULL, zInit = NULL, logfile = NULL,
   verbose = TRUE)
@@ -49,9 +49,6 @@ a cell population should be reassigned and another cell population should be
 split into two clusters. If a split occurs, then `stopIter` will be reset.
 Default TRUE.}
 
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-to `set.seed()` are made.}
-
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
 \item{zInitialize}{Chararacter. One of 'random', 'split', or 'predefined'.
@@ -81,6 +78,7 @@ Clusters the columns of a count matrix containing single-cell
  data into K subpopulations.
 }
 \examples{
+data(celdaCSim)
 celdaCMod <- celda_C(celdaCSim$counts,
     K = celdaCSim$K,
     sampleLabel = celdaCSim$sampleLabel)

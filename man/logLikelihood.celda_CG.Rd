@@ -44,6 +44,7 @@ Calculates the log likelihood for user-provided cell population
  and feature module clusters using the `celda_CG()` model.
 }
 \examples{
+data(celdaCGSim)
 loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
     sampleLabel = celdaCGSim$sampleLabel,
     z = celdaCGSim$z,
