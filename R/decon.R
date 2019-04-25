@@ -174,8 +174,8 @@ simulateContaminatedMatrix <- function(C = 300,
     deltaV2 = MCMCprecision::fit_dirichlet( matrix( c( Pr, Pc) , ncol = 2 ) )$alpha
 
     estRmat = t(Pr) * counts
-    phiUnnormalized = colSumByGroup.numeric( estRmat, cbZ, max(cbZ) )
-    etaUnnormalized = rowSums(phiUnnormalized) - colSumByGroup.numeric( phiUnnormalized, trZ, max(trZ) )
+    phiUnnormalized = .colSumByGroupNumeric( estRmat, cbZ, max(cbZ) )
+    etaUnnormalized = rowSums(phiUnnormalized) - .colSumByGroupNumeric( phiUnnormalized, trZ, max(trZ) )
 
     ## Update paramters
     theta = (colSums(estRmat) + deltaV2[1] ) / (colSums(counts) + sum(deltaV2)  )
@@ -395,7 +395,7 @@ decontX <- function(counts,
     if (deconMethod == "background") {
 
         ## Initialize cell label
-        initialLabel <- decontx.initializeZ(counts=counts)
+        initialLabel <- .decontxInitializeZ(counts=counts)
         globalZ <- initialLabel$globalZ
         cbZ <- initialLabel$cbZ
         trZ <- initialLabel$trZ
@@ -405,10 +405,10 @@ decontX <- function(counts,
         theta <- stats::rbeta(n = nC, shape1 = deltaInit, shape2 = deltaInit)
         estRmat <- t(t(counts) * theta)
 
-        phi <- colSumByGroupNumeric(estRmat, cbZ, max(cbZ) )
-        eta <- rowSums(phi) - colSumByGroupNumeric(phi, trZ, max(trZ))
-        phi <-  normalizeCounts( phi, normalize="proportion", pseudocount.normalize =1e-20 )
-        eta <- normalizeCounts( eta, normalize="proportion", pseudocount.normalize = 1e-20 )  
+        phi <- .colSumByGroupNumeric(estRmat, cbZ, max(cbZ) )
+        eta <- rowSums(phi) - .colSumByGroupNumeric(phi, trZ, max(trZ))
+        phi <-  normalizeCounts( phi, normalize="proportion", pseudocountNormalize =1e-20 )
+        eta <- normalizeCounts( eta, normalize="proportion", pseudocountNormalize = 1e-20 )  
 
         ll <- c()
 
@@ -544,7 +544,7 @@ addLogLikelihood <- function(llA, llB) {
 
 
 ## Initialization of cell labels for DecontX when they are not given
-.decontxInitializeZ = function(counts, K = 10, min.cell = 3, seed = 428) {
+.decontxInitializeZ = function(counts, K = 10, minCell = 3, seed = 428) {
     nC = ncol(counts) 
     if( nC<100 )  {
         K = ceiling(sqrt( nC )) 
@@ -559,7 +559,7 @@ addLogLikelihood <- function(llA, llB) {
             localCounts = counts[, globalZ == k ] 
             localK = min( K, ceiling( sqrt(ncol(localCounts))   )   )
             localZ[globalZ == k] = .initializeSplitZ( localCounts, K = localK, KSubcluster = NULL, 
-                alpha = 1, beta = 1, min.cell = 3, seed = seed)
+                alpha = 1, beta = 1, minCell = 3, seed = seed)
         } else {
             localZ [globalZ == k] = 1L
         }
@@ -568,7 +568,7 @@ addLogLikelihood <- function(llA, llB) {
 
     cbZ  = interaction( globalZ, localZ, lex.order=TRUE, drop=TRUE)   # combined z label  
     trZ = as.integer( sub("\\..*", "", levels(cbZ), perl=TRUE) )  # transitional z label
-    cbZ = as.integer( plyr::mapvalues( cbZ, from=levels(cbZ, to=1:length(levels(cbZ)))  )
+    cbZ = as.integer( plyr::mapvalues( cbZ, from=levels(cbZ), to=1:length(levels(cbZ))) )
 
 
     return( list( "globalZ"=globalZ, "localZ"=localZ, "trZ"=trZ, "cbZ"=cbZ  )  )
