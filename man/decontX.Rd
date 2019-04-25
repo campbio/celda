@@ -4,8 +4,8 @@
 \alias{decontX}
 \title{Decontaminate count matrix}
 \usage{
-decontX(counts, z = NULL, batch = NULL, maxIter = 200,
-  beta = 1e-06, delta = 10, logfile = NULL, verbose = TRUE)
+decontX(counts, z = NULL, batch = NULL, maxIter = 200, delta = 10,
+  logfile = NULL, verbose = TRUE)
 }
 \arguments{
 \item{counts}{Numeric/Integer matrix. Observed count matrix, rows represent
