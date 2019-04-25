@@ -45,6 +45,7 @@ Creates a scatterplot given two dimensions from a data
 }
 \examples{
 \donttest{
+data(celdaCGSim, celdaCGMod)
 celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
     celdaMod = celdaCGMod)
 plotDimReduceGrid(celdaTsne[, 1],

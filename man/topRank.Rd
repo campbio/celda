@@ -34,6 +34,7 @@ topRank() can quickly identify the top `n` rows for each column
  features per cell.
 }
 \examples{
+data(sampleCells)
 topRanksPerCell <- topRank(sampleCells, n = 5)
 topFeatureNamesForCell <- topRanksPerCell$names[1]
 }

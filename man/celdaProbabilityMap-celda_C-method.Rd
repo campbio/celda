@@ -29,6 +29,7 @@ Renders probability and relative expression heatmaps to
  visualize the relationship between cell populations and samples.
 }
 \examples{
+data(celdaCSim, celdaCMod)
 celdaProbabilityMap(celdaCSim$counts, celdaCMod)
 }
 \seealso{

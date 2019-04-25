@@ -32,8 +32,6 @@
 #'  a cell population or feature module should be reassigned and another cell
 #'  population or feature module should be split into two clusters. If a split
 #'  occurs, then 'stopIter' will be reset. Default TRUE.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-#'  to `set.seed()` are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
 #' @param zInitialize Chararacter. One of 'random', 'split', or 'predefined'.
 #'  With 'random', cells are randomly assigned to a populations. With 'split',
@@ -62,6 +60,7 @@
 #'  cells. `celdaGridSearch()` can be used to run multiple values of K/L and
 #'  multiple chains in parallel.
 #' @examples
+#' data(celdaCGSim)
 #' celdaMod <- celda_CG(celdaCGSim$counts,
 #'     K = celdaCGSim$K,
 #'     L = celdaCGSim$L,
@@ -83,7 +82,6 @@ celda_CG <- function(counts,
     maxIter = 200,
     splitOnIter = 10,
     splitOnLast = TRUE,
-    seed = 12345,
     nchains = 3,
     zInitialize = c("split", "random", "predefined"),
     yInitialize = c("split", "random", "predefined"),
@@ -109,7 +107,6 @@ celda_CG <- function(counts,
             maxIter,
             splitOnIter,
             splitOnLast,
-            seed,
             nchains,
             zInitialize,
             yInitialize,
@@ -136,7 +133,6 @@ celda_CG <- function(counts,
     maxIter = 200,
     splitOnIter = 10,
     splitOnLast = TRUE,
-    seed = 12345,
     nchains = 3,
     zInitialize = c("split", "random", "predefined"),
     yInitialize = c("split", "random", "predefined"),
@@ -179,21 +175,20 @@ celda_CG <- function(counts,
     zInitialize <- match.arg(zInitialize)
     yInitialize <- match.arg(yInitialize)
 
-    allSeeds <- seq(seed, seed + nchains - 1)
+    allChains <- seq(nchains)
 
     # Pre-compute lgamma values
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
     lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
 
     bestResult <- NULL
-    for (i in seq_along(allSeeds)) {
+    for (i in allChains) {
         ## Initialize cluster labels
-        currentSeed <- allSeeds[i]
         .logMessages(date(),
             ".. Initializing 'z' in chain",
             i,
             "with",
-            paste0("'", zInitialize, "' (seed=", currentSeed, ")"),
+            paste0("'", zInitialize, "' "),
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
@@ -202,7 +197,7 @@ celda_CG <- function(counts,
             ".. Initializing 'y' in chain",
             i,
             "with",
-            paste0("'", yInitialize, "' (seed=", currentSeed, ")"),
+            paste0("'", yInitialize, "' "),
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
@@ -214,21 +209,18 @@ celda_CG <- function(counts,
             z <- .initializeCluster(K,
                 ncol(counts),
                 initial = zInit,
-                fixed = NULL,
-                seed = currentSeed)
+                fixed = NULL)
         } else if (zInitialize == "split") {
             z <- .initializeSplitZ(
                 counts,
                 K = K,
                 alpha = alpha,
-                beta = beta,
-                seed = seed)
+                beta = beta)
         } else {
             z <- .initializeCluster(K,
                 ncol(counts),
                 initial = NULL,
-                fixed = NULL,
-                seed = currentSeed)
+                fixed = NULL)
         }
 
         if (yInitialize == "predefined") {
@@ -238,21 +230,18 @@ celda_CG <- function(counts,
             y <- .initializeCluster(L,
                     nrow(counts),
                     initial = yInit,
-                    fixed = NULL,
-                    seed = currentSeed)
+                    fixed = NULL)
         } else if (yInitialize == "split") {
             y <- .initializeSplitY(counts,
                     L,
                     beta = beta,
                     delta = delta,
-                    gamma = gamma,
-                    seed = seed)
+                    gamma = gamma)
         } else {
             y <- .initializeCluster(L,
                     nrow(counts),
                     initial = NULL,
-                    fixed = NULL,
-                    seed = currentSeed)
+                    fixed = NULL)
         }
 
         zBest <- z
@@ -288,7 +277,6 @@ celda_CG <- function(counts,
             delta = delta,
             gamma = gamma)
 
-        .setSeed(currentSeed)
         iter <- 1L
         numIterWithoutImprovement <- 0L
         doCellSplit <- TRUE
@@ -508,7 +496,6 @@ celda_CG <- function(counts,
             beta = beta,
             delta = delta,
             gamma = gamma,
-            seed = currentSeed,
             sampleLabel = sampleLabel,
             names = names,
             countChecksum = countChecksum)
@@ -523,8 +510,6 @@ celda_CG <- function(counts,
         .logMessages(date(),
             ".. Finished chain",
             i,
-            "with seed",
-            currentSeed,
             logfile = logfile,
             append = TRUE,
             verbose = verbose)
@@ -539,7 +524,6 @@ celda_CG <- function(counts,
             beta = beta,
             delta = delta,
             gamma = gamma,
-            seed = currentSeed,
             countChecksum = countChecksum),
         completeLogLik = ll,
         finalLogLik = llBest,
@@ -591,8 +575,6 @@ celda_CG <- function(counts,
 #'  the number of features in each module. Default 5.
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to
 #'  each feature in each module. Default 1.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls
-#'  to `set.seed()` are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, cell population
 #'  clusters `z`, feature module clusters `y`, sample assignments `sampleLabel`,
@@ -613,10 +595,7 @@ simulateCells.celda_CG <- function(model,
     beta = 1,
     gamma = 5,
     delta = 1,
-    seed = 12345,
     ...) {
-
-    .setSeed(seed)
 
     ## Number of cells per sample
     nC <- sample(seq(CRange[1], CRange[2]), size = S, replace = TRUE)
@@ -704,7 +683,6 @@ simulateCells.celda_CG <- function(model,
             beta = beta,
             delta = delta,
             gamma = gamma,
-            seed = seed,
             countChecksum = countChecksum),
         sampleLabel = cellSampleLabel,
         names = names
@@ -724,8 +702,7 @@ simulateCells.celda_CG <- function(model,
         alpha = alpha,
         beta = beta,
         gamma = gamma,
-        delta = delta,
-        seed = seed)
+        delta = delta)
     )
 }
 
@@ -753,6 +730,7 @@ simulateCells.celda_CG <- function(model,
 #'  `cell` element of `counts` and `proportions` elements.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' factorizedMatrices <- factorizeMatrix(celdaCGSim$counts,
 #'     celdaCGMod, "posterior")
 #' @export
@@ -933,6 +911,7 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_CG"),
 #' @return The log likelihood for the given cluster assignments
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim)
 #' loglik <- logLikelihood.celda_CG(celdaCGSim$counts,
 #'     sampleLabel = celdaCGSim$sampleLabel,
 #'     z = celdaCGSim$z,
@@ -1054,6 +1033,7 @@ logLikelihood.celda_CG <- function(counts,
 #'  cluster probabilities.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
 #' @export
 setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
@@ -1126,6 +1106,7 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
 #' @return Numeric. The perplexity for the provided count data and model.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
 #' @rawNamespace import(matrixStats, except = c(count))
 #' @export
@@ -1219,6 +1200,7 @@ setMethod("perplexity", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells and `celdaTsne()`
 #'  for generating 2-dimensional coordinates.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' celdaHeatmap(celdaCGSim$counts, celdaCGMod)
 #' @return A list containing dendrograms and the heatmap grob
 #' @export
@@ -1259,11 +1241,10 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_CG"),
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
-#' @param seed Integer. Passed to `set.seed()`. Default 12345. If NULL, no
-#'  calls to `set.seed()` are made.
 #' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()`
 #'  for displaying expression
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 #' @return A two column matrix of t-SNE coordinates
 #' @export
@@ -1275,8 +1256,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
         initialDims = 20,
         modules = NULL,
         perplexity = 20,
-        maxIter = 2500,
-        seed = 12345) {
+        maxIter = 2500) {
 
         preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
             celdaMod,
@@ -1288,7 +1268,6 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
             doPca = FALSE,
             perplexity = perplexity,
             maxIter = maxIter,
-            seed = seed,
             initialDims = initialDims)
         final <- matrix(NA, nrow = ncol(counts), ncol = 2)
         final[preparedCountInfo$cellIx, ] <- res
@@ -1320,6 +1299,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
 #' @seealso `celda_CG()` for clustering features and cells and `celdaHeatmap()`
 #'  for displaying expression.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 #' @return A two column matrix of umap coordinates
 #' @export
@@ -1429,6 +1409,7 @@ setMethod("celdaUmap",
 #'  of each cell population in each sample. Default 'cellPopulation'.
 #' @param ... Additional parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
 #' @return A grob containing the specified plots
 #' @import gridExtra
@@ -1542,6 +1523,7 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_CG"),
 #' @return List. Each element contains the module of the provided feature.
 #' @seealso `celda_CG()` for clustering features and cells
 #' @examples
+#' data(celdaCGSim, celdaCGMod)
 #' module <- featureModuleLookup(celdaCGSim$counts,
 #'     celdaCGMod,
 #'     c("Gene_1", "Gene_XXX"))

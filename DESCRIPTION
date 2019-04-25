@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 0.99.24
+Version: 0.99.32
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu", role = c("aut", "cre")),
              person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
 	     person("Yusuke", "Koga", email="ykoga07@bu.edu", role = c("aut")),
@@ -11,6 +11,7 @@ Depends:
     R (>= 3.6)
 VignetteBuilder: knitr
 Imports:
+    stats,
     plyr,
     foreach,
     ggplot2,
@@ -53,7 +54,7 @@ Suggests:
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 6.1.1
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian

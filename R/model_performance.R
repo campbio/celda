@@ -10,12 +10,11 @@
 #' @param celdaList Object of class 'celdaList'.
 #' @param resample Integer. The number of times to resample the counts matrix
 #'  for evaluating perplexity. Default 5.
-#' @param seed Parameter to set.seed() for random number generation. Default
-#'  12345.If NULL, no calls to `set.seed()` are made.
 #' @return celdaList. Returns the provided `celdaList` with a `perplexity`
 #'  property, detailing the perplexity of all K/L combinations that appeared in
 #'  the celdaList's models.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)
@@ -23,8 +22,7 @@
 #' @export
 resamplePerplexity <- function(counts,
     celdaList,
-    resample = 5,
-    seed = 12345) {
+    resample = 5) {
 
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
@@ -32,8 +30,6 @@ resamplePerplexity <- function(counts,
     if (!isTRUE(is.numeric(resample))) {
         stop("Provided resample parameter was not numeric.")
     }
-
-    .setSeed(seed)
 
     perpRes <- matrix(NA, nrow = length(celdaList@resList), ncol = resample)
     for (j in seq(resample)) {
@@ -61,6 +57,7 @@ resamplePerplexity <- function(counts,
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
@@ -82,6 +79,7 @@ plotGridSearchPerplexity <- function(celdaList, sep = 1) {
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes
@@ -153,6 +151,7 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'   parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes
@@ -202,6 +201,7 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'   parameters.
 #' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)

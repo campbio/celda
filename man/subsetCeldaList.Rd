@@ -23,6 +23,7 @@ Select a subset of models from a `celdaList` object generated
  by `celdaGridSearch()` that match the criteria in the argument `params`.
 }
 \examples{
+data(celdaCGGridSearchRes)
 resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(K = 5,
     L = 10))
 }

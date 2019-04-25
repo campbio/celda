@@ -33,6 +33,7 @@ Calculates the conditional probability of each cell belonging
  assignments in a `celda_CG()` result.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
 clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
 }
 \seealso{

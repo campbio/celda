@@ -25,6 +25,7 @@ Perplexity is a statistical measure of how well a probability
  model can predict new data. Lower perplexity indicates a better model.
 }
 \examples{
+data(celdaCSim, celdaCMod)
 perplexity <- perplexity(celdaCSim$counts, celdaCMod)
 }
 \seealso{

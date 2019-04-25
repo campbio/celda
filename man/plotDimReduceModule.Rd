@@ -56,6 +56,7 @@ Create a scatterplot for each row of a normalized
 }
 \examples{
 \donttest{
+data(celdaCGSim, celdaCGMod)
 celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
     celdaMod = celdaCGMod)
 plotDimReduceModule(
