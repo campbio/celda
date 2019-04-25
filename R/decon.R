@@ -536,7 +536,7 @@ addLogLikelihood <- function(llA, llB) {
         K = ceiling(sqrt( nC )) 
     }
 
-    globalZ = .initializeSplitZ(counts, K = K, KSubcluster = NULL, alpha = 1, beta = 1, minCell = 3, seed = seed) 
+    globalZ = .initializeSplitZ(counts, K = K, KSubcluster = NULL, alpha = 1, beta = 1, minCell = 3 ) 
     globalK = max( globalZ) 
 
     localZ = rep(NA, nC) 
@@ -545,7 +545,7 @@ addLogLikelihood <- function(llA, llB) {
             localCounts = counts[, globalZ == k ] 
             localK = min( K, ceiling( sqrt(ncol(localCounts))   )   )
             localZ[globalZ == k] = .initializeSplitZ( localCounts, K = localK, KSubcluster = NULL, 
-                alpha = 1, beta = 1, minCell = 3, seed = seed)
+                alpha = 1, beta = 1, minCell = 3)
         } else {
             localZ [globalZ == k] = 1L
         }
