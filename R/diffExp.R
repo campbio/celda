@@ -23,13 +23,19 @@
 #'  p-value, log2 fold change, and FDR.
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
-#' library(SummarizedExperiment)
 #' clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
 #'     celdaCGMod, c1 = c(1, 2))
 #' @export
-#' @import data.table plyr
-#' @rawNamespace import(MAST, except = c(combine))
-#' @rawNamespace import(SummarizedExperiment, except = c(shift, rowRanges))
+#' @rawNamespace import(data.table, except = c(melt, shift))
+#' @importFrom MAST FromMatrix
+#' @importFrom MAST zlm
+#' @importFrom MAST summary
+#' @importFrom S4Vectors mcols
+#' @importFrom SummarizedExperiment assay
+#' @importFrom SummarizedExperiment colData
+#' @importFrom SummarizedExperiment assayNames
+#' @importFrom plyr .
+#' @import SummarizedExperiment
 differentialExpression <- function(counts,
     celdaMod,
     c1,
@@ -51,18 +57,22 @@ differentialExpression <- function(counts,
     compareCountMatrix(counts, celdaMod)
 
     if (is.null(c2)) {
-        c2 <- sort(setdiff(unique(celdaMod@clusters$z), c1))
+        c2 <- sort(setdiff(unique(clusters(celdaMod)$z), c1))
     }
     if (length(c1) > 1) {
-        cells1 <- celdaMod@names$column[which(celdaMod@clusters$z %in% c1)]
+        cells1 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z %in% c1)]
     } else {
-        cells1 <- celdaMod@names$column[which(celdaMod@clusters$z == c1)]
+        cells1 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z == c1)]
     }
 
     if (length(c2) > 1) {
-        cells2 <- celdaMod@names$column[which(celdaMod@clusters$z %in% c2)]
+        cells2 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z %in% c2)]
     } else {
-        cells2 <- celdaMod@names$column[which(celdaMod@clusters$z == c2)]
+        cells2 <- matrixNames(celdaMod)$column[which(
+            clusters(celdaMod)$z == c2)]
     }
 
     mat <- counts[, c(cells1, cells2)]
@@ -73,6 +83,10 @@ differentialExpression <- function(counts,
         condition = c(rep("c1", length(cells1)), rep("c2", length(cells2))),
         ngeneson = rep("", (length(cells1) + length(cells2))),
         stringsAsFactors = FALSE)
+
+    # explicitly load library SummarizedExperiment due to MAST package
+    # dependency error
+    # requireNamespace(SummarizedExperiment)
 
     sca <- suppressMessages(MAST::FromMatrix(log_normalized_mat, cdat))
     cdr2 <- colSums(SummarizedExperiment::assay(sca) > 0)
@@ -106,7 +120,7 @@ differentialExpression <- function(counts,
     } else {
         fcHurdleSig <- merge(fcHurdle[fdr < fdrThreshold &
                 abs(coef) > log2fcThreshold],
-            data.table::as.data.table(GenomicRanges::mcols(sca)),
+            data.table::as.data.table(S4Vectors::mcols(sca)),
             by = "primerid")
         if (onlyPos) {
             fcHurdleSig <- fcHurdleSig[which(fcHurdleSig$log2fc > 0), ]

@@ -4,10 +4,10 @@
 \alias{runParams}
 \title{Get run parameters provided to `celdaGridSearch()`}
 \usage{
-runParams(celdaMod)
+runParams(celdaList)
 }
 \arguments{
-\item{celdaMod}{An object of class celdaList.}
+\item{celdaList}{An object of class celdaList.}
 }
 \value{
 Data Frame. Contains details on the various K/L parameters, chain
