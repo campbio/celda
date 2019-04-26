@@ -31,11 +31,11 @@ resamplePerplexity <- function(counts,
         stop("Provided resample parameter was not numeric.")
     }
 
-    perpRes <- matrix(NA, nrow = length(celdaList@resList), ncol = resample)
+    perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
-        for (i in seq(length(celdaList@resList))) {
-            perpRes[i, j] <- perplexity(counts, celdaList@resList[[i]],
+        for (i in seq(length(resList(celdaList)))) {
+            perpRes[i, j] <- perplexity(counts, resList(celdaList)[[i]],
                 newCounts)
         }
     }
@@ -65,8 +65,8 @@ resamplePerplexity <- function(counts,
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
 plotGridSearchPerplexity <- function(celdaList, sep = 1) {
-    do.call(paste0("plotGridSearchPerplexity.",
-        as.character(class(celdaList@resList[[1]]))),
+    do.call(paste0("plotGridSearchPerplexity",
+        as.character(class(resList(celdaList)[[1]]))),
         args = list(celdaList, sep))
 }
 
@@ -86,20 +86,21 @@ plotGridSearchPerplexity <- function(celdaList, sep = 1) {
 #' )
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
-    if (!all(c("K", "L") %in% colnames(celdaList@runParams))) {
-        stop("celdaList@runParams needs K and L columns.")
+plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
+    if (!all(c("K", "L") %in% colnames(runParams(celdaList)))) {
+        stop("runParams(celdaList) needs K and L columns.")
     }
-    if (is.null(celdaList@perplexity)) {
+    if (is.null(celdaPerplexity(celdaList))) {
         stop("No perplexity measurements available. First run",
             " 'resamplePerplexity' with celdaList object.")
     }
 
-    ix1 <- rep(seq(nrow(celdaList@perplexity)),
-        each = ncol(celdaList@perplexity))
-    ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
-    df <- data.frame(celdaList@runParams[ix1, ],
-        perplexity = celdaList@perplexity[cbind(ix1, ix2)])
+    ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
+        each = ncol(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
+    df <- data.frame(runParams(celdaList)[ix1, ],
+        perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
     df$L <- as.factor(df$L)
 
@@ -120,7 +121,8 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
             ggplot2::ylab("Perplexity") +
             ggplot2::xlab("K") +
             ggplot2::scale_x_discrete(breaks = seq(
-                min(celdaList@runParams$K), max(celdaList@runParams$K), sep)) +
+                min(runParams(celdaList)$K),
+                max(runParams(celdaList)$K), sep)) +
             ggplot2::theme_bw()
     } else {
         plot <-
@@ -134,8 +136,8 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
                     color = "K")) +
             ggplot2::ylab("Perplexity") +
             ggplot2::xlab("L") +
-            ggplot2::scale_x_discrete(breaks = seq(min(celdaList@runParams$L),
-                max(celdaList@runParams$L), sep)) +
+            ggplot2::scale_x_discrete(breaks = seq(min(runParams(celdaList)$L),
+                max(runParams(celdaList)$L), sep)) +
             ggplot2::theme_bw()
     }
 
@@ -158,20 +160,21 @@ plotGridSearchPerplexity.celda_CG <- function(celdaList, sep) {
 #' )
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
-    if (!all(c("K") %in% colnames(celdaList@runParams))) {
+plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
+    if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
     }
-    if (is.null(celdaList@perplexity)) {
+    if (is.null(celdaPerplexity(celdaList))) {
         stop("No perplexity measurements available. First run",
             " 'resamplePerplexity' with celdaList object.")
     }
 
-    ix1 <- rep(seq(nrow(celdaList@perplexity)),
-        each = ncol(celdaList@perplexity))
-    ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
-    df <- data.frame(celdaList@runParams[ix1, ],
-        perplexity = celdaList@perplexity[cbind(ix1, ix2)])
+    ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
+        each = ncol(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
+    df <- data.frame(runParams(celdaList)[ix1, ],
+        perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
 
     meansByK <- stats::aggregate(df$perplexity, by = list(df$K), FUN = mean)
@@ -185,8 +188,8 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
             ggplot2::aes_string(x = "K", y = "mean_perplexity", group = 1)) +
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("K") +
-        ggplot2::scale_x_discrete(breaks = seq(min(celdaList@runParams$K),
-            max(celdaList@runParams$K), sep)) +
+        ggplot2::scale_x_discrete(breaks = seq(min(runParams(celdaList)$K),
+            max(runParams(celdaList)$K), sep)) +
         ggplot2::theme_bw()
 
     return(plot)
@@ -207,20 +210,21 @@ plotGridSearchPerplexity.celda_C <- function(celdaList, sep) {
 #'   celdaCGGridSearchRes)
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
-    if (!all(c("L") %in% colnames(celdaList@runParams))) {
-        stop("celdaList@runParams needs the column L.")
+plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
+    if (!all(c("L") %in% colnames(runParams(celdaList)))) {
+        stop("runParams(celdaList) needs the column L.")
     }
-    if (length(celdaList@perplexity) == 0) {
+    if (length(celdaPerplexity(celdaList)) == 0) {
         stop("No perplexity measurements available. First run",
             " 'resamplePerplexity' with celdaList object.")
     }
 
-    ix1 <- rep(seq(nrow(celdaList@perplexity)),
-        each = ncol(celdaList@perplexity))
-    ix2 <- rep(seq(ncol(celdaList@perplexity)), nrow(celdaList@perplexity))
-    df <- data.frame(celdaList@runParams[ix1, ],
-        perplexity = celdaList@perplexity[cbind(ix1, ix2)])
+    ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
+        each = ncol(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
+    df <- data.frame(runParams(celdaList)[ix1, ],
+        perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$L <- as.factor(df$L)
 
 
@@ -235,8 +239,8 @@ plotGridSearchPerplexity.celda_G <- function(celdaList, sep) {
             ggplot2::aes_string(x = "L", y = "mean_perplexity", group = 1)) +
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("L") +
-        ggplot2::scale_x_discrete(breaks = seq(min(celdaList@runParams$L),
-            max(celdaList@runParams$L), sep)) +
+        ggplot2::scale_x_discrete(breaks = seq(min(runParams(celdaList)$L),
+            max(runParams(celdaList)$L), sep)) +
         ggplot2::theme_bw()
 
     return(plot)

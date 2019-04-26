@@ -1,8 +1,3 @@
-#' @title available models
-#' @export
-availableModels <- c("celda_C", "celda_G", "celda_CG")
-
-
 #' @title Run Celda in parallel with multiple parameters
 #' @description Run Celda with different combinations of parameters and
 #'  multiple chains in parallel. The variable `availableModels` contains the
@@ -41,9 +36,13 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #'  cells, and `celda_CG()` for simultaneous clustering of features and cells.
 #'  `subsetCeldaList()` can subset the `celdaList` object. `selectBestModel()`
 #'  can get the best model for each combination of parameters.
+#' @import foreach
+#' @importFrom doParallel registerDoParallel
+#' @importFrom methods is
 #' @examples
+#' \donttest{
 #' data(celdaCGSim)
-#' ## Run various combinations of parameters with 'celdaGridSearch'
+#' #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
 #'     model = "celda_CG",
 #'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
@@ -51,7 +50,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #'     bestOnly = TRUE,
 #'     nchains = 1,
 #'     cores = 2)
-#' @import foreach
+#' }
 #' @export
 celdaGridSearch <- function(counts,
     model,
@@ -181,7 +180,7 @@ celdaGridSearch <- function(counts,
     parallel::stopCluster(cl)
 
     logliks <- vapply(resList, function(mod) {
-        mod@finalLogLik
+        bestLogLikelihood(mod)
     }, double(1))
     runParams <- cbind(runParams, logLikelihood = logliks)
 
@@ -253,15 +252,15 @@ subsetCeldaList <- function(celdaList, params) {
     }
 
     ## Check for bad parameter names
-    if (!all(names(params) %in% colnames(celdaList@runParams))) {
-        badParams <- setdiff(names(params), colnames(celdaList@runParams))
+    if (!all(names(params) %in% colnames(runParams(celdaList)))) {
+        badParams <- setdiff(names(params), colnames(runParams(celdaList)))
         stop("The following elements in 'params' are not columns in runParams",
             " (celdaList) ",
             paste(badParams, collapse = ","))
     }
 
     ## Subset 'runParams' based on items in 'params'
-    newRunParams <- celdaList@runParams
+    newRunParams <- runParams(celdaList)
     for (i in names(params)) {
         newRunParams <-
             subset(newRunParams, newRunParams[, i] %in% params[[i]])
@@ -274,12 +273,12 @@ subsetCeldaList <- function(celdaList, params) {
     }
 
     ## Get index of selected models, subset celdaList, and return
-    ix <- match(newRunParams$index, celdaList@runParams$index)
+    ix <- match(newRunParams$index, runParams(celdaList)$index)
     if (length(ix) == 1) {
-        return(celdaList@resList[[ix]])
+        return(resList(celdaList)[[ix]])
     } else {
         celdaList@runParams <- as.data.frame(newRunParams)
-        celdaList@resList <- celdaList@resList[ix]
+        celdaList@resList <- resList(celdaList)[ix]
         return(celdaList)
     }
 }
@@ -301,26 +300,26 @@ subsetCeldaList <- function(celdaList, params) {
 #' data(celdaCGGridSearchRes)
 #' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 #' cgsBest <- selectBestModel(celdaCGGridSearchRes)
-#' @import data.table
+#' @importFrom data.table as.data.table
 #' @export
 selectBestModel <- function(celdaList) {
     if (!methods::is(celdaList, "celdaList"))
         stop("celdaList parameter was not of class celdaList.")
 
     logLikelihood <- NULL
-    group <- setdiff(colnames(celdaList@runParams),
+    group <- setdiff(colnames(runParams(celdaList)),
         c("index", "chain", "logLikelihood", "mean_perplexity"))
-    dt <- data.table::as.data.table(celdaList@runParams)
+    dt <- data.table::as.data.table(runParams(celdaList))
     newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
         by = group])
-    newRunParams <- newRunParams[, colnames(celdaList@runParams)]
+    newRunParams <- newRunParams[, colnames(runParams(celdaList))]
 
-    ix <- match(newRunParams$index, celdaList@runParams$index)
+    ix <- match(newRunParams$index, runParams(celdaList)$index)
     if (nrow(newRunParams) == 1) {
-        return(celdaList@resList[[ix]])
+        return(resList(celdaList)[[ix]])
     } else {
         celdaList@runParams <- as.data.frame(newRunParams)
-        celdaList@resList <- celdaList@resList[ix]
+        celdaList@resList <- resList(celdaList)[ix]
         return(celdaList)
     }
 }
@@ -329,6 +328,8 @@ selectBestModel <- function(celdaList) {
 #' @title Celda models
 #' @description List of available Celda models with correpsonding descriptions.
 #' @export
+#' @examples
+#' celda()
 #' @return None
 celda <- function() {
     message("celda_C: Clusters the columns of a count matrix containing",
