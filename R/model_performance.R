@@ -31,7 +31,7 @@ resamplePerplexity <- function(counts,
         stop("Provided resample parameter was not numeric.")
     }
 
-    perpRes <- matrix(NA, nrow = length(resList (celdaList)), ncol = resample)
+    perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
         for (i in seq(length(resList(celdaList)))) {
