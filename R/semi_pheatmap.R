@@ -1,7 +1,7 @@
 # Adapted originally from the very excellent pheatmap package
 # (https://cran.r-project.org/web/packages/pheatmap/index.html)
 
-
+#' @importFrom gtable gtable
 .lo <- function(rown,
     coln,
     nrow,
@@ -184,7 +184,7 @@
     }
 
     # Produce gtable
-    gt <- gtable(widths = unit.c(treeHeightRow,
+    gt <- gtable::gtable(widths = unit.c(treeHeightRow,
             annotRowWidth,
             matWidth,
             rownWidth,
@@ -552,7 +552,7 @@
                 width = 2 * textHeight,
                 gp = gpar(col = borderColor, fill = NA))
 
-            txt <- rev(range(grid.pretty(range(annotation[[i]],
+            txt <- rev(range(grid::grid.pretty(range(annotation[[i]],
                 na.rm = TRUE))))
 
             yy <- y - c(1, 7) * textHeight
@@ -582,6 +582,10 @@ vplayout <- function(x, y) {
     return(viewport(layout.pos.row = x, layout.pos.col = y))
 }
 
+#' @importFrom gtable gtable_height
+#' @importFrom gtable gtable_width
+#' @importFrom gtable gtable_add_grob
+#' @import grDevices
 .heatmapMotor <- function(matrix,
         borderColor,
         cellWidth,
@@ -643,12 +647,12 @@ vplayout <- function(x, y) {
 
         if (!is.na(fileName)) {
             if (is.na(height)) {
-                height <- convertHeight(gtable_height(res),
+                height <- convertHeight(gtable::gtable_height(res),
                     "inches",
                     valueOnly = TRUE)
             }
             if (is.na(width)) {
-                width <- convertWidth(gtable_width(res),
+                width <- convertWidth(gtable::gtable_width(res),
                     "inches",
                     valueOnly = TRUE)
             }
@@ -758,7 +762,7 @@ vplayout <- function(x, y) {
         # Draw title
         if (!is.na(main)) {
             elem <- .drawMain(main, fontSize = 1.3 * fontSize, ...)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 1,
                 l = 3,
@@ -769,7 +773,7 @@ vplayout <- function(x, y) {
         # Draw tree for the columns
         if (!.is.na2(treeCol) & treeHeightCol != 0) {
             elem <- .drawDendrogram(treeCol, gapsCol, horizontal = TRUE)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 2,
                 l = 3,
@@ -779,7 +783,7 @@ vplayout <- function(x, y) {
         # Draw tree for the rows
         if (!.is.na2(treeRow) & treeHeightRow != 0) {
             elem <- .drawDendrogram(treeRow, gapsRow, horizontal = FALSE)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 4,
                 l = 1,
@@ -795,7 +799,7 @@ vplayout <- function(x, y) {
             fontSizeNumber,
             numberColor)
 
-        res <- gtable_add_grob(res,
+        res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 4,
                 l = 3,
@@ -809,7 +813,7 @@ vplayout <- function(x, y) {
                 fontSize = fontSizeCol,
                 ...)
             elem <- do.call(.drawColnames, pars)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 5,
                 l = 3,
@@ -823,7 +827,7 @@ vplayout <- function(x, y) {
                 gaps = gapsRow,
                 fontSize = fontSizeRow, ...)
             elem <- do.call(.drawRownames, pars)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 4,
                 l = 4,
@@ -841,7 +845,7 @@ vplayout <- function(x, y) {
                 gapsCol,
                 fontSize,
                 horizontal = TRUE)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 3,
                 l = 3,
@@ -853,7 +857,7 @@ vplayout <- function(x, y) {
                 elem <- .drawAnnotationNames(annotationCol,
                     fontSize,
                     horizontal = TRUE)
-                res <- gtable_add_grob(res,
+                res <- gtable::gtable_add_grob(res,
                     elem,
                     t = 3,
                     l = 4,
@@ -872,7 +876,7 @@ vplayout <- function(x, y) {
                 gapsRow,
                 fontSize,
                 horizontal = FALSE)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = 4,
                 l = 2,
@@ -884,7 +888,7 @@ vplayout <- function(x, y) {
                 elem <- .drawAnnotationNames(annotationRow,
                     fontSize,
                     horizontal = FALSE)
-                res <- gtable_add_grob(res,
+                res <- gtable::gtable_add_grob(res,
                     elem,
                     t = 5,
                     l = 2,
@@ -907,7 +911,7 @@ vplayout <- function(x, y) {
                 ...)
 
             t <- ifelse(is.null(labelsRow), 4, 3)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                 elem,
                 t = t,
                 l = 6,
@@ -921,7 +925,7 @@ vplayout <- function(x, y) {
             elem <- .drawLegend(color, breaks, legend, fontSize = fontSize, ...)
 
             t <- ifelse(is.null(labelsRow), 4, 3)
-            res <- gtable_add_grob(res,
+            res <- gtable::gtable_add_grob(res,
                     elem,
                     t = t,
                     l = 5,
@@ -963,6 +967,7 @@ vplayout <- function(x, y) {
 }
 
 ## changed the original clusterMat() in the pheatmap.r
+#' @importFrom scales hue_pal
 .clusterMat <- function(mat, labels, distance, method) {
     # this funciton is going to change the .clusterMat() in pheatmap
 
@@ -1213,6 +1218,8 @@ vplayout <- function(x, y) {
     return(mat)
 }
 
+#' @importFrom scales dscale
+#' @importFrom scales brewer_pal
 .generateAnnotationColours <- function(annotation,
     annotationColors,
     drop) {
@@ -1233,7 +1240,8 @@ vplayout <- function(x, y) {
             }
         }
 
-        factorColors <- scales::dscale(factor(seq(1, count)), hue_pal(l = 75))
+        factorColors <- scales::dscale(factor(seq(1, count)),
+            scales::hue_pal(l = 75))
 
         contCounter <- 2
         for (i in seq(length(annotation))) {
@@ -1259,7 +1267,7 @@ vplayout <- function(x, y) {
                     factorColors <- factorColors[-ind]
                 } else {
                     annotationColors[[names(annotation)[i]]] <-
-                        brewer_pal("seq", contCounter)(5)[seq(4)]
+                        scales::brewer_pal("seq", contCounter)(5)[seq(4)]
                     contCounter <- contCounter + 1
                 }
             }
@@ -1493,16 +1501,8 @@ vplayout <- function(x, y) {
 #' }
 #'
 #' pheatmap(test, clusteringCallback = callback)
-#'
-#' dontrun{
-#' # Same using dendsort package
-#' library(dendsort)
-#'
-#' callback = function(hc, ...){dendsort(hc)}
-#' pheatmap(test, clusteringCallback = callback)
-#' }
-#'
-#' @export
+#' @importFrom grid grid.pretty
+#' @importFrom RColorBrewer brewer.pal
 semiPheatmap <- function(mat,
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
     kmeansK = NA,
@@ -1697,7 +1697,7 @@ semiPheatmap <- function(mat,
         breaks <- .generateBreaks(as.vector(mat), length(color))
     }
     if (legend & .is.na2(legendBreaks)) {
-        legend <- grid.pretty(range(as.vector(breaks)))
+        legend <- grid::grid.pretty(range(as.vector(breaks)))
         names(legend) <- legend
     }
     else if (legend & !.is.na2(legendBreaks)) {

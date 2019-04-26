@@ -25,8 +25,4 @@ Creates a table that contains the list of features in
 \examples{
 data(celdaCGSim, celdaCGMod)
 featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
-\donttest{
-featureModuleTable(celdaCGSim$counts, celdaCGMod,
- outputFile = "Celda_Output.txt")
-}
 }
