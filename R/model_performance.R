@@ -97,7 +97,8 @@ plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
         each = ncol(celdaPerplexity(celdaList)))
-    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))), nrow(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
     df <- data.frame(runParams(celdaList)[ix1, ],
         perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
@@ -120,7 +121,8 @@ plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
             ggplot2::ylab("Perplexity") +
             ggplot2::xlab("K") +
             ggplot2::scale_x_discrete(breaks = seq(
-                min(runParams(celdaList)$K), max(runParams(celdaList)$K), sep)) +
+                min(runParams(celdaList)$K),
+                max(runParams(celdaList)$K), sep)) +
             ggplot2::theme_bw()
     } else {
         plot <-
@@ -169,7 +171,8 @@ plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
         each = ncol(celdaPerplexity(celdaList)))
-    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))), nrow(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
     df <- data.frame(runParams(celdaList)[ix1, ],
         perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
@@ -218,7 +221,8 @@ plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
         each = ncol(celdaPerplexity(celdaList)))
-    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))), nrow(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
     df <- data.frame(runParams(celdaList)[ix1, ],
         perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$L <- as.factor(df$L)
