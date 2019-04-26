@@ -1425,8 +1425,10 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_CG"),
 
         level <- match.arg(level)
         factorized <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
-        zInclude <- which(tabulate(clusters(celdaMod)$z, params(celdaMod)$K) > 0)
-        yInclude <- which(tabulate(clusters(celdaMod)$y, params(celdaMod)$L) > 0)
+        zInclude <- which(tabulate(clusters(celdaMod)$z,
+            params(celdaMod)$K) > 0)
+        yInclude <- which(tabulate(clusters(celdaMod)$y,
+            params(celdaMod)$L) > 0)
 
         if (level == "cellPopulation") {
             pop <- factorized$proportions$cellPopulation[yInclude,

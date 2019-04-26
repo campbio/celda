@@ -1139,7 +1139,8 @@ setMethod("celdaProbabilityMap", signature(celdaMod = "celda_C"),
         counts <- .processCounts(counts)
         compareCountMatrix(counts, celdaMod)
 
-        zInclude <- which(tabulate(clusters(celdaMod)$z, params(celdaMod)$K) > 0)
+        zInclude <- which(tabulate(clusters(celdaMod)$z,
+            params(celdaMod)$K) > 0)
 
         level <- match.arg(level)
         factorized <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
