@@ -123,22 +123,22 @@ normalizeCounts <- function(counts,
 #' @param from Numeric vector. Unique values in the range of seq(K) that
 #'  correspond to the original cluster labels in `celdaMod`.
 #' @param to Numeric vector. Unique values in the range of seq(K) that
-#' correspond to the new cluster labels.
+#'  correspond to the new cluster labels.
 #' @return Celda object with cell subpopulation clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
 #' data(celdaCGMod)
 #' celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+#' @importFrom plyr mapvalues
 #' @export
 recodeClusterZ <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@clusters$z)) {
+    if (is.null(clusters(celdaMod)$z)) {
         stop("Provided celdaMod argument does not have a z attribute")
     }
-    celdaMod@clusters$z <-
-        plyr::mapvalues(celdaMod@clusters$z, from, to)
+    celdaMod@clusters$z <- plyr::mapvalues(clusters(celdaMod)$z, from, to)
     return(celdaMod)
 }
 
@@ -150,7 +150,7 @@ recodeClusterZ <- function(celdaMod, from, to) {
 #' @param from Numeric vector. Unique values in the range of seq(L) that
 #'  correspond to the original cluster labels in `celdaMod`.
 #' @param to Numeric vector. Unique values in the range of seq(L) that
-#' correspond to the new cluster labels.
+#'  correspond to the new cluster labels.
 #' @return Celda object with recoded feature module clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
@@ -161,11 +161,10 @@ recodeClusterY <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@clusters$y)) {
+    if (is.null(clusters(celdaMod)$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    celdaMod@clusters$y <-
-        plyr::mapvalues(celdaMod@clusters$y, from, to)
+    celdaMod@clusters$y <- plyr::mapvalues(clusters(celdaMod)$y, from, to)
     return(celdaMod)
 }
 
@@ -188,22 +187,22 @@ compareCountMatrix <- function(counts,
     celdaMod,
     errorOnMismatch = TRUE) {
 
-    if ("y" %in% names(celdaMod@clusters)) {
-        if (nrow(counts) != length(celdaMod@clusters$y)) {
+    if ("y" %in% names(clusters(celdaMod))) {
+        if (nrow(counts) != length(clusters(celdaMod)$y)) {
             stop("The provided celda object was generated from a counts",
                 " matrix with a different number of features than the one",
                 " provided.")
         }
     }
 
-    if ("z" %in% names(celdaMod@clusters)) {
-        if (ncol(counts) != length(celdaMod@clusters$z)) {
+    if ("z" %in% names(clusters(celdaMod))) {
+        if (ncol(counts) != length(clusters(celdaMod)$z)) {
             stop("The provided celda object was generated from a counts",
                 " matrix with a different number of cells than the one",
                 " provided.")
         }
     }
-    celdaChecksum <- celdaMod@params$countChecksum
+    celdaChecksum <- params(celdaMod)$countChecksum
     counts <- .processCounts(counts)
     # Checksums are generated in celdaGridSearch and model after processing
     count.md5 <- .createCountChecksum(counts)
@@ -254,6 +253,9 @@ compareCountMatrix <- function(counts,
 #' @return A vector of distinct colors that have been converted to HEX from HSV.
 #' @examples
 #' colorPal <- distinctColors(6) # can be used in plotting functions
+#' @importFrom grDevices colors
+#' @importFrom grDevices rgb2hsv
+#' @importFrom grDevices hsv
 #' @export
 distinctColors <- function(n,
     hues = c("red",
@@ -320,6 +322,7 @@ distinctColors <- function(n,
 
 # Wrapper function, creates checksum for matrix.
 # Feature names, cell names are not taken into account.
+#' @importFrom digest digest
 .createCountChecksum <- function(counts) {
     rownames(counts) <- NULL
     colnames(counts) <- NULL
@@ -378,10 +381,7 @@ distinctColors <- function(n,
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
-#' \donttest{
-#' featureModuleTable(celdaCGSim$counts, celdaCGMod,
-#'  outputFile = "Celda_Output.txt")
-#' }
+#' @importFrom stringi stri_list2matrix
 #' @export
 featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
     factorize.matrix <- factorizeMatrix(counts, celdaMod)
@@ -425,6 +425,9 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
 #' data(celdaCGSim, celdaCGMod)
 #' violinPlot(counts = celdaCGSim$counts,
 #'     celdaMod = celdaCGMod, features = "Gene_1")
+#' @import ggplot2
+#' @importFrom grid unit
+#' @importFrom reshape2 melt
 #' @export
 violinPlot <- function(counts,
     celdaMod,

@@ -73,12 +73,8 @@
 #' plotHeatmap(celdaCGSim$counts,
 #'     z = clusters(celdaCGMod)$z, y = clusters(celdaCGMod)$y)
 #' @return list A list containing dendrogram information and the heatmap grob
-#' @import gtable
-#' @import grid
-#' @import scales
-#' @import RColorBrewer
-#' @import grDevices
 #' @import graphics
+#' @import grid
 #' @export
 plotHeatmap <- function(counts,
     z = NULL,
