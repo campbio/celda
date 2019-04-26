@@ -122,8 +122,8 @@ normalizeCounts <- function(counts,
 #' @param celdaMod Celda object of class `celda_C` or `celda_CG`.
 #' @param from Numeric vector. Unique values in the range of seq(K) that
 #'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of seq(K) that correspond
-#'  to the new cluster labels.
+#' @param to Numeric vector. Unique values in the range of seq(K) that
+#' correspond to the new cluster labels.
 #' @return Celda object with cell subpopulation clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
@@ -149,8 +149,8 @@ recodeClusterZ <- function(celdaMod, from, to) {
 #' @param celdaMod Celda object of class `celda_G` or `celda_CG`.
 #' @param from Numeric vector. Unique values in the range of seq(L) that
 #'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of seq(L) that correspond
-#'  to the new cluster labels.
+#' @param to Numeric vector. Unique values in the range of seq(L) that
+#' correspond to the new cluster labels.
 #' @return Celda object with recoded feature module clusters, with class
 #'  corresponding to that of `celdaMod`.
 #' @examples
