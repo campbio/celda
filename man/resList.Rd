@@ -4,10 +4,10 @@
 \alias{resList}
 \title{Get final celdaModels from a celdaList}
 \usage{
-resList(celdaMod)
+resList(celdaList)
 }
 \arguments{
-\item{celdaMod}{An object of class celdaList.}
+\item{celdaList}{An object of class celdaList.}
 }
 \value{
 List. Contains one celdaModel object for each of the parameters

@@ -34,8 +34,7 @@
     ix <- var > var[elbow]
     perplexitySde <- .secondDerivativeEstimate(perplexity)
     perplexitySdeSd <- stats::sd(perplexitySde[ix], na.rm = TRUE)
-    perplexitySdeMean <-
-        stats::mean(perplexitySde[ix], na.rm = TRUE)
+    perplexitySdeMean <- mean(perplexitySde[ix], na.rm = TRUE)
     perplexitySdePval <-
         stats::pnorm(perplexitySde,
             mean = perplexitySdeMean,

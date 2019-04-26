@@ -36,8 +36,12 @@ This function updates decontamination on dataset with multiple
 }
 \examples{
 data(contaminationSim)
-deconC <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
- z = contaminationSim$z, maxIter = 3)
-deconBg <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
- maxIter = 3)
+deconC <- decontX(
+  counts = contaminationSim$rmat + contaminationSim$cmat,
+  z = contaminationSim$z, maxIter = 3
+)
+deconBg <- decontX(
+  counts = contaminationSim$rmat + contaminationSim$cmat,
+  maxIter = 3
+)
 }

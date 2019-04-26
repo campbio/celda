@@ -134,6 +134,7 @@ simulateContaminatedMatrix <- function(C = 300,
 #  eta Numeric matrix. Rows represent features and columns represent cell
 # populations
 #  theta Numeric vector. Proportion of truely expressed transctripts
+#' @importFrom MCMCprecision fit_dirichlet
 .cDCalcEMDecontamination <- function(counts,
     phi,
     eta,
@@ -594,6 +595,7 @@ decontX <- function(counts,
 
 
 ## Make sure provided cell labels are the right type
+#' @importFrom plyr mapvalues
 .processCellLabels <- function(z, numCells) {
     if (length(z) != numCells) {
         stop("'z' must be of the same length as the number of cells in the",
