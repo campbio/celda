@@ -12,8 +12,8 @@ recodeClusterZ(celdaMod, from, to)
 \item{from}{Numeric vector. Unique values in the range of seq(K) that
 correspond to the original cluster labels in `celdaMod`.}
 
-\item{to}{Numeric vector. Unique values in the range of seq(K) that correspond
-to the new cluster labels.}
+\item{to}{Numeric vector. Unique values in the range of seq(K) that
+correspond to the new cluster labels.}
 }
 \value{
 Celda object with cell subpopulation clusters, with class

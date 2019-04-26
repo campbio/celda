@@ -12,3 +12,6 @@ None
 \description{
 List of available Celda models with correpsonding descriptions.
 }
+\examples{
+celda()
+}

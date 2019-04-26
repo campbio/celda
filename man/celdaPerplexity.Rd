@@ -4,11 +4,10 @@
 \alias{celdaPerplexity}
 \title{Get perplexity for every model in a celdaList}
 \usage{
-celdaPerplexity(celdaMod)
+celdaPerplexity(celdaList)
 }
 \arguments{
-\item{celdaMod}{A celdaModel object of class "celda_C", "celda_G", or
-"celda_CG".}
+\item{celdaList}{An object of class celdaList.}
 }
 \value{
 List. Contains one celdaModel object for each of the parameters
