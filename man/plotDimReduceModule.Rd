@@ -55,3 +55,14 @@ Create a scatterplot for each row of a normalized
  dimensionality reduction tool.
  The cells are colored by the module probability(s).
 }
+\examples{
+\donttest{
+data(celdaCGSim, celdaCGMod)
+celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
+    celdaMod = celdaCGMod)
+plotDimReduceModule(
+    dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
+    counts = celdaCGSim$counts, celdaMod = celdaCGMod,
+    modules = c("1", "2"))
+}
+}
