@@ -4,11 +4,15 @@
 \alias{selectBestModel}
 \title{Select best chain within each combination of parameters}
 \usage{
-selectBestModel(celdaList)
+selectBestModel(celdaList, asList = FALSE)
 }
 \arguments{
 \item{celdaList}{Object of class `celdaList`. An object containing celda
 models returned from `celdaGridSearch()`.}
+
+\item{asList}{`TRUE` or `FALSE`. Whether to return the best model as a
+`celdaList` object or not. If `FALSE`, return the best model as a
+corresponding `celda_C`, `celda_G` or `celda_CG` object.}
 }
 \value{
 A new `celdaList` object containing one model with the best log
