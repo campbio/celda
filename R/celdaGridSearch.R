@@ -192,7 +192,7 @@ celdaGridSearch <- function(counts,
     )
 
     if (isTRUE(bestOnly)) {
-        celdaRes <- selectBestModel(celdaRes)
+        celdaRes <- selectBestModel(celdaRes, asList = TRUE)
     }
 
     if (isTRUE(perplexity)) {
@@ -290,6 +290,9 @@ subsetCeldaList <- function(celdaList, params) {
 #'  `celdaGridSearch()`.
 #' @param celdaList Object of class `celdaList`. An object containing celda
 #'  models returned from `celdaGridSearch()`.
+#' @param asList `TRUE` or `FALSE`. Whether to return the best model as a
+#'  `celdaList` object or not. If `FALSE`, return the best model as a
+#'  corresponding `celda_C`, `celda_G` or `celda_CG` object.
 #' @return A new `celdaList` object containing one model with the best log
 #'  likelihood for each set of parameters. If only one set of parameters is in
 #'  the `celdaList`, the best model will be returned directly instead of a
@@ -302,7 +305,7 @@ subsetCeldaList <- function(celdaList, params) {
 #' cgsBest <- selectBestModel(celdaCGGridSearchRes)
 #' @importFrom data.table as.data.table
 #' @export
-selectBestModel <- function(celdaList) {
+selectBestModel <- function(celdaList, asList = FALSE) {
     if (!methods::is(celdaList, "celdaList"))
         stop("celdaList parameter was not of class celdaList.")
 
@@ -315,7 +318,7 @@ selectBestModel <- function(celdaList) {
     newRunParams <- newRunParams[, colnames(runParams(celdaList))]
 
     ix <- match(newRunParams$index, runParams(celdaList)$index)
-    if (nrow(newRunParams) == 1) {
+    if (nrow(newRunParams) == 1 & !asList) {
         return(resList(celdaList)[[ix]])
     } else {
         celdaList@runParams <- as.data.frame(newRunParams)
