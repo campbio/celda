@@ -13,19 +13,27 @@
 
 ## Installation Instructions
 
-To install the most recent release of celda (R >= 3.6) via devtools:
+To install the latest stable release of **celda** from [Bioconductor](http://bioconductor.org/packages/celda/) (requires R version >= 3.6):
+
+```
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("celda")
+```
+
+To install the development version (R >= 3.6) of **celda** from GitHub using `devtools`:
 ```
 library(devtools)
 install_github("campbio/celda")
 ```
 
-For R3.5 users, please install from the R_3_5 branch. This version of celda is identical to the most recent release of celda except it also works on R3.5.
+For `R-3.5` users, please install from the `R_3_5` branch. This version of **celda** is identical to the most recent release of **celda** (`master` branch) except it also works on `R-3.5`.
 ```
 library(devtools)
 install_github("campbio/celda@R_3_5")
 ```
 
-There has recently been a major update to variable/function names in the celda package. For backward compatibility with results (`celda_CG` and `celda_list` objects) generated from older versions of celda, please install from the mirror branch `20190409_master` which is the release before package reformatting:
+There has recently been a major update to variable/function names in the **celda** package. For backward compatibility with results (`celda_CG` and `celda_list` objects) generated from older versions of **celda**, please install from the mirror branch `20190409_master` which is the release before package reformatting:
 ```
 library(devtools)
 install_github("campbio/celda@20190409_master")
@@ -35,16 +43,16 @@ install_github("campbio/celda@20190409_master")
 ```
 brew install libgit2
 ```
-**NOTE** If you are trying to install celda using Rstudio and get this error: "could not find tools necessary to compile a package", you can try this:
+**NOTE** If you are trying to install **celda** using Rstudio and get this error: `could not find tools necessary to compile a package`, you can try this:
 ```
 options(buildtools.check = function(action) TRUE)
 ```
 
 ## Examples and vignettes
 
-Uncompiled vignettes are available in the package. 
+The vignette in HTML format is available on Bioconductor [here](http://bioconductor.org/packages/release/bioc/vignettes/celda/inst/doc/celda-analysis.html).
 
-Examples of doing single-cell RNA-seq data analysis using celda and DecontX is available in files vignettes/celda-analysis.Rmd and vignettes/DecontX-analysis.Rmd.
+Example vignette of doing single-cell RNA-seq data decontamination using DecontX is available [here](http://bioconductor.org/packages/release/bioc/vignettes/celda/inst/doc/DecontX-analysis.html).
 
 ## For developers
 Check out our [Wiki](https://github.com/campbio/celda/wiki) for [coding style guide](https://github.com/campbio/celda/wiki/Celda-Development-Coding-Style-Guide) if you want to contribute!
