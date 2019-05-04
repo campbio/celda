@@ -50,7 +50,7 @@ options(buildtools.check = function(action) TRUE)
 
 ## Examples and vignettes
 
-The vignette in HTML format is available on Bioconductor [here](http://bioconductor.org/packages/release/bioc/vignettes/celda/inst/doc/celda-analysis.html).
+The vignette in HTML format showing how to use **celda** is available on Bioconductor [here](http://bioconductor.org/packages/release/bioc/vignettes/celda/inst/doc/celda-analysis.html).
 
 Example vignette of doing single-cell RNA-seq data decontamination using DecontX is available [here](http://bioconductor.org/packages/release/bioc/vignettes/celda/inst/doc/DecontX-analysis.html).
 
