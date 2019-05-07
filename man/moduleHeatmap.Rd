@@ -5,7 +5,7 @@
 \title{Heatmap for featureModules}
 \usage{
 moduleHeatmap(counts, celdaMod, featureModule = 1, topCells = 100,
-  topFeatures = NULL, normalize = TRUE, scaleRow = scale,
+  topFeatures = NULL, normalizedCounts = NA, scaleRow = scale,
   showFeaturenames = TRUE)
 }
 \arguments{
@@ -28,8 +28,12 @@ NULL, all cells will be plotted. Default 100.}
 in the featureModule. If NULL, plot all features in the module. Default
 NULL.}
 
-\item{normalize}{Logical. Whether to normalize the columns of `counts`.
-Default TRUE.}
+\item{normalizedCounts}{Integer matrix. Rows represent features and columns
+represent cells. This matrix should correspond to the one provided for 
+`counts`, but should be passed through 
+`normalizeCounts(counts, "proportion", transformationFun=sqrt)`. Use of this
+parameter is particularly useful for plotting many moduleHeatmaps, where
+normalizing the counts matrix repeatedly would be too time consuming.}
 
 \item{scaleRow}{Character. Which function to use to scale each individual
 row. Set to NULL to disable. Occurs after normalization and log
