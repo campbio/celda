@@ -30,7 +30,8 @@ NULL.}
 
 \item{normalizedCounts}{Integer matrix. Rows represent features and columns
 represent cells. This matrix should correspond to the one provided for 
-`counts`, but should be passed through 
+`counts`, but should be passed through. If NA, normalize `counts`. 
+Default NA.
 `normalizeCounts(counts, "proportion", transformationFun=sqrt)`. Use of this
 parameter is particularly useful for plotting many moduleHeatmaps, where
 normalizing the counts matrix repeatedly would be too time consuming.}
