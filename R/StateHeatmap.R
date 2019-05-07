@@ -97,7 +97,7 @@ moduleHeatmap <- function(counts,
     }
 
     cellIndices <- rev(cellIndices)
-    if (!is.na(normalizedCounts)) {
+    if (is.na(normalizedCounts)) {
       normCounts <- normalizeCounts(counts, normalize = "proportion",
           transformationFun = sqrt)
     } else {
