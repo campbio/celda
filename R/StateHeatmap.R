@@ -20,8 +20,8 @@
 #'  in the featureModule. If NULL, plot all features in the module. Default
 #'  NULL.
 #' @param normalizedCounts Integer matrix. Rows represent features and columns
-#'  represent cells. This matrix should correspond to the one provided for 
-#'  `counts`, but should be passed through. If NA, normalize `counts`. 
+#'  represent cells. This matrix should correspond to the one provided for
+#'  `counts`, but should be passed through. If NA, normalize `counts`.
 #'  Default NA.
 #'  `normalizeCounts(counts, "proportion", transformationFun=sqrt)`. Use of this
 #'  parameter is particularly useful for plotting many moduleHeatmaps, where
