@@ -1069,7 +1069,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         seed = 12345) {
 
         if (is.null(seed)) {
-            res <- .celdaTsne(counts,
+            res <- .celdaTsneC(counts,
                 celdaMod,
                 maxCells = 25000,
                 minClusterSize = 100,
@@ -1078,7 +1078,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
                 perplexity = 20,
                 maxIter = 2500)
         } else {
-            with_seed(seed, res <- .celdaTsne(counts,
+            with_seed(seed, res <- .celdaTsneC(counts,
                 celdaMod,
                 maxCells = 25000,
                 minClusterSize = 100,
@@ -1092,7 +1092,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
     })
 
 
-.celdaTsne <- function(counts,
+.celdaTsneC <- function(counts,
     celdaMod,
     maxCells = 25000,
     minClusterSize = 100,
@@ -1136,6 +1136,9 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #'  threshold. Default 100.
 #' @param modules Integer vector. Determines which features modules to use for
 #'  UMAP. If NULL, all modules will be used. Default NULL.
+#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
+#'  are made.
 #' @param umapConfig An object of class "umap.config" specifying parameters to
 #'  the UMAP algorithm.
 #' @param ... Additional parameters.
@@ -1152,10 +1155,11 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
         maxCells = 25000,
         minClusterSize = 100,
         modules = NULL,
+        seed = 12345,
         umapConfig = umap::umap.defaults) {
 
         if (is.null(seed)) {
-            res <- .celdaUmap(counts = counts,
+            res <- .celdaUmapC(counts = counts,
                 celdaMod = celdaMod,
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
@@ -1163,7 +1167,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
                 umapConfig = umapConfig)
         } else {
             with_seed(seed,
-                res <- .celdaUmap(counts = counts,
+                res <- .celdaUmapC(counts = counts,
                     celdaMod = celdaMod,
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
@@ -1175,7 +1179,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     })
 
 
-.celdaUmap <- function(counts,
+.celdaUmapC <- function(counts,
     celdaMod,
     maxCells = 25000,
     minClusterSize = 100,
