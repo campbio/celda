@@ -19,7 +19,7 @@ test_that(desc = "Testing seed setting behavior in count matrix simulation", {
     expect_equal(celdaCGSim1, celdaCGSim5)
     expect_equal(celdaCGSim2, celdaCGSim3)
     expect_equal(celdaCGSim2, celdaCGSim8)
-    
+
     expect_false(isTRUE(all.equal(celdaCGSim1, celdaCGSim2)))
     expect_false(isTRUE(all.equal(celdaCGSim1, celdaCGSim3)))
     expect_false(isTRUE(all.equal(celdaCGSim1, celdaCGSim6)))

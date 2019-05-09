@@ -38,7 +38,7 @@ resamplePerplexity <- function(counts,
                 celdaList = celdaList,
                 resample = resample))
     }
-    
+
     return(res)
 }
 
@@ -46,14 +46,14 @@ resamplePerplexity <- function(counts,
 .resamplePerplexity <- function(counts,
     celdaList,
     resample = 5) {
-    
+
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
     }
     if (!isTRUE(is.numeric(resample))) {
         stop("Provided resample parameter was not numeric.")
     }
-    
+
     perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
@@ -63,11 +63,11 @@ resamplePerplexity <- function(counts,
         }
     }
     celdaList@perplexity <- perpRes
-    
+
     ## Add mean perplexity to runParams
     perpMean <- apply(perpRes, 1, mean)
     celdaList@runParams$mean_perplexity <- perpMean
-    
+
     return(celdaList)
 }
 

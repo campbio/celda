@@ -592,7 +592,7 @@ simulateCellscelda_C <- function(model,
                 ...))
     }
 
-    return (res)
+    return(res)
 }
 
 

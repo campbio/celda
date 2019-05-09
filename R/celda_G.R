@@ -103,7 +103,7 @@ celda_G <- function(counts,
                 verbose,
                 reorder = TRUE))
     }
-    
+
     return(res)
 }
 
@@ -494,7 +494,7 @@ simulateCellscelda_G <- function(model,
     delta = 1,
     seed = 12345,
     ...) {
-    
+
     if (is.null(seed)) {
         res <- .simulateCellscelda_G(model = model,
             C = C,
@@ -517,7 +517,7 @@ simulateCellscelda_G <- function(model,
                 delta = delta,
                 ...))
     }
-    
+
     return(res)
 }
 
@@ -531,9 +531,9 @@ simulateCellscelda_G <- function(model,
     gamma = 5,
     delta = 1,
     ...) {
-    
+
     eta <- .rdirichlet(1, rep(gamma, L))
-    
+
     y <- sample(seq(L),
         size = G,
         prob = eta,
@@ -542,18 +542,18 @@ simulateCellscelda_G <- function(model,
         stop("Some states did not receive any genes after sampling. Try",
             " increasing G and/or setting gamma > 1.")
     }
-    
+
     psi <- matrix(0, nrow = G, ncol = L)
     for (i in seq(L)) {
         ind <- y == i
         psi[ind, i] <- .rdirichlet(1, rep(delta, sum(ind)))
     }
-    
+
     phi <- .rdirichlet(C, rep(beta, L))
-    
+
     ## Select number of transcripts per cell
     nN <- sample(seq(NRange[1], NRange[2]), size = C, replace = TRUE)
-    
+
     ## Select transcript distribution for each cell
     cellCounts <- matrix(0, nrow = G, ncol = C)
     for (i in seq(C)) {
@@ -563,7 +563,7 @@ simulateCellscelda_G <- function(model,
                 size = cellDist[j], prob = psi[, j])
         }
     }
-    
+
     ## Ensure that there are no all-0 rows in the counts matrix, which violates
     ## a celda modeling
     ## constraint (columns are guarnteed at least one count):
@@ -572,10 +572,10 @@ simulateCellscelda_G <- function(model,
         cellCounts <- cellCounts[-zeroRowIdx, ]
         y <- y[-zeroRowIdx]
     }
-    
+
     rownames(cellCounts) <- paste0("Gene_", seq(nrow(cellCounts)))
     colnames(cellCounts) <- paste0("Cell_", seq(ncol(cellCounts)))
-    
+
     ## Peform reordering on final Z and Y assigments:
     cellCounts <- .processCounts(cellCounts)
     names <- list(row = rownames(cellCounts),
@@ -591,7 +591,7 @@ simulateCellscelda_G <- function(model,
         names = names
     )
     result <- .reorderCeldaG(counts = cellCounts, res = result)
-    
+
     return(list(y = clusters(result)$y,
         counts = .processCounts(cellCounts),
         L = L,
@@ -1031,7 +1031,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
         perplexity = 20,
         maxIter = 2500,
         seed = 12345) {
-        
+
         if (is.null(seed)) {
             res <- .celdaTsneG(counts = counts,
                 celdaMod = celdaMod,
@@ -1052,9 +1052,9 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
                     perplexity = perplexity,
                     maxIter = maxIter))
         }
-        
+
         return (res)
-        
+
     })
 
 
@@ -1066,7 +1066,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
     modules = NULL,
     perplexity = 20,
     maxIter = 2500) {
-    
+
     preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
         celdaMod,
         maxCells,
@@ -1118,7 +1118,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
         modules = NULL,
         seed = 12345,
         umapConfig = umap::umap.defaults) {
-        
+
         if (is.null(seed)) {
             res <- .celdaUmapG(counts = counts,
                 celdaMod = celdaMod,
@@ -1135,7 +1135,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
                     modules = modules,
                     umapConfig = umapConfig))
         }
-        
+
         return(res)
     })
 
@@ -1146,7 +1146,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
     minClusterSize = 100,
     modules = NULL,
     umapConfig = umap::umap.defaults) {
-    
+
     preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
         celdaMod,
         maxCells,
