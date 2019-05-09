@@ -10,6 +10,9 @@
 #' @param celdaList Object of class 'celdaList'.
 #' @param resample Integer. The number of times to resample the counts matrix
 #'  for evaluating perplexity. Default 5.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @return celdaList. Returns the provided `celdaList` with a `perplexity`
 #'  property, detailing the perplexity of all K/L combinations that appeared in
 #'  the celdaList's models.
@@ -22,15 +25,35 @@
 #' @export
 resamplePerplexity <- function(counts,
     celdaList,
-    resample = 5) {
+    resample = 5,
+    seed = 12345) {
 
+    if (is.null(seed)) {
+        res <- .resamplePerplexity(counts = counts,
+            celdaList = celdaList,
+            resample = resample)
+    } else {
+        with_seed(seed,
+            res <- .resamplePerplexity(counts = counts,
+                celdaList = celdaList,
+                resample = resample))
+    }
+    
+    return(res)
+}
+
+
+.resamplePerplexity <- function(counts,
+    celdaList,
+    resample = 5) {
+    
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
     }
     if (!isTRUE(is.numeric(resample))) {
         stop("Provided resample parameter was not numeric.")
     }
-
+    
     perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
@@ -40,11 +63,11 @@ resamplePerplexity <- function(counts,
         }
     }
     celdaList@perplexity <- perpRes
-
+    
     ## Add mean perplexity to runParams
     perpMean <- apply(perpRes, 1, mean)
     celdaList@runParams$mean_perplexity <- perpMean
-
+    
     return(celdaList)
 }
 
