@@ -1068,23 +1068,24 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         seed = 12345) {
 
         if (is.null(seed)) {
-            res <- .celdaTsneC(counts,
-                celdaMod,
-                maxCells = 25000,
-                minClusterSize = 100,
-                initialDims = 20,
-                modules = NULL,
-                perplexity = 20,
-                maxIter = 2500)
+            res <- .celdaTsneC(counts = counts,
+                celdaMod = celdaMod,
+                maxCells = maxCells,
+                minClusterSize = minClusterSize,
+                initialDims = initialDims,
+                modules = modules,
+                perplexity = perplexity,
+                maxIter = maxIter)
         } else {
-            with_seed(seed, res <- .celdaTsneC(counts,
-                celdaMod,
-                maxCells = 25000,
-                minClusterSize = 100,
-                initialDims = 20,
-                modules = NULL,
-                perplexity = 20,
-                maxIter = 2500))
+            with_seed(seed,
+                res <- .celdaTsneC(counts = counts,
+                    celdaMod = celdaMod,
+                    maxCells = maxCells,
+                    minClusterSize = minClusterSize,
+                    initialDims = initialDims,
+                    modules = modules,
+                    perplexity = perplexity,
+                    maxIter = maxIter))
         }
 
         return(res)
