@@ -758,7 +758,6 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_G"),
 #'  each feature in each module. Default 1.
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
 #'  the number of features in each module. Default 1.
-#' @param ... Additional parameters.
 #' @keywords log likelihood
 #' @return The log-likelihood for the given cluster assignments.
 #' @seealso `celda_G()` for clustering features

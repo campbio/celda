@@ -795,7 +795,6 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 #'  to each cell population in each sample. Default 1.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
 #'  each feature in each cell population. Default 1.
-#' @param ... Additional parameters.
 #' @return Numeric. The log likelihood for the given cluster assignments
 #' @seealso `celda_C()` for clustering cells
 #' @examples
@@ -1141,7 +1140,6 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #'  \link[withr]{with_seed} are made.
 #' @param umapConfig An object of class "umap.config" specifying parameters to
 #'  the UMAP algorithm.
-#' @param ... Additional parameters.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression.
 #' @examples
