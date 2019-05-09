@@ -1053,7 +1053,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
                     maxIter = maxIter))
         }
 
-        return (res)
+        return(res)
 
     })
 
