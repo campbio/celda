@@ -23,9 +23,9 @@
 #'  a cell population should be reassigned and another cell population should be
 #'  split into two clusters. If a split occurs, then `stopIter` will be reset.
 #'  Default TRUE.
-#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
-#'  are made.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
 #' @param yInitialize Chararacter. One of 'random', 'split', or 'predefined'.
 #'  With 'random', features are randomly assigned to a modules. With 'split',
@@ -473,9 +473,9 @@ celda_G <- function(counts,
 #'  each feature in each module. Default 1.
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
 #'  the number of features in each module. Default 5.
-#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
-#'  are made.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, feature module clusters
 #'  `y`, and input parameters.
@@ -1012,9 +1012,9 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
-#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
-#'  are made.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for
 #'  displaying expression
 #' @examples
@@ -1099,9 +1099,9 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
 #'  threshold. Default 100.
 #' @param modules Integer vector. Determines which features modules to use for
 #'  tSNE. If NULL, all modules will be used. Default NULL.
-#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
-#'  are made.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param umapConfig Object of class `umap.config`. Configures parameters for
 #'  umap. Default `umap::umap.defaults`.
 #' @seealso `celda_G()` for clustering features and cells  and `celdaHeatmap()`

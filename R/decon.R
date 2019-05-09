@@ -15,6 +15,9 @@
 #'  input as a single numeric value, symmetric values for beta distribution are
 #'  specified; if input as a vector of lenght 2, the two values will be the
 #'  shape1 and shape2 paramters of the beta distribution respectively.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @return A list object containing the real expression matrix and contamination
 #'  expression matrix as well as other parameters used in the simulation.
 #' @examples
@@ -26,14 +29,43 @@ simulateContaminatedMatrix <- function(C = 300,
     K = 3,
     NRange = c(500, 1000),
     beta = 0.5,
-    delta = c(1, 2)) {
+    delta = c(1, 2),
+    seed = 12345) {
+    
+    if (is.null(seed)) {
+        res <- .simulateContaminatedMatrix(C = C,
+            G = G,
+            K = K,
+            NRange = NRange,
+            beta = beta,
+            delta = delta)
+    } else {
+        with_seed(seed,
+            res <- .simulateContaminatedMatrix(C = C,
+                G = G,
+                K = K,
+                NRange = NRange,
+                beta = beta,
+                delta = delta))
+    }
+    
+    return(res)
+}
 
+
+.simulateContaminatedMatrix <- function(C = 300,
+    G = 100,
+    K = 3,
+    NRange = c(500, 1000),
+    beta = 0.5,
+    delta = c(1, 2)) {
+    
     if (length(delta) == 1) {
         cpByC <- stats::rbeta(n = C, shape1 = delta, shape2 = delta)
     } else {
         cpByC <- stats::rbeta(n = C, shape1 = delta[1], shape2 = delta[2])
     }
-
+    
     z <- sample(seq(K), size = C, replace = TRUE)
     if (length(unique(z)) < K) {
         warning("Only ",
@@ -43,7 +75,7 @@ simulateContaminatedMatrix <- function(C = 300,
         K <- length(unique(z))
         z <- plyr::mapvalues(z, unique(z), seq(length(unique(z))))
     }
-
+    
     NbyC <- sample(seq(min(NRange), max(NRange)),
         size = C,
         replace = TRUE)
@@ -51,29 +83,29 @@ simulateContaminatedMatrix <- function(C = 300,
         stats::rbinom(n = 1, size = NbyC[i], p = cpByC[i])
     }, integer(1))
     rNbyC <- NbyC - cNbyC
-
+    
     phi <- .rdirichlet(K, rep(beta, G))
-
+    
     ## sample real expressed count matrix
     cellRmat <- vapply(seq(C), function(i) {
         stats::rmultinom(1, size = rNbyC[i], prob = phi[z[i], ])
     }, integer(G))
-
+    
     rownames(cellRmat) <- paste0("Gene_", seq(G))
     colnames(cellRmat) <- paste0("Cell_", seq(C))
-
+    
     ## sample contamination count matrix
     nGByK <- rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
     eta <- normalizeCounts(counts = nGByK, normalize = "proportion")
-
+    
     cellCmat <- vapply(seq(C), function(i) {
         stats::rmultinom(1, size = cNbyC[i], prob = eta[, z[i]])
     }, integer(G))
     cellOmat <- cellRmat + cellCmat
-
+    
     rownames(cellOmat) <- paste0("Gene_", seq(G))
     colnames(cellOmat) <- paste0("Cell_", seq(C))
-
+    
     return(list("nativeCounts" = cellRmat,
         "observedCounts" = cellOmat,
         "NByC" = NbyC,
@@ -198,6 +230,9 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @return A list object which contains the decontaminated count matrix and
 #'  related parameters.
 #' @examples
@@ -214,8 +249,43 @@ decontX <- function(counts,
     beta = 1e-6,
     delta = 10,
     logfile = NULL,
-    verbose = TRUE) {
+    verbose = TRUE,
+    seed = 12345) {
 
+    if (is.null(seed)) {
+        res <- .decontX(counts = counts,
+            z = z,
+            batch = batch,
+            maxIter = maxIter,
+            beta = beta-6,
+            delta = delta,
+            logfile = logfile,
+            verbose = verbose)
+    } else {
+        with_seed(seed,
+            res <- .decontX(counts = counts,
+                z = z,
+                batch = batch,
+                maxIter = maxIter,
+                beta = beta-6,
+                delta = delta,
+                logfile = logfile,
+                verbose = verbose))
+    }
+    
+    return(res)
+}
+
+
+.decontX <- function(counts,
+    z = NULL,
+    batch = NULL,
+    maxIter = 200,
+    beta = 1e-6,
+    delta = 10,
+    logfile = NULL,
+    verbose = TRUE) {
+    
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
@@ -225,9 +295,9 @@ decontX <- function(counts,
             dimnames = list(rownames(counts), colnames(counts)))
         theta <- rep(NA, ncol(counts))
         estConp <- rep(NA, ncol(counts))
-
+        
         batchIndex <- unique(batch)
-
+        
         for (bat in batchIndex) {
             countsBat <- counts[, batch == bat]
             if (!is.null(z)) {
@@ -243,11 +313,11 @@ decontX <- function(counts,
                 delta = delta,
                 logfile = logfile,
                 verbose = verbose)
-
+            
             estRmat[, batch == bat] <- resBat$resList$estNativeCounts
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
-
+            
             if (is.null(logLikelihood)) {
                 logLikelihood <- resBat$resList$logLikelihood
             } else {
@@ -255,19 +325,19 @@ decontX <- function(counts,
                     resBat$resList$logLikelihood)
             }
         }
-
+        
         runParams <- resBat$runParams
         method <- resBat$method
         resList <- list("logLikelihood" = logLikelihood,
             "estNativeCounts" = estRmat,
             "estConp" = estConp,
             "theta" = theta)
-
+        
         return(list("runParams" = runParams,
             "resList" = resList,
             "method" = method))
     }
-
+    
     return(.decontXoneBatch(counts = counts,
         z = z,
         maxIter = maxIter,
