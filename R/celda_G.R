@@ -23,6 +23,9 @@
 #'  a cell population should be reassigned and another cell population should be
 #'  split into two clusters. If a split occurs, then `stopIter` will be reset.
 #'  Default TRUE.
+#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
+#'  are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
 #' @param yInitialize Chararacter. One of 'random', 'split', or 'predefined'.
 #'  With 'random', features are randomly assigned to a modules. With 'split',
@@ -55,6 +58,7 @@ celda_G <- function(counts,
     maxIter = 200,
     splitOnIter = 10,
     splitOnLast = TRUE,
+    seed = 12345,
     nchains = 3,
     yInitialize = c("split", "random", "predefined"),
     countChecksum = NULL,
@@ -63,23 +67,46 @@ celda_G <- function(counts,
     verbose = TRUE) {
 
     .validateCounts(counts)
-    return(.celda_G(counts,
-        L,
-        beta,
-        delta,
-        gamma,
-        stopIter,
-        maxIter,
-        splitOnIter,
-        splitOnLast,
-        nchains,
-        yInitialize,
-        countChecksum,
-        yInit,
-        logfile,
-        verbose,
-        reorder = TRUE))
+    if (is.null(seed)) {
+        res <- .celda_G(counts,
+            L,
+            beta,
+            delta,
+            gamma,
+            stopIter,
+            maxIter,
+            splitOnIter,
+            splitOnLast,
+            nchains,
+            yInitialize,
+            countChecksum,
+            yInit,
+            logfile,
+            verbose,
+            reorder = TRUE)
+    } else {
+        with_seed(seed,
+            res <- .celda_G(counts,
+                L,
+                beta,
+                delta,
+                gamma,
+                stopIter,
+                maxIter,
+                splitOnIter,
+                splitOnLast,
+                nchains,
+                yInitialize,
+                countChecksum,
+                yInit,
+                logfile,
+                verbose,
+                reorder = TRUE))
+    }
+    
+    return(res)
 }
+
 
 .celda_G <- function(counts,
     L,
@@ -446,6 +473,9 @@ celda_G <- function(counts,
 #'  each feature in each module. Default 1.
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
 #'  the number of features in each module. Default 5.
+#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
+#'  are made.
 #' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, feature module clusters
 #'  `y`, and input parameters.
@@ -462,10 +492,48 @@ simulateCellscelda_G <- function(model,
     beta = 1,
     gamma = 5,
     delta = 1,
+    seed = 12345,
     ...) {
+    
+    if (is.null(seed)) {
+        res <- .simulateCellscelda_G(model = model,
+            C = C,
+            NRange = NRange,
+            G = G,
+            L = L,
+            beta = beta,
+            gamma = gamma,
+            delta = delta,
+            ...)
+    } else {
+        with_seed(seed,
+            res <- .simulateCellscelda_G(model = model,
+                C = C,
+                NRange = NRange,
+                G = G,
+                L = L,
+                beta = beta,
+                gamma = gamma,
+                delta = delta,
+                ...))
+    }
+    
+    return(res)
+}
 
+
+.simulateCellscelda_G <- function(model,
+    C = 100,
+    NRange = c(500, 1000),
+    G = 100,
+    L = 10,
+    beta = 1,
+    gamma = 5,
+    delta = 1,
+    ...) {
+    
     eta <- .rdirichlet(1, rep(gamma, L))
-
+    
     y <- sample(seq(L),
         size = G,
         prob = eta,
@@ -474,18 +542,18 @@ simulateCellscelda_G <- function(model,
         stop("Some states did not receive any genes after sampling. Try",
             " increasing G and/or setting gamma > 1.")
     }
-
+    
     psi <- matrix(0, nrow = G, ncol = L)
     for (i in seq(L)) {
         ind <- y == i
         psi[ind, i] <- .rdirichlet(1, rep(delta, sum(ind)))
     }
-
+    
     phi <- .rdirichlet(C, rep(beta, L))
-
+    
     ## Select number of transcripts per cell
     nN <- sample(seq(NRange[1], NRange[2]), size = C, replace = TRUE)
-
+    
     ## Select transcript distribution for each cell
     cellCounts <- matrix(0, nrow = G, ncol = C)
     for (i in seq(C)) {
@@ -495,7 +563,7 @@ simulateCellscelda_G <- function(model,
                 size = cellDist[j], prob = psi[, j])
         }
     }
-
+    
     ## Ensure that there are no all-0 rows in the counts matrix, which violates
     ## a celda modeling
     ## constraint (columns are guarnteed at least one count):
@@ -504,10 +572,10 @@ simulateCellscelda_G <- function(model,
         cellCounts <- cellCounts[-zeroRowIdx, ]
         y <- y[-zeroRowIdx]
     }
-
+    
     rownames(cellCounts) <- paste0("Gene_", seq(nrow(cellCounts)))
     colnames(cellCounts) <- paste0("Cell_", seq(ncol(cellCounts)))
-
+    
     ## Peform reordering on final Z and Y assigments:
     cellCounts <- .processCounts(cellCounts)
     names <- list(row = rownames(cellCounts),
@@ -523,7 +591,7 @@ simulateCellscelda_G <- function(model,
         names = names
     )
     result <- .reorderCeldaG(counts = cellCounts, res = result)
-
+    
     return(list(y = clusters(result)$y,
         counts = .processCounts(cellCounts),
         L = L,
@@ -944,6 +1012,9 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
+#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
+#'  are made.
 #' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for
 #'  displaying expression
 #' @examples
@@ -959,21 +1030,57 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
         initialDims = 20,
         modules = NULL,
         perplexity = 20,
-        maxIter = 2500) {
-
-        preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
-            celdaMod,
-            maxCells,
-            minClusterSize,
-            modules)
-        res <- .calculateTsne(preparedCountInfo$norm,
-            doPca = FALSE,
-            perplexity = perplexity,
-            maxIter = maxIter)
-        rownames(res) <- colnames(counts)
-        colnames(res) <- c("tsne_1", "tsne_2")
-        return(res)
+        maxIter = 2500,
+        seed = 12345) {
+        
+        if (is.null(seed)) {
+            res <- .celdaTsneG(counts = counts,
+                celdaMod = celdaMod,
+                maxCells = maxCells,
+                minClusterSize = minClusterSize,
+                initialDims = initialDims,
+                modules = modules,
+                perplexity = perplexity,
+                maxIter = maxIter)
+        } else {
+            with_seed(seed,
+                res <- .celdaTsneG(counts = counts,
+                    celdaMod = celdaMod,
+                    maxCells = maxCells,
+                    minClusterSize = minClusterSize,
+                    initialDims = initialDims,
+                    modules = modules,
+                    perplexity = perplexity,
+                    maxIter = maxIter))
+        }
+        
+        return (res)
+        
     })
+
+
+.celdaTsneG <- function(counts,
+    celdaMod,
+    maxCells = 25000,
+    minClusterSize = 100,
+    initialDims = 20,
+    modules = NULL,
+    perplexity = 20,
+    maxIter = 2500) {
+    
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
+        celdaMod,
+        maxCells,
+        minClusterSize,
+        modules)
+    res <- .calculateTsne(preparedCountInfo$norm,
+        doPca = FALSE,
+        perplexity = perplexity,
+        maxIter = maxIter)
+    rownames(res) <- colnames(counts)
+    colnames(res) <- c("tsne_1", "tsne_2")
+    return(res)
+}
 
 
 #' @title umap for celda_G
@@ -992,6 +1099,9 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
 #'  threshold. Default 100.
 #' @param modules Integer vector. Determines which features modules to use for
 #'  tSNE. If NULL, all modules will be used. Default NULL.
+#' @param seed Integer. Passed to \link[base]{set.seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to \link[base]{set.seed}
+#'  are made.
 #' @param umapConfig Object of class `umap.config`. Configures parameters for
 #'  umap. Default `umap::umap.defaults`.
 #' @seealso `celda_G()` for clustering features and cells  and `celdaHeatmap()`
@@ -1007,20 +1117,49 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
         maxCells = 25000,
         minClusterSize = 100,
         modules = NULL,
+        seed = 12345,
         umapConfig = umap::umap.defaults) {
-
-        preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
-            celdaMod,
-            maxCells,
-            minClusterSize,
-            modules)
-        umapRes <- .calculateUmap(preparedCountInfo$norm, umapConfig)
-        final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-        final[preparedCountInfo$cellIx, ] <- umapRes
-        rownames(final) <- colnames(counts)
-        colnames(final) <- c("umap_1", "umap_2")
-        return(final)
+        
+        if (is.null(seed)) {
+            res <- .celdaUmapG(counts = counts,
+                celdaMod = celdaMod,
+                maxCells = maxCells,
+                minClusterSize = minClusterSize,
+                modules = modules,
+                umapConfig = umapConfig)
+        } else {
+            with_seed(seed,
+                res <- .celdaUmapG(counts = counts,
+                    celdaMod = celdaMod,
+                    maxCells = maxCells,
+                    minClusterSize = minClusterSize,
+                    modules = modules,
+                    umapConfig = umapConfig))
+        }
+        
+        return(res)
     })
+
+
+.celdaUmapG <- function(counts,
+    celdaMod,
+    maxCells = 25000,
+    minClusterSize = 100,
+    modules = NULL,
+    umapConfig = umap::umap.defaults) {
+    
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
+        celdaMod,
+        maxCells,
+        minClusterSize,
+        modules)
+    umapRes <- .calculateUmap(preparedCountInfo$norm, umapConfig)
+    final <- matrix(NA, nrow = ncol(counts), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- umapRes
+    rownames(final) <- colnames(counts)
+    colnames(final) <- c("umap_1", "umap_2")
+    return(final)
+}
 
 
 .prepareCountsForDimReductionCeldaCG <- function(counts,
