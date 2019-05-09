@@ -35,13 +35,16 @@ library(celda)
 
 To see the latest updates and releases or to post a bug, see our GitHub page at https://github.com/campbio/celda. To ask questions about running celda, post a thread on Bioconductor support site at https://support.bioconductor.org/.
 
+# Reproducibility note
+
+Many functions in *celda* make use of stochastic algorithms or procedures which require the use of random number generator (RNG) for simulation or sampling. To maintain reproducibility, all these functions use a **default seed of 12345** to make sure same results are generated each time one of these functions is called. Explicitly setting the `seed` arguments is needed for greater control and randomness.
+
 # Generation of a cross-contaminated dataset 
 DecontX will take a matrix of counts (referred as observed counts) where each row is a feature, each column is a cell, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of DecontX, we will apply it to a simulated dataset.
 
-In the function `simulateContaminatedMatrix`, the K parameter designates the number of cell clusters, the C parameter determines the number of cells, the G parameter determines the number of genes in the simulated dataset. Explicit call to `set.seed` is needed for reproducibility.
+In the function `simulateContaminatedMatrix`, the K parameter designates the number of cell clusters, the C parameter determines the number of cells, the G parameter determines the number of genes in the simulated dataset.
 
 ```{r}
-set.seed(12345)
 simCounts <- simulateContaminatedMatrix(G = 300, C = 100, K = 3)
 ```
 
