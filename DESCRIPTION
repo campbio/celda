@@ -38,7 +38,8 @@ Imports:
     SummarizedExperiment,
     MCMCprecision,
     ggrepel,
-    Rtsne
+    Rtsne,
+    withr
 Suggests:
     testthat,
     knitr,

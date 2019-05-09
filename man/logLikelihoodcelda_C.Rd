@@ -22,8 +22,6 @@ to each cell population in each sample. Default 1.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
 each feature in each cell population. Default 1.}
-
-\item{...}{Additional parameters.}
 }
 \value{
 Numeric. The log likelihood for the given cluster assignments
