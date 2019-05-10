@@ -17,6 +17,9 @@
 #'  input as a single numeric value, symmetric values for beta distribution are
 #'  specified; if input as a vector of lenght 2, the two values will be the
 #'  shape1 and shape2 paramters of the beta distribution respectively.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @return A list object containing the real expression matrix and contamination
 #'  expression matrix as well as other parameters used in the simulation.
 #' @examples
@@ -24,6 +27,35 @@
 #' contaminationSim <- simulateContaminatedMatrix(K = 3, delta = 1)
 #' @export
 simulateContaminatedMatrix <- function(C = 300,
+    G = 100,
+    K = 3,
+    NRange = c(500, 1000),
+    beta = 0.5,
+    delta = c(1, 2),
+    seed = 12345) {
+
+    if (is.null(seed)) {
+        res <- .simulateContaminatedMatrix(C = C,
+            G = G,
+            K = K,
+            NRange = NRange,
+            beta = beta,
+            delta = delta)
+    } else {
+        with_seed(seed,
+            res <- .simulateContaminatedMatrix(C = C,
+                G = G,
+                K = K,
+                NRange = NRange,
+                beta = beta,
+                delta = delta))
+    }
+
+    return(res)
+}
+
+
+.simulateContaminatedMatrix <- function(C = 300,
     G = 100,
     K = 3,
     NRange = c(500, 1000),
@@ -231,6 +263,9 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @return A list object which contains the decontaminated count matrix and
 #'  related parameters.
 #' @examples
@@ -248,6 +283,41 @@ decontX <- function(counts,
     z = NULL,
     batch = NULL,
     maxIter = 200,
+    delta = 10,
+    logfile = NULL,
+    verbose = TRUE,
+    seed = 12345) {
+
+    if (is.null(seed)) {
+        res <- .decontX(counts = counts,
+            z = z,
+            batch = batch,
+            maxIter = maxIter,
+            beta = beta,
+            delta = delta,
+            logfile = logfile,
+            verbose = verbose)
+    } else {
+        with_seed(seed,
+            res <- .decontX(counts = counts,
+                z = z,
+                batch = batch,
+                maxIter = maxIter,
+                beta = beta,
+                delta = delta,
+                logfile = logfile,
+                verbose = verbose))
+    }
+
+    return(res)
+}
+
+
+.decontX <- function(counts,
+    z = NULL,
+    batch = NULL,
+    maxIter = 200,
+    beta = 1e-6,
     delta = 10,
     logfile = NULL,
     verbose = TRUE) {

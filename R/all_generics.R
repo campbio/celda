@@ -601,9 +601,11 @@ setGeneric("celdaTsne",
 #'  for umap. Default 20.
 #' @param modules Integer vector. Determines which features modules to use for
 #'  tSNE. If NULL, all modules will be used. Default NULL.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param umapConfig An object of class "umapConfig" specifying parameters to
 #'  the UMAP algorithm.
-#' @param ... Additional parameters.
 #' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
 #'  the "X" and "Y" coordinates in the data's t-SNE represetation.
 #' @examples
@@ -619,6 +621,7 @@ setGeneric("celdaUmap",
         minClusterSize = 100,
         initialDims = 20,
         modules = NULL,
+        seed = 12345,
         umapConfig = umap::umap.defaults) {
         standardGeneric("celdaUmap")
     })
