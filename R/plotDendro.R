@@ -45,7 +45,7 @@ plotDendro <- function(decisionTree,
 
     # Get necessary elements
     dendro <- decisionTree$dendro
-    
+
     # Get performance information (training or CV based)
     performance <- decisionTree$performance
 
@@ -63,12 +63,12 @@ plotDendro <- function(decisionTree,
     # Get necessary coordinates to add labels to
     # These will have y > 1
     dendSegs <- unique(dendSegs[dendSegs$y > 1, c("x", "y", "yend", "xend")])
-    
+
     # Labeled splits will be vertical (x != xend) or
     # Length 0 (x == xend & y == yend)
     dendSegsAlt <- dendSegs[
         dendSegs$x != dendSegs$xend |
-            (dendSegs$x == dendSegs$xend & dendSegs$y == dendSegs$yend), 
+            (dendSegs$x == dendSegs$xend & dendSegs$y == dendSegs$yend),
         c("x", "xend", "y")]
     colnames(dendSegsAlt)[1] <- "xalt"
 
@@ -76,12 +76,12 @@ plotDendro <- function(decisionTree,
     # Occur at the end of segments
     segs <- as.data.frame(get_nodes_xy(dendro))
     colnames(segs) <- c("xend", "yend")
-    
+
     # As label and which stat was used
     # Labels will stack
     segs$label <- gsub(";", "\n", get_nodes_attr(dendro, "label"))
     segs$statUsed <- get_nodes_attr(dendro, "statUsed")
-    
+
     # If highlighting a class label, remove non-class specific rules
     if (!is.null(classLabel)) {
         if (!classLabel %in% rownames(decisionTree$summaryMatrix)) {
@@ -92,20 +92,21 @@ plotDendro <- function(decisionTree,
         keepLabel[is.na(keepLabel)] <- FALSE
         segs$label[!keepLabel] <- NA
     }
-    
+
     # Remove non-labelled nodes &
     # leaf nodes (yend == 0)
     segs <- segs[!is.na(segs$label) & segs$yend != 0, ]
 
     # Merge to full set of coordinates
     dendSegsLabelled <- merge(dendSegs, segs)
-    
+
     # Remove duplicated labels
-    dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$y, 
+    dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$y,
         decreasing = T),]
     dendSegsLabelled <- dendSegsLabelled[
-       !duplicated(dendSegsLabelled[,c("xend", "x", "yend", "label", "statUsed")]),]
-    
+        !duplicated(dendSegsLabelled[,
+            c("xend", "x", "yend", "label", "statUsed")]),]
+
     # Merge with alternative x-coordinates for alternative split
     dendSegsLabelled <- merge(dendSegsLabelled, dendSegsAlt)
 
@@ -119,7 +120,7 @@ plotDendro <- function(decisionTree,
 
     # Set xend for IG splits
     dendSegsLabelled$xend[igSplits] <- dendSegsLabelled$xalt[igSplits]
-    
+
     # Set y for non-IG splits
     dendSegsLabelled$y[!igSplits] <- dendSegsLabelled$y[!igSplits] - 0.2
 

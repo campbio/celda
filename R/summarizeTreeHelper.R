@@ -51,19 +51,19 @@
 
     # Get Stat Used
     statUsed <- unlist(lapply(
-         DecTree, function(split) {
-         split$statUsed
+        DecTree, function(split) {
+        split$statUsed
     }))
     statRep <- unlist(lapply(
-         DecTree,
-         function(split) {
+        DecTree,
+        function(split) {
             length(split[!names(split) %in% c("statUsed", "fUsed", "dirs")])
-         }))
+        }))
     statUsed <- unlist(lapply(
-         seq(length(statUsed)),
-         function(i) {
+        seq(length(statUsed)),
+        function(i) {
             rep(statUsed[i], statRep[i])
-         }))
+        }))
     names(statUsed) <- names(splitNames)
 
     # Create Matrix of results
@@ -88,29 +88,29 @@
                 }))
            group1classVec <- unlist(group1classUnique)
 
-         # Get classes always in group 2
-         group2classUnique <- unique(unlist(lapply(
-            split,
-            function(X) {
-                X$group2Consensus
-            })))
-         group2classUnique <- group2classUnique[!group2classUnique %in%
-            group1classVec ]
+            # Get classes always in group 2
+            group2classUnique <- unique(unlist(lapply(
+                split,
+                function(X) {
+                    X$group2Consensus
+                })))
+            group2classUnique <- group2classUnique[!group2classUnique %in%
+                group1classVec ]
 
-         # Assign
-         for (j in seq(length(group1classUnique))) {
-             mat[i, group1classUnique[[j]]] <- j
-         }
-         mat[i, group2classUnique ] <- j + 1
-      }
-   }
+            # Assign
+            for (j in seq(length(group1classUnique))) {
+                mat[i, group1classUnique[[j]]] <- j
+            }
+            mat[i, group2classUnique ] <- j + 1
+        }
+    }
 
     ## Collapse matrix to get set of direction to include in dendrogram
     matCollapse <- sort(apply(
     mat,
         2,
         function(x) {
-           paste(x[x != 0], collapse = "_")
+            paste(x[x != 0], collapse = "_")
         }))
     matUnique <- unique(matCollapse)
 
