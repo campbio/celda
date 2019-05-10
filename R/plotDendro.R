@@ -10,9 +10,25 @@
 #' @param boxSize A numeric value. Size of rule labels. Default is 7.
 #' @param boxColor A character value. Color of rule labels. Default is `black`.
 #' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' plotHeatmap(celdaCGSim$counts,
-#'     z = clusters(celdaCGMod)$z, y = clusters(celdaCGMod)$y)
+#' library(M3DExampleData)
+#' counts <- M3DExampleData::Mmus_example_list$data
+#' # Subset 500 genes for fast clustering
+#' counts <- as.matrix(counts[1501:2000, ])
+#' # Cluster genes ans samples each into 10 modules
+#' cm <- celda_CG(counts = counts, L = 10, K = 5, verbose = FALSE)
+#' # Get features matrix and cluster assignments
+#' factorized <- factorizeMatrix(counts, cm)
+#' features <- factorized$proportions$cell
+#' class <- clusters(cm)$z
+#' # Generate Decision Tree
+#' DecTree <- buildTreeHybrid(features,
+#'                            class,
+#'                            oneoffMetric = "modified F1",
+#'                            threshold = 1,
+#'                            consecutiveOneoff = FALSE)
+#'
+#' # Plot dendrogram
+#' plotDendro(DecTree)
 #' @return A ggplot2 object
 #' @import ggplot2
 #' @import ggdendro
