@@ -6,7 +6,7 @@
 \usage{
 simulateCellscelda_C(model, S = 5, CRange = c(50, 100),
   NRange = c(500, 1000), G = 100, K = 5, alpha = 1, beta = 1,
-  ...)
+  seed = 12345, ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::availableModels`.}
@@ -30,6 +30,10 @@ to each cell population in each sample. Default 1.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount to
 each feature in each cell population. Default 1.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 
 \item{...}{Additional parameters.}
 }

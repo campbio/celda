@@ -5,7 +5,7 @@
 \title{Simulate contaminated count matrix}
 \usage{
 simulateContaminatedMatrix(C = 300, G = 100, K = 3, NRange = c(500,
-  1000), beta = 0.5, delta = c(1, 2))
+  1000), beta = 0.5, delta = c(1, 2), seed = 12345)
 }
 \arguments{
 \item{C}{Integer. Number of cells to be simulated. Default to be 300.}
@@ -25,6 +25,10 @@ be c(500, 1000).}
 input as a single numeric value, symmetric values for beta distribution are
 specified; if input as a vector of lenght 2, the two values will be the
 shape1 and shape2 paramters of the beta distribution respectively.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 }
 \value{
 A list object containing the real expression matrix and contamination

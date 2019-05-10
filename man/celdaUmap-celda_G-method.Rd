@@ -6,7 +6,7 @@
 \title{umap for celda_G}
 \usage{
 \S4method{celdaUmap}{celda_G}(counts, celdaMod, maxCells = 25000,
-  minClusterSize = 100, modules = NULL,
+  minClusterSize = 100, modules = NULL, seed = 12345,
   umapConfig = umap::umap.defaults)
 }
 \arguments{
@@ -25,6 +25,10 @@ threshold. Default 100.}
 
 \item{modules}{Integer vector. Determines which features modules to use for
 tSNE. If NULL, all modules will be used. Default NULL.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 
 \item{umapConfig}{Object of class `umap.config`. Configures parameters for
 umap. Default `umap::umap.defaults`.}
