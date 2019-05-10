@@ -2,17 +2,17 @@
 library(celda)
 context("Testing celda_C")
 
-celdaCCim <- simulateCells("celda_C", K = 10)
-modelC <- celda_C(counts = celdaCCim$counts,
-    sampleLabel = celdaCCim$sampleLabel,
-    K = celdaCCim$K,
+celdaCSim <- simulateCells("celda_C", K = 10)
+modelC <- celda_C(counts = celdaCSim$counts,
+    sampleLabel = celdaCSim$sampleLabel,
+    K = celdaCSim$K,
     algorithm = "EM",
     verbose = FALSE)
-factorized <- factorizeMatrix(counts = celdaCCim$counts, celdaMod = modelC)
+factorized <- factorizeMatrix(counts = celdaCSim$counts, celdaMod = modelC)
 
 # celda_C
 test_that(desc = "Testing simulation and celda_C model", {
-    expect_equal(typeof(celdaCCim$counts), "integer")
+    expect_equal(typeof(celdaCSim$counts), "integer")
     expect_true(all(sweep(factorized$counts$sample,
         2,
         colSums(factorized$counts$sample),
@@ -23,11 +23,11 @@ test_that(desc = "Testing simulation and celda_C model", {
     #     bestLogLikelihood(modelC))
 
     # GitHub #347
-    numericCounts <- celdaCCim$counts
+    numericCounts <- celdaCSim$counts
     storage.mode(numericCounts) <- "numeric"
-    expect_true(is(celda_C(counts = celdaCCim$counts,
-        sampleLabel = celdaCCim$sampleLabel,
-        K = celdaCCim$K,
+    expect_true(is(celda_C(counts = celdaCSim$counts,
+        sampleLabel = celdaCSim$sampleLabel,
+        K = celdaCSim$K,
         algorithm = "EM",
         verbose = FALSE,
         maxIter = 2),
@@ -37,53 +37,53 @@ test_that(desc = "Testing simulation and celda_C model", {
 # clusterProbability
 test_that(desc = "Testing clusterProbability with celda_C", {
     expect_true(all(round(rowSums(
-        clusterProbability(modelC, counts = celdaCCim$counts)[[1]]
+        clusterProbability(modelC, counts = celdaCSim$counts)[[1]]
     )) == 1))
 })
 
 # celdaGridSearch and perplexity calculations
 # test_that(desc = "Testing celdaGridSearch with celda_C", {
-#     celdaCRes <- celdaGridSearch(counts = celdaCCim$counts,
+#     celdaCRes <- celdaGridSearch(counts = celdaCSim$counts,
 #         model = "celda_C",
 #         nchains = 2,
 #         paramsTest = list(K = c(5, 6)),
-#         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel),
+#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel),
 #         maxIter = 2,
 #         verbose = FALSE,
 #         bestOnly = FALSE,
 #         perplexity = FALSE)
-#     expect_error(celdaGridSearch(counts = celdaCCim$counts,
+#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
 #         model = "celda_C",
 #         paramsTest = list(K = c(4, 5), M = c(3, 4)),
-#         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel),
+#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel),
 #         bestOnly = FALSE),
 #         paste0("The following elements in 'paramsTest' are not arguments of",
 #             " 'celda_C': M"))
 #
-#     expect_error(celdaGridSearch(counts = celdaCCim$counts,
+#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
 #         model = "celda_C",
 #         nchains = 1,
 #         maxIter = 1,
 #         paramsTest = list(K = c(4, 5), sampleLabel = "Sample"),
-#         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel)),
+#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel)),
 #         paste0("Setting parameters such as 'z.init', 'y.init', and",
 #             "'sampleLabel' in 'paramsTest' is not currently supported."))
 #
-#     expect_error(celdaGridSearch(counts = celdaCCim$counts,
+#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
 #         model = "celda_C",
 #         nchains = 1,
 #         maxIter = 1,
 #         paramsTest = list(),
-#         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel)),
+#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel)),
 #         paste0("The following arguments are not in 'paramsTest' or",
 #             " 'paramsFixed' but are required for 'celda_C': K"))
 #
-#     expect_error(celdaGridSearch(counts = celdaCCim$counts,
+#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
 #         model = "celda_C",
 #         nchains = 1,
 #         maxIter = 1,
 #         paramsTest = list(K = c(9, 10)),
-#         paramsFixed = list(sampleLabel = celdaCCim$sampleLabel,
+#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel,
 #             xxx = "xxx")),
 #         paste0("The following elements in 'paramsFixed' are not arguments",
 #             "of 'celda_C': xxx"))
@@ -93,12 +93,12 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #         c("index", "chain", "K", "log_likelihood"))
 #     expect_error(plotGridSearchPerplexity(celdaCRes))
 #
-#     celdaCRes <- resamplePerplexity(celdaCCim$counts, celdaCRes, resample = 2)
+#     celdaCRes <- resamplePerplexity(celdaCSim$counts, celdaCRes, resample = 2)
 #     expect_equal(is.null(celdaCRes@perplexity), FALSE)
 #     expect_true(is(celdaCRes, "celdaList"))
-#     expect_error(resamplePerplexity(celdaCCim$counts,
+#     expect_error(resamplePerplexity(celdaCSim$counts,
 #         celdaCRes, resample = "2"))
-#     expect_error(resamplePerplexity(celdaCCim$counts,
+#     expect_error(resamplePerplexity(celdaCSim$counts,
 #         "celdaCRes", resample = 2))
 #
 #     plotObj <- plotGridSearchPerplexity(celdaCRes)
@@ -113,43 +113,43 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 #
 #     celdaCResK5 <- subsetCeldaList(celdaCRes, params = list(K = 5))
 #     modelC2 <- selectBestModel(celdaCResK5)
-#     res <- perplexity(celdaCCim$counts, modelC)
-#     res2 <- perplexity(celdaCCim$counts, modelC,
-#         newCounts = celdaCCim$counts + 1)
+#     res <- perplexity(celdaCSim$counts, modelC)
+#     res2 <- perplexity(celdaCSim$counts, modelC,
+#         newCounts = celdaCSim$counts + 1)
 #
-#     expect_error(res <- perplexity.celda_C(celdaCCim$counts,
+#     expect_error(res <- perplexity.celda_C(celdaCSim$counts,
 #         modelC,
-#         newCounts = celdaCCim$counts[-1, ]))
+#         newCounts = celdaCSim$counts[-1, ]))
 # })
 
 # logLikelihood
 test_that(desc = "Testing logLikelihood.celda_C", {
     expect_lt(logLikelihood(model = "celda_C",
-        counts = celdaCCim$counts,
-        z = celdaCCim$z,
-        K = celdaCCim$K,
+        counts = celdaCSim$counts,
+        z = celdaCSim$z,
+        K = celdaCSim$K,
         alpha = 1,
         beta = 1,
-        sampleLabel = celdaCCim$sampleLabel),
+        sampleLabel = celdaCSim$sampleLabel),
         0)
 
-    fakeZ <- celdaCCim$z
-    fakeZ[1] <- celdaCCim$K + 1
+    fakeZ <- celdaCSim$z
+    fakeZ[1] <- celdaCSim$K + 1
     expect_error(logLikelihood(model = "celda_C",
         z = fakeZ,
-        counts = celdaCCim$counts,
-        K = celdaCCim$K,
+        counts = celdaCSim$counts,
+        K = celdaCSim$K,
         alpha = 1,
         beta = 1,
-        sampleLabel = celdaCCim$sampleLabel),
+        sampleLabel = celdaCSim$sampleLabel),
         "An entry in z contains a value greater than the provided K.")
 })
 
 # Gibbs sampling
 test_that(desc = "Testing celda_C with Gibbs sampling", {
-    res <- celda_C(counts = celdaCCim$counts,
-        sampleLabel = celdaCCim$sampleLabel,
-        K = celdaCCim$K,
+    res <- celda_C(counts = celdaCSim$counts,
+        sampleLabel = celdaCSim$sampleLabel,
+        K = celdaCSim$K,
         algorithm = "Gibbs",
         maxIter = 5,
         nchain = 1)
@@ -159,14 +159,14 @@ test_that(desc = "Testing celda_C with Gibbs sampling", {
 # normalizeCounts
 test_that(desc = paste0("Making sure normalizeCounts doesn't change dimensions",
     " of counts matrix"), {
-        normCounts <- normalizeCounts(celdaCCim$counts)
-        expect_equal(dim(normCounts), dim(celdaCCim$counts))
-        expect_equal(rownames(normCounts), rownames(celdaCCim$counts))
-        expect_equal(colnames(normCounts), colnames(celdaCCim$counts))
-        expect_error(normalizeCounts(celdaCCim$counts,
+        normCounts <- normalizeCounts(celdaCSim$counts)
+        expect_equal(dim(normCounts), dim(celdaCSim$counts))
+        expect_equal(rownames(normCounts), rownames(celdaCSim$counts))
+        expect_equal(colnames(normCounts), colnames(celdaCSim$counts))
+        expect_error(normalizeCounts(celdaCSim$counts,
             transformationFun = "scale"),
             "'transformationFun' needs to be of class 'function'")
-        expect_error(normalizeCounts(celdaCCim$counts, scaleFun = "scale"),
+        expect_error(normalizeCounts(celdaCSim$counts, scaleFun = "scale"),
             "'scaleFun' needs to be of class 'function'")
     })
 
@@ -192,17 +192,17 @@ test_that(desc = "Testing recodeClusterZ with celda_C", {
 
 # compareCountMatrix
 test_that(desc = "Testing CompareCountMatrix with celda_C", {
-    expect_true(compareCountMatrix(counts = celdaCCim$counts,
+    expect_true(compareCountMatrix(counts = celdaCSim$counts,
         celdaMod = modelC))
 
-    lessCells <- celdaCCim$counts[, seq(100)]
+    lessCells <- celdaCSim$counts[, seq(100)]
     expect_error(compareCountMatrix(counts = lessCells, celdaMod = modelC),
         paste0("The provided celda object was generated from a counts matrix",
             " with a different number of cells than the one provided."))
 
     countsMatrixError <- matrix(data = 1,
-        nrow = nrow(celdaCCim$counts),
-        ncol = ncol(celdaCCim$counts))
+        nrow = nrow(celdaCSim$counts),
+        ncol = ncol(celdaCSim$counts))
     expect_false(compareCountMatrix(counts = countsMatrixError,
         celdaMod = modelC,
         errorOnMismatch = FALSE))
@@ -220,14 +220,14 @@ test_that(desc = "Checking topRank to see if it runs without errors", {
 
 # plotHeatmap
 test_that(desc = "Testing plotHeatmap with celda_C", {
-    expect_error(plotHeatmap(counts = celdaCCim$counts, z = modelC@params$K),
+    expect_error(plotHeatmap(counts = celdaCSim$counts, z = modelC@params$K),
         "Length of z must match number of columns in counts matrix")
     expect_error(plotHeatmap(
-        counts = celdaCCim$counts,
+        counts = celdaCSim$counts,
         z = modelC@clusters$z,
         scaleRow = modelC),
         "'scaleRow' needs to be of class 'function'")
-    expect_error(plotHeatmap(counts = celdaCCim$counts,
+    expect_error(plotHeatmap(counts = celdaCSim$counts,
         z = modelC@clusters$z,
         trim = 3),
         paste0("'trim' should be a 2 element vector specifying the lower and",
@@ -237,27 +237,27 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 # plotHeatmap with annotationCell
 # test_that(desc = "Testing plotHeatmap with celda_C, including annotations", {
 #     annot <- as.data.frame(c(rep(x = 1,
-#         times = ncol(celdaCCim$counts) - 100),
+#         times = ncol(celdaCSim$counts) - 100),
 #         rep(x = 2, 100)))
 #
-#     rownames(annot) <- colnames(celdaCCim$counts)
+#     rownames(annot) <- colnames(celdaCSim$counts)
 #     expect_equal(names(plotHeatmap(
 #         celdaMod = modelC,
-#         counts = celdaCCim$counts,
+#         counts = celdaCSim$counts,
 #         annotationCell = annot,
 #         z = modelC@clusters$z)),
 #         c("tree_row", "tree_col", "gtable"))
 #
 #     rownames(annot) <- NULL
 #     expect_equal(names(plotHeatmap(celdaMod = modelC,
-#         counts = celdaCCim$counts,
+#         counts = celdaCSim$counts,
 #         annotation.feature = as.matrix(annot),
 #         z = modelC@clusters$z)),
 #         c("tree_row", "tree_col", "gtable"))
 #
-#     rownames(annot) <- rev(colnames(celdaCCim$counts))
+#     rownames(annot) <- rev(colnames(celdaCSim$counts))
 #     expect_error(plotHeatmap(celdaMod = modelC,
-#         counts = celdaCCim$counts,
+#         counts = celdaCSim$counts,
 #         annotationCell = annot,
 #         z = modelC@clusters$z),
 #         paste0("Row names of 'annotationCell' are different than the column",
@@ -268,24 +268,24 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 # celdaHeatmap
 # test_that(desc = "Testing celdaHeatmap with celda_C", {
 #     expect_equal(names(celdaHeatmap(celdaMod = modelC,
-#         counts = celdaCCim$counts)),
+#         counts = celdaCSim$counts)),
 #         c("tree_row", "tree_col", "gtable"))
 # })
 
 # celdaProbabilityMap
 # test_that(desc = "Testing celdaProbabiltyMap.celda_C for sample level", {
-#     plotObj <- celdaProbabilityMap(counts = celdaCCim$counts,
+#     plotObj <- celdaProbabilityMap(counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         level = "sample")
 #     expect_true(!is.null(plotObj))
 #
 #     ## Without a sample label
-#     modelC <- celda_C(celdaCCim$counts,
+#     modelC <- celda_C(celdaCSim$counts,
 #         sampleLabel = NULL,
-#         K = celdaCCim$K,
+#         K = celdaCSim$K,
 #         maxIter = 5,
 #         nchain = 1)
-#     plotObj <- celdaProbabilityMap(counts = celdaCCim$counts,
+#     plotObj <- celdaProbabilityMap(counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         level = "sample")
 #     expect_true(!is.null(plotObj))
@@ -293,12 +293,12 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 
 # differentialExpression
 # test_that(desc = "Testing differentialExpression with celda_C", {
-#     diffexp_K1 <- differentialExpression(counts = celdaCCim$counts,
+#     diffexp_K1 <- differentialExpression(counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         c1 = 1)
 #     expect_equal(class(diffexp_K1), c("data.table", "data.frame"))
 #     expect_equal(class(diffExp_K1 <- differentialExpression(
-#         counts = celdaCCim$counts,
+#         counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         c1 = c(2, 3),
 #         c2 = 4,
@@ -310,11 +310,11 @@ test_that(desc = "Testing plotHeatmap with celda_C", {
 #         log2fcThreshold = 0.5),
 #         "'counts' should be a numeric count matrix")
 #     expect_error(differentialExpression(
-#         counts = celdaCCim$counts,
+#         counts = celdaCSim$counts,
 #         celdaMod = NULL,
 #         c1 = 3),
 #         "'celdaMod' should be an object of class celda_C or celda_CG")
-#     expect_error(differentialExpression(counts = celdaCCim$counts,
+#     expect_error(differentialExpression(counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         c1 = NULL,
 #         log2fcThreshold = 0.5,
@@ -325,7 +325,7 @@ test_that(desc = paste0("Testing celdaTsne with celda_C when model class is",
     "changed, should error"), {
         modelX <- modelC
         class(modelX) <- "celda_X"
-        expect_error(celdaTsne(counts = celdaCCim$counts,
+        expect_error(celdaTsne(counts = celdaCSim$counts,
             celdaMod = modelX,
             maxCells = length(modelC@clusters$z),
             minClusterSize = 10),
@@ -333,7 +333,7 @@ test_that(desc = paste0("Testing celdaTsne with celda_C when model class is",
     })
 
 test_that(desc = "Testing celdaTsne with celda_C including all cells", {
-    tsne <- celdaTsne(counts = celdaCCim$counts,
+    tsne <- celdaTsne(counts = celdaCSim$counts,
         celdaMod = modelC,
         maxCells = length(modelC@clusters$z),
         minClusterSize = 10)
@@ -346,11 +346,11 @@ test_that(desc = "Testing celdaTsne with celda_C including all cells", {
 })
 
 test_that(desc = "Testing celdaTsne with celda_C including a subset of cells", {
-    expect_success(expect_error(tsne <- celdaTsne(counts = celdaCCim$counts,
+    expect_success(expect_error(tsne <- celdaTsne(counts = celdaCSim$counts,
         celdaMod = modelC,
         maxCells = 50,
         minClusterSize = 50)))
-    tsne <- celdaTsne(counts = celdaCCim$counts,
+    tsne <- celdaTsne(counts = celdaCSim$counts,
         celdaMod = modelC,
         maxCells = 100,
         minClusterSize = 10)
@@ -365,7 +365,7 @@ test_that(desc = paste0("Testing celdaUmap with celda_C when model class is",
     " changed, should error"), {
         modelX <- modelC
         class(modelX) <- "celda_X"
-        expect_error(celdaUmap(counts = celdaCCim$counts,
+        expect_error(celdaUmap(counts = celdaCSim$counts,
             celdaMod = modelX,
             maxCells = length(modelC@clusters$z),
             minClusterSize = 10),
@@ -373,7 +373,7 @@ test_that(desc = paste0("Testing celdaUmap with celda_C when model class is",
     })
 
 # test_that(desc = "Testing celdaUmap with celda_C including all cells", {
-#     umap <- celdaUmap(counts = celdaCCim$counts,
+#     umap <- celdaUmap(counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         maxCells = length(modelC@clusters$z),
 #         minClusterSize = 10)
@@ -385,11 +385,11 @@ test_that(desc = paste0("Testing celdaUmap with celda_C when model class is",
 
 test_that(desc = "Testing celdaUmap with celda_C including a subset of cells", {
     expect_success(expect_error(umap <- celdaUmap(
-        counts = celdaCCim$counts,
+        counts = celdaCSim$counts,
         celdaMod = modelC,
         maxCells = 50,
         minClusterSize = 50)))
-    umap <- celdaUmap(counts = celdaCCim$counts,
+    umap <- celdaUmap(counts = celdaCSim$counts,
         celdaMod = modelC,
         maxCells = 100,
         minClusterSize = 10)
@@ -402,7 +402,7 @@ test_that(desc = "Testing celdaUmap with celda_C including a subset of cells", {
 
 # featureModuleLookup
 test_that(desc = "Testing featureModuleLookup with celda_C", {
-    expect_error(featureModuleLookup(celdaCCim$counts, modelC, "test_feat"))
+    expect_error(featureModuleLookup(celdaCSim$counts, modelC, "test_feat"))
 })
 
 # .cCSplitZ
@@ -429,9 +429,9 @@ test_that(desc = "Testing error checking for .cCSplitZ", {
 })
 
 test_that(desc = "Testing perplexity.celda_C", {
-    expect_true(is.numeric(perplexity(celdaCCim$counts, modelC)))
+    expect_true(is.numeric(perplexity(celdaCSim$counts, modelC)))
 
     class(modelC) <- c("celda_CG")
-    expect_error(perplexity.celda_C(celdaCCim$counts, modelC),
+    expect_error(perplexity.celda_C(celdaCSim$counts, modelC),
         "could not find function \"perplexity.celda_C\"")
 })
