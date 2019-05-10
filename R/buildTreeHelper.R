@@ -864,7 +864,7 @@
                 branchClasses, ". No alternative split added.")
         }
     } else {
-        print("No solely down-regulated class to add alternative split.")
+        print("No solely down-regulated cluster to add alternative split.")
     }
 
     return(tree)
