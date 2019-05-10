@@ -5,7 +5,7 @@
 \title{Simulate cells from the celda_G model}
 \usage{
 simulateCellscelda_G(model, C = 100, NRange = c(500, 1000), G = 100,
-  L = 10, beta = 1, gamma = 5, delta = 1, ...)
+  L = 10, beta = 1, gamma = 5, delta = 1, seed = 12345, ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::availableModels`.}
@@ -28,6 +28,10 @@ the number of features in each module. Default 5.}
 
 \item{delta}{Numeric. Concentration parameter for Psi. Adds a pseudocount to
 each feature in each module. Default 1.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 
 \item{...}{Additional parameters.}
 }

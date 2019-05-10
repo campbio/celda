@@ -404,13 +404,13 @@ test_that(desc = "Checking moduleHeatmap to see if it runs", {
         celdaMod = modelCG,
         topFeatures = 15,
         topCells = 15,
-        normalize = FALSE)),
+        normalizedCounts = NA)),
         c("treeRow", "treeCol", "gtable"))
     expect_equal(names(moduleHeatmap(celdaCGSim$counts,
         celdaMod = modelCG,
         topFeatures = 15,
         topCells = NULL,
-        normalize = FALSE)),
+        normalizedCounts = NA)),
         c("treeRow", "treeCol", "gtable"))
     expect_error(moduleHeatmap(counts = "counts",
         celdaMod = modelCG,
