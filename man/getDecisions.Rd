@@ -22,9 +22,9 @@ Esimate cell cluster membership using feature matrix input.
 \examples{
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
-# subset 100 genes for fast clustering
-counts <- as.matrix(counts[1500:2000, ])
-# cluster genes into 10 modules for quick demo
+# Subset 500 genes for fast clustering
+counts <- as.matrix(counts[1501:2000, ])
+# Cluster genes ans samples each into 10 modules
 cm <- celda_CG(counts = counts, L = 10, K = 5, verbose = FALSE)
 # Get features matrix and cluster assignments
 factorized <- factorizeMatrix(counts, cm)
@@ -36,6 +36,7 @@ DecTree <- buildTreeHybrid(features,
                            oneoffMetric = "modified F1",
                            threshold = 1,
                            consecutiveOneoff = FALSE)
+
 # Get sample estimates in training data
 getDecisions(DecTree$rules, features)
 }
