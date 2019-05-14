@@ -9,7 +9,7 @@
 #'  NULL, no subsetting will be performed. Default NULL.
 #' @param cellIx Integer vector. Select cells for display in heatmap. If NULL,
 #'  no subsetting will be performed. Default NULL.
-#' @param scaleRow Function; A function to scale each individual row. Set to
+#' @param scaleRow Function. A function to scale each individual row. Set to
 #'  NULL to disable. Occurs after normalization and log transformation. Defualt
 #'  is 'scale' and thus will Z-score transform each row.
 #' @param trim Numeric vector. Vector of length two that specifies the lower
@@ -116,26 +116,6 @@ plotHeatmap <- function(counts,
 
     colorScheme <- match.arg(colorScheme)
 
-    if (!is.null(scaleRow)) {
-        if (is.function(scaleRow)) {
-            cn <- colnames(counts)
-            counts <- t(base::apply(counts, 1, scaleRow))
-            colnames(counts) <- cn
-        } else {
-            stop("'scaleRow' needs to be of class 'function'")
-        }
-    }
-
-    if (!is.null(trim)) {
-        if (length(trim) != 2) {
-            stop("'trim' should be a 2 element vector specifying the lower",
-                " and upper boundaries")
-        }
-        trim <- sort(trim)
-        counts[counts < trim[1]] <- trim[1]
-        counts[counts > trim[2]] <- trim[2]
-    }
-
     ## Create cell annotation
     if (!is.null(annotationCell) & !is.null(z)) {
         if (is.null(rownames(annotationCell))) {
@@ -173,6 +153,29 @@ plotHeatmap <- function(counts,
         annotationFeature <- NA
     }
 
+    ## Select subsets of features/cells
+    if (!is.null(featureIx)) {
+        counts <- counts[featureIx, , drop = FALSE]
+        if (length(annotationFeature) > 1 ||
+                (length(annotationFeature) == 1 & !is.na(annotationFeature))) {
+            annotationFeature <- annotationFeature[featureIx, , drop = FALSE]
+        }
+        if (!is.null(y)) {
+            y <- y[featureIx]
+        }
+    }
+
+    if (!is.null(cellIx)) {
+        counts <- counts[, cellIx, drop = FALSE]
+        if (length(annotationCell) > 1 ||
+                (length(annotationCell) == 1 & !is.na(annotationCell))) {
+            annotationCell <- annotationCell[cellIx, , drop = FALSE]
+        }
+        if (!is.null(z)) {
+            z <- z[cellIx]
+        }
+    }
+
     ## Set annotation colors
     if (!is.null(z)) {
         K <- sort(unique(z))
@@ -201,27 +204,25 @@ plotHeatmap <- function(counts,
         }
     }
 
-    ## Select subsets of features/cells
-    if (!is.null(featureIx)) {
-        counts <- counts[featureIx, , drop = FALSE]
-        if (length(annotationFeature) > 1 ||
-                (length(annotationFeature) == 1 & !is.na(annotationFeature))) {
-            annotationFeature <- annotationFeature[featureIx, , drop = FALSE]
-        }
-        if (!is.null(y)) {
-            y <- y[featureIx]
+    # scale indivisual rows by scaleRow
+    if (!is.null(scaleRow)) {
+        if (is.function(scaleRow)) {
+            cn <- colnames(counts)
+            counts <- t(base::apply(counts, 1, scaleRow))
+            colnames(counts) <- cn
+        } else {
+            stop("'scaleRow' needs to be of class 'function'")
         }
     }
 
-    if (!is.null(cellIx)) {
-        counts <- counts[, cellIx, drop = FALSE]
-        if (length(annotationCell) > 1 ||
-                (length(annotationCell) == 1 & !is.na(annotationCell))) {
-            annotationCell <- annotationCell[cellIx, , drop = FALSE]
+    if (!is.null(trim)) {
+        if (length(trim) != 2) {
+            stop("'trim' should be a 2 element vector specifying the lower",
+                " and upper boundaries")
         }
-        if (!is.null(z)) {
-            z <- z[cellIx]
-        }
+        trim <- sort(trim)
+        counts[counts < trim[1]] <- trim[1]
+        counts[counts > trim[2]] <- trim[2]
     }
 
     ## Set color scheme and breaks
@@ -244,7 +245,6 @@ plotHeatmap <- function(counts,
                 seq(colorSchemeCenter + 1e-6, uBoundRange,
                     length.out = colLen - round(colLen / 2)))
         }
-
     } else {
         # Sequential color scheme
         if (is.null(col)) {
