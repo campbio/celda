@@ -27,7 +27,7 @@ library(devtools)
 install_github("campbio/celda")
 ```
 
-For `R-3.5` users, please install from the `R_3_5` branch. This version of **celda** is identical to the most recent release of **celda** (`master` branch) except it also works on `R-3.5`.
+For `R-3.5` users, please install from the `R_3_5` branch. This version of **celda** is identical to the most recent release of **celda** (`master` branch) except it also works on `R-3.5`. **NOTE:** This branch is no longer updated. Please use `R-3.6` versions.
 ```
 library(devtools)
 install_github("campbio/celda@R_3_5")

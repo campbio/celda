@@ -4,9 +4,8 @@
 \alias{decontX}
 \title{Decontaminate count matrix}
 \usage{
-decontX(counts, z = NULL, batch = NULL, maxIter = 200,
-  beta = 1e-06, delta = 10, logfile = NULL, verbose = TRUE,
-  seed = 12345)
+decontX(counts, z = NULL, batch = NULL, maxIter = 200, delta = 10,
+  logfile = NULL, verbose = TRUE, seed = 12345)
 }
 \arguments{
 \item{counts}{Numeric/Integer matrix. Observed count matrix, rows represent
@@ -18,8 +17,6 @@ features and columns represent cells.}
 
 \item{maxIter}{Integer. Maximum iterations of EM algorithm. Default to be
 200.}
-
-\item{beta}{Numeric. Concentration parameter for Phi. Default to be 1e-6.}
 
 \item{delta}{Numeric. Symmetric concentration parameter for Theta. Default
 to be 10.}
@@ -43,8 +40,12 @@ This function updates decontamination on dataset with multiple
 }
 \examples{
 data(contaminationSim)
-deconC <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
- z = contaminationSim$z, maxIter = 3)
-deconBg <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
- maxIter = 3)
+deconC <- decontX(
+  counts = contaminationSim$rmat + contaminationSim$cmat,
+  z = contaminationSim$z, maxIter = 3
+)
+deconBg <- decontX(
+  counts = contaminationSim$rmat + contaminationSim$cmat,
+  maxIter = 3
+)
 }
