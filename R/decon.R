@@ -1,3 +1,5 @@
+
+
 #' @title Simulate contaminated count matrix
 #' @description This function generates a list containing two count matrices --
 #'  one for real expression, the other one for contamination, as well as other
@@ -59,19 +61,24 @@ simulateContaminatedMatrix <- function(C = 300,
     NRange = c(500, 1000),
     beta = 0.5,
     delta = c(1, 2)) {
-
     if (length(delta) == 1) {
-        cpByC <- stats::rbeta(n = C, shape1 = delta, shape2 = delta)
+        cpByC <- stats::rbeta(n = C,
+            shape1 = delta,
+            shape2 = delta)
     } else {
-        cpByC <- stats::rbeta(n = C, shape1 = delta[1], shape2 = delta[2])
+        cpByC <- stats::rbeta(n = C,
+            shape1 = delta[1],
+            shape2 = delta[2])
     }
 
     z <- sample(seq(K), size = C, replace = TRUE)
     if (length(unique(z)) < K) {
-        warning("Only ",
+        warning(
+            "Only ",
             length(unique(z)),
             " clusters are simulated. Try to increase numebr of cells 'C' if",
-            " more clusters are needed")
+            " more clusters are needed"
+        )
         K <- length(unique(z))
         z <- plyr::mapvalues(z, unique(z), seq(length(unique(z))))
     }
@@ -80,7 +87,9 @@ simulateContaminatedMatrix <- function(C = 300,
         size = C,
         replace = TRUE)
     cNbyC <- vapply(seq(C), function(i) {
-        stats::rbinom(n = 1, size = NbyC[i], p = cpByC[i])
+        stats::rbinom(n = 1,
+            size = NbyC[i],
+            p = cpByC[i])
     }, integer(1))
     rNbyC <- NbyC - cNbyC
 
@@ -95,7 +104,8 @@ simulateContaminatedMatrix <- function(C = 300,
     colnames(cellRmat) <- paste0("Cell_", seq(C))
 
     ## sample contamination count matrix
-    nGByK <- rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
+    nGByK <-
+        rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
     eta <- normalizeCounts(counts = nGByK, normalize = "proportion")
 
     cellCmat <- vapply(seq(C), function(i) {
@@ -106,12 +116,16 @@ simulateContaminatedMatrix <- function(C = 300,
     rownames(cellOmat) <- paste0("Gene_", seq(G))
     colnames(cellOmat) <- paste0("Cell_", seq(C))
 
-    return(list("nativeCounts" = cellRmat,
-        "observedCounts" = cellOmat,
-        "NByC" = NbyC,
-        "z" = z,
-        "eta" = eta,
-        "phi" = t(phi)))
+    return(
+        list(
+            "nativeCounts" = cellRmat,
+            "observedCounts" = cellOmat,
+            "NByC" = NbyC,
+            "z" = z,
+            "eta" = eta,
+            "phi" = t(phi)
+        )
+    )
 }
 
 
@@ -137,9 +151,11 @@ simulateContaminatedMatrix <- function(C = 300,
 # decontamination
 # bgDist Numeric matrix. Rows represent feature and columns are the times that
 # the background-distribution has been replicated.
-.bgCalcLL <- function(counts, cellDist, bgDist, theta) {
-    ll <- sum(t(counts) * log(theta * t(cellDist) +
-            (1 - theta) * t(bgDist) + 1e-20))
+.bgCalcLL <- function(counts, globalZ, cbZ, phi, eta, theta) {
+    # ll <- sum(t(counts) * log(theta * t(cellDist) +
+    #        (1 - theta) * t(bgDist) + 1e-20))
+    ll <- sum(t(counts) * log(theta * t(phi)[cbZ, ] +
+            (1 - theta) * t(eta)[globalZ, ] + 1e-20))
     return(ll)
 }
 
@@ -157,9 +173,7 @@ simulateContaminatedMatrix <- function(C = 300,
     theta,
     z,
     K,
-    beta,
     delta) {
-
     ## Notes: use fix-point iteration to update prior for theta, no need
     ## to feed delta anymore
     logPr <- log(t(phi)[z, ] + 1e-20) + log(theta + 1e-20)
@@ -167,53 +181,73 @@ simulateContaminatedMatrix <- function(C = 300,
 
     Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
     Pc <- 1 - Pr
-    deltaV2 <- MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
+    deltaV2 <-
+        MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
 
     estRmat <- t(Pr) * counts
     rnGByK <- .colSumByGroupNumeric(estRmat, z, K)
     cnGByK <- rowSums(rnGByK) - rnGByK
 
     ## Update parameters
-    theta <- (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
+    theta <-
+        (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
     phi <- normalizeCounts(rnGByK,
         normalize = "proportion",
-        pseudocountNormalize = beta)
+        pseudocountNormalize = 1e-20)
     eta <- normalizeCounts(cnGByK,
         normalize = "proportion",
-        pseudocountNormalize = beta)
+        pseudocountNormalize = 1e-20)
 
-    return(list("estRmat" = estRmat,
+    return(list(
+        "estRmat" = estRmat,
         "theta" = theta,
         "phi" = phi,
         "eta" = eta,
-        "delta" = deltaV2))
+        "delta" = deltaV2
+    ))
 }
 
 
 # This function updates decontamination using background distribution
-.cDCalcEMbgDecontamination <- function(counts, cellDist, bgDist, theta, beta) {
-    # meanNByC <- apply(counts, 2, mean)
-    logPr <- log(t(cellDist) + 1e-20) + log(theta + 1e-20) # +
-    # log( t(counts) / meanNByC )   # better when without panelty
-    logPc <- log(t(bgDist) + 1e-20) + log(1 - theta + 2e-20)
+.cDCalcEMbgDecontamination <-
+    function(counts, globalZ, cbZ, trZ, phi, eta, theta) {
+        logPr <- log(t(phi)[cbZ, ] + 1e-20) + log(theta + 1e-20)
+        logPc <-
+            log(t(eta)[globalZ, ] + 1e-20) + log(1 - theta + 1e-20)
 
-    Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
-    Pc <- 1 - Pr
-    deltaV2 <- MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
+        Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
+        Pc <- 1 - Pr
+        deltaV2 <-
+            MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
 
-    estRmat <- t(Pr) * counts
+        estRmat <- t(Pr) * counts
+        phiUnnormalized <-
+            .colSumByGroupNumeric(estRmat, cbZ, max(cbZ))
+        etaUnnormalized <-
+            rowSums(phiUnnormalized) - .colSumByGroupNumeric(phiUnnormalized,
+                trZ, max(trZ))
 
-    ## Update paramters
-    theta <- (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
-    cellDist <- normalizeCounts(estRmat,
-        normalize = "proportion",
-        pseudocountNormalize = beta)
+        ## Update paramters
+        theta <-
+            (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
+        phi <-
+            normalizeCounts(phiUnnormalized,
+                normalize = "proportion",
+                pseudocountNormalize = 1e-20)
+        eta <-
+            normalizeCounts(etaUnnormalized,
+                normalize = "proportion",
+                pseudocountNormalize = 1e-20)
 
-    return(list("estRmat" = estRmat,
-        "theta" = theta,
-        "cellDist" = cellDist,
-        "delta" = deltaV2))
-}
+        return(list(
+            "estRmat" = estRmat,
+            "theta" = theta,
+            "phi" = phi,
+            "eta" = eta,
+            "delta" = deltaV2
+        ))
+    }
+
 
 #' @title Decontaminate count matrix
 #' @description This function updates decontamination on dataset with multiple
@@ -224,7 +258,6 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param batch Integer vector. Cell batch labels. Default NULL.
 #' @param maxIter Integer. Maximum iterations of EM algorithm. Default to be
 #'  200.
-#' @param beta Numeric. Concentration parameter for Phi. Default to be 1e-6.
 #' @param delta Numeric. Symmetric concentration parameter for Theta. Default
 #'  to be 10.
 #' @param logfile Character. Messages will be redirected to a file named
@@ -237,16 +270,19 @@ simulateContaminatedMatrix <- function(C = 300,
 #'  related parameters.
 #' @examples
 #' data(contaminationSim)
-#' deconC <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
-#'  z = contaminationSim$z, maxIter = 3)
-#' deconBg <- decontX(counts = contaminationSim$rmat + contaminationSim$cmat,
-#'  maxIter = 3)
+#' deconC <- decontX(
+#'   counts = contaminationSim$rmat + contaminationSim$cmat,
+#'   z = contaminationSim$z, maxIter = 3
+#' )
+#' deconBg <- decontX(
+#'   counts = contaminationSim$rmat + contaminationSim$cmat,
+#'   maxIter = 3
+#' )
 #' @export
 decontX <- function(counts,
     z = NULL,
     batch = NULL,
     maxIter = 200,
-    beta = 1e-6,
     delta = 10,
     logfile = NULL,
     verbose = TRUE,
@@ -257,7 +293,6 @@ decontX <- function(counts,
             z = z,
             batch = batch,
             maxIter = maxIter,
-            beta = beta,
             delta = delta,
             logfile = logfile,
             verbose = verbose)
@@ -267,7 +302,6 @@ decontX <- function(counts,
                 z = z,
                 batch = batch,
                 maxIter = maxIter,
-                beta = beta,
                 delta = delta,
                 logfile = logfile,
                 verbose = verbose))
@@ -281,18 +315,18 @@ decontX <- function(counts,
     z = NULL,
     batch = NULL,
     maxIter = 200,
-    beta = 1e-6,
     delta = 10,
     logfile = NULL,
     verbose = TRUE) {
-
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
-        estRmat <- matrix(NA,
+        estRmat <- matrix(
+            NA,
             ncol = ncol(counts),
             nrow = nrow(counts),
-            dimnames = list(rownames(counts), colnames(counts)))
+            dimnames = list(rownames(counts), colnames(counts))
+        )
         theta <- rep(NA, ncol(counts))
         estConp <- rep(NA, ncol(counts))
 
@@ -305,16 +339,18 @@ decontX <- function(counts,
             } else {
                 zBat <- z
             }
-            resBat <- .decontXoneBatch(counts = countsBat,
+            resBat <- .decontXoneBatch(
+                counts = countsBat,
                 z = zBat,
                 batch = bat,
                 maxIter = maxIter,
-                beta = beta,
                 delta = delta,
                 logfile = logfile,
-                verbose = verbose)
+                verbose = verbose
+            )
 
-            estRmat[, batch == bat] <- resBat$resList$estNativeCounts
+            estRmat[, batch == bat] <-
+                resBat$resList$estNativeCounts
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
 
@@ -328,23 +364,30 @@ decontX <- function(counts,
 
         runParams <- resBat$runParams
         method <- resBat$method
-        resList <- list("logLikelihood" = logLikelihood,
+        resList <- list(
+            "logLikelihood" = logLikelihood,
             "estNativeCounts" = estRmat,
             "estConp" = estConp,
-            "theta" = theta)
+            "theta" = theta
+        )
 
-        return(list("runParams" = runParams,
+        return(list(
+            "runParams" = runParams,
             "resList" = resList,
-            "method" = method))
+            "method" = method
+        ))
     }
 
-    return(.decontXoneBatch(counts = counts,
-        z = z,
-        maxIter = maxIter,
-        beta = beta,
-        delta = delta,
-        logfile = logfile,
-        verbose = verbose))
+    return(
+        .decontXoneBatch(
+            counts = counts,
+            z = z,
+            maxIter = maxIter,
+            delta = delta,
+            logfile = logfile,
+            verbose = verbose
+        )
+    )
 }
 
 
@@ -353,13 +396,11 @@ decontX <- function(counts,
     z = NULL,
     batch = NULL,
     maxIter = 200,
-    beta = 1e-6,
     delta = 10,
     logfile = NULL,
     verbose = TRUE) {
-
     .checkCountsDecon(counts)
-    .checkParametersDecon(proportionPrior = delta, distributionPrior = beta)
+    .checkParametersDecon(proportionPrior = delta)
 
     # nG <- nrow(counts)
     nC <- ncol(counts)
@@ -376,27 +417,35 @@ decontX <- function(counts,
     numIterWithoutImprovement <- 0L
     stopIter <- 3L
 
-    .logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(
+        paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
-        verbose = verbose)
-    .logMessages("Start DecontX. Decontamination",
+        verbose = verbose
+    )
+    .logMessages(
+        "Start DecontX. Decontamination",
         logfile = logfile,
         append = TRUE,
-        verbose = verbose)
+        verbose = verbose
+    )
 
     if (!is.null(batch)) {
-        .logMessages("batch: ",
+        .logMessages(
+            "batch: ",
             batch,
             logfile = logfile,
             append = TRUE,
-            verbose = verbose)
+            verbose = verbose
+        )
     }
 
-    .logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(
+        paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
-        verbose = verbose)
+        verbose = verbose
+    )
     startTime <- Sys.time()
 
     if (deconMethod == "clustering") {
@@ -411,28 +460,32 @@ decontX <- function(counts,
         eta <- rowSums(phi) - phi
         phi <- normalizeCounts(phi,
             normalize = "proportion",
-            pseudocountNormalize = beta)
+            pseudocountNormalize = 1e-20)
         eta <- normalizeCounts(eta,
             normalize = "proportion",
-            pseudocountNormalize = beta)
+            pseudocountNormalize = 1e-20)
         ll <- c()
 
-        llRound <- .deconCalcLL(counts = counts,
+        llRound <- .deconCalcLL(
+            counts = counts,
             z = z,
             phi = phi,
             eta = eta,
-            theta = theta)
+            theta = theta
+        )
 
         ## EM updates
-        while (iter <= maxIter & numIterWithoutImprovement <= stopIter) {
-            nextDecon <- .cDCalcEMDecontamination(counts = counts,
+        while (iter <= maxIter &
+                numIterWithoutImprovement <= stopIter) {
+            nextDecon <- .cDCalcEMDecontamination(
+                counts = counts,
                 phi = phi,
                 eta = eta,
                 theta = theta,
                 z = z,
                 K = K,
-                beta = beta,
-                delta = delta)
+                delta = delta
+            )
 
             theta <- nextDecon$theta
             phi <- nextDecon$phi
@@ -440,11 +493,13 @@ decontX <- function(counts,
             delta <- nextDecon$delta
 
             ## Calculate log-likelihood
-            llTemp <- .deconCalcLL(counts = counts,
+            llTemp <- .deconCalcLL(
+                counts = counts,
                 z = z,
                 phi = phi,
                 eta = eta,
-                theta = theta)
+                theta = theta
+            )
             ll <- c(ll, llTemp)
             llRound <- c(llRound, round(llTemp, 2))
 
@@ -458,41 +513,71 @@ decontX <- function(counts,
     }
 
     if (deconMethod == "background") {
+        ## Initialize cell label
+        initialLabel <- .decontxInitializeZ(counts = counts)
+        globalZ <- initialLabel$globalZ
+        cbZ <- initialLabel$cbZ
+        trZ <- initialLabel$trZ
+
         ## Initialization
         deltaInit <- delta
-        theta <- stats::rbeta(n = nC,
-            shape1 = deltaInit,
-            shape2 = deltaInit)
+        theta <-
+            stats::rbeta(n = nC,
+                shape1 = deltaInit,
+                shape2 = deltaInit)
         estRmat <- t(t(counts) * theta)
-        bgDist <- rowSums(counts) / sum(counts)
-        bgDist <- matrix(rep(bgDist, nC), ncol = nC)
-        cellDist <- normalizeCounts(estRmat,
-            normalize = "proportion",
-            pseudocountNormalize = beta)
+
+        phi <- .colSumByGroupNumeric(estRmat, cbZ, max(cbZ))
+        eta <-
+            rowSums(phi) - .colSumByGroupNumeric(phi, trZ, max(trZ))
+        phi <-
+            normalizeCounts(phi,
+                normalize = "proportion",
+                pseudocountNormalize = 1e-20)
+        eta <-
+            normalizeCounts(eta,
+                normalize = "proportion",
+                pseudocountNormalize = 1e-20)
+
         ll <- c()
 
-        llRound <- .bgCalcLL(counts = counts,
-            cellDist = cellDist,
-            bgDist = bgDist,
-            theta = theta)
+        llRound <- .bgCalcLL(
+            counts = counts,
+            globalZ = globalZ,
+            cbZ = cbZ,
+            phi = phi,
+            eta = eta,
+            theta = theta
+        )
 
         ## EM updates
-        while (iter <= maxIter & numIterWithoutImprovement <= stopIter) {
-            nextDecon <- .cDCalcEMbgDecontamination(counts = counts,
-                cellDist = cellDist,
-                bgDist = bgDist,
-                theta = theta,
-                beta = beta)
+        while (iter <= maxIter &
+                numIterWithoutImprovement <= stopIter) {
+            nextDecon <- .cDCalcEMbgDecontamination(
+                counts = counts,
+                globalZ = globalZ,
+                cbZ = cbZ,
+                trZ = trZ,
+                phi = phi,
+                eta = eta,
+                theta = theta
+            )
 
             theta <- nextDecon$theta
-            cellDist <- nextDecon$cellDist
+            phi <- nextDecon$phi
+            eta <- nextDecon$eta
             delta <- nextDecon$delta
 
             ## Calculate log-likelihood
-            llTemp <- .bgCalcLL(counts = counts,
-                cellDist = cellDist,
-                bgDist = bgDist,
-                theta = theta)
+            llTemp <-
+                .bgCalcLL(
+                    counts = counts,
+                    globalZ = globalZ,
+                    cbZ = cbZ,
+                    phi = phi,
+                    eta = eta,
+                    theta = theta
+                )
             ll <- c(ll, llTemp)
             llRound <- c(llRound, round(llTemp, 2))
 
@@ -508,54 +593,62 @@ decontX <- function(counts,
     resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
 
     endTime <- Sys.time()
-    .logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(
+        paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
-        verbose = verbose)
-    .logMessages("Completed DecontX. Total time:",
+        verbose = verbose
+    )
+    .logMessages(
+        "Completed DecontX. Total time:",
         format(difftime(endTime, startTime)),
         logfile = logfile,
         append = TRUE,
-        verbose = verbose)
+        verbose = verbose
+    )
     if (!is.null(batch)) {
-        .logMessages("batch: ",
+        .logMessages(
+            "batch: ",
             batch,
             logfile = logfile,
             append = TRUE,
-            verbose = verbose)
+            verbose = verbose
+        )
     }
-    .logMessages(paste(rep("-", 50), collapse = ""),
+    .logMessages(
+        paste(rep("-", 50), collapse = ""),
         logfile = logfile,
         append = TRUE,
-        verbose = verbose)
+        verbose = verbose
+    )
 
-    runParams <- list("betaInit" = beta,
-        "deltaInit" = deltaInit,
+    runParams <- list("deltaInit" = deltaInit,
         "iteration" = iter - 1L)
 
-    resList <- list("logLikelihood" = ll,
+    resList <- list(
+        "logLikelihood" = ll,
         "estNativeCounts" = nextDecon$estRmat,
         "estConp" = resConp,
         "theta" = theta,
-        "delta" = delta)
+        "delta" = delta
+    )
     # if( deconMethod=="clustering" ) {
     #    posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  )
     #    resList = append( resList , posterior.params )
     # }
 
-    return(list("runParams" = runParams,
+    return(list(
+        "runParams" = runParams,
         "resList" = resList,
-        "method" = deconMethod))
+        "method" = deconMethod
+    ))
 }
 
 
 ## Make sure provided parameters are the right type and value range
-.checkParametersDecon <- function(proportionPrior, distributionPrior) {
+.checkParametersDecon <- function(proportionPrior) {
     if (length(proportionPrior) > 1 | any(proportionPrior <= 0)) {
         stop("'delta' should be a single positive value.")
-    }
-    if (length(distributionPrior) > 1 | any(distributionPrior <= 0)) {
-        stop("'beta' should be a single positive value.")
     }
 }
 
@@ -603,3 +696,67 @@ addLogLikelihood <- function(llA, llB) {
 
     return(ll)
 }
+
+
+
+## Initialization of cell labels for DecontX when they are not given
+.decontxInitializeZ <-
+    function(counts,
+        K = 10,
+        minCell = 3,
+        seed = 428) {
+        nC <- ncol(counts)
+        if (nC < 100) {
+            K <- ceiling(sqrt(nC))
+        }
+
+        globalZ <-
+            .initializeSplitZ(
+                counts,
+                K = K,
+                KSubcluster = NULL,
+                alpha = 1,
+                beta = 1,
+                minCell = 3
+            )
+        globalK <- max(globalZ)
+
+        localZ <- rep(NA, nC)
+        for (k in 1:globalK) {
+            if (sum(globalZ == k) > 2) {
+                localCounts <- counts[, globalZ == k]
+                localK <- min(K, ceiling(sqrt(ncol(
+                    localCounts
+                ))))
+                localZ[globalZ == k] <- .initializeSplitZ(
+                    localCounts,
+                    K = localK,
+                    KSubcluster = NULL,
+                    alpha = 1,
+                    beta = 1,
+                    minCell = 3
+                )
+            } else {
+                localZ [globalZ == k] <- 1L
+            }
+        }
+
+
+        cbZ <-
+            interaction(globalZ, localZ, lex.order = TRUE, drop = TRUE)
+                # combined z label
+        trZ <-
+            as.integer(sub("\\..*", "", levels(cbZ), perl = TRUE))
+                # transitional z label
+        cbZ <-
+            as.integer(plyr::mapvalues(cbZ, from = levels(cbZ),
+                to = 1:length(levels(cbZ))))
+
+
+        return(list(
+            "globalZ" = globalZ,
+            "localZ" = localZ,
+            "trZ" = trZ,
+            "cbZ" = cbZ
+        ))
+    }
