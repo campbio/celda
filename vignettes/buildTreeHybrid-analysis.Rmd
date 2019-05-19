@@ -171,3 +171,8 @@ plotDendro(DecTree,
 head(getDecisions(DecTree$rules, features))
 ```
 
+# Session Information
+
+```{r}
+sessionInfo()
+```
