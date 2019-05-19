@@ -39,7 +39,10 @@ Imports:
     MCMCprecision,
     ggrepel,
     Rtsne,
-    withr
+    withr,
+    dendextend,
+    ggdendro,
+    pROC
 Suggests:
     testthat,
     knitr,
