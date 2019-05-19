@@ -72,22 +72,21 @@
 #' class <- clusters(cm)$z
 #' # Generate Decision Tree
 #' DecTree <- buildTreeHybrid(features,
-#'                            class,
-#'                            oneoffMetric = "modified F1",
-#'                            threshold = 1,
-#'                            consecutiveOneoff = FALSE)
+#'     class,
+#'     oneoffMetric = "modified F1",
+#'     threshold = 1,
+#'     consecutiveOneoff = FALSE)
 #'
 #' # Plot dendrogram
 #' plotDendro(DecTree)
-#' @import pROC
 #' @export
 buildTreeHybrid <- function(features,
-                            class,
-                            oneoffMetric = c("modified F1", "pairwise AUC"),
-                            threshold = 0.95,
-                            reuseFeatures = FALSE,
-                            altSplit = TRUE,
-                            consecutiveOneoff = TRUE) {
+    class,
+    oneoffMetric = c("modified F1", "pairwise AUC"),
+    threshold = 0.95,
+    reuseFeatures = FALSE,
+    altSplit = TRUE,
+    consecutiveOneoff = TRUE) {
 
     if (ncol(features) != length(class)) {
         stop("Number of columns of features must equal length of class")

@@ -95,13 +95,13 @@
                     X$group2Consensus
                 })))
             group2classUnique <- group2classUnique[!group2classUnique %in%
-                group1classVec ]
+                group1classVec]
 
             # Assign
             for (j in seq(length(group1classUnique))) {
                 mat[i, group1classUnique[[j]]] <- j
             }
-            mat[i, group2classUnique ] <- j + 1
+            mat[i, group2classUnique] <- j + 1
         }
     }
 

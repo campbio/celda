@@ -8,6 +8,8 @@ plotDendro(decisionTree, classLabel = NULL, addSensPrec = TRUE,
   leafSize = 24, boxSize = 7, boxColor = "black")
 }
 \arguments{
+\item{decisionTree}{List object. The output of `celda::buildTreeHybrid`.}
+
 \item{classLabel}{A character value. The name of a label to which draw
 the path and rules. If NULL (default), the rules for every cluster is shown.}
 
@@ -19,8 +21,6 @@ for each cluster below leaf label? Default is TRUE.}
 \item{boxSize}{A numeric value. Size of rule labels. Default is 7.}
 
 \item{boxColor}{A character value. Color of rule labels. Default is `black`.}
-
-\item{counts}{List object. The output of `celda::buildTreeHybrid`.}
 }
 \value{
 A ggplot2 object
@@ -41,12 +41,12 @@ factorized <- factorizeMatrix(counts, cm)
 features <- factorized$proportions$cell
 class <- clusters(cm)$z
 # Generate Decision Tree
-DecTree <- buildTreeHybrid(features,
-                           class,
-                           oneoffMetric = "modified F1",
-                           threshold = 1,
-                           consecutiveOneoff = FALSE)
+decTree <- buildTreeHybrid(features,
+    class,
+    oneoffMetric = "modified F1",
+    threshold = 1,
+    consecutiveOneoff = FALSE)
 
 # Plot dendrogram
-plotDendro(DecTree)
+plotDendro(decTree)
 }

@@ -17,7 +17,8 @@ output. Returns NA if cluster estimation was ambiguous.}
 A character vector of label predicitions.
 }
 \description{
-Esimate cell cluster membership using feature matrix input.
+Get decisions for a matrix of features. Estimate cell
+ cluster membership using feature matrix input.
 }
 \examples{
 library(M3DExampleData)
@@ -32,10 +33,10 @@ features <- factorized$proportions$cell
 class <- clusters(cm)$z
 # Generate Decision Tree
 DecTree <- buildTreeHybrid(features,
-                           class,
-                           oneoffMetric = "modified F1",
-                           threshold = 1,
-                           consecutiveOneoff = FALSE)
+    class,
+    oneoffMetric = "modified F1",
+    threshold = 1,
+    consecutiveOneoff = FALSE)
 
 # Get sample estimates in training data
 getDecisions(DecTree$rules, features)

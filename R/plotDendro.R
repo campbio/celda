@@ -1,7 +1,7 @@
 #' @title Plots dendrogram of `buildTreeHybrid` output
 #' @description Generates a dendrogram of the rules and performance
 #' (optional) of the decision tree generates by `buildTreeHybrid`.
-#' @param counts List object. The output of `celda::buildTreeHybrid`.
+#' @param decisionTree List object. The output of `celda::buildTreeHybrid`.
 #' @param classLabel A character value. The name of a label to which draw
 #'  the path and rules. If NULL (default), the rules for every cluster is shown.
 #' @param addSensPrec Logical. Print training sensitivities and precisions
@@ -21,27 +21,25 @@
 #' features <- factorized$proportions$cell
 #' class <- clusters(cm)$z
 #' # Generate Decision Tree
-#' DecTree <- buildTreeHybrid(features,
-#'                            class,
-#'                            oneoffMetric = "modified F1",
-#'                            threshold = 1,
-#'                            consecutiveOneoff = FALSE)
+#' decTree <- buildTreeHybrid(features,
+#'     class,
+#'     oneoffMetric = "modified F1",
+#'     threshold = 1,
+#'     consecutiveOneoff = FALSE)
 #'
 #' # Plot dendrogram
-#' plotDendro(DecTree)
+#' plotDendro(decTree)
 #' @return A ggplot2 object
 #' @import ggplot2
-#' @import ggdendro
-#' @import dendextend
+#' @importFrom ggdendro dendro_data ggdendrogram
+#' @importFrom dendextend get_nodes_xy get_nodes_attr get_leaves_attr
 #' @export
-
 plotDendro <- function(decisionTree,
-                    classLabel = NULL,
-                    addSensPrec = TRUE,
-                    leafSize = 24,
-                    boxSize = 7,
-                    boxColor = "black"
-) {
+    classLabel = NULL,
+    addSensPrec = TRUE,
+    leafSize = 24,
+    boxSize = 7,
+    boxColor = "black") {
 
     # Get necessary elements
     dendro <- decisionTree$dendro
@@ -58,7 +56,7 @@ plotDendro <- function(decisionTree,
     names(perfVec) <- names(performance$sensitivity)
 
     # Get dendrogram segments
-    dendSegs <- dendro_data(dendro, type = "rectangle")$segments
+    dendSegs <- ggdendro::dendro_data(dendro, type = "rectangle")$segments
 
     # Get necessary coordinates to add labels to
     # These will have y > 1
@@ -74,13 +72,13 @@ plotDendro <- function(decisionTree,
 
     # Label names will be at nodes, these will
     # Occur at the end of segments
-    segs <- as.data.frame(get_nodes_xy(dendro))
+    segs <- as.data.frame(dendextend::get_nodes_xy(dendro))
     colnames(segs) <- c("xend", "yend")
 
     # As label and which stat was used
     # Labels will stack
-    segs$label <- gsub(";", "\n", get_nodes_attr(dendro, "label"))
-    segs$statUsed <- get_nodes_attr(dendro, "statUsed")
+    segs$label <- gsub(";", "\n", dendextend::get_nodes_attr(dendro, "label"))
+    segs$statUsed <- dendextend::get_nodes_attr(dendro, "statUsed")
 
     # If highlighting a class label, remove non-class specific rules
     if (!is.null(classLabel)) {
@@ -88,7 +86,7 @@ plotDendro <- function(decisionTree,
             stop("classLabel not a valid class ID.")
         }
         dendro <- .highlightClassLabel(dendro, classLabel)
-        keepLabel <- get_nodes_attr(dendro, "keepLabel")
+        keepLabel <- dendextend::get_nodes_attr(dendro, "keepLabel")
         keepLabel[is.na(keepLabel)] <- FALSE
         segs$label[!keepLabel] <- NA
     }
@@ -102,17 +100,16 @@ plotDendro <- function(decisionTree,
 
     # Remove duplicated labels
     dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$y,
-        decreasing = T),]
+        decreasing = T), ]
     dendSegsLabelled <- dendSegsLabelled[
         !duplicated(dendSegsLabelled[,
-            c("xend", "x", "yend", "label", "statUsed")]),]
+            c("xend", "x", "yend", "label", "statUsed")]), ]
 
     # Merge with alternative x-coordinates for alternative split
     dendSegsLabelled <- merge(dendSegsLabelled, dendSegsAlt)
 
     # Order by height and coordinates
-    dendSegsLabelled <- dendSegsLabelled[order(
-        dendSegsLabelled$x),]
+    dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$x), ]
 
     # Find information gain splits
     igSplits <- dendSegsLabelled$statUsed == "IG" &
@@ -125,7 +122,7 @@ plotDendro <- function(decisionTree,
     dendSegsLabelled$y[!igSplits] <- dendSegsLabelled$y[!igSplits] - 0.2
 
     # Get index of leaf labels
-    leafLabels <- get_leaves_attr(dendro, "label")
+    leafLabels <- dendextend::get_leaves_attr(dendro, "label")
 
     # Add sensitivity and precision measurements
     if (addSensPrec) {
@@ -133,38 +130,35 @@ plotDendro <- function(decisionTree,
     }
 
     # Create plot of dendrogram
-    suppressMessages(dendroP <- ggdendrogram(dendro) +
-        geom_label(
-            data = dendSegsLabelled,
-            aes(
-                x = xend,
-                y = y,
-                label = label),
-            size = boxSize,
-            label.size = 1,
-            fontface = "bold",
-            vjust = 1,
-            nudge_y = 0.1,
-            color = boxColor) +
-        theme_bw() +
-        scale_x_reverse(breaks = seq(length(leafLabels)),
-            label = leafLabels) +
-        scale_y_continuous(expand = c(0, 0)) +
-        theme(
-            panel.grid.major.y = element_blank(),
-            legend.position = "none",
-            panel.grid.minor.y = element_blank(),
-            panel.grid.minor.x = element_blank(),
-            panel.grid.major.x = element_blank(),
-            panel.border = element_blank(),
-            axis.title = element_blank(),
-            axis.ticks = element_blank(),
-            axis.text.x = element_text(hjust = 0.5,
-                size = leafSize,
-                family = "mono",
-                vjust = -1),
-            axis.text.y = element_blank()
-        ))
+    suppressMessages(dendroP <- ggdendro::ggdendrogram(dendro) +
+            ggplot2::geom_label(
+                data = dendSegsLabelled,
+                ggplot2::aes(x = xend, y = y, label = label),
+                size = boxSize,
+                label.size = 1,
+                fontface = "bold",
+                vjust = 1,
+                nudge_y = 0.1,
+                color = boxColor) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_x_reverse(breaks = seq(length(leafLabels)),
+                label = leafLabels) +
+            ggplot2::scale_y_continuous(expand = c(0, 0)) +
+            ggplot2::theme(
+                panel.grid.major.y = ggplot2::element_blank(),
+                legend.position = "none",
+                panel.grid.minor.y = ggplot2::element_blank(),
+                panel.grid.minor.x = ggplot2::element_blank(),
+                panel.grid.major.x = ggplot2::element_blank(),
+                panel.border = ggplot2::element_blank(),
+                axis.title = ggplot2::element_blank(),
+                axis.ticks = ggplot2::element_blank(),
+                axis.text.x = ggplot2::element_text(hjust = 0.5,
+                    size = leafSize,
+                    family = "mono",
+                    vjust = -1),
+                axis.text.y = ggplot2::element_blank()
+            ))
 
     # Increase line width slightly for aesthetic purposes
     dendroP$layers[[2]]$aes_params$size <- 1.3

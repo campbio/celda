@@ -45,7 +45,7 @@
 
             # Check for consecutive oneoff
             tryOneoff <- TRUE
-            if(!consectutiveOneoff & split$statUsed == "OO") {
+            if (!consectutiveOneoff & split$statUsed == "OO") {
                 tryOneoff <- FALSE
             }
 
@@ -165,7 +165,11 @@
 
             # Only keep non-null branches
             outBranch <- outBranch[!unlist(lapply(outBranch, is.null))]
-            if (length(outBranch) > 0) return(outBranch) else return(NULL)
+            if (length(outBranch) > 0) {
+                return(outBranch)
+            } else {
+                return(NULL)
+            }
         }, features, class)
 
         # Unlist outList so is one list per 'treeLevel'
@@ -179,6 +183,7 @@
     }
     return(tree)
 }
+
 
 # Wrapper to subset the feature and class set for each split
 .wrapBranchHybrid <- function(
@@ -323,6 +328,7 @@
 }
 
 # Run pairwise AUC metirc on single feature
+#' @importFrom pROC auc roc
 .splitMetricPairwiseAUC <- function(feat, class, features, rPerf = FALSE) {
 
     # Get current feature
@@ -339,7 +345,7 @@
         classK1 <- as.numeric(class == k1)
 
         # Get AUC value
-        aucK1 <- auc(roc(classK1, currentFeature, direction = "<"))
+        aucK1 <- pROC::auc(pROC::roc(classK1, currentFeature, direction = "<"))
 
         # Return
         return(aucK1)
@@ -367,7 +373,8 @@
             currentLabels <- as.integer(currentClusters == k1)
 
             # get AUC value for this feat-cluster pair
-            rocK2 <- roc(currentLabels, currentFeatureSubset, direction = "<")
+            rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,
+                direction = "<")
             aucK2 <- rocK2$auc
             coordK2 <- coords(rocK2, "best", ret = "threshold")[1]
 
@@ -393,6 +400,7 @@
         return(aucValue)
     }
 }
+
 
 # Run modified F1 metric on single feature
 .splitMetricModF1 <- function(feat, class, features, rPerf = FALSE) {
@@ -591,7 +599,7 @@
         if (nrow(classSplitUnique) > 0) {
 
             # Get log(determinant of full matrix)
-            DET <- .psdet(cov(features))
+            DET <- .psdet(stats::cov(features))
 
             # Information gain of every observation
             IGdens <- apply(
