@@ -328,7 +328,7 @@
 }
 
 # Run pairwise AUC metirc on single feature
-#' @importFrom pROC auc roc
+#' @importFrom pROC auc roc coords
 .splitMetricPairwiseAUC <- function(feat, class, features, rPerf = FALSE) {
 
     # Get current feature
@@ -376,7 +376,7 @@
             rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,
                 direction = "<")
             aucK2 <- rocK2$auc
-            coordK2 <- coords(rocK2, "best", ret = "threshold")[1]
+            coordK2 <- pROC::coords(rocK2, "best", ret = "threshold")[1]
 
             # Concatenate vectors
             statK2 <- c(threshold = coordK2, auc = aucK2)
