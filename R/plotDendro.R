@@ -1,11 +1,11 @@
-#' @title Plots dendrogram of `buildTreeHybrid` output
+#' @title Plots dendrogram of `findMarkers` output
 #' @description Generates a dendrogram of the rules and performance
-#' (optional) of the decision tree generates by `buildTreeHybrid`.
-#' @param decisionTree List object. The output of `celda::buildTreeHybrid`.
+#' (optional) of the decision tree generates by `findMarkers`.
+#' @param decisionTree List object. The output of `celda::findMarkers`.
 #' @param classLabel A character value. The name of a label to which draw
 #'  the path and rules. If NULL (default), the rules for every cluster is shown.
 #' @param addSensPrec Logical. Print training sensitivities and precisions
-#'  for each cluster below leaf label? Default is TRUE.
+#'  for each cluster below leaf label? Default is FALSE.
 #' @param leafSize A numeric value. Size of text below each leaf. Default is 24.
 #' @param boxSize A numeric value. Size of rule labels. Default is 7.
 #' @param boxColor A character value. Color of rule labels. Default is `black`.
@@ -21,7 +21,7 @@
 #' features <- factorized$proportions$cell
 #' class <- clusters(cm)$z
 #' # Generate Decision Tree
-#' decTree <- buildTreeHybrid(features,
+#' decTree <- findMarkers(features,
 #'     class,
 #'     oneoffMetric = "modified F1",
 #'     threshold = 1,
@@ -36,7 +36,7 @@
 #' @export
 plotDendro <- function(decisionTree,
     classLabel = NULL,
-    addSensPrec = TRUE,
+    addSensPrec = FALSE,
     leafSize = 24,
     boxSize = 7,
     boxColor = "black") {
@@ -82,7 +82,7 @@ plotDendro <- function(decisionTree,
 
     # If highlighting a class label, remove non-class specific rules
     if (!is.null(classLabel)) {
-        if (!classLabel %in% rownames(decisionTree$summaryMatrix)) {
+        if (!classLabel %in% names(decisionTree$rules)) {
             stop("classLabel not a valid class ID.")
         }
         dendro <- .highlightClassLabel(dendro, classLabel)
@@ -127,6 +127,13 @@ plotDendro <- function(decisionTree,
     # Add sensitivity and precision measurements
     if (addSensPrec) {
         leafLabels <- paste(leafLabels, perfVec[leafLabels], sep = "\n")
+        leafAngle <- 0
+        leafHJust <- 0.5
+        leafVJust <- -1
+    } else {
+        leafAngle <- 90
+        leafHJust <- 1
+        leafVJust <- 0.5
     }
 
     # Create plot of dendrogram
@@ -153,10 +160,12 @@ plotDendro <- function(decisionTree,
                 panel.border = ggplot2::element_blank(),
                 axis.title = ggplot2::element_blank(),
                 axis.ticks = ggplot2::element_blank(),
-                axis.text.x = ggplot2::element_text(hjust = 0.5,
+                axis.text.x = ggplot2::element_text(
+                    hjust = leafHJust,
+                    angle = leafAngle,
                     size = leafSize,
                     family = "mono",
-                    vjust = -1),
+                    vjust = leafVJust),
                 axis.text.y = ggplot2::element_blank()
             ))
 
