@@ -313,7 +313,7 @@ distinctColors <- function(n,
     # And each row/column of the count matrix must have at least one count
     countRowSum <- rowSums(counts)
     countColSum <- colSums(counts)
-    if (sum(countRowSum == 0) > 1 | sum(countColSum == 0) > 1) {
+    if (sum(countRowSum == 0) > 0 | sum(countColSum == 0) > 0) {
         stop("Each row and column of the count matrix must have at least",
             " one count")
     }

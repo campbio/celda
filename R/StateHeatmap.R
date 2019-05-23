@@ -19,8 +19,13 @@
 #' @param topFeatures Integer. Plot `topFeatures` with the highest probability
 #'  in the featureModule. If NULL, plot all features in the module. Default
 #'  NULL.
-#' @param normalize Logical. Whether to normalize the columns of `counts`.
-#'  Default TRUE.
+#' @param normalizedCounts Integer matrix. Rows represent features and columns
+#'  represent cells. This matrix should correspond to the one provided for
+#'  `counts`, but should be passed through. If NA, normalize `counts`.
+#'  Default NA.
+#'  `normalizeCounts(counts, "proportion", transformationFun=sqrt)`. Use of this
+#'  parameter is particularly useful for plotting many moduleHeatmaps, where
+#'  normalizing the counts matrix repeatedly would be too time consuming.
 #' @param scaleRow Character. Which function to use to scale each individual
 #'  row. Set to NULL to disable. Occurs after normalization and log
 #'  transformation. For example, `scale` will Z-score transform each row.
@@ -39,7 +44,7 @@ moduleHeatmap <- function(counts,
     featureModule = 1,
     topCells = 100,
     topFeatures = NULL,
-    normalize = TRUE,
+    normalizedCounts = NA,
     scaleRow = scale,
     showFeaturenames = TRUE) {
 
@@ -93,11 +98,11 @@ moduleHeatmap <- function(counts,
     }
 
     cellIndices <- rev(cellIndices)
-    if (normalize) {
+    if (is.na(normalizedCounts)) {
       normCounts <- normalizeCounts(counts, normalize = "proportion",
           transformationFun = sqrt)
     } else {
-        normCounts <- counts
+        normCounts <- normalizedCounts
     }
 
     # filter counts based on featureIndices

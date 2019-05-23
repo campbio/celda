@@ -280,7 +280,7 @@ test_that(desc = "Testing moduleHeatmap with celda_G", {
         celdaMod = modelG,
         topFeatures = 15,
         topCells = 15,
-        normalize = FALSE)),
+        normalizedCounts = NA)),
         c("treeRow", "treeCol", "gtable"))
 
     expect_error(moduleHeatmap("counts", celdaMod = modelG),

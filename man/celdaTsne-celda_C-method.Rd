@@ -7,7 +7,7 @@
 \usage{
 \S4method{celdaTsne}{celda_C}(counts, celdaMod, maxCells = 25000,
   minClusterSize = 100, initialDims = 20, modules = NULL,
-  perplexity = 20, maxIter = 2500)
+  perplexity = 20, maxIter = 2500, seed = 12345)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -34,6 +34,10 @@ tSNE. If NULL, all modules will be used. Default NULL.}
 
 \item{maxIter}{Integer. Maximum number of iterations in tSNE generation.
 Default 2500.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 }
 \value{
 A two column matrix of t-SNE coordinates
