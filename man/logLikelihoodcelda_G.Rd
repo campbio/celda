@@ -22,8 +22,6 @@ each feature in each module. Default 1.}
 
 \item{gamma}{Numeric. Concentration parameter for Eta. Adds a pseudocount to
 the number of features in each module. Default 1.}
-
-\item{...}{Additional parameters.}
 }
 \value{
 The log-likelihood for the given cluster assignments.
