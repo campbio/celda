@@ -27,7 +27,7 @@ library(devtools)
 install_github("campbio/celda")
 ```
 
-For `R-3.5` users, please install from the `R_3_5` branch. This version of **celda** is identical to the most recent release of **celda** (`master` branch) except it also works on `R-3.5`. **NOTE:** This branch is no longer updated. Please use `R-3.6` versions.
+For `R-3.5` users, please install from the `R_3_5` branch. This version of **celda** is identical to the most recent release of **celda** (`master` branch) except it also works on `R-3.5`.
 ```
 library(devtools)
 install_github("campbio/celda@R_3_5")
@@ -55,4 +55,9 @@ The vignette in HTML format showing how to use **celda** is available on Biocond
 Example vignette of doing single-cell RNA-seq data decontamination using DecontX is available [here](http://bioconductor.org/packages/release/bioc/vignettes/celda/inst/doc/DecontX-analysis.html).
 
 ## For developers
-Check out our [Wiki](https://github.com/campbio/celda/wiki) for [coding style guide](https://github.com/campbio/celda/wiki/Celda-Development-Coding-Style-Guide) if you want to contribute!
+Check out our [Wiki](https://github.com/campbio/celda/wiki) for developer's guide if you want to contribute!
+- [Celda Development Coding Style Guide](https://github.com/campbio/celda/wiki/Celda-Development-Coding-Style-Guide)
+- [Celda Development Robust and Efficient Code](https://github.com/campbio/celda/wiki/Celda-Development-Robust-and-Efficient-Code)
+- [Celda Development Rstudio configuration](https://github.com/campbio/celda/wiki/Celda-Development-Rstudio-configuration)
+- [FAQ on how to use celda](https://github.com/campbio/celda/wiki/FAQ-on-how-to-use-celda)
+- [FAQ on package development](https://github.com/campbio/celda/wiki/FAQ-on-package-development)

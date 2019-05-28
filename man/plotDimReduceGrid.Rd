@@ -5,7 +5,7 @@
 \title{Mapping the dimensionality reduction plot}
 \usage{
 plotDimReduceGrid(dim1, dim2, matrix, size, xlab, ylab, colorLow, colorMid,
-  colorHigh, varLabel)
+  colorHigh, varLabel, headers = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality
@@ -35,6 +35,9 @@ The color will be used to signify the highest values on the scale.
  Default 'blue'.}
 
 \item{varLabel}{Character vector. Title for the color legend.}
+
+\item{headers}{Character vector. If `NULL`, the corresponding rownames are
+used as labels. Otherwise, these headers are used to label the genes.}
 }
 \value{
 The plot as a ggplot object

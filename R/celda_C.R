@@ -46,7 +46,7 @@
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @return An object of class `celda_C` with the cell population clusters
-#'  stored in in `z`.
+#'  stored in `z`.
 #' @seealso `celda_G()` for feature clustering and `celda_CG()` for simultaneous
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of K and multiple chains in parallel.
