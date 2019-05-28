@@ -48,7 +48,7 @@ plotDimReduceGrid <- function(dim1,
     colorMid,
     colorHigh,
     varLabel,
-    headers) {
+    headers = NULL) {
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
     naIx <- is.na(dim1) | is.na(dim2)
@@ -169,6 +169,10 @@ plotDimReduceFeature <- function(dim1,
                 " should be the same length as features ",
                 features)
         }
+
+        if (isFALSE(exactMatch)) {
+            warning("exactMatch is FALSE. headers will not be used!")
+        }
     }
 
     if (isTRUE(normalize)) {
@@ -193,28 +197,15 @@ plotDimReduceFeature <- function(dim1,
 
     varLabel <- "Expression"
     if (!isTRUE(exactMatch)) {
-        featuresIndices <- integer(length(features))
-        notFound <- character(length(features))
-        if (isFALSE(is.null(headers))) {
-            headersFound <- character(length(features))
-        }
-
-        for (i in seq_along(features)) {
-            featuresIndices[i] <- grep(features[i], rownames(counts))
-            if (length(grep(features[i], rownames(counts))) == 0) {
-                notFound[i] <- features[i]
-            } else {
-                if (isFALSE(is.null(headers))) {
-                    headersFound[i] <- headers[i]
-                }
+        featuresIndices <- c()
+        notFound <- c()
+        for (gene in features) {
+            featuresIndices <-
+                c(featuresIndices, grep(gene, rownames(counts)))
+            if (length(grep(gene, rownames(counts))) == 0) {
+                notFound <- c(notFound, gene)
             }
         }
-
-        notFound <- notFound[notFound != ""]
-        if (isFALSE(is.null(headers))) {
-            headers <- headersFound[headersFound != ""]
-        }
-
         counts <- counts[featuresIndices, , drop = FALSE]
         if (length(notFound) > 0) {
             if (length(notFound) == length(features)) {
