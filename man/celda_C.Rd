@@ -75,7 +75,7 @@ can only be used when `initialize = 'random'`. Default NULL.}
 }
 \value{
 An object of class `celda_C` with the cell population clusters
- stored in in `z`.
+ stored in `z`.
 }
 \description{
 Clusters the columns of a count matrix containing single-cell

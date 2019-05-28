@@ -94,7 +94,7 @@ starting values for each feature will be randomly sampled from 1:L.
 }
 \value{
 An object of class `celda_CG` with the cell populations clusters
- stored in in `z` and feature module clusters stored in `y`.
+ stored in `z` and feature module clusters stored in `y`.
 }
 \description{
 Clusters the rows and columns of a count matrix containing
