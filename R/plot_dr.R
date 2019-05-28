@@ -172,6 +172,7 @@ plotDimReduceFeature <- function(dim1,
 
         if (isFALSE(exactMatch)) {
             warning("exactMatch is FALSE. headers will not be used!")
+            headers <- NULL
         }
     }
 
