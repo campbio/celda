@@ -19,6 +19,8 @@
 #'  The color will be used to signify the highest values on the scale.
 #'   Default 'blue'.
 #' @param varLabel Character vector. Title for the color legend.
+#' @param headers Character vector. If `NULL`, the corresponding rownames are
+#'  used as labels. Otherwise, these headers are used to label the genes.
 #' @return The plot as a ggplot object
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
@@ -45,7 +47,8 @@ plotDimReduceGrid <- function(dim1,
     colorLow,
     colorMid,
     colorHigh,
-    varLabel) {
+    varLabel,
+    headers) {
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
     naIx <- is.na(dim1) | is.na(dim2)
@@ -54,24 +57,49 @@ plotDimReduceGrid <- function(dim1,
     m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
     colnames(m) <- c(xlab, ylab, "facet", varLabel)
 
-    ggplot2::ggplot(m,
-        ggplot2::aes_string(x = xlab, y = ylab)) +
-        ggplot2::geom_point(stat = "identity",
-            size = size,
-            ggplot2::aes_string(color = varLabel)) +
-        ggplot2::facet_wrap(~ facet) +
-        ggplot2::theme_bw() +
-        ggplot2::scale_colour_gradient2(low = colorLow,
-            high = colorHigh,
-            mid = colorMid,
-            midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
-            name = gsub("_", " ", varLabel)) +
-        ggplot2::theme(strip.background = ggplot2::element_blank(),
-            panel.grid.major = ggplot2::element_blank(),
-            panel.grid.minor = ggplot2::element_blank(),
-            panel.spacing = unit(0, "lines"),
-            panel.background = ggplot2::element_blank(),
-            axis.line = ggplot2::element_line(colour = "black"))
+    if (isFALSE(is.null(headers))) {
+        names(headers) <- levels(m$facet)
+        headers <- ggplot2::as_labeller(headers)
+
+        g <- ggplot2::ggplot(m,
+            ggplot2::aes_string(x = xlab, y = ylab)) +
+            ggplot2::geom_point(stat = "identity",
+                size = size,
+                ggplot2::aes_string(color = varLabel)) +
+            ggplot2::facet_wrap(~ facet, labeller = headers) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_colour_gradient2(low = colorLow,
+                high = colorHigh,
+                mid = colorMid,
+                midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
+                name = gsub("_", " ", varLabel)) +
+            ggplot2::theme(strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black"))
+    } else {
+        g <- ggplot2::ggplot(m,
+            ggplot2::aes_string(x = xlab, y = ylab)) +
+            ggplot2::geom_point(stat = "identity",
+                size = size,
+                ggplot2::aes_string(color = varLabel)) +
+            ggplot2::facet_wrap(~ facet) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_colour_gradient2(low = colorLow,
+                high = colorHigh,
+                mid = colorMid,
+                midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
+                name = gsub("_", " ", varLabel)) +
+            ggplot2::theme(strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black"))
+    }
+    return(g)
 }
 
 
@@ -87,6 +115,8 @@ plotDimReduceGrid <- function(dim1,
 #' @param counts Integer matrix. Rows represent features and columns
 #'  represent cells.
 #' @param features Character vector. Uses these genes for plotting.
+#' @param headers Character vector. If `NULL`, the corresponding rownames are
+#'  used as labels. Otherwise, these headers are used to label the genes.
 #' @param normalize Logical. Whether to normalize the columns of `counts`.
 #'  Default TRUE.
 #' @param exactMatch Logical. Whether an exact match or a partial match using
@@ -121,6 +151,7 @@ plotDimReduceFeature <- function(dim1,
     dim2,
     counts,
     features,
+    headers = NULL,
     normalize = TRUE,
     exactMatch = TRUE,
     trim = c(-2, 2),
@@ -130,6 +161,16 @@ plotDimReduceFeature <- function(dim1,
     colorLow = "grey",
     colorMid = NULL,
     colorHigh = "blue") {
+
+    if (isFALSE(is.null(headers))) {
+        if (length(headers) != length(features)) {
+            stop("Headers ",
+                headers,
+                " should be the same length as features ",
+                features)
+        }
+    }
+
     if (isTRUE(normalize)) {
         counts <- normalizeCounts(counts,
             transformationFun = sqrt,
@@ -152,15 +193,21 @@ plotDimReduceFeature <- function(dim1,
 
     varLabel <- "Expression"
     if (!isTRUE(exactMatch)) {
-        featuresIndices <- c()
-        notFound <- c()
-        for (gene in features) {
-            featuresIndices <-
-                c(featuresIndices, grep(gene, rownames(counts)))
-            if (length(grep(gene, rownames(counts))) == 0) {
-                notFound <- c(notFound, gene)
+        featuresIndices <- integer(length(features))
+        notFound <- character(length(features))
+        headersFound <- character(length(features))
+        for (i in seq_along(features)) {
+            featuresIndices[i] <- grep(features[i], rownames(counts))
+            if (length(grep(features[i], rownames(counts))) == 0) {
+                notFound[i] <- features[i]
+            } else {
+                headersFound[i] <- headers[i]
             }
         }
+
+        notFound <- notFound[notFound != ""]
+        headers <- headersFound[headersFound != ""]
+
         counts <- counts[featuresIndices, , drop = FALSE]
         if (length(notFound) > 0) {
             if (length(notFound) == length(features)) {
@@ -172,10 +219,11 @@ plotDimReduceFeature <- function(dim1,
                 paste(notFound,
                     sep = "",
                     collapse = ","))
-            }
+        }
     } else {
         featuresNotFound <- setdiff(features,
             intersect(features, rownames(counts)))
+        whichHeadersNotFound <- which(featuresNotFound == features)
         if (length(featuresNotFound) > 0) {
             if (length(featuresNotFound) == length(features)) {
                 stop("None of the provided features had matching",
@@ -188,6 +236,7 @@ plotDimReduceFeature <- function(dim1,
                     collapse = ","))
             }
         featuresFound <- setdiff(features, featuresNotFound)
+        headers <- headers[-whichHeadersNotFound]
         counts <- counts[featuresFound, , drop = FALSE]
     }
     plotDimReduceGrid(dim1,
@@ -199,7 +248,8 @@ plotDimReduceFeature <- function(dim1,
         colorLow,
         colorMid,
         colorHigh,
-        varLabel)
+        varLabel,
+        headers)
 }
 
 
