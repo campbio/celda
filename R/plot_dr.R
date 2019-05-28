@@ -223,7 +223,6 @@ plotDimReduceFeature <- function(dim1,
     } else {
         featuresNotFound <- setdiff(features,
             intersect(features, rownames(counts)))
-        whichHeadersNotFound <- which(featuresNotFound == features)
         if (length(featuresNotFound) > 0) {
             if (length(featuresNotFound) == length(features)) {
                 stop("None of the provided features had matching",
@@ -234,9 +233,11 @@ plotDimReduceFeature <- function(dim1,
                 paste(featuresNotFound,
                     sep = "",
                     collapse = ","))
+
+            whichHeadersNotFound <- which(featuresNotFound == features)
+            headers <- headers[-whichHeadersNotFound]
             }
         featuresFound <- setdiff(features, featuresNotFound)
-        headers <- headers[-whichHeadersNotFound]
         counts <- counts[featuresFound, , drop = FALSE]
     }
     plotDimReduceGrid(dim1,
