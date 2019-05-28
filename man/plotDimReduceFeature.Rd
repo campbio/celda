@@ -4,8 +4,8 @@
 \alias{plotDimReduceFeature}
 \title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
-plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
-  exactMatch = TRUE, trim = c(-2, 2), size = 1,
+plotDimReduceFeature(dim1, dim2, counts, features, headers = NULL,
+  normalize = TRUE, exactMatch = TRUE, trim = c(-2, 2), size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2", colorLow = "grey",
   colorMid = NULL, colorHigh = "blue")
 }
@@ -20,6 +20,9 @@ reduction output.}
 represent cells.}
 
 \item{features}{Character vector. Uses these genes for plotting.}
+
+\item{headers}{Character vector. If `NULL`, the corresponding rownames are
+used as labels. Otherwise, these headers are used to label the genes.}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`.
 Default TRUE.}

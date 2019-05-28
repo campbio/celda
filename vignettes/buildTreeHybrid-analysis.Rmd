@@ -15,7 +15,7 @@ vignette: >
 
 **CE**llular **L**atent **D**irichlet **A**llocation (celda), is among multiple approaches to cluster cells from single-cell RNA-seq data into discrete sub-populations.  In most cases, annotating a concise set of important features for distinguishing these sub-populations is not a trivial task.
 
-In this vignette we will demonstrate the implementation of a multiclass decision tree approach to simultaneously sort and annotate cell cluster label estimations by generating a sequence of univariate rules for each cluster.  
+In this vignette we will demonstrate the implementation of a multiclass decision tree approach to simultaneously sort and annotate cell cluster label estimations by generating a sequence of univariate rules for each cluster.
 
 The procedure has two main deviations from simple multiclass decision tree procedures. First, at each split cells from the same cluster are never separated during tree building.  Instead cells from the same population are moved to one-side of a particular split based on majority voting. Second, each cluster split can be determined by one of two heuristics, as follows...
 
