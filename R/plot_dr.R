@@ -195,18 +195,25 @@ plotDimReduceFeature <- function(dim1,
     if (!isTRUE(exactMatch)) {
         featuresIndices <- integer(length(features))
         notFound <- character(length(features))
-        headersFound <- character(length(features))
+        if (isFALSE(is.null(headers))) {
+            headersFound <- character(length(features))
+        }
+
         for (i in seq_along(features)) {
             featuresIndices[i] <- grep(features[i], rownames(counts))
             if (length(grep(features[i], rownames(counts))) == 0) {
                 notFound[i] <- features[i]
             } else {
-                headersFound[i] <- headers[i]
+                if (isFALSE(is.null(headers))) {
+                    headersFound[i] <- headers[i]
+                }
             }
         }
 
         notFound <- notFound[notFound != ""]
-        headers <- headersFound[headersFound != ""]
+        if (isFALSE(is.null(headers))) {
+            headers <- headersFound[headersFound != ""]
+        }
 
         counts <- counts[featuresIndices, , drop = FALSE]
         if (length(notFound) > 0) {
@@ -233,10 +240,11 @@ plotDimReduceFeature <- function(dim1,
                 paste(featuresNotFound,
                     sep = "",
                     collapse = ","))
-
-            whichHeadersNotFound <- which(featuresNotFound == features)
-            headers <- headers[-whichHeadersNotFound]
+            if (isFALSE(is.null(headers))) {
+                whichHeadersNotFound <- which(featuresNotFound == features)
+                headers <- headers[-whichHeadersNotFound]
             }
+        }
         featuresFound <- setdiff(features, featuresNotFound)
         counts <- counts[featuresFound, , drop = FALSE]
     }
