@@ -3,6 +3,10 @@
 #'  data into K subpopulations.
 #' @param counts Integer matrix. Rows represent features and columns represent
 #'  cells.
+#' @param counts2 Integer matrix. It's needed only for the multi-modal celda
+#'  clustering algorithm. This count matrix represents the additional
+#'  quantification of the other layer for multi-modality data (i.e. CITE-seq).
+#'  For example, for CITE-seq data, the protein counts should be provided here.
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
 #' @param K Integer. Number of cell populations.
@@ -60,6 +64,7 @@
 #' @importFrom withr with_seed
 #' @export
 celda_C <- function(counts,
+    counts2 = NULL,
     sampleLabel = NULL,
     K,
     alpha = 1,
@@ -78,7 +83,31 @@ celda_C <- function(counts,
     verbose = TRUE) {
 
     .validateCounts(counts)
+    if (isFALSE(is.null(counts2))) {
+        .validateCounts(counts2)
+    }
+
     if (is.null(seed)) {
+        if (isFALSE(is.null(counts2))) {
+            res <- .celda_C_mm(counts,
+                counts2,
+                sampleLabel,
+                K,
+                alpha,
+                beta,
+                algorithm,
+                stopIter,
+                maxIter,
+                splitOnIter,
+                splitOnLast,
+                seed,
+                nchains,
+                zInitialize,
+                countChecksum,
+                zInit,
+                logfile,
+                verbose)
+        } else {
         res <- .celda_C(counts,
             sampleLabel,
             K,
@@ -97,7 +126,29 @@ celda_C <- function(counts,
             logfile,
             verbose,
             reorder = TRUE)
+        }
     } else {
+        if (isFALSE(is.null(counts2))) {
+            with_seed(seed,
+                res <- .celda_C_mm(counts,
+                    counts2,
+                    sampleLabel,
+                    K,
+                    alpha,
+                    beta,
+                    algorithm,
+                    stopIter,
+                    maxIter,
+                    splitOnIter,
+                    splitOnLast,
+                    seed,
+                    nchains,
+                    zInitialize,
+                    countChecksum,
+                    zInit,
+                    logfile,
+                    verbose))
+        } else {
         with_seed(seed,
             res <- .celda_C(counts,
                 sampleLabel,
@@ -117,8 +168,8 @@ celda_C <- function(counts,
                 logfile,
                 verbose,
                 reorder = TRUE))
+        }
     }
-
     return(res)
 }
 
@@ -194,7 +245,8 @@ celda_C <- function(counts,
 
         if (zInitialize == "predefined") {
             if (is.null(zInit)) {
-                stop("'zInit' needs to specified when initilize.z == 'given'.")
+                stop("'zInit' needs to specified when zInitialize ==",
+                    " 'predefined'.")
             }
 
             z <- .initializeCluster(K,

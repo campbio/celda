@@ -169,7 +169,8 @@ celda_G <- function(counts,
 
         if (yInitialize == "predefined") {
             if (is.null(yInit)) {
-                stop("'yInit' needs to specified when initilize.y == 'given'.")
+                stop("'yInit' needs to specified when yInitialize ==",
+                    " 'predefined'.")
             }
             y <- .initializeCluster(L,
                 nrow(counts),

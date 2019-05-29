@@ -234,7 +234,8 @@ celda_CG <- function(counts,
 
         if (zInitialize == "predefined") {
             if (is.null(zInit)) {
-                stop("'zInit' needs to specified when initilize.z == 'given'.")
+                stop("'zInit' needs to specified when zInitialize ==",
+                    " 'predefined'.")
             }
             z <- .initializeCluster(K,
                 ncol(counts),
@@ -255,7 +256,8 @@ celda_CG <- function(counts,
 
         if (yInitialize == "predefined") {
             if (is.null(yInit)) {
-                stop("'yInit' needs to specified when initilize.y == 'given'.")
+                stop("'yInit' needs to specified when yInitialize ==",
+                    " 'predefined'.")
             }
             y <- .initializeCluster(L,
                     nrow(counts),
