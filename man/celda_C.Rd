@@ -4,16 +4,21 @@
 \alias{celda_C}
 \title{Cell clustering with Celda}
 \usage{
-celda_C(counts, sampleLabel = NULL, K, alpha = 1, beta = 1,
-  algorithm = c("EM", "Gibbs"), stopIter = 10, maxIter = 200,
-  splitOnIter = 10, splitOnLast = TRUE, seed = 12345, nchains = 3,
-  zInitialize = c("split", "random", "predefined"),
-  countChecksum = NULL, zInit = NULL, logfile = NULL,
+celda_C(counts, counts2 = NULL, sampleLabel = NULL, K, alpha = 1,
+  beta = 1, algorithm = c("EM", "Gibbs"), stopIter = 10,
+  maxIter = 200, splitOnIter = 10, splitOnLast = TRUE,
+  seed = 12345, nchains = 3, zInitialize = c("split", "random",
+  "predefined"), countChecksum = NULL, zInit = NULL, logfile = NULL,
   verbose = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
 cells.}
+
+\item{counts2}{Integer matrix. It's needed only for the multi-modal celda
+clustering algorithm. This count matrix represents the additional
+quantification of the other layer for multi-modality data (i.e. CITE-seq).
+For example, for CITE-seq data, the protein counts should be provided here.}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
