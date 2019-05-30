@@ -38,7 +38,7 @@
         stop("'counts2' should have the same number of columns as 'counts'!")
     }
 
-    if (isTRUE(any(a != b))) {
+    if (isTRUE(any(counts != counts2))) {
         stop("'counts2' should have the same column names as 'counts'!")
     }
 
