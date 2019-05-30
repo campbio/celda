@@ -85,7 +85,7 @@
 
         if (zInitialize == "predefined") {
             if (is.null(zInit)) {
-                stop("'zInit' needs to specified when zInitialize ==",
+                stop("'zInit' needs to be specified when zInitialize ==",
                     " 'predefined'.")
             }
             z <- .initializeCluster(K,
@@ -330,6 +330,7 @@
     s,
     K,
     nG,
+    nG2,
     nM,
     alpha,
     beta,
