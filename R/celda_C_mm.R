@@ -362,6 +362,8 @@
     return(list(mCPByS = mCPByS,
         nGByCP = nGByCP,
         nCP = nCP,
+        nGByCP2 = nGByCP2,
+        nCP2 = nCP2,
         z = z,
         probs = probs))
 }
