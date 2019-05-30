@@ -18,7 +18,7 @@ test_that(desc = "Test 'random' initialization for all models", {
         splitOnIter = -1)
     expect_true(is(modelG, "celda_G"))
     modelC <- celda_C(simRes$counts,
-        simRes$sampleLabel,
+        sampleLabel = simRes$sampleLabel,
         K = simRes$K,
         zInitialize = "random",
         maxIter = 5,
