@@ -5,7 +5,7 @@
     nGByCP,
     nGByCP2,
     nCP,
-    nCP2
+    nCP2,
     s,
     z,
     K,
