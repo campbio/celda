@@ -31,16 +31,6 @@
     }
 
     ## Loop through each split-able Z and perform split
-    clustSplit <- lapply(zToSplit, function(x) {
-        clusters(.celda_C(counts[, z == x],
-            K = 2,
-            zInitialize = "random",
-            maxIter = 5,
-            splitOnIter = -1,
-            splitOnLast = FALSE,
-            verbose = FALSE))$z
-    })
-
     clustSplit <- vector("list", K)
     for (i in zToSplit) {
         clustLabel <- .celda_C(
