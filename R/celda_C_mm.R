@@ -118,7 +118,6 @@
         ll <- .cCCalcLLMM(mCPByS = mCPByS,
             nGByCP = nGByCP,
             nGByCP2 = nGByCP2,
-            s = s,
             K = K,
             nS = nS,
             nG = nG,
@@ -163,7 +162,6 @@
             tempLl <- .cCCalcLLMM(mCPByS = mCPByS,
                 nGByCP = nGByCP,
                 nGByCP2 = nGByCP2,
-                s = s,
                 K = K,
                 nS = nS,
                 nG = nG,
@@ -185,10 +183,11 @@
                     verbose = verbose)
 
                 # the splitting of clusters do not consider protein counts
-                res <- .cCSplitZ(
-                    counts,
+                res <- .cCSplitZMM(counts,
+                    counts2,
                     mCPByS,
                     nGByCP,
+                    nGByCP2,
                     nCP,
                     s,
                     z,
@@ -225,7 +224,6 @@
             tempLl <- .cCCalcLLMM(mCPByS = mCPByS,
                 nGByCP = nGByCP,
                 nGByCP2 = nGByCP2,
-                s = s,
                 K = K,
                 nS = nS,
                 nG = nG,
@@ -373,8 +371,6 @@
 .cCCalcLLMM <- function(mCPByS,
     nGByCP,
     nGByCP2,
-    s,
-    z,
     K,
     nS,
     nG,
