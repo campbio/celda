@@ -189,11 +189,13 @@
                     nGByCP,
                     nGByCP2,
                     nCP,
+                    nCP2,
                     s,
                     z,
                     K,
                     nS,
                     nG,
+                    nG2,
                     alpha,
                     beta,
                     zProb = t(nextZ$probs),
@@ -217,7 +219,9 @@
                 z <- res$z
                 mCPByS <- res$mCPByS
                 nGByCP <- res$nGByCP
+                nGByCP2 <- res$nGByCP2
                 nCP <- res$nCP
+                nCP2 <- res$nCP2
             }
 
             ## Calculate complete likelihood
