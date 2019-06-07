@@ -18,7 +18,7 @@ columns. Default 2.}
 
 \item{threshold}{Numeric. Only return ranked rows or columns in the matrix
 that are above this threshold. If NULL, then no threshold will be applied.
-Default 1.}
+Default 0.}
 
 \item{decreasing}{Logical. Specifies if the rank should be decreasing.
 Default TRUE.}
