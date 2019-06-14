@@ -6,6 +6,8 @@
 #'  the path and rules. If NULL (default), the rules for every cluster is shown.
 #' @param addSensPrec Logical. Print training sensitivities and precisions
 #'  for each cluster below leaf label? Default is FALSE.
+#' @param maxFeaturePrint A numeric value. Maximum number of feature IDs to print
+#'  at a given node. Default is 4.  
 #' @param leafSize A numeric value. Size of text below each leaf. Default is 24.
 #' @param boxSize A numeric value. Size of rule labels. Default is 7.
 #' @param boxColor A character value. Color of rule labels. Default is `black`.
@@ -37,6 +39,7 @@
 plotDendro <- function(decisionTree,
     classLabel = NULL,
     addSensPrec = FALSE,
+    maxFeaturePrint = 4,
     leafSize = 24,
     boxSize = 7,
     boxColor = "black") {
@@ -75,9 +78,18 @@ plotDendro <- function(decisionTree,
     segs <- as.data.frame(dendextend::get_nodes_xy(dendro))
     colnames(segs) <- c("xend", "yend")
 
-    # As label and which stat was used
-    # Labels will stack
+    # Add labels to nodes
     segs$label <- gsub(";", "\n", dendextend::get_nodes_attr(dendro, "label"))
+    segs$label <- sapply(segs$label, function(lab, maxFeaturePrint) {
+      loc <- gregexpr("\n", lab)[[1]][maxFeaturePrint]
+      if(!is.na(loc)) {
+        lab <- substr(lab, 1, loc-2)
+      }
+      return(lab)
+    }, maxFeaturePrint)
+    
+    # Subset for max
+    
     segs$statUsed <- dendextend::get_nodes_attr(dendro, "statUsed")
 
     # If highlighting a class label, remove non-class specific rules
