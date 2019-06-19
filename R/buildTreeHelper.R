@@ -319,10 +319,10 @@
     splitStats <- vapply(
         colnames(features),
         function(feat, features, class, splitMetric) {
-            splitMetric(feat, class, features, rPerf = T)
+            splitMetric(feat, class, features, rPerf = TRUE)
         }, features, class, splitMetric, FUN.VALUE = double(1))
     names(splitStats) <- colnames(features)
-    splitStats <- sort(splitStats, decreasing = T)
+    splitStats <- sort(splitStats, decreasing = TRUE)
 
     return(splitStats)
 }
@@ -412,7 +412,7 @@
     featValues <- features[, feat]
 
     # Get order of values
-    ord <- order(featValues, decreasing = T)
+    ord <- order(featValues, decreasing = TRUE)
 
     # Get sorted class and values
     featValuesSort <- featValues[ord]
@@ -516,7 +516,7 @@
     featValues <- features[, feat]
 
     # Get order of values
-    ord <- order(featValues, decreasing = T)
+    ord <- order(featValues, decreasing = TRUE)
 
     # Get sorted class and values
     featValuesSort <- featValues[ord]
@@ -835,7 +835,7 @@
                     stat = HM,
                     stringsAsFactors = F))
             }, .splitMetricModF1, fSub, cSub, group2only))
-        altStats <- altStats[order(altStats$stat, decreasing = T), ]
+        altStats <- altStats[order(altStats$stat, decreasing = TRUE), ]
 
         # Get alternative splits
         splitStats <- altStats$stat[1]
