@@ -91,33 +91,33 @@ findMarkers <- function(features,
                         reuseFeatures = FALSE,
                         altSplit = TRUE,
                         consecutiveOneoff = TRUE) {
-    
+
     if (ncol(features) != length(class)) {
         stop("Number of columns of features must equal length of class")
     }
-    
+
     if (any(is.na(class))) {
         stop("NA class values")
     }
-    
+
     if (any(is.na(features))){
         stop("NA feature values")
     }
-    
+
     # Match the oneoffMetric argument
     oneoffMetric <- match.arg(oneoffMetric)
-    
+
     # Transpose features
     features <- t(features)
-    
+
     # If no detailed cell types are provided
     if(!hasArg(cellTypes)){
-        
+
         print('Building tree...')
-        
+
         # Set class to factor
         class <- as.factor(class)
-        
+
         # Generate list of tree levels
         tree <- .generateTreeList(
             features,
@@ -126,36 +126,36 @@ findMarkers <- function(features,
             threshold,
             reuseFeatures,
             consecutiveOneoff)
-        
+
         # Add alternative node for the solely down-regulated leaf
         if (altSplit) {
             tree <- .addAlternativeSplit(tree, features, class)
         }
-        
+
         print('Computing performance metrics...')
-        
+
         # Format tree output for plotting and generate summary statistics
         DTsummary <- .summarizeTree(tree, features, class)
-        
+
         return(DTsummary)
     } else {
         # If detailed cell types are provided
-        
+
         # Check that cell types match class labels
         if(mean(unlist(cellTypes) %in% unique(class)) != 1) {
             stop("Provided cell types do not match class labels.
                  Please check the 'cellTypes' argument.")
         }
-        
+
         # Create vector with cell type class labels
         newLabels <- class
         for (i in names(cellTypes)) {
             newLabels[newLabels %in% cellTypes[[i]]] <- i
         }
-        
+
         # Find which cell types have more than one cluster
         largeCellTypes <- names(cellTypes[lengths(cellTypes) > 1])
-        
+
         # Update cell subtype labels
         subtypeLabels <- newLabels
         subtypeLabels[subtypeLabels %in% largeCellTypes] <- paste0(
@@ -164,57 +164,59 @@ findMarkers <- function(features,
             class[subtypeLabels %in% largeCellTypes],
             ")"
         )
-        
+
         # Create tree for cell types
         print('Building tree for all cell types...')
         tree <- .generateTreeList(features, as.factor(newLabels), oneoffMetric,
                                   threshold, reuseFeatures, consecutiveOneoff)
         tree <- list(
-            rules = .mapClass2features(tree, features, as.factor(newLabels))$rules,
+            rules = .mapClass2features(tree, features,
+                as.factor(newLabels))$rules,
             dendro = .convertToDendrogram(tree, as.factor(newLabels))
         )
-        
+
         # Store tree's dendrogram in a separate variable
         dendro <- tree$dendro
-        
+
         # Create separate trees for each cell type with more than one cluster
         newTrees <- lapply(largeCellTypes, function(cellType){
-            
+
             # Print current status
             print(paste('Building tree for cell type:', cellType))
-            
+
             # Remove used features
             featUse <- colnames(features)
             if (!reuseFeatures) {
                 featUse <- featUse[!featUse %in% tree$rules[[cellType]]$feature]
             }
-            
+
             # Create new tree
-            newTree <- .generateTreeList(features[newLabels == cellType, featUse],
-                                         as.factor(subtypeLabels[
-                                             newLabels == cellType]),
-                                         oneoffMetric, threshold,
-                                         reuseFeatures, consecutiveOneoff)
+            newTree <- .generateTreeList(features[newLabels == cellType,
+                featUse],
+                                        as.factor(subtypeLabels[
+                                            newLabels == cellType]),
+                                        oneoffMetric, threshold,
+                                        reuseFeatures, consecutiveOneoff)
             newTree <- list(
                 rules = .mapClass2features(newTree,
-                                           features[newLabels == cellType,],
-                                           as.factor(subtypeLabels[
-                                               newLabels == cellType]))$rules,
+                                            features[newLabels == cellType,],
+                                            as.factor(subtypeLabels[
+                                                newLabels == cellType]))$rules,
                 dendro = .convertToDendrogram(newTree,
-                                              as.factor(subtypeLabels[
-                                                  newLabels == cellType]))
+                                                as.factor(subtypeLabels[
+                                                    newLabels == cellType]))
             )
-            
+
             # Adjust 'rules' table for new tree
             newTree$rules <- lapply(newTree$rules, function(rules){
                 rules$level <- rules$level + max(tree$rules[[cellType]]$level)
                 rules <- rbind(tree$rules[[cellType]], rules)
             })
-            
+
             return(newTree)
         })
         names(newTrees) <- largeCellTypes
-        
+
         # Fix max depth in original tree
         maxDepth <- max(unlist(lapply(newTrees, function(newTree) {
             lapply(newTree$rules, function(ruleDF) {
@@ -222,48 +224,53 @@ findMarkers <- function(features,
             })
         })))
         addDepth <- maxDepth - attributes(dendro)$height
-        
+
         dendro <- dendrapply(dendro, function(node, addDepth) {
             if(attributes(node)$height > 1){
-                attributes(node)$height <- attributes(node)$height + addDepth + 1
+                attributes(node)$height <- attributes(node)$height +
+                addDepth + 1
             }
             return(node)
         }, addDepth)
-        
+
         # Find indices of cell type nodes in tree
         indices <- lapply(largeCellTypes,
-                          function(cellType) {
-                              # Initialize sub trees, indices string, and flag
-                              dendSub <- dendro
-                              index <- ""
-                              flag <- TRUE
-                              
-                              while (flag) {
-                                  # Get the edge with the class of interest
-                                  whEdge <- which(unlist(lapply(dendSub, function(edge)
-                                      cellType %in% attributes(edge)$classLabels)))
-                                  
-                                  # Add this as a string
-                                  index <- paste0(index, "[[", whEdge, "]]")
-                                  
-                                  # Move to this branch
-                                  dendSub <- eval(parse(text = paste0("dendro", index)))
-                                  
-                                  # Is this the only class in that branch
-                                  flag <- length(attributes(dendSub)$classLabels) > 1
-                              }
-                              
-                              return(index)
-                          }
+                            function(cellType) {
+                                # Initialize sub trees, indices string, and flag
+                                dendSub <- dendro
+                                index <- ""
+                                flag <- TRUE
+
+                                while (flag) {
+                                    # Get the edge with the class of interest
+                                    whEdge <- which(unlist(lapply(dendSub,
+                                        function(edge)
+                                        cellType %in%
+                                        attributes(edge)$classLabels)))
+
+                                    # Add this as a string
+                                    index <- paste0(index, "[[", whEdge, "]]")
+
+                                    # Move to this branch
+                                    dendSub <- eval(parse(text =
+                                        paste0("dendro", index)))
+
+                                    # Is this the only class in that branch
+                                    flag <- length(
+                                        attributes(dendSub)$classLabels) > 1
+                            }
+
+                            return(index)
+                        }
         )
         names(indices) <- largeCellTypes
-        
+
         # Add each cell type tree
         for(cellType in largeCellTypes){
-            
+
             # Get current tree
             cellTypeDendro <- newTrees[[cellType]]$dendro
-            
+
             # Adjust labels, member count, and midpoint of nodes
             dendro <- dendrapply(dendro, function(node){
                 # Check if in right branch
@@ -272,28 +279,31 @@ findMarkers <- function(features,
                     attributes(node)$classLabels <-
                         as.character(attributes(node)$classLabels) %>%
                         .[. != cellType] %>%
-                        c(., unique(subtypeLabels)[grep(cellType, unique(subtypeLabels))])
-                    
+                        c(., unique(subtypeLabels)[grep(cellType,
+                            unique(subtypeLabels))])
+
                     # Assign new member count for this branch
-                    attributes(node)$members <- length(attributes(node)$classLabels)
-                    
+                    attributes(node)$members <-
+                    length(attributes(node)$classLabels)
+
                     # Assign new midpoint for this branch
-                    attributes(node)$midpoint <- (attributes(node)$members - 1) / 2
+                    attributes(node)$midpoint <-
+                    (attributes(node)$members - 1) / 2
                 }
                 return(node)
             })
-            
+
             # Replace label at new tree's branch point
             branchPointAttr <- attributes(eval(parse(
                 text = paste0("dendro", indices[[cellType]]))))
             branchPointLabel <- branchPointAttr$label
             branchPointStatUsed <- branchPointAttr$statUsed
-            
+
             if(!is.null(branchPointLabel)) {
                 attributes(cellTypeDendro)$label <- branchPointLabel
                 attributes(cellTypeDendro)$statUsed <- branchPointStatUsed
             }
-            
+
             # Fix height
             indLoc <- gregexpr("\\[\\[", indices[[cellType]])[[1]]
             indLoc <- indLoc[length(indLoc)]
@@ -303,37 +313,42 @@ findMarkers <- function(features,
             parentHeight <- attributes(eval(parse(
                 text = paste0("dendro", parentIndexString))))$height
             cellTypeHeight <- attributes(cellTypeDendro)$height
-            cellTypeDendro <- dendrapply(cellTypeDendro, 
-                                         function(node, 
-                                                  parentHeight,
-                                                  cellTypeHeight) {
-                                             if(attributes(node)$height > 1){
-                                                 attributes(node)$height <- parentHeight - 1 - 
-                                                     (cellTypeHeight - attributes(node)$height)
-                                             }
-                                             return(node)
-                                         }, parentHeight, cellTypeHeight)
-            
+            cellTypeDendro <- dendrapply(cellTypeDendro,
+                                        function(node,
+                                                parentHeight,
+                                                cellTypeHeight) {
+                                            if(attributes(node)$height > 1){
+                                                attributes(node)$height <-
+                                                parentHeight - 1 -
+                                                    (cellTypeHeight -
+                                                        attributes(
+                                                            node)$height)
+                                            }
+                                            return(node)
+                                        }, parentHeight, cellTypeHeight)
+
             # Add new tree to original tree
             eval(parse(text = paste0(
                 "dendro", indices[[cellType]], " <- cellTypeDendro")))
-            
+
             # Append new tree's 'rules' tables to original tree
             tree$rules <- append(tree$rules, newTrees[[cellType]]$rules)
-            
+
             # Remove old tree's rules
             tree$rules <- tree$rules[-which(names(tree$rules) == cellType)]
         }
-        
+
         # Set final tree dendro
         tree$dendro <- dendro
-        
+
         # Get performance statistics
         print('Computing performance statistics...')
-        perfList <- .getPerformance(tree$rules, features, as.factor(subtypeLabels))
+        perfList <- .getPerformance(tree$rules,
+            features,
+            as.factor(subtypeLabels))
         tree$prediction <- perfList$prediction
         tree$performance <- perfList$performance
-        
+
         return(tree)
-        }
+    }
 }
