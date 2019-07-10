@@ -5,7 +5,8 @@
 \title{Plots dendrogram of `findMarkers` output}
 \usage{
 plotDendro(decisionTree, classLabel = NULL, addSensPrec = FALSE,
-  leafSize = 24, boxSize = 7, boxColor = "black")
+  maxFeaturePrint = 4, leafSize = 24, boxSize = 7,
+  boxColor = "black")
 }
 \arguments{
 \item{decisionTree}{List object. The output of `celda::findMarkers`.}
@@ -15,6 +16,9 @@ the path and rules. If NULL (default), the rules for every cluster is shown.}
 
 \item{addSensPrec}{Logical. Print training sensitivities and precisions
 for each cluster below leaf label? Default is FALSE.}
+
+\item{maxFeaturePrint}{A numeric value. Maximum number of feature IDs to print
+at a given node. Default is 4.}
 
 \item{leafSize}{A numeric value. Size of text below each leaf. Default is 24.}
 

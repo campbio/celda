@@ -13,34 +13,56 @@ findMarkers(features, class, cellTypes, oneoffMetric = c("modified F1",
 
 \item{class}{A vector of K label assignemnts.}
 
-\item{cellTypes}{List where each element is a cell type and all the clusters within that cell type (i.e. subtypes).}
+\item{oneoffMetric}{A character string. What one-off metric to run, either
+`modified F1` or  `pairwise AUC`.
+@param cellTypes List where each element is a cell type and all the clusters
+ within that cell type (i.e. subtypes).}
 
-\item{oneoffMetric}{A character string. What one-off metric to run, either `modified F1` or  `pairwise AUC`.}
+\item{threshold}{A numeric value. The threshold for the oneoff metric to use
+between 0 and 1, 0.95 by default. Smaller values will result is more one-off
+splits.}
 
-\item{threshold}{A numeric value. The threshold for the oneoff metric to use between 0 and 1, 0.95 by default. Smaller values will result is more one-off splits.}
+\item{reuseFeatures}{Logical.  Whether or not a feature can be used more than
+once on the same cluster. Default is TRUE.}
 
-\item{reuseFeatures}{Logical.  Whether or not a feature can be used more than once on the same cluster. Default is TRUE.}
+\item{altSplit}{Logical. Whether or not to force a marker for clusters that
+are solely defined by the absence of markers. Defulault is TRUE}
 
-\item{altSplit}{Logical. Whether or not to force a marker for clusters that are solely defined by the absence of markers. Defsult is TRUE}
-
-\item{consecutiveOneoff}{Logical. Whether or not to allow one-off splits at consecutive brances. Default is TRUE}
+\item{consecutiveOneoff}{Logical. Whether or not to allow one-off splits at
+consecutive brances. Default it TRUE}
 }
 \value{
 A named list with five elements.
 \itemize{
   \item rules - A named list with one `data.frame` for every label. Each
-`data.frame` has five columns and gives the set of rules for disinguishing each label.
+`data.frame` has five columns and gives the set of rules for disinguishing
+ each label.
   \itemize{
    \item feature - Feature identifier.
-   \item direction - Relationship to feature value, -1 if less than, 1 if greater than.
+   \item direction - Relationship to feature value, -1 if less than, 1 if
+ greater than.
    \item value - The feature value which defines the decision boundary
-   \item stat - The performance value returned by the splitting metric for this split.
-   \item statUsed - Which performance metric was used. "IG" if information gain and "OO" if one-off.
-   \item level - The level of the tree at which is rule was defined. 1 is the level of the first split of the tree.
+   \item stat - The performance value returned by the splitting metric for
+ this split.
+   \item statUsed - Which performance metric was used. "IG" if information
+ gain and "OO" if one-off.
+   \item level - The level of the tree at which is rule was defined. 1 is the
+ level of the first split of the tree.
   }
  \item dendro - A dendrogram object of the decision tree output
- \item prediction - A character vector of label of predictions of the training data using the final model. "MISSING" if label prediction was ambiguous.
- \item performance - A named list denoting the training performance of the model.
+ \item summaryMatrix - A K(labels) by L(features) matrix representation of
+ the decision rules. Columns denote features and rows denote labels. Non-0
+ values denote instances where a feature was used on a given label. Positive
+ and negative values denote whether the values of the label for that feature
+ were greater than or less than the decision threshold, respectively. The
+ magnitude of Non-0 values denote the level at which the feature was used,
+ where the first split has a magnitude of 1. Note, if reuse_features = TRUE,
+ only the final usage of a feature for a given label is shown.
+ \item prediction - A character vector of label of predictions of the
+ training data using the final model. "MISSING" if label prediction was
+ ambiguous.
+ \item performance - A named list denoting the training performance of the
+ model.
  \itemize{
   \item accuracy - (number correct/number of samples) for the whole set of
  samples.
@@ -63,21 +85,21 @@ Uses decision tree procudure to generate a set of rules for each
 \examples{
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
-# Subset 500 genes for fast clustering
-counts <- as.matrix(counts[1501:2000, ])
-# Cluster genes ans samples each into 10 modules
+# subset 100 genes for fast clustering
+counts <- as.matrix(counts[1500:2000, ])
+# cluster genes into 10 modules for quick demo
 cm <- celda_CG(counts = counts, L = 10, K = 5, verbose = FALSE)
 # Get features matrix and cluster assignments
 factorized <- factorizeMatrix(counts, cm)
 features <- factorized$proportions$cell
 class <- clusters(cm)$z
 # Generate Decision Tree
-decTree <- findMarkers(features,
-    class,
-    oneoffMetric = "modified F1",
-    threshold = 1,
-    consecutiveOneoff = FALSE)
+DecTree <- buildTreeHybrid(features,
+                           class,
+                           oneoffMetric = "modified F1",
+                           threshold = 1,
+                           consecutiveOneoff = FALSE)
 
 # Plot dendrogram
-plotDendro(decTree)
+plotDendro(DecTree)
 }
