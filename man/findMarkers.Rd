@@ -13,10 +13,11 @@ findMarkers(features, class, cellTypes, oneoffMetric = c("modified F1",
 
 \item{class}{A vector of K label assignemnts.}
 
+\item{cellTypes}{List where each element is a cell type and all the clusters
+within that cell type (i.e. subtypes).}
+
 \item{oneoffMetric}{A character string. What one-off metric to run, either
-`modified F1` or  `pairwise AUC`.
-@param cellTypes List where each element is a cell type and all the clusters
- within that cell type (i.e. subtypes).}
+`modified F1` or  `pairwise AUC`.}
 
 \item{threshold}{A numeric value. The threshold for the oneoff metric to use
 between 0 and 1, 0.95 by default. Smaller values will result is more one-off
@@ -94,7 +95,7 @@ factorized <- factorizeMatrix(counts, cm)
 features <- factorized$proportions$cell
 class <- clusters(cm)$z
 # Generate Decision Tree
-DecTree <- buildTreeHybrid(features,
+DecTree <- findMarkers(features,
                            class,
                            oneoffMetric = "modified F1",
                            threshold = 1,

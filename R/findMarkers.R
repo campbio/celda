@@ -6,10 +6,10 @@
 #'  rules for identifying sets of similar clusters.
 #' @param features A L(features) by N(samples) numeric matrix.
 #' @param class A vector of K label assignemnts.
+#' @param cellTypes List where each element is a cell type and all the clusters
+#'   within that cell type (i.e. subtypes).
 #' @param oneoffMetric A character string. What one-off metric to run, either
 #'  `modified F1` or  `pairwise AUC`.
-#'  @param cellTypes List where each element is a cell type and all the clusters
-#'   within that cell type (i.e. subtypes).
 #' @param threshold A numeric value. The threshold for the oneoff metric to use
 #'  between 0 and 1, 0.95 by default. Smaller values will result is more one-off
 #'  splits.
@@ -73,7 +73,7 @@
 #' features <- factorized$proportions$cell
 #' class <- clusters(cm)$z
 #' # Generate Decision Tree
-#' DecTree <- buildTreeHybrid(features,
+#' DecTree <- findMarkers(features,
 #'                            class,
 #'                            oneoffMetric = "modified F1",
 #'                            threshold = 1,
