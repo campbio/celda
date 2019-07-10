@@ -42,7 +42,8 @@ Imports:
     withr,
     dendextend,
     ggdendro,
-    pROC
+    pROC,
+    magrittr
 Suggests:
     testthat,
     knitr,
