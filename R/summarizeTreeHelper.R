@@ -13,7 +13,6 @@
     return(list(
         rules = class2features$rules,
         dendro = dendro,
-        summaryMatrix = class2features$c2fMatrix,
         prediction = perfList$prediction,
         performance = perfList$performance
     ))
@@ -265,13 +264,8 @@ subUnderscore <- function(x, n) unlist(lapply(
     ))
 }
 
-# Create matrix of classes and features combinations
+# Create rules of classes and features sequences
 .mapClass2features <- function(tree, features, class) {
-
-    # Create empty matrix
-    c2fMatrix <- matrix(0, nrow = length(unique(class)), ncol = ncol(features))
-    rownames(c2fMatrix) <- sort(unique(class))
-    colnames(c2fMatrix) <- colnames(features)
 
     # Get class to feature indices
     class2featuresIndices <- do.call(rbind, lapply(
@@ -320,14 +314,6 @@ subUnderscore <- function(x, n) unlist(lapply(
     }))
     rownames(class2featuresIndices) <- NULL
 
-    # Add levels to matrix
-    for (i in seq(nrow(class2featuresIndices))) {
-        c2fMatrix[class2featuresIndices[i, "class"],
-        class2featuresIndices[i, "feature"]] <-
-            class2featuresIndices[i, "level"] *
-                class2featuresIndices[i, "direction"]
-    }
-
 # Generate list of rules for each class
     rules <- lapply(levels(class), function(cl, class2featuresIndices) {
 
@@ -338,6 +324,5 @@ subUnderscore <- function(x, n) unlist(lapply(
     names(rules) <- levels(class)
 
     return(list(
-        c2fMatrix = c2fMatrix,
         rules = rules))
 }
