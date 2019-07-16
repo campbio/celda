@@ -87,12 +87,12 @@ class <- clusters(cm)$z
 ```{r, eval = TRUE, message = FALSE}
 
 DecTree <- findMarkers(features,
-                           class,
-                           oneoffMetric = "modified F1",
-                           threshold = 0.95,
-                           reuseFeatures = FALSE,
-                           altSplit = TRUE,
-                           consecutiveOneoff = FALSE)
+    class,
+    oneoffMetric = "modified F1",
+    threshold = 0.95,
+    reuseFeatures = FALSE,
+    altSplit = TRUE,
+    consecutiveOneoff = FALSE)
 ```
 
 ## `findMarkers` output
@@ -131,11 +131,11 @@ The `findMarkers` output is a named list of four elements
 
 ```{r, eval = TRUE, message = FALSE}
 plotDendro(DecTree,
-           classLabel = NULL,
-           addSensPrec = TRUE,
-           leafSize = 24,
-           boxSize = 7,
-           boxColor = "black")
+    classLabel = NULL,
+    addSensPrec = TRUE,
+    leafSize = 24,
+    boxSize = 7,
+    boxColor = "black")
 ```
 In the plot, the feature(s) used for splits determined by the one-off metric are printed above the cluster labels for which they are markers. Alternatively, the features used for the balanced splits are centered above the two sets of clusters defined by that split. The up-regulated set of clusters for a balanced split are one the right side of that split. The size, sensitivitie and precision of each class are printed below the leaf labels, respectively.
 
@@ -145,11 +145,11 @@ In `plotDendro` the **classLabel** argument may used to only print the sequence 
 
 ```{r, eval = TRUE, message = FALSE}
 plotDendro(DecTree,
-           classLabel = "1",
-           addSensPrec = TRUE,
-           leafSize = 15,
-           boxSize = 7,
-           boxColor = "black")
+    classLabel = "1",
+    addSensPrec = TRUE,
+    leafSize = 15,
+    boxSize = 7,
+    boxColor = "black")
 ```
 
 # Get label estimates from features matrix 
@@ -168,12 +168,12 @@ If you have a priori understanding of sub-groups of your cluster labels, you can
 # Run with a hierarchichal split
 cellTypes <- list(metaLabel = c("4", "5", "1"))
 DecTreeMeta <- findMarkers(features,
-                       class,
-                       cellTypes,
-                       oneoffMetric = "modified F1",
-                       threshold = 1,
-                       reuseFeatures = F,
-                       consecutiveOneoff = FALSE)
+    class,
+    cellTypes,
+    oneoffMetric = "modified F1",
+    threshold = 1,
+    reuseFeatures = F,
+    consecutiveOneoff = FALSE)
 plotDendro(DecTreeMeta)
 ```
 
