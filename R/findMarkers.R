@@ -82,6 +82,7 @@
 #' # Plot dendrogram
 #' plotDendro(DecTree)
 #' @import magrittr
+#' @importFrom methods hasArg
 #' @export
 findMarkers <- function(features,
                         class,
@@ -111,7 +112,7 @@ findMarkers <- function(features,
     features <- t(features)
 
     # If no detailed cell types are provided
-    if(!hasArg(cellTypes)){
+    if(!methods::hasArg(cellTypes)){
 
         print('Building tree...')
 
