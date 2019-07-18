@@ -11,7 +11,7 @@ Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
 Description: celda leverages Bayesian hierarchical modeling to cluster genes,
     cells, or both simultaneously from single cell sequencing data.
 Depends:
-    R (>= 3.6)
+    R (>= 3.5)
 VignetteBuilder: knitr
 Imports:
     stats,
