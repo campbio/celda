@@ -1,10 +1,13 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.1.5
-Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu", role = c("aut", "cre")),
-             person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
-	     person("Yusuke", "Koga", email="ykoga07@bu.edu", role = c("aut")),
-	     person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")))
+Version: 1.1.6
+Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
+    role = c("aut", "cre")),
+    person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
+    person("Yusuke", "Koga", email="ykoga07@bu.edu", role = c("aut")),
+    person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
+    person("Eric", "Reed", email="reeder@bu.edu", role = c("aut")),
+    person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")))
 Description: celda leverages Bayesian hierarchical modeling to cluster genes,
     cells, or both simultaneously from single cell sequencing data.
 Depends:
@@ -42,7 +45,8 @@ Imports:
     withr,
     dendextend,
     ggdendro,
-    pROC
+    pROC,
+    magrittr
 Suggests:
     testthat,
     knitr,

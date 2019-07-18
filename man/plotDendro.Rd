@@ -2,19 +2,23 @@
 % Please edit documentation in R/plotDendro.R
 \name{plotDendro}
 \alias{plotDendro}
-\title{Plots dendrogram of `buildTreeHybrid` output}
+\title{Plots dendrogram of `findMarkers` output}
 \usage{
-plotDendro(decisionTree, classLabel = NULL, addSensPrec = TRUE,
-  leafSize = 24, boxSize = 7, boxColor = "black")
+plotDendro(decisionTree, classLabel = NULL, addSensPrec = FALSE,
+  maxFeaturePrint = 4, leafSize = 24, boxSize = 7,
+  boxColor = "black")
 }
 \arguments{
-\item{decisionTree}{List object. The output of `celda::buildTreeHybrid`.}
+\item{decisionTree}{List object. The output of `celda::findMarkers`.}
 
 \item{classLabel}{A character value. The name of a label to which draw
 the path and rules. If NULL (default), the rules for every cluster is shown.}
 
 \item{addSensPrec}{Logical. Print training sensitivities and precisions
-for each cluster below leaf label? Default is TRUE.}
+for each cluster below leaf label? Default is FALSE.}
+
+\item{maxFeaturePrint}{A numeric value. Maximum number of feature IDs to
+print at a given node. Default is 4.}
 
 \item{leafSize}{A numeric value. Size of text below each leaf. Default is 24.}
 
@@ -27,7 +31,7 @@ A ggplot2 object
 }
 \description{
 Generates a dendrogram of the rules and performance
-(optional) of the decision tree generates by `buildTreeHybrid`.
+(optional) of the decision tree generates by `findMarkers`.
 }
 \examples{
 library(M3DExampleData)
@@ -41,7 +45,7 @@ factorized <- factorizeMatrix(counts, cm)
 features <- factorized$proportions$cell
 class <- clusters(cm)$z
 # Generate Decision Tree
-decTree <- buildTreeHybrid(features,
+decTree <- findMarkers(features,
     class,
     oneoffMetric = "modified F1",
     threshold = 1,
