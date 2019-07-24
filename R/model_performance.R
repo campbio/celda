@@ -10,6 +10,9 @@
 #' @param celdaList Object of class 'celdaList'.
 #' @param resample Integer. The number of times to resample the counts matrix
 #'  for evaluating perplexity. Default 5.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @return celdaList. Returns the provided `celdaList` with a `perplexity`
 #'  property, detailing the perplexity of all K/L combinations that appeared in
 #'  the celdaList's models.
@@ -22,6 +25,26 @@
 #' @export
 resamplePerplexity <- function(counts,
     celdaList,
+    resample = 5,
+    seed = 12345) {
+
+    if (is.null(seed)) {
+        res <- .resamplePerplexity(counts = counts,
+            celdaList = celdaList,
+            resample = resample)
+    } else {
+        with_seed(seed,
+            res <- .resamplePerplexity(counts = counts,
+                celdaList = celdaList,
+                resample = resample))
+    }
+
+    return(res)
+}
+
+
+.resamplePerplexity <- function(counts,
+    celdaList,
     resample = 5) {
 
     if (!methods::is(celdaList, "celdaList")) {
@@ -31,7 +54,7 @@ resamplePerplexity <- function(counts,
         stop("Provided resample parameter was not numeric.")
     }
 
-    perpRes <- matrix(NA, nrow = length(resList (celdaList)), ncol = resample)
+    perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
         for (i in seq(length(resList(celdaList)))) {
@@ -97,7 +120,8 @@ plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
         each = ncol(celdaPerplexity(celdaList)))
-    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))), nrow(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
     df <- data.frame(runParams(celdaList)[ix1, ],
         perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
@@ -120,7 +144,8 @@ plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
             ggplot2::ylab("Perplexity") +
             ggplot2::xlab("K") +
             ggplot2::scale_x_discrete(breaks = seq(
-                min(runParams(celdaList)$K), max(runParams(celdaList)$K), sep)) +
+                min(runParams(celdaList)$K),
+                max(runParams(celdaList)$K), sep)) +
             ggplot2::theme_bw()
     } else {
         plot <-
@@ -169,7 +194,8 @@ plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
         each = ncol(celdaPerplexity(celdaList)))
-    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))), nrow(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
     df <- data.frame(runParams(celdaList)[ix1, ],
         perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$K <- as.factor(df$K)
@@ -218,7 +244,8 @@ plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
         each = ncol(celdaPerplexity(celdaList)))
-    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))), nrow(celdaPerplexity(celdaList)))
+    ix2 <- rep(seq(ncol(celdaPerplexity(celdaList))),
+        nrow(celdaPerplexity(celdaList)))
     df <- data.frame(runParams(celdaList)[ix1, ],
         perplexity = celdaPerplexity(celdaList)[cbind(ix1, ix2)])
     df$L <- as.factor(df$L)

@@ -6,7 +6,7 @@
 \usage{
 celda_C(counts, sampleLabel = NULL, K, alpha = 1, beta = 1,
   algorithm = c("EM", "Gibbs"), stopIter = 10, maxIter = 200,
-  splitOnIter = 10, splitOnLast = TRUE, nchains = 3,
+  splitOnIter = 10, splitOnLast = TRUE, seed = 12345, nchains = 3,
   zInitialize = c("split", "random", "predefined"),
   countChecksum = NULL, zInit = NULL, logfile = NULL,
   verbose = TRUE)
@@ -49,6 +49,10 @@ a cell population should be reassigned and another cell population should be
 split into two clusters. If a split occurs, then `stopIter` will be reset.
 Default TRUE.}
 
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
+
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
 \item{zInitialize}{Chararacter. One of 'random', 'split', or 'predefined'.
@@ -71,7 +75,7 @@ can only be used when `initialize = 'random'`. Default NULL.}
 }
 \value{
 An object of class `celda_C` with the cell population clusters
- stored in in `z`.
+ stored in `z`.
 }
 \description{
 Clusters the columns of a count matrix containing single-cell

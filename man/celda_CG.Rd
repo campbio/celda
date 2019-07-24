@@ -7,8 +7,9 @@
 celda_CG(counts, sampleLabel = NULL, K, L, alpha = 1, beta = 1,
   delta = 1, gamma = 1, algorithm = c("EM", "Gibbs"),
   stopIter = 10, maxIter = 200, splitOnIter = 10,
-  splitOnLast = TRUE, nchains = 3, zInitialize = c("split", "random",
-  "predefined"), yInitialize = c("split", "random", "predefined"),
+  splitOnLast = TRUE, seed = 12345, nchains = 3,
+  zInitialize = c("split", "random", "predefined"),
+  yInitialize = c("split", "random", "predefined"),
   countChecksum = NULL, zInit = NULL, yInit = NULL, logfile = NULL,
   verbose = TRUE)
 }
@@ -57,6 +58,10 @@ a cell population or feature module should be reassigned and another cell
 population or feature module should be split into two clusters. If a split
 occurs, then 'stopIter' will be reset. Default TRUE.}
 
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
+
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
 \item{zInitialize}{Chararacter. One of 'random', 'split', or 'predefined'.
@@ -89,7 +94,7 @@ starting values for each feature will be randomly sampled from 1:L.
 }
 \value{
 An object of class `celda_CG` with the cell populations clusters
- stored in in `z` and feature module clusters stored in `y`.
+ stored in `z` and feature module clusters stored in `y`.
 }
 \description{
 Clusters the rows and columns of a count matrix containing

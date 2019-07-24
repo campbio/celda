@@ -5,7 +5,8 @@
 \title{Embeds cells in two dimensions using umap.}
 \usage{
 celdaUmap(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
-  initialDims = 20, modules = NULL, umapConfig = umap::umap.defaults)
+  initialDims = 20, modules = NULL, seed = 12345,
+  umapConfig = umap::umap.defaults)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -28,10 +29,12 @@ for umap. Default 20.}
 \item{modules}{Integer vector. Determines which features modules to use for
 tSNE. If NULL, all modules will be used. Default NULL.}
 
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
+
 \item{umapConfig}{An object of class "umapConfig" specifying parameters to
 the UMAP algorithm.}
-
-\item{...}{Additional parameters.}
 }
 \value{
 Numeric Matrix of dimension `ncol(counts)` x 2, colums representing

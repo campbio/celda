@@ -5,7 +5,7 @@
 \title{Calculate and visualize perplexity of all models in a celdaList, with
  count resampling}
 \usage{
-resamplePerplexity(counts, celdaList, resample = 5)
+resamplePerplexity(counts, celdaList, resample = 5, seed = 12345)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -16,6 +16,10 @@ cells. This matrix should be the same as the one used to generate
 
 \item{resample}{Integer. The number of times to resample the counts matrix
 for evaluating perplexity. Default 5.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 }
 \value{
 celdaList. Returns the provided `celdaList` with a `perplexity`

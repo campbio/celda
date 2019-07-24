@@ -43,17 +43,17 @@ To see the latest updates and releases or to post a bug, see our GitHub page at 
 
 <br>
 
+# Reproducibility note
+
+Many functions in *celda* make use of stochastic algorithms or procedures which require the use of random number generator (RNG) for simulation or sampling. To maintain reproducibility, all these functions use a **default seed of 12345** to make sure same results are generated each time one of these functions is called. Explicitly setting the `seed` arguments is needed for greater control and randomness.
+
 # Generation of a simulated single cell dataset
 
 celda will take a matrix of counts where each row is a feature, each column is a cell, and each entry in the matrix is the number of counts of each feature in each cell. To illustrate the utility of celda, we will apply it to a simulated dataset.
 
 In the function `simulateCells`, the *K parameter designates the number of cell clusters*, the *L parameter determines the number of feature modules*, the *S parameter determines the number of samples in the simulated dataset*, the *G parameter determines the number of features to be simulated*, and *CRange specifies the lower and upper bounds of the number of cells to be generated in each sample*.
 
-Many functions in celda make use of stochastic algorithms or procedures which require the use of random number generator (RNG) for simulation or sampling. Explicit calls to `set.seed` is needed for reproducibility.
-
 ```{r}
-# For reproducibility, explicit call to set.seed is needed
-set.seed(12345)
 simCounts <- simulateCells("celda_CG",
     K = 5, L = 10, S = 5, G = 200, CRange = c(30, 50))
 ```

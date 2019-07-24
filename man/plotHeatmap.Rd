@@ -25,7 +25,7 @@ features and columns represent cells. .}
 
 \item{y}{Numeric vector. Denotes feature module labels.}
 
-\item{scaleRow}{Function; A function to scale each individual row. Set to
+\item{scaleRow}{Function. A function to scale each individual row. Set to
 NULL to disable. Occurs after normalization and log transformation. Defualt
 is 'scale' and thus will Z-score transform each row.}
 

@@ -9,7 +9,7 @@
 #'  columns. Default 2.
 #' @param threshold Numeric. Only return ranked rows or columns in the matrix
 #'  that are above this threshold. If NULL, then no threshold will be applied.
-#'  Default 1.
+#'  Default 0.
 #' @param decreasing Logical. Specifies if the rank should be decreasing.
 #'  Default TRUE.
 #' @return List. The `index` variable provides the top `n` row (feature) indices
