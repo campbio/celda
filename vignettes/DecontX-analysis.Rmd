@@ -14,7 +14,6 @@ vignette: >
 # Introduction
 
 DecontX is a Bayesian hierarchical model to estimate and remove cross-contamination from ambient RNA in single-cell RNA-seq count data generated from droplet-based sequencing devices. DecontX will take the count matrix with/without the cell labels and estimate the contamination level and deliver a decontaminted count matrix for downstream analysis. 
->>>>>>> campbio/master
 
 In this vignette we will demonstrate how to use decontX to estimate and remove contamination.  
 
