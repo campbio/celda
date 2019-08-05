@@ -415,7 +415,8 @@ plotDimReduceCluster <- function(dim1,
                 ggplot2::guide_legend(override.aes = list(size = 1)))
 
     if (labelClusters == TRUE) {
-        centroidList <- lapply(seq(length(unique(cluster))), function(x) {
+        #centroidList <- lapply(seq(length(unique(cluster))), function(x) {
+        centroidList <- lapply(unique(cluster), function(x) {
             df.sub <- df[df$Cluster == x, ]
             median.1 <- stats::median(df.sub$Dimension_1)
             median.2 <- stats::median(df.sub$Dimension_2)
