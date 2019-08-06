@@ -1552,6 +1552,8 @@ semiPheatmap <- function(mat,
     silent = FALSE,
     rowLabel,
     colLabel,
+    rowGroupOrder = NULL, 
+    colGroupOrder = NULL,
     ...) {
 
     # Set labels
@@ -1620,7 +1622,8 @@ semiPheatmap <- function(mat,
         if (is.null(rowLabel)) {
             rowLabel <- rep(1, nrow(mat))
         } else {
-            o <- order(rowLabel)
+            #o <- order(rowLabel)
+            o <- .Order(labels=rowLabel, groupOrder=rowGroupOrder)
             mat <- mat[o, , drop = FALSE]
             fmat <- fmat[o, , drop = FALSE]
             rowLabel <- rowLabel[o]
@@ -1654,7 +1657,8 @@ semiPheatmap <- function(mat,
         if (is.null(colLabel)) {
             colLabel <- rep(1, ncol(mat))
         } else {
-            o <- order(colLabel)
+            #o <- order(colLabel)
+            o <- .Order(labels=colLabel, groupOrder=colGroupOrder)
             mat <- mat[, o, drop = FALSE]
             fmat <- fmat[, o, drop = FALSE]
             colLabel <- colLabel[o]
@@ -1780,4 +1784,23 @@ semiPheatmap <- function(mat,
     invisible(list(treeRow = treeRow,
         treeCol = treeCol,
         gtable = gt))
+}
+
+
+
+
+# order function that order the row/column labels based on the order of the group priority
+# return value is a vector of the ordered index 
+# labels is a vector of any non-zero length 
+# groupOrder, a column named dataframe/matrix with the "groupName" column storing the group name and the "groupIndex" storing the group priority
+.Order = function(labels, groupOrder=NULL){ 
+    if (is.null(groupOrder)) { 
+        return(order(labels)) 
+    } else {
+        # Throw error is length(unique(labels)) != nrow(groupOrder) 
+        
+        olabels = plyr::mapvalues(x=labels, from=groupOrder[,"groupName"], to=groupOrder[,"groupIndex"])
+        olabels = as.integer(olabels) # Make sure the olabels is integer for order() function
+        return(order(olabels))
+    } 
 }

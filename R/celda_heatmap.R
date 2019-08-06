@@ -79,6 +79,8 @@
 plotHeatmap <- function(counts,
     z = NULL,
     y = NULL,
+    rowGroupOrder = NULL,
+    colGroupOrder = NULL, 
     scaleRow = scale,
     trim = c(-2, 2),
     featureIx = NULL,
@@ -276,6 +278,8 @@ plotHeatmap <- function(counts,
         treeHeightCol = treeheightCell,
         rowLabel = y,
         colLabel = z,
+        rowGroupOrder = rowGroupOrder,
+        colGroupOrder = colGroupOrder,
         silent = TRUE,
         ...)
 
