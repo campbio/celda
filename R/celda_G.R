@@ -608,9 +608,11 @@ setMethod("celdaTsne",
                                                                         min.cluster.size, modules) 
             res = calculateTsne(prepared.count.info$norm, do.pca=FALSE, perplexity=perplexity, 
                                 max.iter=max.iter, seed=seed)
-            rownames(res) = colnames(counts)
-            colnames(res) = c("tsne_1", "tsne_2")
-            return(res)
+            final = matrix(NA, nrow=ncol(counts), ncol=2)
+            final[prepared.count.info$cell.ix, ] = res
+            rownames(final) = colnames(counts)
+            colnames(final) = c("tsne_1", "tsne_2")
+            return(final)
           })
 
 
