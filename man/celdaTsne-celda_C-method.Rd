@@ -5,7 +5,7 @@
 \alias{celdaTsne,celda_C-method}
 \title{tSNE for celda_C}
 \usage{
-\S4method{celdaTsne}{celda_C}(counts, celda.mod, max.cells = 25000,
+\S4method{celdaTsne}{celda_C}(counts, celda.mod, max.cells = NULL,
   min.cluster.size = 100, initial.dims = 20, modules = NULL,
   perplexity = 20, max.iter = 2500, seed = 12345, ...)
 }
@@ -14,7 +14,7 @@
 
 \item{celda.mod}{Celda object of class `celda_C`.}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. If NULL, no subsampling will be performed. Default NULL.}
 
 \item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 

@@ -599,7 +599,7 @@ setMethod("celdaHeatmap",
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class `celda_C`. 
-#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. If NULL, no subsampling will be performed. Default NULL.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
@@ -613,7 +613,7 @@ setMethod("celdaHeatmap",
 #' @export
 setMethod("celdaTsne",
           signature(celda.mod = "celda_C"),
-            function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+            function(counts, celda.mod, max.cells=NULL, min.cluster.size=100,
                      initial.dims=20, modules=NULL, perplexity=20, max.iter=2500, 
                      seed=12345, ...) {
 
@@ -636,7 +636,7 @@ setMethod("celdaTsne",
 #' 
 #' @param counts Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.
 #' @param celda.mod Celda object of class `celda_C`. 
-#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.
+#' @param max.cells Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. If NULL, no subsampling will be performed. Default NULL.
 #' @param min.cluster.size Integer. Do not subsample cell clusters below this threshold. Default 100. 
 #' @param initial.dims Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
@@ -650,7 +650,7 @@ setMethod("celdaTsne",
 #' @export
 setMethod("celdaUmap",
           signature(celda.mod = "celda_C"),
-          function(counts, celda.mod, max.cells=25000, min.cluster.size=100,
+          function(counts, celda.mod, max.cells=NULL, min.cluster.size=100,
                    modules=NULL, umap.config=umap::umap.defaults) {
             prepared.count.info = prepareCountsForDimReduction.celda_C(counts, celda.mod, max.cells,
                                                                        min.cluster.size, modules)
@@ -669,12 +669,16 @@ prepareCountsForDimReduction.celda_C = function(counts, celda.mod, max.cells=250
   compareCountMatrix(counts, celda.mod)
   
   ## Checking if max.cells and min.cluster.size will work
-  if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@params$K)) {
-  stop(paste0("Cannot distribute ", max.cells, " cells among ", 
+  if(!is.null(max.cells)) {
+    if((max.cells < ncol(counts)) & (max.cells / min.cluster.size < celda.mod@params$K)) {
+    stop(paste0("Cannot distribute ", max.cells, " cells among ", 
               celda.mod@params$K, " clusters while maintaining a minumum of ", 
               min.cluster.size, 
               " cells per cluster. Try increasing 'max.cells' or decreasing 'min.cluster.size'."))
-  }
+    }
+  } else {
+    max.cells = ncol(counts)
+  } 
   
   ## Select a subset of cells to sample if greater than 'max.cells'
   total.cells.to.remove = ncol(counts) - max.cells

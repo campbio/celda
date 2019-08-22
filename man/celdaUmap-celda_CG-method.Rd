@@ -5,7 +5,7 @@
 \alias{celdaUmap,celda_CG-method}
 \title{umap for celda_CG}
 \usage{
-\S4method{celdaUmap}{celda_CG}(counts, celda.mod, max.cells = 25000,
+\S4method{celdaUmap}{celda_CG}(counts, celda.mod, max.cells = NULL,
   min.cluster.size = 100, modules = NULL,
   umap.config = umap::umap.defaults)
 }
@@ -14,7 +14,7 @@
 
 \item{celda.mod}{Celda object of class `celda_CG`.}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. Default 25000.}
+\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. If NULL, no subsampling will be performed. Default NULL.}
 
 \item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
 
