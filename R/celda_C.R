@@ -1211,7 +1211,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     compareCountMatrix(counts, celdaMod)
 
     ## Checking if maxCells and minClusterSize will work
-    if(!is.null(maxCells)) {
+    if (!is.null(maxCells)) {
       if ((maxCells < ncol(counts)) &
             (maxCells / minClusterSize < params(celdaMod)$K)) {
 
@@ -1225,8 +1225,8 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
             " 'minClusterSize'.")
       }
     } else {
-      maxCells = ncol(counts)
-    } 
+      maxCells <- ncol(counts)
+    }
 
     ## Select a subset of cells to sample if greater than 'maxCells'
     totalCellsToRemove <- ncol(counts) - maxCells
