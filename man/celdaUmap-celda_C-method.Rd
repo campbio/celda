@@ -5,38 +5,48 @@
 \alias{celdaUmap,celda_C-method}
 \title{umap for celda_C}
 \usage{
-\S4method{celdaUmap}{celda_C}(counts, celda.mod, max.cells = NULL,
-  min.cluster.size = 100, modules = NULL,
-  umap.config = umap::umap.defaults)
+\S4method{celdaUmap}{celda_C}(counts, celdaMod, maxCells = NULL,
+  minClusterSize = 100, modules = NULL, seed = 12345,
+  umapConfig = umap::umap.defaults)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class `celda_C`.}
+\item{celdaMod}{Celda object of class `celda_C`.}
 
-\item{max.cells}{Integer. Maximum number of cells to plot. Cells will be randomly subsampled if ncol(counts) > max.cells. Larger numbers of cells requires more memory. If NULL, no subsampling will be performed. Default NULL.}
+\item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
+randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
+requires more memory. If NULL, no subsampling will be performed.
+Default NULL.}
 
-\item{min.cluster.size}{Integer. Do not subsample cell clusters below this threshold. Default 100.}
+\item{minClusterSize}{Integer. Do not subsample cell clusters below this
+threshold. Default 100.}
 
-\item{initial.dims}{Integer. PCA will be used to reduce the dimentionality of the dataset. The top 'initial.dims' principal components will be used for tSNE. Default 20.}
+\item{modules}{Integer vector. Determines which features modules to use for
+UMAP. If NULL, all modules will be used. Default NULL.}
 
-\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 
-\item{max.iter}{Integer. Maximum number of iterations in tSNE generation. Default 2500.}
-
-\item{seed}{Integer. Passed to `set.seed()`. Default 12345. If NULL, no calls to `set.seed()` are made.}
-
-\item{...}{Additional parameters.}
+\item{umapConfig}{An object of class "umap.config" specifying parameters to
+the UMAP algorithm.}
 }
 \value{
-A two column matrix of t-SNE coordinates
+A two column matrix of umap coordinates
 }
 \description{
-Embeds cells in two dimensions using umap based on a `celda_C` model. PCA on the normalized counts is used to reduce the number of features before applying umap.
+Embeds cells in two dimensions using umap based on a `celda_C`
+ model. PCA on the normalized counts is used to reduce the number of features
+ before applying umap.
 }
 \examples{
-umap.res = celdaUmap(celda.C.sim$counts, celda.C.mod)
+data(celdaCSim, celdaCMod)
+umapRes <- celdaUmap(celdaCSim$counts, celdaCMod)
 }
 \seealso{
-`celda_C()` for clustering cells and `celdaHeatmap()` for displaying expression
+`celda_C()` for clustering cells and `celdaHeatmap()` for displaying
+ expression.
 }

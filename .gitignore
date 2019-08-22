@@ -30,6 +30,6 @@ src/*.o
 src/*.dll
 src/*.so
 etc/*
-
 # Celda log files with default prefix
 Celda_chain.*log.txt
+inst/doc

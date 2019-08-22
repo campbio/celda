@@ -4,14 +4,20 @@
 \alias{logLikelihoodHistory}
 \title{Get log-likelihood history}
 \usage{
-logLikelihoodHistory(celda.mod)
+logLikelihoodHistory(celdaMod)
+}
+\arguments{
+\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
 }
 \value{
-Numeric. The log-likelihood at each step of Gibbs sampling used to generate the model.
+Numeric. The log-likelihood at each step of Gibbs sampling used to
+ generate the model.
 }
 \description{
-Retrieves the complete log-likelihood from all iterations of Gibbs sampling used to generate a celda model.
+Retrieves the complete log-likelihood from all iterations of
+ Gibbs sampling used to generate a celdaModel.
 }
 \examples{
-logLikelihoodHistory(celda.CG.mod)
+data(celdaCGMod)
+logLikelihoodHistory(celdaCGMod)
 }

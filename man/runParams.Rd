@@ -4,14 +4,22 @@
 \alias{runParams}
 \title{Get run parameters provided to `celdaGridSearch()`}
 \usage{
-runParams(celda.mod)
+runParams(celdaList)
+}
+\arguments{
+\item{celdaList}{An object of class celdaList.}
 }
 \value{
-Data Frame. Contains details on the various K/L parameters, chain parameters, and final log-likelihoods derived for each model in the provided celdaList.
+Data Frame. Contains details on the various K/L parameters, chain
+ parameters, and final log-likelihoods derived for each model in the provided
+ celdaList.
 }
 \description{
-Returns details on the clustering parameters, model priors, and seeds provided to `celdaGridSearch()` when the provided celdaList was created.
+Returns details on the clustering parameters, and model priors
+ provided to `celdaGridSearch()` when the provided celdaList was
+ created.
 }
 \examples{
-runParams(celda.CG.grid.search.res)
+data(celdaCGGridSearchRes)
+runParams(celdaCGGridSearchRes)
 }

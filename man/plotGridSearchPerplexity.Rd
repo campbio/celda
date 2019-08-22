@@ -2,22 +2,28 @@
 % Please edit documentation in R/model_performance.R
 \name{plotGridSearchPerplexity}
 \alias{plotGridSearchPerplexity}
-\title{Visualize perplexity of every model in a celda_list, by unique K/L combinations}
+\title{Visualize perplexity of a list of celda models}
 \usage{
-plotGridSearchPerplexity(celda.list)
+plotGridSearchPerplexity(celdaList, sep = 1)
 }
 \arguments{
-\item{celda.list}{Object of class 'celda_list'.}
+\item{celdaList}{Object of class 'celdaList'.}
+
+\item{sep}{Numeric. Breaks in the x axis of the resulting plo.t.}
 }
 \value{
-A ggplot plot object showing perplexity as a function of clustering parameters.
+A ggplot plot object showing perplexity as a function of clustering
+ parameters.
 }
 \description{
-Visualize perplexity of every model in a celda_list, by unique K/L combinations
+Visualize perplexity of every model in a celdaList, by unique
+ K/L combinations
 }
 \examples{
+data(celdaCGSim, celdaCGGridSearchRes)
 ## Run various combinations of parameters with 'celdaGridSearch'
-celda.CG.grid.search.res = resamplePerplexity(celda.CG.sim$counts, 
-                                              celda.CG.grid.search.res)
-plotGridSearchPerplexity(celda.CG.grid.search.res)
+celdaCGGridSearchRes <- resamplePerplexity(
+  celdaCGSim$counts,
+  celdaCGGridSearchRes)
+plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

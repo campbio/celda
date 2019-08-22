@@ -2,16 +2,23 @@
 % Please edit documentation in R/all_generics.R
 \name{params}
 \alias{params}
-\title{Get parameter values provided for celda model creation}
+\title{Get parameter values provided for celdaModel creation}
 \usage{
-params(celda.mod)
+params(celdaMod)
+}
+\arguments{
+\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
 }
 \value{
-List. Contains the model-specific parameters for the provided celda model object depending on its class.
+List. Contains the model-specific parameters for the provided celda
+ model object depending on its class.
 }
 \description{
-Retrieves the K/L, model priors (e.g. alpha, beta), random seed, and count matrix checksum parameters provided during the creation of the provided celda model.
+Retrieves the K/L, model priors (e.g. alpha, beta),
+ and count matrix checksum parameters provided during the creation of the
+ provided celdaModel.
 }
 \examples{
-params(celda.CG.mod)
+data(celdaCGMod)
+params(celdaCGMod)
 }

@@ -2,16 +2,22 @@
 % Please edit documentation in R/all_generics.R
 \name{matrixNames}
 \alias{matrixNames}
-\title{Get feature, cell and sample names from a celda model}
+\title{Get feature, cell and sample names from a celdaModel}
 \usage{
-matrixNames(celda.mod)
+matrixNames(celdaMod)
+}
+\arguments{
+\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
 }
 \value{
-List. Contains row, column, and sample character vectors corresponding to the values provided when the celda model was generated.
+List. Contains row, column, and sample character vectors
+ corresponding to the values provided when the celdaModel was generated.
 }
 \description{
-Retrieves the row, column, and sample names used to generate a celda model.
+Retrieves the row, column, and sample names used to generate
+ a celdaModel.
 }
 \examples{
-matrixNames(celda.CG.mod)
+data(celdaCGMod)
+matrixNames(celdaCGMod)
 }

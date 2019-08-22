@@ -6,12 +6,21 @@
 \usage{
 appendCeldaList(list1, list2)
 }
+\arguments{
+\item{list1}{A celda_list object}
+
+\item{list2}{A celda_list object to be joined with list_1}
+}
 \value{
-A celdaList object. This object contains all resList entries and runParam records from both lists.
+A celdaList object. This object contains all resList entries and
+ runParam records from both lists.
 }
 \description{
-Returns a single celdaList representing the combination of two provided celdaList objects.
+Returns a single celdaList representing the combination of two
+ provided celdaList objects.
 }
 \examples{
-appended.list = appendCeldaList(celda.CG.grid.search.res, celda.CG.grid.search.res)
+data(celdaCGGridSearchRes)
+appendedList <- appendCeldaList(celdaCGGridSearchRes,
+    celdaCGGridSearchRes)
 }

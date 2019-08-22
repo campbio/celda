@@ -2,14 +2,20 @@
 % Please edit documentation in R/all_generics.R
 \name{celdaHeatmap}
 \alias{celdaHeatmap}
-\title{Render a stylable heatmap of count data based on celda clustering results.}
+\title{Plot celda Heatmap}
 \usage{
-celdaHeatmap(counts, celda.mod, feature.ix, ...)
+celdaHeatmap(counts, celdaMod, featureIx, ...)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent cells. This matrix should be the same as the one used to generate `celda.mod`.}
+\item{counts}{Integer matrix. Rows represent features and columns represent
+cells. This matrix should be the same as the one used to generate
+`celdaMod`.}
 
-\item{celda.mod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+\item{celdaMod}{A celdaModel object of class "celda_C", "celda_G", or
+"celda_CG".}
+
+\item{featureIx}{Integer vector. Select features for display in heatmap. If
+NULL, no subsetting will be performed. Default NULL.}
 
 \item{...}{Additional parameters.}
 }
@@ -17,8 +23,10 @@ celdaHeatmap(counts, celda.mod, feature.ix, ...)
 list A list containing dendrogram information and the heatmap grob
 }
 \description{
-Render a stylable heatmap of count data based on celda clustering results.
+Render a stylable heatmap of count data based on celda
+ clustering results.
 }
 \examples{
-celdaHeatmap(celda.CG.sim$counts, celda.CG.mod)
+data(celdaCGSim, celdaCGMod)
+celdaHeatmap(celdaCGSim$counts, celdaCGMod)
 }

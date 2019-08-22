@@ -1,0 +1,39 @@
+Changes in version 1.1.6 (2019-07-16):
+
+    o   Add multiclass decision tree
+
+Changes in version 1.1.4 (2019-05-28):
+
+    o   Add Alternate headings support for plotDimReduceFeature
+
+Changes in version 1.1.3 (2019-05-14):
+
+    o   Add multiclass decision tree (MCDT) cell cluster annotation
+
+Changes in version 1.1.2 (2019-05-14):
+
+    o   Fix a bug in celdaHeatmap
+
+Changes in version 1.1.1 (2019-05-09):
+
+    o   Default seed setting to maintain reproducibility
+
+Changes in version 0.99.34 (2019-04-23):
+
+    o   Minor changes to the vignettes
+
+Changes in version 0.99.23 (2019-04-10):
+
+    o   Remove pheatmap import
+
+Changes in version 0.99.22 (2019-04-09):
+
+    o   Package celda, for bi-clustering of single-cell 'omics data.
+
+Changes in version 0.99.8 (2019-03-11):
+
+    o   Second submission to Bioconductor
+
+Changes in version 0.99.0 (2018-05-15):
+
+    o   First submission to Bioconductor
