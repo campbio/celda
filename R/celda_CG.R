@@ -1482,7 +1482,7 @@ setMethod("celdaUmap",
     modules = NULL) {
 
     ## Checking if maxCells and minClusterSize will work
-    if(!is.null(max.cells)) {    
+    if(!is.null(maxCells)) {    
       if ((maxCells < ncol(counts)) &
         (maxCells / minClusterSize < params(celdaMod)$K)) {
 
@@ -1496,7 +1496,7 @@ setMethod("celdaUmap",
             " decreasing 'minClusterSize'.")
       }
     } else {
-      max.cells = ncol(counts)
+      maxCells = ncol(counts)
     } 
       
     fm <- factorizeMatrix(counts = counts,
