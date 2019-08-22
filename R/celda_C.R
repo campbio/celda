@@ -1035,7 +1035,8 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 #' @param celdaMod Celda object of class `celda_C`.
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. Default 25000.
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
 #' @param initialDims Integer. PCA will be used to reduce the dimentionality
@@ -1059,7 +1060,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 setMethod("celdaTsne", signature(celdaMod = "celda_C"),
     function(counts,
         celdaMod,
-        maxCells = 25000,
+        maxCells = NULL,
         minClusterSize = 100,
         initialDims = 20,
         modules = NULL,
@@ -1094,7 +1095,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 
 .celdaTsneC <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     initialDims = 20,
     modules = NULL,
@@ -1131,7 +1132,8 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #' @param celdaMod Celda object of class `celda_C`.
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. Default 25000.
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
 #' @param modules Integer vector. Determines which features modules to use for
@@ -1151,7 +1153,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     function(counts,
         celdaMod,
-        maxCells = 25000,
+        maxCells = NULL,
         minClusterSize = 100,
         modules = NULL,
         seed = 12345,
@@ -1180,7 +1182,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 
 .celdaUmapC <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     modules = NULL,
     umapConfig = umap::umap.defaults) {
@@ -1201,7 +1203,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 
 .prepareCountsForDimReductionCeldaC <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     modules = NULL) {
 
@@ -1209,7 +1211,8 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     compareCountMatrix(counts, celdaMod)
 
     ## Checking if maxCells and minClusterSize will work
-    if ((maxCells < ncol(counts)) &
+    if (!is.null(maxCells)) {
+      if ((maxCells < ncol(counts)) &
             (maxCells / minClusterSize < params(celdaMod)$K)) {
 
         stop("Cannot distribute ",
@@ -1220,6 +1223,9 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
             minClusterSize,
             " cells per cluster. Try increasing 'maxCells' or decreasing",
             " 'minClusterSize'.")
+      }
+    } else {
+      maxCells <- ncol(counts)
     }
 
     ## Select a subset of cells to sample if greater than 'maxCells'

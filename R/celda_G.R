@@ -1000,7 +1000,8 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
 #' @param celdaMod Celda object of class `celda_G`.
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(conts) > maxCells. Larger numbers of cells
-#'  requires more memory. Default 10000.
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
 #' @param initialDims Integer. PCA will be used to reduce the dimentionality of
@@ -1024,7 +1025,7 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_G"),
 setMethod("celdaTsne", signature(celdaMod = "celda_G"),
     function(counts,
         celdaMod,
-        maxCells = 25000,
+        maxCells = NULL,
         minClusterSize = 100,
         initialDims = 20,
         modules = NULL,
@@ -1060,7 +1061,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
 
 .celdaTsneG <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     initialDims = 20,
     modules = NULL,
@@ -1076,9 +1077,11 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
         doPca = FALSE,
         perplexity = perplexity,
         maxIter = maxIter)
-    rownames(res) <- colnames(counts)
-    colnames(res) <- c("tsne_1", "tsne_2")
-    return(res)
+    final <- matrix(NA, nrow = ncol(counts), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- res
+    rownames(final) <- colnames(counts)
+    colnames(final) <- c("tSNE_1", "tSNE_2")
+    return(final)
 }
 
 
@@ -1093,7 +1096,8 @@ setMethod("celdaTsne", signature(celdaMod = "celda_G"),
 #' @param celdaMod Celda object of class `celda_CG`.
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. Default 25000.
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
 #' @param modules Integer vector. Determines which features modules to use for
@@ -1142,7 +1146,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
 
 .celdaUmapG <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     modules = NULL,
     umapConfig = umap::umap.defaults) {
@@ -1156,19 +1160,22 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
     final <- matrix(NA, nrow = ncol(counts), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
     rownames(final) <- colnames(counts)
-    colnames(final) <- c("umap_1", "umap_2")
+    colnames(final) <- c("UMAP_1", "UMAP_2")
     return(final)
 }
 
 
 .prepareCountsForDimReductionCeldaCG <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     modules = NULL) {
 
-    if (maxCells > ncol(counts)) {
-        maxCells <- ncol(counts)
+    if (is.null(maxCells) || maxCells > ncol(counts)) {
+      maxCells <- ncol(counts)
+      cellIx <- 1:ncol(counts)
+    } else {
+      cellIx <- sample(seq(ncol(counts)), maxCells)
     }
 
     fm <- factorizeMatrix(counts = counts,
@@ -1185,7 +1192,6 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
         modulesToUse <- modules
     }
 
-    cellIx <- sample(seq(ncol(counts)), maxCells)
     norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
         normalize = "proportion",
         transformationFun = sqrt))

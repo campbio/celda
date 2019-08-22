@@ -5,7 +5,7 @@
 \alias{celdaUmap,celda_C-method}
 \title{umap for celda_C}
 \usage{
-\S4method{celdaUmap}{celda_C}(counts, celdaMod, maxCells = 25000,
+\S4method{celdaUmap}{celda_C}(counts, celdaMod, maxCells = NULL,
   minClusterSize = 100, modules = NULL, seed = 12345,
   umapConfig = umap::umap.defaults)
 }
@@ -18,7 +18,8 @@ cells. This matrix should be the same as the one used to generate
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
 randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-requires more memory. Default 25000.}
+requires more memory. If NULL, no subsampling will be performed.
+Default NULL.}
 
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
 threshold. Default 100.}
