@@ -485,10 +485,10 @@ plotDimReduceCluster <- function(dim1,
 # dimensionality reduction with PCA before UMAP.
 # @param initialDims Integer. Number of dimensions from PCA to use as
 # input in UMAP. Default 50.
-# @param nThreads Number of threads to use. Default 1.
+# @param cores Number of threads to use. Default 1.
 # @param ... Other parameters to pass to `uwot::umap`.
 #' @import uwot
-.calculateUmap <- function(norm, nNeighbors = 30, minDist = 0.2, spread = 1, pca=FALSE, initialDims=50, nThreads = 1, ...) {
+.calculateUmap <- function(norm, nNeighbors = 30, minDist = 0.75, spread = 1, pca=FALSE, initialDims=50, cores = 1, ...) {
     if (isTRUE(pca)) {
       doPCA <- initialDims
     } else {
@@ -497,5 +497,5 @@ plotDimReduceCluster <- function(dim1,
     
     return(uwot::umap(norm, n_neighbors=nNeighbors,
     		min_dist = minDist, spread = spread,
-    		n_threads = nThreads, n_sgd_threads = 1, pca = doPCA, ...))
+    		n_threads = cores, n_sgd_threads = 1, pca = doPCA, ...))
 }

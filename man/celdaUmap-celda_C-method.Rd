@@ -7,8 +7,8 @@
 \usage{
 \S4method{celdaUmap}{celda_C}(counts, celdaMod, maxCells = NULL,
   minClusterSize = 100, seed = 12345, nNeighbors = 30,
-  minDist = 0.2, spread = 1, pca = TRUE, initialDims = 50,
-  nThreads = 1, ...)
+  minDist = 0.75, spread = 1, pca = TRUE, initialDims = 50,
+  cores = 1, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -50,7 +50,7 @@ dimensionality reduction with PCA before UMAP.}
 \item{initialDims}{Integer. Number of dimensions from PCA to use as
 input in UMAP. Default 50.}
 
-\item{nThreads}{Number of threads to use. Default 1.}
+\item{cores}{Number of threads to use. Default 1.}
 
 \item{...}{Other parameters to pass to `uwot::umap`.}
 }

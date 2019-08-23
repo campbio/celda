@@ -1427,7 +1427,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_CG"),
 #' @param spread The effective scale of embedded points. In combination with
 #'          ‘min_dist’, this determines how clustered/clumped the
 #'          embedded points are. Default 1. See `?uwot::umap` for more information.
-#' @param nThreads Number of threads to use. Default 1.
+#' @param cores Number of threads to use. Default 1.
 #' @param ... Other parameters to pass to `uwot::umap`.
 #' @seealso `celda_CG()` for clustering features and cells and `celdaHeatmap()`
 #'  for displaying expression.
@@ -1444,9 +1444,9 @@ setMethod("celdaUmap",
         modules = NULL,
         seed = 12345,
         nNeighbors = 30,
-        minDist = 0.2,
+        minDist = 0.75,
         spread = 1,
-        nThreads = 1,
+        cores = 1,
         ...) {
 
         if (is.null(seed)) {
@@ -1458,7 +1458,7 @@ setMethod("celdaUmap",
                 nNeighbors = nNeighbors,
                 minDist = minDist,
                 spread = spread,
-                nThreads = nThreads,
+                cores = cores,
                 ...)
         } else {
             with_seed(seed,
@@ -1470,7 +1470,7 @@ setMethod("celdaUmap",
                     nNeighbors = nNeighbors,
                     minDist = minDist,
                     spread = spread,
-                    nThreads = nThreads,
+                    cores = cores,
                     ...))
         }
 
@@ -1486,7 +1486,7 @@ setMethod("celdaUmap",
     nNeighbors = nNeighbors,
     minDist = minDist,
     spread = spread,
-    nThreads = nThreads,
+    cores = cores,
     ...) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(counts,
@@ -1498,7 +1498,7 @@ setMethod("celdaUmap",
         nNeighbors = nNeighbors,
         minDist = minDist,
         spread = spread,
-        nThreads = nThreads,
+        cores = cores,
         ...)
 
     final <- matrix(NA, nrow = ncol(counts), ncol = 2)

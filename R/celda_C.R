@@ -1148,7 +1148,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #' dimensionality reduction with PCA before UMAP.
 #' @param initialDims Integer. Number of dimensions from PCA to use as
 #' input in UMAP. Default 50.
-#' @param nThreads Number of threads to use. Default 1.
+#' @param cores Number of threads to use. Default 1.
 #' @param ... Other parameters to pass to `uwot::umap`.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression.
@@ -1164,11 +1164,11 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
         minClusterSize = 100,
         seed = 12345,
         nNeighbors = 30,
-        minDist = 0.2,
+        minDist = 0.75,
         spread = 1,
         pca = TRUE,
         initialDims = 50,
-        nThreads = 1,        
+        cores = 1,        
         ...) {
 
         if (is.null(seed)) {
@@ -1181,7 +1181,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
                 spread = spread,
                 pca = pca,
                 initialDims = initialDims,
-                nThreads = nThreads,
+                cores = cores,
                 ...)
         } else {
             with_seed(seed,
@@ -1194,7 +1194,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
                     spread = spread,
                     pca = pca,
                     initialDims = initialDims,
-                    nThreads = nThreads,
+                    cores = cores,
                     ...))
         }
 
@@ -1211,7 +1211,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     spread = 1,
     pca = TRUE,
     initialDims = 50,
-    nThreads = 1,
+    cores = 1,
     ...) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
@@ -1224,7 +1224,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
         spread = spread,
         pca = pca,
         initialDims = initialDims,        
-        nThreads = nThreads,
+        cores = cores,
         ...)
 
     final <- matrix(NA, nrow = ncol(counts), ncol = 2)

@@ -7,7 +7,7 @@
 \usage{
 \S4method{celdaUmap}{celda_G}(counts, celdaMod, maxCells = NULL,
   minClusterSize = 100, modules = NULL, seed = 12345,
-  nNeighbors = 30, minDist = 0.2, spread = 1, nThreads = 1, ...)
+  nNeighbors = 30, minDist = 0.2, spread = 1, cores = 1, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -46,7 +46,7 @@ even dispersal of points. Default 0.2. See `?uwot::umap` for more information.}
 ‘min_dist’, this determines how clustered/clumped the
 embedded points are. Default 1. See `?uwot::umap` for more information.}
 
-\item{nThreads}{Number of threads to use. Default 1.}
+\item{cores}{Number of threads to use. Default 1.}
 
 \item{...}{Other parameters to pass to `uwot::umap`.}
 }
