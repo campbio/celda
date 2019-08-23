@@ -505,7 +505,7 @@ plotDimReduceCluster <- function(dim1,
       doPCA <- NULL
     }
 
-    res <- uwot::umap(norm, n_neighbors=nNeighbors,
+    res <- uwot::umap(norm, n_neighbors = nNeighbors,
             min_dist = minDist, spread = spread,
             n_threads = cores, n_sgd_threads = 1, pca = doPCA, ...)
     return(res)
