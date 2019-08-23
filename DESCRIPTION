@@ -34,7 +34,7 @@ Imports:
     data.table,
     Rcpp,
     RcppEigen,
-    umap,
+    uwot,
     enrichR,
     stringi,
     SummarizedExperiment,

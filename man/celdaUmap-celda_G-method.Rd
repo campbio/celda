@@ -5,9 +5,9 @@
 \alias{celdaUmap,celda_G-method}
 \title{umap for celda_G}
 \usage{
-\S4method{celdaUmap}{celda_G}(counts, celdaMod, maxCells = 25000,
+\S4method{celdaUmap}{celda_G}(counts, celdaMod, maxCells = NULL,
   minClusterSize = 100, modules = NULL, seed = 12345,
-  umapConfig = umap::umap.defaults)
+  nNeighbors = 30, minDist = 0.2, spread = 1, cores = 1, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -25,14 +25,33 @@ Default NULL.}
 threshold. Default 100.}
 
 \item{modules}{Integer vector. Determines which features modules to use for
-tSNE. If NULL, all modules will be used. Default NULL.}
+UMAP. If NULL, all modules will be used. Default NULL.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 
-\item{umapConfig}{Object of class `umap.config`. Configures parameters for
-umap. Default `umap::umap.defaults`.}
+\item{nNeighbors}{The size of local neighborhood used for
+manifold approximation. Larger values result in more global
+views of the manifold, while smaller values result in more
+local data being preserved. Default 30.
+See `?uwot::umap` for more information.}
+
+\item{minDist}{The effective minimum distance between embedded points.
+Smaller values will result in a more clustered/clumped
+embedding where nearby points on the manifold are drawn
+closer together, while larger values will result on a more
+even dispersal of points. Default 0.2.
+See `?uwot::umap` for more information.}
+
+\item{spread}{The effective scale of embedded points. In combination with
+‘min_dist’, this determines how clustered/clumped the
+embedded points are. Default 1.
+See `?uwot::umap` for more information.}
+
+\item{cores}{Number of threads to use. Default 1.}
+
+\item{...}{Other parameters to pass to `uwot::umap`.}
 }
 \value{
 A two column matrix of umap coordinates
