@@ -1135,15 +1135,17 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #' @param nNeighbors The size of local neighborhood used for
 #'   manifold approximation. Larger values result in more global
 #'   views of the manifold, while smaller values result in more
-#'   local data being preserved. Default 30. See `?uwot::umap` for more information.
+#'   local data being preserved. Default 30.
+#'   See `?uwot::umap` for more information.
 #' @param minDist The effective minimum distance between embedded points.
-#'          Smaller values will result in a more clustered/clumped
-#'          embedding where nearby points on the manifold are drawn
-#'          closer together, while larger values will result on a more
-#'          even dispersal of points. Default 0.2. See `?uwot::umap` for more information.
+#'   Smaller values will result in a more clustered/clumped
+#'   embedding where nearby points on the manifold are drawn
+#'   closer together, while larger values will result on a more
+#'   even dispersal of points. Default 0.2.
+#'   See `?uwot::umap` for more information.
 #' @param spread The effective scale of embedded points. In combination with
-#'          ‘min_dist’, this determines how clustered/clumped the
-#'          embedded points are. Default 1. See `?uwot::umap` for more information.
+#'   ‘min_dist’, this determines how clustered/clumped the
+#'   embedded points are. Default 1. See `?uwot::umap` for more information.
 #' @param pca Logical. Whether to perform
 #' dimensionality reduction with PCA before UMAP.
 #' @param initialDims Integer. Number of dimensions from PCA to use as
@@ -1168,7 +1170,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
         spread = 1,
         pca = TRUE,
         initialDims = 50,
-        cores = 1,        
+        cores = 1,
         ...) {
 
         if (is.null(seed)) {
@@ -1223,7 +1225,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
         minDist = minDist,
         spread = spread,
         pca = pca,
-        initialDims = initialDims,        
+        initialDims = initialDims,
         cores = cores,
         ...)
 

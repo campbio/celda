@@ -615,7 +615,7 @@ setGeneric("celdaUmap",
         minClusterSize = 100,
         modules = NULL,
         seed = 12345,
-	    ...) {
+        ...) {
         standardGeneric("celdaUmap")
     })
 

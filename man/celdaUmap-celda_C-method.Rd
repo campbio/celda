@@ -32,13 +32,15 @@ a default value of 12345 is used. If NULL, no calls to
 \item{nNeighbors}{The size of local neighborhood used for
 manifold approximation. Larger values result in more global
 views of the manifold, while smaller values result in more
-local data being preserved. Default 30. See `?uwot::umap` for more information.}
+local data being preserved. Default 30.
+See `?uwot::umap` for more information.}
 
 \item{minDist}{The effective minimum distance between embedded points.
 Smaller values will result in a more clustered/clumped
 embedding where nearby points on the manifold are drawn
 closer together, while larger values will result on a more
-even dispersal of points. Default 0.2. See `?uwot::umap` for more information.}
+even dispersal of points. Default 0.2.
+See `?uwot::umap` for more information.}
 
 \item{spread}{The effective scale of embedded points. In combination with
 ‘min_dist’, this determines how clustered/clumped the
