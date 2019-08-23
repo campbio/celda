@@ -445,14 +445,14 @@ plotDimReduceCluster <- function(dim1,
 # @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
 # @param doPca Logical. Whether to perform
 # dimensionality reduction with PCA before tSNE.
-# @param initialDims Integer.Number of dimensions from PCA to use as
-# input in tSNE.
+# @param initialDims Integer. Number of dimensions from PCA to use as
+# input in tSNE. Default 50.
 #' @importFrom Rtsne Rtsne
 .calculateTsne <- function(norm,
     perplexity = 20,
     maxIter = 2500,
     doPca = FALSE,
-    initialDims = 20) {
+    initialDims = 50) {
 
     res <- Rtsne::Rtsne(
         norm,
@@ -467,12 +467,35 @@ plotDimReduceCluster <- function(dim1,
 }
 
 
-# Run the umap algorithm for dimensionality reduction
+# Run the UMAP algorithm for dimensionality reduction
 # @param norm Normalized count matrix.
-# @param umapConfig An object of class umap.config,
-# containing configuration parameters to be passed to umap.
-# Default umap::umap.defualts.
-#' @importFrom umap umap
-.calculateUmap <- function(norm, umapConfig = umap::umap.defaults) {
-    return(umap::umap(norm, umapConfig)$layout)
+# @param nNeighbors The size of local neighborhood used for
+#   manifold approximation. Larger values result in more global
+#   views of the manifold, while smaller values result in more
+#   local data being preserved. Default 30. See `?uwot::umap` for more information.
+# @param minDist The effective minimum distance between embedded points.
+#          Smaller values will result in a more clustered/clumped
+#          embedding where nearby points on the manifold are drawn
+#          closer together, while larger values will result on a more
+#          even dispersal of points. Default 0.2. See `?uwot::umap` for more information.
+# @param spread The effective scale of embedded points. In combination with
+#          ‘min_dist’, this determines how clustered/clumped the
+#          embedded points are. Default 1. See `?uwot::umap` for more information.
+# @param pca Logical. Whether to perform
+# dimensionality reduction with PCA before UMAP.
+# @param initialDims Integer. Number of dimensions from PCA to use as
+# input in UMAP. Default 50.
+# @param nThreads Number of threads to use. Default 1.
+# @param ... Other parameters to pass to `uwot::umap`.
+#' @import uwot
+.calculateUmap <- function(norm, nNeighbors = 30, minDist = 0.2, spread = 1, pca=FALSE, initialDims=50, nThreads = 1, ...) {
+    if (isTRUE(pca)) {
+      doPCA <- initialDims
+    } else {
+      doPCA <- NULL
+    }
+    
+    return(uwot::umap(norm, n_neighbors=nNeighbors,
+    		min_dist = minDist, spread = spread,
+    		n_threads = nThreads, n_sgd_threads = 1, pca = doPCA, ...))
 }

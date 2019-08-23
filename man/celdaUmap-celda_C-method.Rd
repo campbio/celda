@@ -6,8 +6,9 @@
 \title{umap for celda_C}
 \usage{
 \S4method{celdaUmap}{celda_C}(counts, celdaMod, maxCells = NULL,
-  minClusterSize = 100, modules = NULL, seed = 12345,
-  umapConfig = umap::umap.defaults)
+  minClusterSize = 100, seed = 12345, nNeighbors = 30,
+  minDist = 0.2, spread = 1, pca = TRUE, initialDims = 50,
+  nThreads = 1, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -24,18 +25,37 @@ Default NULL.}
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
 threshold. Default 100.}
 
-\item{modules}{Integer vector. Determines which features modules to use for
-UMAP. If NULL, all modules will be used. Default NULL.}
-
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 
-\item{umapConfig}{An object of class "umap.config" specifying parameters to
-the UMAP algorithm.}
+\item{nNeighbors}{The size of local neighborhood used for
+manifold approximation. Larger values result in more global
+views of the manifold, while smaller values result in more
+local data being preserved. Default 30. See `?uwot::umap` for more information.}
+
+\item{minDist}{The effective minimum distance between embedded points.
+Smaller values will result in a more clustered/clumped
+embedding where nearby points on the manifold are drawn
+closer together, while larger values will result on a more
+even dispersal of points. Default 0.2. See `?uwot::umap` for more information.}
+
+\item{spread}{The effective scale of embedded points. In combination with
+‘min_dist’, this determines how clustered/clumped the
+embedded points are. Default 1. See `?uwot::umap` for more information.}
+
+\item{pca}{Logical. Whether to perform
+dimensionality reduction with PCA before UMAP.}
+
+\item{initialDims}{Integer. Number of dimensions from PCA to use as
+input in UMAP. Default 50.}
+
+\item{nThreads}{Number of threads to use. Default 1.}
+
+\item{...}{Other parameters to pass to `uwot::umap`.}
 }
 \value{
-A two column matrix of umap coordinates
+A two column matrix of UMAP coordinates
 }
 \description{
 Embeds cells in two dimensions using umap based on a `celda_C`

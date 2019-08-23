@@ -596,33 +596,26 @@ setGeneric("celdaTsne",
 #'  requires more memory. Default 25000.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
-#' @param initialDims Integer. PCA will be used to reduce the dimentionality
-#'  of the dataset. The top 'initialDims' principal components will be used
-#'  for umap. Default 20.
 #' @param modules Integer vector. Determines which features modules to use for
 #'  tSNE. If NULL, all modules will be used. Default NULL.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @param umapConfig An object of class "umapConfig" specifying parameters to
 #'  the UMAP algorithm.
-#' @return Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
-#'  the "X" and "Y" coordinates in the data's t-SNE represetation.
-#' @examples
+#' @param ... Additional parameters to `uwot::umap`
+#' @return A two column matrix of UMAP coordinates#' @examples
 #' data(celdaCGSim, celdaCGMod)
-#' tsneRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
-#' @importFrom umap umap.defaults
+#' umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 #' @export
 setGeneric("celdaUmap",
     signature = "celdaMod",
     function(counts,
         celdaMod,
-        maxCells = 25000,
+        maxCells = NULL,
         minClusterSize = 100,
-        initialDims = 20,
         modules = NULL,
         seed = 12345,
-        umapConfig = umap::umap.defaults) {
+	    ...) {
         standardGeneric("celdaUmap")
     })
 
