@@ -48,6 +48,7 @@ plotDimReduceGrid <- function(dim1,
     colorMid,
     colorHigh,
     varLabel,
+    ncol = NULL,
     headers = NULL) {
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
@@ -66,7 +67,6 @@ plotDimReduceGrid <- function(dim1,
             ggplot2::geom_point(stat = "identity",
                 size = size,
                 ggplot2::aes_string(color = varLabel)) +
-            ggplot2::facet_wrap(~ facet, labeller = headers) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(low = colorLow,
                 high = colorHigh,
@@ -79,6 +79,11 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
+        if (isFALSE(is.null(ncol))){
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers, ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers)
+        }
     } else {
         g <- ggplot2::ggplot(m,
             ggplot2::aes_string(x = xlab, y = ylab)) +
@@ -98,6 +103,11 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
+        if (isFALSE(is.null(ncol))){
+            g <- g + ggplot2::facet_wrap(~ facet, ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~ facet)
+        }
     }
     return(g)
 }
@@ -147,7 +157,7 @@ plotDimReduceGrid <- function(dim1,
 #'     exactMatch = TRUE)
 #' }
 #' @export
-plotDimReduceFeature <- function(dim1,
+plotDimReduceFeature2 <- function(dim1,
     dim2,
     counts,
     features,
@@ -160,7 +170,8 @@ plotDimReduceFeature <- function(dim1,
     ylab = "Dimension_2",
     colorLow = "grey",
     colorMid = NULL,
-    colorHigh = "blue") {
+    colorHigh = "blue",
+    ncol = NULL) {
 
     if (isFALSE(is.null(headers))) {
         if (length(headers) != length(features)) {
@@ -250,6 +261,7 @@ plotDimReduceFeature <- function(dim1,
         colorMid,
         colorHigh,
         varLabel,
+        ncol,
         headers)
 }
 
@@ -307,7 +319,8 @@ plotDimReduceModule <-
         ylab = "Dimension_2",
         colorLow = "grey",
         colorMid = NULL,
-        colorHigh = "blue") {
+        colorHigh = "blue",
+        ncol = NULL) {
 
         factorized <- factorizeMatrix(celdaMod = celdaMod,
             counts = counts)
@@ -344,7 +357,8 @@ plotDimReduceModule <-
             colorLow,
             colorMid,
             colorHigh,
-            varLabel)
+            varLabel,
+            ncol)
     }
 
 
