@@ -157,7 +157,7 @@ plotDimReduceGrid <- function(dim1,
 #'     exactMatch = TRUE)
 #' }
 #' @export
-plotDimReduceFeature2 <- function(dim1,
+plotDimReduceFeature <- function(dim1,
     dim2,
     counts,
     features,
