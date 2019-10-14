@@ -101,7 +101,7 @@ findMarkers <- function(features,
         stop("NA class values")
     }
 
-    if (any(is.na(features))){
+    if (any(is.na(features))) {
         stop("NA feature values")
     }
 
@@ -178,7 +178,7 @@ findMarkers <- function(features,
         dendro <- tree$dendro
 
         # Create separate trees for each cell type with more than one cluster
-        newTrees <- lapply(largeCellTypes, function(cellType){
+        newTrees <- lapply(largeCellTypes, function(cellType) {
 
             # Print current status
             message("Building tree for cell type ", cellType)
@@ -268,7 +268,7 @@ findMarkers <- function(features,
             cellTypeDendro <- newTrees[[cellType]]$dendro
 
             # Adjust labels, member count, and midpoint of nodes
-            dendro <- dendrapply(dendro, function(node){
+            dendro <- dendrapply(dendro, function(node) {
                 # Check if in right branch
                 if (cellType %in% as.character(attributes(node)$classLabels)) {
                     # Replace cell type label with subtype labels
@@ -311,7 +311,7 @@ findMarkers <- function(features,
             cellTypeHeight <- attributes(cellTypeDendro)$height
             cellTypeDendro <- dendrapply(cellTypeDendro,
                 function(node, parentHeight, cellTypeHeight) {
-                    if (attributes(node)$height > 1){
+                    if (attributes(node)$height > 1) {
                         attributes(node)$height <-
                             parentHeight - 1 - (cellTypeHeight - attributes(
                                 node)$height)
