@@ -34,7 +34,7 @@ getDecisions <- function(rules, features) {
 }
 
 # Function to predict class from list of rules
-.predictClass <- function(samp, rules){
+.predictClass <- function(samp, rules) {
 
     # Initilize possible classes and level
     classes <- names(rules)

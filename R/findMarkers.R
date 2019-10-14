@@ -204,7 +204,7 @@ findMarkers <- function(features,
                         newLabels == cellType])))
 
             # Adjust 'rules' table for new tree
-            newTree$rules <- lapply(newTree$rules, function(rules){
+            newTree$rules <- lapply(newTree$rules, function(rules) {
                 rules$level <- rules$level + max(tree$rules[[cellType]]$level)
                 rules <- rbind(tree$rules[[cellType]], rules)
             })

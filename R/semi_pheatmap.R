@@ -898,7 +898,8 @@ vplayout <- function(x, y) {
         }
 
         # Draw annotation legend
-        annotation <- c(annotationCol[seq.int(from = length(annotationCol), to = 1)],
+        annotation <- c(annotationCol[seq.int(
+            from = length(annotationCol), to = 1)],
             annotationRow[seq.int(from = length(annotationRow), to = 1)])
         annotation <- annotation[unlist(lapply(annotation,
             function(x) !.is.na2(x)))]
@@ -1658,7 +1659,7 @@ semiPheatmap <- function(mat,
             colLabel <- rep(1, ncol(mat))
         } else {
             #o <- order(colLabel)
-            o <- .Order(labels=colLabel, groupOrder=colGroupOrder)
+            o <- .Order(labels = colLabel, groupOrder = colGroupOrder)
             mat <- mat[, o, drop = FALSE]
             fmat <- fmat[, o, drop = FALSE]
             colLabel <- colLabel[o]
@@ -1789,21 +1790,23 @@ semiPheatmap <- function(mat,
 
 
 
-# order function that order the row/column labels 
+# order function that order the row/column labels
 # based on the order of the group priority
 # return value is a vector of the ordered index
 # labels is a vector of any non-zero length
-# groupOrder, a column named dataframe/matrix 
-# with the "groupName" column storing the group 
+# groupOrder, a column named dataframe/matrix
+# with the "groupName" column storing the group
 # name and the "groupIndex" storing the group priority
 .Order <- function(labels, groupOrder=NULL) {
     if (is.null(groupOrder)) {
-        return(order(labels)) 
+        return(order(labels))
     } else {
         # Throw error is length(unique(labels)) != nrow(groupOrder)
-        olabels <- plyr::mapvalues(x = labels, from = groupOrder[, "groupName"], 
-				   to = groupOrder[, "groupIndex"])
-        olabels <- as.integer(olabels) # Make sure the olabels is integer for order() function
+        olabels <- plyr::mapvalues(x = labels,
+            from = groupOrder[, "groupName"],
+            to = groupOrder[, "groupIndex"])
+        # Make sure the olabels is integer for order() function
+        olabels <- as.integer(olabels) 
         return(order(olabels))
     }
 }
