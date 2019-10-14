@@ -1806,7 +1806,7 @@ semiPheatmap <- function(mat,
             from = groupOrder[, "groupName"],
             to = groupOrder[, "groupIndex"])
         # Make sure the olabels is integer for order() function
-        olabels <- as.integer(olabels) 
+        olabels <- as.integer(olabels)
         return(order(olabels))
     }
 }
