@@ -710,8 +710,7 @@ addLogLikelihood <- function(llA, llB) {
             K <- ceiling(sqrt(nC))
         }
 
-        globalZ <-
-            .initializeSplitZ(
+        globalZ <- .initializeSplitZ(
                 counts,
                 K = K,
                 KSubcluster = NULL,
@@ -722,7 +721,7 @@ addLogLikelihood <- function(llA, llB) {
         globalK <- max(globalZ)
 
         localZ <- rep(NA, nC)
-        for (k in 1:globalK) {
+        for (k in seq(globalK)) {
             if (sum(globalZ == k) > 2) {
                 localCounts <- counts[, globalZ == k]
                 localK <- min(K, ceiling(sqrt(ncol(
@@ -741,16 +740,12 @@ addLogLikelihood <- function(llA, llB) {
             }
         }
 
-
-        cbZ <-
-            interaction(globalZ, localZ, lex.order = TRUE, drop = TRUE)
+        cbZ <- interaction(globalZ, localZ, lex.order = TRUE, drop = TRUE)
                 # combined z label
-        trZ <-
-            as.integer(sub("\\..*", "", levels(cbZ), perl = TRUE))
+        trZ <- as.integer(sub("\\..*", "", levels(cbZ), perl = TRUE))
                 # transitional z label
-        cbZ <-
-            as.integer(plyr::mapvalues(cbZ, from = levels(cbZ),
-                to = 1:length(levels(cbZ))))
+        cbZ <- as.integer(plyr::mapvalues(cbZ, from = levels(cbZ),
+                to = seq(length(levels(cbZ)))))
 
 
         return(list(
