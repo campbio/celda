@@ -129,11 +129,11 @@ plotDimReduceGrid <- function(dim1,
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`. The color
-#'  will be used to signify the lowest values on the scale. Default 'grey'.
+#'  will be used to signify the lowest values on the scale. Default 'blue'.
 #' @param colorMid Character. A color available from `colors()`. The color
-#'  will be used to signify the midpoint on the scale.
+#'  will be used to signify the midpoint on the scale. Default 'white'.
 #' @param colorHigh Character. A color available from `colors()`. The color
-#'  will be used to signify the highest values on the scale. Default 'blue'.
+#'  will be used to signify the highest values on the scale. Default 'red'.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
@@ -158,9 +158,9 @@ plotDimReduceFeature <- function(dim1,
     size = 1,
     xlab = "Dimension_1",
     ylab = "Dimension_2",
-    colorLow = "grey",
-    colorMid = NULL,
-    colorHigh = "blue") {
+    colorLow = "blue",
+    colorMid = "white",
+    colorHigh = "red") {
 
     if (isFALSE(is.null(headers))) {
         if (length(headers) != length(features)) {
