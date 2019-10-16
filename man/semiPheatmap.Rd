@@ -276,7 +276,7 @@ pheatmap(test,
     clusteringDistanceCols = dcols)
 
 # Modify ordering of the clusters using clustering callback option
-callback = function(hc, mat){
+callback = function(hc, mat) {
     sv = svd(t(mat))$v[, 1]
     dend = reorder(as.dendrogram(hc), wts = sv)
     as.hclust(dend)
