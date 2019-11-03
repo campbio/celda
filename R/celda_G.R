@@ -149,11 +149,18 @@ celda_G <- function(counts,
     allChains <- seq(nchains)
 
     # Pre-compute lgamma values
+
+	# delta needs to be integer for computational speed
+	delta <- as.integer(round(delta))
+	if(delta == 0) delta <- 1L
+
     lgbeta <- lgamma(seq(0, max(.colSums(counts,
         nrow(counts), ncol(counts)))) + beta)
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
-    lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
-
+    #lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
+	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts))))
+	
+	
     bestResult <- NULL
     for (i in allChains) {
         ## Randomly select y or y to supplied initial values

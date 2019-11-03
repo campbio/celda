@@ -207,9 +207,15 @@ celda_CG <- function(counts,
 
     allChains <- seq(nchains)
 
+	# delta needs to be integer for computational speed
+	delta <- as.integer(round(delta))
+	if(delta == 0) delta <- 1L
+
     # Pre-compute lgamma values
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
-    lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
+    #lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
+	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts))))
+
 
     bestResult <- NULL
     for (i in allChains) {

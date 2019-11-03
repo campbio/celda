@@ -300,12 +300,17 @@
     nG <- p$nG
     rm(p)
 
+	# delta needs to be integer for computational speed
+	delta <- as.integer(round(delta))
+	if(delta == 0) delta <- 1L
+
     # Pre-compute lgamma values
     lgbeta <- lgamma((seq(0, max(.colSums(counts, nrow(counts),
         ncol(counts))))) + beta)
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
-    lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
-
+    #lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
+	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts))))
+	
     # Remove clusters 1-by-1 until L is reached
     while (currentL > L) {
         # Find second best assignment give current assignments for each cell
