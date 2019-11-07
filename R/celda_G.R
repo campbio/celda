@@ -158,7 +158,7 @@ celda_G <- function(counts,
         nrow(counts), ncol(counts)))) + beta)
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
     #lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
-	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts))))
+	lgdelta <- c(NA, lgamma(1:(sum(counts) + (nrow(counts) * delta) + 1)))
 	
 	
     bestResult <- NULL

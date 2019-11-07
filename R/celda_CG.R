@@ -214,7 +214,7 @@ celda_CG <- function(counts,
     # Pre-compute lgamma values
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
     #lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
-	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts))))
+	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts)+1e6)))
 
 
     bestResult <- NULL
