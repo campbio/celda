@@ -309,7 +309,7 @@
         ncol(counts))))) + beta)
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
     #lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
-	lgdelta <- c(NA, lgamma(1:(sum(counts) + (nrow(counts) * delta) + 1)))
+	lgdelta <- c(NA, lgamma(seq(sum(counts) + (nrow(counts) * delta) + 1)))
 	
     # Remove clusters 1-by-1 until L is reached
     while (currentL > L) {

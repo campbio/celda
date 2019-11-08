@@ -213,8 +213,7 @@ celda_CG <- function(counts,
 
     # Pre-compute lgamma values
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
-    #lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
-	lgdelta <- c(NA, lgamma(1:(sum(counts)+nrow(counts)+1e6)))
+	lgdelta <- c(NA, lgamma(seq(sum(counts) + (nrow(counts) * delta) + 1)))
 
 
     bestResult <- NULL
@@ -1135,8 +1134,12 @@ setMethod("clusterProbability", signature(celdaMod = "celda_CG"),
         p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
         lgbeta <- lgamma(seq(0, max(p$nCP)) + beta)
         lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
-        lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
 
+		# delta needs to be integer for computational speed
+		delta <- as.integer(round(delta))
+		if(delta == 0) delta <- 1L
+	    lgdelta <- c(NA, lgamma(seq(sum(counts) + (nrow(counts) * delta) + 1)))
+	
         nextZ <- .cCCalcGibbsProbZ(counts = p$nTSByC,
             mCPByS = p$mCPByS,
             nGByCP = p$nTSByCP,
