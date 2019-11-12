@@ -4,9 +4,8 @@
 \alias{celdaUmap}
 \title{Embeds cells in two dimensions using umap.}
 \usage{
-celdaUmap(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
-  initialDims = 20, modules = NULL, seed = 12345,
-  umapConfig = umap::umap.defaults)
+celdaUmap(counts, celdaMod, maxCells = NULL, minClusterSize = 100,
+  modules = NULL, seed = 12345, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -22,28 +21,21 @@ requires more memory. Default 25000.}
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
 threshold. Default 100.}
 
-\item{initialDims}{Integer. PCA will be used to reduce the dimentionality
-of the dataset. The top 'initialDims' principal components will be used
-for umap. Default 20.}
-
 \item{modules}{Integer vector. Determines which features modules to use for
 tSNE. If NULL, all modules will be used. Default NULL.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
-\link[withr]{with_seed} are made.}
-
-\item{umapConfig}{An object of class "umapConfig" specifying parameters to
+\link[withr]{with_seed} are made.
 the UMAP algorithm.}
+
+\item{...}{Additional parameters to `uwot::umap`}
 }
 \value{
-Numeric Matrix of dimension `ncol(counts)` x 2, colums representing
- the "X" and "Y" coordinates in the data's t-SNE represetation.
+A two column matrix of UMAP coordinates#' @examples
+data(celdaCGSim, celdaCGMod)
+umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 }
 \description{
 Embeds cells in two dimensions using umap.
-}
-\examples{
-data(celdaCGSim, celdaCGMod)
-tsneRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 }

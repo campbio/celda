@@ -5,9 +5,9 @@
 \alias{celdaTsne,celda_C-method}
 \title{tSNE for celda_C}
 \usage{
-\S4method{celdaTsne}{celda_C}(counts, celdaMod, maxCells = 25000,
-  minClusterSize = 100, initialDims = 20, modules = NULL,
-  perplexity = 20, maxIter = 2500, seed = 12345)
+\S4method{celdaTsne}{celda_C}(counts, celdaMod, maxCells = NULL,
+  minClusterSize = 100, initialDims = 20, perplexity = 20,
+  maxIter = 2500, seed = 12345)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
@@ -18,7 +18,8 @@ cells. This matrix should be the same as the one used to generate
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
 randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-requires more memory. Default 25000.}
+requires more memory. If NULL, no subsampling will be performed.
+Default NULL.}
 
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
 threshold. Default 100.}
@@ -26,9 +27,6 @@ threshold. Default 100.}
 \item{initialDims}{Integer. PCA will be used to reduce the dimentionality
 of the dataset. The top 'initialDims' principal components will be used
 for tSNE. Default 20.}
-
-\item{modules}{Integer vector. Determines which features modules to use for
-tSNE. If NULL, all modules will be used. Default NULL.}
 
 \item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
 

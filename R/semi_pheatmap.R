@@ -755,7 +755,7 @@ vplayout <- function(x, y) {
         }
 
         # Omit border color if cell size is too small
-        if (mindim < 3){
+        if (mindim < 3) {
             borderColor <- NA
         }
 
@@ -898,8 +898,9 @@ vplayout <- function(x, y) {
         }
 
         # Draw annotation legend
-        annotation <- c(annotationCol[length(annotationCol):1],
-            annotationRow[length(annotationRow):1])
+        annotation <- c(annotationCol[seq(length(annotationCol), 1)],
+            annotationRow[seq(length(annotationRow), 1)])
+
         annotation <- annotation[unlist(lapply(annotation,
             function(x) !.is.na2(x)))]
 
@@ -1494,7 +1495,7 @@ vplayout <- function(x, y) {
 #'     clusteringDistanceCols = dcols)
 #'
 #' # Modify ordering of the clusters using clustering callback option
-#' callback = function(hc, mat){
+#' callback = function(hc, mat) {
 #'     sv = svd(t(mat))$v[, 1]
 #'     dend = reorder(as.dendrogram(hc), wts = sv)
 #'     as.hclust(dend)
@@ -1552,6 +1553,8 @@ semiPheatmap <- function(mat,
     silent = FALSE,
     rowLabel,
     colLabel,
+    rowGroupOrder = NULL,
+    colGroupOrder = NULL,
     ...) {
 
     # Set labels
@@ -1620,7 +1623,8 @@ semiPheatmap <- function(mat,
         if (is.null(rowLabel)) {
             rowLabel <- rep(1, nrow(mat))
         } else {
-            o <- order(rowLabel)
+            #o <- order(rowLabel)
+            o <- .Order(labels = rowLabel, groupOrder = rowGroupOrder)
             mat <- mat[o, , drop = FALSE]
             fmat <- fmat[o, , drop = FALSE]
             rowLabel <- rowLabel[o]
@@ -1654,7 +1658,8 @@ semiPheatmap <- function(mat,
         if (is.null(colLabel)) {
             colLabel <- rep(1, ncol(mat))
         } else {
-            o <- order(colLabel)
+            #o <- order(colLabel)
+            o <- .Order(labels = colLabel, groupOrder = colGroupOrder)
             mat <- mat[, o, drop = FALSE]
             fmat <- fmat[, o, drop = FALSE]
             colLabel <- colLabel[o]
@@ -1780,4 +1785,28 @@ semiPheatmap <- function(mat,
     invisible(list(treeRow = treeRow,
         treeCol = treeCol,
         gtable = gt))
+}
+
+
+
+
+# order function that order the row/column labels
+# based on the order of the group priority
+# return value is a vector of the ordered index
+# labels is a vector of any non-zero length
+# groupOrder, a column named dataframe/matrix
+# with the "groupName" column storing the group
+# name and the "groupIndex" storing the group priority
+.Order <- function(labels, groupOrder=NULL) {
+    if (is.null(groupOrder)) {
+        return(order(labels))
+    } else {
+        # Throw error is length(unique(labels)) != nrow(groupOrder)
+        olabels <- plyr::mapvalues(x = labels,
+            from = groupOrder[, "groupName"],
+            to = groupOrder[, "groupIndex"])
+        # Make sure the olabels is integer for order() function
+        olabels <- as.integer(olabels)
+        return(order(olabels))
+    }
 }
