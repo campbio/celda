@@ -79,8 +79,9 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
-        if (isFALSE(is.null(ncol))){
-            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers, ncol = ncol)
+        if (isFALSE(is.null(ncol))) {
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers,
+                ncol = ncol)
         } else {
             g <- g + ggplot2::facet_wrap(~ facet, labeller = headers)
         }
@@ -103,7 +104,7 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
-        if (isFALSE(is.null(ncol))){
+        if (isFALSE(is.null(ncol))) {
             g <- g + ggplot2::facet_wrap(~ facet, ncol = ncol)
         } else {
             g <- g + ggplot2::facet_wrap(~ facet)
@@ -407,10 +408,10 @@ plotDimReduceCluster <- function(dim1,
     ylab = "Dimension_2",
     specificClusters = NULL,
     labelClusters = FALSE,
-    group.by = NULL,
+    groupBy = NULL,
     labelSize = 3.5) {
-    if (!is.null(group.by)) {
-        df <- data.frame(dim1, dim2, cluster, group.by)
+    if (!is.null(groupBy)) {
+        df <- data.frame(dim1, dim2, cluster, groupBy)
         colnames(df) <- c(xlab, ylab, "Cluster", "Sample")
     } else {
         df <- data.frame(dim1, dim2, cluster)
@@ -457,8 +458,9 @@ plotDimReduceCluster <- function(dim1,
                 mapping = ggplot2::aes_string(label = "Cluster"),
                 size = labelSize)
     }
-    if (!is.null(x = group.by)) {
-        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) + theme(strip.background = element_blank())
+    if (!is.null(x = groupBy)) {
+        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) +
+            theme(strip.background = element_blank())
     }
     return(g)
 }
