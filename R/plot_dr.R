@@ -383,7 +383,7 @@ plotDimReduceModule <-
 #'  If NULL, all clusters will be colored. Default NULL.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
-#' @param group.by Character vector. Contains sample labels for each cell.
+#' @param groupBy Character vector. Contains sample labels for each cell.
 #'  If NULL, all samples will be plotted together. Default NULL.
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
