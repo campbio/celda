@@ -382,6 +382,8 @@ plotDimReduceModule <-
 #'  If NULL, all clusters will be colored. Default NULL.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
+#' @param group.by Character vector. Contains sample labels for each cell.
+#'  If NULL, all samples will be plotted together. Default NULL.
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
 #' @return The plot as a ggplot object
@@ -405,9 +407,15 @@ plotDimReduceCluster <- function(dim1,
     ylab = "Dimension_2",
     specificClusters = NULL,
     labelClusters = FALSE,
+    group.by = NULL,
     labelSize = 3.5) {
-    df <- data.frame(dim1, dim2, cluster)
-    colnames(df) <- c(xlab, ylab, "Cluster")
+    if (!is.null(group.by)) {
+        df <- data.frame(dim1, dim2, cluster, group.by)
+        colnames(df) <- c(xlab, ylab, "Cluster", "Sample")
+    } else {
+        df <- data.frame(dim1, dim2, cluster)
+        colnames(df) <- c(xlab, ylab, "Cluster")
+    }
     naIx <- is.na(dim1) | is.na(dim2)
     df <- df[!naIx, ]
     df[3] <- as.factor(df[[3]])
@@ -448,6 +456,9 @@ plotDimReduceCluster <- function(dim1,
             ggrepel::geom_text_repel(data = centroid,
                 mapping = ggplot2::aes_string(label = "Cluster"),
                 size = labelSize)
+    }
+    if (!is.null(x = group.by)) {
+        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) + theme(strip.background = element_blank())
     }
     return(g)
 }
