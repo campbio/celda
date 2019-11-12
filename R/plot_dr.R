@@ -48,6 +48,7 @@ plotDimReduceGrid <- function(dim1,
     colorMid,
     colorHigh,
     varLabel,
+    ncol = NULL,
     headers = NULL) {
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
@@ -66,7 +67,6 @@ plotDimReduceGrid <- function(dim1,
             ggplot2::geom_point(stat = "identity",
                 size = size,
                 ggplot2::aes_string(color = varLabel)) +
-            ggplot2::facet_wrap(~ facet, labeller = headers) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(low = colorLow,
                 high = colorHigh,
@@ -79,6 +79,11 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
+        if (isFALSE(is.null(ncol))){
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers, ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers)
+        }
     } else {
         g <- ggplot2::ggplot(m,
             ggplot2::aes_string(x = xlab, y = ylab)) +
@@ -98,6 +103,11 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
+        if (isFALSE(is.null(ncol))){
+            g <- g + ggplot2::facet_wrap(~ facet, ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~ facet)
+        }
     }
     return(g)
 }
@@ -160,7 +170,8 @@ plotDimReduceFeature <- function(dim1,
     ylab = "Dimension_2",
     colorLow = "blue",
     colorMid = "white",
-    colorHigh = "red") {
+    colorHigh = "red",
+    ncol = NULL) {
 
     if (isFALSE(is.null(headers))) {
         if (length(headers) != length(features)) {
@@ -250,6 +261,7 @@ plotDimReduceFeature <- function(dim1,
         colorMid,
         colorHigh,
         varLabel,
+        ncol,
         headers)
 }
 
@@ -307,7 +319,8 @@ plotDimReduceModule <-
         ylab = "Dimension_2",
         colorLow = "grey",
         colorMid = NULL,
-        colorHigh = "blue") {
+        colorHigh = "blue",
+        ncol = NULL) {
 
         factorized <- factorizeMatrix(celdaMod = celdaMod,
             counts = counts)
@@ -344,7 +357,8 @@ plotDimReduceModule <-
             colorLow,
             colorMid,
             colorHigh,
-            varLabel)
+            varLabel,
+            ncol)
     }
 
 
@@ -368,6 +382,8 @@ plotDimReduceModule <-
 #'  If NULL, all clusters will be colored. Default NULL.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
+#' @param group.by Character vector. Contains sample labels for each cell.
+#'  If NULL, all samples will be plotted together. Default NULL.
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
 #' @return The plot as a ggplot object
@@ -391,9 +407,15 @@ plotDimReduceCluster <- function(dim1,
     ylab = "Dimension_2",
     specificClusters = NULL,
     labelClusters = FALSE,
+    group.by = NULL,
     labelSize = 3.5) {
-    df <- data.frame(dim1, dim2, cluster)
-    colnames(df) <- c(xlab, ylab, "Cluster")
+    if (!is.null(group.by)) {
+        df <- data.frame(dim1, dim2, cluster, group.by)
+        colnames(df) <- c(xlab, ylab, "Cluster", "Sample")
+    } else {
+        df <- data.frame(dim1, dim2, cluster)
+        colnames(df) <- c(xlab, ylab, "Cluster")
+    }
     naIx <- is.na(dim1) | is.na(dim2)
     df <- df[!naIx, ]
     df[3] <- as.factor(df[[3]])
@@ -434,6 +456,9 @@ plotDimReduceCluster <- function(dim1,
             ggrepel::geom_text_repel(data = centroid,
                 mapping = ggplot2::aes_string(label = "Cluster"),
                 size = labelSize)
+    }
+    if (!is.null(x = group.by)) {
+        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) + theme(strip.background = element_blank())
     }
     return(g)
 }
