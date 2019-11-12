@@ -459,8 +459,8 @@ plotDimReduceCluster <- function(dim1,
                 size = labelSize)
     }
     if (!is.null(x = groupBy)) {
-        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample")))
-        + theme(strip.background = element_blank())
+        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) +
+            theme(strip.background = element_blank())
     }
     return(g)
 }
