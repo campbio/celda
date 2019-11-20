@@ -6,7 +6,8 @@
 \usage{
 plotDimReduceCluster(dim1, dim2, cluster, size = 1,
   xlab = "Dimension_1", ylab = "Dimension_2",
-  specificClusters = NULL, labelClusters = FALSE, labelSize = 3.5)
+  specificClusters = NULL, labelClusters = FALSE, groupBy = NULL,
+  labelSize = 3.5)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data
@@ -30,6 +31,9 @@ If NULL, all clusters will be colored. Default NULL.}
 
 \item{labelClusters}{Logical. Whether the cluster labels are plotted.
 Default FALSE.}
+
+\item{groupBy}{Character vector. Contains sample labels for each cell.
+If NULL, all samples will be plotted together. Default NULL.}
 
 \item{labelSize}{Numeric. Sets size of label if labelClusters is TRUE.
 Default 3.5.}

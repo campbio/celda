@@ -9,6 +9,10 @@ cG_CalcGibbsProbY <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, 
     .Call('_celda_cG_CalcGibbsProbY', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
 }
 
+cG_CalcGibbsProbY_fast <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
+    .Call('_celda_cG_CalcGibbsProbY_fast', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
+}
+
 #' Fast matrix multiplication for double x int
 #' 
 #' @param A a double matrix

@@ -8,7 +8,7 @@
 plotDimReduceModule(dim1, dim2, counts, celdaMod, modules = NULL,
   rescale = TRUE, size = 1, xlab = "Dimension_1",
   ylab = "Dimension_2", colorLow = "grey", colorMid = NULL,
-  colorHigh = "blue")
+  colorHigh = "blue", ncol = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector.
