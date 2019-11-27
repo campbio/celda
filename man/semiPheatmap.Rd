@@ -23,7 +23,8 @@ semiPheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
   numberColor = "grey30", fontSizeNumber = 0.8 * fontSize,
   gapsRow = NULL, gapsCol = NULL, labelsRow = NULL,
   labelsCol = NULL, fileName = NA, width = NA, height = NA,
-  silent = FALSE, rowLabel, colLabel, ...)
+  silent = FALSE, rowLabel, colLabel, rowGroupOrder = NULL,
+  colGroupOrder = NULL, ...)
 }
 \arguments{
 \item{mat}{numeric matrix of the values to be plotted.}

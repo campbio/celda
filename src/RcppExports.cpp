@@ -97,6 +97,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cG_CalcGibbsProbY_fast
+NumericVector cG_CalcGibbsProbY_fast(const int index, const IntegerMatrix& counts, const IntegerMatrix& nTSbyC, const IntegerVector& nbyTS, const IntegerVector& nGbyTS, const IntegerVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const int delta);
+RcppExport SEXP _celda_cG_CalcGibbsProbY_fast(SEXP indexSEXP, SEXP countsSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nGbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP nGSEXP, SEXP lg_betaSEXP, SEXP lg_gammaSEXP, SEXP lg_deltaSEXP, SEXP deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const int >::type index(indexSEXP);
+    Rcpp::traits::input_parameter< const IntegerMatrix& >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< const IntegerMatrix& >::type nTSbyC(nTSbyCSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type nbyTS(nbyTSSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type nGbyTS(nGbyTSSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type nbyG(nbyGSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const int >::type L(LSEXP);
+    Rcpp::traits::input_parameter< const int >::type nG(nGSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lg_beta(lg_betaSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lg_gamma(lg_gammaSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type lg_delta(lg_deltaSEXP);
+    Rcpp::traits::input_parameter< const int >::type delta(deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cG_CalcGibbsProbY_fast(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // eigenMatMultInt
 SEXP eigenMatMultInt(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map< Eigen::MatrixXi> B);
 RcppExport SEXP _celda_eigenMatMultInt(SEXP ASEXP, SEXP BSEXP) {
@@ -159,6 +182,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_cG_CalcGibbsProbY_V1", (DL_FUNC) &_celda_cG_CalcGibbsProbY_V1, 13},
     {"_celda_cG_CalcGibbsProbY_v2", (DL_FUNC) &_celda_cG_CalcGibbsProbY_v2, 14},
     {"_celda_cG_CalcGibbsProbY", (DL_FUNC) &_celda_cG_CalcGibbsProbY, 13},
+    {"_celda_cG_CalcGibbsProbY_fast", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fast, 13},
     {"_celda_eigenMatMultInt", (DL_FUNC) &_celda_eigenMatMultInt, 2},
     {"_celda_fastNormProp", (DL_FUNC) &_celda_fastNormProp, 2},
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},

@@ -264,3 +264,63 @@ NumericVector cG_CalcGibbsProbY(const int index,
 }
 
 
+// [[Rcpp::export]]
+NumericVector cG_CalcGibbsProbY_fast(const int index,
+	const IntegerMatrix& counts,
+	const IntegerMatrix& nTSbyC,
+	const IntegerVector& nbyTS,
+	const IntegerVector& nGbyTS,
+	const IntegerVector& nbyG,
+	const IntegerVector& y,
+	const int L,
+	const int nG,
+	const NumericVector& lg_beta,
+	const NumericVector& lg_gamma,
+	const NumericVector& lg_delta,
+	const int delta) {
+
+  int index0 = index - 1;
+  int current_y = y[index0] - 1;
+  int i;
+
+  NumericVector probs(L);
+
+  // Calculate probabilities related to the "n.TS.by.C" part of equation one time up front
+  // The first case of if statement represents when the current feature is already added to that module
+  // The second case represents when the current feature is NOT YET added to that module
+  for (i = 0; i < L; i++) {
+    if (i == current_y ) {
+      for (int col = 0; col < counts.ncol(); col++) {
+        probs[i] += lg_beta[nTSbyC(i, col)];
+	probs[i] -= lg_beta[nTSbyC(i, col) - counts(index0, col)];
+      }
+    } else {
+      for (int col = 0; col < counts.ncol(); col++) {
+        probs[i] += lg_beta[nTSbyC(i, col) + counts(index0, col)];
+	probs[i] -= lg_beta[nTSbyC(i, col)];
+      }
+    }
+  }
+
+  // Calculate the probabilities for each module
+  // If statements determine whether to add or subtract counts from each probability
+  for (i = 0; i < L; i++) {
+    if (i == current_y) {
+      probs[i] += lg_gamma[nGbyTS[i]];
+      probs[i] -= lg_gamma[nGbyTS[i] - 1];
+      probs[i] += lg_delta[nGbyTS[i]];   //number of genes associated with gene model 
+      probs[i] -= lg_delta[nGbyTS[i] - 1];
+      probs[i] += lg_delta(nbyTS[i] - nbyG[index0] + (nGbyTS[i] - 1) * delta); //number of transcripts associated with gene module
+      probs[i] -= lg_delta(nbyTS[i] + nGbyTS[i] * delta);
+    } else {
+      probs[i] += lg_gamma[nGbyTS[i] + 1];
+      probs[i] -= lg_gamma[nGbyTS[i]];
+      probs[i] += lg_delta[nGbyTS[i] + 1];
+      probs[i] -= lg_delta[nGbyTS[i]];
+      probs[i] += lg_delta(nbyTS[i] + nGbyTS[i] * delta);
+      probs[i] -= lg_delta(nbyTS[i] + nbyG[index0] + (nGbyTS[i] + 1) * delta);
+    }
+  }
+
+  return(probs);
+}
