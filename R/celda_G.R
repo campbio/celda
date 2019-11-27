@@ -424,7 +424,7 @@ celda_G <- function(counts,
     probs <- matrix(NA, ncol = nG, nrow = L)
     ix <- sample(seq(nG))
     for (i in ix) {
-        probs[, i] <- cG_CalcGibbsProbY_fast(
+        probs[, i] <- cG_CalcGibbsProbY_fastC(
             index = i,
             counts = counts,
             nTSbyC = nTSByC,
