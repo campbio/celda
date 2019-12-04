@@ -9,16 +9,12 @@ cG_CalcGibbsProbY <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, 
     .Call('_celda_cG_CalcGibbsProbY', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
 }
 
+cG_CalcGibbsProbY_fastRow <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
+    .Call('_celda_cG_CalcGibbsProbY_fastRow', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
+}
+
 cG_CalcGibbsProbY_fast <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
     .Call('_celda_cG_CalcGibbsProbY_fast', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
-}
-
-cG_CalcGibbsProbY_fastVector <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
-    .Call('_celda_cG_CalcGibbsProbY_fastVector', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
-}
-
-cG_CalcGibbsProbY_fastVectorFlip <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
-    .Call('_celda_cG_CalcGibbsProbY_fastVectorFlip', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
 }
 
 #' Fast matrix multiplication for double x int
