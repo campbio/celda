@@ -322,8 +322,8 @@ decontX <- function(counts,
     haveEmptyGenes = FALSE
     totalGenes = nrow(counts) 
     noneEmptyGeneIndex = rowSums(counts) != 0 
+    geneNames = rownames(counts)
     if (sum(noneEmptyGeneIndex) != totalGenes) {
-        geneNames = rownames(counts)
 	counts = counts[noneEmptyGeneIndex, ]
 	haveEmptyGenes = TRUE
     }
