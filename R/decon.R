@@ -680,7 +680,7 @@ decontX <- function(counts,
     if (sum(is.na(counts)) > 0) {
         stop("Missing value in 'counts' matrix.")
     }
-    if (nrow(counts) < 2) {
+    if (is.null(dim(counts))) {
         stop("At least 2 genes need to have non-zero expressions.")
     }
 }
