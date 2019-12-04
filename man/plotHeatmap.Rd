@@ -4,10 +4,10 @@
 \alias{plotHeatmap}
 \title{Plots heatmap based on Celda model}
 \usage{
-plotHeatmap(counts, z = NULL, y = NULL, scaleRow = scale,
-  trim = c(-2, 2), featureIx = NULL, cellIx = NULL,
-  clusterFeature = TRUE, clusterCell = TRUE,
-  colorScheme = c("divergent", "sequential"),
+plotHeatmap(counts, z = NULL, y = NULL, rowGroupOrder = NULL,
+  colGroupOrder = NULL, scaleRow = scale, trim = c(-2, 2),
+  featureIx = NULL, cellIx = NULL, clusterFeature = TRUE,
+  clusterCell = TRUE, colorScheme = c("divergent", "sequential"),
   colorSchemeSymmetric = TRUE, colorSchemeCenter = 0, col = NULL,
   annotationCell = NULL, annotationFeature = NULL,
   annotationColor = NULL, breaks = NULL, legend = TRUE,

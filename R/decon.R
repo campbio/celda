@@ -288,8 +288,12 @@ decontX <- function(counts,
     verbose = TRUE,
     seed = 12345) {
 
+    res = matrix(0, ncol = ncol(counts), nrow = nrow(counts), 
+        dimnames = list(rownames(counts), colnames(counts))) 
+    noneEmpGeneIndex = rowSums(counts) != 0
+    counts = counts[noneEmpGeneIndex, ]
     if (is.null(seed)) {
-        res <- .decontX(counts = counts,
+        res[noneEmpGeneIndex, ] <- .decontX(counts = counts,
             z = z,
             batch = batch,
             maxIter = maxIter,
@@ -298,7 +302,7 @@ decontX <- function(counts,
             verbose = verbose)
     } else {
         with_seed(seed,
-            res <- .decontX(counts = counts,
+            res[noneEmpGeneIndex, ] <- .decontX(counts = counts,
                 z = z,
                 batch = batch,
                 maxIter = maxIter,
