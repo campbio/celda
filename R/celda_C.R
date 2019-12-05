@@ -433,35 +433,51 @@ celda_C <- function(counts,
     ix <- sample(seq(nM))
     for (i in ix) {
         ## Subtract cell counts from current population assignment
-        nGByCP1 <- nGByCP
-        nGByCP1[, z[i]] <- nGByCP[, z[i]] - counts[, i]
-        nGByCP1 <- .colSums(lgamma(nGByCP1 + beta), nrow(nGByCP), ncol(nGByCP))
+        #nGByCP1 <- nGByCP
+        #nGByCP1[, z[i]] <- nGByCP[, z[i]] - counts[, i]
+        #nGByCP1 <- .colSums(lgamma(nGByCP1 + beta), nrow(nGByCP), ncol(nGByCP))
 
-        nCP1 <- nCP
-        nCP1[z[i]] <- nCP1[z[i]] - nByC[i]
-        nCP1 <- lgamma(nCP1 + (nG * beta))
+        #nCP1 <- nCP
+        #nCP1[z[i]] <- nCP1[z[i]] - nByC[i]
+        #nCP1 <- lgamma(nCP1 + (nG * beta))
 
         ## Add cell counts to all other populations
-        nGByCP2 <- nGByCP
-        otherIx <- seq(K)[-z[i]]
-        nGByCP2[, otherIx] <- nGByCP2[, otherIx] + counts[, i]
-        nGByCP2 <- .colSums(lgamma(nGByCP2 + beta), nrow(nGByCP), ncol(nGByCP))
+        #nGByCP2 <- nGByCP
+        #otherIx <- seq(K)[-z[i]]
+        #nGByCP2[, otherIx] <- nGByCP2[, otherIx] + counts[, i]
+        #nGByCP2 <- .colSums(lgamma(nGByCP2 + beta), nrow(nGByCP), ncol(nGByCP))
 
-        nCP2 <- nCP
-        nCP2[otherIx] <- nCP2[otherIx] + nByC[i]
-        nCP2 <- lgamma(nCP2 + (nG * beta))
+        #nCP2 <- nCP
+        #nCP2[otherIx] <- nCP2[otherIx] + nByC[i]
+        #nCP2 <- lgamma(nCP2 + (nG * beta))
 
 
         mCPByS[z[i], s[i]] <- mCPByS[z[i], s[i]] - 1L
 
         ## Calculate probabilities for each state
+        ## when consider a specific cluster fo this cell,
+        ##   no need to calculate cells in other cluster
         for (j in seq_len(K)) {
-            otherIx <- seq(K)[-j]
-            probs[j, i] <- log(mCPByS[j, s[i]] + alpha) + ## Theta simplified
-                sum(nGByCP1[otherIx]) + ## Phi Numerator (other cells)
-                nGByCP2[j] - ## Phi Numerator (current cell)
-                sum(nCP1[otherIx]) - ## Phi Denominator (other cells)
-                nCP2[j] ## Phi Denominator (current cell)
+            #otherIx <- seq(K)[-j]
+            if (j != z[i]) { # when j is not current population assignment
+                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) + ## Theta simplified
+                sum(lgamma(nGByCP[, j] + counts[, i] + beta)) - # if adding this cell -- Phi Numerator
+                lgamma(nCP[j] + nByC[i] + nG * beta) - # if adding this cell -- Phi Denominator
+                sum(lgamma(nGByCP[, j] + beta)) +  # if without this cell -- Phi Numerator
+                lgamma(nCP[j] + nG * beta)  # if without this cell -- Phi Denominator
+                #sum(nGByCP1[otherIx]) + ## Phi Numerator (other cells)
+                #nGByCP2[j] - ## Phi Numerator (current cell)
+                #sum(nCP1[otherIx]) - ## Phi Denominator (other cells)
+                #nCP2[j] - ## Phi Denominator (current cell)
+            } else {  # when j is current population assignment
+                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) + ## Theta simplified
+                sum(lgamma(nGByCP[, j] + beta)) -
+                lgamma(nCP[j] + nG * beta) -
+                sum(lgamma(nGByCP[, j] - counts[, i] + beta)) +
+                lgamma(nCP[j] - nByC[i] + nG * beta)
+
+            }
+
         }
 
         ## Sample next state and add back counts

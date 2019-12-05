@@ -5,6 +5,14 @@ cG_calcGibbsProbY_Simple <- function(counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, 
     .Call('_celda_cG_calcGibbsProbY_Simple', PACKAGE = 'celda', counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta)
 }
 
+cG_CalcGibbsProbY_ori <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
+    .Call('_celda_cG_CalcGibbsProbY_ori', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
+}
+
+cG_CalcGibbsProbY_fastRow <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
+    .Call('_celda_cG_CalcGibbsProbY_fastRow', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
+}
+
 cG_CalcGibbsProbY <- function(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta) {
     .Call('_celda_cG_CalcGibbsProbY', PACKAGE = 'celda', index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta)
 }
