@@ -35,13 +35,11 @@ test_that(desc = "Testing simulateContaminatedMatrix", {
 })
 
 ## DecontX
-test_that(desc = "Testing DecontX", {
-    expect_equal(ncol(deconSim$observedCounts) + ncol(deconSim2$observedCounts),
-        ncol(batchDecontX$resList$estNativeCounts))
-    # expect_equal(length(batchDecontX$resList$estConp) ,
-    # ncol(batchDecontX$resList$estNativeCounts))
-    expect_equal(batchDecontXBg$method, "background")
-})
+#test_that(desc = "Testing DecontX", {
+#    expect_equal(ncol(deconSim$observedCounts) + ncol(deconSim2$observedCounts),
+#        ncol(batchDecontX$resList$estNativeCounts))
+#    expect_equal(batchDecontXBg$method, "background")
+#})
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {
@@ -63,7 +61,7 @@ test_that(desc = "Testing .decontXoneBatch", {
     expect_error(.decontXoneBatch(counts = deconSim$observedCounts,
         z = rep(1, ncol(
             deconSim$observedCounts))),
-        "'z' must have at least 2 different values.")
+        "No need to decontaminate when only one cluster is in the dataset.")
     countsNA <- deconSim$observedCounts
     countsNA[1, 1] <- NA
     expect_error(.decontXoneBatch(counts = countsNA, z = deconSim$z),

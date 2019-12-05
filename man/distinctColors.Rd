@@ -4,9 +4,12 @@
 \alias{distinctColors}
 \title{Create a color palette}
 \usage{
-distinctColors(n, hues = c("red", "cyan", "orange", "blue", "yellow",
-  "purple", "green", "magenta"), saturationRange = c(0.7, 1),
-  valueRange = c(0.7, 1))
+distinctColors(
+  n,
+  hues = c("red", "cyan", "orange", "blue", "yellow", "purple", "green", "magenta"),
+  saturationRange = c(0.7, 1),
+  valueRange = c(0.7, 1)
+)
 }
 \arguments{
 \item{n}{Integer. Number of colors to generate.}

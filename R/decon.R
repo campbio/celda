@@ -444,7 +444,6 @@ decontX <- function(counts,
 
     # nG <- nrow(counts)
     nC <- ncol(counts)
-    K <- length(unique(z))
 
     if (is.null(z)) {
         .logMessages(
@@ -478,6 +477,7 @@ decontX <- function(counts,
         deconMethod <- "clustering"
     }
     z <- .processCellLabels(z, numCells = nC)
+    K <- length(unique(z))
 
     iter <- 1L
     numIterWithoutImprovement <- 0L
@@ -777,39 +777,39 @@ addLogLikelihood <- function(llA, llB) {
 	dbscanEps = 1) {
 
         if (!is(object, "SingleCellExperiment")) {
-            object = SingleCellExperiment::SingleCellExperiment(assays = list(object = object))
+            sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts= object))
         }
 
-        # normalize
-        sce = scater::normalizeSCE(sce)  # add the log2 normalized counts into sce object
+       	# add the log2 normalized counts into sce object
+        sce <- suppressWarnings(scater::normalizeSCE(sce))
 
         if (nrow(sce) <= varGenes) {
-             topVariableGenes = 1:nrow(sce)
+             topVariableGenes <- 1:nrow(sce)
         } else if( nrow(sce) > varGenes ) { 
         # Use the top most variable genes to do rough clustering (celda_CG & Louvian graph algorithm) 
-        mvTrend = scran::trendVar(sce, use.spikes=FALSE) 
-        decomposeTrend = scran::decomposeVar(sce, mvTrend) 
-        topVariableGenes = order(decomposeTrend$bio, decreasing=TRUE)[1:varGenes]
+        mvTrend <- scran::trendVar(sce, use.spikes=FALSE) 
+        decomposeTrend <- scran::decomposeVar(sce, mvTrend) 
+        topVariableGenes <- order(decomposeTrend$bio, decreasing=TRUE)[1:varGenes]
         }
-        countsFiltered = as.matrix(counts(sce[topVariableGenes, ]))
-        storage.mode(countsFiltered) = "integer"
+        countsFiltered <- as.matrix(SingleCellExperiment::counts(sce[topVariableGenes, ]))
+        storage.mode(countsFiltered) <- "integer"
 
         # Celda clustering using recursive module splitting
         L = min(L, nrow(countsFiltered))    
-        initial.module.split = recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
-        initial.modules.model = subsetCeldaList(initial.module.split, list(L=L))
+        initial.module.split <- recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
+        initial.modules.model <- subsetCeldaList(initial.module.split, list(L=L))
 
         
         # Louvian community detection
-        fm = factorizeMatrix(countsFiltered, initial.modules.model, type="counts")
-        resUmap = uwot::umap(t(sqrt(fm$counts$cell)), n_neighbors=15, min_dist = 0.01, spread = 1)
+        fm <- factorizeMatrix(countsFiltered, initial.modules.model, type="counts")
+        resUmap <- uwot::umap(t(sqrt(fm$counts$cell)), n_neighbors=15, min_dist = 0.01, spread = 1)
 
         # Use dbSCAN on the UMAP to identify broad cell types
-        totalClusters = 1
-        while(totalClusters <= 1 & dbscan.eps > 0) {
-        resDbscan = dbscan(resUmap, dbscanEps)
-        dbscanEps = dbscanEps - (0.25 * dbscanEps)
-        totalClusters = length(unique(resDbscan$cluster))
+        totalClusters <- 1
+        while(totalClusters <= 1 & dbscanEps > 0) {
+        resDbscan <- dbscan::dbscan(resUmap, dbscanEps)
+        dbscanEps <- dbscanEps - (0.25 * dbscanEps)
+        totalClusters <- length(unique(resDbscan$cluster))
         }
 
         return("z" = resDbscan$cluster)
@@ -819,7 +819,7 @@ addLogLikelihood <- function(llA, llB) {
 ## process varGenes
 .processvarGenes = function(varGenes) {
     if (is.null(varGenes)) {
-        varGenes = 5000
+        varGenes <- 5000
     } else {
         if (varGenes < 2 | !is.integer(varGenes)) {
             stop("Parameter 'varGenes' must be an integer and larger than 1.") 
@@ -831,7 +831,7 @@ addLogLikelihood <- function(llA, llB) {
 ## process dbscanEps for resolusion threshold using DBSCAN
 .processdbscanEps = function(dbscanEps) {
     if (is.null(dbscanEps)) {
-        dbscanEps = 1
+        dbscanEps <- 1
     } else {
         if (dbscanEps < 0) {
             stop("Parameter 'dbscanEps' needs to be non-negative.")

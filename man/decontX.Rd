@@ -4,8 +4,18 @@
 \alias{decontX}
 \title{Decontaminate count matrix}
 \usage{
-decontX(counts, z = NULL, batch = NULL, maxIter = 200, delta = 10,
-  logfile = NULL, verbose = TRUE, seed = 12345)
+decontX(
+  counts,
+  z = NULL,
+  batch = NULL,
+  maxIter = 200,
+  delta = 10,
+  logfile = NULL,
+  verbose = TRUE,
+  varGenes = NULL,
+  dbscanEps = NULL,
+  seed = 12345
+)
 }
 \arguments{
 \item{counts}{Numeric/Integer matrix. Observed count matrix, rows represent
@@ -25,6 +35,12 @@ to be 10.}
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
+
+\item{varGenes}{Positive Integer. Used only when z is not provided.
+Need to be larger than 1. Default value is 5000 if not provided.}
+
+\item{dbscanEps}{Numeric. Used only when z is not provided.
+Need to be non-negative. Default is 1.0 if not provided.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to

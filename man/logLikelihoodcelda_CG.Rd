@@ -4,8 +4,18 @@
 \alias{logLikelihoodcelda_CG}
 \title{Calculate Celda_CG log likelihood}
 \usage{
-logLikelihoodcelda_CG(counts, sampleLabel, z, y, K, L, alpha, beta, delta,
-  gamma)
+logLikelihoodcelda_CG(
+  counts,
+  sampleLabel,
+  z,
+  y,
+  K,
+  L,
+  alpha,
+  beta,
+  delta,
+  gamma
+)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
