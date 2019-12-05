@@ -580,7 +580,7 @@ decontX <- function(counts,
 
     if (deconMethod == "background") {
         ## Initialize cell label
-        initialLabel <- .decontxInitializeZ(counts = counts)
+        initialLabel <- .decontxInitializeZ(object= counts)
         globalZ <- initialLabel$globalZ
         cbZ <- initialLabel$cbZ
         trZ <- initialLabel$trZ
