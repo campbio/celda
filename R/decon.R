@@ -318,14 +318,24 @@ decontX <- function(counts,
     delta = 10,
     logfile = NULL,
     verbose = TRUE) {
+    # empty expression genes won't be used for estimation
+    haveEmptyGenes <- FALSE
+    totalGenes <- nrow(counts)
+    noneEmptyGeneIndex <- rowSums(counts) != 0
+    geneNames <- rownames(counts)
+    if (sum(noneEmptyGeneIndex) != totalGenes) {
+        counts <- counts[noneEmptyGeneIndex, ]
+        haveEmptyGenes <- TRUE
+    }
+
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
         estRmat <- matrix(
-            NA,
+            0,
             ncol = ncol(counts),
-            nrow = nrow(counts),
-            dimnames = list(rownames(counts), colnames(counts))
+            nrow = totalGenes,
+            dimnames = list(geneNames, colnames(counts))
         )
         theta <- rep(NA, ncol(counts))
         estConp <- rep(NA, ncol(counts))
@@ -349,8 +359,13 @@ decontX <- function(counts,
                 verbose = verbose
             )
 
-            estRmat[, batch == bat] <-
-                resBat$resList$estNativeCounts
+            if (haveEmptyGenes) {
+                estRmat[noneEmptyGeneIndex, batch == bat] <-
+                    resBat$resList$estNativeCounts
+            } else {
+                estRmat[, batch == bat] <-
+                    resBat$resList$estNativeCounts
+            }
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
 
@@ -378,16 +393,23 @@ decontX <- function(counts,
         ))
     }
 
-    return(
-        .decontXoneBatch(
-            counts = counts,
-            z = z,
-            maxIter = maxIter,
-            delta = delta,
-            logfile = logfile,
-            verbose = verbose
-        )
+    # when there is only one batch
+    resultsOneBatch <- .decontXoneBatch(
+        counts = counts,
+        z = z,
+        maxIter = maxIter,
+        delta = delta,
+        logfile = logfile,
+        verbose = verbose
     )
+    if (haveEmptyGenes) {
+        resBat <- matrix(0, nrow = totalGenes, ncol = ncol(counts),
+            dimnames = list(geneNames, colnames(counts)))
+        resBat[noneEmptyGeneIndex, ] <- resultsOneBatch$resList$estNativeCounts
+        resultsOneBatch$resList$estNativeCounts <- resBat
+    }
+    return(resultsOneBatch)
+
 }
 
 
@@ -657,6 +679,9 @@ decontX <- function(counts,
 .checkCountsDecon <- function(counts) {
     if (sum(is.na(counts)) > 0) {
         stop("Missing value in 'counts' matrix.")
+    }
+    if (is.null(dim(counts))) {
+        stop("At least 2 genes need to have non-zero expressions.")
     }
 }
 
