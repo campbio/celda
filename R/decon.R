@@ -320,9 +320,9 @@ decontX <- function(counts,
     verbose = TRUE) {
     # empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
-    totalGenes <- nrow(counts) 
+    totalGenes <- nrow(counts)
     noneEmptyGeneIndex <- rowSums(counts) != 0
-    geneNames = rownames(counts)
+    geneNames <- rownames(counts)
     if (sum(noneEmptyGeneIndex) != totalGenes) {
         counts <- counts[noneEmptyGeneIndex, ]
         haveEmptyGenes <- TRUE
@@ -402,7 +402,7 @@ decontX <- function(counts,
         logfile = logfile,
         verbose = verbose
     )
-    if (haveEmptyGenes) { 
+    if (haveEmptyGenes) {
         resBat <- matrix(0, nrow = totalGenes, ncol = ncol(counts),
             dimnames = list(geneNames, colnames(counts)))
         resBat[noneEmptyGeneIndex, ] <- resultsOneBatch$resList$estNativeCounts
