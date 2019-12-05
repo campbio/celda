@@ -263,6 +263,10 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
+#' @param varGenes Positive Integer. Used only when z is not provided.
+#' Need to be larger than 1. Default value is 5000 if not provided.
+#' @param dbscanEps Numeric. Used only when z is not provided.
+#' Need to be non-negative. Default is 1.0 if not provided.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -286,6 +290,8 @@ decontX <- function(counts,
     delta = 10,
     logfile = NULL,
     verbose = TRUE,
+    varGenes = NULL,
+    dbscanEps = NULL,
     seed = 12345) {
 
     if (is.null(seed)) {
@@ -295,7 +301,9 @@ decontX <- function(counts,
             maxIter = maxIter,
             delta = delta,
             logfile = logfile,
-            verbose = verbose)
+            verbose = verbose,
+	    varGenes = varGenes,
+	    dbscanEps = dbscanEps)
     } else {
         with_seed(seed,
             res <- .decontX(counts = counts,
@@ -304,7 +312,9 @@ decontX <- function(counts,
                 maxIter = maxIter,
                 delta = delta,
                 logfile = logfile,
-                verbose = verbose))
+                verbose = verbose,
+		varGenes = varGenes,
+		dbscanEps = dbscanEps))
     }
 
     return(res)
@@ -317,7 +327,9 @@ decontX <- function(counts,
     maxIter = 200,
     delta = 10,
     logfile = NULL,
-    verbose = TRUE) {
+    verbose = TRUE,
+    varGenes = NULL,
+    dbscanEps = NULL) {
     # empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
     totalGenes <- nrow(counts)
@@ -356,7 +368,9 @@ decontX <- function(counts,
                 maxIter = maxIter,
                 delta = delta,
                 logfile = logfile,
-                verbose = verbose
+                verbose = verbose,
+		varGenes = varGenes,
+		dbscanEps = dbscanEps
             )
 
             if (haveEmptyGenes) {
@@ -400,7 +414,9 @@ decontX <- function(counts,
         maxIter = maxIter,
         delta = delta,
         logfile = logfile,
-        verbose = verbose
+        verbose = verbose,
+	varGenes = varGenes,
+	dbscanEps = dbscanEps
     )
     if (haveEmptyGenes) {
         resBat <- matrix(0, nrow = totalGenes, ncol = ncol(counts),
@@ -420,7 +436,9 @@ decontX <- function(counts,
     maxIter = 200,
     delta = 10,
     logfile = NULL,
-    verbose = TRUE) {
+    verbose = TRUE,
+    varGenes = NULL,
+    dbscanEps = NULL) {
     .checkCountsDecon(counts)
     .checkParametersDecon(proportionPrior = delta)
 
@@ -429,11 +447,37 @@ decontX <- function(counts,
     K <- length(unique(z))
 
     if (is.null(z)) {
-        deconMethod <- "background"
+        .logMessages(
+            paste(rep("-", 50), collapse = ""),
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
+        )
+        .logMessages(
+            "Clustering using graph and density-based method to find cell clusters",
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
+        )
+        .logMessages(
+            paste(rep("-", 50), collapse = ""),
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
+        )
+        #deconMethod <- "background"
+	deconMethod <- "clustering"
+
+        varGenes = .processvarGenes(varGenes)
+        dbscanEps = .processdbscanEps(dbscanEps)
+
+        z <- .decontxInitializeZ(object = counts,
+            varGenes = varGenes,
+            dbscanEps = dbscanEps)
     } else {
         deconMethod <- "clustering"
-        z <- .processCellLabels(z, numCells = nC)
     }
+    z <- .processCellLabels(z, numCells = nC)
 
     iter <- 1L
     numIterWithoutImprovement <- 0L
@@ -645,7 +689,8 @@ decontX <- function(counts,
     )
 
     runParams <- list("deltaInit" = deltaInit,
-        "iteration" = iter - 1L)
+        "iteration" = iter - 1L,
+	"z" = z)
 
     resList <- list(
         "logLikelihood" = ll,
@@ -694,7 +739,7 @@ decontX <- function(counts,
             " 'counts' matrix.")
     }
     if (length(unique(z)) < 2) {
-        stop("'z' must have at least 2 different values.") # Even though
+        stop("No need to decontaminate when only one cluster is in the dataset.") # Even though
         # everything runs smoothly when length(unique(z)) == 1, result is not
         # trustful
     }
@@ -726,58 +771,71 @@ addLogLikelihood <- function(llA, llB) {
 
 ## Initialization of cell labels for DecontX when they are not given
 .decontxInitializeZ <-
-    function(counts,
-        K = 10,
-        minCell = 3,
-        seed = 428) {
-        nC <- ncol(counts)
-        if (nC < 100) {
-            K <- ceiling(sqrt(nC))
+    function(object, # object is either a sce object or a count matrix
+        varGenes = 5000,
+        L = 50,
+	dbscanEps = 1) {
+
+        if (!is(object, "SingleCellExperiment")) {
+            object = SingleCellExperiment::SingleCellExperiment(assays = list(object = object))
         }
 
-        globalZ <- .initializeSplitZ(
-                counts,
-                K = K,
-                KSubcluster = NULL,
-                alpha = 1,
-                beta = 1,
-                minCell = 3
-            )
-        globalK <- max(globalZ)
+        # normalize
+        sce = scater::normalizeSCE(sce)  # add the log2 normalized counts into sce object
 
-        localZ <- rep(NA, nC)
-        for (k in seq(globalK)) {
-            if (sum(globalZ == k) > 2) {
-                localCounts <- counts[, globalZ == k]
-                localK <- min(K, ceiling(sqrt(ncol(
-                    localCounts
-                ))))
-                localZ[globalZ == k] <- .initializeSplitZ(
-                    localCounts,
-                    K = localK,
-                    KSubcluster = NULL,
-                    alpha = 1,
-                    beta = 1,
-                    minCell = 3
-                )
-            } else {
-                localZ [globalZ == k] <- 1L
-            }
+        if (nrow(sce) <= varGenes) {
+             topVariableGenes = 1:nrow(sce)
+        } else if( nrow(sce) > varGenes ) { 
+        # Use the top most variable genes to do rough clustering (celda_CG & Louvian graph algorithm) 
+        mvTrend = scran::trendVar(sce, use.spikes=FALSE) 
+        decomposeTrend = scran::decomposeVar(sce, mvTrend) 
+        topVariableGenes = order(decomposeTrend$bio, decreasing=TRUE)[1:varGenes]
+        }
+        countsFiltered = as.matrix(counts(sce[topVariableGenes, ]))
+        storage.mode(countsFiltered) = "integer"
+
+        # Celda clustering using recursive module splitting
+        L = min(L, nrow(countsFiltered))    
+        initial.module.split = recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
+        initial.modules.model = subsetCeldaList(initial.module.split, list(L=L))
+
+        
+        # Louvian community detection
+        fm = factorizeMatrix(countsFiltered, initial.modules.model, type="counts")
+        resUmap = uwot::umap(t(sqrt(fm$counts$cell)), n_neighbors=15, min_dist = 0.01, spread = 1)
+
+        # Use dbSCAN on the UMAP to identify broad cell types
+        totalClusters = 1
+        while(totalClusters <= 1 & dbscan.eps > 0) {
+        resDbscan = dbscan(resUmap, dbscanEps)
+        dbscanEps = dbscanEps - (0.25 * dbscanEps)
+        totalClusters = length(unique(resDbscan$cluster))
         }
 
-        cbZ <- interaction(globalZ, localZ, lex.order = TRUE, drop = TRUE)
-                # combined z label
-        trZ <- as.integer(sub("\\..*", "", levels(cbZ), perl = TRUE))
-                # transitional z label
-
-        cbZ <- as.integer(plyr::mapvalues(cbZ, from = levels(cbZ),
-                to = seq(length(levels(cbZ)))))
-
-
-        return(list(
-            "globalZ" = globalZ,
-            "localZ" = localZ,
-            "trZ" = trZ,
-            "cbZ" = cbZ
-        ))
+        return("z" = resDbscan$cluster)
     }
+
+
+## process varGenes
+.processvarGenes = function(varGenes) {
+    if (is.null(varGenes)) {
+        varGenes = 5000
+    } else {
+        if (varGenes < 2 | !is.integer(varGenes)) {
+            stop("Parameter 'varGenes' must be an integer and larger than 1.") 
+	}
+    }
+    return(varGenes)
+}
+
+## process dbscanEps for resolusion threshold using DBSCAN
+.processdbscanEps = function(dbscanEps) {
+    if (is.null(dbscanEps)) {
+        dbscanEps = 1
+    } else {
+        if (dbscanEps < 0) {
+            stop("Parameter 'dbscanEps' needs to be non-negative.")
+	}
+    }
+    return(dbscanEps)
+}
