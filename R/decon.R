@@ -318,14 +318,14 @@ decontX <- function(counts,
     delta = 10,
     logfile = NULL,
     verbose = TRUE) {
-    # empty expression genes won't be used for estimation 
-    haveEmptyGenes = FALSE
-    totalGenes = nrow(counts) 
-    noneEmptyGeneIndex = rowSums(counts) != 0 
+    # empty expression genes won't be used for estimation
+    haveEmptyGenes <- FALSE
+    totalGenes <- nrow(counts) 
+    noneEmptyGeneIndex <- rowSums(counts) != 0
     geneNames = rownames(counts)
     if (sum(noneEmptyGeneIndex) != totalGenes) {
-	counts = counts[noneEmptyGeneIndex, ]
-	haveEmptyGenes = TRUE
+        counts <- counts[noneEmptyGeneIndex, ]
+        haveEmptyGenes <- TRUE
     }
 
     if (!is.null(batch)) {
@@ -359,13 +359,13 @@ decontX <- function(counts,
                 verbose = verbose
             )
 
-	    if (haveEmptyGenes) {
+            if (haveEmptyGenes) {
                 estRmat[noneEmptyGeneIndex, batch == bat] <-
                     resBat$resList$estNativeCounts
             } else {
                 estRmat[, batch == bat] <-
                     resBat$resList$estNativeCounts
-	    }
+            }
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
 
@@ -394,7 +394,7 @@ decontX <- function(counts,
     }
 
     # when there is only one batch
-    resultsOneBatch = .decontXoneBatch(
+    resultsOneBatch <- .decontXoneBatch(
         counts = counts,
         z = z,
         maxIter = maxIter,
@@ -403,10 +403,10 @@ decontX <- function(counts,
         verbose = verbose
     )
     if (haveEmptyGenes) { 
-        resBat = matrix(0, nrow = totalGenes, ncol = ncol(counts),
+        resBat <- matrix(0, nrow = totalGenes, ncol = ncol(counts),
             dimnames = list(geneNames, colnames(counts)))
-        resBat[noneEmptyGeneIndex, ] = resultsOneBatch$resList$estNativeCounts
-        resultsOneBatch$resList$estNativeCounts = resBat
+        resBat[noneEmptyGeneIndex, ] <- resultsOneBatch$resList$estNativeCounts
+        resultsOneBatch$resList$estNativeCounts <- resBat
     }
     return(resultsOneBatch)
 
