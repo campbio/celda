@@ -50,7 +50,7 @@ NumericVector cG_calcGibbsProbY_Simple(const IntegerMatrix counts,
 
 
 // [[Rcpp::export]]
-NumericVector cG_CalcGibbsProbY(const int index,
+NumericVector cG_CalcGibbsProbY_ori(const int index,
 	const IntegerMatrix& counts,
 	const IntegerMatrix& nTSbyC,
 	const IntegerVector& nbyTS,
@@ -184,7 +184,7 @@ NumericVector cG_CalcGibbsProbY_fastRow(const int index,
 
 
 // [[Rcpp::export]]
-NumericVector cG_CalcGibbsProbY_fast(const int index,
+NumericVector cG_CalcGibbsProbY(const int index,
 	const IntegerMatrix& counts,
 	const IntegerMatrix& nTSbyC,
 	const IntegerVector& nbyTS,

@@ -27,9 +27,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cG_CalcGibbsProbY
-NumericVector cG_CalcGibbsProbY(const int index, const IntegerMatrix& counts, const IntegerMatrix& nTSbyC, const IntegerVector& nbyTS, const IntegerVector& nGbyTS, const IntegerVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const double delta);
-RcppExport SEXP _celda_cG_CalcGibbsProbY(SEXP indexSEXP, SEXP countsSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nGbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP nGSEXP, SEXP lg_betaSEXP, SEXP lg_gammaSEXP, SEXP lg_deltaSEXP, SEXP deltaSEXP) {
+// cG_CalcGibbsProbY_ori
+NumericVector cG_CalcGibbsProbY_ori(const int index, const IntegerMatrix& counts, const IntegerMatrix& nTSbyC, const IntegerVector& nbyTS, const IntegerVector& nGbyTS, const IntegerVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const double delta);
+RcppExport SEXP _celda_cG_CalcGibbsProbY_ori(SEXP indexSEXP, SEXP countsSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nGbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP nGSEXP, SEXP lg_betaSEXP, SEXP lg_gammaSEXP, SEXP lg_deltaSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,7 +46,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type lg_gamma(lg_gammaSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type lg_delta(lg_deltaSEXP);
     Rcpp::traits::input_parameter< const double >::type delta(deltaSEXP);
-    rcpp_result_gen = Rcpp::wrap(cG_CalcGibbsProbY(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta));
+    rcpp_result_gen = Rcpp::wrap(cG_CalcGibbsProbY_ori(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -73,9 +73,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cG_CalcGibbsProbY_fast
-NumericVector cG_CalcGibbsProbY_fast(const int index, const IntegerMatrix& counts, const IntegerMatrix& nTSbyC, const IntegerVector& nbyTS, const IntegerVector& nGbyTS, const IntegerVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const double delta);
-RcppExport SEXP _celda_cG_CalcGibbsProbY_fast(SEXP indexSEXP, SEXP countsSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nGbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP nGSEXP, SEXP lg_betaSEXP, SEXP lg_gammaSEXP, SEXP lg_deltaSEXP, SEXP deltaSEXP) {
+// cG_CalcGibbsProbY
+NumericVector cG_CalcGibbsProbY(const int index, const IntegerMatrix& counts, const IntegerMatrix& nTSbyC, const IntegerVector& nbyTS, const IntegerVector& nGbyTS, const IntegerVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const double delta);
+RcppExport SEXP _celda_cG_CalcGibbsProbY(SEXP indexSEXP, SEXP countsSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nGbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP nGSEXP, SEXP lg_betaSEXP, SEXP lg_gammaSEXP, SEXP lg_deltaSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -92,7 +92,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type lg_gamma(lg_gammaSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type lg_delta(lg_deltaSEXP);
     Rcpp::traits::input_parameter< const double >::type delta(deltaSEXP);
-    rcpp_result_gen = Rcpp::wrap(cG_CalcGibbsProbY_fast(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta));
+    rcpp_result_gen = Rcpp::wrap(cG_CalcGibbsProbY(index, counts, nTSbyC, nbyTS, nGbyTS, nbyG, y, L, nG, lg_beta, lg_gamma, lg_delta, delta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -155,9 +155,9 @@ RcppExport SEXP _rowSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_celda_cG_calcGibbsProbY_Simple", (DL_FUNC) &_celda_cG_calcGibbsProbY_Simple, 11},
-    {"_celda_cG_CalcGibbsProbY", (DL_FUNC) &_celda_cG_CalcGibbsProbY, 13},
+    {"_celda_cG_CalcGibbsProbY_ori", (DL_FUNC) &_celda_cG_CalcGibbsProbY_ori, 13},
     {"_celda_cG_CalcGibbsProbY_fastRow", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fastRow, 13},
-    {"_celda_cG_CalcGibbsProbY_fast", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fast, 13},
+    {"_celda_cG_CalcGibbsProbY", (DL_FUNC) &_celda_cG_CalcGibbsProbY, 13},
     {"_celda_eigenMatMultInt", (DL_FUNC) &_celda_eigenMatMultInt, 2},
     {"_celda_fastNormProp", (DL_FUNC) &_celda_fastNormProp, 2},
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},
