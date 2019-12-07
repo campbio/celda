@@ -266,8 +266,17 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param varGenes Positive Integer. Used only when z is not provided.
 #' Need to be larger than 1. Default value is 5000 if not provided.
+#' varGenes, being the number of most variable genes, is used to filter genes
+#' based on the variability of gene's expression cross cells. While the variability
+#' is calcualted using scran::trendVar() and scran::decomposeVar().
+#' @param L Positive Integer. Used only when z is not provided.
+#' Need to be larger than 1. Default value is 50 if not provided.
+#' L, being the number of gene modules, is used on celda_CG clustering
+#' to collapse genes into gene modules.
 #' @param dbscanEps Numeric. Used only when z is not provided.
 #' Need to be non-negative. Default is 1.0 if not provided.
+#' dbscanEps is the clustering resolution parameter that is used to feed into
+#' dbscan::dbscan() to estimate broad cell clusters. 
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -292,6 +301,7 @@ decontX <- function(counts,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
+    L = NULL,
     dbscanEps = NULL,
     seed = 12345) {
 
@@ -304,6 +314,7 @@ decontX <- function(counts,
             logfile = logfile,
             verbose = verbose,
 	    varGenes = varGenes,
+            L = L,
 	    dbscanEps = dbscanEps)
     } else {
         with_seed(seed,
@@ -315,6 +326,7 @@ decontX <- function(counts,
                 logfile = logfile,
                 verbose = verbose,
 		varGenes = varGenes,
+                L = L,
 		dbscanEps = dbscanEps))
     }
 
@@ -330,7 +342,9 @@ decontX <- function(counts,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
-    dbscanEps = NULL) {
+    dbscanEps = NULL,
+    L = NULL) {
+
     ## Empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
     totalGenes <- nrow(counts)
@@ -341,6 +355,9 @@ decontX <- function(counts,
         haveEmptyGenes <- TRUE
     }
 
+    nC = ncol(counts)
+    allCellNames = colnames(counts)
+
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
@@ -348,19 +365,19 @@ decontX <- function(counts,
             0,
             ncol = ncol(counts),
             nrow = totalGenes,
-            dimnames = list(geneNames, colnames(counts))
+            dimnames = list(geneNames, allCellNames)
         )
-        theta <- rep(NA, ncol(counts))
-        estConp <- rep(NA, ncol(counts))
+        theta <- rep(NA, nC)
+        estConp <- rep(NA, nC)
+	returnZ <- rep(NA, nC) 
 
         batchIndex <- unique(batch)
 
         for (bat in batchIndex) {
+            zBat <- NULL
             countsBat <- counts[, batch == bat]
             if (!is.null(z)) {
                 zBat <- z[batch == bat]
-            } else {
-                zBat <- z
             }
             resBat <- .decontXoneBatch(
                 counts = countsBat,
@@ -371,7 +388,8 @@ decontX <- function(counts,
                 logfile = logfile,
                 verbose = verbose,
 		varGenes = varGenes,
-		dbscanEps = dbscanEps
+		dbscanEps = dbscanEps,
+                L = L
             )
 
             if (haveEmptyGenes) {
@@ -383,6 +401,7 @@ decontX <- function(counts,
             }
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
+            returnZ[batch == bat] <- resBat$runParams$z
 
             if (is.null(logLikelihood)) {
                 logLikelihood <- resBat$resList$logLikelihood
@@ -393,6 +412,9 @@ decontX <- function(counts,
         }
 
         runParams <- resBat$runParams
+	## All batches share the same other parameters except cluster label z
+	## So update z in the final returned result
+	runParams$z <- returnZ
         method <- resBat$method
         resList <- list(
             "logLikelihood" = logLikelihood,
@@ -417,11 +439,12 @@ decontX <- function(counts,
         logfile = logfile,
         verbose = verbose,
 	varGenes = varGenes,
-	dbscanEps = dbscanEps
+	dbscanEps = dbscanEps,
+        L = L
     )
     if (haveEmptyGenes) {
-        resBat <- matrix(0, nrow = totalGenes, ncol = ncol(counts),
-            dimnames = list(geneNames, colnames(counts)))
+        resBat <- matrix(0, nrow = totalGenes, ncol = nC,
+            dimnames = list(geneNames, allCellNames))
         resBat[noneEmptyGeneIndex, ] <- resultsOneBatch$resList$estNativeCounts
         resultsOneBatch$resList$estNativeCounts <- resBat
     }
@@ -439,7 +462,8 @@ decontX <- function(counts,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
-    dbscanEps = NULL) {
+    dbscanEps = NULL,
+    L = NULL) {
     .checkCountsDecon(counts)
     .checkParametersDecon(proportionPrior = delta)
 
@@ -471,6 +495,7 @@ decontX <- function(counts,
 
         varGenes = .processvarGenes(varGenes)
         dbscanEps = .processdbscanEps(dbscanEps)
+	L = .processL(L)
 
         z <- .decontxInitializeZ(object = counts,
             varGenes = varGenes,
@@ -694,7 +719,7 @@ addLogLikelihood <- function(llA, llB) {
     function(object, # object is either a sce object or a count matrix
         varGenes = 5000,
         L = 50,
-	dbscanEps = 1) {
+	dbscanEps = 1.0) {
 
         if (!is(object, "SingleCellExperiment")) {
             sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts= object))
@@ -760,4 +785,16 @@ addLogLikelihood <- function(llA, llB) {
 	}
     }
     return(dbscanEps)
+}
+
+## process gene modules L
+.processL = function(L) {
+    if (is.null(L)) {
+        L = 50
+    } else {
+        if (L < 2 | !is.integer(L)) {
+            stop("Parameter 'L' must be an integer and larger than 1.")
+        }
+    }
+    return(L)
 }
