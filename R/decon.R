@@ -147,6 +147,7 @@ simulateContaminatedMatrix <- function(C = 300,
     return(ll)
 }
 
+# DEPRECATED. This is not used, but is kept as it might be useful in the future.
 # This function calculates the log-likelihood of background distribution
 # decontamination
 # bgDist Numeric matrix. Rows represent feature and columns are the times that
@@ -207,7 +208,7 @@ simulateContaminatedMatrix <- function(C = 300,
     ))
 }
 
-
+# DEPRECATED. This is not used, but is kept as it might be useful in the feature.
 # This function updates decontamination using background distribution
 .cDCalcEMbgDecontamination <-
     function(counts, globalZ, cbZ, trZ, phi, eta, theta) {
@@ -330,7 +331,7 @@ decontX <- function(counts,
     verbose = TRUE,
     varGenes = NULL,
     dbscanEps = NULL) {
-    # empty expression genes won't be used for estimation
+    ## Empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
     totalGenes <- nrow(counts)
     noneEmptyGeneIndex <- rowSums(counts) != 0
@@ -407,7 +408,7 @@ decontX <- function(counts,
         ))
     }
 
-    # when there is only one batch
+    ## When there is only one batch
     resultsOneBatch <- .decontXoneBatch(
         counts = counts,
         z = z,
@@ -464,6 +465,7 @@ decontX <- function(counts,
             append = TRUE,
             verbose = verbose
         )
+        ## Always uses clusters for DecontX estimation
         #deconMethod <- "background"
 	deconMethod <- "clustering"
 
@@ -473,9 +475,8 @@ decontX <- function(counts,
         z <- .decontxInitializeZ(object = counts,
             varGenes = varGenes,
             dbscanEps = dbscanEps)
-    } else {
-        deconMethod <- "clustering"
     }
+
     z <- .processCellLabels(z, numCells = nC)
     K <- length(unique(z))
 
@@ -578,83 +579,6 @@ decontX <- function(counts,
         }
     }
 
-    if (deconMethod == "background") {
-        ## Initialize cell label
-        initialLabel <- .decontxInitializeZ(object= counts)
-        globalZ <- initialLabel$globalZ
-        cbZ <- initialLabel$cbZ
-        trZ <- initialLabel$trZ
-
-        ## Initialization
-        deltaInit <- delta
-        theta <-
-            stats::rbeta(n = nC,
-                shape1 = deltaInit,
-                shape2 = deltaInit)
-        estRmat <- t(t(counts) * theta)
-
-        phi <- .colSumByGroupNumeric(estRmat, cbZ, max(cbZ))
-        eta <-
-            rowSums(phi) - .colSumByGroupNumeric(phi, trZ, max(trZ))
-        phi <-
-            normalizeCounts(phi,
-                normalize = "proportion",
-                pseudocountNormalize = 1e-20)
-        eta <-
-            normalizeCounts(eta,
-                normalize = "proportion",
-                pseudocountNormalize = 1e-20)
-
-        ll <- c()
-
-        llRound <- .bgCalcLL(
-            counts = counts,
-            globalZ = globalZ,
-            cbZ = cbZ,
-            phi = phi,
-            eta = eta,
-            theta = theta
-        )
-
-        ## EM updates
-        while (iter <= maxIter &
-                numIterWithoutImprovement <= stopIter) {
-            nextDecon <- .cDCalcEMbgDecontamination(
-                counts = counts,
-                globalZ = globalZ,
-                cbZ = cbZ,
-                trZ = trZ,
-                phi = phi,
-                eta = eta,
-                theta = theta
-            )
-
-            theta <- nextDecon$theta
-            phi <- nextDecon$phi
-            eta <- nextDecon$eta
-            delta <- nextDecon$delta
-
-            ## Calculate log-likelihood
-            llTemp <-
-                .bgCalcLL(
-                    counts = counts,
-                    globalZ = globalZ,
-                    cbZ = cbZ,
-                    phi = phi,
-                    eta = eta,
-                    theta = theta
-                )
-            ll <- c(ll, llTemp)
-            llRound <- c(llRound, round(llTemp, 2))
-
-            if (round(llTemp, 2) > llRound[iter] | iter == 1) {
-                numIterWithoutImprovement <- 1L
-            } else {
-                numIterWithoutImprovement <- numIterWithoutImprovement + 1L
-            }
-            iter <- iter + 1L
-        }
-    }
 
     resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
 
@@ -699,10 +623,6 @@ decontX <- function(counts,
         "theta" = theta,
         "delta" = delta
     )
-    # if( deconMethod=="clustering" ) {
-    #    posterior.params = list( "est.GeneDist"=phi,  "est.ConDist"=eta  )
-    #    resList = append( resList , posterior.params )
-    # }
 
     return(list(
         "runParams" = runParams,
@@ -780,27 +700,29 @@ addLogLikelihood <- function(llA, llB) {
             sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts= object))
         }
 
-       	# add the log2 normalized counts into sce object
+       	## Add the log2 normalized counts into sce object
+        ## The normalized counts is also centered using library size in the original count matrix
+        ## in scater::normalizeSCE()
         sce <- suppressWarnings(scater::normalizeSCE(sce))
 
         if (nrow(sce) <= varGenes) {
              topVariableGenes <- 1:nrow(sce)
         } else if( nrow(sce) > varGenes ) { 
-        # Use the top most variable genes to do rough clustering (celda_CG & Louvian graph algorithm) 
-        mvTrend <- scran::trendVar(sce, use.spikes=FALSE) 
-        decomposeTrend <- scran::decomposeVar(sce, mvTrend) 
-        topVariableGenes <- order(decomposeTrend$bio, decreasing=TRUE)[1:varGenes]
+        ## Use the top most variable genes to do rough clustering (celda_CG & Louvian graph algorithm) 
+            mvTrend <- scran::trendVar(sce, use.spikes=FALSE) 
+            decomposeTrend <- scran::decomposeVar(sce, mvTrend) 
+            topVariableGenes <- order(decomposeTrend$bio, decreasing=TRUE)[1:varGenes]
         }
         countsFiltered <- as.matrix(SingleCellExperiment::counts(sce[topVariableGenes, ]))
         storage.mode(countsFiltered) <- "integer"
 
-        # Celda clustering using recursive module splitting
+        ## Celda clustering using recursive module splitting
         L = min(L, nrow(countsFiltered))    
         initial.module.split <- recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
         initial.modules.model <- subsetCeldaList(initial.module.split, list(L=L))
 
         
-        # Louvian community detection
+        ## Louvian community detection
         fm <- factorizeMatrix(countsFiltered, initial.modules.model, type="counts")
         resUmap <- uwot::umap(t(sqrt(fm$counts$cell)), n_neighbors=15, min_dist = 0.01, spread = 1)
 
