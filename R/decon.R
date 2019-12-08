@@ -514,6 +514,7 @@ decontX <- function(counts,
 
     # nG <- nrow(counts)
     nC <- ncol(counts)
+    deconMethod <- "clustering"
 
     if (is.null(z)) {
         .logMessages(
@@ -535,7 +536,6 @@ decontX <- function(counts,
         )
         ## Always uses clusters for DecontX estimation
         #deconMethod <- "background"
-	deconMethod <- "clustering"
 
         varGenes = .processvarGenes(varGenes)
         dbscanEps = .processdbscanEps(dbscanEps)
@@ -678,8 +678,7 @@ decontX <- function(counts,
 
     return(list(
         "runParams" = runParams,
-        "resList" = resList,
-        "method" = deconMethod
+        "resList" = resList
     ))
 }
 
