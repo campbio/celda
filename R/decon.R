@@ -451,43 +451,29 @@ decontX <- function(counts,
             "theta" = theta
         )
 
-        .logMessages(
-            paste(rep("-", 50), collapse = ""),
-            "\n", 
-            "All is done",
-            zMessage,
-            "\n", 
-            paste(rep("-", 50), collapse = ""),
-            sep = "",
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose
-        )
-
-        return(list(
+        returnResult <- list(
             "runParams" = runParams,
             "resList" = resList,
             "method" = method
-        ))
-    }
-
-    ## When there is only one batch
-    resultsOneBatch <- .decontXoneBatch(
-        counts = counts,
-        z = z,
-        maxIter = maxIter,
-        delta = delta,
-        logfile = logfile,
-        verbose = verbose,
-	varGenes = varGenes,
-	dbscanEps = dbscanEps,
-        L = L
-    )
-    if (haveEmptyGenes) {
-        resBat <- matrix(0, nrow = totalGenes, ncol = nC,
-            dimnames = list(geneNames, allCellNames))
-        resBat[noneEmptyGeneIndex, ] <- resultsOneBatch$resList$estNativeCounts
-        resultsOneBatch$resList$estNativeCounts <- resBat
+        )
+    } else { ## When there is only one batch
+        returnResult <- .decontXoneBatch(
+            counts = counts,
+            z = z,
+            maxIter = maxIter,
+            delta = delta,
+            logfile = logfile,
+            verbose = verbose,
+            varGenes = varGenes,
+            dbscanEps = dbscanEps,
+            L = L
+        )
+        if (haveEmptyGenes) {
+            resBat <- matrix(0, nrow = totalGenes, ncol = nC,
+                dimnames = list(geneNames, allCellNames))
+            resBat[noneEmptyGeneIndex, ] <- returnResult$resList$estNativeCounts
+            returnResult$resList$estNativeCounts <- resBat
+        }
     }
   
     zMessage = ""
@@ -507,7 +493,7 @@ decontX <- function(counts,
         verbose = verbose
     )
 
-    return(resultsOneBatch)
+    return(returnResult)
 
 }
 
