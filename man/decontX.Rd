@@ -13,6 +13,7 @@ decontX(
   logfile = NULL,
   verbose = TRUE,
   varGenes = NULL,
+  L = NULL,
   dbscanEps = NULL,
   seed = 12345
 )
@@ -37,10 +38,20 @@ to be 10.}
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 
 \item{varGenes}{Positive Integer. Used only when z is not provided.
-Need to be larger than 1. Default value is 5000 if not provided.}
+Need to be larger than 1. Default value is 5000 if not provided.
+varGenes, being the number of most variable genes, is used to filter genes
+based on the variability of gene's expression cross cells. While the variability
+is calcualted using scran::trendVar() and scran::decomposeVar().}
+
+\item{L}{Positive Integer. Used only when z is not provided.
+Need to be larger than 1. Default value is 50 if not provided.
+L, being the number of gene modules, is used on celda_CG clustering
+to collapse genes into gene modules.}
 
 \item{dbscanEps}{Numeric. Used only when z is not provided.
-Need to be non-negative. Default is 1.0 if not provided.}
+Need to be non-negative. Default is 1.0 if not provided.
+dbscanEps is the clustering resolution parameter that is used to feed into
+dbscan::dbscan() to estimate broad cell clusters.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to

@@ -358,6 +358,18 @@ decontX <- function(counts,
     nC = ncol(counts)
     allCellNames = colnames(counts)
 
+    .logMessages(
+        paste(rep("-", 50), collapse = ""),
+        "\n", 
+        "Starting DecontX. Decontamination",
+        "\n", 
+        paste(rep("-", 50), collapse = ""),
+	sep = "",
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+    )
+
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
@@ -374,6 +386,21 @@ decontX <- function(counts,
         batchIndex <- unique(batch)
 
         for (bat in batchIndex) {
+            .logMessages(
+                  paste(rep(" ", 4), collapse = ""),
+		  paste(rep("-", 50), collapse = ""),
+                  "\n",
+                  paste(rep(" ", 4), collapse = ""),
+                  "Estimate contamination within batch",
+                  "\n",
+                  paste(rep(" ", 4), collapse = ""),
+		  paste(rep("-", 50), collapse = ""),
+                  sep = "",
+                  logfile = logfile,
+                  append = TRUE,
+                  verbose = verbose
+            )
+
             zBat <- NULL
             countsBat <- counts[, batch == bat]
             if (!is.null(z)) {
@@ -448,6 +475,24 @@ decontX <- function(counts,
         resBat[noneEmptyGeneIndex, ] <- resultsOneBatch$resList$estNativeCounts
         resultsOneBatch$resList$estNativeCounts <- resBat
     }
+  
+    zMessage = ""
+    if (is.null(z)) {
+        zMessage = "\nEstimated cell clusters z is saved in the result as well."
+    }
+    .logMessages(
+        paste(rep("-", 50), collapse = ""),
+        "\n", 
+        "All is done",
+        zMessage,
+        "\n", 
+        paste(rep("-", 50), collapse = ""),
+	sep = "",
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+    )
+
     return(resultsOneBatch)
 
 }
@@ -472,19 +517,18 @@ decontX <- function(counts,
 
     if (is.null(z)) {
         .logMessages(
+            paste(rep(" ", 8), collapse = ""),
             paste(rep("-", 50), collapse = ""),
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose
-        )
-        .logMessages(
-            "Clustering using graph and density-based method to find cell clusters",
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose
-        )
-        .logMessages(
+            "\n",
+            paste(rep(" ", 8), collapse = ""),
+            "Start to estimate broad cell types",
+            "\n",
+            paste(rep(" ", 8), collapse = ""),
+            "which will then be used for DecontX contamination estimation.",
+            "\n",
+            paste(rep(" ", 8), collapse = ""),
             paste(rep("-", 50), collapse = ""),
+            sep = "",
             logfile = logfile,
             append = TRUE,
             verbose = verbose
@@ -499,7 +543,9 @@ decontX <- function(counts,
 
         z <- .decontxInitializeZ(object = counts,
             varGenes = varGenes,
-            dbscanEps = dbscanEps)
+            dbscanEps = dbscanEps,
+            verbose = verbose,
+            logfile = logfile)
     }
 
     z <- .processCellLabels(z, numCells = nC)
@@ -510,30 +556,15 @@ decontX <- function(counts,
     stopIter <- 3L
 
     .logMessages(
+        paste(rep(" ", 8), collapse = ""),
         paste(rep("-", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
-    .logMessages(
-        "Start DecontX. Decontamination",
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
-
-    if (!is.null(batch)) {
-        .logMessages(
-            "batch: ",
-            batch,
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose
-        )
-    }
-
-    .logMessages(
+        "\n",
+        paste(rep(" ", 8), collapse = ""),
+        "Estimate contamination",
+        "\n",
+        paste(rep(" ", 8), collapse = ""),
         paste(rep("-", 50), collapse = ""),
+        sep = "",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -608,30 +639,26 @@ decontX <- function(counts,
     resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
 
     endTime <- Sys.time()
-    .logMessages(
-        paste(rep("-", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
-    .logMessages(
-        "Completed DecontX. Total time:",
-        format(difftime(endTime, startTime)),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
     if (!is.null(batch)) {
-        .logMessages(
-            "batch: ",
-            batch,
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose
-        )
+        batchMessage = paste(" ", "in batch ", batch, ".", sep = "")
+    } else {
+        batchMessage = "."
     }
     .logMessages(
+        paste(rep(" ", 8), collapse = ""),
         paste(rep("-", 50), collapse = ""),
+        "\n",
+        paste(rep(" ", 8), collapse = ""),
+        "Contamination estimation is completed",
+        batchMessage,
+        "\n",
+        paste(rep(" ", 8), collapse = ""),
+        "DecontX time: ",
+        format(difftime(endTime, startTime)),
+        "\n",
+        paste(rep(" ", 8), collapse = ""),
+        paste(rep("-", 50), collapse = ""),
+	sep = "",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -719,7 +746,9 @@ addLogLikelihood <- function(llA, llB) {
     function(object, # object is either a sce object or a count matrix
         varGenes = 5000,
         L = 50,
-	dbscanEps = 1.0) {
+	dbscanEps = 1.0,
+        verbose = TRUE,
+        logfile = NULL) {
 
         if (!is(object, "SingleCellExperiment")) {
             sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts= object))
@@ -741,16 +770,64 @@ addLogLikelihood <- function(llA, llB) {
         countsFiltered <- as.matrix(SingleCellExperiment::counts(sce[topVariableGenes, ]))
         storage.mode(countsFiltered) <- "integer"
 
+        .logMessages(
+            paste(rep(" ", 12), collapse = ""),
+            paste(rep("-", 50), collapse = ""),
+            "\n",
+            paste(rep(" ", 12), collapse = ""),
+            "Collapse genes into ",
+            L,
+            " gene modules",
+            "\n",
+            paste(rep(" ", 12), collapse = ""),
+            paste(rep("-", 50), collapse = ""),
+            sep = "",
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
+        )
         ## Celda clustering using recursive module splitting
-        L = min(L, nrow(countsFiltered))    
-        initial.module.split <- recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
-        initial.modules.model <- subsetCeldaList(initial.module.split, list(L=L))
+        if (L < nrow(countsFiltered)) {
+            initial.module.split <- recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
+            initial.modules.model <- subsetCeldaList(initial.module.split, list(L=L))
+            fm <- factorizeMatrix(countsFiltered, initial.modules.model, type="counts")$counts$cell
+        } else {
+            fm = countsFiltered
+        }
+ 
+        .logMessages(
+            paste(rep(" ", 12), collapse = ""),
+            paste(rep("-", 50), collapse = ""),
+            "\n",
+            paste(rep(" ", 12), collapse = ""),
+            "Use umap to reduce features into 2 dimensions for cell community detection",
+            "\n",
+            paste(rep(" ", 12), collapse = ""),
+            paste(rep("-", 50), collapse = ""),
+            sep = "",
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
+        )
+        ## Umap to reduce dimension into 2 cluster
+        nNeighbors = min(15, ncol(countsFiltered))
+        resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors=nNeighbors, min_dist = 0.01, spread = 1)
+	rm(fm)
 
-        
-        ## Louvian community detection
-        fm <- factorizeMatrix(countsFiltered, initial.modules.model, type="counts")
-        resUmap <- uwot::umap(t(sqrt(fm$counts$cell)), n_neighbors=15, min_dist = 0.01, spread = 1)
-
+        .logMessages(
+            paste(rep(" ", 12), collapse = ""),
+            paste(rep("-", 50), collapse = ""),
+            "\n",
+            paste(rep(" ", 12), collapse = ""),
+            "Use density-based model DBSCAN to detect cell community",
+            "\n",
+            paste(rep(" ", 12), collapse = ""),
+            paste(rep("-", 50), collapse = ""),
+            sep = "",
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
+        )
         # Use dbSCAN on the UMAP to identify broad cell types
         totalClusters <- 1
         while(totalClusters <= 1 & dbscanEps > 0) {
@@ -798,3 +875,5 @@ addLogLikelihood <- function(llA, llB) {
     }
     return(L)
 }
+
+
