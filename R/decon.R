@@ -391,7 +391,8 @@ decontX <- function(counts,
 		  paste(rep("-", 50), collapse = ""),
                   "\n",
                   paste(rep(" ", 4), collapse = ""),
-                  "Estimate contamination within batch",
+                  "Estimate contamination within batch ",
+		  bat,
                   "\n",
                   paste(rep(" ", 4), collapse = ""),
 		  paste(rep("-", 50), collapse = ""),
@@ -448,6 +449,19 @@ decontX <- function(counts,
             "estNativeCounts" = estRmat,
             "estConp" = estConp,
             "theta" = theta
+        )
+
+        .logMessages(
+            paste(rep("-", 50), collapse = ""),
+            "\n", 
+            "All is done",
+            zMessage,
+            "\n", 
+            paste(rep("-", 50), collapse = ""),
+            sep = "",
+            logfile = logfile,
+            append = TRUE,
+            verbose = verbose
         )
 
         return(list(
