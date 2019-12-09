@@ -276,7 +276,7 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param dbscanEps Numeric. Used only when z is not provided.
 #' Need to be non-negative. Default is 1.0 if not provided.
 #' dbscanEps is the clustering resolution parameter that is used to feed into
-#' dbscan::dbscan() to estimate broad cell clusters. 
+#' dbscan::dbscan() to estimate broad cell clusters.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -313,9 +313,9 @@ decontX <- function(counts,
             delta = delta,
             logfile = logfile,
             verbose = verbose,
-	    varGenes = varGenes,
+            varGenes = varGenes,
             L = L,
-	    dbscanEps = dbscanEps)
+            dbscanEps = dbscanEps)
     } else {
         with_seed(seed,
             res <- .decontX(counts = counts,
@@ -325,9 +325,9 @@ decontX <- function(counts,
                 delta = delta,
                 logfile = logfile,
                 verbose = verbose,
-		varGenes = varGenes,
+                varGenes = varGenes,
                 L = L,
-		dbscanEps = dbscanEps))
+                dbscanEps = dbscanEps))
     }
 
     return(res)
@@ -360,11 +360,11 @@ decontX <- function(counts,
 
     .logMessages(
         paste(rep("-", 50), collapse = ""),
-        "\n", 
+        "\n",
         "Starting DecontX. Decontamination",
-        "\n", 
+        "\n",
         paste(rep("-", 50), collapse = ""),
-	sep = "",
+        sep = "",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -381,21 +381,21 @@ decontX <- function(counts,
         )
         theta <- rep(NA, nC)
         estConp <- rep(NA, nC)
-	returnZ <- rep(NA, nC) 
+        returnZ <- rep(NA, nC) 
 
         batchIndex <- unique(batch)
 
         for (bat in batchIndex) {
             .logMessages(
                   paste(rep(" ", 4), collapse = ""),
-		  paste(rep("-", 50), collapse = ""),
+                  paste(rep("-", 50), collapse = ""),
                   "\n",
                   paste(rep(" ", 4), collapse = ""),
                   "Estimate contamination within batch ",
 		  bat,
                   "\n",
                   paste(rep(" ", 4), collapse = ""),
-		  paste(rep("-", 50), collapse = ""),
+                  paste(rep("-", 50), collapse = ""),
                   sep = "",
                   logfile = logfile,
                   append = TRUE,
@@ -415,8 +415,8 @@ decontX <- function(counts,
                 delta = delta,
                 logfile = logfile,
                 verbose = verbose,
-		varGenes = varGenes,
-		dbscanEps = dbscanEps,
+                varGenes = varGenes,
+                dbscanEps = dbscanEps,
                 L = L
             )
 
@@ -440,9 +440,9 @@ decontX <- function(counts,
         }
 
         runParams <- resBat$runParams
-	## All batches share the same other parameters except cluster label z
-	## So update z in the final returned result
-	runParams$z <- returnZ
+        ## All batches share the same other parameters except cluster label z
+        ## So update z in the final returned result
+        runParams$z <- returnZ
         method <- resBat$method
         resList <- list(
             "logLikelihood" = logLikelihood,
@@ -475,19 +475,19 @@ decontX <- function(counts,
             returnResult$resList$estNativeCounts <- resBat
         }
     }
-  
-    zMessage = ""
+ 
+    zMessage <- ""
     if (is.null(z)) {
-        zMessage = "\nEstimated cell clusters z is saved in the result as well."
+        zMessage <- "\nEstimated cell clusters z is saved in the result as well."
     }
     .logMessages(
         paste(rep("-", 50), collapse = ""),
-        "\n", 
+        "\n",
         "All is done",
         zMessage,
-        "\n", 
+        "\n",
         paste(rep("-", 50), collapse = ""),
-	sep = "",
+        sep = "",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -537,9 +537,9 @@ decontX <- function(counts,
         ## Always uses clusters for DecontX estimation
         #deconMethod <- "background"
 
-        varGenes = .processvarGenes(varGenes)
-        dbscanEps = .processdbscanEps(dbscanEps)
-	L = .processL(L)
+        varGenes <- .processvarGenes(varGenes)
+        dbscanEps <- .processdbscanEps(dbscanEps)
+        L <- .processL(L)
 
         z <- .decontxInitializeZ(object = counts,
             varGenes = varGenes,
@@ -640,9 +640,9 @@ decontX <- function(counts,
 
     endTime <- Sys.time()
     if (!is.null(batch)) {
-        batchMessage = paste(" ", "in batch ", batch, ".", sep = "")
+        batchMessage <- paste(" ", "in batch ", batch, ".", sep = "")
     } else {
-        batchMessage = "."
+        batchMessage <- "."
     }
     .logMessages(
         paste(rep(" ", 8), collapse = ""),
@@ -658,7 +658,7 @@ decontX <- function(counts,
         "\n",
         paste(rep(" ", 8), collapse = ""),
         paste(rep("-", 50), collapse = ""),
-	sep = "",
+        sep = "",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -666,7 +666,7 @@ decontX <- function(counts,
 
     runParams <- list("deltaInit" = deltaInit,
         "iteration" = iter - 1L,
-	"z" = z)
+        "z" = z)
 
     resList <- list(
         "logLikelihood" = ll,
@@ -745,27 +745,27 @@ addLogLikelihood <- function(llA, llB) {
     function(object, # object is either a sce object or a count matrix
         varGenes = 5000,
         L = 50,
-	dbscanEps = 1.0,
+        dbscanEps = 1.0,
         verbose = TRUE,
         logfile = NULL) {
 
         if (!is(object, "SingleCellExperiment")) {
-            sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts= object))
+            sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = object))
         }
 
-       	## Add the log2 normalized counts into sce object
+        ## Add the log2 normalized counts into sce object
         ## The normalized counts is also centered using library size in the original count matrix
         ## in scater::normalizeSCE()
         #sce <- suppressWarnings(scater::normalizeSCE(sce))
-        sce <- scater::logNormCounts(sce, log=TRUE)
+        sce <- scater::logNormCounts(sce, log = TRUE)
 
         if (nrow(sce) <= varGenes) {
              topVariableGenes <- 1:nrow(sce)
-        } else if( nrow(sce) > varGenes ) { 
+        } else if (nrow(sce) > varGenes) { 
         ## Use the top most variable genes to do rough clustering (celda_CG & Louvian graph algorithm) 
-            mvTrend <- scran::trendVar(sce, use.spikes=FALSE) 
+            mvTrend <- scran::trendVar(sce, use.spikes = FALSE)
             decomposeTrend <- scran::decomposeVar(sce, mvTrend) 
-            topVariableGenes <- order(decomposeTrend$bio, decreasing=TRUE)[1:varGenes]
+            topVariableGenes <- order(decomposeTrend$bio, decreasing = TRUE)[1:varGenes]
         }
         countsFiltered <- as.matrix(SingleCellExperiment::counts(sce[topVariableGenes, ]))
         storage.mode(countsFiltered) <- "integer"
@@ -788,13 +788,13 @@ addLogLikelihood <- function(llA, llB) {
         )
         ## Celda clustering using recursive module splitting
         if (L < nrow(countsFiltered)) {
-            initial.module.split <- recursiveSplitModule(countsFiltered, initialL=L, maxL=L, perplexity=FALSE, verbose=FALSE)
-            initial.modules.model <- subsetCeldaList(initial.module.split, list(L=L))
-            fm <- factorizeMatrix(countsFiltered, initial.modules.model, type="counts")$counts$cell
+            initial.module.split <- recursiveSplitModule(countsFiltered, initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+            initial.modules.model <- subsetCeldaList(initial.module.split, list(L = L))
+            fm <- factorizeMatrix(countsFiltered, initial.modules.model, type = "counts")$counts$cell
         } else {
-            fm = countsFiltered
+            fm <- countsFiltered
         }
- 
+
         .logMessages(
             paste(rep(" ", 12), collapse = ""),
             paste(rep("-", 50), collapse = ""),
@@ -810,9 +810,9 @@ addLogLikelihood <- function(llA, llB) {
             verbose = verbose
         )
         ## Louvan graph-based method to reduce dimension into 2 cluster
-        nNeighbors = min(15, ncol(countsFiltered))
-        resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors=nNeighbors, min_dist = 0.01, spread = 1)
-	rm(fm)
+        nNeighbors <- min(15, ncol(countsFiltered))
+        resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors = nNeighbors, min_dist = 0.01, spread = 1)
+        rm(fm)
 
         .logMessages(
             paste(rep(" ", 12), collapse = ""),
@@ -830,7 +830,7 @@ addLogLikelihood <- function(llA, llB) {
         )
         # Use dbSCAN on the UMAP to identify broad cell types
         totalClusters <- 1
-        while(totalClusters <= 1 & dbscanEps > 0) {
+        while (totalClusters <= 1 & dbscanEps > 0) {
         resDbscan <- dbscan::dbscan(resUmap, dbscanEps)
         dbscanEps <- dbscanEps - (0.25 * dbscanEps)
         totalClusters <- length(unique(resDbscan$cluster))
@@ -841,33 +841,33 @@ addLogLikelihood <- function(llA, llB) {
 
 
 ## process varGenes
-.processvarGenes = function(varGenes) {
+.processvarGenes <- function(varGenes) {
     if (is.null(varGenes)) {
         varGenes <- 5000
     } else {
         if (varGenes < 2 | !is.integer(varGenes)) {
-            stop("Parameter 'varGenes' must be an integer and larger than 1.") 
-	}
+            stop("Parameter 'varGenes' must be an integer and larger than 1.")
+        }
     }
     return(varGenes)
 }
 
 ## process dbscanEps for resolusion threshold using DBSCAN
-.processdbscanEps = function(dbscanEps) {
+.processdbscanEps <- function(dbscanEps) {
     if (is.null(dbscanEps)) {
         dbscanEps <- 1
     } else {
         if (dbscanEps < 0) {
             stop("Parameter 'dbscanEps' needs to be non-negative.")
-	}
+        }
     }
     return(dbscanEps)
 }
 
 ## process gene modules L
-.processL = function(L) {
+.processL <- function(L) {
     if (is.null(L)) {
-        L = 50
+        L <- 50
     } else {
         if (L < 2 | !is.integer(L)) {
             stop("Parameter 'L' must be an integer and larger than 1.")
