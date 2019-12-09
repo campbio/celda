@@ -756,7 +756,8 @@ addLogLikelihood <- function(llA, llB) {
        	## Add the log2 normalized counts into sce object
         ## The normalized counts is also centered using library size in the original count matrix
         ## in scater::normalizeSCE()
-        sce <- suppressWarnings(scater::normalizeSCE(sce))
+        #sce <- suppressWarnings(scater::normalizeSCE(sce))
+        sce <- scater::logNormCounts(sce, log=TRUE)
 
         if (nrow(sce) <= varGenes) {
              topVariableGenes <- 1:nrow(sce)
@@ -808,7 +809,7 @@ addLogLikelihood <- function(llA, llB) {
             append = TRUE,
             verbose = verbose
         )
-        ## Umap to reduce dimension into 2 cluster
+        ## Louvan graph-based method to reduce dimension into 2 cluster
         nNeighbors = min(15, ncol(countsFiltered))
         resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors=nNeighbors, min_dist = 0.01, spread = 1)
 	rm(fm)
