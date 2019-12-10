@@ -40,8 +40,8 @@ to be 10.}
 \item{varGenes}{Positive Integer. Used only when z is not provided.
 Need to be larger than 1. Default value is 5000 if not provided.
 varGenes, being the number of most variable genes, is used to filter genes
-based on the variability of gene's expression cross cells. While the variability
-is calcualted using scran::trendVar() and scran::decomposeVar().}
+based on the variability of gene's expression cross cells. While the
+variability is calcualted using scran::trendVar() and scran::decomposeVar().}
 
 \item{L}{Positive Integer. Used only when z is not provided.
 Need to be larger than 1. Default value is 50 if not provided.

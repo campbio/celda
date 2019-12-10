@@ -208,7 +208,8 @@ simulateContaminatedMatrix <- function(C = 300,
     ))
 }
 
-# DEPRECATED. This is not used, but is kept as it might be useful in the feature.
+# DEPRECATED. This is not used, but is kept as it might be useful in the
+# feature.
 # This function updates decontamination using background distribution
 .cDCalcEMbgDecontamination <-
     function(counts, globalZ, cbZ, trZ, phi, eta, theta) {
@@ -267,8 +268,8 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param varGenes Positive Integer. Used only when z is not provided.
 #' Need to be larger than 1. Default value is 5000 if not provided.
 #' varGenes, being the number of most variable genes, is used to filter genes
-#' based on the variability of gene's expression cross cells. While the variability
-#' is calcualted using scran::trendVar() and scran::decomposeVar().
+#' based on the variability of gene's expression cross cells. While the
+#' variability is calcualted using scran::trendVar() and scran::decomposeVar().
 #' @param L Positive Integer. Used only when z is not provided.
 #' Need to be larger than 1. Default value is 50 if not provided.
 #' L, being the number of gene modules, is used on celda_CG clustering
@@ -355,8 +356,8 @@ decontX <- function(counts,
         haveEmptyGenes <- TRUE
     }
 
-    nC = ncol(counts)
-    allCellNames = colnames(counts)
+    nC <- ncol(counts)
+    allCellNames <- colnames(counts)
 
     .logMessages(
         paste(rep("-", 50), collapse = ""),
@@ -381,7 +382,7 @@ decontX <- function(counts,
         )
         theta <- rep(NA, nC)
         estConp <- rep(NA, nC)
-        returnZ <- rep(NA, nC) 
+        returnZ <- rep(NA, nC)
 
         batchIndex <- unique(batch)
 
@@ -392,7 +393,7 @@ decontX <- function(counts,
                   "\n",
                   paste(rep(" ", 4), collapse = ""),
                   "Estimate contamination within batch ",
-		  bat,
+                  bat,
                   "\n",
                   paste(rep(" ", 4), collapse = ""),
                   paste(rep("-", 50), collapse = ""),
@@ -475,7 +476,7 @@ decontX <- function(counts,
             returnResult$resList$estNativeCounts <- resBat
         }
     }
- 
+
     zMessage <- ""
     if (is.null(z)) {
         zMessage <- "\nEstimated cell clusters z is saved in the result as well."
@@ -754,17 +755,18 @@ addLogLikelihood <- function(llA, llB) {
         }
 
         ## Add the log2 normalized counts into sce object
-        ## The normalized counts is also centered using library size in the original count matrix
-        ## in scater::normalizeSCE()
+        ## The normalized counts is also centered using library size in the
+        ## original count matrix in scater::normalizeSCE()
         #sce <- suppressWarnings(scater::normalizeSCE(sce))
         sce <- scater::logNormCounts(sce, log = TRUE)
 
         if (nrow(sce) <= varGenes) {
-             topVariableGenes <- 1:nrow(sce)
-        } else if (nrow(sce) > varGenes) { 
-        ## Use the top most variable genes to do rough clustering (celda_CG & Louvian graph algorithm) 
+             topVariableGenes <- seq_len(nrow(sce))
+        } else if (nrow(sce) > varGenes) {
+        ## Use the top most variable genes to do rough clustering
+        ## (celda_CG & Louvian graph algorithm)
             mvTrend <- scran::trendVar(sce, use.spikes = FALSE)
-            decomposeTrend <- scran::decomposeVar(sce, mvTrend) 
+            decomposeTrend <- scran::decomposeVar(sce, mvTrend)
             topVariableGenes <- order(decomposeTrend$bio, decreasing = TRUE)[1:varGenes]
         }
         countsFiltered <- as.matrix(SingleCellExperiment::counts(sce[topVariableGenes, ]))
@@ -788,9 +790,13 @@ addLogLikelihood <- function(llA, llB) {
         )
         ## Celda clustering using recursive module splitting
         if (L < nrow(countsFiltered)) {
-            initial.module.split <- recursiveSplitModule(countsFiltered, initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
-            initial.modules.model <- subsetCeldaList(initial.module.split, list(L = L))
-            fm <- factorizeMatrix(countsFiltered, initial.modules.model, type = "counts")$counts$cell
+            initialModuleSplit <- recursiveSplitModule(countsFiltered,
+                initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+            initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
+            fm <- factorizeMatrix(countsFiltered, initialModel, type = "counts")
+            fm <- fm$counts$cell
+            rm(initialModuleSplit)
+            rm(initialModel)
         } else {
             fm <- countsFiltered
         }
@@ -811,7 +817,8 @@ addLogLikelihood <- function(llA, llB) {
         )
         ## Louvan graph-based method to reduce dimension into 2 cluster
         nNeighbors <- min(15, ncol(countsFiltered))
-        resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors = nNeighbors, min_dist = 0.01, spread = 1)
+        resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors = nNeighbors,
+            min_dist = 0.01, spread = 1)
         rm(fm)
 
         .logMessages(
@@ -875,5 +882,3 @@ addLogLikelihood <- function(llA, llB) {
     }
     return(L)
 }
-
-

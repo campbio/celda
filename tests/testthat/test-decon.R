@@ -35,11 +35,6 @@ test_that(desc = "Testing simulateContaminatedMatrix", {
 })
 
 ## DecontX
-#test_that(desc = "Testing DecontX", {
-#    expect_equal(ncol(deconSim$observedCounts) + ncol(deconSim2$observedCounts),
-#        ncol(batchDecontX$resList$estNativeCounts))
-#    expect_equal(batchDecontXBg$method, "background")
-#})
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {
