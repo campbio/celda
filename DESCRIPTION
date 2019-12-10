@@ -46,7 +46,7 @@ Imports:
     ggdendro,
     pROC,
     magrittr,
-    scater,
+    scater (>= 1.14.4),
     scran,
     SingleCellExperiment,
     dbscan
