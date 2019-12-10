@@ -357,7 +357,7 @@ decontX <- function(counts,
     }
 
     nC <- ncol(counts)
-    allCellNames = colnames(counts)
+    allCellNames <- colnames(counts)
 
     .logMessages(
         paste(rep("-", 50), collapse = ""),
@@ -382,7 +382,7 @@ decontX <- function(counts,
         )
         theta <- rep(NA, nC)
         estConp <- rep(NA, nC)
-        returnZ <- rep(NA, nC) 
+        returnZ <- rep(NA, nC)
 
         batchIndex <- unique(batch)
 
@@ -882,5 +882,3 @@ addLogLikelihood <- function(llA, llB) {
     }
     return(L)
 }
-
-
