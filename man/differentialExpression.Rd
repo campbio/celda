@@ -4,8 +4,15 @@
 \alias{differentialExpression}
 \title{Differential expression for cell subpopulations using MAST}
 \usage{
-differentialExpression(counts, celdaMod, c1, c2 = NULL,
-  onlyPos = FALSE, log2fcThreshold = NULL, fdrThreshold = 1)
+differentialExpression(
+  counts,
+  celdaMod,
+  c1,
+  c2 = NULL,
+  onlyPos = FALSE,
+  log2fcThreshold = NULL,
+  fdrThreshold = 1
+)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent

@@ -4,9 +4,19 @@
 \alias{celdaGridSearch}
 \title{Run Celda in parallel with multiple parameters}
 \usage{
-celdaGridSearch(counts, model, paramsTest, paramsFixed = NULL,
-  maxIter = 200, nchains = 3, cores = 1, bestOnly = TRUE,
-  perplexity = TRUE, verbose = TRUE, logfilePrefix = "Celda")
+celdaGridSearch(
+  counts,
+  model,
+  paramsTest,
+  paramsFixed = NULL,
+  maxIter = 200,
+  nchains = 3,
+  cores = 1,
+  bestOnly = TRUE,
+  perplexity = TRUE,
+  verbose = TRUE,
+  logfilePrefix = "Celda"
+)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent

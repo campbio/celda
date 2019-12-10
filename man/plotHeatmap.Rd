@@ -4,18 +4,38 @@
 \alias{plotHeatmap}
 \title{Plots heatmap based on Celda model}
 \usage{
-plotHeatmap(counts, z = NULL, y = NULL, rowGroupOrder = NULL,
-  colGroupOrder = NULL, scaleRow = scale, trim = c(-2, 2),
-  featureIx = NULL, cellIx = NULL, clusterFeature = TRUE,
-  clusterCell = TRUE, colorScheme = c("divergent", "sequential"),
-  colorSchemeSymmetric = TRUE, colorSchemeCenter = 0, col = NULL,
-  annotationCell = NULL, annotationFeature = NULL,
-  annotationColor = NULL, breaks = NULL, legend = TRUE,
-  annotationLegend = TRUE, annotationNamesFeature = TRUE,
-  annotationNamesCell = TRUE, showNamesFeature = FALSE,
-  showNamesCell = FALSE, hclustMethod = "ward.D2",
+plotHeatmap(
+  counts,
+  z = NULL,
+  y = NULL,
+  rowGroupOrder = NULL,
+  colGroupOrder = NULL,
+  scaleRow = scale,
+  trim = c(-2, 2),
+  featureIx = NULL,
+  cellIx = NULL,
+  clusterFeature = TRUE,
+  clusterCell = TRUE,
+  colorScheme = c("divergent", "sequential"),
+  colorSchemeSymmetric = TRUE,
+  colorSchemeCenter = 0,
+  col = NULL,
+  annotationCell = NULL,
+  annotationFeature = NULL,
+  annotationColor = NULL,
+  breaks = NULL,
+  legend = TRUE,
+  annotationLegend = TRUE,
+  annotationNamesFeature = TRUE,
+  annotationNamesCell = TRUE,
+  showNamesFeature = FALSE,
+  showNamesCell = FALSE,
+  hclustMethod = "ward.D2",
   treeheightFeature = ifelse(clusterFeature, 50, 0),
-  treeheightCell = ifelse(clusterCell, 50, 0), silent = FALSE, ...)
+  treeheightCell = ifelse(clusterCell, 50, 0),
+  silent = FALSE,
+  ...
+)
 }
 \arguments{
 \item{counts}{Numeric matrix. Normalized counts matrix where rows represent
