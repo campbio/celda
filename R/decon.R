@@ -105,7 +105,7 @@ simulateContaminatedMatrix <- function(C = 300,
 
     ## sample contamination count matrix
     nGByK <-
-        rowSums(cellRmat) - .colSumByGroupNumeric(cellRmat, group = z, K = K)
+        rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
     eta <- normalizeCounts(counts = nGByK, normalize = "proportion")
 
     cellCmat <- vapply(seq(C), function(i) {
