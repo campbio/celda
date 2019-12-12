@@ -49,7 +49,8 @@ Imports:
     scater (>= 1.14.4),
     scran,
     SingleCellExperiment,
-    dbscan
+    dbscan,
+    BiocManager (>= 1.30.10)
 Suggests:
     testthat,
     knitr,
@@ -60,7 +61,6 @@ Suggests:
     biomaRt,
     covr,
     M3DExampleData,
-    BiocManager,
     BiocStyle
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
