@@ -50,7 +50,7 @@ Imports:
     scran,
     SingleCellExperiment,
     dbscan,
-    BiocManager (>= 3.10)
+    BiocManager (>= 1.30.10)
 Suggests:
     testthat,
     knitr,
