@@ -479,7 +479,8 @@ decontX <- function(counts,
 
     zMessage <- ""
     if (is.null(z)) {
-        zMessage <- "\nEstimated cell clusters z is saved in the result as well."
+        zMessage <- paste0("\nEstimated cell clusters z is saved in the",
+            " result as well.")
     }
     .logMessages(
         paste(rep("-", 50), collapse = ""),
@@ -711,7 +712,8 @@ decontX <- function(counts,
             " 'counts' matrix.")
     }
     if (length(unique(z)) < 2) {
-        stop("No need to decontaminate when only one cluster is in the dataset.") # Even though
+        stop("No need to decontaminate when only one cluster",
+            " is in the dataset.") # Even though
         # everything runs smoothly when length(unique(z)) == 1, result is not
         # trustful
     }
@@ -751,7 +753,8 @@ addLogLikelihood <- function(llA, llB) {
         logfile = NULL) {
 
         if (!is(object, "SingleCellExperiment")) {
-            sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = object))
+            sce <- SingleCellExperiment::SingleCellExperiment(assays =
+                    list(counts = object))
         }
 
         ## Add the log2 normalized counts into sce object
@@ -767,9 +770,11 @@ addLogLikelihood <- function(llA, llB) {
         ## (celda_CG & Louvian graph algorithm)
             mvTrend <- scran::trendVar(sce, use.spikes = FALSE)
             decomposeTrend <- scran::decomposeVar(sce, mvTrend)
-            topVariableGenes <- order(decomposeTrend$bio, decreasing = TRUE)[1:varGenes]
+            topVariableGenes <- order(decomposeTrend$bio,
+                decreasing = TRUE)[seq(varGenes)]
         }
-        countsFiltered <- as.matrix(SingleCellExperiment::counts(sce[topVariableGenes, ]))
+        countsFiltered <- as.matrix(SingleCellExperiment::counts(
+            sce[topVariableGenes, ]))
         storage.mode(countsFiltered) <- "integer"
 
         .logMessages(
@@ -806,8 +811,8 @@ addLogLikelihood <- function(llA, llB) {
             paste(rep("-", 50), collapse = ""),
             "\n",
             paste(rep(" ", 12), collapse = ""),
-            "Use umap to reduce features into 2 dimensions for cell community detection",
-            "\n",
+            "Use umap to reduce features into 2 dimensions",
+            " for cell community detection\n",
             paste(rep(" ", 12), collapse = ""),
             paste(rep("-", 50), collapse = ""),
             sep = "",
