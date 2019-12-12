@@ -460,17 +460,23 @@ celda_C <- function(counts,
         for (j in seq_len(K)) {
             #otherIx <- seq(K)[-j]
             if (j != z[i]) { # when j is not current population assignment
-                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) + ## Theta simplified
-                sum(lgamma(nGByCP[, j] + counts[, i] + beta)) - # if adding this cell -- Phi Numerator
-                lgamma(nCP[j] + nByC[i] + nG * beta) - # if adding this cell -- Phi Denominator
-                sum(lgamma(nGByCP[, j] + beta)) +  # if without this cell -- Phi Numerator
-                lgamma(nCP[j] + nG * beta)  # if without this cell -- Phi Denominator
+                ## Theta simplified
+                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) +
+                # if adding this cell -- Phi Numerator
+                sum(lgamma(nGByCP[, j] + counts[, i] + beta)) -
+                # if adding this cell -- Phi Denominator
+                lgamma(nCP[j] + nByC[i] + nG * beta) -
+                # if without this cell -- Phi Numerator
+                sum(lgamma(nGByCP[, j] + beta)) +
+                # if without this cell -- Phi Denominator
+                lgamma(nCP[j] + nG * beta)
                 #sum(nGByCP1[otherIx]) + ## Phi Numerator (other cells)
                 #nGByCP2[j] - ## Phi Numerator (current cell)
                 #sum(nCP1[otherIx]) - ## Phi Denominator (other cells)
                 #nCP2[j] - ## Phi Denominator (current cell)
             } else {  # when j is current population assignment
-                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) + ## Theta simplified
+                ## Theta simplified
+                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) +
                 sum(lgamma(nGByCP[, j] + beta)) -
                 lgamma(nCP[j] + nG * beta) -
                 sum(lgamma(nGByCP[, j] - counts[, i] + beta)) +
