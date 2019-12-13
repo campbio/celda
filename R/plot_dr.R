@@ -19,6 +19,8 @@
 #'  The color will be used to signify the highest values on the scale.
 #'   Default 'blue'.
 #' @param varLabel Character vector. Title for the color legend.
+#' @param headers Character vector. If `NULL`, the corresponding rownames are
+#'  used as labels. Otherwise, these headers are used to label the genes.
 #' @return The plot as a ggplot object
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
@@ -45,7 +47,8 @@ plotDimReduceGrid <- function(dim1,
     colorLow,
     colorMid,
     colorHigh,
-    varLabel) {
+    varLabel,
+    headers = NULL) {
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
     naIx <- is.na(dim1) | is.na(dim2)
@@ -54,24 +57,49 @@ plotDimReduceGrid <- function(dim1,
     m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
     colnames(m) <- c(xlab, ylab, "facet", varLabel)
 
-    ggplot2::ggplot(m,
-        ggplot2::aes_string(x = xlab, y = ylab)) +
-        ggplot2::geom_point(stat = "identity",
-            size = size,
-            ggplot2::aes_string(color = varLabel)) +
-        ggplot2::facet_wrap(~ facet) +
-        ggplot2::theme_bw() +
-        ggplot2::scale_colour_gradient2(low = colorLow,
-            high = colorHigh,
-            mid = colorMid,
-            midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
-            name = gsub("_", " ", varLabel)) +
-        ggplot2::theme(strip.background = ggplot2::element_blank(),
-            panel.grid.major = ggplot2::element_blank(),
-            panel.grid.minor = ggplot2::element_blank(),
-            panel.spacing = unit(0, "lines"),
-            panel.background = ggplot2::element_blank(),
-            axis.line = ggplot2::element_line(colour = "black"))
+    if (isFALSE(is.null(headers))) {
+        names(headers) <- levels(m$facet)
+        headers <- ggplot2::as_labeller(headers)
+
+        g <- ggplot2::ggplot(m,
+            ggplot2::aes_string(x = xlab, y = ylab)) +
+            ggplot2::geom_point(stat = "identity",
+                size = size,
+                ggplot2::aes_string(color = varLabel)) +
+            ggplot2::facet_wrap(~ facet, labeller = headers) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_colour_gradient2(low = colorLow,
+                high = colorHigh,
+                mid = colorMid,
+                midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
+                name = gsub("_", " ", varLabel)) +
+            ggplot2::theme(strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black"))
+    } else {
+        g <- ggplot2::ggplot(m,
+            ggplot2::aes_string(x = xlab, y = ylab)) +
+            ggplot2::geom_point(stat = "identity",
+                size = size,
+                ggplot2::aes_string(color = varLabel)) +
+            ggplot2::facet_wrap(~ facet) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_colour_gradient2(low = colorLow,
+                high = colorHigh,
+                mid = colorMid,
+                midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
+                name = gsub("_", " ", varLabel)) +
+            ggplot2::theme(strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black"))
+    }
+    return(g)
 }
 
 
@@ -87,6 +115,8 @@ plotDimReduceGrid <- function(dim1,
 #' @param counts Integer matrix. Rows represent features and columns
 #'  represent cells.
 #' @param features Character vector. Uses these genes for plotting.
+#' @param headers Character vector. If `NULL`, the corresponding rownames are
+#'  used as labels. Otherwise, these headers are used to label the genes.
 #' @param normalize Logical. Whether to normalize the columns of `counts`.
 #'  Default TRUE.
 #' @param exactMatch Logical. Whether an exact match or a partial match using
@@ -99,11 +129,11 @@ plotDimReduceGrid <- function(dim1,
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`. The color
-#'  will be used to signify the lowest values on the scale. Default 'grey'.
+#'  will be used to signify the lowest values on the scale. Default 'blue'.
 #' @param colorMid Character. A color available from `colors()`. The color
-#'  will be used to signify the midpoint on the scale.
+#'  will be used to signify the midpoint on the scale. Default 'white'.
 #' @param colorHigh Character. A color available from `colors()`. The color
-#'  will be used to signify the highest values on the scale. Default 'blue'.
+#'  will be used to signify the highest values on the scale. Default 'red'.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
@@ -121,15 +151,31 @@ plotDimReduceFeature <- function(dim1,
     dim2,
     counts,
     features,
+    headers = NULL,
     normalize = TRUE,
     exactMatch = TRUE,
     trim = c(-2, 2),
     size = 1,
     xlab = "Dimension_1",
     ylab = "Dimension_2",
-    colorLow = "grey",
-    colorMid = NULL,
-    colorHigh = "blue") {
+    colorLow = "blue",
+    colorMid = "white",
+    colorHigh = "red") {
+
+    if (isFALSE(is.null(headers))) {
+        if (length(headers) != length(features)) {
+            stop("Headers ",
+                headers,
+                " should be the same length as features ",
+                features)
+        }
+
+        if (isFALSE(exactMatch)) {
+            warning("exactMatch is FALSE. headers will not be used!")
+            headers <- NULL
+        }
+    }
+
     if (isTRUE(normalize)) {
         counts <- normalizeCounts(counts,
             transformationFun = sqrt,
@@ -172,7 +218,7 @@ plotDimReduceFeature <- function(dim1,
                 paste(notFound,
                     sep = "",
                     collapse = ","))
-            }
+        }
     } else {
         featuresNotFound <- setdiff(features,
             intersect(features, rownames(counts)))
@@ -186,7 +232,11 @@ plotDimReduceFeature <- function(dim1,
                 paste(featuresNotFound,
                     sep = "",
                     collapse = ","))
+            if (isFALSE(is.null(headers))) {
+                whichHeadersNotFound <- which(featuresNotFound == features)
+                headers <- headers[-whichHeadersNotFound]
             }
+        }
         featuresFound <- setdiff(features, featuresNotFound)
         counts <- counts[featuresFound, , drop = FALSE]
     }
@@ -199,7 +249,8 @@ plotDimReduceFeature <- function(dim1,
         colorLow,
         colorMid,
         colorHigh,
-        varLabel)
+        varLabel,
+        headers)
 }
 
 
@@ -364,7 +415,8 @@ plotDimReduceCluster <- function(dim1,
                 ggplot2::guide_legend(override.aes = list(size = 1)))
 
     if (labelClusters == TRUE) {
-        centroidList <- lapply(seq(length(unique(cluster))), function(x) {
+        #centroidList <- lapply(seq(length(unique(cluster))), function(x) {
+        centroidList <- lapply(unique(cluster), function(x) {
             df.sub <- df[df$Cluster == x, ]
             median.1 <- stats::median(df.sub$Dimension_1)
             median.2 <- stats::median(df.sub$Dimension_2)
@@ -393,14 +445,14 @@ plotDimReduceCluster <- function(dim1,
 # @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
 # @param doPca Logical. Whether to perform
 # dimensionality reduction with PCA before tSNE.
-# @param initialDims Integer.Number of dimensions from PCA to use as
-# input in tSNE.
+# @param initialDims Integer. Number of dimensions from PCA to use as
+# input in tSNE. Default 50.
 #' @importFrom Rtsne Rtsne
 .calculateTsne <- function(norm,
     perplexity = 20,
     maxIter = 2500,
     doPca = FALSE,
-    initialDims = 20) {
+    initialDims = 50) {
 
     res <- Rtsne::Rtsne(
         norm,
@@ -415,12 +467,46 @@ plotDimReduceCluster <- function(dim1,
 }
 
 
-# Run the umap algorithm for dimensionality reduction
+# Run the UMAP algorithm for dimensionality reduction
 # @param norm Normalized count matrix.
-# @param umapConfig An object of class umap.config,
-# containing configuration parameters to be passed to umap.
-# Default umap::umap.defualts.
-#' @importFrom umap umap
-.calculateUmap <- function(norm, umapConfig = umap::umap.defaults) {
-    return(umap::umap(norm, umapConfig)$layout)
+# @param nNeighbors The size of local neighborhood used for
+#   manifold approximation. Larger values result in more global
+#   views of the manifold, while smaller values result in more
+#   local data being preserved. Default 30.
+#    See `?uwot::umap` for more information.
+# @param minDist The effective minimum distance between embedded points.
+#    Smaller values will result in a more clustered/clumped
+#    embedding where nearby points on the manifold are drawn
+#    closer together, while larger values will result on a more
+#    even dispersal of points. Default 0.2.
+#    See `?uwot::umap` for more information.
+# @param spread The effective scale of embedded points. In combination with
+#    ‘min_dist’, this determines how clustered/clumped the
+#    embedded points are. Default 1.
+#    See `?uwot::umap` for more information.
+# @param pca Logical. Whether to perform
+# dimensionality reduction with PCA before UMAP.
+# @param initialDims Integer. Number of dimensions from PCA to use as
+# input in UMAP. Default 50.
+# @param cores Number of threads to use. Default 1.
+# @param ... Other parameters to pass to `uwot::umap`.
+#' @import uwot
+.calculateUmap <- function(norm,
+                           nNeighbors = 30,
+                           minDist = 0.75,
+                           spread = 1,
+                           pca=FALSE,
+                           initialDims = 50,
+                           cores = 1,
+                           ...) {
+    if (isTRUE(pca)) {
+      doPCA <- initialDims
+    } else {
+      doPCA <- NULL
+    }
+
+    res <- uwot::umap(norm, n_neighbors = nNeighbors,
+            min_dist = minDist, spread = spread,
+            n_threads = cores, n_sgd_threads = 1, pca = doPCA, ...)
+    return(res)
 }

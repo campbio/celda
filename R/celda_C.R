@@ -46,7 +46,7 @@
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @return An object of class `celda_C` with the cell population clusters
-#'  stored in in `z`.
+#'  stored in `z`.
 #' @seealso `celda_G()` for feature clustering and `celda_CG()` for simultaneous
 #'  clustering of features and cells. `celdaGridSearch()` can be used to run
 #'  multiple values of K and multiple chains in parallel.
@@ -1035,14 +1035,13 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 #' @param celdaMod Celda object of class `celda_C`.
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. Default 25000.
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
 #' @param initialDims Integer. PCA will be used to reduce the dimentionality
 #'  of the dataset. The top 'initialDims' principal components will be used
 #'  for tSNE. Default 20.
-#' @param modules Integer vector. Determines which features modules to use for
-#'  tSNE. If NULL, all modules will be used. Default NULL.
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
@@ -1059,10 +1058,9 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_C"),
 setMethod("celdaTsne", signature(celdaMod = "celda_C"),
     function(counts,
         celdaMod,
-        maxCells = 25000,
+        maxCells = NULL,
         minClusterSize = 100,
         initialDims = 20,
-        modules = NULL,
         perplexity = 20,
         maxIter = 2500,
         seed = 12345) {
@@ -1073,7 +1071,6 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
                 initialDims = initialDims,
-                modules = modules,
                 perplexity = perplexity,
                 maxIter = maxIter)
         } else {
@@ -1083,7 +1080,6 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
                     initialDims = initialDims,
-                    modules = modules,
                     perplexity = perplexity,
                     maxIter = maxIter))
         }
@@ -1094,18 +1090,16 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 
 .celdaTsneC <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
     initialDims = 20,
-    modules = NULL,
     perplexity = 20,
     maxIter = 2500) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
         celdaMod,
         maxCells,
-        minClusterSize,
-        modules)
+        minClusterSize)
 
     res <- .calculateTsne(preparedCountInfo$norm,
         perplexity = perplexity,
@@ -1116,7 +1110,7 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
     final <- matrix(NA, nrow = ncol(counts), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- res
     rownames(final) <- colnames(counts)
-    colnames(final) <- c("tsne_1", "tsne_2")
+    colnames(final) <- c("tSNE1", "tSNE_2")
     return(final)
 }
 
@@ -1131,47 +1125,79 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
 #' @param celdaMod Celda object of class `celda_C`.
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. Default 25000.
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
-#' @param modules Integer vector. Determines which features modules to use for
-#'  UMAP. If NULL, all modules will be used. Default NULL.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @param umapConfig An object of class "umap.config" specifying parameters to
-#'  the UMAP algorithm.
+#' @param nNeighbors The size of local neighborhood used for
+#'   manifold approximation. Larger values result in more global
+#'   views of the manifold, while smaller values result in more
+#'   local data being preserved. Default 30.
+#'   See `?uwot::umap` for more information.
+#' @param minDist The effective minimum distance between embedded points.
+#'   Smaller values will result in a more clustered/clumped
+#'   embedding where nearby points on the manifold are drawn
+#'   closer together, while larger values will result on a more
+#'   even dispersal of points. Default 0.2.
+#'   See `?uwot::umap` for more information.
+#' @param spread The effective scale of embedded points. In combination with
+#'   ‘min_dist’, this determines how clustered/clumped the
+#'   embedded points are. Default 1. See `?uwot::umap` for more information.
+#' @param pca Logical. Whether to perform
+#' dimensionality reduction with PCA before UMAP.
+#' @param initialDims Integer. Number of dimensions from PCA to use as
+#' input in UMAP. Default 50.
+#' @param cores Number of threads to use. Default 1.
+#' @param ... Other parameters to pass to `uwot::umap`.
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression.
 #' @examples
 #' data(celdaCSim, celdaCMod)
 #' umapRes <- celdaUmap(celdaCSim$counts, celdaCMod)
-#' @return A two column matrix of umap coordinates
+#' @return A two column matrix of UMAP coordinates
 #' @export
 setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     function(counts,
         celdaMod,
-        maxCells = 25000,
+        maxCells = NULL,
         minClusterSize = 100,
-        modules = NULL,
         seed = 12345,
-        umapConfig = umap::umap.defaults) {
+        nNeighbors = 30,
+        minDist = 0.75,
+        spread = 1,
+        pca = TRUE,
+        initialDims = 50,
+        cores = 1,
+        ...) {
 
         if (is.null(seed)) {
             res <- .celdaUmapC(counts = counts,
                 celdaMod = celdaMod,
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
-                modules = modules,
-                umapConfig = umapConfig)
+                nNeighbors = nNeighbors,
+                minDist = minDist,
+                spread = spread,
+                pca = pca,
+                initialDims = initialDims,
+                cores = cores,
+                ...)
         } else {
             with_seed(seed,
                 res <- .celdaUmapC(counts = counts,
                     celdaMod = celdaMod,
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
-                    modules = modules,
-                    umapConfig = umapConfig))
+                    nNeighbors = nNeighbors,
+                    minDist = minDist,
+                    spread = spread,
+                    pca = pca,
+                    initialDims = initialDims,
+                    cores = cores,
+                    ...))
         }
 
         return(res)
@@ -1180,36 +1206,48 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 
 .celdaUmapC <- function(counts,
     celdaMod,
-    maxCells = 25000,
+    maxCells = NULL,
     minClusterSize = 100,
-    modules = NULL,
-    umapConfig = umap::umap.defaults) {
+    nNeighbors = 30,
+    minDist = 0.2,
+    spread = 1,
+    pca = TRUE,
+    initialDims = 50,
+    cores = 1,
+    ...) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
         celdaMod,
         maxCells,
-        minClusterSize,
-        modules)
-    res <- .calculateUmap(preparedCountInfo$norm, umapConfig)
+        minClusterSize)
+    umapRes <- .calculateUmap(preparedCountInfo$norm,
+        nNeighbors = nNeighbors,
+        minDist = minDist,
+        spread = spread,
+        pca = pca,
+        initialDims = initialDims,
+        cores = cores,
+        ...)
+
     final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-    final[preparedCountInfo$cellIx, ] <- res
+    final[preparedCountInfo$cellIx, ] <- umapRes
     rownames(final) <- colnames(counts)
-    colnames(final) <- c("umap_1", "umap_2")
+    colnames(final) <- c("UMAP_1", "UMAP_2")
     return(final)
 }
 
 
 .prepareCountsForDimReductionCeldaC <- function(counts,
     celdaMod,
-    maxCells = 25000,
-    minClusterSize = 100,
-    modules = NULL) {
+    maxCells = NULL,
+    minClusterSize = 100) {
 
     counts <- .processCounts(counts)
     compareCountMatrix(counts, celdaMod)
 
     ## Checking if maxCells and minClusterSize will work
-    if ((maxCells < ncol(counts)) &
+    if (!is.null(maxCells)) {
+      if ((maxCells < ncol(counts)) &
             (maxCells / minClusterSize < params(celdaMod)$K)) {
 
         stop("Cannot distribute ",
@@ -1220,6 +1258,9 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
             minClusterSize,
             " cells per cluster. Try increasing 'maxCells' or decreasing",
             " 'minClusterSize'.")
+      }
+    } else {
+      maxCells <- ncol(counts)
     }
 
     ## Select a subset of cells to sample if greater than 'maxCells'

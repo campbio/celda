@@ -4,10 +4,10 @@
 \alias{plotDimReduceFeature}
 \title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
-plotDimReduceFeature(dim1, dim2, counts, features, normalize = TRUE,
-  exactMatch = TRUE, trim = c(-2, 2), size = 1,
-  xlab = "Dimension_1", ylab = "Dimension_2", colorLow = "grey",
-  colorMid = NULL, colorHigh = "blue")
+plotDimReduceFeature(dim1, dim2, counts, features, headers = NULL,
+  normalize = TRUE, exactMatch = TRUE, trim = c(-2, 2), size = 1,
+  xlab = "Dimension_1", ylab = "Dimension_2", colorLow = "blue",
+  colorMid = "white", colorHigh = "red")
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data
@@ -20,6 +20,9 @@ reduction output.}
 represent cells.}
 
 \item{features}{Character vector. Uses these genes for plotting.}
+
+\item{headers}{Character vector. If `NULL`, the corresponding rownames are
+used as labels. Otherwise, these headers are used to label the genes.}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`.
 Default TRUE.}
@@ -39,13 +42,13 @@ Set to NULL to disable. Default c(-2,2).}
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`. The color
-will be used to signify the lowest values on the scale. Default 'grey'.}
+will be used to signify the lowest values on the scale. Default 'blue'.}
 
 \item{colorMid}{Character. A color available from `colors()`. The color
-will be used to signify the midpoint on the scale.}
+will be used to signify the midpoint on the scale. Default 'white'.}
 
 \item{colorHigh}{Character. A color available from `colors()`. The color
-will be used to signify the highest values on the scale. Default 'blue'.}
+will be used to signify the highest values on the scale. Default 'red'.}
 }
 \value{
 The plot as a ggplot object

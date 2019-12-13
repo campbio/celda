@@ -67,6 +67,7 @@ colSums(simCounts$phi)
 colSums(simCounts$eta)
 ```
 
+
 # Decontamination using DecontX
 DecontX uses bayesian method to estimate and remove contamination via varitaional inference.
 
