@@ -410,6 +410,7 @@ plotDimReduceCluster <- function(dim1,
     labelClusters = FALSE,
     groupBy = NULL,
     labelSize = 3.5) {
+
     if (!is.null(groupBy)) {
         df <- data.frame(dim1, dim2, cluster, groupBy)
         colnames(df) <- c(xlab, ylab, "Cluster", "Sample")
@@ -417,13 +418,16 @@ plotDimReduceCluster <- function(dim1,
         df <- data.frame(dim1, dim2, cluster)
         colnames(df) <- c(xlab, ylab, "Cluster")
     }
+
     naIx <- is.na(dim1) | is.na(dim2)
     df <- df[!naIx, ]
     df[3] <- as.factor(df[[3]])
     clusterColors <- distinctColors(nlevels(as.factor(cluster)))
+
     if (!is.null(specificClusters)) {
         clusterColors[!levels(df[[3]]) %in% specificClusters] <- "gray92"
     }
+
     g <- ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
         ggplot2::geom_point(stat = "identity",
             size = size,
@@ -441,21 +445,23 @@ plotDimReduceCluster <- function(dim1,
         #centroidList <- lapply(seq(length(unique(cluster))), function(x) {
         centroidList <- lapply(unique(cluster), function(x) {
             df.sub <- df[df$Cluster == x, ]
-            median.1 <- stats::median(df.sub$Dimension_1)
-            median.2 <- stats::median(df.sub$Dimension_2)
+            median.1 <- stats::median(df.sub[, xlab])
+            median.2 <- stats::median(df.sub[, ylab])
             cbind(median.1, median.2, x)
         })
         centroid <- do.call(rbind, centroidList)
-        centroid <- as.data.frame(centroid)
+        centroid <- data.frame(Dimension_1 = as.numeric(centroid[, 1]),
+          Dimension_2 = as.numeric(centroid[, 2]),
+          Cluster = centroid[, 3])
 
-        colnames(centroid) <- c("Dimension_1", "Dimension_2", "Cluster")
+        colnames(centroid)[seq(2)] <- c(xlab, ylab)
         g <- g + ggplot2::geom_point(data = centroid,
-            mapping = ggplot2::aes_string(x = "Dimension_1",
-                y = "Dimension_2"),
+            mapping = ggplot2::aes_string(x = xlab,
+                y = ylab),
             size = 0,
             alpha = 0) +
             ggrepel::geom_text_repel(data = centroid,
-                mapping = ggplot2::aes_string(label = "Cluster"),
+                mapping = ggplot2::aes(label = Cluster),
                 size = labelSize)
     }
     if (!is.null(x = groupBy)) {
