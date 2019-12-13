@@ -750,7 +750,7 @@ addLogLikelihood <- function(llA, llB) {
                 # transitional z label
         cbZ <-
             as.integer(plyr::mapvalues(cbZ, from = levels(cbZ),
-                to = 1:length(levels(cbZ))))
+                to = seq(length(levels(cbZ)))))
 
 
         return(list(

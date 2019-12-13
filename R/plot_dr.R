@@ -17,8 +17,10 @@
 #'  The color will be used to signify the midpoint on the scale.
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
-#'   Default 'blue'.
+#'  Default 'blue'.
 #' @param varLabel Character vector. Title for the color legend.
+#' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+#'  number of columns for facet wrap.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the genes.
 #' @return The plot as a ggplot object
@@ -48,6 +50,7 @@ plotDimReduceGrid <- function(dim1,
     colorMid,
     colorHigh,
     varLabel,
+    ncol = NULL,
     headers = NULL) {
 
     df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
@@ -66,7 +69,6 @@ plotDimReduceGrid <- function(dim1,
             ggplot2::geom_point(stat = "identity",
                 size = size,
                 ggplot2::aes_string(color = varLabel)) +
-            ggplot2::facet_wrap(~ facet, labeller = headers) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(low = colorLow,
                 high = colorHigh,
@@ -79,6 +81,12 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
+        if (isFALSE(is.null(ncol))) {
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers,
+                ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~ facet, labeller = headers)
+        }
     } else {
         g <- ggplot2::ggplot(m,
             ggplot2::aes_string(x = xlab, y = ylab)) +
@@ -98,6 +106,11 @@ plotDimReduceGrid <- function(dim1,
                 panel.spacing = unit(0, "lines"),
                 panel.background = ggplot2::element_blank(),
                 axis.line = ggplot2::element_line(colour = "black"))
+        if (isFALSE(is.null(ncol))) {
+            g <- g + ggplot2::facet_wrap(~ facet, ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~ facet)
+        }
     }
     return(g)
 }
@@ -134,6 +147,8 @@ plotDimReduceGrid <- function(dim1,
 #'  will be used to signify the midpoint on the scale. Default 'white'.
 #' @param colorHigh Character. A color available from `colors()`. The color
 #'  will be used to signify the highest values on the scale. Default 'red'.
+#' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+#'  number of columns for facet wrap.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
@@ -160,7 +175,8 @@ plotDimReduceFeature <- function(dim1,
     ylab = "Dimension_2",
     colorLow = "blue",
     colorMid = "white",
-    colorHigh = "red") {
+    colorHigh = "red",
+    ncol = NULL) {
 
     if (isFALSE(is.null(headers))) {
         if (length(headers) != length(features)) {
@@ -250,6 +266,7 @@ plotDimReduceFeature <- function(dim1,
         colorMid,
         colorHigh,
         varLabel,
+        ncol,
         headers)
 }
 
@@ -283,6 +300,8 @@ plotDimReduceFeature <- function(dim1,
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #'  Default 'blue'.
+#' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+#'  number of columns for facet wrap.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
@@ -307,7 +326,8 @@ plotDimReduceModule <-
         ylab = "Dimension_2",
         colorLow = "grey",
         colorMid = NULL,
-        colorHigh = "blue") {
+        colorHigh = "blue",
+        ncol = NULL) {
 
         factorized <- factorizeMatrix(celdaMod = celdaMod,
             counts = counts)
@@ -344,7 +364,8 @@ plotDimReduceModule <-
             colorLow,
             colorMid,
             colorHigh,
-            varLabel)
+            varLabel,
+            ncol)
     }
 
 
@@ -368,6 +389,8 @@ plotDimReduceModule <-
 #'  If NULL, all clusters will be colored. Default NULL.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
+#' @param groupBy Character vector. Contains sample labels for each cell.
+#'  If NULL, all samples will be plotted together. Default NULL.
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
 #' @return The plot as a ggplot object
@@ -391,16 +414,26 @@ plotDimReduceCluster <- function(dim1,
     ylab = "Dimension_2",
     specificClusters = NULL,
     labelClusters = FALSE,
+    groupBy = NULL,
     labelSize = 3.5) {
-    df <- data.frame(dim1, dim2, cluster)
-    colnames(df) <- c(xlab, ylab, "Cluster")
+
+    if (!is.null(groupBy)) {
+        df <- data.frame(dim1, dim2, cluster, groupBy)
+        colnames(df) <- c(xlab, ylab, "Cluster", "Sample")
+    } else {
+        df <- data.frame(dim1, dim2, cluster)
+        colnames(df) <- c(xlab, ylab, "Cluster")
+    }
+
     naIx <- is.na(dim1) | is.na(dim2)
     df <- df[!naIx, ]
     df[3] <- as.factor(df[[3]])
     clusterColors <- distinctColors(nlevels(as.factor(cluster)))
+
     if (!is.null(specificClusters)) {
         clusterColors[!levels(df[[3]]) %in% specificClusters] <- "gray92"
     }
+
     g <- ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
         ggplot2::geom_point(stat = "identity",
             size = size,
@@ -418,22 +451,28 @@ plotDimReduceCluster <- function(dim1,
         #centroidList <- lapply(seq(length(unique(cluster))), function(x) {
         centroidList <- lapply(unique(cluster), function(x) {
             df.sub <- df[df$Cluster == x, ]
-            median.1 <- stats::median(df.sub$Dimension_1)
-            median.2 <- stats::median(df.sub$Dimension_2)
+            median.1 <- stats::median(df.sub[, xlab])
+            median.2 <- stats::median(df.sub[, ylab])
             cbind(median.1, median.2, x)
         })
         centroid <- do.call(rbind, centroidList)
-        centroid <- as.data.frame(centroid)
+        centroid <- data.frame(Dimension_1 = as.numeric(centroid[, 1]),
+          Dimension_2 = as.numeric(centroid[, 2]),
+          Cluster = centroid[, 3])
 
-        colnames(centroid) <- c("Dimension_1", "Dimension_2", "Cluster")
+        colnames(centroid)[seq(2)] <- c(xlab, ylab)
         g <- g + ggplot2::geom_point(data = centroid,
-            mapping = ggplot2::aes_string(x = "Dimension_1",
-                y = "Dimension_2"),
+            mapping = ggplot2::aes_string(x = xlab,
+                y = ylab),
             size = 0,
             alpha = 0) +
             ggrepel::geom_text_repel(data = centroid,
-                mapping = ggplot2::aes_string(label = "Cluster"),
+                mapping = ggplot2::aes(label = Cluster),
                 size = labelSize)
+    }
+    if (!is.null(x = groupBy)) {
+        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) +
+            theme(strip.background = element_blank())
     }
     return(g)
 }

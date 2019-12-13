@@ -755,7 +755,7 @@ vplayout <- function(x, y) {
         }
 
         # Omit border color if cell size is too small
-        if (mindim < 3){
+        if (mindim < 3) {
             borderColor <- NA
         }
 
@@ -898,8 +898,8 @@ vplayout <- function(x, y) {
         }
 
         # Draw annotation legend
-        annotation <- c(annotationCol[length(annotationCol):1],
-            annotationRow[length(annotationRow):1])
+        annotation <- c(annotationCol[seq(length(annotationCol), 1)],
+            annotationRow[seq(length(annotationRow), 1)])
         annotation <- annotation[unlist(lapply(annotation,
             function(x) !.is.na2(x)))]
 
@@ -1494,7 +1494,7 @@ vplayout <- function(x, y) {
 #'     clusteringDistanceCols = dcols)
 #'
 #' # Modify ordering of the clusters using clustering callback option
-#' callback = function(hc, mat){
+#' callback = function(hc, mat) {
 #'     sv = svd(t(mat))$v[, 1]
 #'     dend = reorder(as.dendrogram(hc), wts = sv)
 #'     as.hclust(dend)

@@ -1210,7 +1210,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_G"),
 
     if (is.null(maxCells) || maxCells > ncol(counts)) {
       maxCells <- ncol(counts)
-      cellIx <- 1:ncol(counts)
+      cellIx <- seq(ncol(counts))
     } else {
       cellIx <- sample(seq(ncol(counts)), maxCells)
     }
