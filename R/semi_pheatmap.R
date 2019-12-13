@@ -900,7 +900,6 @@ vplayout <- function(x, y) {
         # Draw annotation legend
         annotation <- c(annotationCol[seq(length(annotationCol), 1)],
             annotationRow[seq(length(annotationRow), 1)])
-
         annotation <- annotation[unlist(lapply(annotation,
             function(x) !.is.na2(x)))]
 
