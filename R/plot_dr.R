@@ -17,8 +17,10 @@
 #'  The color will be used to signify the midpoint on the scale.
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
-#'   Default 'blue'.
+#'  Default 'blue'.
 #' @param varLabel Character vector. Title for the color legend.
+#' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+#'  number of columns for facet wrap.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the genes.
 #' @return The plot as a ggplot object
@@ -145,6 +147,8 @@ plotDimReduceGrid <- function(dim1,
 #'  will be used to signify the midpoint on the scale. Default 'white'.
 #' @param colorHigh Character. A color available from `colors()`. The color
 #'  will be used to signify the highest values on the scale. Default 'red'.
+#' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+#'  number of columns for facet wrap.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
@@ -296,6 +300,8 @@ plotDimReduceFeature <- function(dim1,
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #'  Default 'blue'.
+#' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+#'  number of columns for facet wrap.
 #' @return The plot as a ggplot object
 #' @examples
 #' \donttest{
