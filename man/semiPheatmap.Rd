@@ -4,26 +4,58 @@
 \alias{semiPheatmap}
 \title{A function to draw clustered heatmaps.}
 \usage{
-semiPheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
-  "RdYlBu")))(100), kmeansK = NA, breaks = NA,
-  borderColor = "grey60", cellWidth = NA, cellHeight = NA,
-  scale = "none", clusterRows = TRUE, clusterCols = TRUE,
+semiPheatmap(
+  mat,
+  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
+  kmeansK = NA,
+  breaks = NA,
+  borderColor = "grey60",
+  cellWidth = NA,
+  cellHeight = NA,
+  scale = "none",
+  clusterRows = TRUE,
+  clusterCols = TRUE,
   clusteringDistanceRows = "euclidean",
-  clusteringDistanceCols = "euclidean", clusteringMethod = "complete",
-  clusteringCallback = .identity2, cutreeRows = NA, cutreeCols = NA,
+  clusteringDistanceCols = "euclidean",
+  clusteringMethod = "complete",
+  clusteringCallback = .identity2,
+  cutreeRows = NA,
+  cutreeCols = NA,
   treeHeightRow = ifelse(clusterRows, 50, 0),
-  treeHeightCol = ifelse(clusterCols, 50, 0), legend = TRUE,
-  legendBreaks = NA, legendLabels = NA, annotationRow = NA,
-  annotationCol = NA, annotation = NA, annotationColors = NA,
-  annotationLegend = TRUE, annotationNamesRow = TRUE,
-  annotationNamesCol = TRUE, dropLevels = TRUE, showRownames = TRUE,
-  showColnames = TRUE, main = NA, fontSize = 10,
-  fontSizeRow = fontSize, fontSizeCol = fontSize,
-  displayNumbers = FALSE, numberFormat = "\%.2f",
-  numberColor = "grey30", fontSizeNumber = 0.8 * fontSize,
-  gapsRow = NULL, gapsCol = NULL, labelsRow = NULL,
-  labelsCol = NULL, fileName = NA, width = NA, height = NA,
-  silent = FALSE, rowLabel, colLabel, ...)
+  treeHeightCol = ifelse(clusterCols, 50, 0),
+  legend = TRUE,
+  legendBreaks = NA,
+  legendLabels = NA,
+  annotationRow = NA,
+  annotationCol = NA,
+  annotation = NA,
+  annotationColors = NA,
+  annotationLegend = TRUE,
+  annotationNamesRow = TRUE,
+  annotationNamesCol = TRUE,
+  dropLevels = TRUE,
+  showRownames = TRUE,
+  showColnames = TRUE,
+  main = NA,
+  fontSize = 10,
+  fontSizeRow = fontSize,
+  fontSizeCol = fontSize,
+  displayNumbers = FALSE,
+  numberFormat = "\%.2f",
+  numberColor = "grey30",
+  fontSizeNumber = 0.8 * fontSize,
+  gapsRow = NULL,
+  gapsCol = NULL,
+  labelsRow = NULL,
+  labelsCol = NULL,
+  fileName = NA,
+  width = NA,
+  height = NA,
+  silent = FALSE,
+  rowLabel,
+  colLabel,
+  ...
+)
 }
 \arguments{
 \item{mat}{numeric matrix of the values to be plotted.}
@@ -276,7 +308,7 @@ pheatmap(test,
     clusteringDistanceCols = dcols)
 
 # Modify ordering of the clusters using clustering callback option
-callback = function(hc, mat){
+callback = function(hc, mat) {
     sv = svd(t(mat))$v[, 1]
     dend = reorder(as.dendrogram(hc), wts = sv)
     as.hclust(dend)

@@ -4,9 +4,15 @@
 \alias{plotDendro}
 \title{Plots dendrogram of `findMarkers` output}
 \usage{
-plotDendro(decisionTree, classLabel = NULL, addSensPrec = FALSE,
-  maxFeaturePrint = 4, leafSize = 24, boxSize = 7,
-  boxColor = "black")
+plotDendro(
+  decisionTree,
+  classLabel = NULL,
+  addSensPrec = FALSE,
+  maxFeaturePrint = 4,
+  leafSize = 24,
+  boxSize = 7,
+  boxColor = "black"
+)
 }
 \arguments{
 \item{decisionTree}{List object. The output of `celda::findMarkers`.}
