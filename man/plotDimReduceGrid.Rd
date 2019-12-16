@@ -44,9 +44,12 @@ The color will be used to signify the midpoint on the scale.}
 
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
- Default 'blue'.}
+Default 'blue'.}
 
 \item{varLabel}{Character vector. Title for the color legend.}
+
+\item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+number of columns for facet wrap.}
 
 \item{headers}{Character vector. If `NULL`, the corresponding rownames are
 used as labels. Otherwise, these headers are used to label the genes.}
