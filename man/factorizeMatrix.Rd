@@ -5,8 +5,11 @@
 \title{Generate factorized matrices showing each feature's influence on cell
  / gene clustering}
 \usage{
-factorizeMatrix(counts, celdaMod, type = c("counts", "proportion",
-  "posterior"))
+factorizeMatrix(
+  counts,
+  celdaMod,
+  type = c("counts", "proportion", "posterior")
+)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent

@@ -4,10 +4,23 @@
 \alias{plotDimReduceFeature}
 \title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
-plotDimReduceFeature(dim1, dim2, counts, features, headers = NULL,
-  normalize = TRUE, exactMatch = TRUE, trim = c(-2, 2), size = 1,
-  xlab = "Dimension_1", ylab = "Dimension_2", colorLow = "blue",
-  colorMid = "white", colorHigh = "red")
+plotDimReduceFeature(
+  dim1,
+  dim2,
+  counts,
+  features,
+  headers = NULL,
+  normalize = TRUE,
+  exactMatch = TRUE,
+  trim = c(-2, 2),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue",
+  colorMid = "white",
+  colorHigh = "red",
+  ncol = NULL
+)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data
@@ -49,6 +62,9 @@ will be used to signify the midpoint on the scale. Default 'white'.}
 
 \item{colorHigh}{Character. A color available from `colors()`. The color
 will be used to signify the highest values on the scale. Default 'red'.}
+
+\item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+number of columns for facet wrap.}
 }
 \value{
 The plot as a ggplot object

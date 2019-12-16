@@ -5,10 +5,21 @@
 \title{Plotting the Celda module probability on a
  dimensionality reduction plot}
 \usage{
-plotDimReduceModule(dim1, dim2, counts, celdaMod, modules = NULL,
-  rescale = TRUE, size = 1, xlab = "Dimension_1",
-  ylab = "Dimension_2", colorLow = "grey", colorMid = NULL,
-  colorHigh = "blue")
+plotDimReduceModule(
+  dim1,
+  dim2,
+  counts,
+  celdaMod,
+  modules = NULL,
+  rescale = TRUE,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "grey",
+  colorMid = NULL,
+  colorHigh = "blue",
+  ncol = NULL
+)
 }
 \arguments{
 \item{dim1}{Numeric vector.
@@ -45,6 +56,9 @@ The color will be used to signify the midpoint on the scale.}
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
 Default 'blue'.}
+
+\item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+number of columns for facet wrap.}
 }
 \value{
 The plot as a ggplot object
