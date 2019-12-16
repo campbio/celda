@@ -62,6 +62,9 @@ will be used to signify the midpoint on the scale. Default 'white'.}
 
 \item{colorHigh}{Character. A color available from `colors()`. The color
 will be used to signify the highest values on the scale. Default 'red'.}
+
+\item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
+number of columns for facet wrap.}
 }
 \value{
 The plot as a ggplot object
