@@ -177,21 +177,35 @@ simulateContaminatedMatrix <- function(C = 300,
     delta) {
     ## Notes: use fix-point iteration to update prior for theta, no need
     ## to feed delta anymore
+
     logPr <- log(t(phi)[z, ] + 1e-20) + log(theta + 1e-20)
     logPc <- log(t(eta)[z, ] + 1e-20) + log(1 - theta + 1e-20)
+#    Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
+#print(head(logPr[1:5,1:5]))    
+#    logPr <- t(log(phi + 1e-20)[,z]) + log(theta + 1e-20)
+#    logPc <- t(log(eta + 1e-20)[,z]) + log(1 - theta + 1e-20)
+#print(head(logPr1[1:5,1:5]))        
+    Pr.e <- exp(logPr)
+    Pc.e <- exp(logPc)
+    Pr <- Pr.e / (Pr.e + Pc.e)
+#    Pc <- 1 - Pr
+#    deltaV2 <- MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
 
-    Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
-    Pc <- 1 - Pr
-    deltaV2 <-
-        MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
-
-    estRmat <- t(Pr) * counts
+    estRmat <- t(Pr) * counts 
+#    estRmat <- counts * Pr
     rnGByK <- .colSumByGroupNumeric(estRmat, z, K)
     cnGByK <- rowSums(rnGByK) - rnGByK
 
+    counts.cs = colSums(counts)
+    estRmat.cs <- colSums(estRmat) 
+    estRmat.cs.n <- estRmat.cs / counts.cs
+    estCmat.cs.n <- 1 - estRmat.cs.n
+    temp <- cbind(estRmat.cs.n, estCmat.cs.n)
+    deltaV2 <- MCMCprecision::fit_dirichlet(temp)$alpha
+
     ## Update parameters
     theta <-
-        (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
+        (estRmat.cs + deltaV2[1]) / (counts.cs + sum(deltaV2))
     phi <- normalizeCounts(rnGByK,
         normalize = "proportion",
         pseudocountNormalize = 1e-20)
