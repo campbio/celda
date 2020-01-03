@@ -1,7 +1,6 @@
-// [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
-using namespace Rcpp;
-
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace Rcpp; using namespace arma;
 
 // [[Rcpp::export]]
 Rcpp::List decontXEM(const arma::sp_mat& counts,

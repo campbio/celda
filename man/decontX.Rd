@@ -10,6 +10,7 @@ decontX(
   batch = NULL,
   maxIter = 200,
   delta = 10,
+  convergence = 0.01,
   logfile = NULL,
   verbose = TRUE,
   varGenes = NULL,
