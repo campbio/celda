@@ -218,3 +218,71 @@ Rcpp::List decontXInitialize(const arma::sp_mat& counts,
 
 }  
 
+
+
+
+// [[Rcpp::export]]
+arma::sp_mat calculateNativeMatrix(const arma::sp_mat& counts,
+                     const arma::sp_mat& native_counts,
+                     const NumericVector& theta,
+                     const NumericMatrix& eta,
+                     const NumericMatrix& phi,
+                     const IntegerVector& z,
+                     const IntegerVector row_index,
+                     const IntegerVector col_index,
+                     const double& pseudocount) {
+
+  // Perform error checking
+  if(counts.n_cols != theta.size()) {
+    stop("Length of 'theta' must be equal to the number of columns in 'counts'.");
+  }
+  if(counts.n_cols != z.size()) {
+    stop("Length of 'z' must be equal to the number of columns in 'counts'.");
+  }  
+  if(counts.n_rows != phi.nrow()) {
+    stop("The number of rows in 'phi' must be equal to the number of rows in 'counts'.");
+  }
+  if(counts.n_rows != eta.nrow()) {
+    stop("The number of rows in 'eta' must be equal to the number of rows in 'counts'.");
+  }
+  if(phi.ncol() != eta.ncol()) {
+    stop("The number of columns in 'eta' must be equal to the number of columns in 'phi'.");
+  }
+  if(min(z) < 1 || max(z) > eta.ncol()) {
+    stop("The entries in 'z' need to be between 1 and the number of columns in eta and phi.");
+  }
+  if(max(row_index) - 1 > native_counts.n_rows || min(row_index) < 0) {
+    stop("The entries in 'row_index' need to be less than 'nrow(native_counts)' and greater than 0.");
+  }
+  if(max(col_index) - 1 > native_counts.n_cols || min(col_index) < 0) {
+    stop("The entries in 'row_index' need to be less than 'ncol(native_counts)' and greater than 0.");
+  }
+
+  arma::sp_mat native_matrix = native_counts;
+  
+  int i;
+  int j;
+  int k; 
+  double x; 
+  double pcontamin;
+  double pnative;
+  double normp;
+  for (arma::sp_mat::const_iterator it = counts.begin(); it != counts.end(); ++it) {
+    i = it.row();
+    j = it.col();
+    x = *it;
+    k = z[j] - 1;
+    
+    // Calculate variational probabilities 
+    pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
+    pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
+    
+    // Normalize probabilities and add to proper components
+    normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
+    native_matrix.at(row_index(i) - 1, col_index(j) - 1) = normp * x;
+  }
+  
+  return native_matrix;
+}
+
+

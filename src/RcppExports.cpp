@@ -54,6 +54,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calculateNativeMatrix
+arma::sp_mat calculateNativeMatrix(const arma::sp_mat& counts, const arma::sp_mat& native_counts, const NumericVector& theta, const NumericMatrix& eta, const NumericMatrix& phi, const IntegerVector& z, const IntegerVector row_index, const IntegerVector col_index, const double& pseudocount);
+RcppExport SEXP _celda_calculateNativeMatrix(SEXP countsSEXP, SEXP native_countsSEXP, SEXP thetaSEXP, SEXP etaSEXP, SEXP phiSEXP, SEXP zSEXP, SEXP row_indexSEXP, SEXP col_indexSEXP, SEXP pseudocountSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type native_counts(native_countsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type z(zSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type row_index(row_indexSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type col_index(col_indexSEXP);
+    Rcpp::traits::input_parameter< const double& >::type pseudocount(pseudocountSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculateNativeMatrix(counts, native_counts, theta, eta, phi, z, row_index, col_index, pseudocount));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cG_calcGibbsProbY_Simple
 NumericVector cG_calcGibbsProbY_Simple(const IntegerMatrix counts, IntegerVector nGbyTS, IntegerMatrix nTSbyC, IntegerVector nbyTS, IntegerVector nbyG, const IntegerVector y, const int L, const int index, const double gamma, const double beta, const double delta);
 RcppExport SEXP _celda_cG_calcGibbsProbY_Simple(SEXP countsSEXP, SEXP nGbyTSSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP indexSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP deltaSEXP) {
@@ -205,6 +224,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_decontXEM", (DL_FUNC) &_celda_decontXEM, 7},
     {"_celda_decontXLogLik", (DL_FUNC) &_celda_decontXLogLik, 6},
     {"_celda_decontXInitialize", (DL_FUNC) &_celda_decontXInitialize, 4},
+    {"_celda_calculateNativeMatrix", (DL_FUNC) &_celda_calculateNativeMatrix, 9},
     {"_celda_cG_calcGibbsProbY_Simple", (DL_FUNC) &_celda_cG_calcGibbsProbY_Simple, 11},
     {"_celda_cG_CalcGibbsProbY_ori", (DL_FUNC) &_celda_cG_CalcGibbsProbY_ori, 13},
     {"_celda_cG_CalcGibbsProbY_fastRow", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fastRow, 13},

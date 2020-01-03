@@ -305,7 +305,7 @@ decontX <- function(counts,
     batch = NULL,
     maxIter = 200,
     delta = 10,
-    convergence = 0.01,    
+    convergence = 0.001,    
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
@@ -349,7 +349,7 @@ decontX <- function(counts,
     batch = NULL,
     maxIter = 200,
     delta = 10,
-    convergence = 0.01,    
+    convergence = 0.001,    
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
@@ -379,6 +379,7 @@ decontX <- function(counts,
     ## Empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
     totalGenes <- nrow(counts)
+    totalCells <- ncol(counts)
     noneEmptyGeneIndex <- Matrix::rowSums(counts) != 0
     geneNames <- rownames(counts)
     if (sum(noneEmptyGeneIndex) != totalGenes) {
@@ -388,16 +389,19 @@ decontX <- function(counts,
 
     nC <- ncol(counts)
     allCellNames <- colnames(counts)
+
+    estRmat <- Matrix::Matrix(
+      data = 0,
+      ncol = totalCells,
+      nrow = totalGenes,
+      sparse = TRUE,
+      dimnames = list(geneNames, allCellNames)
+    )
     
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
-#        estRmat <- matrix(
-#            0,
-#            ncol = ncol(counts),
-#            nrow = totalGenes,
-#            dimnames = list(geneNames, allCellNames)
-#        )
+        
         theta <- rep(NA, nC)
         estConp <- rep(NA, nC)
         returnZ <- rep(NA, nC)
@@ -433,13 +437,24 @@ decontX <- function(counts,
                 L = L
             )
 
-            if (haveEmptyGenes) {
-                estRmat[noneEmptyGeneIndex, batch == bat] <-
-                    resBat$resList$estNativeCounts
-            } else {
-                estRmat[, batch == bat] <-
-                    resBat$resList$estNativeCounts
-            }
+#            if (haveEmptyGenes) {
+#                estRmat[cbind(which(noneEmptyGeneIndex), which(batch == bat))] <-
+#                    resBat$resList$estNativeCounts
+#            } else {
+#                estRmat[cbind(seq(nrow(counts)), which(batch == bat))] <-
+#                    resBat$resList$estNativeCounts
+#            }
+            estRmat <- calculateNativeMatrix(
+              counts = countsBat,
+              native_counts = estRmat,
+              theta = resBat$resList$theta,
+              eta = resBat$resList$eta,
+              row_index = which(noneEmptyGeneIndex),
+              col_index = which(batch == bat),
+              phi = resBat$resList$phi,
+              z = as.integer(resBat$runParams$z),
+              pseudocount = 1e-20)
+               
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
             returnZ[batch == bat] <- resBat$runParams$z
@@ -482,12 +497,29 @@ decontX <- function(counts,
             dbscanEps = dbscanEps,
             L = L
         )
-        if (haveEmptyGenes) {
-            resBat <- matrix(0, nrow = totalGenes, ncol = nC,
-                dimnames = list(geneNames, allCellNames))
-            resBat[noneEmptyGeneIndex, ] <- returnResult$resList$estNativeCounts
-            returnResult$resList$estNativeCounts <- resBat
-        }
+#        if (haveEmptyGenes) {
+#            resBat <- matrix(0, nrow = totalGenes, ncol = nC,
+#                dimnames = list(geneNames, allCellNames))
+#            ix <- rep(which(noneEmptyGeneIndex), nC)
+#            jx <- rep(seq(nC), sum(noneEmptyGeneIndex))
+#            resBat <- sparseMatrix(i=ix, j=jx,
+#                x = returnResult$resList$estNativeCounts@x,
+#                dims = c(totalGenes, nC),
+#                dimnames = list(geneNames, allCellNames))
+#            resBat[cbind(which(noneEmptyGeneIndex), seq(nC))] <- returnResult$resList$estNativeCounts
+
+        estRmat <- calculateNativeMatrix(
+          counts = counts,
+          native_counts = estRmat,
+          theta = returnResult$resList$theta,
+          eta = returnResult$resList$eta,
+          row_index = which(noneEmptyGeneIndex),
+          col_index = seq(totalCells),
+          phi = returnResult$resList$phi,
+          z = as.integer(returnResult$runParams$z),
+          pseudocount = 1e-20)
+          returnResult$resList$estNativeCounts <- estRmat
+#        }
     }
 
     endTime <- Sys.time()
@@ -701,7 +733,9 @@ decontX <- function(counts,
         "estNativeCounts" = nextDecon$estRmat,
         "estConp" = resConp,
         "theta" = theta,
-        "delta" = delta
+        "delta" = delta,
+        "phi" = phi,        
+        "eta" = eta
     )
 
     return(list(
