@@ -60,8 +60,11 @@ a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 }
 \value{
-A list object which contains the decontaminated count matrix and
- related parameters.
+List. 'decontX_counts' contains the decontaminated count matrix
+'contamination' contains the per-cell contamination estimates.
+'batchEstimates' contains the estimated probability distributions
+for each batch. 'z' contains the cell cluster labels. 'runParams'
+contains a list of arguments used in this function.
 }
 \description{
 Identifies contamination in single cell datasets.

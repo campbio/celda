@@ -272,9 +272,6 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param delta Numeric. Symmetric Dirichlet concentration parameter
 #' for Theta. Default 10.
-#' @param logfile Character. Messages will be redirected to a file named
-#'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
-#' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param varGenes Integer. The number of variable genes to use in
 #' Celda clustering. Variability is calcualted using \link[scran]{modelGeneVar}. 
 #' Used only when z is not provided. Default 5000.
@@ -287,8 +284,15 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @return A list object which contains the decontaminated count matrix and
-#'  related parameters.
+#' @param logfile Character. Messages will be redirected to a file named
+#'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#' @param verbose Logical. Whether to print log messages. Default TRUE.
+#' @return List. 'decontX_counts' contains the decontaminated count matrix
+#' 'contamination' contains the per-cell contamination estimates.
+#' 'batchEstimates' contains the estimated probability distributions
+#' for each batch. 'z' contains the cell cluster labels. 'runParams'
+#' contains a list of arguments used in this function.
+#' 
 #' @examples
 #'  s <- simulateContaminatedMatrix()
 #'  result <- decontX(s$observedCounts, s$z)
@@ -366,6 +370,17 @@ decontX <- function(counts,
         append = TRUE,
         verbose = verbose)
 
+    runParams <- list(
+        batch = batch,
+        maxIter = maxIter,
+        delta = delta,
+        convergence = convergence,
+        varGenes = varGenes,
+        L = L,
+        dbscanEps = dbscanEps,
+        logfile = logfile,
+        verbose = verbose)
+
     # Convert to sparse matrix
     # After Celda can run on sparse matrix,
     # then we can just have this be required
@@ -386,6 +401,7 @@ decontX <- function(counts,
     nC <- ncol(counts)
     allCellNames <- colnames(counts)
 
+    ## Set up final deconaminated matrix
     estRmat <- Matrix::Matrix(
       data = 0,
       ncol = totalCells,
@@ -394,108 +410,141 @@ decontX <- function(counts,
       dimnames = list(geneNames, allCellNames)
     )
 
-    if (!is.null(batch)) {
-        ## Set result lists upfront for all cells from different batches
-        logLikelihood <- c()
-
-        theta <- rep(NA, nC)
-        estConp <- rep(NA, nC)
-        returnZ <- rep(NA, nC)
-
-        batchIndex <- unique(batch)
-
-        for (bat in batchIndex) {
-            .logMessages(
-                date(),
-                ".. Analyzing cells in batch",
-                bat,
-                logfile = logfile,
-                append = TRUE,
-                verbose = verbose
-            )
-
-            zBat <- NULL
-            countsBat <- counts[, batch == bat]
-            if (!is.null(z)) {
-                zBat <- z[batch == bat]
-            }
-            resBat <- .decontXoneBatch(
-                counts = countsBat,
-                z = zBat,
-                batch = bat,
-                maxIter = maxIter,
-                delta = delta,
-                convergence = convergence,
-                logfile = logfile,
-                verbose = verbose,
-                varGenes = varGenes,
-                dbscanEps = dbscanEps,
-                L = L
-            )
-
-            estRmat <- calculateNativeMatrix(
-              counts = countsBat,
-              native_counts = estRmat,
-              theta = resBat$resList$theta,
-              eta = resBat$resList$eta,
-              row_index = which(noneEmptyGeneIndex),
-              col_index = which(batch == bat),
-              phi = resBat$resList$phi,
-              z = as.integer(resBat$runParams$z),
-              pseudocount = 1e-20)
-
-            estConp[batch == bat] <- resBat$resList$estConp
-            theta[batch == bat] <- resBat$resList$theta
-            returnZ[batch == bat] <- resBat$runParams$z
-
-            if (is.null(logLikelihood)) {
-                logLikelihood <- resBat$resList$logLikelihood
-            } else {
-                logLikelihood <- addLogLikelihood(logLikelihood,
-                    resBat$resList$logLikelihood)
-            }
-        }
-
-        runParams <- resBat$runParams
-        ## All batches share the same other parameters except cluster label z
-        ## So update z in the final returned result
-        runParams$z <- returnZ
-        method <- resBat$method
-
-        returnResult <- list(
-            "runParams" = runParams,
-            "logLikelihood" = logLikelihood,
-            "decontX_counts" = estRmat,
-            "contamination" = estConp,
-            "theta" = theta
-        )
-    } else { ## When there is only one batch
-        returnResult <- .decontXoneBatch(
-            counts = counts,
-            z = z,
-            maxIter = maxIter,
-            delta = delta,
-            convergence = convergence,
-            logfile = logfile,
-            verbose = verbose,
-            varGenes = varGenes,
-            dbscanEps = dbscanEps,
-            L = L
-        )
-
-        estRmat <- calculateNativeMatrix(
-          counts = counts,
-          native_counts = estRmat,
-          theta = returnResult$theta,
-          eta = returnResult$eta,
-          row_index = which(noneEmptyGeneIndex),
-          col_index = seq(totalCells),
-          phi = returnResult$phi,
-          z = as.integer(returnResult$runParams$z),
-          pseudocount = 1e-20)
-          
-          returnResult$decontX_counts <- estRmat
+    ## Generate batch labels if none were supplied
+    if (is.null(batch)) {
+      batch <- rep("all", nC)
     }
+	batchIndex <- unique(batch)
+	
+	## Set result lists upfront for all cells from different batches
+	logLikelihood <- c()
+	estConp <- rep(NA, nC)
+	returnZ <- rep(NA, nC)
+    resBatch <- list()
+    
+    ## Cycle through each sample/batch and run DecontX
+	for (bat in batchIndex) {
+	
+	  if(length(batchIndex) == 1) {
+        .logMessages(
+		  date(),
+		  ".. Analyzing all cells",
+		  logfile = logfile,
+		  append = TRUE,
+		  verbose = verbose
+	    )	  
+	  } else {
+        .logMessages(
+		  date(),
+		  ".. Analyzing cells in batch",
+		  bat,
+		  logfile = logfile,
+		  append = TRUE,
+		  verbose = verbose
+	    )
+	  }  
+
+	  zBat <- NULL
+	  countsBat <- counts[, batch == bat]
+	  if (!is.null(z)) {
+		  zBat <- z[batch == bat]
+	  }
+	  res <- .decontXoneBatch(
+		  counts = countsBat,
+		  z = zBat,
+		  batch = bat,
+		  maxIter = maxIter,
+		  delta = delta,
+		  convergence = convergence,
+		  logfile = logfile,
+		  verbose = verbose,
+		  varGenes = varGenes,
+		  dbscanEps = dbscanEps,
+		  L = L
+	  )
+
+	  estRmat <- calculateNativeMatrix(
+		  counts = countsBat,
+		  native_counts = estRmat,
+		  theta = res$theta,
+		  eta = res$eta,
+		  row_index = which(noneEmptyGeneIndex),
+		  col_index = which(batch == bat),
+		  phi = res$phi,
+		  z = as.integer(res$z),
+		  pseudocount = 1e-20
+	  )
+
+	  resBatch[[bat]] <- list(
+	      z = res$z,
+		  phi = res$phi,
+		  eta = res$eta,
+		  delta = res$delta,
+		  theta = res$theta,
+		  logLikelihood = res$logLikelihood,
+		  UMAP = res$UMAP,
+		  z = res$z,
+		  iteration = res$iteration
+	  )
+	 
+	  estConp[batch == bat] <- res$contamination
+	  if(length(batchIndex) > 1) {
+	    returnZ[batch == bat] <- paste0(bat, "-", res$z)
+	  } else {
+	    returnZ[batch == bat] <- res$z
+	  }  
+
+#		if (is.null(logLikelihood)) {
+#			logLikelihood <- resBat$resList$logLikelihood
+#		} else {
+#			logLikelihood <- addLogLikelihood(logLikelihood,
+#				resBat$resList$logLikelihood)
+#		}
+	}
+    names(resBatch) <- batchIndex
+    
+#	runParams <- res$runParams
+	## All batches share the same other parameters except cluster label z
+	## So update z in the final returned result
+#	runParams$z <- returnZ
+#	method <- res$method
+        
+	returnResult <- list(
+		"runParams" = runParams,
+		"batchEstimates" = resBatch,
+		"decontX_counts" = estRmat,
+		"contamination" = estConp,
+		"z" = returnZ
+	)
+
+
+#    } else { ## When there is only one batch
+#        returnResult <- .decontXoneBatch(
+#            counts = counts,
+#            z = z,
+#            maxIter = maxIter,
+#            delta = delta,
+#            convergence = convergence,
+#            logfile = logfile,
+#            verbose = verbose,
+#            varGenes = varGenes,
+#            dbscanEps = dbscanEps,
+#            L = L
+#        )
+
+#        estRmat <- calculateNativeMatrix(
+#          counts = counts,
+#          native_counts = estRmat,
+#          theta = returnResult$theta,
+#          eta = returnResult$eta,
+#          row_index = which(noneEmptyGeneIndex),
+#          col_index = seq(totalCells),
+#          phi = returnResult$phi,
+#          z = as.integer(returnResult$runParams$z),
+#          pseudocount = 1e-20)
+          
+#          returnResult$decontX_counts <- estRmat
+#    }
 
     endTime <- Sys.time()
     .logMessages(paste(rep("-", 50), collapse = ""),
@@ -695,32 +744,20 @@ decontX <- function(counts,
         }
     }
 
-
 #    resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
     resConp <- nextDecon$contamination
     names(resConp) <- colnames(counts)
 
-    if (!is.null(batch)) {
-        batchMessage <- paste(" ", "in batch ", batch, ".", sep = "")
-    } else {
-        batchMessage <- "."
-    }
-
-    runParams <- list("deltaInit" = deltaInit,
-        "iteration" = iter - 1L,
-        "z" = z)
-    if (!is.null(umap)) {
-      runParams[["UMAP"]] <- umap
-    }
-
     return(list(
-        "runParams" = runParams,
         "logLikelihood" = ll,
         "contamination" = resConp,
         "theta" = theta,
         "delta" = delta,
         "phi" = phi,
-        "eta" = eta
+        "eta" = eta,
+        "UMAP" = umap,
+        "iteration" = iter - 1L,
+        "z" = z
     ))
 }
 
