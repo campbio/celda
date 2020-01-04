@@ -561,6 +561,7 @@ decontX <- function(counts,
     nC <- ncol(counts)
     deconMethod <- "clustering"
 
+    umap <- NULL
     if (is.null(z)) {
         .logMessages(
             date(),
@@ -576,11 +577,16 @@ decontX <- function(counts,
         dbscanEps <- .processdbscanEps(dbscanEps)
         L <- .processL(L)
 
-        z <- .decontxInitializeZ(object = counts,
+        celda.init <- .decontxInitializeZ(object = counts,
             varGenes = varGenes,
             dbscanEps = dbscanEps,
             verbose = verbose,
             logfile = logfile)
+        z <- celda.init$z
+        umap <- celda.init$umap
+        colnames(umap) <- c("DecontX_UMAP_1",
+                            "DecontX_UMAP_2") 
+        rownames(umap) <- colnames(counts)
     }
 
     z <- .processCellLabels(z, numCells = nC)
@@ -727,7 +733,10 @@ decontX <- function(counts,
     runParams <- list("deltaInit" = deltaInit,
         "iteration" = iter - 1L,
         "z" = z)
-
+    if(!is.null(umap)) {
+      runParams[["UMAP"]] <- umap
+    }
+    
     resList <- list(
         "logLikelihood" = ll,
         "estNativeCounts" = nextDecon$estRmat,
@@ -828,10 +837,14 @@ addLogLikelihood <- function(llA, llB) {
         } else if (nrow(sce) > varGenes) {
         ## Use the top most variable genes to do rough clustering
         ## (celda_CG & Louvian graph algorithm)
-            mvTrend <- scran::trendVar(sce, use.spikes = FALSE)
-            decomposeTrend <- scran::decomposeVar(sce, mvTrend)
-            topVariableGenes <- order(decomposeTrend$bio,
-                decreasing = TRUE)[seq(varGenes)]
+            #mvTrend <- scran::trendVar(sce, use.spikes = FALSE)
+            #decomposeTrend <- scran::decomposeVar(sce, mvTrend)
+            #topVariableGenes <- order(decomposeTrend$bio,
+            #    decreasing = TRUE)[seq(varGenes)]
+            
+            sce.var <- scran::modelGeneVar(sce)
+            topVariableGenes <- order(sce.var$bio,
+                 decreasing = TRUE)[seq(varGenes)]
         }
         countsFiltered <- as.matrix(SingleCellExperiment::counts(
             sce[topVariableGenes, ]))
@@ -885,12 +898,13 @@ addLogLikelihood <- function(llA, llB) {
         # Use dbSCAN on the UMAP to identify broad cell types
         totalClusters <- 1
         while (totalClusters <= 1 & dbscanEps > 0) {
-        resDbscan <- dbscan::dbscan(resUmap, dbscanEps)
-        dbscanEps <- dbscanEps - (0.25 * dbscanEps)
-        totalClusters <- length(unique(resDbscan$cluster))
+          resDbscan <- dbscan::dbscan(resUmap, dbscanEps)
+          dbscanEps <- dbscanEps - (0.25 * dbscanEps)
+          totalClusters <- length(unique(resDbscan$cluster))
         }
 
-        return("z" = resDbscan$cluster)
+        return(list("z" = resDbscan$cluster,
+                    "umap" = resUmap))
     }
 
 
