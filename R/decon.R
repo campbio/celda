@@ -257,60 +257,56 @@ simulateContaminatedMatrix <- function(C = 300,
     }
 
 
-#' @title Decontaminate count matrix
-#' @description This function updates decontamination on dataset with multiple
-#'  batches.
-#' @param counts Numeric/Integer matrix. Observed count matrix, rows represent
+#' @title DecontX
+#' @description Identifies contamination in single cell datasets.
+#' @param counts Numeric matrix. Observed count matrix, rows represent
 #'  features and columns represent cells.
-#' @param z Integer vector. Cell population labels. Default NULL.
-#' @param batch Integer vector. Cell batch labels. Default NULL.
-#' @param maxIter Integer. Maximum iterations of EM algorithm. Default to be
-#'  200.
-#' @param delta Numeric. Symmetric concentration parameter for Theta. Default
-#'  to be 10.
+#' @param z Integer vector. Cell cluster labels. If NULL, Celda will be used
+#' to reduce the dimensionality of the dataset to 'L' modules, \link[uwot]{umap}
+#' will be used to further reduce the dataset to 2 dimenions and
+#' \link[dbscan]{dbscan} will be used to identify clusters of broad cell types.
+#' Default NULL.
+#' @param batch Integer vector. Batch labels for cells. If batch labels 
+#' are supplied, DecontX is run on cells from each batch separately.
+#' Default NULL.
+#' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
+#' @param delta Numeric. Symmetric Dirichlet concentration parameter
+#' for Theta. Default 10.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @param varGenes Positive Integer. Used only when z is not provided.
-#' Need to be larger than 1. Default value is 5000 if not provided.
-#' varGenes, being the number of most variable genes, is used to filter genes
-#' based on the variability of gene's expression cross cells. While the
-#' variability is calcualted using scran::trendVar() and scran::decomposeVar().
-#' @param L Positive Integer. Used only when z is not provided.
-#' Need to be larger than 1. Default value is 50 if not provided.
-#' L, being the number of gene modules, is used on celda_CG clustering
-#' to collapse genes into gene modules.
-#' @param dbscanEps Numeric. Used only when z is not provided.
-#' Need to be non-negative. Default is 1.0 if not provided.
-#' dbscanEps is the clustering resolution parameter that is used to feed into
-#' dbscan::dbscan() to estimate broad cell clusters.
+#' @param varGenes Integer. The number of variable genes to use in
+#' Celda clustering. Variability is calcualted using \link[scran]{modelGeneVar}. 
+#' Used only when z is not provided. Default 5000.
+#' @param L Integer. Number of modules for Celda clustering. Used to reduce
+#' the dimensionality of the dataset before applying UMAP and dbscan.
+#' Used only when z is not provided. Default 50.
+#' @param dbscanEps Numeric. The clustering resolution parameter
+#' used in \link[dbscan]{dbscan} to estimate broad cell clusters.
+#' Used only when z is not provided. Default 1.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @return A list object which contains the decontaminated count matrix and
 #'  related parameters.
 #' @examples
-#' data(contaminationSim)
-#' deconC <- decontX(
-#'   counts = contaminationSim$rmat + contaminationSim$cmat,
-#'   z = contaminationSim$z, maxIter = 3
-#' )
-#' deconBg <- decontX(
-#'   counts = contaminationSim$rmat + contaminationSim$cmat,
-#'   maxIter = 3
-#' )
+#'  s <- simulateContaminatedMatrix()
+#'  res <- decontX(s$observedCounts, s$z)
+#'  contamination <- colSums(s$observedCounts - s$nativeCounts) /
+#'                     colSums(s$observedCounts)
+#'  plot(contamination, res$resList$estConp)
 #' @export
 decontX <- function(counts,
     z = NULL,
     batch = NULL,
-    maxIter = 200,
+    maxIter = 500,
     delta = 10,
     convergence = 0.001,
     logfile = NULL,
     verbose = TRUE,
-    varGenes = NULL,
-    L = NULL,
-    dbscanEps = NULL,
+    varGenes = 5000,
+    L = 50,
+    dbscanEps = 1,
     seed = 12345) {
 
     if (is.null(seed)) {
@@ -567,7 +563,7 @@ decontX <- function(counts,
         z <- celda.init$z
         umap <- celda.init$umap
         colnames(umap) <- c("DecontX_UMAP_1",
-                            "DecontX_UMAP_2") 
+                            "DecontX_UMAP_2")
         rownames(umap) <- colnames(counts)
     }
 
@@ -715,10 +711,10 @@ decontX <- function(counts,
     runParams <- list("deltaInit" = deltaInit,
         "iteration" = iter - 1L,
         "z" = z)
-    if(!is.null(umap)) {
+    if (!is.null(umap)) {
       runParams[["UMAP"]] <- umap
     }
-    
+
     resList <- list(
         "logLikelihood" = ll,
         "estNativeCounts" = nextDecon$estRmat,
@@ -823,7 +819,7 @@ addLogLikelihood <- function(llA, llB) {
             #decomposeTrend <- scran::decomposeVar(sce, mvTrend)
             #topVariableGenes <- order(decomposeTrend$bio,
             #    decreasing = TRUE)[seq(varGenes)]
-            
+
             sce.var <- scran::modelGeneVar(sce)
             topVariableGenes <- order(sce.var$bio,
                  decreasing = TRUE)[seq(varGenes)]
