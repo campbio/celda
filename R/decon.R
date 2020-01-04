@@ -461,17 +461,13 @@ decontX <- function(counts,
         ## So update z in the final returned result
         runParams$z <- returnZ
         method <- resBat$method
-        resList <- list(
-            "logLikelihood" = logLikelihood,
-            "estNativeCounts" = estRmat,
-            "estConp" = estConp,
-            "theta" = theta
-        )
 
         returnResult <- list(
             "runParams" = runParams,
-            "resList" = resList,
-            "method" = method
+            "logLikelihood" = logLikelihood,
+            "decontX_counts" = estRmat,
+            "contamination" = estConp,
+            "theta" = theta
         )
     } else { ## When there is only one batch
         returnResult <- .decontXoneBatch(
@@ -490,14 +486,15 @@ decontX <- function(counts,
         estRmat <- calculateNativeMatrix(
           counts = counts,
           native_counts = estRmat,
-          theta = returnResult$resList$theta,
-          eta = returnResult$resList$eta,
+          theta = returnResult$theta,
+          eta = returnResult$eta,
           row_index = which(noneEmptyGeneIndex),
           col_index = seq(totalCells),
-          phi = returnResult$resList$phi,
+          phi = returnResult$phi,
           z = as.integer(returnResult$runParams$z),
           pseudocount = 1e-20)
-          returnResult$resList$estNativeCounts <- estRmat
+          
+          returnResult$decontX_counts <- estRmat
     }
 
     endTime <- Sys.time()
@@ -539,6 +536,7 @@ decontX <- function(counts,
     nC <- ncol(counts)
     deconMethod <- "clustering"
 
+    ## Generate cell cluster labels if none are provided
     umap <- NULL
     if (is.null(z)) {
         .logMessages(
@@ -715,19 +713,14 @@ decontX <- function(counts,
       runParams[["UMAP"]] <- umap
     }
 
-    resList <- list(
+    return(list(
+        "runParams" = runParams,
         "logLikelihood" = ll,
-        "estNativeCounts" = nextDecon$estRmat,
-        "estConp" = resConp,
+        "contamination" = resConp,
         "theta" = theta,
         "delta" = delta,
         "phi" = phi,
         "eta" = eta
-    )
-
-    return(list(
-        "runParams" = runParams,
-        "resList" = resList
     ))
 }
 
@@ -891,8 +884,8 @@ addLogLikelihood <- function(llA, llB) {
     if (is.null(varGenes)) {
         varGenes <- 5000
     } else {
-        if (varGenes < 2 | !is.integer(varGenes)) {
-            stop("Parameter 'varGenes' must be an integer and larger than 1.")
+        if (varGenes < 2 | length(varGenes) > 1) {
+            stop("Parameter 'varGenes' must be an integer larger than 1.")
         }
     }
     return(varGenes)
@@ -915,8 +908,8 @@ addLogLikelihood <- function(llA, llB) {
     if (is.null(L)) {
         L <- 50
     } else {
-        if (L < 2 | !is.integer(L)) {
-            stop("Parameter 'L' must be an integer and larger than 1.")
+        if (L < 2 | length(L) > 1) {
+            stop("Parameter 'L' must be an integer larger than 1.")
         }
     }
     return(L)
