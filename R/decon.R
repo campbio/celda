@@ -291,10 +291,10 @@ simulateContaminatedMatrix <- function(C = 300,
 #'  related parameters.
 #' @examples
 #'  s <- simulateContaminatedMatrix()
-#'  res <- decontX(s$observedCounts, s$z)
+#'  result <- decontX(s$observedCounts, s$z)
 #'  contamination <- colSums(s$observedCounts - s$nativeCounts) /
 #'                     colSums(s$observedCounts)
-#'  plot(contamination, res$resList$estConp)
+#'  plot(contamination, result$contamination)
 #' @export
 decontX <- function(counts,
     z = NULL,
