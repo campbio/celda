@@ -2,6 +2,8 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp; using namespace arma;
 
+
+
 // [[Rcpp::export]]
 Rcpp::List decontXEM(const arma::sp_mat& counts,
                      const NumericVector& counts_colsums,
@@ -49,7 +51,8 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
 
   int i;
   int j;
-  int k; 
+  int k;
+  int nr = phi.nrow();
   double x; 
   double pcontamin;
   double pnative;
@@ -61,12 +64,18 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
     x = *it;
     k = z[j] - 1;
     
-    // Calculate variational probabilities 
-    pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
-    pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
+    // Calculate variational probabilities
+    // Removing the log/exp speeds it up and produces the same result since
+    // there are only 2 probabilities being multiplied
+    
+    //pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
+    //pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
+    pnative = (phi[nr * k + i] + pseudocount) * (theta[j] + pseudocount);
+    pcontamin = (eta[nr * k + i] + pseudocount) * (1 - theta[j] + pseudocount);
     
     // Normalize probabilities and add to proper components
-    normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
+    //normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
+    normp = pnative / (pcontamin + pnative);
     px = normp * x;
     new_phi(i,k) += px;
     native_total(j) += px;
@@ -141,7 +150,8 @@ double decontXLogLik(const arma::sp_mat& counts,
   int i;
   int j;
   int k; 
-  double x; 
+  double x;
+  int nr = phi.nrow();
   
   // Original R code:
   // ll <- sum(Matrix::t(counts) * log(theta * t(phi)[z, ] +
@@ -153,13 +163,11 @@ double decontXLogLik(const arma::sp_mat& counts,
     x = *it;
     k = z[j] - 1;
     
-    loglik += x * log((phi(i,k) * theta(j)) + (eta(i,k) * (1 - theta(j))) + pseudocount);    
+    loglik += x * log((phi[nr * k + i] * theta[j]) + (eta[nr * k + i] * (1 - theta[j])) + pseudocount);    
   }
     
   return loglik;
 }  
-
-
 
 
 
