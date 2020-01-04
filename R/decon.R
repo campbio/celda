@@ -184,12 +184,12 @@ simulateContaminatedMatrix <- function(C = 300,
     Pc.e <- exp(logPc)
     Pr <- Pr.e / (Pr.e + Pc.e)
 
-    estRmat <- t(Pr) * counts 
+    estRmat <- t(Pr) * counts
     rnGByK <- .colSumByGroupNumeric(estRmat, z, K)
     cnGByK <- rowSums(rnGByK) - rnGByK
 
-    counts.cs = colSums(counts)
-    estRmat.cs <- colSums(estRmat) 
+    counts.cs <- colSums(counts)
+    estRmat.cs <- colSums(estRmat)
     estRmat.cs.n <- estRmat.cs / counts.cs
     estCmat.cs.n <- 1 - estRmat.cs.n
     temp <- cbind(estRmat.cs.n, estCmat.cs.n)
@@ -305,14 +305,14 @@ decontX <- function(counts,
     batch = NULL,
     maxIter = 200,
     delta = 10,
-    convergence = 0.001,    
+    convergence = 0.001,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
     L = NULL,
     dbscanEps = NULL,
     seed = 12345) {
-    
+
     if (is.null(seed)) {
         res <- .decontX(counts = counts,
             z = z,
@@ -349,7 +349,7 @@ decontX <- function(counts,
     batch = NULL,
     maxIter = 200,
     delta = 10,
-    convergence = 0.001,    
+    convergence = 0.001,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
@@ -372,9 +372,9 @@ decontX <- function(counts,
 
     # Convert to sparse matrix
     # After Celda can run on sparse matrix,
-    # then we can just have this be required 
-    # as input 
-    counts = as(counts, "dgCMatrix")
+    # then we can just have this be required
+    # as input
+    counts <- as(counts, "dgCMatrix")
 
     ## Empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
@@ -397,11 +397,11 @@ decontX <- function(counts,
       sparse = TRUE,
       dimnames = list(geneNames, allCellNames)
     )
-    
+
     if (!is.null(batch)) {
         ## Set result lists upfront for all cells from different batches
         logLikelihood <- c()
-        
+
         theta <- rep(NA, nC)
         estConp <- rep(NA, nC)
         returnZ <- rep(NA, nC)
@@ -437,13 +437,6 @@ decontX <- function(counts,
                 L = L
             )
 
-#            if (haveEmptyGenes) {
-#                estRmat[cbind(which(noneEmptyGeneIndex), which(batch == bat))] <-
-#                    resBat$resList$estNativeCounts
-#            } else {
-#                estRmat[cbind(seq(nrow(counts)), which(batch == bat))] <-
-#                    resBat$resList$estNativeCounts
-#            }
             estRmat <- calculateNativeMatrix(
               counts = countsBat,
               native_counts = estRmat,
@@ -454,7 +447,7 @@ decontX <- function(counts,
               phi = resBat$resList$phi,
               z = as.integer(resBat$runParams$z),
               pseudocount = 1e-20)
-               
+
             estConp[batch == bat] <- resBat$resList$estConp
             theta[batch == bat] <- resBat$resList$theta
             returnZ[batch == bat] <- resBat$runParams$z
@@ -497,16 +490,6 @@ decontX <- function(counts,
             dbscanEps = dbscanEps,
             L = L
         )
-#        if (haveEmptyGenes) {
-#            resBat <- matrix(0, nrow = totalGenes, ncol = nC,
-#                dimnames = list(geneNames, allCellNames))
-#            ix <- rep(which(noneEmptyGeneIndex), nC)
-#            jx <- rep(seq(nC), sum(noneEmptyGeneIndex))
-#            resBat <- sparseMatrix(i=ix, j=jx,
-#                x = returnResult$resList$estNativeCounts@x,
-#                dims = c(totalGenes, nC),
-#                dimnames = list(geneNames, allCellNames))
-#            resBat[cbind(which(noneEmptyGeneIndex), seq(nC))] <- returnResult$resList$estNativeCounts
 
         estRmat <- calculateNativeMatrix(
           counts = counts,
@@ -519,7 +502,6 @@ decontX <- function(counts,
           z = as.integer(returnResult$runParams$z),
           pseudocount = 1e-20)
           returnResult$resList$estNativeCounts <- estRmat
-#        }
     }
 
     endTime <- Sys.time()
@@ -597,13 +579,13 @@ decontX <- function(counts,
     stopIter <- 3L
 
     .logMessages(
-        date(),        
+        date(),
         ".. Estimating contamination",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
     )
-     
+
     if (deconMethod == "clustering") {
         ## Initialization
         deltaInit <- delta
@@ -619,7 +601,7 @@ decontX <- function(counts,
                        pseudocount = 1e-20)
         phi <- nextDecon$phi
         eta <- nextDecon$eta
-                       
+
 #        estRmat <- Matrix::t(Matrix::t(counts) * theta)
 #        phi <- .colSumByGroupNumeric(as.matrix(estRmat), z, K)
 #        eta <- rowSums(phi) - phi
@@ -650,8 +632,8 @@ decontX <- function(counts,
         ## EM updates
         theta.previous <- theta
         converged <- FALSE
-        counts.colsums = Matrix::colSums(counts)         
-        while (iter <= maxIter & !isTRUE(converged) & 
+        counts.colsums <- Matrix::colSums(counts)
+        while (iter <= maxIter & !isTRUE(converged) &
                 numIterWithoutImprovement <= stopIter) {
 #            nextDecon <- .cDCalcEMDecontamination(
 #                counts = counts,
@@ -701,7 +683,7 @@ decontX <- function(counts,
             }
 
             max.divergence <- max(abs(theta.previous - theta))
-            if(max.divergence < convergence) {
+            if (max.divergence < convergence) {
               converged <- TRUE
             }
             theta.previous <- theta
@@ -714,8 +696,8 @@ decontX <- function(counts,
                 logfile = logfile,
                 append = TRUE,
                 verbose = verbose)
-                
-            iter <- iter + 1L   
+
+            iter <- iter + 1L
         }
     }
 
@@ -723,13 +705,13 @@ decontX <- function(counts,
 #    resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
     resConp <- nextDecon$contamination
     names(resConp) <- colnames(counts)
-    
+
     if (!is.null(batch)) {
         batchMessage <- paste(" ", "in batch ", batch, ".", sep = "")
     } else {
         batchMessage <- "."
     }
-    
+
     runParams <- list("deltaInit" = deltaInit,
         "iteration" = iter - 1L,
         "z" = z)
@@ -743,7 +725,7 @@ decontX <- function(counts,
         "estConp" = resConp,
         "theta" = theta,
         "delta" = delta,
-        "phi" = phi,        
+        "phi" = phi,
         "eta" = eta
     )
 
@@ -873,7 +855,7 @@ addLogLikelihood <- function(llA, llB) {
         }
 
         .logMessages(
-            date(), 
+            date(),
             ".... Reducing dimensionality with UMAP",
             logfile = logfile,
             append = TRUE,
@@ -886,11 +868,11 @@ addLogLikelihood <- function(llA, llB) {
         rm(fm)
 
         .logMessages(
-            date(), 
+            date(),
             " .... Determining cell clusters with DBSCAN (Eps=",
             dbscanEps,
             ")",
-            sep="",
+            sep = "",
             logfile = logfile,
             append = TRUE,
             verbose = verbose
