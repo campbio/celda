@@ -258,28 +258,36 @@ simulateContaminatedMatrix <- function(C = 300,
 
 
 #' @title DecontX
-#' @description Identifies contamination in single cell datasets.
+#' @description Identifies contamination from factors such as ambient RNA
+#' in single cell genomic datasets.
 #' @param counts Numeric matrix. Observed count matrix, rows represent
 #'  features and columns represent cells.
 #' @param z Integer vector. Cell cluster labels. If NULL, Celda will be used
-#' to reduce the dimensionality of the dataset to 'L' modules, \link[uwot]{umap}
-#' will be used to further reduce the dataset to 2 dimenions and
-#' \link[dbscan]{dbscan} will be used to identify clusters of broad cell types.
-#' Default NULL.
+#' to reduce the dimensionality of the dataset to 'L' modules,
+#' '\link[uwot]{umap}' from the 'uwot' package  will be used to further
+#' reduce the dataset to 2 dimenions and the '\link[dbscan]{dbscan}'
+#' function from the 'dbscan' package will be used to identify clusters
+#' of broad cell types. Default NULL.
 #' @param batch Integer vector. Batch labels for cells. If batch labels 
 #' are supplied, DecontX is run on cells from each batch separately.
 #' Default NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
+#' @param convergence Numeric. The EM algorithm will be stopped if the maximum
+#' difference in the contamination estimates between the previous 'convergenceCheck'
+#' is less than this. Default 0.001.
+#' @param convergenceCheck Integer. Check for convergence every
+#' 'convergenceCheck' iterations. Default 10.
 #' @param delta Numeric. Symmetric Dirichlet concentration parameter
-#' for Theta. Default 10.
+#' to initialize theta. Default 10.
 #' @param varGenes Integer. The number of variable genes to use in
-#' Celda clustering. Variability is calcualted using \link[scran]{modelGeneVar}. 
+#' Celda clustering. Variability is calcualted using '\link[scran]{modelGeneVar}'
+#' function from the 'scran' package. 
 #' Used only when z is not provided. Default 5000.
 #' @param L Integer. Number of modules for Celda clustering. Used to reduce
 #' the dimensionality of the dataset before applying UMAP and dbscan.
 #' Used only when z is not provided. Default 50.
 #' @param dbscanEps Numeric. The clustering resolution parameter
-#' used in \link[dbscan]{dbscan} to estimate broad cell clusters.
+#' used in '\link[dbscan]{dbscan}' to estimate broad cell clusters.
 #' Used only when z is not provided. Default 1.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
@@ -287,11 +295,11 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @return List. 'decontX_counts' contains the decontaminated count matrix
+#' @return 'decontX_counts' contains the decontaminated count matrix.
 #' 'contamination' contains the per-cell contamination estimates.
 #' 'batchEstimates' contains the estimated probability distributions
 #' for each batch. 'z' contains the cell cluster labels. 'runParams'
-#' contains a list of arguments used in this function.
+#' contains a list of arguments used in the function call.
 #' 
 #' @examples
 #'  s <- simulateContaminatedMatrix()
@@ -306,6 +314,7 @@ decontX <- function(counts,
     maxIter = 500,
     delta = 10,
     convergence = 0.001,
+    convergenceStep = 10,
     logfile = NULL,
     verbose = TRUE,
     varGenes = 5000,
@@ -320,6 +329,7 @@ decontX <- function(counts,
             maxIter = maxIter,
             delta = delta,
             convergence = convergence,
+            convergenceStep = convergenceStep,
             logfile = logfile,
             verbose = verbose,
             varGenes = varGenes,
@@ -333,6 +343,7 @@ decontX <- function(counts,
                 maxIter = maxIter,
                 delta = delta,
                 convergence = convergence,
+                convergenceStep = convergenceStep,                
                 logfile = logfile,
                 verbose = verbose,
                 varGenes = varGenes,
@@ -350,6 +361,7 @@ decontX <- function(counts,
     maxIter = 200,
     delta = 10,
     convergence = 0.001,
+    convergenceStep = 10,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
@@ -456,6 +468,7 @@ decontX <- function(counts,
 		  maxIter = maxIter,
 		  delta = delta,
 		  convergence = convergence,
+		  convergenceStep = convergenceStep,
 		  logfile = logfile,
 		  verbose = verbose,
 		  varGenes = varGenes,
@@ -573,6 +586,7 @@ decontX <- function(counts,
     maxIter = 200,
     delta = 10,
     convergence = 0.01,
+    convergenceStep = 10,
     logfile = NULL,
     verbose = TRUE,
     varGenes = NULL,
@@ -708,30 +722,34 @@ decontX <- function(counts,
 #                eta = eta,
 #                theta = theta
 #            )
-            llTemp <- decontXLogLik(
-                counts = counts,
-                z = z,
-                phi = phi,
-                eta = eta,
-                theta = theta,
-                pseudocount = 1e-20)
 
-            ll <- c(ll, llTemp)
-            llRound <- c(llRound, round(llTemp, 2))
+            ## Calculate likelihood and check for convergence
+            if (iter %% convergenceStep == 0) {
 
-            if (round(llTemp, 2) > llRound[iter] | iter == 1) {
-                numIterWithoutImprovement <- 1L
-            } else {
-                numIterWithoutImprovement <- numIterWithoutImprovement + 1L
-            }
+			  llTemp <- decontXLogLik(
+				  counts = counts,
+				  z = z,
+				  phi = phi,
+				  eta = eta,
+				  theta = theta,
+				  pseudocount = 1e-20)
 
-            max.divergence <- max(abs(theta.previous - theta))
-            if (max.divergence < convergence) {
-              converged <- TRUE
-            }
-            theta.previous <- theta
+			  ll <- c(ll, llTemp)
+#			  llRound <- c(llRound, round(llTemp, 2))
 
-            .logMessages(date(),
+#			  if (round(llTemp, 2) > llRound[iter] | iter == 1) {
+#				  numIterWithoutImprovement <- 1L
+#			  } else {
+#				  numIterWithoutImprovement <- numIterWithoutImprovement + 1L
+#			  }
+            
+              max.divergence <- max(abs(theta.previous - theta))
+              if (max.divergence < convergence) {
+                converged <- TRUE
+              }
+              theta.previous <- theta
+
+              .logMessages(date(),
                 ".... Completed iteration:",
                 iter,
                 "| converge:",
@@ -739,8 +757,10 @@ decontX <- function(counts,
                 logfile = logfile,
                 append = TRUE,
                 verbose = verbose)
-
+            }
+            
             iter <- iter + 1L
+            
         }
     }
 
