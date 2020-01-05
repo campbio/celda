@@ -405,17 +405,9 @@ decontX <- function(counts,
       counts <- as(counts, "dgCMatrix")  
     }
     
-    ## Empty expression genes won't be used for estimation
-    haveEmptyGenes <- FALSE
     totalGenes <- nrow(counts)
     totalCells <- ncol(counts)
-    noneEmptyGeneIndex <- Matrix::rowSums(counts) != 0
     geneNames <- rownames(counts)
-    if (sum(noneEmptyGeneIndex) != totalGenes) {
-        counts <- counts[noneEmptyGeneIndex, ]
-        haveEmptyGenes <- TRUE
-    }
-
     nC <- ncol(counts)
     allCellNames <- colnames(counts)
 
@@ -488,7 +480,7 @@ decontX <- function(counts,
 		  native_counts = estRmat,
 		  theta = res$theta,
 		  eta = res$eta,
-		  row_index = which(noneEmptyGeneIndex),
+		  row_index = seq(nrow(counts)),
 		  col_index = which(batch == bat),
 		  phi = res$phi,
 		  z = as.integer(res$z),

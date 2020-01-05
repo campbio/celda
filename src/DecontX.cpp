@@ -42,8 +42,8 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
   NumericMatrix new_phi(phi.nrow(), phi.ncol());
   NumericMatrix new_eta(eta.nrow(), eta.ncol());
     
-  std::fill(new_phi.begin(), new_phi.end(), pseudocount);
-  std::fill(new_eta.begin(), new_eta.end(), pseudocount);
+//  std::fill(new_phi.begin(), new_phi.end(), pseudocount);
+//  std::fill(new_eta.begin(), new_eta.end(), pseudocount);
     
   // Obtaining 'fit_dirichlet' function from MCMCprecision package
   Environment pkg = Environment::namespace_env("MCMCprecision");
