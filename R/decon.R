@@ -268,7 +268,7 @@ simulateContaminatedMatrix <- function(C = 300,
 #' reduce the dataset to 2 dimenions and the '\link[dbscan]{dbscan}'
 #' function from the 'dbscan' package will be used to identify clusters
 #' of broad cell types. Default NULL.
-#' @param batch Integer vector. Batch labels for cells. If batch labels 
+#' @param batch Integer vector. Batch labels for cells. If batch labels
 #' are supplied, DecontX is run on cells from each batch separately.
 #' Default NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
@@ -281,7 +281,7 @@ simulateContaminatedMatrix <- function(C = 300,
 #' to initialize theta. Default 10.
 #' @param varGenes Integer. The number of variable genes to use in
 #' Celda clustering. Variability is calcualted using '\link[scran]{modelGeneVar}'
-#' function from the 'scran' package. 
+#' function from the 'scran' package.
 #' Used only when z is not provided. Default 5000.
 #' @param L Integer. Number of modules for Celda clustering. Used to reduce
 #' the dimensionality of the dataset before applying UMAP and dbscan.
@@ -300,7 +300,7 @@ simulateContaminatedMatrix <- function(C = 300,
 #' 'batchEstimates' contains the estimated probability distributions
 #' for each batch. 'z' contains the cell cluster labels. 'runParams'
 #' contains a list of arguments used in the function call.
-#' 
+#'
 #' @examples
 #'  s <- simulateContaminatedMatrix()
 #'  result <- decontX(s$observedCounts, s$z)
@@ -387,10 +387,10 @@ decontX <- function(counts,
           logfile = logfile,
           append = TRUE,
 		  verbose = verbose
-	    )	        
-      counts <- as(counts, "dgCMatrix")  
+	    )
+      counts <- as(counts, "dgCMatrix")
     }
-    
+
     totalGenes <- nrow(counts)
     totalCells <- ncol(counts)
     geneNames <- rownames(counts)
@@ -418,10 +418,10 @@ decontX <- function(counts,
 	estConp <- rep(NA, nC)
 	returnZ <- rep(NA, nC)
     resBatch <- list()
-    
+
     ## Cycle through each sample/batch and run DecontX
 	for (bat in batchIndex) {
-	
+
 	  if(length(batchIndex) == 1) {
         .logMessages(
 		  date(),
