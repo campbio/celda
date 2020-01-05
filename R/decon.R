@@ -322,36 +322,21 @@ decontX <- function(counts,
     dbscanEps = 1,
     seed = 12345) {
 
-    if (is.null(seed)) {
-        res <- .decontX(counts = counts,
-            z = z,
-            batch = batch,
-            maxIter = maxIter,
-            delta = delta,
-            convergence = convergence,
-            iterLogLik = iterLogLik,
-            logfile = logfile,
-            verbose = verbose,
-            varGenes = varGenes,
-            L = L,
-            dbscanEps = dbscanEps)
-    } else {
-        withr::with_seed(seed,
-            res <- .decontX(counts = counts,
-                z = z,
-                batch = batch,
-                maxIter = maxIter,
-                delta = delta,
-                convergence = convergence,
-                iterLogLik = iterLogLik,                
-                logfile = logfile,
-                verbose = verbose,
-                varGenes = varGenes,
-                L = L,
-                dbscanEps = dbscanEps))
-    }
+  res <- .decontX(counts = counts,
+      z = z,
+      batch = batch,
+      maxIter = maxIter,
+      delta = delta,
+      convergence = convergence,
+      iterLogLik = iterLogLik,
+      logfile = logfile,
+      verbose = verbose,
+      varGenes = varGenes,
+      L = L,
+      dbscanEps = dbscanEps,
+      seed = seed)
 
-    return(res)
+  return(res)
 }
 
 
@@ -366,7 +351,8 @@ decontX <- function(counts,
     verbose = TRUE,
     varGenes = NULL,
     dbscanEps = NULL,
-    L = NULL) {
+    L = NULL,
+    seed = 12345) {
 
     startTime <- Sys.time()
     .logMessages(paste(rep("-", 50), collapse = ""),
@@ -422,7 +408,7 @@ decontX <- function(counts,
 
     ## Generate batch labels if none were supplied
     if (is.null(batch)) {
-      batch <- rep(1, nC)
+      batch <- rep("batch", nC)
     }
     runParams$batch <- batch
 	batchIndex <- unique(batch)
@@ -460,21 +446,37 @@ decontX <- function(counts,
 	  if (!is.null(z)) {
 		  zBat <- z[batch == bat]
 	  }
-	  res <- .decontXoneBatch(
-		  counts = countsBat,
-		  z = zBat,
-		  batch = bat,
-		  maxIter = maxIter,
-		  delta = delta,
-		  convergence = convergence,
-		  iterLogLik = iterLogLik,
-		  logfile = logfile,
-		  verbose = verbose,
-		  varGenes = varGenes,
-		  dbscanEps = dbscanEps,
-		  L = L
-	  )
-
+	  if (is.null(seed)) {
+	      res <- .decontXoneBatch(
+		      counts = countsBat,
+		      z = zBat,
+		      batch = bat,
+		      maxIter = maxIter,
+		      delta = delta,
+		      convergence = convergence,
+		      iterLogLik = iterLogLik,
+		      logfile = logfile,
+		      verbose = verbose,
+		      varGenes = varGenes,
+		      dbscanEps = dbscanEps,
+		      L = L)	  
+	  } else {
+	    withr::with_seed(seed,
+	      res <- .decontXoneBatch(
+		      counts = countsBat,
+		      z = zBat,
+		      batch = bat,
+		      maxIter = maxIter,
+		      delta = delta,
+		      convergence = convergence,
+		      iterLogLik = iterLogLik,
+		      logfile = logfile,
+		      verbose = verbose,
+		      varGenes = varGenes,
+		      dbscanEps = dbscanEps,
+		      L = L)
+	      )
+      }
 	  estRmat <- calculateNativeMatrix(
 		  counts = countsBat,
 		  native_counts = estRmat,
