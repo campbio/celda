@@ -357,6 +357,7 @@ decontX <- function(counts,
 
 .decontX <- function(counts,
     z = NULL,
+    batch = NULL,    
     maxIter = 200,
     delta = 10,
     convergence = 0.001,
