@@ -66,8 +66,8 @@ Used only when z is not provided. Default 1.}
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 
-\item{convergenceCheck}{Integer. Check for convergence every
-'convergenceCheck' iterations. Default 10.}
+\item{iterLogLik}{Integer. Every iteration to calculate log likelihood
+Default 10.}
 }
 \value{
 'decontX_counts' contains the decontaminated count matrix.

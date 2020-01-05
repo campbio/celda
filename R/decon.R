@@ -275,8 +275,8 @@ simulateContaminatedMatrix <- function(C = 300,
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous 'convergenceCheck'
 #' is less than this. Default 0.001.
-#' @param convergenceCheck Integer. Check for convergence every
-#' 'convergenceCheck' iterations. Default 10.
+#' @param iterLogLik Integer. Calculate log likelihood every 'iterLogLik'
+#' iteration. Default 10.
 #' @param delta Numeric. Symmetric Dirichlet concentration parameter
 #' to initialize theta. Default 10.
 #' @param varGenes Integer. The number of variable genes to use in
@@ -393,12 +393,18 @@ decontX <- function(counts,
         logfile = logfile,
         verbose = verbose)
 
-    # Convert to sparse matrix
-    # After Celda can run on sparse matrix,
-    # then we can just have this be required
-    # as input
-    counts <- as(counts, "dgCMatrix")
-
+    ## Convert to sparse matrix
+    if (class(counts) != "dgCMatrix") {
+      .logMessages(
+          date(),
+          ".. Converting to sparse matrix",
+          logfile = logfile,
+          append = TRUE,
+		  verbose = verbose
+	    )	        
+      counts <- as(counts, "dgCMatrix")  
+    }
+    
     ## Empty expression genes won't be used for estimation
     haveEmptyGenes <- FALSE
     totalGenes <- nrow(counts)
@@ -723,8 +729,14 @@ decontX <- function(counts,
 #                theta = theta
 #            )
 
+            max.divergence <- max(abs(theta.previous - theta))
+            if (max.divergence < convergence) {
+              converged <- TRUE
+            }
+			theta.previous <- theta
+
             ## Calculate likelihood and check for convergence
-            if (iter %% convergenceStep == 0) {
+            if (iter %% convergenceStep == 0 || converged) {
 
 			  llTemp <- decontXLogLik(
 				  counts = counts,
@@ -743,12 +755,6 @@ decontX <- function(counts,
 #				  numIterWithoutImprovement <- numIterWithoutImprovement + 1L
 #			  }
             
-              max.divergence <- max(abs(theta.previous - theta))
-              if (max.divergence < convergence) {
-                converged <- TRUE
-              }
-              theta.previous <- theta
-
               .logMessages(date(),
                 ".... Completed iteration:",
                 iter,
