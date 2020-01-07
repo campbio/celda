@@ -1,262 +1,3 @@
-
-
-#' @title Simulate contaminated count matrix
-#' @description This function generates a list containing two count matrices --
-#'  one for real expression, the other one for contamination, as well as other
-#'  parameters used in the simulation which can be useful for running
-#'  decontamination.
-#' @param C Integer. Number of cells to be simulated. Default to be 300.
-#' @param G Integer. Number of genes to be simulated. Default to be 100.
-#' @param K Integer. Number of cell populations to be simulated. Default to be
-#'  3.
-#' @param NRange Integer vector. A vector of length 2 that specifies the lower
-#'  and upper bounds of the number of counts generated for each cell. Default to
-#'  be c(500, 1000).
-#' @param beta Numeric. Concentration parameter for Phi. Default to be 0.5.
-#' @param delta Numeric or Numeric vector. Concentration parameter for Theta. If
-#'  input as a single numeric value, symmetric values for beta distribution are
-#'  specified; if input as a vector of lenght 2, the two values will be the
-#'  shape1 and shape2 paramters of the beta distribution respectively.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @return A list object containing the real expression matrix and contamination
-#'  expression matrix as well as other parameters used in the simulation.
-#' @examples
-#' contaminationSim <- simulateContaminatedMatrix(K = 3, delta = c(1, 9))
-#' contaminationSim <- simulateContaminatedMatrix(K = 3, delta = 1)
-#' @export
-simulateContaminatedMatrix <- function(C = 300,
-    G = 100,
-    K = 3,
-    NRange = c(500, 1000),
-    beta = 0.5,
-    delta = c(1, 2),
-    seed = 12345) {
-
-    if (is.null(seed)) {
-        res <- .simulateContaminatedMatrix(C = C,
-            G = G,
-            K = K,
-            NRange = NRange,
-            beta = beta,
-            delta = delta)
-    } else {
-        with_seed(seed,
-            res <- .simulateContaminatedMatrix(C = C,
-                G = G,
-                K = K,
-                NRange = NRange,
-                beta = beta,
-                delta = delta))
-    }
-
-    return(res)
-}
-
-
-.simulateContaminatedMatrix <- function(C = 300,
-    G = 100,
-    K = 3,
-    NRange = c(500, 1000),
-    beta = 0.5,
-    delta = c(1, 2)) {
-    if (length(delta) == 1) {
-        cpByC <- stats::rbeta(n = C,
-            shape1 = delta,
-            shape2 = delta)
-    } else {
-        cpByC <- stats::rbeta(n = C,
-            shape1 = delta[1],
-            shape2 = delta[2])
-    }
-
-    z <- sample(seq(K), size = C, replace = TRUE)
-    if (length(unique(z)) < K) {
-        warning(
-            "Only ",
-            length(unique(z)),
-            " clusters are simulated. Try to increase numebr of cells 'C' if",
-            " more clusters are needed"
-        )
-        K <- length(unique(z))
-        z <- plyr::mapvalues(z, unique(z), seq(length(unique(z))))
-    }
-
-    NbyC <- sample(seq(min(NRange), max(NRange)),
-        size = C,
-        replace = TRUE)
-    cNbyC <- vapply(seq(C), function(i) {
-        stats::rbinom(n = 1,
-            size = NbyC[i],
-            p = cpByC[i])
-    }, integer(1))
-    rNbyC <- NbyC - cNbyC
-
-    phi <- .rdirichlet(K, rep(beta, G))
-
-    ## sample real expressed count matrix
-    cellRmat <- vapply(seq(C), function(i) {
-        stats::rmultinom(1, size = rNbyC[i], prob = phi[z[i], ])
-    }, integer(G))
-
-    rownames(cellRmat) <- paste0("Gene_", seq(G))
-    colnames(cellRmat) <- paste0("Cell_", seq(C))
-
-    ## sample contamination count matrix
-    nGByK <-
-        rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
-    eta <- normalizeCounts(counts = nGByK, normalize = "proportion")
-
-    cellCmat <- vapply(seq(C), function(i) {
-        stats::rmultinom(1, size = cNbyC[i], prob = eta[, z[i]])
-    }, integer(G))
-    cellOmat <- cellRmat + cellCmat
-
-    rownames(cellOmat) <- paste0("Gene_", seq(G))
-    colnames(cellOmat) <- paste0("Cell_", seq(C))
-
-    return(
-        list(
-            "nativeCounts" = cellRmat,
-            "observedCounts" = cellOmat,
-            "NByC" = NbyC,
-            "z" = z,
-            "eta" = eta,
-            "phi" = t(phi)
-        )
-    )
-}
-
-
-# This function calculates the log-likelihood
-#
-# counts Numeric/Integer matrix. Observed count matrix, rows represent features
-# and columns represent cells
-# z Integer vector. Cell population labels
-# phi Numeric matrix. Rows represent features and columns represent cell
-# populations
-# eta Numeric matrix. Rows represent features and columns represent cell
-# populations
-# theta Numeric vector. Proportion of truely expressed transcripts
-.deconCalcLL <- function(counts, z, phi, eta, theta) {
-    # ll = sum( t(counts) * log( (1-conP )*geneDist[z,] + conP * conDist[z, ] +
-    # 1e-20 ) )  # when dist_mat are K x G matrices
-    ll <- sum(Matrix::t(counts) * log(theta * t(phi)[z, ] +
-            (1 - theta) * t(eta)[z, ] + 1e-20))
-    return(ll)
-}
-
-# DEPRECATED. This is not used, but is kept as it might be useful in the future.
-# This function calculates the log-likelihood of background distribution
-# decontamination
-# bgDist Numeric matrix. Rows represent feature and columns are the times that
-# the background-distribution has been replicated.
-.bgCalcLL <- function(counts, globalZ, cbZ, phi, eta, theta) {
-    # ll <- sum(t(counts) * log(theta * t(cellDist) +
-    #        (1 - theta) * t(bgDist) + 1e-20))
-    ll <- sum(t(counts) * log(theta * t(phi)[cbZ, ] +
-            (1 - theta) * t(eta)[globalZ, ] + 1e-20))
-    return(ll)
-}
-
-
-# This function updates decontamination
-#  phi Numeric matrix. Rows represent features and columns represent cell
-# populations
-#  eta Numeric matrix. Rows represent features and columns represent cell
-# populations
-#  theta Numeric vector. Proportion of truely expressed transctripts
-#' @importFrom MCMCprecision fit_dirichlet
-.cDCalcEMDecontamination <- function(counts,
-    phi,
-    eta,
-    theta,
-    z,
-    K,
-    delta) {
-    ## Notes: use fix-point iteration to update prior for theta, no need
-    ## to feed delta anymore
-
-    logPr <- log(t(phi)[z, ] + 1e-20) + log(theta + 1e-20)
-    logPc <- log(t(eta)[z, ] + 1e-20) + log(1 - theta + 1e-20)
-    Pr.e <- exp(logPr)
-    Pc.e <- exp(logPc)
-    Pr <- Pr.e / (Pr.e + Pc.e)
-
-    estRmat <- t(Pr) * counts
-    rnGByK <- .colSumByGroupNumeric(estRmat, z, K)
-    cnGByK <- rowSums(rnGByK) - rnGByK
-
-    counts.cs <- colSums(counts)
-    estRmat.cs <- colSums(estRmat)
-    estRmat.cs.n <- estRmat.cs / counts.cs
-    estCmat.cs.n <- 1 - estRmat.cs.n
-    temp <- cbind(estRmat.cs.n, estCmat.cs.n)
-    deltaV2 <- MCMCprecision::fit_dirichlet(temp)$alpha
-
-    ## Update parameters
-    theta <-
-        (estRmat.cs + deltaV2[1]) / (counts.cs + sum(deltaV2))
-    phi <- normalizeCounts(rnGByK,
-        normalize = "proportion",
-        pseudocountNormalize = 1e-20)
-    eta <- normalizeCounts(cnGByK,
-        normalize = "proportion",
-        pseudocountNormalize = 1e-20)
-
-    return(list(
-        "estRmat" = estRmat,
-        "theta" = theta,
-        "phi" = phi,
-        "eta" = eta,
-        "delta" = deltaV2
-    ))
-}
-
-# DEPRECATED. This is not used, but is kept as it might be useful in the
-# feature.
-# This function updates decontamination using background distribution
-.cDCalcEMbgDecontamination <-
-    function(counts, globalZ, cbZ, trZ, phi, eta, theta) {
-        logPr <- log(t(phi)[cbZ, ] + 1e-20) + log(theta + 1e-20)
-        logPc <-
-            log(t(eta)[globalZ, ] + 1e-20) + log(1 - theta + 1e-20)
-
-        Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
-        Pc <- 1 - Pr
-        deltaV2 <-
-            MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
-
-        estRmat <- t(Pr) * counts
-        phiUnnormalized <-
-            .colSumByGroupNumeric(estRmat, cbZ, max(cbZ))
-        etaUnnormalized <-
-            rowSums(phiUnnormalized) - .colSumByGroupNumeric(phiUnnormalized,
-                trZ, max(trZ))
-
-        ## Update paramters
-        theta <-
-            (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
-        phi <-
-            normalizeCounts(phiUnnormalized,
-                normalize = "proportion",
-                pseudocountNormalize = 1e-20)
-        eta <-
-            normalizeCounts(etaUnnormalized,
-                normalize = "proportion",
-                pseudocountNormalize = 1e-20)
-
-        return(list(
-            "estRmat" = estRmat,
-            "theta" = theta,
-            "phi" = phi,
-            "eta" = eta,
-            "delta" = deltaV2
-        ))
-    }
-
-
 #' @title DecontX
 #' @description Identifies contamination from factors such as ambient RNA
 #' in single cell genomic datasets.
@@ -307,38 +48,88 @@ simulateContaminatedMatrix <- function(C = 300,
 #'  contamination <- colSums(s$observedCounts - s$nativeCounts) /
 #'                     colSums(s$observedCounts)
 #'  plot(contamination, result$contamination)
+NULL
+
 #' @export
-decontX <- function(counts,
-    z = NULL,
-    batch = NULL,
-    maxIter = 500,
-    delta = 10,
-    convergence = 0.001,
-    iterLogLik = 10,
-    logfile = NULL,
-    verbose = TRUE,
-    varGenes = 5000,
-    L = 50,
-    dbscanEps = 1,
-    seed = 12345) {
+setGeneric("decontX", function(x, ...) standardGeneric("decontX"))
 
-  res <- .decontX(counts = counts,
-      z = z,
-      batch = batch,
-      maxIter = maxIter,
-      delta = delta,
-      convergence = convergence,
-      iterLogLik = iterLogLik,
-      logfile = logfile,
-      verbose = verbose,
-      varGenes = varGenes,
-      L = L,
-      dbscanEps = dbscanEps,
-      seed = seed)
 
-  return(res)
+#########################
+# Setting up S4 methods #
+#########################
+
+#' @export
+#' @rdname decontX
+setMethod("decontX", "ANY", function(x, ...) {
+  .decontX(counts=x, ...)
+})
+
+#' @export
+#' @importFrom SummarizedExperiment assay
+#' @rdname decontX
+setMethod("decontX", "SingleCellExperiment", function(x, ..., assayName="counts")
+{
+  mat <- SummarizedExperiment::assay(x, i=assayName)
+  result <- .decontX(mat, ...)
+  
+  ## Add results into column annotation
+  colData(x) = cbind(colData(x),
+                    celda_decontX_Contamination = result$contamination,
+                                     celda_decontX_Clusters = result$z)
+  
+  ## Add new matrix into assay slot wiht same class as original counts
+  if(class(mat) == "DelayedMatrix") {
+    decontXcounts(x) <- DelayedArray(result$decontX_counts)
+  } else {
+    SummarizedExperiment::assay(x, "decontXcounts") <-
+      as(result$decontX_counts, class(mat))
+  }
+  
+  ## Save the rest of the result object into metadata
+  result$decontX_counts <- NULL
+  metadata(x)$decontX <- result
+  
+  x
+}) 
+
+
+## Copied from SingleCellExperiment Package
+
+GET_FUN <- function(exprs_values, ...) {
+    (exprs_values) # To ensure evaluation
+    function(object, ...) {
+        assay(object, i=exprs_values, ...)
+    }
 }
 
+SET_FUN <- function(exprs_values, ...) {
+    (exprs_values) # To ensure evaluation
+    function(object, ..., value) {
+        assay(object, i=exprs_values, ...) <- value
+        object
+    }
+}
+
+#' @export
+setGeneric("decontXcounts", function(object, ...) standardGeneric("decontXcounts"))
+
+#' @export
+setGeneric("decontXcounts<-", function(object, ..., value) standardGeneric("decontXcounts<-"))
+
+#' @export
+setMethod("decontXcounts", "SingleCellExperiment", GET_FUN("decontXcounts"))
+
+#' @export
+setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("decontXcounts"))
+
+
+
+
+
+
+##########################
+# Core Decontx Functions #
+##########################
 
 .decontX <- function(counts,
     z = NULL,
@@ -784,6 +575,140 @@ decontX <- function(counts,
 }
 
 
+
+
+
+# This function calculates the log-likelihood
+#
+# counts Numeric/Integer matrix. Observed count matrix, rows represent features
+# and columns represent cells
+# z Integer vector. Cell population labels
+# phi Numeric matrix. Rows represent features and columns represent cell
+# populations
+# eta Numeric matrix. Rows represent features and columns represent cell
+# populations
+# theta Numeric vector. Proportion of truely expressed transcripts
+.deconCalcLL <- function(counts, z, phi, eta, theta) {
+    # ll = sum( t(counts) * log( (1-conP )*geneDist[z,] + conP * conDist[z, ] +
+    # 1e-20 ) )  # when dist_mat are K x G matrices
+    ll <- sum(Matrix::t(counts) * log(theta * t(phi)[z, ] +
+            (1 - theta) * t(eta)[z, ] + 1e-20))
+    return(ll)
+}
+
+# DEPRECATED. This is not used, but is kept as it might be useful in the future.
+# This function calculates the log-likelihood of background distribution
+# decontamination
+# bgDist Numeric matrix. Rows represent feature and columns are the times that
+# the background-distribution has been replicated.
+.bgCalcLL <- function(counts, globalZ, cbZ, phi, eta, theta) {
+    # ll <- sum(t(counts) * log(theta * t(cellDist) +
+    #        (1 - theta) * t(bgDist) + 1e-20))
+    ll <- sum(t(counts) * log(theta * t(phi)[cbZ, ] +
+            (1 - theta) * t(eta)[globalZ, ] + 1e-20))
+    return(ll)
+}
+
+
+# This function updates decontamination
+#  phi Numeric matrix. Rows represent features and columns represent cell
+# populations
+#  eta Numeric matrix. Rows represent features and columns represent cell
+# populations
+#  theta Numeric vector. Proportion of truely expressed transctripts
+#' @importFrom MCMCprecision fit_dirichlet
+.cDCalcEMDecontamination <- function(counts,
+    phi,
+    eta,
+    theta,
+    z,
+    K,
+    delta) {
+    ## Notes: use fix-point iteration to update prior for theta, no need
+    ## to feed delta anymore
+
+    logPr <- log(t(phi)[z, ] + 1e-20) + log(theta + 1e-20)
+    logPc <- log(t(eta)[z, ] + 1e-20) + log(1 - theta + 1e-20)
+    Pr.e <- exp(logPr)
+    Pc.e <- exp(logPc)
+    Pr <- Pr.e / (Pr.e + Pc.e)
+
+    estRmat <- t(Pr) * counts
+    rnGByK <- .colSumByGroupNumeric(estRmat, z, K)
+    cnGByK <- rowSums(rnGByK) - rnGByK
+
+    counts.cs <- colSums(counts)
+    estRmat.cs <- colSums(estRmat)
+    estRmat.cs.n <- estRmat.cs / counts.cs
+    estCmat.cs.n <- 1 - estRmat.cs.n
+    temp <- cbind(estRmat.cs.n, estCmat.cs.n)
+    deltaV2 <- MCMCprecision::fit_dirichlet(temp)$alpha
+
+    ## Update parameters
+    theta <-
+        (estRmat.cs + deltaV2[1]) / (counts.cs + sum(deltaV2))
+    phi <- normalizeCounts(rnGByK,
+        normalize = "proportion",
+        pseudocountNormalize = 1e-20)
+    eta <- normalizeCounts(cnGByK,
+        normalize = "proportion",
+        pseudocountNormalize = 1e-20)
+
+    return(list(
+        "estRmat" = estRmat,
+        "theta" = theta,
+        "phi" = phi,
+        "eta" = eta,
+        "delta" = deltaV2
+    ))
+}
+
+# DEPRECATED. This is not used, but is kept as it might be useful in the
+# feature.
+# This function updates decontamination using background distribution
+.cDCalcEMbgDecontamination <-
+    function(counts, globalZ, cbZ, trZ, phi, eta, theta) {
+        logPr <- log(t(phi)[cbZ, ] + 1e-20) + log(theta + 1e-20)
+        logPc <-
+            log(t(eta)[globalZ, ] + 1e-20) + log(1 - theta + 1e-20)
+
+        Pr <- exp(logPr) / (exp(logPr) + exp(logPc))
+        Pc <- 1 - Pr
+        deltaV2 <-
+            MCMCprecision::fit_dirichlet(matrix(c(Pr, Pc), ncol = 2))$alpha
+
+        estRmat <- t(Pr) * counts
+        phiUnnormalized <-
+            .colSumByGroupNumeric(estRmat, cbZ, max(cbZ))
+        etaUnnormalized <-
+            rowSums(phiUnnormalized) - .colSumByGroupNumeric(phiUnnormalized,
+                trZ, max(trZ))
+
+        ## Update paramters
+        theta <-
+            (colSums(estRmat) + deltaV2[1]) / (colSums(counts) + sum(deltaV2))
+        phi <-
+            normalizeCounts(phiUnnormalized,
+                normalize = "proportion",
+                pseudocountNormalize = 1e-20)
+        eta <-
+            normalizeCounts(etaUnnormalized,
+                normalize = "proportion",
+                pseudocountNormalize = 1e-20)
+
+        return(list(
+            "estRmat" = estRmat,
+            "theta" = theta,
+            "phi" = phi,
+            "eta" = eta,
+            "delta" = deltaV2
+        ))
+}
+
+
+
+
+
 ## Make sure provided parameters are the right type and value range
 .checkParametersDecon <- function(proportionPrior) {
     if (length(proportionPrior) > 1 | any(proportionPrior <= 0)) {
@@ -973,3 +898,138 @@ addLogLikelihood <- function(llA, llB) {
     }
     return(L)
 }
+
+
+
+#########################
+# Simulating Data       #
+#########################
+
+#' @title Simulate contaminated count matrix
+#' @description This function generates a list containing two count matrices --
+#'  one for real expression, the other one for contamination, as well as other
+#'  parameters used in the simulation which can be useful for running
+#'  decontamination.
+#' @param C Integer. Number of cells to be simulated. Default to be 300.
+#' @param G Integer. Number of genes to be simulated. Default to be 100.
+#' @param K Integer. Number of cell populations to be simulated. Default to be
+#'  3.
+#' @param NRange Integer vector. A vector of length 2 that specifies the lower
+#'  and upper bounds of the number of counts generated for each cell. Default to
+#'  be c(500, 1000).
+#' @param beta Numeric. Concentration parameter for Phi. Default to be 0.5.
+#' @param delta Numeric or Numeric vector. Concentration parameter for Theta. If
+#'  input as a single numeric value, symmetric values for beta distribution are
+#'  specified; if input as a vector of lenght 2, the two values will be the
+#'  shape1 and shape2 paramters of the beta distribution respectively.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
+#' @return A list object containing the real expression matrix and contamination
+#'  expression matrix as well as other parameters used in the simulation.
+#' @examples
+#' contaminationSim <- simulateContaminatedMatrix(K = 3, delta = c(1, 9))
+#' contaminationSim <- simulateContaminatedMatrix(K = 3, delta = 1)
+#' @export
+simulateContaminatedMatrix <- function(C = 300,
+    G = 100,
+    K = 3,
+    NRange = c(500, 1000),
+    beta = 0.5,
+    delta = c(1, 2),
+    seed = 12345) {
+
+    if (is.null(seed)) {
+        res <- .simulateContaminatedMatrix(C = C,
+            G = G,
+            K = K,
+            NRange = NRange,
+            beta = beta,
+            delta = delta)
+    } else {
+        with_seed(seed,
+            res <- .simulateContaminatedMatrix(C = C,
+                G = G,
+                K = K,
+                NRange = NRange,
+                beta = beta,
+                delta = delta))
+    }
+
+    return(res)
+}
+
+
+.simulateContaminatedMatrix <- function(C = 300,
+    G = 100,
+    K = 3,
+    NRange = c(500, 1000),
+    beta = 0.5,
+    delta = c(1, 2)) {
+    if (length(delta) == 1) {
+        cpByC <- stats::rbeta(n = C,
+            shape1 = delta,
+            shape2 = delta)
+    } else {
+        cpByC <- stats::rbeta(n = C,
+            shape1 = delta[1],
+            shape2 = delta[2])
+    }
+
+    z <- sample(seq(K), size = C, replace = TRUE)
+    if (length(unique(z)) < K) {
+        warning(
+            "Only ",
+            length(unique(z)),
+            " clusters are simulated. Try to increase numebr of cells 'C' if",
+            " more clusters are needed"
+        )
+        K <- length(unique(z))
+        z <- plyr::mapvalues(z, unique(z), seq(length(unique(z))))
+    }
+
+    NbyC <- sample(seq(min(NRange), max(NRange)),
+        size = C,
+        replace = TRUE)
+    cNbyC <- vapply(seq(C), function(i) {
+        stats::rbinom(n = 1,
+            size = NbyC[i],
+            p = cpByC[i])
+    }, integer(1))
+    rNbyC <- NbyC - cNbyC
+
+    phi <- .rdirichlet(K, rep(beta, G))
+
+    ## sample real expressed count matrix
+    cellRmat <- vapply(seq(C), function(i) {
+        stats::rmultinom(1, size = rNbyC[i], prob = phi[z[i], ])
+    }, integer(G))
+
+    rownames(cellRmat) <- paste0("Gene_", seq(G))
+    colnames(cellRmat) <- paste0("Cell_", seq(C))
+
+    ## sample contamination count matrix
+    nGByK <-
+        rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
+    eta <- normalizeCounts(counts = nGByK, normalize = "proportion")
+
+    cellCmat <- vapply(seq(C), function(i) {
+        stats::rmultinom(1, size = cNbyC[i], prob = eta[, z[i]])
+    }, integer(G))
+    cellOmat <- cellRmat + cellCmat
+
+    rownames(cellOmat) <- paste0("Gene_", seq(G))
+    colnames(cellOmat) <- paste0("Cell_", seq(C))
+
+    return(
+        list(
+            "nativeCounts" = cellRmat,
+            "observedCounts" = cellOmat,
+            "NByC" = NbyC,
+            "z" = z,
+            "eta" = eta,
+            "phi" = t(phi)
+        )
+    )
+}
+
