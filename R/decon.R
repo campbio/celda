@@ -61,7 +61,7 @@ setGeneric("decontX", function(x, ...) standardGeneric("decontX"))
 #' @export
 #' @rdname decontX
 setMethod("decontX", "ANY", function(x, ...) {
-  .decontX(counts=x, ...)
+  .decontX(counts = x, ...)
 })
 
 #' @export
@@ -170,18 +170,6 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
         logfile = logfile,
         verbose = verbose)
 
-    ## Convert to sparse matrix
-    if (!inherits(counts, "dgCMatrix")) {
-      .logMessages(
-          date(),
-          ".. Converting to sparse matrix",
-          logfile = logfile,
-          append = TRUE,
-		  verbose = verbose
-	    )
-      counts <- as(counts, "dgCMatrix")
-    }
-
     totalGenes <- nrow(counts)
     totalCells <- ncol(counts)
     geneNames <- rownames(counts)
@@ -234,6 +222,20 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 
 	  zBat <- NULL
 	  countsBat <- counts[, batch == bat]
+	  
+      ## Convert to sparse matrix
+      if (!inherits(countsBat, "dgCMatrix")) {
+        .logMessages(
+            date(),
+            ".... Converting to sparse matrix",
+            logfile = logfile,
+            append = TRUE,
+		    verbose = verbose
+	    )
+        countsBat <- as(countsBat, "dgCMatrix")
+      }
+
+	  
 	  if (!is.null(z)) {
 		  zBat <- z[batch == bat]
 	  }
