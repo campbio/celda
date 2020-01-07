@@ -1,21 +1,26 @@
-#' @title DecontX
+#' @title Contamination estimation with decontX
+#' 
 #' @description Identifies contamination from factors such as ambient RNA
 #' in single cell genomic datasets.
-#' @param counts Numeric matrix. Observed count matrix, rows represent
-#'  features and columns represent cells.
+#'
+#' @name decontX
+#'
+#' @param x A numeric matrix of counts, or a \linkS4class{SingleCellExperiment}
+#' containing such a matrix in the 'assayName' assay.
 #' @param z Integer vector. Cell cluster labels. If NULL, Celda will be used
 #' to reduce the dimensionality of the dataset to 'L' modules,
 #' '\link[uwot]{umap}' from the 'uwot' package  will be used to further
 #' reduce the dataset to 2 dimenions and the '\link[dbscan]{dbscan}'
 #' function from the 'dbscan' package will be used to identify clusters
 #' of broad cell types. Default NULL.
-#' @param batch Integer vector. Batch labels for cells. If batch labels
-#' are supplied, DecontX is run on cells from each batch separately.
-#' Default NULL.
+#' @param batch Numeric or character vector. Batch labels for cells.
+#' If batch labels are supplied, DecontX is run on cells from each
+#' batch separately. Cells run in different channels or assays
+#' should be considered different batches. Default NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
-#' difference in the contamination estimates between the previous 'convergenceCheck'
-#' is less than this. Default 0.001.
+#' difference in the contamination estimates between the previous and
+#' current iterations is less than this. Default 0.001.
 #' @param iterLogLik Integer. Calculate log likelihood every 'iterLogLik'
 #' iteration. Default 10.
 #' @param delta Numeric. Symmetric Dirichlet concentration parameter
@@ -36,11 +41,23 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @return 'decontXcounts' contains the decontaminated count matrix.
-#' 'contamination' contains the per-cell contamination estimates.
-#' 'estimates' contains the estimated probability distributions
-#' for each batch. 'z' contains the cell cluster labels. 'runParams'
-#' contains a list of arguments used in the function call.
+#'
+#' @return If \code{x} is a matrix-like object, a list will be returned
+#' with the following items:
+#' \describe{
+#' \item{\code{decontXcounts}:}{The decontaminated count matrix.}
+#' \item{\code{contamination}:}{Percentage of contamination in each cell.}
+#' \item{\code{estimates}:}{Estimated probability distributions
+#' for each batch.}
+#' \item{\code{z}:}{Cell population/cluster labels used for analysis.}
+#' \item{\code{runParams}:}{List of arguments used in the function call.}
+#' }
+#'
+#' If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
+#' counts will be stored as an assay and can be accessed with 
+#' \code{decontXcounts(x)}. The contamination values and cluster labels
+#' will be stored in \code{colData(x)}. All other items will be stored
+#' in \code{metadata(x)$decontX}.
 #'
 #' @examples
 #'  s <- simulateContaminatedMatrix()
@@ -65,7 +82,6 @@ setMethod("decontX", "ANY", function(x, ...) {
 })
 
 #' @export
-#' @importFrom SummarizedExperiment assay
 #' @rdname decontX
 setMethod("decontX", "SingleCellExperiment", function(x, ..., assayName="counts")
 {
@@ -79,7 +95,7 @@ setMethod("decontX", "SingleCellExperiment", function(x, ..., assayName="counts"
   
   ## Add new matrix into assay slot wiht same class as original counts
   if(class(mat) == "DelayedMatrix") {
-    decontXcounts(x) <- DelayedArray(result$decontXcounts)
+    decontXcounts(x) <- DelayedArray::DelayedArray(result$decontXcounts)
   } else {
     SummarizedExperiment::assay(x, "decontXcounts") <-
       as(result$decontXcounts, class(mat))
@@ -212,8 +228,9 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 	  } else {
         .logMessages(
 		  date(),
-		  ".. Analyzing cells in batch '",
+		  " .. Analyzing cells in batch '",
 		  bat, "'",
+		  sep = "",
 		  logfile = logfile,
 		  append = TRUE,
 		  verbose = verbose

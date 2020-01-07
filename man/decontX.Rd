@@ -2,27 +2,17 @@
 % Please edit documentation in R/decon.R
 \name{decontX}
 \alias{decontX}
-\title{DecontX}
+\alias{decontX,ANY-method}
+\alias{decontX,SingleCellExperiment-method}
+\title{Contamination estimation with decontX}
 \usage{
-decontX(
-  counts,
-  z = NULL,
-  batch = NULL,
-  maxIter = 500,
-  delta = 10,
-  convergence = 0.001,
-  convergenceStep = 10,
-  logfile = NULL,
-  verbose = TRUE,
-  varGenes = 5000,
-  L = 50,
-  dbscanEps = 1,
-  seed = 12345
-)
+\S4method{decontX}{ANY}(x, ...)
+
+\S4method{decontX}{SingleCellExperiment}(x, ..., assayName = "counts")
 }
 \arguments{
-\item{counts}{Numeric matrix. Observed count matrix, rows represent
-features and columns represent cells.}
+\item{x}{A numeric matrix of counts, or a \linkS4class{SingleCellExperiment}
+containing such a matrix in the 'assayName' assay.}
 
 \item{z}{Integer vector. Cell cluster labels. If NULL, Celda will be used
 to reduce the dimensionality of the dataset to 'L' modules,
@@ -31,27 +21,26 @@ reduce the dataset to 2 dimenions and the '\link[dbscan]{dbscan}'
 function from the 'dbscan' package will be used to identify clusters
 of broad cell types. Default NULL.}
 
-\item{batch}{Integer vector. Batch labels for cells. If batch labels 
-are supplied, DecontX is run on cells from each batch separately.
-Default NULL.}
+\item{batch}{Numeric or character vector. Batch labels for cells.
+If batch labels are supplied, DecontX is run on cells from each
+batch separately. Cells run in different channels or assays
+should be considered different batches. Default NULL.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
+
+\item{convergence}{Numeric. The EM algorithm will be stopped if the maximum
+difference in the contamination estimates between the previous and
+current iterations is less than this. Default 0.001.}
+
+\item{iterLogLik}{Integer. Calculate log likelihood every 'iterLogLik'
+iteration. Default 10.}
 
 \item{delta}{Numeric. Symmetric Dirichlet concentration parameter
 to initialize theta. Default 10.}
 
-\item{convergence}{Numeric. The EM algorithm will be stopped if the maximum
-difference in the contamination estimates between the previous 'convergenceCheck'
-is less than this. Default 0.001.}
-
-\item{logfile}{Character. Messages will be redirected to a file named
-`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
-
-\item{verbose}{Logical. Whether to print log messages. Default TRUE.}
-
 \item{varGenes}{Integer. The number of variable genes to use in
 Celda clustering. Variability is calcualted using '\link[scran]{modelGeneVar}'
-function from the 'scran' package. 
+function from the 'scran' package.
 Used only when z is not provided. Default 5000.}
 
 \item{L}{Integer. Number of modules for Celda clustering. Used to reduce
@@ -66,15 +55,28 @@ Used only when z is not provided. Default 1.}
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 
-\item{iterLogLik}{Integer. Every iteration to calculate log likelihood
-Default 10.}
+\item{logfile}{Character. Messages will be redirected to a file named
+`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+
+\item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-'decontX_counts' contains the decontaminated count matrix.
-'contamination' contains the per-cell contamination estimates.
-'batchEstimates' contains the estimated probability distributions
-for each batch. 'z' contains the cell cluster labels. 'runParams'
-contains a list of arguments used in the function call.
+If \code{x} is a matrix-like object, a list will be returned
+with the following items:
+\describe{
+\item{\code{decontXcounts}:}{The decontaminated count matrix.}
+\item{\code{contamination}:}{Percentage of contamination in each cell.}
+\item{\code{estimates}:}{Estimated probability distributions
+for each batch.}
+\item{\code{z}:}{Cell population/cluster labels.}
+\item{\code{runParams}:}{List of arguments used in the function call.}
+}
+
+If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
+counts will be stored as an assay and can be accessed with 
+\code{decontXcounts(x)}. The contamination values and cluster labels
+will be stored in \code{colData(x)}. All other items will be stored
+in \code{metadata(x)$decontX}.
 }
 \description{
 Identifies contamination from factors such as ambient RNA
