@@ -36,9 +36,9 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @return 'decontX_counts' contains the decontaminated count matrix.
+#' @return 'decontXcounts' contains the decontaminated count matrix.
 #' 'contamination' contains the per-cell contamination estimates.
-#' 'batchEstimates' contains the estimated probability distributions
+#' 'estimates' contains the estimated probability distributions
 #' for each batch. 'z' contains the cell cluster labels. 'runParams'
 #' contains a list of arguments used in the function call.
 #'
@@ -79,14 +79,14 @@ setMethod("decontX", "SingleCellExperiment", function(x, ..., assayName="counts"
   
   ## Add new matrix into assay slot wiht same class as original counts
   if(class(mat) == "DelayedMatrix") {
-    decontXcounts(x) <- DelayedArray(result$decontX_counts)
+    decontXcounts(x) <- DelayedArray(result$decontXcounts)
   } else {
     SummarizedExperiment::assay(x, "decontXcounts") <-
-      as(result$decontX_counts, class(mat))
+      as(result$decontXcounts, class(mat))
   }
   
   ## Save the rest of the result object into metadata
-  result$decontX_counts <- NULL
+  result$decontXcounts <- NULL
   metadata(x)$decontX <- result
   
   x
@@ -187,7 +187,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 
     ## Generate batch labels if none were supplied
     if (is.null(batch)) {
-      batch <- rep("batch", nC)
+      batch <- rep("all_cells", nC)
     }
     runParams$batch <- batch
 	batchIndex <- unique(batch)
@@ -212,8 +212,8 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 	  } else {
         .logMessages(
 		  date(),
-		  ".. Analyzing cells in batch",
-		  bat,
+		  ".. Analyzing cells in batch '",
+		  bat, "'",
 		  logfile = logfile,
 		  append = TRUE,
 		  verbose = verbose
@@ -318,8 +318,8 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
         
 	returnResult <- list(
 		"runParams" = runParams,
-		"batchEstimates" = resBatch,
-		"decontX_counts" = estRmat,
+		"estimates" = resBatch,
+		"decontXcounts" = estRmat,
 		"contamination" = estConp,
 		"z" = returnZ
 	)
@@ -398,7 +398,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
     if (is.null(z)) {
         .logMessages(
             date(),
-            ".. Estimating cell types with Celda",
+            ".... Estimating cell types with Celda",
             logfile = logfile,
             append = TRUE,
             verbose = verbose
@@ -431,7 +431,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 
     .logMessages(
         date(),
-        ".. Estimating contamination",
+        ".... Estimating contamination",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -545,7 +545,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 #			  }
             
               .logMessages(date(),
-                ".... Completed iteration:",
+                "...... Completed iteration:",
                 iter,
                 "| converge:",
                 signif(max.divergence, 4),
@@ -809,7 +809,7 @@ addLogLikelihood <- function(llA, llB) {
 
         .logMessages(
             date(),
-            ".... Collapsing features into",
+            "...... Collapsing features into",
             L,
             "modules",
             logfile = logfile,
@@ -831,7 +831,7 @@ addLogLikelihood <- function(llA, llB) {
 
         .logMessages(
             date(),
-            ".... Reducing dimensionality with UMAP",
+            "...... Reducing dimensionality with UMAP",
             logfile = logfile,
             append = TRUE,
             verbose = verbose
@@ -844,7 +844,7 @@ addLogLikelihood <- function(llA, llB) {
 
         .logMessages(
             date(),
-            " .... Determining cell clusters with DBSCAN (Eps=",
+            " ...... Determining cell clusters with DBSCAN (Eps=",
             dbscanEps,
             ")",
             sep = "",
