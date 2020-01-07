@@ -7,12 +7,14 @@
 #'
 #' @param x A numeric matrix of counts, or a \linkS4class{SingleCellExperiment}
 #' containing such a matrix in the 'assayName' assay.
-#' @param z Integer vector. Cell cluster labels. If NULL, Celda will be used
-#' to reduce the dimensionality of the dataset to 'L' modules,
-#' '\link[uwot]{umap}' from the 'uwot' package  will be used to further
-#' reduce the dataset to 2 dimenions and the '\link[dbscan]{dbscan}'
-#' function from the 'dbscan' package will be used to identify clusters
-#' of broad cell types. Default NULL.
+#' @param assayName Character. Name of the assay to use if \code{x} is a
+#' \linkS4class{SingleCellExperiment}.
+#' @param z Numeric or character vector. Cell cluster labels. If NULL,
+#' Celda will be used to reduce the dimensionality of the dataset
+#' to 'L' modules, '\link[uwot]{umap}' from the 'uwot' package 
+#' will be used to further reduce the dataset to 2 dimenions and
+#' the '\link[dbscan]{dbscan}' function from the 'dbscan' package
+#' will be used to identify clusters of broad cell types. Default NULL.
 #' @param batch Numeric or character vector. Batch labels for cells.
 #' If batch labels are supplied, DecontX is run on cells from each
 #' batch separately. Cells run in different channels or assays
@@ -56,8 +58,8 @@
 #' If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
 #' counts will be stored as an assay and can be accessed with 
 #' \code{decontXcounts(x)}. The contamination values and cluster labels
-#' will be stored in \code{colData(x)}. All other items will be stored
-#' in \code{metadata(x)$decontX}.
+#' will be stored in \code{colData(x)}. \code{estimates} and \code{runParams}
+#' will be stored in \code{metadata(x)$decontX}.
 #'
 #' @examples
 #'  s <- simulateContaminatedMatrix()
@@ -75,23 +77,43 @@ setGeneric("decontX", function(x, ...) standardGeneric("decontX"))
 # Setting up S4 methods #
 #########################
 
-#' @export
-#' @rdname decontX
-setMethod("decontX", "ANY", function(x, ...) {
-  .decontX(counts = x, ...)
-})
 
 #' @export
 #' @rdname decontX
-setMethod("decontX", "SingleCellExperiment", function(x, ..., assayName="counts")
+setMethod("decontX", "SingleCellExperiment", function(x,
+    assayName="counts",
+    z = NULL,
+    batch = NULL,    
+    maxIter = 500,
+    delta = 10,
+    convergence = 0.001,
+    iterLogLik = 10,
+    varGenes = 5000,
+    dbscanEps = 1,
+    L = 50,
+    seed = 12345,
+    logfile = NULL,
+    verbose = TRUE)
 {
   mat <- SummarizedExperiment::assay(x, i=assayName)
-  result <- .decontX(mat, ...)
+  result <- .decontX(counts = mat,
+      z = z,
+      batch = batch,
+      maxIter = maxIter,
+      convergence = convergence,
+      iterLogLik = iterLogLik,
+      delta = delta,
+      varGenes = varGenes,
+      L = L,
+      dbscanEps = dbscanEps,
+      seed = seed,
+      logfile = logfile,
+      verbose = verbose)
   
   ## Add results into column annotation
   colData(x) = cbind(colData(x),
-                    celda_decontX_Contamination = result$contamination,
-                                     celda_decontX_Clusters = result$z)
+                    decontX_Contamination = result$contamination,
+                                     decontX_Clusters = result$z)
   
   ## Add new matrix into assay slot wiht same class as original counts
   if(class(mat) == "DelayedMatrix") {
@@ -107,6 +129,37 @@ setMethod("decontX", "SingleCellExperiment", function(x, ..., assayName="counts"
   
   x
 }) 
+
+#' @export
+#' @rdname decontX
+setMethod("decontX", "ANY", function(x,
+    z = NULL,
+    batch = NULL,    
+    maxIter = 500,
+    delta = 10,
+    convergence = 0.001,
+    iterLogLik = 10,
+    varGenes = 5000,
+    dbscanEps = 1,
+    L = 50,
+    seed = 12345,
+    logfile = NULL,
+    verbose = TRUE)
+{
+  .decontX(counts = x,
+      z = z,
+      batch = batch,
+      maxIter = maxIter,
+      convergence = convergence,
+      iterLogLik = iterLogLik,
+      delta = delta,
+      varGenes = varGenes,
+      L = L,
+      dbscanEps = dbscanEps,
+      seed = seed,
+      logfile = logfile,
+      verbose = verbose)
+})
 
 
 ## Copied from SingleCellExperiment Package
@@ -141,8 +194,6 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 
 
 
-
-
 ##########################
 # Core Decontx Functions #
 ##########################
@@ -151,15 +202,15 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
     z = NULL,
     batch = NULL,    
     maxIter = 200,
-    delta = 10,
     convergence = 0.001,
     iterLogLik = 10,
-    logfile = NULL,
-    verbose = TRUE,
+    delta = 10,    
     varGenes = NULL,
+    L = NULL,    
     dbscanEps = NULL,
-    L = NULL,
-    seed = 12345) {
+    seed = 12345,
+    logfile = NULL,
+    verbose = TRUE) {
 
     startTime <- Sys.time()
     .logMessages(paste(rep("-", 50), collapse = ""),
@@ -429,6 +480,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 
         celda.init <- .decontxInitializeZ(object = counts,
             varGenes = varGenes,
+            L = L,
             dbscanEps = dbscanEps,
             verbose = verbose,
             logfile = logfile)
