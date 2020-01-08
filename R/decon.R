@@ -6,9 +6,9 @@
 #' @name decontX
 #'
 #' @param x A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
-#' with the matrix located in the assay slot under 'assayName'. \code{x} will
-#' be converted to a sparse matrix of class "dgCMatrix" from the
-#' \code{\link[Matrix]} package.
+#' with the matrix located in the assay slot under \code{assayName}.
+#' Cells in each batch will be subsetted and converted to a sparse matrix
+#' of class \code{dgCMatrix} from package \link{Matrix} before analysis.
 #' @param assayName Character. Name of the assay to use if \code{x} is a
 #' \linkS4class{SingleCellExperiment}.
 #' @param z Numeric or character vector. Cell cluster labels. If NULL,
@@ -417,7 +417,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"),
 	)
 
     ## Try to convert class of new matrix to class of original matrix
-    if (class(counts) != "dgCMatrix") {
+    if (inherits(counts, "dgCMatrix")) {
       .logMessages(
           date(),
 	      ".. Finalizing decontaminated matrix",
@@ -427,7 +427,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"),
 	  )
 	}  	  
     
-    if (class(counts) %in% c("DelayedMatrix", "DelayedArray")) {
+    if (inherits(counts, c("DelayedMatrix", "DelayedArray"))) {
 
       ## Determine class of seed in DelayedArray
       seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]

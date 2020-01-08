@@ -3,7 +3,7 @@ library(celda)
 context("Testing Deconx")
 
 deconSim <- simulateContaminatedMatrix(K = 10, delta = c(1, 5))
-modelDecontXoneBatch <- .decontX(deconSim$observedCounts,
+modelDecontXoneBatch <- decontX(deconSim$observedCounts,
         z = deconSim$z,
         maxIter = 2)
 
