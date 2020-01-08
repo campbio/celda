@@ -447,7 +447,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"),
           returnResult$decontXcounts <-
               as(returnResult$decontXcounts, class(counts))
         }
-      })
+      }, silent = TRUE)
     } 
 
 
