@@ -123,11 +123,34 @@ setMethod("decontX", "SingleCellExperiment", function(x,
       as(result$decontXcounts, class(mat))
   }
   
+  ## Put estimated UMAPs into SCE if z was estimated with Celda/UMAP
+  if (is.null(result$runParams$z)) {
+    batchIndex <- unique(result$runParams$batch)
+    if (length(batchIndex) > 1) {
+      for(i in batchIndex) {
+      
+        ## Each individual UMAP will only be for one batch so need
+        ## to put NAs in for cells in other batches
+        tempUMAP <- matrix(NA, ncol = 2, nrow = ncol(mat))
+        tempUMAP[result$runParams$batch == i,] <- result$estimates[[i]]$UMAP
+        colnames(tempUMAP) <- c("UMAP_1", "UMAP_2")
+        rownames(tempUMAP) <- colnames(mat)
+        
+        SingleCellExperiment::reducedDim(x,
+            paste("decontX", i, "UMAP", sep="_")) <- tempUMAP
+      }
+    } else {
+      SingleCellExperiment::reducedDim(x,"decontX_UMAP") <- 
+          result$estimates[[batchIndex]]$UMAP
+    }
+  }  
+  
+
   ## Save the rest of the result object into metadata
   result$decontXcounts <- NULL
   metadata(x)$decontX <- result
   
-  x
+  return(x)
 }) 
 
 #' @export
@@ -227,6 +250,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
         verbose = verbose)
 
     runParams <- list(
+        z = z,
         batch = batch,
         maxIter = maxIter,
         delta = delta,
