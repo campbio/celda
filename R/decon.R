@@ -441,11 +441,14 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"),
       returnResult$decontXcounts <-
           DelayedArray::DelayedArray(returnResult$decontXcounts)   
 
-    } #else if (canCoerce(returnResult$decontXcounts, class(counts))) {
-  
-      #returnResult$decontXcounts <- as(returnResult$decontXcounts, class(counts))
-      
-    #} 
+    } else  {
+      try({
+      if (canCoerce(returnResult$decontXcounts, class(counts))) {
+          returnResult$decontXcounts <-
+              as(returnResult$decontXcounts, class(counts))
+        }
+      })
+    } 
 
 
 #    } else { ## When there is only one batch
