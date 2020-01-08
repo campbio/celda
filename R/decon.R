@@ -28,8 +28,8 @@
 #' @param delta Numeric. Symmetric Dirichlet concentration parameter
 #' to initialize theta. Default 10.
 #' @param varGenes Integer. The number of variable genes to use in
-#' Celda clustering. Variability is calcualted using '\link[scran]{modelGeneVar}'
-#' function from the 'scran' package.
+#' Celda clustering. Variability is calcualted using
+#' \code{\link[scran]{modelGeneVar}} function from the 'scran' package.
 #' Used only when z is not provided. Default 5000.
 #' @param L Integer. Number of modules for Celda clustering. Used to reduce
 #' the dimensionality of the dataset before applying UMAP and dbscan.
@@ -49,8 +49,9 @@
 #' \describe{
 #' \item{\code{decontXcounts}:}{The decontaminated count matrix.}
 #' \item{\code{contamination}:}{Percentage of contamination in each cell.}
-#' \item{\code{estimates}:}{Estimated probability distributions
-#' for each batch.}
+#' \item{\code{estimates}:}{List of estimated parameters for each batch. If z
+#' was not supplied, then the UMAP coordinates used to generated cell
+#' cluster labels will also be stored here.}
 #' \item{\code{z}:}{Cell population/cluster labels used for analysis.}
 #' \item{\code{runParams}:}{List of arguments used in the function call.}
 #' }
@@ -59,7 +60,9 @@
 #' counts will be stored as an assay and can be accessed with 
 #' \code{decontXcounts(x)}. The contamination values and cluster labels
 #' will be stored in \code{colData(x)}. \code{estimates} and \code{runParams}
-#' will be stored in \code{metadata(x)$decontX}.
+#' will be stored in \code{metadata(x)$decontX}. If z was not supplied, then
+#' the UMAPs used to generated cell cluster labels will be stored in
+#' \code{reducedDims} slot in \code{x}
 #'
 #' @examples
 #'  s <- simulateContaminatedMatrix()
