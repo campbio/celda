@@ -441,7 +441,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"),
       returnResult$decontXcounts <-
           DelayedArray::DelayedArray(returnResult$decontXcounts)   
 
-    } else if (canCoerce(result$decontXcounts, class(counts))) {
+    } else if (canCoerce(returnResult$decontXcounts, class(counts))) {
   
       returnResult$decontXcounts <- as(returnResult$decontXcounts, class(counts))
       
