@@ -1,5 +1,4 @@
 
-
 #' @title Simulate contaminated count matrix
 #' @description This function generates a list containing two count matrices --
 #'  one for real expression, the other one for contamination, as well as other
@@ -189,9 +188,9 @@ simulateContaminatedMatrix <- function(C = 300,
     rnGByK <- .colSumByGroupNumeric(estRmat, z, K)
     cnGByK <- rowSums(rnGByK) - rnGByK
 
-    TNbyC <- colSums(counts) 
+    TNbyC <- colSums(counts)
     estRbyCol <- colSums(estRmat)
-    
+
     PrbyC <- estRbyCol / TNbyC
     PcbyC <- 1 - PrbyC
     deltaV2 <- MCMCprecision::fit_dirichlet(cbind(PrbyC, PcbyC))$alpha
