@@ -910,17 +910,22 @@ addLogLikelihood <- function(llA, llB) {
             verbose = verbose
         )
         ## Celda clustering using recursive module splitting
-        if (L < nrow(countsFiltered)) {
-            initialModuleSplit <- recursiveSplitModule(countsFiltered,
-                initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
-            initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
-            fm <- factorizeMatrix(countsFiltered, initialModel, type = "counts")
-            fm <- fm$counts$cell
-            rm(initialModuleSplit)
-            rm(initialModel)
-        } else {
-            fm <- countsFiltered
-        }
+        L <- min(L, nrow(countsFiltered))
+        initialModuleSplit <- recursiveSplitModule(countsFiltered,
+            initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)        
+        initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
+
+        #if (L < nrow(countsFiltered)) {
+        #    initialModuleSplit <- recursiveSplitModule(countsFiltered,
+        #        initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+        #    initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
+        #    fm <- factorizeMatrix(countsFiltered, initialModel, type = "counts")
+        #    fm <- fm$counts$cell
+        #    rm(initialModuleSplit)
+        #    rm(initialModel)
+        #} else {
+        #    fm <- countsFiltered
+        #}
 
         .logMessages(
             date(),
@@ -931,9 +936,11 @@ addLogLikelihood <- function(llA, llB) {
         )
         ## Louvan graph-based method to reduce dimension into 2 cluster
         nNeighbors <- min(15, ncol(countsFiltered))
-        resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors = nNeighbors,
-            min_dist = 0.01, spread = 1)
-        rm(fm)
+        #resUmap <- uwot::umap(t(sqrt(fm)), n_neighbors = nNeighbors,
+        #    min_dist = 0.01, spread = 1)
+        #rm(fm)
+        resUmap <- celdaUmap(countsFiltered, initialModel, 
+                       minDist = 0.01, spread = 1, nNeighbors = nNeighbors)
 
         .logMessages(
             date(),
