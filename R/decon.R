@@ -5,8 +5,10 @@
 #'
 #' @name decontX
 #'
-#' @param x A numeric matrix of counts, or a \linkS4class{SingleCellExperiment}
-#' containing such a matrix in the 'assayName' assay.
+#' @param x A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
+#' with the matrix located in the assay slot under 'assayName'. \code{x} will
+#' be converted to a sparse matrix of class "dgCMatrix" from the
+#' \code{\link[Matrix]} package.
 #' @param assayName Character. Name of the assay to use if \code{x} is a
 #' \linkS4class{SingleCellExperiment}.
 #' @param z Numeric or character vector. Cell cluster labels. If NULL,
@@ -117,15 +119,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   colData(x) = cbind(colData(x),
                     decontX_Contamination = result$contamination,
                                      decontX_Clusters = result$z)
-  
-  ## Add new matrix into assay slot wiht same class as original counts
-  if(class(mat) == "DelayedMatrix") {
-    decontXcounts(x) <- DelayedArray::DelayedArray(result$decontXcounts)
-  } else {
-    SummarizedExperiment::assay(x, "decontXcounts") <-
-      as(result$decontXcounts, class(mat))
-  }
-  
+
   ## Put estimated UMAPs into SCE if z was estimated with Celda/UMAP
   if (is.null(result$runParams$z)) {
     batchIndex <- unique(result$runParams$batch)
@@ -206,16 +200,19 @@ SET_FUN <- function(exprs_values, ...) {
 }
 
 #' @export
-setGeneric("decontXcounts", function(object, ...) standardGeneric("decontXcounts"))
+setGeneric("decontXcounts", function(object, ...)
+    standardGeneric("decontXcounts"))
 
 #' @export
-setGeneric("decontXcounts<-", function(object, ..., value) standardGeneric("decontXcounts<-"))
+setGeneric("decontXcounts<-", function(object, ..., value)
+    standardGeneric("decontXcounts<-"))
 
 #' @export
 setMethod("decontXcounts", "SingleCellExperiment", GET_FUN("decontXcounts"))
 
 #' @export
-setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("decontXcounts"))
+setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"),
+    SET_FUN("decontXcounts"))
 
 
 
@@ -418,6 +415,37 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
 		"contamination" = estConp,
 		"z" = returnZ
 	)
+
+    ## Try to convert class of new matrix to class of original matrix
+    if (class(counts) != "dgCMatrix") {
+      .logMessages(
+          date(),
+	      ".. Finalizing decontaminated matrix",
+		  logfile = logfile,
+		  append = TRUE,
+		  verbose = verbose
+	  )
+	}  	  
+    
+    if (class(counts) %in% c("DelayedMatrix", "DelayedArray")) {
+
+      ## Determine class of seed in DelayedArray
+      seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
+      if (seed.class == "HDF5ArraySeed") {
+        returnResult$decontXcounts <- as(returnResult$decontXcounts, "HDF5Matrix")
+      } else {
+        if (isTRUE(canCoerce(returnResult$decontXcounts, seed.class))) {
+          returnResult$decontXcounts <- as(returnResult$decontXcounts, seed.class)
+        }    
+      }
+      returnResult$decontXcounts <-
+          DelayedArray::DelayedArray(returnResult$decontXcounts)   
+
+    } else if (canCoerce(result$decontXcounts, class(counts))) {
+  
+      returnResult$decontXcounts <- as(returnResult$decontXcounts, class(counts))
+      
+    } 
 
 
 #    } else { ## When there is only one batch
@@ -694,7 +722,7 @@ setReplaceMethod("decontXcounts", c("SingleCellExperiment", "ANY"), SET_FUN("dec
     return(ll)
 }
 
-# DEPRECATED. This is not used, but is kept as it might be useful in the future.
+# DEPRECATED. This is not used, but is kept as it might be useful in the future
 # This function calculates the log-likelihood of background distribution
 # decontamination
 # bgDist Numeric matrix. Rows represent feature and columns are the times that
@@ -919,15 +947,15 @@ addLogLikelihood <- function(llA, llB) {
         initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
 
         #if (L < nrow(countsFiltered)) {
-        #    initialModuleSplit <- recursiveSplitModule(countsFiltered,
-        #        initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
-        #    initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
-        #    fm <- factorizeMatrix(countsFiltered, initialModel, type = "counts")
-        #    fm <- fm$counts$cell
-        #    rm(initialModuleSplit)
-        #    rm(initialModel)
+        #  initialModuleSplit <- recursiveSplitModule(countsFiltered,
+        #      initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+        #  initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
+        #  fm <- factorizeMatrix(countsFiltered, initialModel, type = "counts")
+        #  fm <- fm$counts$cell
+        #  rm(initialModuleSplit)
+        #  rm(initialModel)
         #} else {
-        #    fm <- countsFiltered
+        #  fm <- countsFiltered
         #}
 
         .logMessages(

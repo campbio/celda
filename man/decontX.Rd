@@ -40,8 +40,10 @@
 )
 }
 \arguments{
-\item{x}{A numeric matrix of counts, or a \linkS4class{SingleCellExperiment}
-containing such a matrix in the 'assayName' assay.}
+\item{x}{A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under 'assayName'. \code{x} will
+be converted to a sparse matrix of class "dgCMatrix" from the
+\code{\link[Matrix]} package.}
 
 \item{assayName}{Character. Name of the assay to use if \code{x} is a
 \linkS4class{SingleCellExperiment}.}
