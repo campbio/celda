@@ -49,7 +49,10 @@
 #' @return If \code{x} is a matrix-like object, a list will be returned
 #' with the following items:
 #' \describe{
-#' \item{\code{decontXcounts}:}{The decontaminated count matrix.}
+#' \item{\code{decontXcounts}:}{The decontaminated matrix. Values obtained
+#' from the variational inference procedure may be non-integer. However,
+#' integer counts can be obtained by rounding,
+#' e.g. \code{round(decontXcounts)}.}
 #' \item{\code{contamination}:}{Percentage of contamination in each cell.}
 #' \item{\code{estimates}:}{List of estimated parameters for each batch. If z
 #' was not supplied, then the UMAP coordinates used to generated cell
@@ -144,6 +147,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   
 
   ## Save the rest of the result object into metadata
+  decontXcounts(x) <- result$decontXcounts
   result$decontXcounts <- NULL
   metadata(x)$decontX <- result
   
