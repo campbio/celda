@@ -411,20 +411,8 @@ setReplaceMethod(
       returnZ[batch == bat] <- res$z
     }
 
-    # 		if (is.null(logLikelihood)) {
-    # 			logLikelihood <- resBat$resList$logLikelihood
-    # 		} else {
-    # 			logLikelihood <- addLogLikelihood(logLikelihood,
-    # 				resBat$resList$logLikelihood)
-    # 		}
   }
   names(resBatch) <- batchIndex
-
-  # 	runParams <- res$runParams
-  ## All batches share the same other parameters except cluster label z
-  ## So update z in the final returned result
-  # 	runParams$z <- returnZ
-  # 	method <- res$method
 
   returnResult <- list(
     "runParams" = runParams,
@@ -469,35 +457,6 @@ setReplaceMethod(
       silent = TRUE
     )
   }
-
-
-  #    } else { ## When there is only one batch
-  #        returnResult <- .decontXoneBatch(
-  #            counts = counts,
-  #            z = z,
-  #            maxIter = maxIter,
-  #            delta = delta,
-  #            convergence = convergence,
-  #            logfile = logfile,
-  #            verbose = verbose,
-  #            varGenes = varGenes,
-  #            dbscanEps = dbscanEps,
-  #            L = L
-  #        )
-
-  #        estRmat <- calculateNativeMatrix(
-  #          counts = counts,
-  #          native_counts = estRmat,
-  #          theta = returnResult$theta,
-  #          eta = returnResult$eta,
-  #          row_index = which(noneEmptyGeneIndex),
-  #          col_index = seq(totalCells),
-  #          phi = returnResult$phi,
-  #          z = as.integer(returnResult$runParams$z),
-  #          pseudocount = 1e-20)
-
-  #          returnResult$decontX_counts <- estRmat
-  #    }
 
   endTime <- Sys.time()
   .logMessages(paste(rep("-", 50), collapse = ""),
@@ -593,7 +552,6 @@ setReplaceMethod(
   if (deconMethod == "clustering") {
     ## Initialization
     deltaInit <- delta
-    # theta  = stats::runif(nC, min = 0.1, max = 0.5)
     theta <- stats::rbeta(
       n = nC,
       shape1 = deltaInit,
@@ -610,25 +568,7 @@ setReplaceMethod(
     phi <- nextDecon$phi
     eta <- nextDecon$eta
 
-    #        estRmat <- Matrix::t(Matrix::t(counts) * theta)
-    #        phi <- .colSumByGroupNumeric(as.matrix(estRmat), z, K)
-    #        eta <- rowSums(phi) - phi
-    #        phi <- normalizeCounts(phi,
-    #            normalize = "proportion",
-    #            pseudocountNormalize = 1e-20)
-    #        eta <- normalizeCounts(eta,
-    #            normalize = "proportion",
-    #            pseudocountNormalize = 1e-20)
     ll <- c()
-
-
-    #        llRound <- .deconCalcLL(
-    #            counts = counts,
-    #            z = z,
-    #            phi = phi,
-    #            eta = eta,
-    #            theta = theta
-    #        )
     llRound <- decontXLogLik(
       counts = counts,
       z = z,
@@ -644,15 +584,7 @@ setReplaceMethod(
     counts.colsums <- Matrix::colSums(counts)
     while (iter <= maxIter & !isTRUE(converged) &
       numIterWithoutImprovement <= stopIter) {
-      #            nextDecon <- .cDCalcEMDecontamination(
-      #                counts = counts,
-      #                phi = phi,
-      #                eta = eta,
-      #                theta = theta,
-      #                z = z,
-      #                K = K,
-      #                delta = delta
-      #            )
+
       nextDecon <- decontXEM(
         counts = counts,
         counts_colsums = counts.colsums,
@@ -667,15 +599,6 @@ setReplaceMethod(
       phi <- nextDecon$phi
       eta <- nextDecon$eta
       delta <- nextDecon$delta
-
-      ## Calculate log-likelihood
-      #            llTemp <- .deconCalcLL(
-      #                counts = counts,
-      #                z = z,
-      #                phi = phi,
-      #                eta = eta,
-      #                theta = theta
-      #            )
 
       max.divergence <- max(abs(theta.previous - theta))
       if (max.divergence < convergence) {
@@ -695,13 +618,6 @@ setReplaceMethod(
         )
 
         ll <- c(ll, llTemp)
-        # 			  llRound <- c(llRound, round(llTemp, 2))
-
-        # 			  if (round(llTemp, 2) > llRound[iter] | iter == 1) {
-        # 				  numIterWithoutImprovement <- 1L
-        # 			  } else {
-        # 				  numIterWithoutImprovement <- numIterWithoutImprovement + 1L
-        # 			  }
 
         .logMessages(date(),
           "...... Completed iteration:",
@@ -953,22 +869,11 @@ addLogLikelihood <- function(llA, llB) {
       )
     }
 
-    ## Add the log2 normalized counts into sce object
-    ## The normalized counts is also centered using library size in the
-    ## original count matrix in scater::normalizeSCE()
-    # sce <- suppressWarnings(scater::normalizeSCE(sce))
     sce <- scater::logNormCounts(sce, log = TRUE)
 
     if (nrow(sce) <= varGenes) {
       topVariableGenes <- seq_len(nrow(sce))
     } else if (nrow(sce) > varGenes) {
-      ## Use the top most variable genes to do rough clustering
-      ## (celda_CG & Louvian graph algorithm)
-      # mvTrend <- scran::trendVar(sce, use.spikes = FALSE)
-      # decomposeTrend <- scran::decomposeVar(sce, mvTrend)
-      # topVariableGenes <- order(decomposeTrend$bio,
-      #    decreasing = TRUE)[seq(varGenes)]
-
       sce.var <- scran::modelGeneVar(sce)
       topVariableGenes <- order(sce.var$bio,
         decreasing = TRUE
@@ -994,18 +899,6 @@ addLogLikelihood <- function(llA, llB) {
       initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE
     )
     initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
-
-    # if (L < nrow(countsFiltered)) {
-    #  initialModuleSplit <- recursiveSplitModule(countsFiltered,
-    #      initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
-    #  initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
-    #  fm <- factorizeMatrix(countsFiltered, initialModel, type = "counts")
-    #  fm <- fm$counts$cell
-    #  rm(initialModuleSplit)
-    #  rm(initialModel)
-    # } else {
-    #  fm <- countsFiltered
-    # }
 
     .logMessages(
       date(),
