@@ -33,6 +33,7 @@ Imports:
     S4Vectors,
     data.table,
     Rcpp,
+    RcppArmadillo,
     RcppEigen,
     uwot,
     enrichR,
@@ -62,7 +63,7 @@ Suggests:
     M3DExampleData,
     BiocManager,
     BiocStyle
-LinkingTo: Rcpp, RcppEigen
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false

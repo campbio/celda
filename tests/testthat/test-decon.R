@@ -3,23 +3,14 @@ library(celda)
 context("Testing Deconx")
 
 deconSim <- simulateContaminatedMatrix(K = 10, delta = c(1, 5))
-modelDecontXoneBatch <- .decontXoneBatch(deconSim$observedCounts,
+modelDecontXoneBatch <- decontX(deconSim$observedCounts,
         z = deconSim$z,
-        maxIter = 2)
-modelDecontXoneBatchIter1 <- .decontXoneBatch(deconSim$observedCounts,
-        z = deconSim$z,
-        maxIter = 1)
-modelDecontXoneBatchbg <- decontX(deconSim$observedCounts,
         maxIter = 2)
 
 deconSim2 <- simulateContaminatedMatrix(K = 10, delta = 5)
 batchDecontX <- decontX(cbind(deconSim$observedCounts,
     deconSim2$observedCounts),
         z = c(deconSim$z, deconSim2$z),
-        batch = rep(seq(2), each = ncol(deconSim$observedCounts)),
-        maxIter = 2)
-batchDecontXBg <- decontX(cbind(deconSim$observedCounts,
-    deconSim2$observedCounts),
         batch = rep(seq(2), each = ncol(deconSim$observedCounts)),
         maxIter = 2)
 
@@ -38,18 +29,15 @@ test_that(desc = "Testing simulateContaminatedMatrix", {
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {
-    expect_equal(modelDecontXoneBatch$resList$estConp,
-        1 - colSums(modelDecontXoneBatch$resList$estNativeCounts) /
-            colSums(deconSim$observedCounts))
-    expect_error(.decontXoneBatch(counts = deconSim$observedCounts,
+    expect_error(decontX(x = deconSim$observedCounts,
         z = deconSim$z,
         delta = -1),
         "'delta' should be a single positive value.")
-    expect_error(.decontXoneBatch(counts = deconSim$observedCounts,
+    expect_error(decontX(x = deconSim$observedCounts,
         z = deconSim$z,
         delta = c(1, 1)),
         "'delta' should be a single positive value.")
-    expect_error(.decontXoneBatch(counts = deconSim$observedCounts,
+    expect_error(decontX(x = deconSim$observedCounts,
         z = c(deconSim$z, 1)),
         paste0("'z' must be of the same length as the number of cells in the",
             " 'counts' matrix."))
@@ -63,18 +51,12 @@ test_that(desc = "Testing .decontXoneBatch", {
         "Missing value in 'counts' matrix.")
 })
 
-test_that(desc = "Testing .decontXoneBatch using background distribution", {
-    expect_equal(
-        modelDecontXoneBatchbg$resList$estConp,
-        1 - colSums(modelDecontXoneBatchbg$resList$estNativeCounts) /
-            deconSim$NByC)
-})
 
 ## logLikelihood
 #test_that(desc = "Testing logLikelihood.DecontXoneBatch", {
     # z.process = processCellLabels(deconSim$z,
     # num.cells=ncol(deconSim$observedCounts) )
-    # expect_equal( decon.calcLL(counts=deconSim$observedCounts, z=z.process  ,
+    # expect_equal( decon.calcLL(x=deconSim$observedCounts, z=z.process  ,
     #    theta=modelDecontXoneBatch$resList$theta,
     # eta=modelDecontXoneBatch$resList$est.ConDist,
     # phi=modelDecontXoneBatch$resList$est.GeneDist ),
