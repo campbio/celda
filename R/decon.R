@@ -876,7 +876,7 @@ addLogLikelihood <- function(llA, llB) {
     }
 
     sce <- scater::logNormCounts(sce, log = TRUE)
-		#sce <- scater::normalize(sce)
+    #sce <- scater::normalize(sce)
 
     if (nrow(sce) <= varGenes) {
       topVariableGenes <- seq_len(nrow(sce))
@@ -906,7 +906,7 @@ addLogLikelihood <- function(llA, llB) {
     initialModuleSplit <- recursiveSplitModule(countsFiltered,
       initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
     } else {
-			with_seed(seed, initialModuleSplit <- recursiveSplitModule(countsFiltered,
+      with_seed(seed, initialModuleSplit <- recursiveSplitModule(countsFiltered,
         initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
     )}
     initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
