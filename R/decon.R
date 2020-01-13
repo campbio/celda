@@ -359,7 +359,8 @@ setReplaceMethod(
         verbose = verbose,
         varGenes = varGenes,
         dbscanEps = dbscanEps,
-        L = L
+        L = L,
+        seed = seed
       )
     } else {
       withr::with_seed(
@@ -376,7 +377,8 @@ setReplaceMethod(
           verbose = verbose,
           varGenes = varGenes,
           dbscanEps = dbscanEps,
-          L = L
+          L = L,
+          seed = seed
         )
       )
     }
@@ -481,6 +483,8 @@ setReplaceMethod(
 
 
 # This function updates decontamination for one batch
+# seed passed to this function is to be furhter passed to 
+# function .decontxInitializeZ()
 .decontXoneBatch <- function(counts,
                              z = NULL,
                              batch = NULL,
@@ -492,7 +496,8 @@ setReplaceMethod(
                              verbose = TRUE,
                              varGenes = NULL,
                              dbscanEps = NULL,
-                             L = NULL) {
+                             L = NULL,
+                             seed = 12345) {
   .checkCountsDecon(counts)
   .checkParametersDecon(proportionPrior = delta)
 
@@ -523,6 +528,7 @@ setReplaceMethod(
       L = L,
       dbscanEps = dbscanEps,
       verbose = verbose,
+      seed = seed,
       logfile = logfile
     )
     z <- celda.init$z
@@ -861,6 +867,7 @@ addLogLikelihood <- function(llA, llB) {
            L = 50,
            dbscanEps = 1.0,
            verbose = TRUE,
+           seed = 12345,
            logfile = NULL) {
     if (!is(object, "SingleCellExperiment")) {
       sce <- SingleCellExperiment::SingleCellExperiment(
@@ -870,6 +877,7 @@ addLogLikelihood <- function(llA, llB) {
     }
 
     sce <- scater::logNormCounts(sce, log = TRUE)
+		#sce <- scater::normalize(sce)
 
     if (nrow(sce) <= varGenes) {
       topVariableGenes <- seq_len(nrow(sce))
@@ -895,9 +903,13 @@ addLogLikelihood <- function(llA, llB) {
     )
     ## Celda clustering using recursive module splitting
     L <- min(L, nrow(countsFiltered))
+    if (is.null(seed)) {
     initialModuleSplit <- recursiveSplitModule(countsFiltered,
-      initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE
-    )
+      initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+    } else {
+			with_seed(seed, initialModuleSplit <- recursiveSplitModule(countsFiltered,
+        initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+    )}
     initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
 
     .logMessages(
@@ -913,7 +925,7 @@ addLogLikelihood <- function(llA, llB) {
     #    min_dist = 0.01, spread = 1)
     # rm(fm)
     resUmap <- celdaUmap(countsFiltered, initialModel,
-      minDist = 0.01, spread = 1, nNeighbors = nNeighbors
+      minDist = 0.01, spread = 1, nNeighbors = nNeighbors, seed = seed
     )
 
     .logMessages(
