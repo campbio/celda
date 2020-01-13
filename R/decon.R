@@ -449,8 +449,7 @@ setReplaceMethod(
     returnResult$decontXcounts <-
       DelayedArray::DelayedArray(returnResult$decontXcounts)
   } else {
-    try(
-      {
+    try({
         if (canCoerce(returnResult$decontXcounts, class(counts))) {
           returnResult$decontXcounts <-
             as(returnResult$decontXcounts, class(counts))
@@ -483,7 +482,7 @@ setReplaceMethod(
 
 
 # This function updates decontamination for one batch
-# seed passed to this function is to be furhter passed to 
+# seed passed to this function is to be furhter passed to
 # function .decontxInitializeZ()
 .decontXoneBatch <- function(counts,
                              z = NULL,
