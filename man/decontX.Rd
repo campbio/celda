@@ -50,7 +50,7 @@ of class \code{dgCMatrix} from package \link{Matrix} before analysis.}
 
 \item{z}{Numeric or character vector. Cell cluster labels. If NULL,
 Celda will be used to reduce the dimensionality of the dataset
-to 'L' modules, '\link[uwot]{umap}' from the 'uwot' package 
+to 'L' modules, '\link[uwot]{umap}' from the 'uwot' package
 will be used to further reduce the dataset to 2 dimenions and
 the '\link[dbscan]{dbscan}' function from the 'dbscan' package
 will be used to identify clusters of broad cell types. Default NULL.}
@@ -111,7 +111,7 @@ cluster labels will also be stored here.}
 }
 
 If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
-counts will be stored as an assay and can be accessed with 
+counts will be stored as an assay and can be accessed with
 \code{decontXcounts(x)}. The contamination values and cluster labels
 will be stored in \code{colData(x)}. \code{estimates} and \code{runParams}
 will be stored in \code{metadata(x)$decontX}. If z was not supplied, then
@@ -123,9 +123,9 @@ Identifies contamination from factors such as ambient RNA
 in single cell genomic datasets.
 }
 \examples{
- s <- simulateContaminatedMatrix()
- result <- decontX(s$observedCounts, s$z)
- contamination <- colSums(s$observedCounts - s$nativeCounts) /
-                    colSums(s$observedCounts)
- plot(contamination, result$contamination)
+s <- simulateContaminatedMatrix()
+result <- decontX(s$observedCounts, s$z)
+contamination <- colSums(s$observedCounts - s$nativeCounts) /
+  colSums(s$observedCounts)
+plot(contamination, result$contamination)
 }
