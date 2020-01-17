@@ -5,7 +5,7 @@
     oneoffMetric,
     threshold,
     reuseFeatures,
-    consectutiveOneoff = TRUE) {
+    consecutiveOneoff = TRUE) {
 
     # Initialize Tree
     treeLevel <- tree <- list()
@@ -45,7 +45,7 @@
 
             # Check for consecutive oneoff
             tryOneoff <- TRUE
-            if (!consectutiveOneoff & split$statUsed == "OO") {
+            if (!consecutiveOneoff & split$statUsed == "One-off") {
                 tryOneoff <- FALSE
             }
 
@@ -138,7 +138,7 @@
                         reuseFeatures,
                         oneoffMetric,
                         tryOneoff)
-
+                    
                     if (!is.null(branch2)) {
 
                         # Add multiple features
@@ -208,7 +208,7 @@
 
     # Drop levels (class that are no longer in)
     cSub <- droplevels(class[gKeep])
-
+    
     # If multiple columns in fSub run split, else return null
     if (ncol(fSub) > 1) {
         return(.wrapSplitHybrid(fSub, cSub, threshold, oneoffMetric, tryOneoff))
@@ -237,7 +237,7 @@
             class,
             splitMetric = splitMetric)
         splitStats <- splitStats[splitStats >= threshold]
-        statUsed <- "OO"
+        statUsed <- "One-off"
     } else {
         splitStats <- integer(0)
     }
@@ -249,7 +249,7 @@
         splitStats <- .splitMetricRecursive(features,
             class,
             splitMetric = splitMetric)[1] # Use top
-    statUsed <- "IG"
+    statUsed <- "Split"
     }
 
     # Get split for best gene
@@ -345,7 +345,7 @@
         classK1 <- as.numeric(class == k1)
 
         # Get AUC value
-        aucK1 <- pROC::auc(pROC::roc(classK1, currentFeature, direction = "<"))
+        aucK1 <- pROC::auc(pROC::roc(classK1, currentFeature, direction = "<", quiet = TRUE))
 
         # Return
         return(aucK1)
@@ -373,10 +373,9 @@
             currentLabels <- as.integer(currentClusters == k1)
 
             # get AUC value for this feat-cluster pair
-            rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,
-                direction = "<")
+            rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,direction = "<", quiet=TRUE)
             aucK2 <- rocK2$auc
-            coordK2 <- pROC::coords(rocK2, "best", ret = "threshold")[1]
+            coordK2 <- pROC::coords(rocK2, "best", ret = "threshold", transpose = TRUE)[1]
 
             # Concatenate vectors
             statK2 <- c(threshold = coordK2, auc = aucK2)
@@ -388,10 +387,10 @@
     aucMin <- min(aucFram$auc)
 
     # Get indices where this AUC occurs
-    aucMinIndices <- aucFram$auc == aucMin
+    aucMinIndices <- which(aucFram$auc == aucMin)
 
     # Use maximum value if there are ties
-    aucValue <- max(aucFram[, "threshold"])
+    aucValue <- max(aucFram$threshold)
 
     # Return performance or value?
     if (rPerf) {
@@ -417,16 +416,16 @@
     # Get sorted class and values
     featValuesSort <- featValues[ord]
     classSort <- class[ord]
-
+    
     # Keep splits of the data where the class changes
     keep <- c(
         classSort[seq(1, (len - 1))] != classSort[seq(2, (len))] &
             featValuesSort[seq(1, (len - 1))] != featValuesSort[seq(2, (len))],
         FALSE)
-
+    
     # Create data.matrix
     X <- model.matrix(~ 0 + classSort)
-
+    
     # Get cumulative sums
     sRCounts <- apply(X, 2, cumsum)
 
@@ -447,7 +446,7 @@
 
     # Combine logical vectors
     sKeep <- sKeepPossible & sKeepCheck
-
+    
     if (sum(sKeep) > 0) {
 
         # Remove these if they exist
@@ -645,6 +644,7 @@
         maxVal <- featValuesKeep[which.max(IG)]
         wMax <- max(which(featValuesSort == maxVal))
         IGvalue <- mean(c(featValuesSort[wMax], featValuesSort[wMax + 1]))
+        
     } else {
         IGreturn <- 0
         IGvalue <- NA
