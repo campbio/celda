@@ -1,7 +1,7 @@
 # Function to summarize and format tree list output by .generateTreeList
 .summarizeTree <- function(tree, features, class) {
 
-# Format tree into dendrogram object
+    # Format tree into dendrogram object
     dendro <- .convertToDendrogram(tree, class)
 
     # Map classes to features
@@ -19,34 +19,39 @@
 }
 
 # Function to reformat raw tree ouput to a dendrogram
-.convertToDendrogram <- function(tree, class) {
+.convertToDendrogram <- function(tree, class, splitNames = NULL) {
 
     # Unlist decision tree (one element for each split)
     DecTree <- unlist(tree, recursive = F)
 
-    # Name split by gene and threshold
-    splitNames <- lapply(DecTree, function(split) {
-
-        # Remove non-split elements
-        dirs <- paste0(split$dirs, collapse = "_")
-        split <- split[!names(split) %in% c("statUsed", "fUsed", "dirs")]
-
-        # Get set of features and values for each
-        featuresplits <- lapply(split, function(node) {
-            nodeFeature <- node$featureName
-            nodeStrings <- paste(nodeFeature, collapse = ";")
+    if(is.null(splitNames)){
+        # Name split by gene and threshold
+        splitNames <- lapply(DecTree, function(split) {
+            
+            # Remove non-split elements
+            dirs <- paste0(split$dirs, collapse = "_")
+            split <- split[!names(split) %in% c("statUsed", "fUsed", "dirs")]
+            
+            # Get set of features and values for each
+            featuresplits <- lapply(split, function(node) {
+                nodeFeature <- node$featureName
+                nodeStrings <- paste(nodeFeature, collapse = ";")
+            })
+            
+            # Get split directions
+            names(featuresplits) <- paste(
+                dirs,
+                seq(length(featuresplits)),
+                sep = "_")
+            
+            return(featuresplits)
         })
-
-        # Get split directions
-        names(featuresplits) <- paste(
-            dirs,
-            seq(length(featuresplits)),
-            sep = "_")
-
-        return(featuresplits)
-    })
-    splitNames <- unlist(splitNames)
-    names(splitNames) <- sub("1_", "", names(splitNames))
+        splitNames <- unlist(splitNames)
+        names(splitNames) <- sub("1_", "", names(splitNames))
+    }
+    else{
+        names(splitNames) <- 1:(length(DecTree[[1]])-3)
+    }
 
     # Get Stat Used
     statUsed <- unlist(lapply(
@@ -141,15 +146,15 @@
         # Add element
         iSplit <- unlist(strsplit(i, "_"))
         iPaste <- paste0("dendro",
-            paste(paste0("[[", iSplit, "]]"), collapse = ""))
-            eval(parse(
-                text =
+                         paste(paste0("[[", iSplit, "]]"), collapse = ""))
+        eval(parse(
+            text =
                 paste0(iPaste, "<-list()")
-            ))
+        ))
 
         # Add attributes
         classLabels <- names(
-        matCollapse[subUnderscore(matCollapse, ncharX(i)) == i])
+            matCollapse[subUnderscore(matCollapse, ncharX(i)) == i])
         members <- length(classLabels)
 
         # Add height, set to one if leaf
@@ -265,7 +270,7 @@ subUnderscore <- function(x, n) unlist(lapply(
 }
 
 # Create rules of classes and features sequences
-.mapClass2features <- function(tree, features, class) {
+.mapClass2features <- function(tree, features, class, topLevelMeta = FALSE) {
 
     # Get class to feature indices
     class2featuresIndices <- do.call(rbind, lapply(
@@ -315,13 +320,21 @@ subUnderscore <- function(x, n) unlist(lapply(
     rownames(class2featuresIndices) <- NULL
 
 # Generate list of rules for each class
-    rules <- lapply(levels(class), function(cl, class2featuresIndices) {
+    if(topLevelMeta){
+        orderedClass <- unique(
+            class2featuresIndices[class2featuresIndices$direction==1,"class"])
+    }
+    else{
+        orderedClass <- levels(class)
+    }
+    
+    rules <- lapply(orderedClass, function(cl, class2featuresIndices) {
 
         class2featuresIndices[class2featuresIndices$class == cl,
         colnames(class2featuresIndices) != "class"]
 
     }, class2featuresIndices)
-    names(rules) <- levels(class)
+    names(rules) <- orderedClass
 
     return(list(
         rules = rules))
