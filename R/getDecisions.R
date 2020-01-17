@@ -34,7 +34,7 @@ getDecisions <- function(rules, features) {
 }
 
 # Function to predict class from list of rules
-.predictClass <- function(samp, rules) {
+.predictClass <- function(samp, rules){
 
     # Initilize possible classes and level
     classes <- names(rules)
@@ -60,7 +60,7 @@ getDecisions <- function(rules, features) {
             ruleClass$sample <- samp[ruleClass$feature]
 
             # For multiple direction == 1, use one with the top stat
-            if (sum(ruleClass$direction == 1) > 1) {
+            if (sum(ruleClass$direction == 1) > 1){
                 ruleClass <- ruleClass[order(
                     ruleClass$direction
                     , decreasing = T), ]
