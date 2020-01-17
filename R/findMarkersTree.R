@@ -210,7 +210,7 @@ findMarkersTree <- function(features,
         
         return(DTsummary)
     } else {
-        ## If metaclusters are provided or to be identified
+        # If metaclusters are provided or to be identified
         
         #consecutive one-offs break the code(tricky to find 1st balanced split)
         if(consecutiveOneoff){
