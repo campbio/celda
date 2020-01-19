@@ -1627,7 +1627,7 @@ semiPheatmap <- function(mat,
             mat <- mat[o, , drop = FALSE]
             fmat <- fmat[o, , drop = FALSE]
             rowLabel <- rowLabel[o]
-            if (!is.null(annotationRow)) {
+            if (!is.na(annotationRow)) {
                 annotationRow <- annotationRow[o, , drop = FALSE]
             }
         }
@@ -1640,9 +1640,9 @@ semiPheatmap <- function(mat,
         mat <- mat[treeRow$order, , drop = FALSE]
         fmat <- fmat[treeRow$order, , drop = FALSE]
         labelsRow <- labelsRow[treeRow$order]
-	if (!is.null(annotationRow){
-	annotationRow <- annotationRow[treeRow$order, , drop=FALSE]
-	}
+        if (!is.na(annotationRow)) {
+          annotationRow <- annotationRow[treeRow$order, , drop=FALSE]
+        }
         if (!is.na(cutreeRows)) {
             gapsRow <- .findGaps(treeRow, cutreeRows)
         } else {
@@ -1664,7 +1664,7 @@ semiPheatmap <- function(mat,
             mat <- mat[, o, drop = FALSE]
             fmat <- fmat[, o, drop = FALSE]
             colLabel <- colLabel[o]
-            if (!is.null(annotationCol)) {
+            if (!is.na(annotationCol)) {
                 annotationCol <- annotationCol[o, , drop = FALSE]
             }
         }
@@ -1678,9 +1678,9 @@ semiPheatmap <- function(mat,
         mat <- mat[, treeCol$order, drop = FALSE]
         fmat <- fmat[, treeCol$order, drop = FALSE]
         labelsCol <- labelsCol[treeCol$order]
-	if (!is.null(annotationCol){
-	annotationCol <- annotationCol[treeCol$order, , drop=FALSE]
-	}
+        if (!is.na(annotationCol)) {
+          annotationCol <- annotationCol[treeCol$order, , drop=FALSE]
+        }
         if (!is.na(cutreeCols)) {
             gapsCol <- .findGaps(treeCol, cutreeCols)
         } else {
