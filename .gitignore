@@ -29,6 +29,8 @@ celda.Rproj
 src/*.o
 src/*.dll
 src/*.so
+src-i386/*
+src-x64/*
 etc/*
 # Celda log files with default prefix
 Celda_chain.*log.txt
