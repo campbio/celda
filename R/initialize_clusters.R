@@ -79,8 +79,9 @@
     )
     overallZ <- as.integer(as.factor(clusters(res)$z))
     currentK <- max(overallZ)
-
-    while (currentK < K) {
+    
+    counter <- 0
+    while (currentK < K & counter < 25) {
         # Determine which clusters are split-able
         # KRemaining <- K - currentK
         KPerCluster <- min(ceiling(K / currentK), KSubcluster)
@@ -123,6 +124,7 @@
                 break
             }
         }
+        counter <- counter + 1
     }
 
     # Decompose counts for likelihood calculation
@@ -241,7 +243,8 @@
     overallY <- as.integer(as.factor(clusters(res)$y))
     currentL <- max(overallY)
 
-    while (currentL < L) {
+    counter <- 0
+    while (currentL < L & counter < 25) {
         # Determine which clusters are split-able
         yTa <- tabulate(overallY, max(overallY))
         yToSplit <- sample(which(yTa > minFeature & yTa > LSubcluster))
@@ -288,6 +291,7 @@
                 break
             }
         }
+        counter <- counter + 1
     }
 
     ## Decompose counts for likelihood calculation
