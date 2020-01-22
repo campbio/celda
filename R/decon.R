@@ -875,8 +875,10 @@ addLogLikelihood <- function(llA, llB) {
       )
     }
 
+    sce <- sce[Matrix::rowSums(SingleCellExperiment::counts(sce)) > 0, ]
     sce <- scater::logNormCounts(sce, log = TRUE)
     #sce <- scater::normalize(sce)
+
 
     if (nrow(sce) <= varGenes) {
       topVariableGenes <- seq_len(nrow(sce))

@@ -1643,7 +1643,7 @@ semiPheatmap <- function(mat,
         labelsRow <- labelsRow[treeRow$order]
         if (!is.null(annotationRow) && length(annotationRow) > 1
             && !is.na(annotationRow)) {
-          annotationRow <- annotationRow[treeRow$order, , drop=FALSE]
+          annotationRow <- annotationRow[treeRow$order, , drop = FALSE]
         }
         if (!is.na(cutreeRows)) {
             gapsRow <- .findGaps(treeRow, cutreeRows)
@@ -1684,7 +1684,7 @@ semiPheatmap <- function(mat,
 
         if (!is.null(annotationCol) && length(annotationCol) > 1
             && !is.na(annotationCol)) {
-          annotationCol <- annotationCol[treeCol$order, , drop=FALSE]
+          annotationCol <- annotationCol[treeCol$order, , drop = FALSE]
         }
         if (!is.na(cutreeCols)) {
             gapsCol <- .findGaps(treeCol, cutreeCols)
