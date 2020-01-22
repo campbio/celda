@@ -79,7 +79,7 @@
     )
     overallZ <- as.integer(as.factor(clusters(res)$z))
     currentK <- max(overallZ)
-    
+
     counter <- 0
     while (currentK < K & counter < 25) {
         # Determine which clusters are split-able
