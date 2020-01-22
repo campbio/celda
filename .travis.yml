@@ -1,7 +1,4 @@
 language: r
-install:
-  - R -e "0" --args --bootstrap-packrat
-  - R -e "packrat::restore(restart = FALSE)"
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/packrat/src
