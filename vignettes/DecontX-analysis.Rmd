@@ -22,7 +22,7 @@ In this vignette we will demonstrate how to use DecontX to estimate and remove c
 celda can be installed from Bioconductor:
 
 ```{r, eval= FALSE}
-if (!requireNamespace("BiocManager", quietly=TRUE)){
+if (!requireNamespace("BiocManager", quietly=TRUE)) {
     install.packages("BiocManager")}
 BiocManager::install("celda")
 ```
@@ -72,14 +72,14 @@ colSums(simCounts$eta)
 DecontX uses bayesian method to estimate and remove contamination via varitaional inference.
 
 ```{r, warning = FALSE, message = FALSE}
-decontxModel <- decontX(counts = simCounts$observedCounts, z = simCounts$z)
+decontxModel <- decontX(x = simCounts$observedCounts, z = simCounts$z)
 ```
 
 ## Check convergence
 Use log-likelihood to check convergence
 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
-plot(decontxModel$resList$logLikelihood)
+plot(decontxModel$estimates$all_cells$logLikelihood)
 ```
 
 ## Evaluate model performance
@@ -87,7 +87,7 @@ plot(decontxModel$resList$logLikelihood)
 `decontX` estimates a contamination proportion for each cell. We compare the estimated contamination proportion with the real contamination proportion.
 
 ```{r, eval = TRUE, fig.width = 5, fig.height = 5}
-plot(decontxModel$resList$estConp,
+plot(decontxModel$contamination,
     colSums(contamination) / simCounts$NByC, col = simCounts$z)
 abline(0, 1)
 ```
