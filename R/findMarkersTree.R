@@ -815,7 +815,9 @@ findMarkersTree <- function(features,
         tree$branchPoints <- branchPoints
         
         #return class labels
-        tree$classLabels <- subtypeLabels
+        tree$classLabels <- regmatches(subtypeLabels,
+                                       regexpr(pattern = "(?<=\\().*?(?=\\)$)",
+                                               subtypeLabels, perl = TRUE))
         tree$metaclusterLabels <- metaclusterLabels
         
         # Final return
@@ -2387,9 +2389,9 @@ plotDendro <- function(tree,
         
         # Create vector of per class performance
         perfVec <- paste0("Sens. ",
-            format(round(performance$sensitivity, 2), nsmall = 2),
-            "\n Prec. ",
-            format(round(performance$precision, 2), nsmall = 2)
+                          format(round(performance$sensitivity, 2), nsmall = 2),
+                          "\n Prec. ",
+                          format(round(performance$precision, 2), nsmall = 2)
         )
         names(perfVec) <- names(performance$sensitivity)
     }
@@ -2679,13 +2681,21 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     #get marker features
     marker <- unique(branch$feature)
     
+    #add feature labels
+    if('featureLabels' %in% names(tree)){
+        featureLabels <- tree$featureLabels
+    }
+    
     #check that feature labels are provided
     if(missing(featureLabels) &
+       !('featureLabels' %in% names(tree)) &
        (sum(marker %in% rownames(counts)) != length(marker))){
         stop("Please provide feature labels, i.e. gene cluster labels")
     }
     else{
-        if(missing(featureLabels) & (sum(marker %in% rownames(counts)) == length(marker))){
+        if(missing(featureLabels) &
+           !('featureLabels' %in% names(tree)) &
+           (sum(marker %in% rownames(counts)) == length(marker))){
             featureLabels == rownames(counts)
         }
     }
@@ -2784,6 +2794,10 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     
     #if balanced split
     if(branch$statUsed[1] == "Split"){
+        #keep entries for balanced split only (in case of alt. split)
+        split <- branch$feature[1]
+        branch <- branch[branch$feature == split,]
+        
         #get up-regulated and down-regulated classes
         upClasses <- unique(branch[branch$direction==1, "class"])
         downClasses <- unique(branch[branch$direction==(-1), "class"])
