@@ -67,7 +67,7 @@
     # Initialize the model with KSubcluster clusters
     res <- .celda_C(
         counts,
-        K = KSubcluster,
+        K = min(KSubcluster, ncol(counts)),
         maxIter = 20,
         zInitialize = "random",
         alpha = alpha,
@@ -266,7 +266,7 @@
 
             clustLabel <- .celda_G(
                 countsY,
-                L = LSubcluster,
+                L = min(LSubcluster, nrow(countsY)),
                 yInitialize = "random",
                 beta = beta,
                 delta = delta,
