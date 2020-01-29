@@ -1618,7 +1618,7 @@ semiPheatmap <- function(mat,
     }
 
     # Do clustering for rows
-    if (clusterRows == TRUE) {
+    if (isTRUE(clusterRows)) {
         if (is.null(rowLabel)) {
             rowLabel <- rep(1, nrow(mat))
         } else {
@@ -1627,7 +1627,7 @@ semiPheatmap <- function(mat,
             mat <- mat[o, , drop = FALSE]
             fmat <- fmat[o, , drop = FALSE]
             rowLabel <- rowLabel[o]
-            if (!is.null(annotationRow) && length(annotationRow) > 1
+            if (!is.null(annotationRow) && length(annotationRow) > 0
                 && !is.na(annotationRow)) {
                 annotationRow <- annotationRow[o, , drop = FALSE]
             }
@@ -1641,7 +1641,7 @@ semiPheatmap <- function(mat,
         mat <- mat[treeRow$order, , drop = FALSE]
         fmat <- fmat[treeRow$order, , drop = FALSE]
         labelsRow <- labelsRow[treeRow$order]
-        if (!is.null(annotationRow) && length(annotationRow) > 1
+        if (!is.null(annotationRow) && length(annotationRow) > 0
             && !is.na(annotationRow)) {
           annotationRow <- annotationRow[treeRow$order, , drop = FALSE]
         }
@@ -1657,7 +1657,7 @@ semiPheatmap <- function(mat,
 
 
     ## Do clustering for columns
-    if (clusterCols == TRUE) {
+    if (isTRUE(clusterCols)) {
         if (is.null(colLabel)) {
             colLabel <- rep(1, ncol(mat))
         } else {
@@ -1666,7 +1666,7 @@ semiPheatmap <- function(mat,
             mat <- mat[, o, drop = FALSE]
             fmat <- fmat[, o, drop = FALSE]
             colLabel <- colLabel[o]
-            if (!is.null(annotationCol) && length(annotationCol) > 1
+            if (!is.null(annotationCol) && length(annotationCol) > 0
                 && !is.na(annotationCol)) {
                 annotationCol <- annotationCol[o, , drop = FALSE]
             }
@@ -1682,7 +1682,7 @@ semiPheatmap <- function(mat,
         fmat <- fmat[, treeCol$order, drop = FALSE]
         labelsCol <- labelsCol[treeCol$order]
 
-        if (!is.null(annotationCol) && length(annotationCol) > 1
+        if (!is.null(annotationCol) && length(annotationCol) > 0
             && !is.na(annotationCol)) {
           annotationCol <- annotationCol[treeCol$order, , drop = FALSE]
         }
