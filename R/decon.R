@@ -456,10 +456,12 @@ setReplaceMethod(
     ## Determine class of seed in DelayedArray
     seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
     if (seed.class == "HDF5ArraySeed") {
-      returnResult$decontXcounts <- methods::as(returnResult$decontXcounts, "HDF5Matrix")
+      returnResult$decontXcounts <-
+          methods::as(returnResult$decontXcounts, "HDF5Matrix")
     } else {
       if (isTRUE(methods::canCoerce(returnResult$decontXcounts, seed.class))) {
-        returnResult$decontXcounts <- methods::as(returnResult$decontXcounts, seed.class)
+        returnResult$decontXcounts <-
+          methods::as(returnResult$decontXcounts, seed.class)
       }
     }
     returnResult$decontXcounts <-

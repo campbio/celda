@@ -1401,9 +1401,9 @@ vplayout <- function(x, y) {
 #' @param silent do not draw the plot (useful when using the gtable output)
 #' @param rowLabel row cluster labels for semi-clustering
 #' @param colLabel column cluster labels for semi-clustering
-#' @param rowGroupOrder Vector. Specifies the order of feature clusters when 
+#' @param rowGroupOrder Vector. Specifies the order of feature clusters when
 #'  semisupervised clustering is performed on the \code{y} labels.
-#' @param colGroupOrder Vector. Specifies the order of cell clusters when 
+#' @param colGroupOrder Vector. Specifies the order of cell clusters when
 #'  semisupervised clustering is performed on the \code{z} labels.
 #' @param \dots graphical parameters for the text used in plot. Parameters
 #'  passed to \code{\link{grid.text}}, see \code{\link{gpar}}.
