@@ -8,8 +8,6 @@ plotHeatmap(
   counts,
   z = NULL,
   y = NULL,
-  rowGroupOrder = NULL,
-  colGroupOrder = NULL,
   scaleRow = scale,
   trim = c(-2, 2),
   featureIx = NULL,
@@ -30,6 +28,8 @@ plotHeatmap(
   annotationNamesCell = TRUE,
   showNamesFeature = FALSE,
   showNamesCell = FALSE,
+  rowGroupOrder = NULL,
+  colGroupOrder = NULL,
   hclustMethod = "ward.D2",
   treeheightFeature = ifelse(clusterFeature, 50, 0),
   treeheightCell = ifelse(clusterCell, 50, 0),
@@ -117,6 +117,12 @@ Default TRUE.}
 
 \item{showNamesCell}{Logical. Specifies if cell names should be shown.
 Default FALSE.}
+
+\item{rowGroupOrder}{Vector. Specifies the order of feature clusters when 
+semisupervised clustering is performed on the \code{y} labels.}
+
+\item{colGroupOrder}{Vector. Specifies the order of cell clusters when 
+semisupervised clustering is performed on the \code{z} labels.}
 
 \item{hclustMethod}{Character. Specifies the method to use for the 'hclust'
 function. See `?hclust` for possible values. Default "ward.D2".}

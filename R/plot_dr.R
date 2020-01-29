@@ -447,7 +447,7 @@ plotDimReduceCluster <- function(dim1,
         ggplot2::guides(color =
                 ggplot2::guide_legend(override.aes = list(size = 1)))
 
-    if (labelClusters == TRUE) {
+    if (isTRUE(labelClusters)) {
         #centroidList <- lapply(seq(length(unique(cluster))), function(x) {
         centroidList <- lapply(unique(cluster), function(x) {
             df.sub <- df[df$Cluster == x, ]
@@ -467,7 +467,7 @@ plotDimReduceCluster <- function(dim1,
             size = 0,
             alpha = 0) +
             ggrepel::geom_text_repel(data = centroid,
-                mapping = ggplot2::aes(label = Cluster),
+                mapping = ggplot2::aes(label = centroid$Cluster),
                 size = labelSize)
     }
     if (!is.null(x = groupBy)) {

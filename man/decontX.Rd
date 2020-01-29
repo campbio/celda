@@ -93,6 +93,8 @@ a default value of 12345 is used. If NULL, no calls to
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
+
+\item{...}{For the generic, further arguments to pass to each method.}
 }
 \value{
 If \code{x} is a matrix-like object, a list will be returned
