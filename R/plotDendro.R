@@ -152,7 +152,8 @@ plotDendro <- function(decisionTree,
     suppressMessages(dendroP <- ggdendro::ggdendrogram(dendro) +
             ggplot2::geom_label(
                 data = dendSegsLabelled,
-                ggplot2::aes(x = xend, y = y, label = label),
+                ggplot2::aes(x = dendSegsLabelled$xend, y = dendSegsLabelled$y,
+                             label = dendSegsLabelled$label),
                 size = boxSize,
                 label.size = 1,
                 fontface = "bold",

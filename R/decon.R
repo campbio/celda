@@ -45,6 +45,7 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
+#' @param ... For the generic, further arguments to pass to each method.
 #'
 #' @return If \code{x} is a matrix-like object, a list will be returned
 #' with the following items:
@@ -153,7 +154,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   ## Save the rest of the result object into metadata
   decontXcounts(x) <- result$decontXcounts
   result$decontXcounts <- NULL
-  metadata(x)$decontX <- result
+  S4Vectors::metadata(x)$decontX <- result
 
   return(x)
 })
@@ -208,12 +209,27 @@ SET_FUN <- function(exprs_values, ...) {
   }
 }
 
+
+
+#' @title Get or set decontaminated counts matrix
+#'
+#' @description Gets or sets the decontaminated counts matrix from a
+#' a \linkS4class{SingleCellExperiment} object.
+#' @name decontXcounts
+#' @param object A \linkS4class{SingleCellExperiment} object.
+#' @param value A matrix to save as an assay called \code{decontXcounts} 
+#' @param ... For the generic, further arguments to pass to each method.
+#' @seealso \code{\link{assay}} and \code{\link{assay<-}}
+NULL
+
 #' @export
+#' @rdname decontXcounts
 setGeneric("decontXcounts", function(object, ...) {
   standardGeneric("decontXcounts")
 })
 
 #' @export
+#' @rdname decontXcounts
 setGeneric("decontXcounts<-", function(object, ..., value) {
   standardGeneric("decontXcounts<-")
 })
@@ -339,7 +355,7 @@ setReplaceMethod(
         append = TRUE,
         verbose = verbose
       )
-      countsBat <- as(countsBat, "dgCMatrix")
+      countsBat <- methods::as(countsBat, "dgCMatrix")
     }
 
 
@@ -440,19 +456,19 @@ setReplaceMethod(
     ## Determine class of seed in DelayedArray
     seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
     if (seed.class == "HDF5ArraySeed") {
-      returnResult$decontXcounts <- as(returnResult$decontXcounts, "HDF5Matrix")
+      returnResult$decontXcounts <- methods::as(returnResult$decontXcounts, "HDF5Matrix")
     } else {
-      if (isTRUE(canCoerce(returnResult$decontXcounts, seed.class))) {
-        returnResult$decontXcounts <- as(returnResult$decontXcounts, seed.class)
+      if (isTRUE(methods::canCoerce(returnResult$decontXcounts, seed.class))) {
+        returnResult$decontXcounts <- methods::as(returnResult$decontXcounts, seed.class)
       }
     }
     returnResult$decontXcounts <-
       DelayedArray::DelayedArray(returnResult$decontXcounts)
   } else {
     try({
-        if (canCoerce(returnResult$decontXcounts, class(counts))) {
+        if (methods::canCoerce(returnResult$decontXcounts, class(counts))) {
           returnResult$decontXcounts <-
-            as(returnResult$decontXcounts, class(counts))
+            methods::as(returnResult$decontXcounts, class(counts))
         }
       },
       silent = TRUE

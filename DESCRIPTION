@@ -50,13 +50,13 @@ Imports:
     scater (>= 1.14.4),
     scran,
     SingleCellExperiment,
-    dbscan
+    dbscan,
+    DelayedArray
 Suggests:
     testthat,
     knitr,
     roxygen2,
     rmarkdown,
-    corrplot,
     Matrix,
     biomaRt,
     covr,

@@ -58,6 +58,10 @@
 #'  Default TRUE.
 #' @param showNamesCell Logical. Specifies if cell names should be shown.
 #'  Default FALSE.
+#' @param rowGroupOrder Vector. Specifies the order of feature clusters when 
+#'  semisupervised clustering is performed on the \code{y} labels.
+#' @param colGroupOrder Vector. Specifies the order of cell clusters when 
+#'  semisupervised clustering is performed on the \code{z} labels.
 #' @param hclustMethod Character. Specifies the method to use for the 'hclust'
 #'  function. See `?hclust` for possible values. Default "ward.D2".
 #' @param treeheightFeature Numeric. Width of the feature dendrogram. Set to 0
@@ -79,8 +83,6 @@
 plotHeatmap <- function(counts,
     z = NULL,
     y = NULL,
-    rowGroupOrder = NULL,
-    colGroupOrder = NULL,
     scaleRow = scale,
     trim = c(-2, 2),
     featureIx = NULL,
@@ -101,6 +103,8 @@ plotHeatmap <- function(counts,
     annotationNamesCell = TRUE,
     showNamesFeature = FALSE,
     showNamesCell = FALSE,
+    rowGroupOrder = NULL,
+    colGroupOrder = NULL,
     hclustMethod = "ward.D2",
     treeheightFeature = ifelse(clusterFeature, 50, 0),
     treeheightCell = ifelse(clusterCell, 50, 0),
