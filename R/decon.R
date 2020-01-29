@@ -217,7 +217,7 @@ SET_FUN <- function(exprs_values, ...) {
 #' a \linkS4class{SingleCellExperiment} object.
 #' @name decontXcounts
 #' @param object A \linkS4class{SingleCellExperiment} object.
-#' @param value A matrix to save as an assay called \code{decontXcounts} 
+#' @param value A matrix to save as an assay called \code{decontXcounts}
 #' @param ... For the generic, further arguments to pass to each method.
 #' @seealso \code{\link{assay}} and \code{\link{assay<-}}
 NULL
