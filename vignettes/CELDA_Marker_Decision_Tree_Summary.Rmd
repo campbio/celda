@@ -1,0 +1,303 @@
+---
+title: "CELDA Marker Decision Tree"
+author: "Ahmed Youssef"
+date: "January 26, 2019"
+output:
+  html_notebook:
+    theme: cosmo
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+urlcolor: blue
+---
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, echo=FALSE, error=FALSE}
+library(knitr)
+knitr::opts_chunk$set(tidy = TRUE)
+```
+
+# Introduction
+
+This report demonstrates the use of CELDA's decision tree marker selection algorithm. Briefly, the algorithm identifies sets of marker genes/features for each cell population in a clustered single-cell RNA-Seq dataset. The function itself simply requires a matrix describing the relationships (e.g. counts/proportions) between individual cells and features (e.g. genes/modules/principal components), as well as the cell cluster assignments. The function is independent of upstream clustering, and as such should work for datasets clustered by CELDA, Seurat, or other packages.
+
+The example data used in this report is published 10X scRNA-Seq data from 2,150 mouse lung cells, which was clustered into 36 cell populations and 125 gene modules using [CELDA](https://bioconductor.org/packages/release/bioc/html/celda.html). The paper can be found [here](http://www.nature.com/articles/s41586-018-0590-4) and the dataset [here](https://tabula-muris.ds.czbiohub.org).
+
+**NOTE: As of the time of writing this report, the updated marker tree function shown here is not incorporated into the CELDA package yet.**
+
+```{r readFunctions, echo=FALSE, message=FALSE, warning=FALSE}
+#read in updated findMarkers function
+source("/Users/Ahmed/Documents/Challenge Project/Marker Decision Tree/Marker_Tree_Scripts/findMarkersTree.R")
+
+#read in counts matrix
+counts <- readRDS('../Tabula_Muris/tabula_muris_10X_lung_counts.rds')
+
+#read in celda model
+library(celda)
+library(magrittr)
+celda <- readRDS('../Tabula_Muris/celda_K36_L125.rds')
+
+#some required packages
+library(magrittr)
+library(ggplot2)
+```
+
+# Algorithm
+
+The algorithm identifies gene markers for cell populations in a given clustered scRNA-Seq dataset. The algorithm itself is a multiclass decision tree approach to simultaneously sort and annotate cell cluster label estimations by generating a sequence of univariate rules for each cluster. The procedure has three main differences from typical decision tree procedures:
+
+1. Rather than utilizing one splitting criterion throughout the tree-building process, one of two splitting criteria is chosen at each node of the tree
+2. More than two branches are allowed at particular nodes
+3. Observations (cells) belonging to the same class are forced to segregate to the same child branch at each node
+
+The choice of splitting criterion at each node proceds in two basic steps:
+
+1. We use one splitting criterion to search for individual features that distinguish individual clusters, such that these individual clusters have primarily higher values for the given feature compared to all other clusters. We refer to this as a *one-off split*.
+
+2. If no feature to cluster combination reaches a specific threshold we deploy a second splitting criterion intended to capture broader hierarchical relationships between the clusters by keeping relatively similar clusters on the same child branch. We refer to this as a *balanced split*.
+
+As such, a one-off marker is a feature that can be used to uniquely distinguish a given class from others at a certain level of the tree, while a balanced split represents the feature that best separates two or more classes at a certain level of the tree. The final tree identifies markers for each of the classes (i.e. cell clusters) as well as capturing the hierarchical relationships between the classes.
+
+
+# Creating decision tree
+
+`findMarkersTree` is the main function for creating the tree. This function has 12 input parameters, detailed below, but only two are required since they have no defaults. Those two can be any of the following pairs:
+
+* *celda* object + counts matrix
+* *seurat* object
+* features matrix + class labels
+
+
+## Input parameters
+
+**Main input parameters:**
+
+* `features` A features-by-samples numeric matrix. This matrix represents the relationship between individual cells and the features of interest (e.g. counts matrix for individual genes, or proportions of gene modules in each cell). Alternatively, a celda or seurat object can be passed.
+
+* `class` A vector of cell cluster labels. Alternatively, a celda or seurat object can be passed.
+
+* `celda` A celda object. The function will automatically extract the class labels and features matrix, but the counts matrix has to be passed as well.
+
+* `seurat` A seurat object. The function will automatically extract the class labels, counts matrix, and features matrix based on the PCA cell embeddings and feature loadings. Note that the Seurat object must include PCA results (*output from seurat's `RunPCA` function*) and clustering results (*output from seurat's `FindClusters` function*).
+
+* `threshold` The threshold for determining a good one-off split. The higher the threshold the more strict the algorithm will be for determining a gene as a marker for a population. Default is 0.90.
+
+**Optional parameters:**
+
+* `oneoffMetric` A selection for one of two possible metrics for evaluating good one-off splits for segregating a single cluster from every other cluster based on up-regulation of that cluster alone. The performance of either is a value between 0 and 1. Default is *modified F1*. The two options include:
+
+    * *modified F1* - Finds the univariate split that maximizes the harmonic mean of the sensitivity and precision of the up-regulated cluster, as well as the minimum cluster-specific sensitivity across all down-regulated clusters.
+
+     * *pairwise AUC* - Finds the univariate split for the minimum pairwise AUC between the up-regulated cluster and every down-regulated cluster individually.
+     
+* `autoMetaclusters` Logical. Whether to identify metaclusters prior to creating the tree based on the distance between clusters in a UMAP dimensionality reduction projection. A metacluster is simply a large cluster that includes several clusters within it. Default is TRUE.  
+     
+* `metaclusters` Optional. List where each element is a metacluster (e.g. known cell type) listing all the clusters within that metacluster (e.g. subtypes).
+
+* `featureLabels` Optional. A vector of feature assignments. Useful when using clusters of features (e.g. gene modules) and user wishes to expand tree results to individual features (e.g. score individual genes within marker gene modules). Row names in counts matrix should be individual feature names.
+
+* `counts` Optional. Numeric genes-by-cells counts matrix. Useful when using clusters of features (e.g. gene modules) and user wishes to expand tree results to individual features (e.g. score individual genes within marker gene modules). Row names should be individual feature names.
+
+* `reuseFeatures` A logical value. Whether a feature can be used as a rule for the same cluster more than once. Note, that even when `reuseFeatures = FALSE` a feature is still allowed to be used more than once in the decision tree. This happens when the same feature is used for different sets of cluster rules after those sets of clusters have diverged. Default is FALSE.
+
+* `altSplit` A logical value. Often times one cluster will never include a positive marker in its set of rules, i.e. it is only defined by being down-regulated for each marker in the tree. This option forces a positive marker for such a cluster regardless of the given threshold. Default is TRUE.
+
+* `consecutiveOneoff` A logical value. Whether one-off splits can be used at two consecutive levels in the tree. Note, that even when when set to FALSE, more than one good one-off split will be assessed at the same level and used if determined to be a good split. Default is FALSE.
+
+* `seed` Numeric. Seed used to enable reproducible UMAP results in case parameter *autoMetaclusters* is set to TRUE. Default is 12345.
+
+
+## Simple decision tree
+
+For this report, we will use a test dataset consisting of 2,150 mouse lung cells that have previously been clustered by [CELDA](https://bioconductor.org/packages/release/bioc/html/celda.html) into 36 cell populations and 125 gene modules. The CELDA object has been loaded into the current working session as the variable `celda` and the counts matrix as the variable `counts`. `findMarkersTree` requires two inputs: the features matrix, in this case represented by the proportions of each gene module within each cell, and the cell cluster labels. Alternatively, the user can provide a celda object using the parameter `celda`, or a seurat object using the parameter `seurat`, and the function will extract the relevant information.
+
+The code below generates the decision tree for our test dataset. We will use a strict one-off classifier threshold of 0.95 in this example. The function usually takes a few minutes to run. The `plotDendro` function can be used to plot the decision tree. More ways to explore the decision tree results are detailed in the sections further down in this report.
+
+```{r simpleTree, fig.width=5, echo=TRUE}
+#create decision tree
+tree <- findMarkersTree(celda = celda, counts = counts,  threshold = 0.95, autoMetaclusters = FALSE)
+
+#plot tree
+plotDendro(tree)
+```
+
+
+## Metaclusters
+
+A metacluster is simply a large cluster that includes several previously-identified clusters within it. It can be thought of as a broad cell type encompassing multiple subpopulations (e.g. T-cells and its various subtypes). `findMarkersTree` includes two options for incorporating metaclusters in the tree-building process: using user-defined metaclusters, or automatically detecting and grouping similar cell clusters into metaclusters. In both cases, an initial tree is constructed for just the metaclusters, followed by each metacluster being broken down further into its member clusters. As such, the tree can distinguish between the broader cell types present in the data, as well as revealing the finer differences between the different subtypes.
+
+The procedure for creating the decision tree is slightly different when using metaclusters such that the algorithm ensures that positive one-off markers are identified for each metacluster. The change in the algorithm when using metaclusters only affects the 'top-level' decision tree, i.e. once a positive marker is identified for each metacluster, the process for creating subtrees for each metacluster remains the same. The approach can be summarized as follows:
+
+1) Compute decision tree using initial classifier threshold and metacluster assignments
+2) If tree contains balanced split:
+     - group all of the split's up-regulated metaclusters into one new metacluster
+     - create tree again using same threshold but with the now-updated set of metaclusters
+3) If new tree doesn't have balanced split (i.e. one-off markers identified for all metaclusters): 
+     - accept new metacluster assignments
+     - proceed to create trees for each individual metacluster's members using original user-provided threshold
+4) If new tree still has balanced split:
+     - keep original metacluster assignments
+     - lower classifer threshold by 10%
+     - repeat until step 3 is satisfied 
+
+
+
+### Metaclusters decision tree
+
+By default, the function identifies metaclusters present in the dataset based on the distance between clusters in a UMAP dimensionality reduction projection. This can be disabled by setting the parameter `autoMetaclusters` to FALSE. Alternatively, the user can provide metacluster assignments by passing the parameter `metaclusters`.
+
+[DBSCAN](https://cran.r-project.org/web/packages/dbscan/dbscan.pdf) is used to automatically determine metaclusters, taking as an input the cell coordinates from the UMAP dimensionality reduction method and a resolution parameter *epsilon* which controls the number of clusters (set to 1 by default).
+
+Since the detection of clusters is based on the results of UMAP, using a seed is neccessary to ensure reproducible results. The default seed is 12345 but can be changed by the user using the `seed` parameter. UMAP is implemented using the [*uwot*](https://github.com/jlmelville/uwot) package, with the following parameters: n_neighbors = 15, min_dist = 0.01, spread = 1, n_sgd_threads = 1.
+
+
+The UMAP plots below the original cell clusters side-by-side with the automatically-identified metaclusters for comparison, where the 36 CELDA_identified clusters were divided into 17 metaclusters:
+
+```{r autoMetaclustersUMAP, warning=FALSE, fig.width=8, fig.height=3, echo=FALSE}
+#import required packages
+library(uwot)
+library(dbscan)
+
+#auto-identify metaclusters (for demonstration)
+seed <- 12345
+features <- celda::factorizeMatrix(counts, celda)$proportions$cell
+withr::with_seed(seed, umap <- uwot::umap(sqrt(t(features)), n_neighbors=15, min_dist = 0.01, spread = 1, n_sgd_threads = 1))
+dbscan <- dbscan::dbscan(umap, eps = 1)
+
+#create UMAP plots
+p1<-celda::plotDimReduceCluster(dim1=umap[,1], dim2=umap[,2], cluster=celda@clusters$z, labelClusters=T)+
+  ggtitle("Original CELDA-identified clusters")
+p2 <-celda::plotDimReduceCluster(dim1=umap[,1], dim2=umap[,2], cluster=dbscan$cluster, labelClusters=T) +
+  ggtitle("Auto-identified metaclusters")
+
+#arrange plots
+library(gridExtra)
+grid.arrange(p1, p2, nrow = 1)
+```
+
+The tree using these metaclusters is shown below. This is the default method for creating the tree in `findMarkersTree`.
+
+```{r autoMetaclustersTree, fig.width=5}
+#create decision tree
+metaTree <- findMarkersTree(celda = celda, counts = counts)
+
+plotDendro(metaTree)
+```
+
+# Exploring results
+
+The previous sections showed the `plotDendro` function which plots the actual tree (dendrogram) generated by `findMarkersTree`. There are two more ways to explore the results of the decision tree algorithm: tables and heatmaps. These methods are demonstrated below.
+
+Note: The decision tree used in the following sections is that generated using metaclusters, i.e. the second tree from above.
+
+## Tables
+
+The output of `findMarkersTree` contains two lists of tables that summarize the structure of the tree. The first is the `rules` tables, one table per cluster, which shows the 'rules' for each class, i.e. the up-regulated and down-regulated markers for the corresponding class at each level of the tree, along with the classifier score for that particular marker. The second is the `branchPoints` tables, which shows a similar table but for a specified branch point in the tree.
+
+The `rules` tables thus offer a way to explore the global structure of the tree as it relates to one specific cluster, while the `branchPoints` tables explore the hierarchical structure of the tree involving multiple clusters.
+
+### Rules tables
+
+There is one `rules` table per class. If metaclusters were used, the name of the table is the name of the metacluster followed by the name of the cluster in parentheses, as seen below.
+
+```{r rulesTable1}
+#take a look at names of rules tables
+head(names(metaTree$rules), 5)
+```
+
+The rules tables have seven columns:
+
+* `class` Name of class for this rules table. Only useful when concatenating multiple rules tables.
+* `feature` The name of the feature (in this case gene module) marker.
+* `direction` Binary. 1 if the feature is up-regulated for this class, -1 if down-regulated.
+* `stat` Score of classifer (one-off split) or IG calculation (balanced split) for that particular class-feature combination.
+* `statUsed` One-off or balanced split.
+* `level` The vertical level of the tree at which this marker is identified for this class.
+* `metacluster` If metaclusters are used, the name of the metacluster this class belongs to.
+* `gene` If clusters of features are used, the name of the individual gene within the feature cluster.
+* `geneAUC` If clusters of features are used, the classifier score of the individual gene within the feature cluster.
+
+```{r rulesTable2}
+#exmaple rules table
+metaTree$rules$`M10(16)`
+```
+
+### Branch point tables
+
+There is one `branchPoints` table for each branch point in the tree. The branch points can most easily be identified by visually examining the dendrogram plot of the tree. The branch points are labeled according to the involved metacluster and the vertical level within the tree, with the top-level of the tree labeled as 'top_level' and each subsequent level as 'Metacluster_level_1', etc...
+
+In case of multiple branch points within one level of a metacluster, the branch points are labelled '_split_A','_split_B', etc.. going from left to right on the dendrogram.
+
+```{r branchTable1}
+#take a look at names of rules tables
+head(names(metaTree$branchPoints), 5)
+```
+
+The branch points tables have the same seven columns as the rules tables.
+
+```{r branchTable2}
+#example branch points table
+metaTree$branchPoints$M11_level_1
+```
+
+### Expanding results to gene-level
+
+If the tree is built using clusters of features (e.g. gene modules), there is an option to expand the results to score the individual features within these feature clusters. So in our example dataset, the genes within each marker module get individual scores that would detail which genes within that module are the best markers. This score is a simple one-vs-all AUC score, where each gene within the marker module is scored according to how well it distinguishes it's assigned class compared to all the other classes at that particular branch point.
+
+Expanding the results to the gene-level requires two additional inputs to `findMarkersTree`: the counts matrix, and a vector with the feature cluster assignments (e.g. `celda@clusters$y`). **This step is performed automatically if a `celda` or `seurat` object is passed.**
+
+NOTE: the parameter `featureLabels` must have the same names as the rownames in the features matrix. In the CELDA factorized matrix, for example, the featues are named 'L1','L2',etc. while the feature labels are just '1','2', etc.. This must be accounted for when passing the the `featureLabels` parameter to `plotMarkerHeatmap` or `findMarkersTree`.
+
+
+## Heatmaps
+
+The function `plotMarkerHeatmap` plots the heatmap for a specified branch point in the decision tree. The heatmap is created using CELDA's built-in heatmap function (which uses *pheatmap*).  The function has the following parameters:
+
+* `tree` A decision tree from CELDA's *findMarkersTree* function.
+* `counts` Numeric matrix. Gene-by-cell counts matrix.
+* `branchPoint` Character. Name of branch point to plot heatmap for. Name should match those in *tree$branchPoints*.
+* `featureLabels` Vector of feature cluster assignments (i.e. which module does each gene belong to?). Length should be equal to number of rows in counts matrix, and formatting should match that used in *findMarkersTree*. Required when using clusters of features and not previously provided to *findMarkersTree*.
+* `topFeatures` Integer. Number of genes to plot per marker module. Genes are sorted based on their AUC for their respective cluster. Only applicable if *findMarkersTree* was run with expansion to gene-level results. Default is 10.
+* `silent` Logical. Whether to avoid plotting heatmap to screen. Default is FALSE.
+
+
+2 example heatmaps are shown below, one for a one-off split and one for a balanced split. Since this tree includes gene-level scores (from the previous `findMarkersTree` call), we can limit the plotted modules to the top 5 genes within each module only.
+
+### One-off split
+
+```{r heatmap}
+#example one-off heatmap
+plotMarkerHeatmap(metaTree, counts, branchPoint = "M11_level_1", topFeatures = 5)
+```
+
+### Balanced split
+```{r heatmap2}
+#example balanced split heatmap
+plotMarkerHeatmap(metaTree, counts, branchPoint = "M10_level_2", topFeatures = 15)
+```
+
+
+## Performance statistics
+
+The output of `findMarkersTree` includes a named list `performance` denoting the training performance of the tree. it contains the following elements:
+
+* accuracy - (number correct/number of samples) for the whole set of samples.
+* balAcc - Mean sensitivity across all labels.
+* meanPrecision - Mean precision across all labels.
+* correct - Number of correct predictions of each label.
+* sizes - Number of actual counts of each label.
+* sensitivity - Sensitivity of the prediction of each label.
+* precision - Precision of the prediction of each label.
+
+
+# Session Info
+
+```{r sessionInfo}
+sessionInfo()
+```
