@@ -797,7 +797,8 @@ findMarkersTree <- function(features,
             return(br)
         })
         #adjust subtype labels
-        tree$rules <- lapply(tree$rules, function(r){
+        tree$rules <- suppressWarnings(lapply(tree$rules, function(r){
+            r$class <- as.character(r$class)
             r$class[grepl("\\(.*\\)",r$class)] <- regmatches(
                 r$class[grepl("\\(.*\\)",r$class)],
                 regexpr(pattern = "(?<=\\().*?(?=\\)$)",
@@ -808,7 +809,7 @@ findMarkersTree <- function(features,
                 gsub("\\(.*\\)", "",
                      r$metacluster[grepl("\\(.*\\)",r$metacluster)])
             return(r)
-        })
+        }))
         
         
         #add to tree
@@ -818,7 +819,11 @@ findMarkersTree <- function(features,
         tree$classLabels <- regmatches(subtypeLabels,
                                        regexpr(pattern = "(?<=\\().*?(?=\\)$)",
                                                subtypeLabels, perl = TRUE))
+        
         tree$metaclusterLabels <- metaclusterLabels
+        tree$metaclusterLabels[grepl("\\(.*\\)",metaclusterLabels)] <- 
+            gsub("\\(.*\\)", "",
+                 metaclusterLabels[grepl("\\(.*\\)",metaclusterLabels)])
         
         # Final return
         return(tree)
@@ -2692,7 +2697,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     #if top-level in metaclusters tree
     if(branchPoint == "top_level"){
         #get unique metaclusters
-        metaclusters <- unique(branch$class)
+        metaclusters <- unique(branch$metacluster)
         
         #list which will contain final set of genes for heatmap
         whichFeatures <- c()
@@ -2701,7 +2706,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         for(meta in metaclusters){
             
             #subset table
-            curMeta <- branch[branch$class==meta,]
+            curMeta <- branch[branch$metacluster==meta,]
             
             #if we have gene-level info in the tree
             if("gene" %in% names(branch)){
@@ -2721,22 +2726,24 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
                 markerGenes <- .removeZeroVariance(counts, 
                                                    cells = which(
                                                        tree$metaclusterLabels %in%
-                                                           unique(curMeta$class)),
+                                                           unique(curMeta$metacluster)),
                                                    markers = markerGenes)
                 
                 #add to list of features
                 whichFeatures <- c(whichFeatures, markerGenes)
             }
             else{
+                #current markers
+                curMarker <- unique(curMeta$feature)
                 
                 #get marker gene indices
-                markerGenes <- which(featureLabels == marker)
+                markerGenes <- which(featureLabels %in% curMarker)
                 
                 #get features with non-zero variance to avoid error
                 markerGenes <- .removeZeroVariance(counts, 
                                                    cells = which(
                                                        tree$metaclusterLabels %in%
-                                                           unique(curMeta$class)),
+                                                           unique(curMeta$metacluster)),
                                                    markers = markerGenes)
                 
                 #add to list of features
@@ -2752,12 +2759,14 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         #order the markers for metaclusters
         allMarkers <- setNames(as.list(colOrder$groupName), colOrder$groupName)
         allMarkers <- lapply(allMarkers, function(x){
-            unique(branch[branch$class==x,"feature"])
+            unique(branch[branch$metacluster==x,"feature"])
         })
         rowOrder <- data.frame(groupName = unlist(allMarkers),
                                groupIndex = seq_along(unlist(allMarkers)))
-        rowOrder <- rowOrder[-which(
-            !rowOrder$groupName %in% tree$featureLabels[whichFeatures]),]
+        toRemove <- which(!rowOrder$groupName %in% featureLabels[whichFeatures])
+        if(length(toRemove) > 0){
+            rowOrder <- rowOrder[-toRemove,]
+        }
         
         #sort cells according to metacluster size
         x <- tree$metaclusterLabels
@@ -2767,7 +2776,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         #create heatmap with only the markers
         return(
             plotHeatmap(counts = counts, z = tree$metaclusterLabels,
-                        y = tree$featureLabels, featureIx=whichFeatures, 
+                        y = featureLabels, featureIx=whichFeatures, 
                         cellIx = sortedCells, showNamesFeature = TRUE,
                         main = "Top-level", silent = silent,
                         treeheightFeature = 0, colGroupOrder = colOrder,
@@ -2819,7 +2828,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
             
             #create heatmap with only the split feature and split classes
             return(plotHeatmap(counts = counts, z = tree$classLabels,
-                               y=tree$featureLabels, featureIx=whichFeatures,
+                               y=featureLabels, featureIx=whichFeatures,
                                cellIx = reorderedCells, clusterCell = FALSE,
                                showNamesFeature = TRUE, main = branchPoint, 
                                silent = silent, treeheightFeature = 0, 
@@ -2834,7 +2843,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
             
             #create heatmap with only the split feature and split classes
             return(plotHeatmap(counts = counts, z = tree$classLabels,
-                               y=tree$featureLabels, featureIx=whichFeatures,
+                               y=featureLabels, featureIx=whichFeatures,
                                cellIx = reorderedCells, clusterCell = FALSE,
                                showNamesFeature = TRUE, main = branchPoint,
                                silent = silent, treeheightFeature = 0,
@@ -2907,8 +2916,10 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         })
         rowOrder <- data.frame(groupName = unlist(allMarkers),
                                groupIndex = seq_along(unlist(allMarkers)))
-        rowOrder <- rowOrder[-which(
-            !rowOrder$groupName %in% tree$featureLabels[whichFeatures]),]
+        toRemove <- which(!rowOrder$groupName %in% featureLabels[whichFeatures])
+        if(length(toRemove) > 0){
+            rowOrder <- rowOrder[-toRemove,]
+        }
         
         #sort cells according to metacluster size
         x <- tree$classLabels#[tree$classLabels %in% unique(branch$class)]
@@ -2918,7 +2929,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         
         #create heatmap with only the split features and split classes
         return(plotHeatmap(counts = counts, z = tree$classLabels, 
-                           y = tree$featureLabels, featureIx=whichFeatures, 
+                           y = featureLabels, featureIx=whichFeatures, 
                            cellIx = sortedCells,
                            showNamesFeature = TRUE, main = branchPoint, 
                            silent = silent, treeheightFeature = 0,
