@@ -203,10 +203,10 @@ unless specified otherwise.}
 
 \item{colLabel}{column cluster labels for semi-clustering}
 
-\item{rowGroupOrder}{Vector. Specifies the order of feature clusters when 
+\item{rowGroupOrder}{Vector. Specifies the order of feature clusters when
 semisupervised clustering is performed on the \code{y} labels.}
 
-\item{colGroupOrder}{Vector. Specifies the order of cell clusters when 
+\item{colGroupOrder}{Vector. Specifies the order of cell clusters when
 semisupervised clustering is performed on the \code{z} labels.}
 
 \item{\dots}{graphical parameters for the text used in plot. Parameters
