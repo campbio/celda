@@ -199,7 +199,7 @@ plotHeatmap <- function(counts,
 
     if (!is.null(y)) {
         L <- sort(unique(y))
-        lCol <- distinctColors(max(L))[L]        
+        lCol <- distinctColors(max(L))[L]
         names(lCol) <- L
         if (!is.null(annotationColor)) {
             if (!("module" %in% names(annotationColor))) {
