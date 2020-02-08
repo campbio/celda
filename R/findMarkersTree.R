@@ -95,13 +95,11 @@
 #' # Plot dendrogram
 #' plotDendro(DecTree)
 #' 
-#' @import magrittr
 #' @importFrom methods hasArg
 #' @import dbscan
 #' @import uwot
 #' @import pROC
 #' @import withr
-#' @import magrittr
 #' @export
 findMarkersTree <- function(features,
                             class,
@@ -600,13 +598,13 @@ findMarkersTree <- function(features,
                 # Check if in right branch
                 if (metacluster %in%
                     as.character(attributes(node)$classLabels)) {
-                    # Replace cell type label with subtype labels
-                    attributes(node)$classLabels <-
-                        as.character(attributes(node)$classLabels) %>%
-                        .[. != metacluster] %>%
-                        c(., unique(subtypeLabels)[grep(metacluster,
-                                                        unique(subtypeLabels))
-                                                   ])
+                     # Replace cell type label with subtype labels
+                    labels <- attributes(node)$classLabels
+                    labels <- as.character(labels)
+                    labels <- labels[labels != metacluster]
+                    labels <- c(labels, unique(subtypeLabels)
+                                [grep(metacluster,unique(subtypeLabels))])
+                    attributes(node)$classLabels <- labels
                     
                     # Assign new member count for this branch
                     attributes(node)$members <-
