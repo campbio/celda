@@ -60,13 +60,13 @@ are solely defined by the absence of markers. Default is TRUE.}
 \item{consecutiveOneoff}{Logical. Whether or not to allow one-off splits at
 consecutive brances. Default is FALSE.}
 
-\item{seed}{Numeric. Seed used to enable reproducible UMAP results
-for identifying metaclusters. Default is 12345.}
-
-\item{autoMetaclusters.}{Logical. Whether to identify metaclusters prior to
+\item{autoMetaclusters}{Logical. Whether to identify metaclusters prior to
 creating the tree based on the distance between clusters in a UMAP 
 dimensionality reduction projection. A metacluster is simply a large
 cluster that includes several clusters within it. Default is TRUE.}
+
+\item{seed}{Numeric. Seed used to enable reproducible UMAP results
+for identifying metaclusters. Default is 12345.}
 }
 \value{
 A named list with six elements:

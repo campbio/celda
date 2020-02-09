@@ -13,7 +13,6 @@ Depends:
     R (>= 3.6)
 VignetteBuilder: knitr
 Imports:
-    stats,
     plyr,
     foreach,
     ggplot2,
@@ -51,7 +50,8 @@ Imports:
     scran,
     SingleCellExperiment,
     dbscan,
-    DelayedArray
+    DelayedArray,
+    Seurat
 Suggests:
     testthat,
     knitr,

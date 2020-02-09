@@ -31,7 +31,7 @@
 #'  are solely defined by the absence of markers. Default is TRUE.
 #' @param consecutiveOneoff Logical. Whether or not to allow one-off splits at
 #'  consecutive brances. Default is FALSE.
-#' @param autoMetaclusters. Logical. Whether to identify metaclusters prior to
+#' @param autoMetaclusters Logical. Whether to identify metaclusters prior to
 #'  creating the tree based on the distance between clusters in a UMAP 
 #'  dimensionality reduction projection. A metacluster is simply a large
 #'  cluster that includes several clusters within it. Default is TRUE.
@@ -96,12 +96,6 @@
 #' plotDendro(DecTree)
 #' 
 #' @import magrittr
-#' @importFrom methods hasArg
-#' @import dbscan
-#' @import uwot
-#' @import pROC
-#' @import withr
-#' @import magrittr
 #' @export
 findMarkersTree <- function(features,
                             class,
@@ -138,7 +132,7 @@ findMarkersTree <- function(features,
         counts <- as.matrix(seurat@assays$RNA@data)
         
         #get class labels
-        class <- as.character(Idents(seurat))
+        class <- as.character(Seurat::Idents(seurat))
         
         #get feature labels
         featureLabels <- unlist(apply(seurat@reductions$pca@feature.loadings,1,
@@ -232,7 +226,7 @@ findMarkersTree <- function(features,
             
             #if seurat object then use seurat's UMAP parameters
             if(methods::hasArg(seurat)){
-                suppressMessages(seurat <- RunUMAP(seurat, dims = 1:ncol(seurat@reductions$pca@feature.loadings)))
+                suppressMessages(seurat <- Seurat::RunUMAP(seurat, dims = 1:ncol(seurat@reductions$pca@feature.loadings)))
                 umap <- seurat@reductions$umap@cell.embeddings
             }
             else{
@@ -601,13 +595,13 @@ findMarkersTree <- function(features,
                 if (metacluster %in%
                     as.character(attributes(node)$classLabels)) {
                     # Replace cell type label with subtype labels
-                    attributes(node)$classLabels <-
-                        as.character(attributes(node)$classLabels) %>%
-                        .[. != metacluster] %>%
-                        c(., unique(subtypeLabels)[grep(metacluster,
-                                                        unique(subtypeLabels))
-                                                   ])
-                    
+                    labels <- attributes(node)$classLabels
+                    labels <- as.character(labels)
+                    labels <- labels[labels != metacluster]
+                    labels <- c(labels, unique(subtypeLabels)
+                              [grep(metacluster,unique(subtypeLabels))])
+                    attributes(node)$classLabels <- labels
+
                     # Assign new member count for this branch
                     attributes(node)$members <-
                         length(attributes(node)$classLabels)
@@ -1345,7 +1339,6 @@ findMarkersTree <- function(features,
 }
 
 # Run pairwise AUC metirc on single feature
-#' @importFrom pROC auc roc coords
 .splitMetricPairwiseAUC <- function(feat, class, features, rPerf = FALSE) {
     
     # Get current feature
@@ -1695,8 +1688,8 @@ findMarkersTree <- function(features,
         rowSums(X[, !splitVector, drop = F])), , drop = F]
     
     # Get pseudo-determinant of covariance matrices
-    DETR <- .psdet(cov(sRFeat))
-    DETL <- .psdet(cov(sLFeat))
+    DETR <- .psdet(stats::cov(sRFeat))
+    DETL <- .psdet(stats::cov(sLFeat))
     
     # Get relative sizes
     sJ <- nrow(features)
@@ -2354,9 +2347,6 @@ subUnderscore <- function(x, n) unlist(lapply(
 #' plotDendro(DecTree)
 #' 
 #' @return A ggplot2 object
-#' @import ggplot2
-#' @importFrom ggdendro dendro_data ggdendrogram
-#' @importFrom dendextend get_nodes_xy get_nodes_attr get_leaves_attr
 #' @export
 plotDendro <- function(tree,
                        classLabel = NULL,
@@ -2543,8 +2533,8 @@ plotDendro <- function(tree,
         # Add metacluster labels to top of plot
         dendroP <- dendroP +
             geom_text(data = metaclusterText, 
-                      aes(x = xend, y = y,
-                          label = label, fontface=2), 
+                      aes(x = metaclusterText$xend, y = metaclusterText$y,
+                          label = metaclusterText$label, fontface=2), 
                       angle = 90, 
                       nudge_y = 0.5,
                       family = "Palatino", 
@@ -2717,7 +2707,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
                 genes <- unique(curMeta$gene)
                 
                 #keep top N features
-                genes <- head(genes, topFeatures)
+                genes <- utils::head(genes, topFeatures)
                 
                 #get gene indices
                 markerGenes <- which(rownames(counts) %in% genes)
@@ -2814,7 +2804,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
             genes <- unique(branch$gene)
             
             #keep top N features
-            genes <- head(genes, topFeatures)
+            genes <- utils::head(genes, topFeatures)
             
             #get gene indices
             whichFeatures <- which(rownames(counts) %in% genes)
@@ -2873,7 +2863,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
                 genes <- unique(curClass$gene)
                 
                 #keep top N features
-                genes <- head(genes, topFeatures)
+                genes <- utils::head(genes, topFeatures)
                 
                 #get gene indices
                 markerGenes <- which(rownames(counts) %in% genes)
