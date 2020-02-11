@@ -50,7 +50,7 @@ Imports:
     SingleCellExperiment,
     dbscan,
     DelayedArray,
-    seurat,
+    Seurat,
     stringr
 Suggests:
     testthat,
