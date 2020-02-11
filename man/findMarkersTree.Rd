@@ -88,7 +88,7 @@ A named list with six elements:
     this rule is applied to.
   }
  \item dendro - A dendrogram object of the decision tree output. Plot with 
- plotDendro()
+ plotMarkerDendro()
  \item classLabels - A vector of the class labels used in the model, i.e.
   cell cluster labels.
  \item metaclusterLabels - A vector of the metacluster labels
@@ -134,6 +134,6 @@ class <- clusters(cm)$z
 DecTree <- findMarkersTree(features, class)
 
 # Plot dendrogram
-plotDendro(DecTree)
+plotMarkerDendro(DecTree)
 
 }

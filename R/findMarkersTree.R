@@ -56,7 +56,7 @@
 #'     this rule is applied to.
 #'   }
 #'  \item dendro - A dendrogram object of the decision tree output. Plot with 
-#'  plotDendro()
+#'  plotMarkerDendro()
 #'  \item classLabels - A vector of the class labels used in the model, i.e.
 #'   cell cluster labels.
 #'  \item metaclusterLabels - A vector of the metacluster labels
@@ -93,9 +93,8 @@
 #' DecTree <- findMarkersTree(features, class)
 #' 
 #' # Plot dendrogram
-#' plotDendro(DecTree)
+#' plotMarkerDendro(DecTree)
 #' 
-#' @import magrittr
 #' @export
 findMarkersTree <- function(features,
                             class,
@@ -2344,11 +2343,11 @@ subUnderscore <- function(x, n) unlist(lapply(
 #' DecTree <- findMarkersTree(features,class,threshold = 1)
 #' 
 #' # Plot dendrogram
-#' plotDendro(DecTree)
+#' plotMarkerDendro(DecTree)
 #' 
 #' @return A ggplot2 object
 #' @export
-plotDendro <- function(tree,
+plotMarkerDendro <- function(tree,
                        classLabel = NULL,
                        addSensPrec = FALSE,
                        maxFeaturePrint = 4,
@@ -2766,7 +2765,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         #create heatmap with only the markers
         return(
             plotHeatmap(counts = counts, z = tree$metaclusterLabels,
-                        y = featureLabels, featureIx=whichFeatures, 
+                        y = featureLabels, featureIx = whichFeatures, 
                         cellIx = sortedCells, showNamesFeature = TRUE,
                         main = "Top-level", silent = silent,
                         treeheightFeature = 0, colGroupOrder = colOrder,

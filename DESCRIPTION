@@ -45,13 +45,13 @@ Imports:
     dendextend,
     ggdendro,
     pROC,
-    magrittr,
     scater (>= 1.14.4),
     scran,
     SingleCellExperiment,
     dbscan,
     DelayedArray,
-    Seurat
+    Seurat,
+    stringr
 Suggests:
     testthat,
     knitr,
