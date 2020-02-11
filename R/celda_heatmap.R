@@ -75,7 +75,8 @@
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' plotHeatmap(celdaCGSim$counts,
-#'     z = clusters(celdaCGMod)$z, y = clusters(celdaCGMod)$y)
+#'   z = clusters(celdaCGMod)$z, y = clusters(celdaCGMod)$y
+#' )
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @import graphics
 #' @import grid
@@ -114,13 +115,13 @@ plotHeatmap <- function(counts,
   if (!is.null(z) & length(z) != ncol(counts)) {
     stop("Length of z must match number of columns in counts matrix")
   }
-  
+
   if (!is.null(y) & length(y) != nrow(counts)) {
     stop("Length of y must match number of rows in counts matrix")
   }
-  
+
   colorScheme <- match.arg(colorScheme)
-  
+
   ## Create cell annotation
   if (!is.null(annotationCell) & !is.null(z)) {
     if (is.null(rownames(annotationCell))) {
@@ -130,16 +131,16 @@ plotHeatmap <- function(counts,
         stop("Row names of 'annotationCell' are different than the
              column names of 'counts'")
       }
-      }
+    }
     annotationCell <-
       data.frame(cell = as.factor(z), annotationCell)
-    } else if (is.null(annotationCell) & !is.null(z)) {
-      annotationCell <- data.frame(cell = as.factor(z))
-      rownames(annotationCell) <- colnames(counts)
-    } else {
-      annotationCell <- NA
-    }
-  
+  } else if (is.null(annotationCell) & !is.null(z)) {
+    annotationCell <- data.frame(cell = as.factor(z))
+    rownames(annotationCell) <- colnames(counts)
+  } else {
+    annotationCell <- NA
+  }
+
   # Set feature annotation
   if (!is.null(annotationFeature) & !is.null(y)) {
     if (is.null(rownames(annotationFeature))) {
@@ -149,39 +150,41 @@ plotHeatmap <- function(counts,
         stop("Row names of 'annotationFeature' are different than the
              row names of 'counts'")
       }
-      }
-    annotationFeature <- data.frame(module = as.factor(y),
-                                    annotationFeature)
-    } else if (is.null(annotationFeature) & !is.null(y)) {
-      annotationFeature <- data.frame(module = as.factor(y))
-      rownames(annotationFeature) <- rownames(counts)
-    } else {
-      annotationFeature <- NA
     }
-  
+    annotationFeature <- data.frame(
+      module = as.factor(y),
+      annotationFeature
+    )
+  } else if (is.null(annotationFeature) & !is.null(y)) {
+    annotationFeature <- data.frame(module = as.factor(y))
+    rownames(annotationFeature) <- rownames(counts)
+  } else {
+    annotationFeature <- NA
+  }
+
   ## Select subsets of features/cells
   if (!is.null(featureIx)) {
     counts <- counts[featureIx, , drop = FALSE]
     if (!is.null(annotationFeature) &&
-        !is.null(ncol(annotationFeature))) {
+      !is.null(ncol(annotationFeature))) {
       annotationFeature <- annotationFeature[featureIx, , drop = FALSE]
     }
     if (!is.null(y)) {
       y <- y[featureIx]
     }
   }
-  
+
   if (!is.null(cellIx)) {
     counts <- counts[, cellIx, drop = FALSE]
     if (!is.null(annotationCell) &&
-        !is.null(ncol(annotationCell))) {
+      !is.null(ncol(annotationCell))) {
       annotationCell <- annotationCell[cellIx, , drop = FALSE]
     }
     if (!is.null(z)) {
       z <- z[cellIx]
     }
   }
-  
+
   ## Set annotation colors
   if (!is.null(z)) {
     if (is.factor(z)) {
@@ -192,8 +195,8 @@ plotHeatmap <- function(counts,
     K <- stringr::str_sort(K, numeric = TRUE)
     kCol <- distinctColors(length(K))
     names(kCol) <- K
-    
-    
+
+
     if (!is.null(annotationColor)) {
       if (!("cell" %in% names(annotationColor))) {
         annotationColor <- c(list(cell = kCol), annotationColor)
@@ -202,7 +205,7 @@ plotHeatmap <- function(counts,
       annotationColor <- list(cell = kCol)
     }
   }
-  
+
   if (!is.null(y)) {
     if (is.factor(y)) {
       L <- levels(y)
@@ -212,7 +215,7 @@ plotHeatmap <- function(counts,
     L <- stringr::str_sort(L, numeric = TRUE)
     lCol <- distinctColors(length(L))
     names(lCol) <- L
-    
+
     if (!is.null(annotationColor)) {
       if (!("module" %in% names(annotationColor))) {
         annotationColor <- c(list(module = lCol), annotationColor)
@@ -221,7 +224,7 @@ plotHeatmap <- function(counts,
       annotationColor <- list(module = lCol)
     }
   }
-  
+
   # scale indivisual rows by scaleRow
   if (!is.null(scaleRow)) {
     if (is.function(scaleRow)) {
@@ -232,21 +235,23 @@ plotHeatmap <- function(counts,
       stop("'scaleRow' needs to be of class 'function'")
     }
   }
-  
+
   if (!is.null(trim)) {
     if (length(trim) != 2) {
-      stop("'trim' should be a 2 element vector specifying the lower",
-           " and upper boundaries")
+      stop(
+        "'trim' should be a 2 element vector specifying the lower",
+        " and upper boundaries"
+      )
     }
     trim <- sort(trim)
     counts[counts < trim[1]] <- trim[1]
     counts[counts > trim[2]] <- trim[2]
   }
-  
+
   ## Set color scheme and breaks
   uBoundRange <- max(counts, na.rm = TRUE)
   lboundRange <- min(counts, na.rm = TRUE)
-  
+
   if (colorScheme == "divergent") {
     if (colorSchemeSymmetric == TRUE) {
       uBoundRange <- max(abs(uBoundRange), abs(lboundRange))
@@ -254,7 +259,8 @@ plotHeatmap <- function(counts,
     }
     if (is.null(col)) {
       col <- colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"),
-                              space = "Lab")(100)
+        space = "Lab"
+      )(100)
     }
     colLen <- length(col)
     if (is.null(breaks)) {
@@ -274,15 +280,17 @@ plotHeatmap <- function(counts,
   } else {
     # Sequential color scheme
     if (is.null(col)) {
-      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9,
-                                                      name = "Blues")))(100)
+      col <- colorRampPalette(c("#FFFFFF", brewer.pal(
+        n = 9,
+        name = "Blues"
+      )))(100)
     }
     colLen <- length(col)
     if (is.null(breaks)) {
       breaks <- seq(lboundRange, uBoundRange, length.out = colLen)
     }
   }
-  
+
   sp <- semiPheatmap(
     mat = counts,
     color = col,
@@ -308,11 +316,11 @@ plotHeatmap <- function(counts,
     silent = TRUE,
     ...
   )
-  
+
   if (!isTRUE(silent)) {
     grid::grid.newpage()
     grid::grid.draw(sp$gtable)
   }
-  
+
   invisible(sp)
 }
