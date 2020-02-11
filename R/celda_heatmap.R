@@ -81,226 +81,238 @@
 #' @import grid
 #' @export
 plotHeatmap <- function(counts,
-    z = NULL,
-    y = NULL,
-    scaleRow = scale,
-    trim = c(-2, 2),
-    featureIx = NULL,
-    cellIx = NULL,
-    clusterFeature = TRUE,
-    clusterCell = TRUE,
-    colorScheme = c("divergent", "sequential"),
-    colorSchemeSymmetric = TRUE,
-    colorSchemeCenter = 0,
-    col = NULL,
-    annotationCell = NULL,
-    annotationFeature = NULL,
-    annotationColor = NULL,
-    breaks = NULL,
-    legend = TRUE,
-    annotationLegend = TRUE,
-    annotationNamesFeature = TRUE,
-    annotationNamesCell = TRUE,
-    showNamesFeature = FALSE,
-    showNamesCell = FALSE,
-    rowGroupOrder = NULL,
-    colGroupOrder = NULL,
-    hclustMethod = "ward.D2",
-    treeheightFeature = ifelse(clusterFeature, 50, 0),
-    treeheightCell = ifelse(clusterCell, 50, 0),
-    silent = FALSE,
-    ...) {
-
-    # Check for same lengths for z and y group variables
-    if (!is.null(z) & length(z) != ncol(counts)) {
-        stop("Length of z must match number of columns in counts matrix")
-    }
-
-    if (!is.null(y) & length(y) != nrow(counts)) {
-        stop("Length of y must match number of rows in counts matrix")
-    }
-
-    colorScheme <- match.arg(colorScheme)
-
-    ## Create cell annotation
-    if (!is.null(annotationCell) & !is.null(z)) {
-        if (is.null(rownames(annotationCell))) {
-            rownames(annotationCell) <- colnames(counts)
-        } else {
-            if (any(rownames(annotationCell) != colnames(counts))) {
-                stop("Row names of 'annotationCell' are different than the
-                    column names of 'counts'")
-            }
-        }
-        annotationCell <- data.frame(cell = as.factor(z), annotationCell)
+                        z = NULL,
+                        y = NULL,
+                        scaleRow = scale,
+                        trim = c(-2, 2),
+                        featureIx = NULL,
+                        cellIx = NULL,
+                        clusterFeature = TRUE,
+                        clusterCell = TRUE,
+                        colorScheme = c("divergent", "sequential"),
+                        colorSchemeSymmetric = TRUE,
+                        colorSchemeCenter = 0,
+                        col = NULL,
+                        annotationCell = NULL,
+                        annotationFeature = NULL,
+                        annotationColor = NULL,
+                        breaks = NULL,
+                        legend = TRUE,
+                        annotationLegend = TRUE,
+                        annotationNamesFeature = TRUE,
+                        annotationNamesCell = TRUE,
+                        showNamesFeature = FALSE,
+                        showNamesCell = FALSE,
+                        rowGroupOrder = NULL,
+                        colGroupOrder = NULL,
+                        hclustMethod = "ward.D2",
+                        treeheightFeature = ifelse(clusterFeature, 50, 0),
+                        treeheightCell = ifelse(clusterCell, 50, 0),
+                        silent = FALSE,
+                        ...) {
+  # Check for same lengths for z and y group variables
+  if (!is.null(z) & length(z) != ncol(counts)) {
+    stop("Length of z must match number of columns in counts matrix")
+  }
+  
+  if (!is.null(y) & length(y) != nrow(counts)) {
+    stop("Length of y must match number of rows in counts matrix")
+  }
+  
+  colorScheme <- match.arg(colorScheme)
+  
+  ## Create cell annotation
+  if (!is.null(annotationCell) & !is.null(z)) {
+    if (is.null(rownames(annotationCell))) {
+      rownames(annotationCell) <- colnames(counts)
+    } else {
+      if (any(rownames(annotationCell) != colnames(counts))) {
+        stop("Row names of 'annotationCell' are different than the
+             column names of 'counts'")
+      }
+      }
+    annotationCell <-
+      data.frame(cell = as.factor(z), annotationCell)
     } else if (is.null(annotationCell) & !is.null(z)) {
-        annotationCell <- data.frame(cell = as.factor(z))
-        rownames(annotationCell) <- colnames(counts)
+      annotationCell <- data.frame(cell = as.factor(z))
+      rownames(annotationCell) <- colnames(counts)
     } else {
-        annotationCell <- NA
+      annotationCell <- NA
     }
-
-    # Set feature annotation
-    if (!is.null(annotationFeature) & !is.null(y)) {
-        if (is.null(rownames(annotationFeature))) {
-            rownames(annotationFeature) <- rownames(counts)
-        } else {
-            if (any(rownames(annotationFeature) != rownames(counts))) {
-                stop("Row names of 'annotationFeature' are different than the
-                    row names of 'counts'")
-            }
-        }
-        annotationFeature <- data.frame(module = as.factor(y),
-            annotationFeature)
+  
+  # Set feature annotation
+  if (!is.null(annotationFeature) & !is.null(y)) {
+    if (is.null(rownames(annotationFeature))) {
+      rownames(annotationFeature) <- rownames(counts)
+    } else {
+      if (any(rownames(annotationFeature) != rownames(counts))) {
+        stop("Row names of 'annotationFeature' are different than the
+             row names of 'counts'")
+      }
+      }
+    annotationFeature <- data.frame(module = as.factor(y),
+                                    annotationFeature)
     } else if (is.null(annotationFeature) & !is.null(y)) {
-        annotationFeature <- data.frame(module = as.factor(y))
-        rownames(annotationFeature) <- rownames(counts)
+      annotationFeature <- data.frame(module = as.factor(y))
+      rownames(annotationFeature) <- rownames(counts)
     } else {
-        annotationFeature <- NA
+      annotationFeature <- NA
     }
-
-    ## Select subsets of features/cells
-    if (!is.null(featureIx)) {
-        counts <- counts[featureIx, , drop = FALSE]
-        if (!is.null(annotationFeature) && !is.null(ncol(annotationFeature))) {
-          annotationFeature <- annotationFeature[featureIx, , drop = FALSE]
-        }        
-        if (!is.null(y)) {
-            y <- y[featureIx]
-        }
+  
+  ## Select subsets of features/cells
+  if (!is.null(featureIx)) {
+    counts <- counts[featureIx, , drop = FALSE]
+    if (!is.null(annotationFeature) &&
+        !is.null(ncol(annotationFeature))) {
+      annotationFeature <- annotationFeature[featureIx, , drop = FALSE]
     }
-
-    if (!is.null(cellIx)) {
-        counts <- counts[, cellIx, drop = FALSE]
-        if (!is.null(annotationCell) && !is.null(ncol(annotationCell))) {
-          annotationCell <- annotationCell[cellIx, , drop = FALSE]
-        }        
-        if (!is.null(z)) {
-            z <- z[cellIx]
-        }
-    }
-
-    ## Set annotation colors
-    if (!is.null(z)) {
-        if(is.factor(z)) {
-          K <- levels(z)
-        } else {
-          K <- unique(z)
-        }
-        K <- stringr::str_sort(K, numeric = TRUE)
-        kCol <- distinctColors(length(K))
-        names(kCol) <- K
-        
-      
-        if (!is.null(annotationColor)) {
-            if (!("cell" %in% names(annotationColor))) {
-                annotationColor <- c(list(cell = kCol), annotationColor)
-            }
-        } else {
-            annotationColor <- list(cell = kCol)
-        }
-    }
-
     if (!is.null(y)) {
-        if(is.factor(y)) {
-          L <- levels(y)
-        } else {
-          L <- unique(y)
-        }
-        L <- stringr::str_sort(L, numeric = TRUE)
-        lCol <- distinctColors(length(L))
-        names(lCol) <- L
-      
-        if (!is.null(annotationColor)) {
-            if (!("module" %in% names(annotationColor))) {
-                annotationColor <- c(list(module = lCol), annotationColor)
-            }
-        } else {
-            annotationColor <- list(module = lCol)
-        }
+      y <- y[featureIx]
     }
-
-    # scale indivisual rows by scaleRow
-    if (!is.null(scaleRow)) {
-        if (is.function(scaleRow)) {
-            cn <- colnames(counts)
-            counts <- t(base::apply(counts, 1, scaleRow))
-            colnames(counts) <- cn
-        } else {
-            stop("'scaleRow' needs to be of class 'function'")
-        }
+  }
+  
+  if (!is.null(cellIx)) {
+    counts <- counts[, cellIx, drop = FALSE]
+    if (!is.null(annotationCell) &&
+        !is.null(ncol(annotationCell))) {
+      annotationCell <- annotationCell[cellIx, , drop = FALSE]
     }
-
-    if (!is.null(trim)) {
-        if (length(trim) != 2) {
-            stop("'trim' should be a 2 element vector specifying the lower",
-                " and upper boundaries")
-        }
-        trim <- sort(trim)
-        counts[counts < trim[1]] <- trim[1]
-        counts[counts > trim[2]] <- trim[2]
+    if (!is.null(z)) {
+      z <- z[cellIx]
     }
-
-    ## Set color scheme and breaks
-    uBoundRange <- max(counts, na.rm = TRUE)
-    lboundRange <- min(counts, na.rm = TRUE)
-
-    if (colorScheme == "divergent") {
-        if (colorSchemeSymmetric == TRUE) {
-            uBoundRange <- max(abs(uBoundRange), abs(lboundRange))
-            lboundRange <- -uBoundRange
-        }
-        if (is.null(col)) {
-            col <- colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"),
-                space = "Lab")(100)
-        }
-        colLen <- length(col)
-        if (is.null(breaks)) {
-            breaks <- c(seq(lboundRange, colorSchemeCenter,
-                length.out = round(colLen / 2) + 1),
-                seq(colorSchemeCenter + 1e-6, uBoundRange,
-                    length.out = colLen - round(colLen / 2)))
-        }
+  }
+  
+  ## Set annotation colors
+  if (!is.null(z)) {
+    if (is.factor(z)) {
+      K <- levels(z)
     } else {
-        # Sequential color scheme
-        if (is.null(col)) {
-            col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9,
-                name = "Blues")))(100)
-        }
-        colLen <- length(col)
-        if (is.null(breaks)) {
-            breaks <- seq(lboundRange, uBoundRange, length.out = colLen)
-        }
+      K <- unique(z)
     }
-
-    sp <- semiPheatmap(mat = counts,
-        color = col,
-        breaks = breaks,
-        clusterCols = clusterCell,
-        clusterRows = clusterFeature,
-        annotationRow = annotationFeature,
-        annotationCol = annotationCell,
-        annotationColors = annotationColor,
-        legend = legend,
-        annotationLegend = annotationLegend,
-        annotationNamesRow = annotationNamesFeature,
-        annotationNamesCol = annotationNamesCell,
-        showRownames = showNamesFeature,
-        showColnames = showNamesCell,
-        clusteringMethod = hclustMethod,
-        treeHeightRow = treeheightFeature,
-        treeHeightCol = treeheightCell,
-        rowLabel = y,
-        colLabel = z,
-        rowGroupOrder = rowGroupOrder,
-        colGroupOrder = colGroupOrder,
-        silent = TRUE,
-        ...)
-
-    if (!isTRUE(silent)) {
-        grid::grid.newpage()
-        grid::grid.draw(sp$gtable)
+    K <- stringr::str_sort(K, numeric = TRUE)
+    kCol <- distinctColors(length(K))
+    names(kCol) <- K
+    
+    
+    if (!is.null(annotationColor)) {
+      if (!("cell" %in% names(annotationColor))) {
+        annotationColor <- c(list(cell = kCol), annotationColor)
+      }
+    } else {
+      annotationColor <- list(cell = kCol)
     }
-
-    invisible(sp)
+  }
+  
+  if (!is.null(y)) {
+    if (is.factor(y)) {
+      L <- levels(y)
+    } else {
+      L <- unique(y)
+    }
+    L <- stringr::str_sort(L, numeric = TRUE)
+    lCol <- distinctColors(length(L))
+    names(lCol) <- L
+    
+    if (!is.null(annotationColor)) {
+      if (!("module" %in% names(annotationColor))) {
+        annotationColor <- c(list(module = lCol), annotationColor)
+      }
+    } else {
+      annotationColor <- list(module = lCol)
+    }
+  }
+  
+  # scale indivisual rows by scaleRow
+  if (!is.null(scaleRow)) {
+    if (is.function(scaleRow)) {
+      cn <- colnames(counts)
+      counts <- t(base::apply(counts, 1, scaleRow))
+      colnames(counts) <- cn
+    } else {
+      stop("'scaleRow' needs to be of class 'function'")
+    }
+  }
+  
+  if (!is.null(trim)) {
+    if (length(trim) != 2) {
+      stop("'trim' should be a 2 element vector specifying the lower",
+           " and upper boundaries")
+    }
+    trim <- sort(trim)
+    counts[counts < trim[1]] <- trim[1]
+    counts[counts > trim[2]] <- trim[2]
+  }
+  
+  ## Set color scheme and breaks
+  uBoundRange <- max(counts, na.rm = TRUE)
+  lboundRange <- min(counts, na.rm = TRUE)
+  
+  if (colorScheme == "divergent") {
+    if (colorSchemeSymmetric == TRUE) {
+      uBoundRange <- max(abs(uBoundRange), abs(lboundRange))
+      lboundRange <- -uBoundRange
+    }
+    if (is.null(col)) {
+      col <- colorRampPalette(c("#1E90FF", "#FFFFFF", "#CD2626"),
+                              space = "Lab")(100)
+    }
+    colLen <- length(col)
+    if (is.null(breaks)) {
+      breaks <- c(
+        seq(
+          lboundRange,
+          colorSchemeCenter,
+          length.out = round(colLen / 2) + 1
+        ),
+        seq(
+          colorSchemeCenter + 1e-6,
+          uBoundRange,
+          length.out = colLen - round(colLen / 2)
+        )
+      )
+    }
+  } else {
+    # Sequential color scheme
+    if (is.null(col)) {
+      col <- colorRampPalette(c("#FFFFFF", brewer.pal(n = 9,
+                                                      name = "Blues")))(100)
+    }
+    colLen <- length(col)
+    if (is.null(breaks)) {
+      breaks <- seq(lboundRange, uBoundRange, length.out = colLen)
+    }
+  }
+  
+  sp <- semiPheatmap(
+    mat = counts,
+    color = col,
+    breaks = breaks,
+    clusterCols = clusterCell,
+    clusterRows = clusterFeature,
+    annotationRow = annotationFeature,
+    annotationCol = annotationCell,
+    annotationColors = annotationColor,
+    legend = legend,
+    annotationLegend = annotationLegend,
+    annotationNamesRow = annotationNamesFeature,
+    annotationNamesCol = annotationNamesCell,
+    showRownames = showNamesFeature,
+    showColnames = showNamesCell,
+    clusteringMethod = hclustMethod,
+    treeHeightRow = treeheightFeature,
+    treeHeightCol = treeheightCell,
+    rowLabel = y,
+    colLabel = z,
+    rowGroupOrder = rowGroupOrder,
+    colGroupOrder = colGroupOrder,
+    silent = TRUE,
+    ...
+  )
+  
+  if (!isTRUE(silent)) {
+    grid::grid.newpage()
+    grid::grid.draw(sp$gtable)
+  }
+  
+  invisible(sp)
 }
