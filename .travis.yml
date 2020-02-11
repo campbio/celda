@@ -8,7 +8,8 @@ jobs:
   include:
     - stage: prepare cache
       script: true
-    - stage: test
+    - stage: run
+      script: false
 before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 r_build_args: "--no-build-vignettes"
