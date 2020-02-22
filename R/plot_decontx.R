@@ -5,6 +5,30 @@
 #' @param  counts 
 #' @param  z
 #' @param  geneMarkers, a dataframe of marker genes which corresponding to their cell types  
+#' @param  threshold, default as 
+
+celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 4, color = "red3", textLabelSize=5 ){
+    nC_CTbyZ = .celdabarplot(counts, z, geneMarkers, threshold)
+
+    nC_CTbyZ.melt = reshape2::melt(nC_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
+
+    plt = ggplot2::ggplot(nC_CTbyZ.melt, aes( x = z, y = percent * 100) ) + 
+			geom_bar(stat = "identity", fill = color ) +
+		  geom_text(aes(x = z, y= percent * 100 + 5 ,label = paste0(percent * 100, "%") ) , size = textLabelSize ) +
+			facet_grid(. ~ cellType ) + 
+			theme(panel.background=element_rect(fill="white", color="grey"),
+						panel.grid = element_line("grey"), legend.position="none",
+						legend.key=element_rect(fill="white", color="white"),
+						panel.grid.minor = element_blank(),
+						panel.grid.major = element_blank(),
+						text=element_text(size=10),
+						axis.text.x = element_text(size=8, angle = 45, hjust = 1),
+						axis.text.y=element_text(size=9),
+						legend.key.size = grid::unit(8, "mm"),
+						legend.text = element_text(size=10),
+						strip.text.x = element_text(size = 10))
+		return(plt)
+}
 
 .celdabarplot = function(counts, z, geneMarkers, threshold = 4){
 
@@ -75,10 +99,13 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
 		ng_CTbyC = sparseMatrix( i = i_celltype, j = ij_pair[, "col"], x = 1, giveCsparse=TRUE, dimnames = list(CTnames, Cnames), dims=c(nTC, ncol(sub_counts)) )
 		binary_CTbyC = as((ng_CTbyC > 0) * 1, "matrix") 
 		storage.mode(binary_CTbyC) = "integer"
-		ng_CTbyZ = celda:::.colSumByGroup(binary_CTbyC, z, K)
-		rownames(ng_CTbyZ) = rownames(ng_CTbyC)
+		nC_CTbyZ = celda:::.colSumByGroup(binary_CTbyC, z, K)
+		rownames(nC_CTbyZ) = rownames(ng_CTbyC)
+		colnames(nC_CTbyZ) = 1:K
 
-	return (ng_CTbyZ)
+		pct_CTbyZ = sweep(nC_CTbyZ, MARGIN=2, STATS=table(z), FUN="/")
+	#return (nC_CTbyZ)
+	return(pct_CTbyZ)
 }
 
 
@@ -98,10 +125,12 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
     return(geneMarkers)
 }
 
+# 
 #geneMarkers should be a dataframe
-counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
-geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
-z = c(rep(1, 4), rep(2,4), rep(3,2))
-a = .celdabarplot( counts = counts, z = z, geneMarkers = geneMarkers)
-
+#counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
+#geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
+#z = c(rep(1, 4), rep(2,4), rep(3,2))
+#a = .celdabarplot( counts = counts, z = z, geneMarkers = geneMarkers)
+#plt = celdaMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
+#plt
 
