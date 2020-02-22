@@ -6,15 +6,17 @@
 #' @param  z
 #' @param  geneMarkers, a dataframe of marker genes which corresponding to their cell types  
 #' @param  threshold, default as 
+#' @param  color, default as "red3"
+#' @param  textLabelSize, default as 3
 
-celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 4, color = "red3", textLabelSize=5 ){
+celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3", textLabelSize=3 ){
     nC_CTbyZ = .celdabarplot(counts, z, geneMarkers, threshold)
 
     nC_CTbyZ.melt = reshape2::melt(nC_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
 
-    plt = ggplot2::ggplot(nC_CTbyZ.melt, aes( x = z, y = percent * 100) ) + 
+    plt = ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes( x = z, y = percent * 100) ) + 
 			geom_bar(stat = "identity", fill = color ) +
-		  geom_text(aes(x = z, y= percent * 100 + 5 ,label = paste0(percent * 100, "%") ) , size = textLabelSize ) +
+		  geom_text(aes(x = z, y= percent * 100 + 5 ,label = paste0(round(percent,4) * 100, "%") ) , size = textLabelSize ) +
 			facet_grid(. ~ cellType ) + 
 			theme(panel.background=element_rect(fill="white", color="grey"),
 						panel.grid = element_line("grey"), legend.position="none",
@@ -133,4 +135,3 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
 #a = .celdabarplot( counts = counts, z = z, geneMarkers = geneMarkers)
 #plt = celdaMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
 #plt
-
