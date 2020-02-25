@@ -10,7 +10,14 @@
 #' @param  textLabelSize, default as 3
 
 celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3", textLabelSize=3 ){
+
+    z = factor(z)
+		z_names = levels(z)
+		levels(z) = 1:length(levels(z))
+		z = as.integer(z)
+
     nC_CTbyZ = .celdabarplot(counts, z, geneMarkers, threshold)
+		colnames(nC_CTbyZ) = z_names
 
     nC_CTbyZ.melt = reshape2::melt(nC_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
 
@@ -50,9 +57,8 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3"
 	geneMarkers = .geneMarkerProcess(geneMarkers) 
 
 	if (is.null(nrow(sub_counts))) {
-		# There is only one gene after subsetting 
-		# which resulted into a vector, instead of a matrix
-		nC_CTbyZ = (sub_counts > threshold) * 1
+		# There is only one gene after subsetting, resulting into a vector
+		nC_CTbyZ = collapseVectorByGeneMarker( sub_vector = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
 
 	} else {
        # collapse gene by cell matrix into cell-type-marker by cell-type matrix,
@@ -63,6 +69,19 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3"
 	return(nC_CTbyZ)
 }
   
+
+collapseVectorByGeneMarker = function(sub_vector, genePresented, z, threshold = 1) {
+	K = max(z)
+	binary_2byZ = table(sub_vector > threshold, z)
+	CTnames = genePresented[, "cellType"]
+  pct_CTbyZ = sweep(binary_2byZ, MARGIN=2, STATS=table(z), FUN="/")[rownames(binary_2byZ) == TRUE, ]
+  if (length(CTnames) > 1) {
+    pct_CTbyZ = matrix(rep(pct_CTbyZ, length(CTnames)), nrow = length(CTnames), dimnames = list(CTnames, 1:K))
+  } else {
+    pct_CTbyZ = matrix(pct_CTbyZ, nrow = 1, dimnames = list(CTnames, 1:K))
+  }
+  return(pct_CTbyZ)
+}
 
 
 collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) {
@@ -129,9 +148,9 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
 
 # 
 #geneMarkers should be a dataframe
-#counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
-#geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
-#z = c(rep(1, 4), rep(2,4), rep(3,2))
+counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
+geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
+z = c(rep(1, 4), rep(2,4), rep(3,2))
 #a = .celdabarplot( counts = counts, z = z, geneMarkers = geneMarkers)
 #plt = celdaMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
 #plt
