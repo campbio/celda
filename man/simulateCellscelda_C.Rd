@@ -4,18 +4,9 @@
 \alias{simulateCellscelda_C}
 \title{Simulate cells from the celda_C model}
 \usage{
-simulateCellscelda_C(
-  model,
-  S = 5,
-  CRange = c(50, 100),
-  NRange = c(500, 1000),
-  G = 100,
-  K = 5,
-  alpha = 1,
-  beta = 1,
-  seed = 12345,
-  ...
-)
+simulateCellscelda_C(model, S = 5, CRange = c(50, 100),
+  NRange = c(500, 1000), G = 100, K = 5, alpha = 1, beta = 1,
+  seed = 12345, ...)
 }
 \arguments{
 \item{model}{Character. Options available in `celda::availableModels`.}

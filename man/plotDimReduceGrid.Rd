@@ -4,20 +4,8 @@
 \alias{plotDimReduceGrid}
 \title{Mapping the dimensionality reduction plot}
 \usage{
-plotDimReduceGrid(
-  dim1,
-  dim2,
-  matrix,
-  size,
-  xlab,
-  ylab,
-  colorLow,
-  colorMid,
-  colorHigh,
-  varLabel,
-  ncol = NULL,
-  headers = NULL
-)
+plotDimReduceGrid(dim1, dim2, matrix, size, xlab, ylab, colorLow, colorMid,
+  colorHigh, varLabel, ncol = NULL, headers = NULL)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data dimensionality

@@ -4,16 +4,9 @@
 \alias{moduleHeatmap}
 \title{Heatmap for featureModules}
 \usage{
-moduleHeatmap(
-  counts,
-  celdaMod,
-  featureModule = 1,
-  topCells = 100,
-  topFeatures = NULL,
-  normalizedCounts = NA,
-  scaleRow = scale,
-  showFeaturenames = TRUE
-)
+moduleHeatmap(counts, celdaMod, featureModule = 1, topCells = 100,
+  topFeatures = NULL, normalizedCounts = NA, scaleRow = scale,
+  showFeaturenames = TRUE)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent

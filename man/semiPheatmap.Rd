@@ -4,60 +4,27 @@
 \alias{semiPheatmap}
 \title{A function to draw clustered heatmaps.}
 \usage{
-semiPheatmap(
-  mat,
-  color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
-  kmeansK = NA,
-  breaks = NA,
-  borderColor = "grey60",
-  cellWidth = NA,
-  cellHeight = NA,
-  scale = "none",
-  clusterRows = TRUE,
-  clusterCols = TRUE,
+semiPheatmap(mat, color = colorRampPalette(rev(brewer.pal(n = 7, name =
+  "RdYlBu")))(100), kmeansK = NA, breaks = NA,
+  borderColor = "grey60", cellWidth = NA, cellHeight = NA,
+  scale = "none", clusterRows = TRUE, clusterCols = TRUE,
   clusteringDistanceRows = "euclidean",
-  clusteringDistanceCols = "euclidean",
-  clusteringMethod = "complete",
-  clusteringCallback = .identity2,
-  cutreeRows = NA,
-  cutreeCols = NA,
+  clusteringDistanceCols = "euclidean", clusteringMethod = "complete",
+  clusteringCallback = .identity2, cutreeRows = NA, cutreeCols = NA,
   treeHeightRow = ifelse(clusterRows, 50, 0),
-  treeHeightCol = ifelse(clusterCols, 50, 0),
-  legend = TRUE,
-  legendBreaks = NA,
-  legendLabels = NA,
-  annotationRow = NA,
-  annotationCol = NA,
-  annotation = NA,
-  annotationColors = NA,
-  annotationLegend = TRUE,
-  annotationNamesRow = TRUE,
-  annotationNamesCol = TRUE,
-  dropLevels = TRUE,
-  showRownames = TRUE,
-  showColnames = TRUE,
-  main = NA,
-  fontSize = 10,
-  fontSizeRow = fontSize,
-  fontSizeCol = fontSize,
-  displayNumbers = FALSE,
-  numberFormat = "\%.2f",
-  numberColor = "grey30",
-  fontSizeNumber = 0.8 * fontSize,
-  gapsRow = NULL,
-  gapsCol = NULL,
-  labelsRow = NULL,
-  labelsCol = NULL,
-  fileName = NA,
-  width = NA,
-  height = NA,
-  silent = FALSE,
-  rowLabel,
-  colLabel,
-  rowGroupOrder = NULL,
-  colGroupOrder = NULL,
-  ...
-)
+  treeHeightCol = ifelse(clusterCols, 50, 0), legend = TRUE,
+  legendBreaks = NA, legendLabels = NA, annotationRow = NA,
+  annotationCol = NA, annotation = NA, annotationColors = NA,
+  annotationLegend = TRUE, annotationNamesRow = TRUE,
+  annotationNamesCol = TRUE, dropLevels = TRUE, showRownames = TRUE,
+  showColnames = TRUE, main = NA, fontSize = 10,
+  fontSizeRow = fontSize, fontSizeCol = fontSize,
+  displayNumbers = FALSE, numberFormat = "\%.2f",
+  numberColor = "grey30", fontSizeNumber = 0.8 * fontSize,
+  gapsRow = NULL, gapsCol = NULL, labelsRow = NULL,
+  labelsCol = NULL, fileName = NA, width = NA, height = NA,
+  silent = FALSE, rowLabel, colLabel, rowGroupOrder = NULL,
+  colGroupOrder = NULL, ...)
 }
 \arguments{
 \item{mat}{numeric matrix of the values to be plotted.}
@@ -203,10 +170,10 @@ unless specified otherwise.}
 
 \item{colLabel}{column cluster labels for semi-clustering}
 
-\item{rowGroupOrder}{Vector. Specifies the order of feature clusters when 
+\item{rowGroupOrder}{Vector. Specifies the order of feature clusters when
 semisupervised clustering is performed on the \code{y} labels.}
 
-\item{colGroupOrder}{Vector. Specifies the order of cell clusters when 
+\item{colGroupOrder}{Vector. Specifies the order of cell clusters when
 semisupervised clustering is performed on the \code{z} labels.}
 
 \item{\dots}{graphical parameters for the text used in plot. Parameters

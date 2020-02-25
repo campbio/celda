@@ -3,13 +3,14 @@
 
 #' Barplot that shows the percentage of cells representing given marker genes
 #' @param  counts 
-#' @param  z
+#' @param  z, a vector. Cell cluster label, same length as the column numbers of the count matrix
 #' @param  geneMarkers, a dataframe of marker genes which corresponding to their cell types  
-#' @param  threshold, default as 
+#' @param  threshold, default as 1.  
 #' @param  color, default as "red3"
 #' @param  textLabelSize, default as 3
+#' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot 
 
-celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3", textLabelSize=3 ){
+celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize=3, precision = 2 ){
 
     z = factor(z)
 		z_names = levels(z)
@@ -23,7 +24,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3"
 
     plt = ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes( x = z, y = percent * 100) ) + 
 			geom_bar(stat = "identity", fill = color ) +
-		  geom_text(aes(x = z, y= percent * 100 + 5 ,label = paste0(round(percent,4) * 100, "%") ) , size = textLabelSize ) +
+		  geom_text(aes(x = z, y= percent * 100 + 5 ,label = paste0(round(percent,precision) * 100, "%") ) , size = textLabelSize ) +
 			facet_grid(. ~ cellType ) + 
 			theme(panel.background=element_rect(fill="white", color="grey"),
 						panel.grid = element_line("grey"), legend.position="none",
@@ -39,7 +40,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 0, color = "red3"
 		return(plt)
 }
 
-.celdabarplot = function(counts, z, geneMarkers, threshold = 4){
+.celdabarplot = function(counts, z, geneMarkers, threshold = 1){
 
   rNames = rownames(counts)
 	gNames = geneMarkers[, "geneMarkers"]
@@ -92,7 +93,7 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
 	nCTbyZ = matrix(0, nrow=nTC,  ncol=nZ)
 
 	# convert matrix into dgCMatrix if it is not
-	mtx = as( sub_counts > threshold, "dgCMatrix")
+	mtx = Matrix::Matrix(data = sub_counts > threshold, sparse=TRUE)  # convert to "dgCMatrix" 
 	ij_pair = Ringo::nonzero(mtx)
 	i_celltype = plyr::mapvalues(ij_pair[,"row"], from=genePresented[,"geneMarkers"], to=genePresented[,"cellType"])
 
