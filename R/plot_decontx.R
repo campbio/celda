@@ -23,8 +23,8 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   plt <- ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes(x = z, y = percent * 100)) +
     ggplot2::geom_bar(stat = "identity", fill = color) +
     ggplot2::geom_text(aes(x = z, y = percent * 100 + 5, label = paste0(round(percent, precision) * 100, "%")), size = textLabelSize) +
-		ggplot2::xlab("Cluster") + 
-		ggplot2::ylab("Percentage of cells expressing cell-type\nspecific markers") +
+    ggplot2::xlab("Cluster") +
+    ggplot2::ylab("Percentage of cells expressing cell-type\nspecific markers") +
     ggplot2::facet_grid(. ~ cellType) +
     ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white", color = "grey"),
@@ -80,7 +80,7 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   pct_CTbyZ <- sweep(binary_2byZ, MARGIN = 2, STATS = table(z), FUN = "/")[rownames(binary_2byZ) == TRUE, ]
 
   if (length(CTnames) > 1) {
-		# Multiple cell types have this marker
+    # Multiple cell types have this marker
     pct_CTbyZ <- matrix(rep(pct_CTbyZ, length(CTnames)), nrow = length(CTnames), dimnames = list(CTnames, 1:K))
   } else {
     # Only one cell type has this marker
@@ -105,7 +105,6 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   if (nrow(genePresented) == length(unique(genePresented[, "geneMarkers"]))) {
     # When each gene qs only specified in ONE cell type
-
   } else {
     # When at least one gene is specified as marker for multiple cell types
 
