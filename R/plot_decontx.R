@@ -1,5 +1,3 @@
-## Barplot that shows the percentage of cells representing given marker genes
-## input: 
 
 #' Barplot that shows the percentage of cells representing given marker genes
 #' @param  counts 
@@ -12,10 +10,8 @@
 
 celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize=3, precision = 2 ){
 
-    z = factor(z)
-		z_names = levels(z)
-		levels(z) = 1:length(levels(z))
-		z = as.integer(z)
+		z_names = levels(factor(z))
+		z = .processZ(z)
 
     nC_CTbyZ = .celdabarplot(counts, z, geneMarkers, threshold)
 		colnames(nC_CTbyZ) = z_names
@@ -40,12 +36,13 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 		return(plt)
 }
 
+
 .celdabarplot = function(counts, z, geneMarkers, threshold = 1){
 
   rNames = rownames(counts)
 	gNames = geneMarkers[, "geneMarkers"]
 
-  # Only use intersected genes 
+  # Only use intersected marker genes 
 	intersectedGenes = intersect(rNames, gNames)
 
 	if (length(intersectedGenes) == 0) {
@@ -58,20 +55,21 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 	geneMarkers = .geneMarkerProcess(geneMarkers) 
 
 	if (is.null(nrow(sub_counts))) {
-		# There is only one gene after subsetting, resulting into a vector
-		nC_CTbyZ = collapseVectorByGeneMarker( sub_vector = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
+		# When there is only one gene --> a vector
+		nC_CTbyZ = .vctrRowProjectColCollapse( sub_vector = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
 
 	} else {
-       # collapse gene by cell matrix into cell-type-marker by cell-type matrix,
-       # with each element being the number of cells in that cell-type presented any marker in that cell type
-       nC_CTbyZ = collapseRowByGeneMarker( sub_counts = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
+		# When multiple genes --> matrix 
+       nC_CTbyZ = .mtxRowProjectColCollapse( sub_counts = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
 	}
 
 	return(nC_CTbyZ)
 }
   
 
-collapseVectorByGeneMarker = function(sub_vector, genePresented, z, threshold = 1) {
+# Collapse (1-)Gene x Cell count vector into cell-type-marker by cluster matrix
+# with each element being the cells% in that cluster shows at least one marker in that cell type
+.vctrRowProjectColCollapse= function(sub_vector, genePresented, z, threshold = 1) {
 	K = max(z)
 	binary_2byZ = table(sub_vector > threshold, z)
 	CTnames = genePresented[, "cellType"]
@@ -84,8 +82,9 @@ collapseVectorByGeneMarker = function(sub_vector, genePresented, z, threshold = 
   return(pct_CTbyZ)
 }
 
-
-collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) {
+# Collapse Gene x Cell count matrix into cell-type-marker by cluster matrix
+# with each element being the cells% in that cluster shows at least one marker in that cell type
+.mtxRowProjectColCollapse= function(sub_counts, genePresented, z, threshold = 1) {
 	K = max(z)
 
   nTC = length(levels(genePresented[, "cellType"]))
@@ -93,7 +92,7 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
 	nCTbyZ = matrix(0, nrow=nTC,  ncol=nZ)
 
 	# convert matrix into dgCMatrix if it is not
-	mtx = Matrix::Matrix(data = sub_counts > threshold, sparse=TRUE)  # convert to "dgCMatrix" 
+	mtx = Matrix::as.matrix(sub_counts > threshold * 1, "dgCMatrix")  
 	ij_pair = Ringo::nonzero(mtx)
 	i_celltype = plyr::mapvalues(ij_pair[,"row"], from=genePresented[,"geneMarkers"], to=genePresented[,"cellType"])
 
@@ -126,16 +125,15 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
 		colnames(nC_CTbyZ) = 1:K
 
 		pct_CTbyZ = sweep(nC_CTbyZ, MARGIN=2, STATS=table(z), FUN="/")
-	#return (nC_CTbyZ)
-	return(pct_CTbyZ)
+
+	  return(pct_CTbyZ)
 }
 
 
 
+# geneMarkers should be a dataframe,  w/ 2 column names being `cellType` and `geneMarkers`
+# convert both `cellType` and `geneMarkers` are factors with levels being integer 
 .geneMarkerProcess = function( geneMarkers ){
-    # geneMarkers should be a dataframe,  column names should be `cellType` and `geneMarkers`
-	  # `cellType` should be factor + integer
-	  # `geneMarkers` should be factor + integer
         geneMarkers[, "cellName"] = geneMarkers[, "cellType"]
 				geneMarkers[, "cellType"] = factor(geneMarkers[, "cellType"])
 				levels(geneMarkers[, "cellType"]) = 1:length(levels(geneMarkers[, "cellType"]))
@@ -147,11 +145,18 @@ collapseRowByGeneMarker = function(sub_counts, genePresented, z, threshold = 1) 
     return(geneMarkers)
 }
 
-# 
+# Convert z to be factor with levels being integer
+.processZ = function(z) {
+    z = factor(z) 
+    levels(z) = seq_len(length(levels(z)))
+		z = as.integer(z)
+		return(z)
+}
+
+
 #geneMarkers should be a dataframe
 #counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
 #geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
 #z = c(rep(1, 4), rep(2,4), rep(3,2))
-#a = .celdabarplot( counts = counts, z = z, geneMarkers = geneMarkers)
 #plt = celdaMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
 #plt
