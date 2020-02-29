@@ -15,34 +15,35 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   z_names <- levels(factor(z))
   z <- .processZ(z)
 
-  nC_CTbyZ <- .celdabarplot(counts, z, geneMarkers, threshold)
-  colnames(nC_CTbyZ) <- z_names
+  pct_CTbyZ <- .calCellPct(counts, z, geneMarkers, threshold)
+  colnames(pct_CTbyZ) <- z_names
 
-  nC_CTbyZ.melt <- reshape2::melt(nC_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
+  pct_CTbyZ.melt <- reshape2::melt(pct_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
 
   plt <- ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes(x = z, y = percent * 100)) +
-    geom_bar(stat = "identity", fill = color) +
-    geom_text(aes(x = z, y = percent * 100 + 5, label = paste0(round(percent, precision) * 100, "%")), size = textLabelSize) +
-		xlab("Cluster") + ylab("Percentage of cells expressing cell-type\nspecific markers") +
-    facet_grid(. ~ cellType) +
-    theme(
-      panel.background = element_rect(fill = "white", color = "grey"),
-      panel.grid = element_line("grey"), legend.position = "none",
-      legend.key = element_rect(fill = "white", color = "white"),
-      panel.grid.minor = element_blank(),
-      panel.grid.major = element_blank(),
-      text = element_text(size = 10),
-      axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
-      axis.text.y = element_text(size = 9),
+    ggplot2::geom_bar(stat = "identity", fill = color) +
+    ggplot2::geom_text(aes(x = z, y = percent * 100 + 5, label = paste0(round(percent, precision) * 100, "%")), size = textLabelSize) +
+		ggplot2::xlab("Cluster") + 
+		ggplot2::ylab("Percentage of cells expressing cell-type\nspecific markers") +
+    ggplot2::facet_grid(. ~ cellType) +
+    ggplot2::theme(
+      panel.background = ggplot2::element_rect(fill = "white", color = "grey"),
+      panel.grid = ggplot2::element_line("grey"), legend.position = "none",
+      legend.key = ggplot2::element_rect(fill = "white", color = "white"),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
+      text = ggplot2::element_text(size = 10),
+      axis.text.x = ggplot2::element_text(size = 8, angle = 45, hjust = 1),
+      axis.text.y = ggplot2::element_text(size = 9),
       legend.key.size = grid::unit(8, "mm"),
-      legend.text = element_text(size = 10),
-      strip.text.x = element_text(size = 10)
+      legend.text = ggplot2::element_text(size = 10),
+      strip.text.x = ggplot2::element_text(size = 10)
     )
   return(plt)
 }
 
 
-.celdabarplot <- function(counts, z, geneMarkers, threshold = 1) {
+.calCellPct <- function(counts, z, geneMarkers, threshold = 1) {
   rNames <- rownames(counts)
   gNames <- geneMarkers[, "geneMarkers"]
 
@@ -60,13 +61,13 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   if (is.null(nrow(sub_counts))) {
     # When there is only one gene --> a vector
-    nC_CTbyZ <- .vctrRowProjectColCollapse(sub_vector = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
+    pct_CTbyZ <- .vctrRowProjectColCollapse(sub_vector = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
   } else {
     # When multiple genes --> matrix
-    nC_CTbyZ <- .mtxRowProjectColCollapse(sub_counts = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
+    pct_CTbyZ <- .mtxRowProjectColCollapse(sub_counts = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
   }
 
-  return(nC_CTbyZ)
+  return(pct_CTbyZ)
 }
 
 
@@ -77,9 +78,12 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   binary_2byZ <- table(sub_vector >= threshold, z)
   CTnames <- genePresented[, "cellType"]
   pct_CTbyZ <- sweep(binary_2byZ, MARGIN = 2, STATS = table(z), FUN = "/")[rownames(binary_2byZ) == TRUE, ]
+
   if (length(CTnames) > 1) {
+		# Multiple cell types have this marker
     pct_CTbyZ <- matrix(rep(pct_CTbyZ, length(CTnames)), nrow = length(CTnames), dimnames = list(CTnames, 1:K))
   } else {
+    # Only one cell type has this marker
     pct_CTbyZ <- matrix(pct_CTbyZ, nrow = 1, dimnames = list(CTnames, 1:K))
   }
   return(pct_CTbyZ)
