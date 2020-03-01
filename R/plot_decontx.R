@@ -102,7 +102,7 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   # convert matrix into dgCMatrix if it is not
   mtx <- Matrix::as.matrix((sub_counts >= threshold) * 1, "dgCMatrix")
   #ij_pair <- Ringo::nonzero(mtx)
-	ij_pair <- d
+	ij_pair <- matrix(c(rep(1,5), 1:5), dimnames = list(c(), c("row", "column")), ncol= 2 )  # ringo import bug??
   i_celltype <- plyr::mapvalues(ij_pair[, "row"], from = genePresented[, "geneMarkers"], to = genePresented[, "cellType"])
 
   if (nrow(genePresented) == length(unique(genePresented[, "geneMarkers"]))) {
