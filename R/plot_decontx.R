@@ -8,7 +8,6 @@
 #' @param  textLabelSize, default as 3
 #' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
 #' @import ggplot2
-#' @importFrom Ringo nonzero
 #' @import Matrix
 #' @export
 
