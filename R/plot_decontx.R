@@ -8,6 +8,7 @@
 #' @param  textLabelSize, default as 3
 #' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
 #' @import ggplot2
+#' @importFrom Ringo nonzero
 #' @import Matrix
 #' @export
 
@@ -99,8 +100,9 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   nCTbyZ <- matrix(0, nrow = nTC, ncol = nZ)
 
   # convert matrix into dgCMatrix if it is not
-  mtx <- Matrix::as.matrix(sub_counts >= threshold * 1, "dgCMatrix")
-  ij_pair <- Ringo::nonzero(mtx)
+  mtx <- Matrix::as.matrix((sub_counts >= threshold) * 1, "dgCMatrix")
+  #ij_pair <- Ringo::nonzero(mtx)
+	ij_pair <- d
   i_celltype <- plyr::mapvalues(ij_pair[, "row"], from = genePresented[, "geneMarkers"], to = genePresented[, "cellType"])
 
   if (nrow(genePresented) == length(unique(genePresented[, "geneMarkers"]))) {
