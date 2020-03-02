@@ -1,15 +1,14 @@
-
-#' Barplot that shows the percentage of cells representing given marker genes
-#' @param  counts
-#' @param  z, a vector. Cell cluster label, same length as the column numbers of the count matrix
-#' @param  geneMarkers, a dataframe of marker genes which corresponding to their cell types
-#' @param  threshold, default as 1.
-#' @param  color, default as "red3"
-#' @param  textLabelSize, default as 3
-#' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
-#' @import ggplot2
-#' @import Matrix
-#' @importFrom reshape2 melt
+#' @title Plots percentage of cells with
+#'
+#' @description Barplot that shows the percentage of cells within subpopulations
+#' with detectable levels of given marker genes
+#' @param  counts Matrix of counts
+#' @param  z a vector. Cell cluster label, same length as the column numbers of the count matrix
+#' @param  geneMarkers a dataframe of marker genes which corresponding to their cell types
+#' @param  threshold default as 1.
+#' @param  color default as "red3"
+#' @param  textLabelSize default as 3
+#' @param  precision default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
 #' @export
 
 celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize = 3, precision = 2) {
@@ -21,9 +20,9 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   pct_CTbyZ.melt <- reshape2::melt(pct_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
 
-  plt <- ggplot2::ggplot(pct_CTbyZ.melt, ggplot2::aes(x = z, y = percent * 100)) +
+  plt <- ggplot2::ggplot(pct_CTbyZ.melt, ggplot2::aes(x = z, y = pct_CTbyZ.melt$percent * 100)) +
     ggplot2::geom_bar(stat = "identity", fill = color) +
-    ggplot2::geom_text(aes(x = z, y = percent * 100 + 5, label = paste0(round(percent, precision) * 100, "%")), size = textLabelSize) +
+    ggplot2::geom_text(aes(x = z, y = pct_CTbyZ.melt$percent * 100 + 5, label = paste0(round(pct_CTbyZ.melt$percent, precision) * 100, "%")), size = textLabelSize) +
     ggplot2::xlab("Cluster") +
     ggplot2::ylab("Percentage of cells expressing cell-type\nspecific markers") +
     ggplot2::facet_grid(. ~ cellType) +
@@ -131,8 +130,8 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   CTnames <- levels(factor(genePresented[, "cellName"]))
   Cnames <- colnames(sub_counts)
-  ng_CTbyC <- sparseMatrix(i = i_celltype, j = iC, x = 1, giveCsparse = TRUE, dimnames = list(CTnames, Cnames), dims = c(nTC, ncol(sub_counts)))
-  binary_CTbyC <- as((ng_CTbyC > 0) * 1, "matrix")
+  ng_CTbyC <- Matrix::sparseMatrix(i = i_celltype, j = iC, x = 1, giveCsparse = TRUE, dimnames = list(CTnames, Cnames), dims = c(nTC, ncol(sub_counts)))
+  binary_CTbyC <- methods::as((ng_CTbyC > 0) * 1, "matrix")
   storage.mode(binary_CTbyC) <- "integer"
   nC_CTbyZ <- .colSumByGroup(binary_CTbyC, z, K)
   rownames(nC_CTbyZ) <- rownames(ng_CTbyC)

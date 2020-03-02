@@ -2,26 +2,34 @@
 % Please edit documentation in R/plot_decontx.R
 \name{celdaMarkerPlot}
 \alias{celdaMarkerPlot}
-\title{Barplot that shows the percentage of cells representing given marker genes}
+\title{Plots percentage of cells with}
 \usage{
-celdaMarkerPlot(counts, z, geneMarkers, threshold = 1, color = "red3",
-  textLabelSize = 3, precision = 2)
+celdaMarkerPlot(
+  counts,
+  z,
+  geneMarkers,
+  threshold = 1,
+  color = "red3",
+  textLabelSize = 3,
+  precision = 2
+)
 }
 \arguments{
-\item{counts}{}
+\item{counts}{Matrix of counts}
 
-\item{z, }{a vector. Cell cluster label, same length as the column numbers of the count matrix}
+\item{z}{a vector. Cell cluster label, same length as the column numbers of the count matrix}
 
-\item{geneMarkers, }{a dataframe of marker genes which corresponding to their cell types}
+\item{geneMarkers}{a dataframe of marker genes which corresponding to their cell types}
 
-\item{threshold, }{default as 1.}
+\item{threshold}{default as 1.}
 
-\item{color, }{default as "red3"}
+\item{color}{default as "red3"}
 
-\item{textLabelSize, }{default as 3}
+\item{textLabelSize}{default as 3}
 
-\item{precision, }{default as 2. Precision of percentage of cells showing the marker gene shown on the barplot}
+\item{precision}{default as 2. Precision of percentage of cells showing the marker gene shown on the barplot}
 }
 \description{
-Barplot that shows the percentage of cells representing given marker genes
+Barplot that shows the percentage of cells within subpopulations
+with detectable levels of given marker genes
 }

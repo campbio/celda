@@ -4,8 +4,15 @@
 \alias{celdaUmap}
 \title{Embeds cells in two dimensions using umap.}
 \usage{
-celdaUmap(counts, celdaMod, maxCells = NULL, minClusterSize = 100,
-  modules = NULL, seed = 12345, ...)
+celdaUmap(
+  counts,
+  celdaMod,
+  maxCells = NULL,
+  minClusterSize = 100,
+  modules = NULL,
+  seed = 12345,
+  ...
+)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent

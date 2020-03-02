@@ -4,8 +4,15 @@
 \alias{simulateContaminatedMatrix}
 \title{Simulate contaminated count matrix}
 \usage{
-simulateContaminatedMatrix(C = 300, G = 100, K = 3, NRange = c(500,
-  1000), beta = 0.5, delta = c(1, 2), seed = 12345)
+simulateContaminatedMatrix(
+  C = 300,
+  G = 100,
+  K = 3,
+  NRange = c(500, 1000),
+  beta = 0.5,
+  delta = c(1, 2),
+  seed = 12345
+)
 }
 \arguments{
 \item{C}{Integer. Number of cells to be simulated. Default to be 300.}

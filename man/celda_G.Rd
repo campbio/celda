@@ -4,11 +4,24 @@
 \alias{celda_G}
 \title{Feature clustering with Celda}
 \usage{
-celda_G(counts, L, beta = 1, delta = 1, gamma = 1, stopIter = 10,
-  maxIter = 200, splitOnIter = 10, splitOnLast = TRUE,
-  seed = 12345, nchains = 3, yInitialize = c("split", "random",
-  "predefined"), countChecksum = NULL, yInit = NULL, logfile = NULL,
-  verbose = TRUE)
+celda_G(
+  counts,
+  L,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  yInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  yInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
