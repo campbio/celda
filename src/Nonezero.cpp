@@ -2,10 +2,10 @@
 using namespace Rcpp ;
 
 //' get row and column indices of none zero elements in the matrix
-////' 
-////' @param R_counts A matrix
-////' @return An integer matrix where each row is a row, column indices pair 
-//// [[Rcpp::export]]
+//' 
+//' @param R_counts A matrix
+//' @return An integer matrix where each row is a row, column indices pair 
+// [[Rcpp::export]]
 SEXP nonzero(NumericMatrix R_counts) {
 
     IntegerVector row(1);

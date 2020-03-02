@@ -18,7 +18,12 @@ calculateNativeMatrix <- function(counts, native_counts, theta, eta, phi, z, row
 }
 
 #' get row and column indices of none zero elements in the matrix
-NULL
+#' 
+#' @param R_counts A matrix
+#' @return An integer matrix where each row is a row, column indices pair 
+nonzero <- function(R_counts) {
+    .Call('_celda_nonzero', PACKAGE = 'celda', R_counts)
+}
 
 cG_calcGibbsProbY_Simple <- function(counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta) {
     .Call('_celda_cG_calcGibbsProbY_Simple', PACKAGE = 'celda', counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta)
