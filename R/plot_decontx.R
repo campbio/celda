@@ -99,31 +99,38 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   nCTbyZ <- matrix(0, nrow = nTC, ncol = nZ)
 
   # convert matrix into dgCMatrix if it is not
-  mtx <- Matrix::as.matrix((sub_counts >= threshold) * 1, "dgCMatrix")
-  ij_pair <- nonzero(mtx)
-  i_celltype <- plyr::mapvalues(ij_pair["row"], from = genePresented[, "geneMarkers"], to = genePresented[, "cellType"])
+  ij_pair <- nonzero(sub_counts)
+	index_filter = ij_pair[["val"]] >= threshold
+	iR = ij_pair[["row"]] = ij_pair[["row"]][index_filter]
+	iC = ij_pair[["col"]] = ij_pair[["col"]][index_filter]
+  i_celltype <- plyr::mapvalues(iR, from = genePresented[, "geneMarkers"], to = genePresented[, "cellType"])
 
   if (nrow(genePresented) == length(unique(genePresented[, "geneMarkers"]))) {
     # When each gene qs only specified in ONE cell type
   } else {
     # When at least one gene is specified as marker for multiple cell types
 
-    duplicateTF <- duplicated(genePresented[, "geneMarkers"])
+    duplicateTF <- duplicated(genePresented[, "geneMarkers"]) 
+    # assume if a gene has shown more than once,
+    # it is because this gene is also a marker for another cell type
+		# TODO: make sure there is no same gene same celltype pair has shown more than once
+
     duplicatedMarker <- genePresented[duplicateTF, ]
 
     for (r in 1:nrow(duplicatedMarker)) {
       celltype <- duplicatedMarker[r, "cellType"]
       gene <- duplicatedMarker[r, "geneMarkers"]
 
-      duplicated_pair <- ij_pair["row"] == gene
-      ij_pair <- rbind(ij_pair, ij_pair[duplicated_pair, ])
+      duplicated_pair <- ij_pair[["row"]] == gene
+			iR <- c(iR, ij_pair[["row"]][duplicated_pair])
+			iC <- c(iC, ij_pair[["col"]][duplicated_pair]) 
       i_celltype <- c(i_celltype, celltype)
     }
   }
 
   CTnames <- levels(factor(genePresented[, "cellName"]))
   Cnames <- colnames(sub_counts)
-  ng_CTbyC <- sparseMatrix(i = i_celltype, j = ij_pair["col"], x = 1, giveCsparse = TRUE, dimnames = list(CTnames, Cnames), dims = c(nTC, ncol(sub_counts)))
+  ng_CTbyC <- sparseMatrix(i = i_celltype, j = iC, x = 1, giveCsparse = TRUE, dimnames = list(CTnames, Cnames), dims = c(nTC, ncol(sub_counts)))
   binary_CTbyC <- as((ng_CTbyC > 0) * 1, "matrix")
   storage.mode(binary_CTbyC) <- "integer"
   nC_CTbyZ <- .colSumByGroup(binary_CTbyC, z, K)
@@ -134,7 +141,6 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   return(pct_CTbyZ)
 }
-
 
 
 # geneMarkers should be a dataframe,  w/ 2 column names being `cellType` and `geneMarkers`
