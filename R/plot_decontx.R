@@ -9,6 +9,7 @@
 #' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
 #' @import ggplot2
 #' @import Matrix
+#' @importFrom reshape2 melt
 #' @export
 
 celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize = 3, precision = 2) {
@@ -20,7 +21,7 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   pct_CTbyZ.melt <- reshape2::melt(pct_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
 
-  plt <- ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes(x = z, y = percent * 100)) +
+  plt <- ggplot2::ggplot(pct_CTbyZ.melt, ggplot2::aes(x = z, y = percent * 100)) +
     ggplot2::geom_bar(stat = "identity", fill = color) +
     ggplot2::geom_text(aes(x = z, y = percent * 100 + 5, label = paste0(round(percent, precision) * 100, "%")), size = textLabelSize) +
     ggplot2::xlab("Cluster") +
