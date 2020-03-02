@@ -23,9 +23,9 @@ SEXP nonzero(NumericMatrix R_counts) {
                 row.push_back(r + 1);
                 col.push_back(c + 1);
                 val.push_back(x);
-						}
-				}
-		}
+            }
+        }
+    }
 
 		row.erase(0);
 		col.erase(0);
