@@ -17,6 +17,9 @@ calculateNativeMatrix <- function(counts, native_counts, theta, eta, phi, z, row
     .Call('_celda_calculateNativeMatrix', PACKAGE = 'celda', counts, native_counts, theta, eta, phi, z, row_index, col_index, pseudocount)
 }
 
+#' get row and column indices of none zero elements in the matrix
+NULL
+
 cG_calcGibbsProbY_Simple <- function(counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta) {
     .Call('_celda_cG_calcGibbsProbY_Simple', PACKAGE = 'celda', counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta)
 }
