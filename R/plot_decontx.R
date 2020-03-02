@@ -100,9 +100,8 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   # convert matrix into dgCMatrix if it is not
   mtx <- Matrix::as.matrix((sub_counts >= threshold) * 1, "dgCMatrix")
-  #ij_pair <- Ringo::nonzero(mtx)
-	ij_pair <- matrix(c(rep(1,5), 1:5), dimnames = list(c(), c("row", "column")), ncol= 2 )  # ringo import bug??
-  i_celltype <- plyr::mapvalues(ij_pair[, "row"], from = genePresented[, "geneMarkers"], to = genePresented[, "cellType"])
+  ij_pair <- nonzero(mtx)
+  i_celltype <- plyr::mapvalues(ij_pair["row"], from = genePresented[, "geneMarkers"], to = genePresented[, "cellType"])
 
   if (nrow(genePresented) == length(unique(genePresented[, "geneMarkers"]))) {
     # When each gene qs only specified in ONE cell type
@@ -116,7 +115,7 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
       celltype <- duplicatedMarker[r, "cellType"]
       gene <- duplicatedMarker[r, "geneMarkers"]
 
-      duplicated_pair <- ij_pair[, "row"] == gene
+      duplicated_pair <- ij_pair["row"] == gene
       ij_pair <- rbind(ij_pair, ij_pair[duplicated_pair, ])
       i_celltype <- c(i_celltype, celltype)
     }
@@ -124,7 +123,7 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
   CTnames <- levels(factor(genePresented[, "cellName"]))
   Cnames <- colnames(sub_counts)
-  ng_CTbyC <- sparseMatrix(i = i_celltype, j = ij_pair[, "col"], x = 1, giveCsparse = TRUE, dimnames = list(CTnames, Cnames), dims = c(nTC, ncol(sub_counts)))
+  ng_CTbyC <- sparseMatrix(i = i_celltype, j = ij_pair["col"], x = 1, giveCsparse = TRUE, dimnames = list(CTnames, Cnames), dims = c(nTC, ncol(sub_counts)))
   binary_CTbyC <- as((ng_CTbyC > 0) * 1, "matrix")
   storage.mode(binary_CTbyC) <- "integer"
   nC_CTbyZ <- .colSumByGroup(binary_CTbyC, z, K)

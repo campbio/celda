@@ -18,7 +18,8 @@ SEXP nonzero(NumericMatrix R_counts) {
 
     for (int c = 0; c < nC; c++) {
         for (int r = 0; r < nR; r++) {
-            if (x = R_counts[c * nR + r] != 0) {
+            x = R_counts[c * nR + r];
+            if (x != 0) {
                 row.push_back(r + 1);
                 col.push_back(c + 1);
                 val.push_back(x);
@@ -37,4 +38,3 @@ SEXP nonzero(NumericMatrix R_counts) {
 
 		return(res);
 }
-
