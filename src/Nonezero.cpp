@@ -26,6 +26,10 @@ SEXP nonzero(NumericMatrix R_counts) {
 				}
 		}
 
+		row.erase(0);
+		col.erase(0);
+		val.erase(0);
+
     List res;
 		res["row"] = row;
 		res["col"] = col;
