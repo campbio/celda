@@ -4,6 +4,7 @@ dist: trusty
 sudo: false
 warnings_are_errors: false
 bioc_required: true
+script: true
 before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 r_build_args: "--no-build-vignettes"
