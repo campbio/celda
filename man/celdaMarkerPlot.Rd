@@ -15,13 +15,13 @@ celdaMarkerPlot(
 )
 }
 \arguments{
-\item{counts}{}
+\item{counts}{Count matrix.}
 
-\item{z, }{a vector. Cell cluster label, same length as the column numbers of the count matrix}
+\item{z}{A vector. Cell cluster label, same length as the column numbers of the count matrix}
 
-\item{geneMarkers, }{a dataframe of marker genes which corresponding to their cell types}
+\item{geneMarkers}{A dataframe of marker genes which corresponding to their cell types}
 
-\item{threshold, }{default as 1.}
+\item{threshold}{Default 1.}
 
 \item{color, }{default as "red3"}
 

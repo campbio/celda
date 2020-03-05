@@ -51,7 +51,8 @@ Imports:
     scran,
     SingleCellExperiment,
     dbscan,
-    DelayedArray
+    DelayedArray,
+    Ringo
 Suggests:
     testthat,
     knitr,

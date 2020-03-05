@@ -1,13 +1,12 @@
 
 #' Barplot that shows the percentage of cells representing given marker genes
-#' @param  counts 
-#' @param  z, a vector. Cell cluster label, same length as the column numbers of the count matrix
-#' @param  geneMarkers, a dataframe of marker genes which corresponding to their cell types  
-#' @param  threshold, default as 1.  
+#' @param  counts Count matrix.
+#' @param  z A vector. Cell cluster label, same length as the column numbers of the count matrix
+#' @param  geneMarkers A dataframe of marker genes which corresponding to their cell types
+#' @param  threshold Default 1.
 #' @param  color, default as "red3"
 #' @param  textLabelSize, default as 3
-#' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot 
-
+#' @param  precision, default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
 celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize=3, precision = 2 ){
 
 		z_names = levels(factor(z))
@@ -18,10 +17,10 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 
     nC_CTbyZ.melt = reshape2::melt(nC_CTbyZ, varnames = c("cellType", "z"), value.name = "percent")
 
-    plt = ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes( x = z, y = percent * 100) ) + 
+    plt = ggplot2::ggplot(nC_CTbyZ.melt, ggplot2::aes( x = z, y = percent * 100) ) +
 			geom_bar(stat = "identity", fill = color ) +
 		  geom_text(aes(x = z, y= percent * 100 + 5 ,label = paste0(round(percent,precision) * 100, "%") ) , size = textLabelSize ) +
-			facet_grid(. ~ cellType ) + 
+			facet_grid(. ~ cellType ) +
 			theme(panel.background=element_rect(fill="white", color="grey"),
 						panel.grid = element_line("grey"), legend.position="none",
 						legend.key=element_rect(fill="white", color="white"),
@@ -42,7 +41,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
   rNames = rownames(counts)
 	gNames = geneMarkers[, "geneMarkers"]
 
-  # Only use intersected marker genes 
+  # Only use intersected marker genes
 	intersectedGenes = intersect(rNames, gNames)
 
 	if (length(intersectedGenes) == 0) {
@@ -52,20 +51,20 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 	sub_counts = counts[rNames %in% intersectedGenes, ]
 	geneMarkers = geneMarkers[gNames %in% intersectedGenes, ]
 
-	geneMarkers = .geneMarkerProcess(geneMarkers) 
+	geneMarkers = .geneMarkerProcess(geneMarkers)
 
 	if (is.null(nrow(sub_counts))) {
 		# When there is only one gene --> a vector
 		nC_CTbyZ = .vctrRowProjectColCollapse( sub_vector = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
 
 	} else {
-		# When multiple genes --> matrix 
+		# When multiple genes --> matrix
        nC_CTbyZ = .mtxRowProjectColCollapse( sub_counts = sub_counts, genePresented = geneMarkers, z = z, threshold = threshold)
 	}
 
 	return(nC_CTbyZ)
 }
-  
+
 
 # Collapse (1-)Gene x Cell count vector into cell-type-marker by cluster matrix
 # with each element being the cells% in that cluster shows at least one marker in that cell type
@@ -84,6 +83,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 
 # Collapse Gene x Cell count matrix into cell-type-marker by cluster matrix
 # with each element being the cells% in that cluster shows at least one marker in that cell type
+#' @importFrom Ringo nonzero
 .mtxRowProjectColCollapse= function(sub_counts, genePresented, z, threshold = 1) {
 	K = max(z)
 
@@ -92,7 +92,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 	nCTbyZ = matrix(0, nrow=nTC,  ncol=nZ)
 
 	# convert matrix into dgCMatrix if it is not
-	mtx = Matrix::as.matrix(sub_counts > threshold * 1, "dgCMatrix")  
+	mtx = Matrix::as.matrix(sub_counts > threshold * 1, "dgCMatrix")
 	ij_pair = Ringo::nonzero(mtx)
 	i_celltype = plyr::mapvalues(ij_pair[,"row"], from=genePresented[,"geneMarkers"], to=genePresented[,"cellType"])
 
@@ -118,9 +118,9 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
     CTnames = levels(factor(genePresented[, "cellName"]))
 		Cnames = colnames(sub_counts)
 		ng_CTbyC = sparseMatrix( i = i_celltype, j = ij_pair[, "col"], x = 1, giveCsparse=TRUE, dimnames = list(CTnames, Cnames), dims=c(nTC, ncol(sub_counts)) )
-		binary_CTbyC = as((ng_CTbyC > 0) * 1, "matrix") 
+		binary_CTbyC = as((ng_CTbyC > 0) * 1, "matrix")
 		storage.mode(binary_CTbyC) = "integer"
-		nC_CTbyZ = celda:::.colSumByGroup(binary_CTbyC, z, K)
+		nC_CTbyZ = .colSumByGroup(binary_CTbyC, z, K)
 		rownames(nC_CTbyZ) = rownames(ng_CTbyC)
 		colnames(nC_CTbyZ) = 1:K
 
@@ -132,7 +132,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 
 
 # geneMarkers should be a dataframe,  w/ 2 column names being `cellType` and `geneMarkers`
-# convert both `cellType` and `geneMarkers` are factors with levels being integer 
+# convert both `cellType` and `geneMarkers` are factors with levels being integer
 .geneMarkerProcess = function( geneMarkers ){
         geneMarkers[, "cellName"] = geneMarkers[, "cellType"]
 				geneMarkers[, "cellType"] = factor(geneMarkers[, "cellType"])
@@ -147,7 +147,7 @@ celdaMarkerPlot = function(counts, z, geneMarkers, threshold = 1, color = "red3"
 
 # Convert z to be factor with levels being integer
 .processZ = function(z) {
-    z = factor(z) 
+    z = factor(z)
     levels(z) = seq_len(length(levels(z)))
 		z = as.integer(z)
 		return(z)

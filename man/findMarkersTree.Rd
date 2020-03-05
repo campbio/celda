@@ -60,13 +60,13 @@ are solely defined by the absence of markers. Default is TRUE.}
 \item{consecutiveOneoff}{Logical. Whether or not to allow one-off splits at
 consecutive brances. Default is FALSE.}
 
-\item{seed}{Numeric. Seed used to enable reproducible UMAP results
-for identifying metaclusters. Default is 12345.}
-
-\item{autoMetaclusters.}{Logical. Whether to identify metaclusters prior to
-creating the tree based on the distance between clusters in a UMAP 
+\item{autoMetaclusters}{Logical. Whether to identify metaclusters prior to
+creating the tree based on the distance between clusters in a UMAP
 dimensionality reduction projection. A metacluster is simply a large
 cluster that includes several clusters within it. Default is TRUE.}
+
+\item{seed}{Numeric. Seed used to enable reproducible UMAP results
+for identifying metaclusters. Default is 12345.}
 }
 \value{
 A named list with six elements:
@@ -87,7 +87,7 @@ A named list with six elements:
    \item metacluster - Optional. If metaclusters were used, the metacluster
     this rule is applied to.
   }
- \item dendro - A dendrogram object of the decision tree output. Plot with 
+ \item dendro - A dendrogram object of the decision tree output. Plot with
  plotDendro()
  \item classLabels - A vector of the class labels used in the model, i.e.
   cell cluster labels.
@@ -119,7 +119,7 @@ Create a decision tree that identifies gene markers for given
  balanced metric to determine rules for identifying sets of similar clusters.
 }
 \examples{
-# Generate simulated single-cell dataset using celda 
+# Generate simulated single-cell dataset using celda
 sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
 # Celda clustering into 5 clusters & 10 modules

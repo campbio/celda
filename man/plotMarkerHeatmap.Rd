@@ -27,7 +27,7 @@ that used in \emph{findMarkersTree()}. Required when using clusters
 of features and not previously provided to \emph{findMarkersTree()}}
 
 \item{topFeatures}{Integer. Number of genes to plot per marker module.
-Genes are sorted based on their AUC for their respective cluster. 
+Genes are sorted based on their AUC for their respective cluster.
 Default is 10.}
 
 \item{silent}{Logical. Whether to avoid plotting heatmap to screen.
@@ -41,7 +41,7 @@ the specified branch point.
 Creates heatmap for a specified branch point in a marker tree.
 }
 \examples{
-# Generate simulated single-cell dataset using celda 
+# Generate simulated single-cell dataset using celda
 sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
 # Celda clustering into 5 clusters & 10 modules
