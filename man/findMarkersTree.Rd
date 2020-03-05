@@ -135,5 +135,4 @@ DecTree <- findMarkersTree(features, class)
 
 # Plot dendrogram
 plotDendro(DecTree)
-
 }
