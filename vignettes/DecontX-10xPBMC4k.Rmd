@@ -1,0 +1,36 @@
+---
+title: "Decontamination of ambient RNA in single-cell RNA-seq with DecontX on 10X PBMC4k data" 
+author: "Shiyi Yang, Sean Corbett, Yusuke Koga, Zhe Wang, W. Evan Johnson, Masanao Yajima, Joshua D. Campbell"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA for scRNA-seq data with DecontX}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, eval=TRUE, message=FALSE}
+library(celda)
+```
+
+DecontX can take either `SingleCellExperiment` object from [SingleCellExperiment package] (https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) or a count matrix in the format of rows being gnees and columns being cells.
+
+# TODO: Load PBMC4k data from 10X CellRanger output
+# Load PBMC4k data from 10X
+```{r, eval=TRUE, message=FALSE}
+library(TENxPBMCData)  # selected single cell RNAseq datasets from 10X Genomics
+pbmc <- TENxPBMCData("pbmc4k")
+colnames(pbmc) <- paste(pbmc$Sample, pbmc$Barcode, sep="_")
+```
+
+
+
+# Estimate and remove contaminated counts using DecontX (2 scenarios -- with and without cell types specified)
+## Use DecontX for contamination estimation when there is no cell type specified for the cells
+
+
+
+## Use DecontX for contamination estimation when there is cell type specified for each individual cells
