@@ -16,38 +16,49 @@ vignette: >
 library(celda)
 ```
 
-DecontX can take either `SingleCellExperiment` object from [SingleCellExperiment package] (https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) or a count matrix in the format of rows being genesand columns being cells.  
+DecontX can take either `SingleCellExperiment` object from [SingleCellExperiment package] (https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) or a count matrix in the format of rows being genesand columns being cells. When using SingleCellExperiment object, DecontX is using the counts matrix extracted from the SingleCellExperiment object. 
 
 # TODO: Load PBMC4k data from 10X CellRanger output
 # Load PBMC4k data from 10X
 ```{r, eval=TRUE, message=FALSE}
 library(TENxPBMCData)  # selected single cell RNAseq datasets from 10X Genomics
 pbmc <- TENxPBMCData("pbmc4k")
-colnames(pbmc) <- paste(pbmc$Sample, pbmc$Barcode, sep="_")
+colnames(pbmc) <- paste(pbmc$Sample, pbmc$Barcode, sep="_") # Rename cells
 ```
 
-Take a look at the count matrix in the `pbmc` singleCellExperiment object via `assay` function from [SummarizedExperiment] (https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
+Take a look at the count matrix in the `pbmc` singleCellExperiment object via `assay` function from [SummarizedExperiment] (https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html). There are total 33694 genes and 4340 cells in this PBMC data.
 ```{r}
 library(SummarizedExperiment)
 pbmc_counts = SummarizedExperiment::assay(pbmc, i = "counts")
+print(pbmc_counts)
 ```
 
-
-Filter out genes that are likely to be noise. We normally choose genes that have expressed at least 3 counts in at least 3 cells.
+Among the 33694 genes, many of then are empty genes (i.e., not expressed by any cell), and many of the genes are likely to be noise due to extremely low expression among these 4340 cells.
+We filter out genes that are likely to be noise. We normally keep genes that have expressed at least 3 counts in at least 3 cells.
+After filtering, we have 4529 genes left.
 ```{r}
-
+#pbmc_filterg = pbmc[rowSums(pbmc_counts > 2) > 2, ] 
+pbmc_filterg = pbmc[rowSums(pbmc_counts >= 3) >= 3, ] # Filtering can be applied directly on SingleCellExperiment object 
+print(pbmc_filterg)
 ```
 
 
 
 # Estimate and remove contaminated counts using DecontX (2 scenarios -- with and without cell types specified)
-## Use DecontX for contamination estimation when there is no cell type specified for the cells
-We use celda_CG -- a Bayesian bi-clustering method on single cell RNAseq data -- to get cell clusters (as well as gene modules, which enhances cell type identification). 
+## Use DecontX for contamination estimation when there is cell type specified for each individual cells (Here we use celda_CG -- a Bayesian bi-clustering method on single cell RNAseq data -- to get cell clusters as well as gene modules, which enhances cell clustering. You can substitute `celda_CG` with any clustering method you have faith in. DecontX takes the expression count matrix (gene by cell count matrix) and a vector of the same length as number of cells in the count matrix specifying cell cluster. 
 ```{r}
+pbmc_filterg_counts = SummarizedExperiment::assay(pbmc_filterg, "counts")
+pbmc_filterg_counts = as.matrix(pbmc_filterg_counts) # Change obejct type as basic matrix to pass into celda::celda_CG
+set.seed(12345)
+celda_res = celda_CG(counts = pbmc_filterg_counts, K = 19, L = 150) # specify number of cell clusters being K=19, number of gnee modules being L=150
+```
+P.s: we have analyzed this PBMC 4k data before, so we don't bother with the parameters choice for the bi-clustering method `celda_CG` here. For a detailed toturial of usage on `celda`, it is availabel [here] (celda-vignettes url) 
 
+```{r}
+cell_cluster = celda_res@clusters$z 
+decontx_res = decontX( x = pbmc_filterg, z = cell_cluster) 
 ```
 
 
 
-
-## Use DecontX for contamination estimation when there is cell type specified for each individual cells
+## Use DecontX for contamination estimation when there is no cell type specified for the cells
