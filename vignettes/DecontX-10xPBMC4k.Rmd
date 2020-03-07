@@ -16,7 +16,7 @@ vignette: >
 library(celda)
 ```
 
-DecontX can take either `SingleCellExperiment` object from [SingleCellExperiment package] (https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) or a count matrix in the format of rows being gnees and columns being cells.
+DecontX can take either `SingleCellExperiment` object from [SingleCellExperiment package] (https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) or a count matrix in the format of rows being genesand columns being cells.  
 
 # TODO: Load PBMC4k data from 10X CellRanger output
 # Load PBMC4k data from 10X
@@ -26,10 +26,27 @@ pbmc <- TENxPBMCData("pbmc4k")
 colnames(pbmc) <- paste(pbmc$Sample, pbmc$Barcode, sep="_")
 ```
 
+Take a look at the count matrix in the `pbmc` singleCellExperiment object via `assay` function from [SummarizedExperiment] (https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
+```{r}
+library(SummarizedExperiment)
+pbmc_counts = SummarizedExperiment::assay(pbmc, i = "counts")
+```
+
+
+Filter out genes that are likely to be noise. We normally choose genes that have expressed at least 3 counts in at least 3 cells.
+```{r}
+
+```
+
 
 
 # Estimate and remove contaminated counts using DecontX (2 scenarios -- with and without cell types specified)
 ## Use DecontX for contamination estimation when there is no cell type specified for the cells
+We use celda_CG -- a Bayesian bi-clustering method on single cell RNAseq data -- to get cell clusters (as well as gene modules, which enhances cell type identification). 
+```{r}
+
+```
+
 
 
 
