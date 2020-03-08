@@ -49,16 +49,41 @@ print(pbmc_filterg)
 ```{r}
 pbmc_filterg_counts = SummarizedExperiment::assay(pbmc_filterg, "counts")
 pbmc_filterg_counts = as.matrix(pbmc_filterg_counts) # Change obejct type as basic matrix to pass into celda::celda_CG
-set.seed(12345)
 celda_res = celda_CG(counts = pbmc_filterg_counts, K = 19, L = 150) # specify number of cell clusters being K=19, number of gnee modules being L=150
 ```
-P.s: we have analyzed this PBMC 4k data before, so we don't bother with the parameters choice for the bi-clustering method `celda_CG` here. For a detailed toturial of usage on `celda`, it is availabel [here] (celda-vignettes url) 
+P.s: we have analyzed this 4K PBMC data before, so we don't bother with the parameters choice for the bi-clustering method `celda_CG` here. For a detailed toturial of usage on `celda`, it is availabel [here] (celda-vignettes url) 
 
+
+
+Pass expression (gene by cell) count matrix and the cluster labels from `celda_CG` to decontX, it will return estimated results. Corresponding to the 2 types of input, output result is either in a `list`, or a SingleCellExperiment object with the result list added back to its `metadata` slot (?? Am I understanding the structure right? Is metadata a "slot" of the sce-object??). When `decontX` takes a SingleCellExperiment object, we can use function `metadata` to extract the result list and use `str` function to look at the 4 attributes ("runParams", "estimates", "contamination", "z") in it.
 ```{r}
 cell_cluster = celda_res@clusters$z 
-decontx_res = decontX( x = pbmc_filterg, z = cell_cluster) 
+decontx_res_sce = decontX( x = pbmc_filterg, z = cell_cluster) 
+print(decontx_res_sce)
+#decontx_res = decontX( x = pbmc_filterg_counts, z = cell_cluster) ## This works too. Difference is that the output is a list rathen than being a SingleCellExperiment object
+decontx_res = metadata(decontx_res_sce)$decontX
+str(decontx_res)
 ```
+
+
+## Explanation of DecontX results
+There are 4 attributes of DecontX results: 
+(1)
+(2)
+(3)
+(4)
+
+# Check DecontX decontaminated count to see if gene expressions are cleaner by looking at marker genes' expression
+## First we have to identify cell types, which is one step further from cell clustering, as we do not really know which cluster is corresponding to what cell type and multiple cell clusters can also be from the same cell types. We are looking at the 4 major cell types (T-cell, B-cell, NK-cell and monocytes) in this PBMC data.
+
+
+
 
 
 
 ## Use DecontX for contamination estimation when there is no cell type specified for the cells
+
+
+
+
+
