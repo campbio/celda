@@ -76,7 +76,7 @@ There are 4 attributes of DecontX results:
 
 # Check DecontX decontaminated count to see if gene expressions are cleaner by looking at marker genes' expression
 ## First we have to identify cell types, which is one step further from cell clustering, as we do not really know which cluster is corresponding to what cell type and multiple cell clusters can also be from the same cell type. We are looking at the 4 major cell types (T-cell, B-cell, NK-cell and monocytes) in this PBMC data.
-Combining both the clustering results from `celda_CG`, visualization on a reduced 2-dimention space using Tsne (T-stochastic Neighbor Embedding), and marker genes, we relate cell clusters (more specifically the cells in them) to cell types. The marker genes used to identify these 4 major cell types are CD3D and CD3E (T-cell markers), MS4A1 and CD79A (B-cell markers), GNLY (NK-cell marker), CD14 or FCGR3A (monocytes markers). There are also other cell types (such as dendritic cells, plasma cells, etc.), we don't include these cell types in our demonstration here and we point you to [here] (celda-vignettes url on PBMC4k data) for cell type analysis using `celda`.
+Combining both the clustering results from `celda_CG`, visualization on a reduced 2-dimention space using Tsne (T-stochastic Neighbor Embedding), and marker genes, we relate cell clusters (more specifically the cells in them) to cell types. The marker genes used to identify these 4 major cell types are CD3D (T-cell marker), MS4A1 and CD79A (B-cell markers), GNLY (NK-cell marker), CD14 or FCGR3A (monocytes markers). There are also other cell types (such as dendritic cells, plasma cells, etc.), we don't include these cell types in our demonstration here and we point you to [here] (celda-vignettes url on PBMC4k data) for cell type analysis using `celda`.
 ```{r}
 celdaTsne.ori = celdaTsne( counts = pbmc_filterg_counts , celdaMod = celda_res ) 
 pltTsne.ori = plotDimReduceCluster( dim1 = celdaTsne.ori[,1], dim2 = celdaTsne.ori[, 2], cluster = cell_cluster, labelClusters = T)
@@ -85,7 +85,7 @@ print(pltTsne.ori)
 
 We use violin plot to look at the marker gene expression levels in each cluster identified before by `celda_CG`. Those gene names are stored in the "rowData" of the singleCellExperiment object. On the other hand, the rownames of the expression count matrix is using gene ID. We have to match marker genes' name to the gene ID to locate them in the expression count matrix.
 ```{r}
-markerGenes = do.call(what = rbind, args = list(data.frame("celltype" = "Tcell", "markergenes"=c("CD3D", "IL7R")), 
+markerGenes = do.call(what = rbind, args = list(data.frame("celltype" = "Tcell", "markergenes"=c("CD3D" )), 
 		                                data.frame("celltype" = "Bcell", "markergenes"=c("MS4A1", "CD79A")),
 			                        data.frame("celltype" = "NKcell", "markergenes"=c("GNLY")),
 			                        data.frame("celltype" = "monocytes", "markergenes"=c("CD14", "FCGR3A")),
@@ -127,6 +127,14 @@ cell_type = match.z.celltype(z = cell_cluster, cellType.list = cellType_list)
 print(table(cell_cluster, cell_type))
 ```
 
+We look at the gene expressions for these 4 major cell types by comparing the original expression count and the decontaminated counts by DecontX. Since dropout events are prevalent in single cell RNAseq data, we include more genes from now to show clearer cell-type expressions.
+```{r}
+ct_markergenes = do.call(what = rbind, rgs = list(data.frame("celltype" = "Tcell", "markergenes"=c("CD3D", "CD3E")),
+																									data.frame("celltype" = "Bcell", "markergenes"=c("MS4A1", "CD79A", "CD79B")),
+																									data.frame("celltype" = "NKcell", "markergenes"=c("GNLY")),
+																									data.frame("celltype" = "monocytes", "markergenes"=c("LYZ", "SA100A8", "SA100A9"))))
+
+```
 
 
 ## Use DecontX for contamination estimation when there is no cell type specified for the cells
