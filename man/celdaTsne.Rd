@@ -4,17 +4,9 @@
 \alias{celdaTsne}
 \title{Embeds cells in two dimensions using tSNE based on celda_CG results.}
 \usage{
-celdaTsne(
-  counts,
-  celdaMod,
-  maxCells = 25000,
-  minClusterSize = 100,
-  initialDims = 20,
-  modules = NULL,
-  perplexity = 20,
-  maxIter = 2500,
-  ...
-)
+celdaTsne(counts, celdaMod, maxCells = 25000, minClusterSize = 100,
+  initialDims = 20, modules = NULL, perplexity = 20,
+  maxIter = 2500, ...)
 }
 \arguments{
 \item{counts}{Integer matrix. Rows represent features and columns represent
