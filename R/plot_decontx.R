@@ -57,7 +57,7 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "re
   sub_counts <- counts[rNames %in% intersectedGenes, ]
   geneMarkers <- geneMarkers[gNames %in% intersectedGenes, ]
 
-  geneMarkers <- .geneMarkerProcess(geneMarkers)
+  geneMarkers <- .geneMarkerProcess(geneMarkers, orders = rownames(sub_counts))
 
   if (is.null(nrow(sub_counts))) {
     # When there is only one gene --> a vector
@@ -145,13 +145,17 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "re
 
 # geneMarkers should be a dataframe,  w/ 2 column names being `cellType` and `geneMarkers`
 # convert both `cellType` and `geneMarkers` are factors with levels being integer
-.geneMarkerProcess <- function(geneMarkers) {
+.geneMarkerProcess <- function(geneMarkers, orders = None) {
   geneMarkers[, "cellName"] <- geneMarkers[, "cellType"]
   geneMarkers[, "cellType"] <- factor(geneMarkers[, "cellType"])
   levels(geneMarkers[, "cellType"]) <- 1:length(levels(geneMarkers[, "cellType"]))
 
   geneMarkers[, "geneName"] <- geneMarkers[, "geneMarkers"]
-  geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"])
+  if (is.null(orders)) {
+    geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"])
+  } else {
+    geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"], levels = orders)
+  }
   levels(geneMarkers[, "geneMarkers"]) <- 1:length(levels(geneMarkers[, "geneMarkers"]))
 
   return(geneMarkers)

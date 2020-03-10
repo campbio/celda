@@ -129,10 +129,19 @@ print(table(cell_cluster, cell_type))
 
 We look at the gene expressions for these 4 major cell types by comparing the original expression count and the decontaminated counts by DecontX. Since dropout events are prevalent in single cell RNAseq data, we include more genes from now to show clearer cell-type expressions.
 ```{r}
-ct_markergenes = do.call(what = rbind, rgs = list(data.frame("celltype" = "Tcell", "markergenes"=c("CD3D", "CD3E")),
+ct_markergenes = do.call(what = rbind, args = list(data.frame("celltype" = "Tcell", "markergenes"=c("CD3D", "CD3E")),
 																									data.frame("celltype" = "Bcell", "markergenes"=c("MS4A1", "CD79A", "CD79B")),
 																									data.frame("celltype" = "NKcell", "markergenes"=c("GNLY")),
-																									data.frame("celltype" = "monocytes", "markergenes"=c("LYZ", "SA100A8", "SA100A9"))))
+																									data.frame("celltype" = "monocytes", "markergenes"=c("LYZ", "S100A8", "S100A9"))))
+ct_markergenes_wID = merge( x = ct_markergenes, y = rowData(pbmc_filterg), by.x = "markergenes", by.y = "Symbol")
+ct_markergenes_wID[, "feature"] = paste( ct_markergenes_wID[, "ENSEMBL_ID"], ct_markergenes_wID[, "markergenes"], sep = "_")
+print(head(ct_markergenes_wID))
+
+ct_markergenes = ct_markergenes_wID[, c("celltype", "feature")]
+colnames(ct_markergenes) = c("cellType", "geneMarkers")
+
+pltMarker = decontXMarkerPlot( counts = pbmc_filterg_counts_rename, z = cell_type, geneMarkers = ct_markergenes) 
+
 
 ```
 
