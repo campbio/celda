@@ -4,16 +4,9 @@
 \alias{findMarkers}
 \title{Generate decision tree from single-cell clustering output.}
 \usage{
-findMarkers(
-  features,
-  class,
-  cellTypes,
-  oneoffMetric = c("modified F1", "pairwise AUC"),
-  threshold = 0.95,
-  reuseFeatures = FALSE,
-  altSplit = TRUE,
-  consecutiveOneoff = TRUE
-)
+findMarkers(features, class, cellTypes, oneoffMetric = c("modified F1",
+  "pairwise AUC"), threshold = 0.95, reuseFeatures = FALSE,
+  altSplit = TRUE, consecutiveOneoff = TRUE)
 }
 \arguments{
 \item{features}{A L(features) by N(samples) numeric matrix.}

@@ -4,18 +4,10 @@
 \alias{plotDimReduceCluster}
 \title{Plotting the cell labels on a dimensionality reduction plot}
 \usage{
-plotDimReduceCluster(
-  dim1,
-  dim2,
-  cluster,
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
-  specificClusters = NULL,
-  labelClusters = FALSE,
-  groupBy = NULL,
-  labelSize = 3.5
-)
+plotDimReduceCluster(dim1, dim2, cluster, size = 1,
+  xlab = "Dimension_1", ylab = "Dimension_2",
+  specificClusters = NULL, labelClusters = FALSE, groupBy = NULL,
+  labelSize = 3.5)
 }
 \arguments{
 \item{dim1}{Numeric vector. First dimension from data

@@ -1,4 +1,4 @@
-#' @title Plots percentage of cells with
+#' @title Plots percentage of cells with their cell type markers
 #'
 #' @description Barplot that shows the percentage of cells within subpopulations
 #' with detectable levels of given marker genes
@@ -11,7 +11,7 @@
 #' @param  precision default as 2. Precision of percentage of cells showing the marker gene shown on the barplot
 #' @export
 
-celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize = 3, precision = 2) {
+decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3", textLabelSize = 3, precision = 2) {
   z_names <- levels(factor(z))
   z <- .processZ(z)
 
@@ -57,7 +57,7 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
   sub_counts <- counts[rNames %in% intersectedGenes, ]
   geneMarkers <- geneMarkers[gNames %in% intersectedGenes, ]
 
-  geneMarkers <- .geneMarkerProcess(geneMarkers)
+  geneMarkers <- .geneMarkerProcess(geneMarkers, orders = rownames(sub_counts))
 
   if (is.null(nrow(sub_counts))) {
     # When there is only one gene --> a vector
@@ -145,13 +145,17 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 
 # geneMarkers should be a dataframe,  w/ 2 column names being `cellType` and `geneMarkers`
 # convert both `cellType` and `geneMarkers` are factors with levels being integer
-.geneMarkerProcess <- function(geneMarkers) {
+.geneMarkerProcess <- function(geneMarkers, orders = None) {
   geneMarkers[, "cellName"] <- geneMarkers[, "cellType"]
   geneMarkers[, "cellType"] <- factor(geneMarkers[, "cellType"])
   levels(geneMarkers[, "cellType"]) <- 1:length(levels(geneMarkers[, "cellType"]))
 
   geneMarkers[, "geneName"] <- geneMarkers[, "geneMarkers"]
-  geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"])
+  if (is.null(orders)) {
+    geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"])
+  } else {
+    geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"], levels = orders)
+  }
   levels(geneMarkers[, "geneMarkers"]) <- 1:length(levels(geneMarkers[, "geneMarkers"]))
 
   return(geneMarkers)
@@ -170,5 +174,5 @@ celdaMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "red3
 # counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
 # geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
 # z = c(rep(1, 4), rep(2,4), rep(3,2))
-# plt = celdaMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
+# plt = decontxMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
 # plt
