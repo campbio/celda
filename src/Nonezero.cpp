@@ -1,5 +1,6 @@
+// [[Rcpp::depends(RcppEigen)]]
 #include <Rcpp.h>
-using namespace Rcpp ;
+using namespace Rcpp;
 
 //' get row and column indices of none zero elements in the matrix
 //' 
