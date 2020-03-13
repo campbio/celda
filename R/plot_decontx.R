@@ -169,10 +169,3 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "re
   return(z)
 }
 
-
-# geneMarkers should be a dataframe
-# counts = matrix(1:70, nrow=7, dimnames=list(1:7, NULL))
-# geneMarkers = data.frame( cellType = c(rep("Tcells", 3), rep("Bcells", 3), "DC"), geneMarkers = 1:7) # string as factor
-# z = c(rep(1, 4), rep(2,4), rep(3,2))
-# plt = decontxMarkerPlot(counts = counts, z = z, geneMarkers = geneMarkers)
-# plt
