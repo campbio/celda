@@ -62,7 +62,8 @@ Suggests:
     covr,
     BiocManager,
     BiocStyle,
-    M3DExampleData
+    M3DExampleData,
+    TENxPBMCData
 LinkingTo: RcppArmadillo, Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
