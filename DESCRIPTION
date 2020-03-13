@@ -51,19 +51,19 @@ Imports:
     dbscan,
     DelayedArray,
     Seurat,
-    stringr
+    stringr,
+    Matrix
 Suggests:
     testthat,
     knitr,
     roxygen2,
     rmarkdown,
-    Matrix,
     biomaRt,
     covr,
-    M3DExampleData,
     BiocManager,
-    BiocStyle
-LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+    BiocStyle,
+    M3DExampleData
+LinkingTo: RcppArmadillo, Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false

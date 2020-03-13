@@ -33,3 +33,5 @@ etc/*
 # Celda log files with default prefix
 Celda_chain.*log.txt
 inst/doc
+doc
+Meta

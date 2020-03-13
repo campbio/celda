@@ -211,6 +211,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// nonzero
+SEXP nonzero(NumericMatrix R_counts);
+RcppExport SEXP _celda_nonzero(SEXP R_countsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type R_counts(R_countsSEXP);
+    rcpp_result_gen = Rcpp::wrap(nonzero(R_counts));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _colSumByGroup(SEXP, SEXP);
 RcppExport SEXP _colSumByGroup_numeric(SEXP, SEXP);
@@ -233,6 +244,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_fastNormProp", (DL_FUNC) &_celda_fastNormProp, 2},
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},
     {"_celda_fastNormPropSqrt", (DL_FUNC) &_celda_fastNormPropSqrt, 2},
+    {"_celda_nonzero", (DL_FUNC) &_celda_nonzero, 1},
     {"_colSumByGroup",         (DL_FUNC) &_colSumByGroup,         2},
     {"_colSumByGroup_numeric", (DL_FUNC) &_colSumByGroup_numeric, 2},
     {"_colSumByGroupChange",   (DL_FUNC) &_colSumByGroupChange,   4},
