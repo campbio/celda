@@ -4,8 +4,15 @@
 \alias{decontXMarkerPlot}
 \title{Plots percentage of cells with their cell type markers}
 \usage{
-decontXMarkerPlot(counts, z, geneMarkers, threshold = 1,
-  color = "red3", textLabelSize = 3, precision = 2)
+decontXMarkerPlot(
+  counts,
+  z,
+  geneMarkers,
+  threshold = 1,
+  color = "red3",
+  textLabelSize = 3,
+  precision = 2
+)
 }
 \arguments{
 \item{counts}{Matrix of counts}

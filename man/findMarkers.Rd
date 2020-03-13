@@ -4,9 +4,16 @@
 \alias{findMarkers}
 \title{Generate decision tree from single-cell clustering output.}
 \usage{
-findMarkers(features, class, cellTypes, oneoffMetric = c("modified F1",
-  "pairwise AUC"), threshold = 0.95, reuseFeatures = FALSE,
-  altSplit = TRUE, consecutiveOneoff = TRUE)
+findMarkers(
+  features,
+  class,
+  cellTypes,
+  oneoffMetric = c("modified F1", "pairwise AUC"),
+  threshold = 0.95,
+  reuseFeatures = FALSE,
+  altSplit = TRUE,
+  consecutiveOneoff = TRUE
+)
 }
 \arguments{
 \item{features}{A L(features) by N(samples) numeric matrix.}
@@ -84,6 +91,7 @@ Uses decision tree procudure to generate a set of rules for each
  rules for identifying sets of similar clusters.
 }
 \examples{
+\dontrun{
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
 # subset 100 genes for fast clustering
@@ -103,4 +111,5 @@ DecTree <- findMarkers(features,
 
 # Plot dendrogram
 plotDendro(DecTree)
+}
 }

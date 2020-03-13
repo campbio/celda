@@ -21,6 +21,7 @@ Get decisions for a matrix of features. Estimate cell
  cluster membership using feature matrix input.
 }
 \examples{
+\dontrun{
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
 # Subset 500 genes for fast clustering
@@ -40,4 +41,5 @@ DecTree <- findMarkers(features,
 
 # Get sample estimates in training data
 getDecisions(DecTree$rules, features)
+}
 }
