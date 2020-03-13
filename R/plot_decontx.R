@@ -145,7 +145,7 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1, color = "re
 
 # geneMarkers should be a dataframe,  w/ 2 column names being `cellType` and `geneMarkers`
 # convert both `cellType` and `geneMarkers` are factors with levels being integer
-.geneMarkerProcess <- function(geneMarkers, orders = None) {
+.geneMarkerProcess <- function(geneMarkers, orders = NULL) {
   geneMarkers[, "cellName"] <- geneMarkers[, "cellType"]
   geneMarkers[, "cellType"] <- factor(geneMarkers[, "cellType"])
   levels(geneMarkers[, "cellType"]) <- 1:length(levels(geneMarkers[, "cellType"]))

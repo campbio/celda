@@ -162,9 +162,11 @@ plotHeatmap <- function(counts,
     ## Select subsets of features/cells
     if (!is.null(featureIx)) {
         counts <- counts[featureIx, , drop = FALSE]
-        if (length(annotationFeature) > 1 ||
-                (length(annotationFeature) == 1 & !is.na(annotationFeature))) {
+        if (!is.null(annotationFeature) & length(annotationFeature) > 0) {
+          if(length(annotationFeature) == 1 & !is.na(annotationFeature) | 
+             length(annotationFeature) > 1) {
             annotationFeature <- annotationFeature[featureIx, , drop = FALSE]
+          }  
         }
         if (!is.null(y)) {
             y <- y[featureIx]
@@ -173,9 +175,11 @@ plotHeatmap <- function(counts,
 
     if (!is.null(cellIx)) {
         counts <- counts[, cellIx, drop = FALSE]
-        if (length(annotationCell) > 1 ||
-                (length(annotationCell) == 1 & !is.na(annotationCell))) {
+        if (!is.null(annotationCell) & length(annotationCell) > 0) {
+          if(length(annotationCell) == 1 & !is.na(annotationCell) | 
+             length(annotationFeature) > 1) {
             annotationCell <- annotationCell[cellIx, , drop = FALSE]
+          }  
         }
         if (!is.null(z)) {
             z <- z[cellIx]

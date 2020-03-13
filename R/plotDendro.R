@@ -12,6 +12,7 @@
 #' @param boxSize A numeric value. Size of rule labels. Default is 7.
 #' @param boxColor A character value. Color of rule labels. Default is `black`.
 #' @examples
+#' \dontrun{
 #' library(M3DExampleData)
 #' counts <- M3DExampleData::Mmus_example_list$data
 #' # Subset 500 genes for fast clustering
@@ -31,6 +32,7 @@
 #'
 #' # Plot dendrogram
 #' plotDendro(decTree)
+#' }
 #' @return A ggplot2 object
 #' @import ggplot2
 #' @importFrom ggdendro dendro_data ggdendrogram

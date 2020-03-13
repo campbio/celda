@@ -62,6 +62,7 @@
 #'  }
 #' }
 #' @examples
+#' \dontrun{
 #' library(M3DExampleData)
 #' counts <- M3DExampleData::Mmus_example_list$data
 #' # subset 100 genes for fast clustering
@@ -81,6 +82,7 @@
 #'
 #' # Plot dendrogram
 #' plotDendro(DecTree)
+#' }
 #' @import magrittr
 #' @importFrom methods hasArg
 #' @export

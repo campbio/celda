@@ -4,3 +4,5 @@
 .travis.yml
 NOTICE
 _pkgdown.yml
+^doc$
+^Meta$

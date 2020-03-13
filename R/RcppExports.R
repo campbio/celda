@@ -17,14 +17,6 @@ calculateNativeMatrix <- function(counts, native_counts, theta, eta, phi, z, row
     .Call('_celda_calculateNativeMatrix', PACKAGE = 'celda', counts, native_counts, theta, eta, phi, z, row_index, col_index, pseudocount)
 }
 
-#' get row and column indices of none zero elements in the matrix
-#' 
-#' @param R_counts A matrix
-#' @return An integer matrix where each row is a row, column indices pair 
-nonzero <- function(R_counts) {
-    .Call('_celda_nonzero', PACKAGE = 'celda', R_counts)
-}
-
 cG_calcGibbsProbY_Simple <- function(counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta) {
     .Call('_celda_cG_calcGibbsProbY_Simple', PACKAGE = 'celda', counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta)
 }
@@ -75,5 +67,13 @@ fastNormPropLog <- function(R_counts, R_alpha) {
 #' @return A numeric matrix where the columns have been normalized to proportions
 fastNormPropSqrt <- function(R_counts, R_alpha) {
     .Call('_celda_fastNormPropSqrt', PACKAGE = 'celda', R_counts, R_alpha)
+}
+
+#' get row and column indices of none zero elements in the matrix
+#' 
+#' @param R_counts A matrix
+#' @return An integer matrix where each row is a row, column indices pair 
+nonzero <- function(R_counts) {
+    .Call('_celda_nonzero', PACKAGE = 'celda', R_counts)
 }
 
