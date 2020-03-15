@@ -14,7 +14,8 @@
 #' @param featureLabels  Vector of feature assignments, e.g. which cluster
 #'  does each gene belong to? Useful when using clusters of features
 #'  (e.g. gene modules or Seurat PCs) and user wishes to expand tree results
-#'  to individual features (e.g. score individual genes within marker gene modules).
+#'  to individual features (e.g. score individual genes within marker gene
+#'  modules).
 #' @param counts Numeric counts matrix. Useful when using clusters
 #'  of features (e.g. gene modules) and user wishes to expand tree results to
 #'  individual features (e.g. score individual genes within marker gene
@@ -102,23 +103,23 @@
 #' @import withr
 #' @export
 findMarkersTree <- function(features,
-                            class,
-                            oneoffMetric = c("modified F1", "pairwise AUC"),
-                            metaclusters,
-                            featureLabels,
-                            counts,
-                            celda,
-                            seurat,
-                            threshold = 0.90,
-                            reuseFeatures = FALSE,
-                            altSplit = TRUE,
-                            consecutiveOneoff = FALSE,
-                            autoMetaclusters = TRUE,
-                            seed = 12345) {
+    class,
+    oneoffMetric = c("modified F1", "pairwise AUC"),
+    metaclusters,
+    featureLabels,
+    counts,
+    celda,
+    seurat,
+    threshold = 0.90,
+    reuseFeatures = FALSE,
+    altSplit = TRUE,
+    consecutiveOneoff = FALSE,
+    autoMetaclusters = TRUE,
+    seed = 12345) {
 
-    if(methods::hasArg(celda)){
+    if (methods::hasArg(celda)) {
         #check that counts matrix is provided
-        if(!methods::hasArg(counts)){
+        if (!methods::hasArg(counts)) {
             stop("Please provide counts matrix in addition to celda object.")
         }
 
@@ -129,9 +130,8 @@ findMarkersTree <- function(features,
         class <- celda@clusters$z
 
         #get feature labels
-        featureLabels <- paste0('L',celda@clusters$y)
-    }
-    else if(methods::hasArg(seurat)){
+        featureLabels <- paste0("L", celda@clusters$y)
+    } else if (methods::hasArg(seurat)) {
         #get counts matrix from seurat object
         counts <- as.matrix(seurat@assays$RNA@data)
 
@@ -139,19 +139,18 @@ findMarkersTree <- function(features,
         class <- as.character(seurat::Idents(seurat))
 
         #get feature labels
-        featureLabels <- unlist(apply(seurat@reductions$pca@feature.loadings,1,
-                                      function(x)
-                                          return(names(x)[which(x==max(x))])))
+        featureLabels <- unlist(apply(seurat@reductions$pca@feature.loadings,
+            1, function(x) {return(names(x)[which(x==max(x))])}))
 
         #sum counts for each PC in each cell
-        features <- matrix(unlist(lapply(unique(featureLabels), function(pc){
-            colSums(counts[featureLabels==pc,])
+        features <- matrix(unlist(lapply(unique(featureLabels), function(pc) {
+            colSums(counts[featureLabels == pc, ])
         })),
-        ncol = length(class), byrow = TRUE,
-        dimnames = list(unique(featureLabels),colnames(counts)))
+            ncol = length(class), byrow = TRUE,
+            dimnames = list(unique(featureLabels), colnames(counts)))
 
         #normalize column-wise (i.e. convert counts to proportions)
-        features <- apply(features, 2, function(x) x/sum(x))
+        features <- apply(features, 2, function(x) {x / sum(x)})
     }
 
     if (ncol(features) != length(class)) {
@@ -162,7 +161,7 @@ findMarkersTree <- function(features,
         stop("NA class values")
     }
 
-    if (any(is.na(features))){
+    if (any(is.na(features))) {
         stop("NA feature values")
     }
 
@@ -205,8 +204,8 @@ findMarkersTree <- function(features,
 
         # Add column to each rules table which specifies its class
         DTsummary$rules <- mapply(cbind,
-                                  "class"=as.character(names(DTsummary$rules)),
-                                  DTsummary$rules, SIMPLIFY = FALSE)
+            "class" = as.character(names(DTsummary$rules)),
+            DTsummary$rules, SIMPLIFY = FALSE)
 
         # Generate table for each branch point in the tree
         DTsummary$branchPoints <- .createBranchPoints(DTsummary$rules)
@@ -219,68 +218,66 @@ findMarkersTree <- function(features,
         # If metaclusters are provided or to be identified
 
         #consecutive one-offs break the code(tricky to find 1st balanced split)
-        if(consecutiveOneoff){
-            stop("Cannot use metaclusters if consecutive one-offs are allowed.
-                 Please set the consecutiveOneoff parameter to FALSE.")
+        if (consecutiveOneoff) {
+            stop("Cannot use metaclusters if consecutive one-offs are allowed.",
+                " Please set the consecutiveOneoff parameter to FALSE.")
         }
 
         # Check if need to identify metaclusters
-        if(autoMetaclusters & !methods::hasArg(metaclusters)){
+        if (autoMetaclusters & !methods::hasArg(metaclusters)) {
             message("Identifying metaclusters...")
 
             #if seurat object then use seurat's UMAP parameters
-            if(methods::hasArg(seurat)){
-                suppressMessages(seurat <- seurat::RunUMAP(seurat, dims = 1:ncol(seurat@reductions$pca@feature.loadings)))
+            if (methods::hasArg(seurat)) {
+                suppressMessages(seurat <- seurat::RunUMAP(seurat,
+                    dims = seq(ncol(seurat@reductions$pca@feature.loadings))))
                 umap <- seurat@reductions$umap@cell.embeddings
-            }
-            else{
-                if(is.null(seed)){
+            } else {
+                if (is.null(seed)) {
                     umap <- uwot::umap(t(sqrt(t(features))),
-                                       n_neighbors=15, min_dist = 0.01,
-                                       spread = 1, n_sgd_threads = 1)
-                }
-                else{
+                        n_neighbors = 15, min_dist = 0.01,
+                        spread = 1, n_sgd_threads = 1)
+                } else {
                     withr::with_seed(
                         seed,
                         umap <- uwot::umap(t(sqrt(t(features))),
-                                           n_neighbors = 15, min_dist = 0.01,
-                                           spread = 1, n_sgd_threads = 1))
+                            n_neighbors = 15, min_dist = 0.01,
+                            spread = 1, n_sgd_threads = 1))
                 }
             }
             # dbscan to find metaclusters
             dbscan <- dbscan::dbscan(umap, eps = 1)
 
             # place each population in the correct metacluster
-            mapping <-
-                unlist(lapply(sort(as.integer(unique(class))),
-                              function(population) {
-                                  #get indexes of occurences of this population
-                                  indexes <- which(class == population)
+            mapping <- unlist(lapply(sort(as.integer(unique(class))),
+                function(population) {
+                    #get indexes of occurences of this population
+                    indexes <- which(class == population)
 
-                                  #get corresponding metaclusters
-                                  metaIndices <- dbscan$cluster[indexes]
+                    #get corresponding metaclusters
+                    metaIndices <- dbscan$cluster[indexes]
 
-                                  #return corresponding metacluster with majority vote
-                                  return(names(sort(table(metaIndices),decreasing=TRUE)[1]))
-                              }))
+                    #return corresponding metacluster with majority vote
+                    return(names(sort(table(metaIndices), decreasing=TRUE)[1]))
+                }))
 
             # create list which will contain subtypes of each metacluster
             metaclusters <- vector(mode = "list")
 
             # fill in list of populations for each metacluster
-            for(i in unique(mapping)){
+            for (i in unique(mapping)) {
                 metaclusters[[i]] <-
                     sort(as.integer(unique(class)))[which(mapping == i)]
             }
             names(metaclusters) <- paste0("M", unique(mapping))
 
-            message(paste("Identified",length(metaclusters), "metaclusters"))
+            message(paste("Identified", length(metaclusters), "metaclusters"))
         }
 
         # Check that cell types match class labels
         if (mean(unlist(metaclusters) %in% unique(class)) != 1) {
             stop("Provided cell types do not match class labels. ",
-                 "Please check the 'metaclusters' argument.")
+                "Please check the 'metaclusters' argument.")
         }
 
         # Create vector with metacluster labels
@@ -291,14 +288,14 @@ findMarkersTree <- function(features,
 
         # Rename metaclusters with just one cluster
         oneCluster <- names(metaclusters[lengths(metaclusters) == 1])
-        if(length(oneCluster) > 0){
+        if (length(oneCluster) > 0) {
             oneClusterIndices <- which(metaclusterLabels %in% oneCluster)
             metaclusterLabels[oneClusterIndices] <-
-                paste0(metaclusterLabels[oneClusterIndices],"(",
-                       class[oneClusterIndices],")")
+                paste0(metaclusterLabels[oneClusterIndices], "(",
+                    class[oneClusterIndices], ")")
             names(metaclusters[lengths(metaclusters) == 1]) <-
                 paste0(names(metaclusters[lengths(metaclusters) == 1]), "(",
-                       unlist(metaclusters[lengths(metaclusters) == 1]),")")
+                    unlist(metaclusters[lengths(metaclusters) == 1]), ")")
         }
 
         #create temporary variables for top-level tree
@@ -310,7 +307,7 @@ findMarkersTree <- function(features,
         # Create top-level tree
 
         #while there is still a balanced split at the top-level
-        while(TRUE){
+        while (TRUE) {
             #create tree
             message("Building top-level tree across all metaclusters...")
             tree <-
@@ -325,27 +322,27 @@ findMarkersTree <- function(features,
 
             # Add alternative node for the solely down-regulated leaf
             tree <- .addAlternativeSplit(tree, features,
-                                         as.factor(metaclusterLabels))
+                as.factor(metaclusterLabels))
 
             #store clusters with markers at current threshold
             topLevel <- tree[[1]][[1]]
-            if(topLevel$statUsed == "One-off"){
+            if (topLevel$statUsed == "One-off") {
                 markerThreshold[[as.character(tmpThreshold)]] <- unlist(
-                    lapply(topLevel[1:(length(topLevel)-3)], function(marker){
-                        return(marker$group1Consensus)
-                    })
+                    lapply(topLevel[seq(length(topLevel) - 3)],
+                        function(marker) {
+                            return(marker$group1Consensus)
+                        })
                 )
             }
 
             #if no more balanced split
-            if(length(tree) == 1){
+            if (length(tree) == 1) {
                 #if all clusters have positive markers
-                if(length(tree[[1]][[1]]) == (length(metaclusters)+3)){
+                if (length(tree[[1]][[1]]) == (length(metaclusters) + 3)) {
                     break
-                }
-                else{
+                } else {
                     #decrease threshold by 10%
-                    tmpThreshold <- tmpThreshold*0.9
+                    tmpThreshold <- tmpThreshold * 0.9
                     message("Decreasing classifier threshold to ",tmpThreshold)
                     next
                 }
@@ -356,15 +353,15 @@ findMarkersTree <- function(features,
                 upClass <- tree[[2]][[1]][[1]]$group1Consensus
 
                 #if only 2 clusters at the balanced split then merge them
-                if((length(upClass) == 1) &&
-                   (length(tree[[2]][[1]][[1]]$group2Consensus) == 1)){
+                if ((length(upClass) == 1) &&
+                        (length(tree[[2]][[1]][[1]]$group2Consensus) == 1)) {
                     upClass <- c(upClass, tree[[2]][[1]][[1]]$group2Consensus)
                 }
 
                 #update metacluster label of each cell
                 tmpMeta <- metaclusterLabels
                 tmpMeta[tmpMeta %in% upClass] <-
-                    paste(upClass, sep="", collapse="+")
+                    paste(upClass, sep = "", collapse = "+")
 
 
                 #create top-level tree again
@@ -380,17 +377,17 @@ findMarkersTree <- function(features,
 
                 # Add alternative node for the solely down-regulated leaf
                 tmpTree <- .addAlternativeSplit(tmpTree, features,
-                                                as.factor(tmpMeta))
+                    as.factor(tmpMeta))
 
                 #if new tree still has balanced split/no markers for some
-                if((length(tmpTree) > 1) ||
-                   (length(tree[[1]][[1]]) != (length(metaclusters) + 3))) {
+                if ((length(tmpTree) > 1) ||
+                        (length(tree[[1]][[1]]) != (length(metaclusters) + 3))) {
 
                     #decrease threshold by 10%
-                    tmpThreshold <- tmpThreshold*0.9
-                    message("Decreasing classifier threshold to ",tmpThreshold)
-                }
-                else{
+                    tmpThreshold <- tmpThreshold * 0.9
+                    message("Decreasing classifier threshold to ",
+                        tmpThreshold)
+                } else {
                     #set final metacluster labels to new set of clusters
                     metaclusterLabels <- tmpMeta
 
@@ -403,7 +400,7 @@ findMarkersTree <- function(features,
                     #remove old metaclusters
                     metaclusters[upClass] <- NULL
                     #add new metacluster to list of metaclusters
-                    metaclusters[paste(upClass, sep="", collapse="+")] <-
+                    metaclusters[paste(upClass, sep = "", collapse = "+")] <-
                         list(unname(newMetacluster))
 
                     break
@@ -414,40 +411,40 @@ findMarkersTree <- function(features,
         #re-format output
         finalTree <- tree
         tree <- list(rules = .mapClass2features(finalTree, features,
-                                                as.factor(metaclusterLabels),
-                                                topLevelMeta = TRUE)$rules)
+            as.factor(metaclusterLabels),
+            topLevelMeta = TRUE)$rules)
 
         #keep markers at first threshold they reached only
         markersToRemove <- c()
-        for(thresh in names(markerThreshold)){
+        for (thresh in names(markerThreshold)) {
             thresholdClasses <- markerThreshold[[thresh]]
-            for(cl in thresholdClasses){
+            for (cl in thresholdClasses) {
                 curRules <- tree$rules[[cl]]
-                lowMarkerIndices <- which(curRules$direction==1 &
-                                              curRules$stat<as.numeric(thresh))
-                if(length(lowMarkerIndices)>0 & length(which(curRules$direction==1))>1){
+                lowMarkerIndices <- which(curRules$direction == 1 &
+                        curRules$stat < as.numeric(thresh))
+                if (length(lowMarkerIndices) > 0 &
+                        length(which(curRules$direction == 1)) > 1) {
                     markersToRemove <- c(markersToRemove,
-                                         curRules[lowMarkerIndices,'feature'])
+                        curRules[lowMarkerIndices, 'feature'])
                 }
             }
         }
-        tree$rules <- lapply(tree$rules, function(rules){
-            return(rules[!rules$feature %in% markersToRemove,])
+        tree$rules <- lapply(tree$rules, function(rules) {
+            return(rules[!rules$feature %in% markersToRemove, ])
         })
 
         #store final set of top-level markers
-        topLevelMarkers <- unlist(lapply(tree$rules, function(cluster){
-            markers <- cluster[cluster$direction==1, "feature"]
+        topLevelMarkers <- unlist(lapply(tree$rules, function(cluster) {
+            markers <- cluster[cluster$direction == 1, "feature"]
             return(paste(markers, collapse = ";"))
         }))
 
         #create tree dendrogram
-        tree$dendro <-
-            .convertToDendrogram(finalTree, as.factor(metaclusterLabels),
-                                 splitNames = topLevelMarkers)
+        tree$dendro <- .convertToDendrogram(finalTree,
+            as.factor(metaclusterLabels), splitNames = topLevelMarkers)
 
         #add metacluster label to rules table
-        for(metacluster in names(tree$rules)){
+        for (metacluster in names(tree$rules)) {
             tree$rules[[metacluster]]$metacluster <- metacluster
         }
 
@@ -467,16 +464,16 @@ findMarkersTree <- function(features,
         )
 
         # Update metaclusters list
-        for(metacluster in names(metaclusters)){
+        for (metacluster in names(metaclusters)) {
             subtypes <- metaclusters[metacluster]
-            subtypes <- lapply(subtypes, function(subtype){
-                paste0(metacluster,"(",subtype,")")
+            subtypes <- lapply(subtypes, function(subtype) {
+                paste0(metacluster, "(", subtype, ")")
             })
             metaclusters[metacluster] <- subtypes
         }
 
         # Create separate trees for each cell type with more than one cluster
-        newTrees <- lapply(largeMetaclusters, function(metacluster){
+        newTrees <- lapply(largeMetaclusters, function(metacluster) {
 
             # Print current status
             message("Building tree for metacluster ", metacluster)
@@ -485,15 +482,14 @@ findMarkersTree <- function(features,
             featUse <- colnames(features)
             if (!reuseFeatures) {
                 tmpRules <- tree$rules[[metacluster]]
-                featUse <-
-                    featUse[!featUse %in%
-                                tmpRules[tmpRules$direction == 1, "feature"]]
+                featUse <- featUse[!featUse %in%
+                        tmpRules[tmpRules$direction == 1, "feature"]]
             }
 
             # Create new tree
             newTree <-
                 .generateTreeList(
-                    features[metaclusterLabels == metacluster,featUse],
+                    features[metaclusterLabels == metacluster, featUse],
                     as.factor(subtypeLabels[metaclusterLabels == metacluster]),
                     oneoffMetric,
                     threshold,
@@ -503,28 +499,21 @@ findMarkersTree <- function(features,
 
             # Add alternative node for the solely down-regulated leaf
             if (altSplit) {
-                newTree <-
-                    .addAlternativeSplit(newTree,
-                                         features[metaclusterLabels == metacluster, featUse],
-                                         as.factor(subtypeLabels[metaclusterLabels == metacluster]))
+                newTree <- .addAlternativeSplit(newTree,
+                    features[metaclusterLabels == metacluster, featUse],
+                    as.factor(subtypeLabels[metaclusterLabels == metacluster]))
             }
 
-            newTree <- list(
-                rules = .mapClass2features(newTree,
-                                           features[metaclusterLabels
-                                                    == metacluster,],
-                                           as.factor(subtypeLabels[
-                                               metaclusterLabels== metacluster]
-                                           ))$rules,
+            newTree <- list(rules = .mapClass2features(newTree,
+                features[metaclusterLabels == metacluster,],
+                as.factor(subtypeLabels[metaclusterLabels ==
+                        metacluster]))$rules,
                 dendro = .convertToDendrogram(newTree,
-                                              as.factor(
-                                                  subtypeLabels[
-                                                      metaclusterLabels ==
-                                                          metacluster]))
+                    as.factor(subtypeLabels[metaclusterLabels == metacluster]))
             )
 
             # Adjust 'rules' table for new tree
-            newTree$rules <- lapply(newTree$rules, function(rules){
+            newTree$rules <- lapply(newTree$rules, function(rules) {
                 rules$level <- rules$level +
                     max(tree$rules[[metacluster]]$level)
                 rules$metacluster <- metacluster
@@ -536,7 +525,7 @@ findMarkersTree <- function(features,
         names(newTrees) <- largeMetaclusters
 
         # Fix max depth in original tree
-        if(length(newTrees) > 0){
+        if (length(newTrees) > 0) {
             maxDepth <- max(unlist(lapply(newTrees, function(newTree) {
                 lapply(newTree$rules, function(ruleDF) {
                     ruleDF$level
@@ -555,35 +544,33 @@ findMarkersTree <- function(features,
 
         # Find indices of cell type nodes in tree
         indices <- lapply(largeMetaclusters,
-                          function(metacluster) {
-                              # Initialize sub trees, indices string, and flag
-                              dendSub <- dendro
-                              index <- ""
-                              flag <- TRUE
+            function(metacluster) {
+                # Initialize sub trees, indices string, and flag
+                dendSub <- dendro
+                index <- ""
+                flag <- TRUE
 
-                              while (flag) {
-                                  # Get the edge with the class of interest
-                                  whEdge <- which(unlist(
-                                      lapply(dendSub,
-                                             function(edge)
-                                                 metacluster %in%
-                                                 attributes(edge)$classLabels)
-                                  ))
+                while (flag) {
+                    # Get the edge with the class of interest
+                    whEdge <- which(unlist(
+                        lapply(dendSub,
+                            function(edge)
+                                metacluster %in%
+                                attributes(edge)$classLabels)
+                    ))
 
-                                  # Add this as a string
-                                  index <- paste0(index, "[[", whEdge, "]]")
+                    # Add this as a string
+                    index <- paste0(index, "[[", whEdge, "]]")
 
-                                  # Move to this branch
-                                  dendSub <- eval(parse(text = paste0(
-                                      "dendro", index)))
+                    # Move to this branch
+                    dendSub <- eval(parse(text = paste0("dendro", index)))
 
-                                  # Is this the only class in that branch
-                                  flag <- length(
-                                      attributes(dendSub)$classLabels) > 1
-                              }
+                    # Is this the only class in that branch
+                    flag <- length(attributes(dendSub)$classLabels) > 1
+                }
 
-                              return(index)
-                          }
+                return(index)
+            }
         )
         names(indices) <- largeMetaclusters
 
@@ -594,17 +581,17 @@ findMarkersTree <- function(features,
             metaclusterDendro <- newTrees[[metacluster]]$dendro
 
             # Adjust labels, member count, and midpoint of nodes
-            dendro <- dendrapply(dendro, function(node){
+            dendro <- dendrapply(dendro, function(node) {
                 # Check if in right branch
                 if (metacluster %in%
-                    as.character(attributes(node)$classLabels)) {
+                        as.character(attributes(node)$classLabels)) {
 
                     # Replace cell type label with subtype labels
                     labels <- attributes(node)$classLabels
                     labels <- as.character(labels)
                     labels <- labels[labels != metacluster]
                     labels <- c(labels, unique(subtypeLabels)
-                                [grep(metacluster,unique(subtypeLabels))])
+                        [grep(metacluster,unique(subtypeLabels))])
                     attributes(node)$classLabels <- labels
 
                     # Assign new member count for this branch
@@ -632,23 +619,21 @@ findMarkersTree <- function(features,
             # Fix height
             indLoc <- gregexpr("\\[\\[", indices[[metacluster]])[[1]]
             indLoc <- indLoc[length(indLoc)]
-            parentIndexString <- substr(indices[[metacluster]],
-                                        0,
-                                        indLoc - 1)
+            parentIndexString <- substr(indices[[metacluster]], 0, indLoc - 1)
             parentHeight <- attributes(eval(parse(
                 text = paste0("dendro", parentIndexString))))$height
             metaclusterHeight <- attributes(metaclusterDendro)$height
             metaclusterDendro <- dendrapply(metaclusterDendro,
-                                            function(node, parentHeight,
-                                                     metaclusterHeight) {
-                                                if (attributes(node)$height > 1){
-                                                    attributes(node)$height <-
-                                                        parentHeight - 1 -
-                                                        (metaclusterHeight -
-                                                             attributes(node)$height)
-                                                }
-                                                return(node)
-                                            }, parentHeight, metaclusterHeight)
+                function(node, parentHeight,
+                    metaclusterHeight) {
+                    if (attributes(node)$height > 1){
+                        attributes(node)$height <-
+                            parentHeight - 1 -
+                            (metaclusterHeight -
+                                    attributes(node)$height)
+                    }
+                    return(node)
+                }, parentHeight, metaclusterHeight)
 
             # Add new tree to original tree
             eval(parse(text = paste0(
@@ -656,7 +641,7 @@ findMarkersTree <- function(features,
 
             # Append new tree's 'rules' tables to original tree
             tree$rules <- append(tree$rules, newTrees[[metacluster]]$rules,
-                                 after = which(names(tree$rules)==metacluster))
+                after = which(names(tree$rules)==metacluster))
 
             # Remove old tree's rules
             tree$rules <- tree$rules[-which(names(tree$rules) == metacluster)]
@@ -668,26 +653,29 @@ findMarkersTree <- function(features,
         # Get performance statistics
         message("Computing performance statistics...")
         perfList <- .getPerformance(tree$rules,
-                                    features,
-                                    as.factor(subtypeLabels))
+            features,
+            as.factor(subtypeLabels))
         tree$prediction <- perfList$prediction
         tree$performance <- perfList$performance
 
         # Remove confusing 'value' column
-        tree$rules <- lapply(tree$rules, function(x) { x["value"] <- NULL; x })
+        tree$rules <- lapply(tree$rules, function(x) {
+            x["value"] <- NULL
+            return(x)})
 
         #add column to each rules table which specifies its class
         tree$rules <- mapply(cbind, "class" = as.character(names(tree$rules)),
-                             tree$rules, SIMPLIFY = FALSE)
+            tree$rules, SIMPLIFY = FALSE)
 
         #create branch points table
-        branchPoints <- .createBranchPoints(tree$rules, largeMetaclusters, metaclusters)
+        branchPoints <- .createBranchPoints(tree$rules, largeMetaclusters,
+            metaclusters)
 
         #collapse all rules tables into one large table
         collapsed <- do.call("rbind", tree$rules)
 
         #get top-level rules
-        topLevelRules <- collapsed[collapsed$level == 1,]
+        topLevelRules <- collapsed[collapsed$level == 1, ]
 
         #add 'class' column
         topLevelRules$class <- topLevelRules$metacluster
@@ -696,32 +684,32 @@ findMarkersTree <- function(features,
         branchPoints[["top_level"]] <- topLevelRules
 
         #check if need to expand features to gene-level
-        if(methods::hasArg(featureLabels) && methods::hasArg(counts)){
+        if (methods::hasArg(featureLabels) && methods::hasArg(counts)) {
 
             message("Computing scores for individual genes...")
 
             #make sure feature labels match those in the tree
-            if(!all(unique(collapsed$feature) %in% unique(featureLabels))){
-                m<-"Provided feature labels don't match those in count matrix."
-                stop(m)
+            if (!all(unique(collapsed$feature) %in% unique(featureLabels))) {
+                stop("Provided feature labels don't match those in count",
+                    " matrix.")
             }
 
             #iterate over branch points
-            branchPoints <- lapply(branchPoints, function(branch){
+            branchPoints <- lapply(branchPoints, function(branch) {
 
                 #iterate over unique features
                 featAUC <- lapply(unique(branch$feature), .getGeneAUC, branch,
-                                  subtypeLabels, metaclusterLabels,
-                                  featureLabels, counts)
+                    subtypeLabels, metaclusterLabels,
+                    featureLabels, counts)
 
                 #update branch table after merging genes data
                 return(do.call("rbind", featAUC))
             })
 
             #simplify top-level in rules tables to only up-regulated markers
-            tree$rules <- lapply(tree$rules, function(rule){
-                return(rule[-intersect(
-                    which(rule$level==1), which(rule$direction==(-1))), ])
+            tree$rules <- lapply(tree$rules, function(rule) {
+                return(rule[-intersect(which(rule$level == 1),
+                    which(rule$direction == (-1))), ])
             })
 
             ##add gene-level info to rules tables
@@ -730,24 +718,25 @@ findMarkersTree <- function(features,
             collapsedBranches$class <- as.character(collapsedBranches$class)
 
             #loop over rules tables and get relevant info
-            tree$rules <- lapply(tree$rules, function(class){
+            tree$rules <- lapply(tree$rules, function(class) {
                 #initialize table to return
                 toReturn <- data.frame(NULL)
 
                 #loop over rows of this class
-                for(i in 1:nrow(class)){
+                for (i in seq(nrow(class))) {
                     #extract relevant genes from branch points tables
                     genesAUC <- collapsedBranches[
-                        collapsedBranches$feature==class$feature[i] &
-                            collapsedBranches$level==class$level[i] &
-                            collapsedBranches$class==class$class[i],]
+                        collapsedBranches$feature == class$feature[i] &
+                            collapsedBranches$level == class$level[i] &
+                            collapsedBranches$class == class$class[i], ]
 
                     #don't forget top-level
-                    if(class$level[i]==1){
+                    if (class$level[i] == 1) {
                         genesAUC <- collapsedBranches[
-                            collapsedBranches$feature==class$feature[i] &
-                                collapsedBranches$level==class$level[i] &
-                                collapsedBranches$class==class$metacluster[i],]
+                            collapsedBranches$feature == class$feature[i] &
+                                collapsedBranches$level == class$level[i] &
+                                collapsedBranches$class ==
+                                class$metacluster[i], ]
                     }
 
                     #merge table
@@ -757,7 +746,7 @@ findMarkersTree <- function(features,
             })
 
             #remove table row names
-            tree$rules <- lapply(tree$rules, function(t){
+            tree$rules <- lapply(tree$rules, function(t) {
                 rownames(t) <- NULL
                 return(t)
             })
@@ -769,44 +758,44 @@ findMarkersTree <- function(features,
 
         #simplify top-level branch point to save memory
         branchPoints$top_level <- branchPoints$top_level[
-            branchPoints$top_level$direction==1,]
+            branchPoints$top_level$direction==1, ]
         branchPoints$top_level <- branchPoints$top_level[
-            !duplicated(branchPoints$top_level),]
+            !duplicated(branchPoints$top_level), ]
 
         #remove branch points row names
-        branchPoints <- lapply(branchPoints, function(br){
+        branchPoints <- lapply(branchPoints, function(br) {
             rownames(br) <- NULL
             return(br)
         })
 
         #adjust subtype labels
-        branchPoints <- lapply(branchPoints, function(br){
+        branchPoints <- lapply(branchPoints, function(br) {
             br$class <- as.character(br$class)
-            br$class[grepl("\\(.*\\)",br$class)] <- regmatches(
-                br$class[grepl("\\(.*\\)",br$class)],
+            br$class[grepl("\\(.*\\)", br$class)] <- regmatches(
+                br$class[grepl("\\(.*\\)", br$class)],
                 regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                        br$class[grepl("\\(.*\\)",br$class)],
-                        perl = TRUE))
+                    br$class[grepl("\\(.*\\)", br$class)],
+                    perl = TRUE))
 
             br$metacluster <- as.character(br$metacluster)
-            br$metacluster[grepl("\\(.*\\)",br$metacluster)] <-
+            br$metacluster[grepl("\\(.*\\)", br$metacluster)] <-
                 gsub("\\(.*\\)", "",
-                     br$metacluster[grepl("\\(.*\\)",br$metacluster)])
+                    br$metacluster[grepl("\\(.*\\)", br$metacluster)])
 
             return(br)
         })
         #adjust subtype labels
-        tree$rules <- suppressWarnings(lapply(tree$rules, function(r){
+        tree$rules <- suppressWarnings(lapply(tree$rules, function(r) {
             r$class <- as.character(r$class)
-            r$class[grepl("\\(.*\\)",r$class)] <- regmatches(
-                r$class[grepl("\\(.*\\)",r$class)],
+            r$class[grepl("\\(.*\\)", r$class)] <- regmatches(
+                r$class[grepl("\\(.*\\)", r$class)],
                 regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                        r$class[grepl("\\(.*\\)",r$class)],
-                        perl = TRUE))
+                    r$class[grepl("\\(.*\\)", r$class)],
+                    perl = TRUE))
 
-            r$metacluster[grepl("\\(.*\\)",r$metacluster)] <-
+            r$metacluster[grepl("\\(.*\\)", r$metacluster)] <-
                 gsub("\\(.*\\)", "",
-                     r$metacluster[grepl("\\(.*\\)",r$metacluster)])
+                    r$metacluster[grepl("\\(.*\\)",r$metacluster)])
             return(r)
         }))
 
@@ -816,13 +805,13 @@ findMarkersTree <- function(features,
 
         #return class labels
         tree$classLabels <- regmatches(subtypeLabels,
-                                       regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                                               subtypeLabels, perl = TRUE))
+            regexpr(pattern = "(?<=\\().*?(?=\\)$)",
+                subtypeLabels, perl = TRUE))
 
         tree$metaclusterLabels <- metaclusterLabels
-        tree$metaclusterLabels[grepl("\\(.*\\)",metaclusterLabels)] <-
+        tree$metaclusterLabels[grepl("\\(.*\\)", metaclusterLabels)] <-
             gsub("\\(.*\\)", "",
-                 metaclusterLabels[grepl("\\(.*\\)",metaclusterLabels)])
+                metaclusterLabels[grepl("\\(.*\\)", metaclusterLabels)])
 
         # Final return
         return(tree)
@@ -830,12 +819,12 @@ findMarkersTree <- function(features,
 }
 
 #helper function to create table for each branch point in the tree
-.createBranchPoints <- function(rules, largeMetaclusters, metaclusters){
+.createBranchPoints <- function(rules, largeMetaclusters, metaclusters) {
     # First step differs if metaclusters were used
 
-    if(methods::hasArg(metaclusters) && (length(largeMetaclusters)>0)){
+    if (methods::hasArg(metaclusters) && (length(largeMetaclusters)>0)) {
         #iterate over metaclusters and add the rules for each level
-        branchPoints <- lapply(largeMetaclusters, function(metacluster){
+        branchPoints <- lapply(largeMetaclusters, function(metacluster) {
             #get names of subtypes
             subtypes <- metaclusters[[metacluster]]
 
@@ -843,35 +832,34 @@ findMarkersTree <- function(features,
             subtypeRules <- do.call("rbind", rules[subtypes])
 
             #get rules at each level
-            levels <- lapply(2:max(subtypeRules$level), function(level){
-                return(subtypeRules[subtypeRules$level == level,])
+            levels <- lapply(seq(2, max(subtypeRules$level)), function(level) {
+                return(subtypeRules[subtypeRules$level == level, ])
             })
             names(levels) <- paste0(metacluster,"_level_",
-                                    1:(max(subtypeRules$level)-1))
+                seq(max(subtypeRules$level) - 1))
 
             return(levels)
         })
         branchPoints <- unlist(branchPoints, recursive = FALSE)
-    }
-    else{
+    } else {
         #collapse all rules into one table
         collapsed <- do.call("rbind", rules)
 
         #subset rules at each level
-        branchPoints <- lapply(1:max(collapsed$level), function(level){
-            return(collapsed[collapsed$level==level,])
+        branchPoints <- lapply(seq(max(collapsed$level)), function(level) {
+            return(collapsed[collapsed$level==level, ])
         })
-        names(branchPoints) <- paste0("level_",1:max(collapsed$level))
+        names(branchPoints) <- paste0("level_", seq(max(collapsed$level)))
     }
 
     #split each level into its branch points
-    branchPoints <- lapply(branchPoints, function(level){
+    branchPoints <- lapply(branchPoints, function(level) {
         #check if need to split
         firstFeat <- level$feature[1]
         firstStat <- level$stat[1]
-        if(setequal(level[level$feature==firstFeat & level$stat==firstStat,
-                          "class"],
-                    unique(level$class))){
+        if (setequal(level[level$feature == firstFeat & level$stat == firstStat,
+            "class"],
+            unique(level$class))) {
             return(level)
         }
 
@@ -880,53 +868,53 @@ findMarkersTree <- function(features,
         oSplits <- NA
 
         #get balanced split rows by themselves
-        balS <- level[level$statUsed=="Split",]
+        balS <- level[level$statUsed == "Split", ]
 
         #return table for each unique value of 'stat'
-        if(nrow(balS) > 0){
+        if (nrow(balS) > 0) {
             #get unique splits (based on stat)
             unS <- unique(balS$stat)
 
             #return table for each unique split
-            bSplits <- lapply(unS, function(s){
-                balS[balS$stat==s,]
+            bSplits <- lapply(unS, function(s) {
+                balS[balS$stat == s, ]
             })
         }
 
         #get one-off rows by themselves
-        oneS <- level[level$statUsed=="One-off",]
+        oneS <- level[level$statUsed == "One-off", ]
 
-        if(nrow(oneS) > 0){
+        if (nrow(oneS) > 0) {
             #check if need to split
             firstFeat <- oneS$feature[1]
-            if(setequal(oneS[oneS$feature==firstFeat,"class"],
-                        unique(oneS$class))){
+            if (setequal(oneS[oneS$feature == firstFeat, "class"],
+                unique(oneS$class))) {
                 oSplits <- oneS
             }
 
             #get class groups for each marker
-            markers <- oneS[oneS$direction==1, "feature"]
-            groups <- unique(unlist(lapply(markers, function(m){
+            markers <- oneS[oneS$direction == 1, "feature"]
+            groups <- unique(unlist(lapply(markers, function(m) {
                 return(paste(
-                    as.character(oneS[oneS$feature==m,"class"]),
+                    as.character(oneS[oneS$feature==m, "class"]),
                     collapse = " "))
             })))
 
             #return table for each class group
-            oSplits <- lapply(groups, function(x){
+            oSplits <- lapply(groups, function(x) {
                 gr <- unlist(strsplit(x, split = " "))
-                oneS[as.character(oneS$class) %in% gr,]
+                oneS[as.character(oneS$class) %in% gr, ]
             })
         }
 
         #rename new tables
-        if(is.list(bSplits)){
+        if (is.list(bSplits)) {
             names(bSplits) <- paste0("split_",
-                                     LETTERS[length(bSplits):1])
+                LETTERS[seq(length(bSplits), 1)])
         }
-        if(is.list(oSplits)){
+        if (is.list(oSplits)) {
             names(oSplits) <- paste0("one-off_",
-                                     LETTERS[length(oSplits):1])
+                LETTERS[seq(length(oSplits), 1)])
         }
 
         #return 2 sets of table
@@ -938,51 +926,48 @@ findMarkersTree <- function(features,
     )
 
     #adjust for new tables
-    branchPoints <- lapply(branchPoints, function(br){
-        if(inherits(br, "list")){
+    branchPoints <- lapply(branchPoints, function(br) {
+        if (inherits(br, "list")) {
             return(br)
-        }
-        else{
+        } else {
             return(list(br))
         }
     })
     branchPoints <- unlist(branchPoints, recursive = FALSE)
     #replace dots in names of new branches with underscores
     names(branchPoints) <- gsub(pattern = "\\.([^\\.]*)$",
-                                replacement = "_\\1",
-                                names(branchPoints))
+        replacement = "_\\1",
+        names(branchPoints))
 
     return(branchPoints)
 }
 
 #helper function to get AUC for individual genes within feature
 .getGeneAUC <- function(marker, table, subtypeLabels,
-                        metaclusterLabels, featureLabels, counts){
+    metaclusterLabels, featureLabels, counts) {
     #get up-regulated & down-regulated classes for this feature
     upClass <-
         as.character(table[table$feature == marker &
-                               table$direction == 1, "class"])
+                table$direction == 1, "class"])
     downClasses <-
         as.character(table[table$feature == marker &
-                               table$direction == (-1), "class"])
+                table$direction == (-1), "class"])
 
     #subset counts matrix
-    if(table$level[1] > 1){
-        subCounts <- counts[,which(subtypeLabels %in% c(upClass, downClasses))]
-    }
-    else{
-        subCounts <- counts[,which(metaclusterLabels %in%
-                                       c(upClass, downClasses))]
+    if (table$level[1] > 1) {
+        subCounts <- counts[, which(subtypeLabels %in% c(upClass, downClasses))]
+    } else {
+        subCounts <- counts[, which(metaclusterLabels %in%
+                c(upClass, downClasses))]
     }
 
     #subset class labels
-    if(table$level[1] > 1){
+    if (table$level[1] > 1) {
         subLabels <- subtypeLabels[which(subtypeLabels %in%
-                                             c(upClass, downClasses))]
-    }
-    else{
+                c(upClass, downClasses))]
+    } else {
         subLabels <- metaclusterLabels[which(metaclusterLabels %in%
-                                                 c(upClass, downClasses))]
+                c(upClass, downClasses))]
     }
 
     #set label to 0 if not class of interest
@@ -992,9 +977,9 @@ findMarkersTree <- function(features,
     markers <- rownames(counts)[which(featureLabels == marker)]
 
     #get one-vs-all AUC for each gene
-    auc <- unlist(lapply(markers, function(markerGene){
-        as.numeric(pROC::auc(pROC::roc(subLabels, subCounts[markerGene,],
-                                       direction = "<", quiet = TRUE)))
+    auc <- unlist(lapply(markers, function(markerGene) {
+        as.numeric(pROC::auc(pROC::roc(subLabels, subCounts[markerGene, ],
+            direction = "<", quiet = TRUE)))
     }))
     names(auc) <- markers
 
@@ -1002,8 +987,8 @@ findMarkersTree <- function(features,
     auc <- sort(auc, decreasing = TRUE)
 
     #create table for this marker
-    featTable <- table[table$feature == marker,]
-    featTable <- featTable[rep(seq_len(nrow(featTable)), each=length(auc)),]
+    featTable <- table[table$feature == marker, ]
+    featTable <- featTable[rep(seq_len(nrow(featTable)), each = length(auc)), ]
     featTable$gene <- rep(names(auc), length(c(upClass, downClasses)))
     featTable$geneAUC <- rep(auc, length(c(upClass, downClasses)))
 
@@ -1134,7 +1119,7 @@ findMarkersTree <- function(features,
                         X$group2
                     })))
                 group2Samples <- group2Samples[!group2Samples %in%
-                                                   group1Samples]
+                        group1Samples]
 
                 # Check that there is still more than one class
                 group2Classes <- levels(droplevels(
@@ -1163,8 +1148,8 @@ findMarkersTree <- function(features,
 
                         # Instead of 2, this direction is 1 + the num. splits
                         branch2$dirs <- c(split$dirs,
-                                          sum(!names(split) %in%
-                                                  c("statUsed", "fUsed", "dirs")) + 1)
+                            sum(!names(split) %in%
+                                    c("statUsed", "fUsed", "dirs")) + 1)
                     }
                 } else {
                     branch2 <- NULL
@@ -1232,10 +1217,10 @@ findMarkersTree <- function(features,
 
 # Wrapper function to perform split metrics
 .wrapSplitHybrid <- function(features,
-                             class,
-                             threshold = 0.95,
-                             oneoffMetric,
-                             tryOneoff = TRUE) {
+    class,
+    threshold = 0.95,
+    oneoffMetric,
+    tryOneoff = TRUE) {
 
     # Get best one-2-one splits
     ## Use modified f1 or pairwise auc?
@@ -1260,8 +1245,8 @@ findMarkersTree <- function(features,
     if (length(splitStats) == 0) {
         splitMetric <- .splitMetricIGpIGd
         splitStats <- .splitMetricRecursive(features,
-                                            class,
-                                            splitMetric = splitMetric)[1] # Use top
+            class,
+            splitMetric = splitMetric)[1] # Use top
         statUsed <- "Split"
     }
 
@@ -1361,7 +1346,8 @@ findMarkersTree <- function(features,
         classK1 <- as.numeric(class == k1)
 
         # Get AUC value
-        aucK1 <- pROC::auc(pROC::roc(classK1, currentFeature, direction = "<", quiet = TRUE))
+        aucK1 <- pROC::auc(pROC::roc(classK1, currentFeature, direction = "<",
+            quiet = TRUE))
 
         # Return
         return(aucK1)
@@ -1389,9 +1375,11 @@ findMarkersTree <- function(features,
             currentLabels <- as.integer(currentClusters == k1)
 
             # get AUC value for this feat-cluster pair
-            rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,direction = "<", quiet=TRUE)
+            rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,
+                direction = "<", quiet=TRUE)
             aucK2 <- rocK2$auc
-            coordK2 <- pROC::coords(rocK2, "best", ret = "threshold", transpose = TRUE)[1]
+            coordK2 <- pROC::coords(rocK2, "best", ret = "threshold",
+                transpose = TRUE)[1]
 
             # Concatenate vectors
             statK2 <- c(threshold = coordK2, auc = aucK2)
@@ -1453,7 +1441,7 @@ findMarkersTree <- function(features,
     Xsum <- colSums(X)
 
     # Remove impossible splits (No class has > 50% of there samples on one side)
-    sRProbs <- sRCounts %*% diag(Xsum^-1)
+    sRProbs <- sRCounts %*% diag(Xsum ^ -1)
     sKeepPossible <- rowSums(sRProbs >= 0.5) > 0 & rowSums(sRProbs < 0.5) > 0
 
     # Remove anything after a full prob (Doesn't always happen)
@@ -1493,7 +1481,7 @@ findMarkersTree <- function(features,
                 # Get harmonic mean of best sens, best prec, and worst sens
                 HMout <- (3 * bestSens * bestPrec * worstSens) /
                     (bestSens * bestPrec + bestPrec * worstSens +
-                         bestSens * worstSens)
+                            bestSens * worstSens)
 
                 return(HMout)
             }, Xsum, sRCounts, sLCounts, FUN.VALUE = double(1))
@@ -1557,7 +1545,7 @@ findMarkersTree <- function(features,
     Xsum <- colSums(X)
 
     # Remove impossible splits
-    sRProbs <- sRCounts %*% diag(Xsum^-1)
+    sRProbs <- sRCounts %*% diag(Xsum ^ -1)
     sKeep <- rowSums(sRProbs >= 0.5) > 0 & rowSums(sRProbs < 0.5) > 0
 
     if (sum(sKeep) > 0) {
@@ -1571,9 +1559,9 @@ findMarkersTree <- function(features,
 
         # Multiply them to get probabilities
         sRProbs <- t(t(sRCounts) %*%
-                         diag(rowSums(sRCounts)^-1, nrow = nrow(sRCounts)))
+                diag(rowSums(sRCounts) ^ -1, nrow = nrow(sRCounts)))
         sLProbs <- t(t(sLCounts) %*%
-                         diag(rowSums(sLCounts)^-1, nrow = nrow(sLCounts)))
+                diag(rowSums(sLCounts) ^ -1, nrow = nrow(sLCounts)))
 
         # Multiply them by there log
         sRTrans <- sRProbs * log(sRProbs)
@@ -1608,7 +1596,8 @@ findMarkersTree <- function(features,
         # Get unique splits of the data
         classSplitUnique <- unique(classSplit)
         classSplitUnique <- classSplitUnique[!rowSums(classSplitUnique) %in%
-                                                 c(0, ncol(classSplitUnique)), , drop = FALSE]
+                c(0, ncol(classSplitUnique)), ,
+            drop = FALSE]
 
         # Get density information gain
         if (nrow(classSplitUnique) > 0) {
@@ -2005,7 +1994,7 @@ getDecisions <- function(rules, features) {
     # Unlist decision tree (one element for each split)
     DecTree <- unlist(tree, recursive = F)
 
-    if(is.null(splitNames)){
+    if (is.null(splitNames)) {
         # Name split by gene and threshold
         splitNames <- lapply(DecTree, function(split) {
 
@@ -2031,7 +2020,7 @@ getDecisions <- function(rules, features) {
         names(splitNames) <- sub("1_", "", names(splitNames))
     }
     else{
-        names(splitNames) <- 1:(length(DecTree[[1]])-3)
+        names(splitNames) <- seq(length(DecTree[[1]]) - 3)
     }
 
     # Get Stat Used
@@ -2080,7 +2069,7 @@ getDecisions <- function(rules, features) {
                     X$group2Consensus
                 })))
             group2classUnique <- group2classUnique[!group2classUnique %in%
-                                                       group1classVec]
+                    group1classVec]
 
             # Assign
             for (j in seq(length(group1classUnique))) {
@@ -2127,10 +2116,8 @@ getDecisions <- function(rules, features) {
         # Add element
         iSplit <- unlist(strsplit(i, "_"))
         iPaste <- paste0("dendro",
-                         paste(paste0("[[", iSplit, "]]"), collapse = ""))
-        eval(parse(
-            text =
-                paste0(iPaste, "<-list()")
+            paste(paste0("[[", iSplit, "]]"), collapse = ""))
+        eval(parse(text = paste0(iPaste, "<-list()")
         ))
 
         # Add attributes
@@ -2266,7 +2253,7 @@ subUnderscore <- function(x, n) unlist(lapply(
 
                     # Keep only split information
                     split <- split[!names(split) %in%
-                                       c("statUsed", "fUsed", "dirs")]
+                            c("statUsed", "fUsed", "dirs")]
 
                     # Create data frame of split rules
                     edgeFram <- do.call(rbind, lapply(split, function(edge) {
@@ -2301,18 +2288,18 @@ subUnderscore <- function(x, n) unlist(lapply(
     rownames(class2featuresIndices) <- NULL
 
     # Generate list of rules for each class
-    if(topLevelMeta){
+    if (topLevelMeta) {
         orderedClass <- unique(
-            class2featuresIndices[class2featuresIndices$direction==1,"class"])
-    }
-    else{
+            class2featuresIndices[class2featuresIndices$direction == 1,
+                "class"])
+    } else {
         orderedClass <- levels(class)
     }
 
     rules <- lapply(orderedClass, function(cl, class2featuresIndices) {
 
         class2featuresIndices[class2featuresIndices$class == cl,
-                              colnames(class2featuresIndices) != "class"]
+            colnames(class2featuresIndices) != "class"]
 
     }, class2featuresIndices)
     names(rules) <- orderedClass
@@ -2358,25 +2345,25 @@ subUnderscore <- function(x, n) unlist(lapply(
 #' @importFrom dendextend get_nodes_xy get_nodes_attr get_leaves_attr
 #' @export
 plotDendro <- function(tree,
-                       classLabel = NULL,
-                       addSensPrec = FALSE,
-                       maxFeaturePrint = 4,
-                       leafSize = 10,
-                       boxSize = 2,
-                       boxColor = "black") {
+    classLabel = NULL,
+    addSensPrec = FALSE,
+    maxFeaturePrint = 4,
+    leafSize = 10,
+    boxSize = 2,
+    boxColor = "black") {
 
     # Get necessary elements
     dendro <- tree$dendro
 
     # Get performance information (training or CV based)
-    if(addSensPrec){
+    if (addSensPrec) {
         performance <- tree$performance
 
         # Create vector of per class performance
         perfVec <- paste0("Sens. ",
-                          format(round(performance$sensitivity, 2), nsmall = 2),
-                          "\n Prec. ",
-                          format(round(performance$precision, 2), nsmall = 2)
+            format(round(performance$sensitivity, 2), nsmall = 2),
+            "\n Prec. ",
+            format(round(performance$precision, 2), nsmall = 2)
         )
         names(perfVec) <- names(performance$sensitivity)
     }
@@ -2408,7 +2395,7 @@ plotDendro <- function(tree,
     segs$label <- sapply(segs$label, function(lab, maxFeaturePrint) {
         loc <- gregexpr("\n", lab)[[1]][maxFeaturePrint]
         if(!is.na(loc)) {
-            lab <- substr(lab, 1, loc-1)
+            lab <- substr(lab, 1, loc - 1)
         }
         return(lab)
     }, maxFeaturePrint)
@@ -2435,11 +2422,10 @@ plotDendro <- function(tree,
 
     # Remove duplicated labels
     dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$y,
-                                               decreasing = T), ]
+        decreasing = T), ]
     dendSegsLabelled <- dendSegsLabelled[
-        !duplicated(dendSegsLabelled[,
-                                     c("xend", "x", "yend",
-                                       "label", "statUsed")]), ]
+        !duplicated(dendSegsLabelled[, c("xend", "x", "yend",
+            "label", "statUsed")]), ]
 
     # Merge with alternative x-coordinates for alternative split
     dendSegsLabelled <- merge(dendSegsLabelled, dendSegsAlt)
@@ -2461,10 +2447,10 @@ plotDendro <- function(tree,
     leafLabels <- dendextend::get_leaves_attr(dendro, "label")
 
     # Adjust leaf labels if there are metacluster labels
-    if(!is.null(tree$metaclusterLabels)){
+    if (!is.null(tree$metaclusterLabels)) {
         leafLabels <- regmatches(leafLabels,
-                                 regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                                         leafLabels, perl = TRUE))
+            regexpr(pattern = "(?<=\\().*?(?=\\)$)",
+                leafLabels, perl = TRUE))
     }
 
     # Add sensitivity and precision measurements
@@ -2481,78 +2467,76 @@ plotDendro <- function(tree,
 
     # Create plot of dendrogram
     suppressMessages(dendroP <- ggdendro::ggdendrogram(dendro) +
-                         ggplot2::geom_label(
-                             data = dendSegsLabelled,
-                             ggplot2::aes(x = dendSegsLabelled$xend,
-                                          y = dendSegsLabelled$y,
-                                          label = dendSegsLabelled$label),
-                             size = boxSize,
-                             label.size = 1,
-                             fontface = "bold",
-                             vjust = 1,
-                             nudge_y = 0.1,
-                             color = boxColor) +
-                         ggplot2::theme_bw() +
-                         ggplot2::scale_x_reverse(breaks =
-                                                      seq(length(leafLabels)),
-                                                  label = leafLabels) +
-                         ggplot2::scale_y_continuous(expand = c(0, 0)) +
-                         ggplot2::theme(
-                             panel.grid.major.y = ggplot2::element_blank(),
-                             legend.position = "none",
-                             panel.grid.minor.y = ggplot2::element_blank(),
-                             panel.grid.minor.x = ggplot2::element_blank(),
-                             panel.grid.major.x = ggplot2::element_blank(),
-                             panel.border = ggplot2::element_blank(),
-                             axis.title = ggplot2::element_blank(),
-                             axis.ticks = ggplot2::element_blank(),
-                             axis.text.x = ggplot2::element_text(
-                                 hjust = leafHJust,
-                                 angle = leafAngle,
-                                 size = leafSize,
-                                 family = "Palatino",
-                                 face = "bold",
-                                 vjust = leafVJust),
-                             axis.text.y = ggplot2::element_blank()
-                         )
+            ggplot2::geom_label(
+                data = dendSegsLabelled,
+                ggplot2::aes(x = dendSegsLabelled$xend,
+                    y = dendSegsLabelled$y,
+                    label = dendSegsLabelled$label),
+                size = boxSize,
+                label.size = 1,
+                fontface = "bold",
+                vjust = 1,
+                nudge_y = 0.1,
+                color = boxColor) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_x_reverse(breaks =
+                    seq(length(leafLabels)),
+                label = leafLabels) +
+            ggplot2::scale_y_continuous(expand = c(0, 0)) +
+            ggplot2::theme(
+                panel.grid.major.y = ggplot2::element_blank(),
+                legend.position = "none",
+                panel.grid.minor.y = ggplot2::element_blank(),
+                panel.grid.minor.x = ggplot2::element_blank(),
+                panel.grid.major.x = ggplot2::element_blank(),
+                panel.border = ggplot2::element_blank(),
+                axis.title = ggplot2::element_blank(),
+                axis.ticks = ggplot2::element_blank(),
+                axis.text.x = ggplot2::element_text(
+                    hjust = leafHJust,
+                    angle = leafAngle,
+                    size = leafSize,
+                    family = "Palatino",
+                    face = "bold",
+                    vjust = leafVJust),
+                axis.text.y = ggplot2::element_blank()
+            )
     )
 
     # Check if need to add metacluster labels
-    if(!is.null(tree$metaclusterLabels)){
+    if (!is.null(tree$metaclusterLabels)) {
         #store metacluster labels to add
         newLabels <- unique(tree$branchPoints$top_level$metacluster)
 
         #adjust labels for metaclusters of size one
-        newLabels <- unlist(lapply(newLabels, function(curMeta){
-            if(substr(curMeta, nchar(curMeta), nchar(curMeta)) == ")"){
+        newLabels <- unlist(lapply(newLabels, function(curMeta) {
+            if (substr(curMeta, nchar(curMeta), nchar(curMeta)) == ")") {
                 return(gsub(pattern = "\\(.*\\)$", replacement = "",
-                            x = curMeta))
-            }
-            else{
+                    x = curMeta))
+            } else {
                 return(curMeta)
             }
         }))
 
         # Create table for metacluster labels
         metaclusterText <- dendSegsLabelled[dendSegsLabelled$y ==
-                                                max(dendSegsLabelled$y),
-                                            c("xend", "y", "label")]
+                max(dendSegsLabelled$y),
+            c("xend", "y", "label")]
         metaclusterText$label <- newLabels
 
         # Add metacluster labels to top of plot
         dendroP <- dendroP +
             geom_text(data = metaclusterText,
-                      aes(x = xend, y = y,
-                          label = label, fontface=2),
-                      angle = 90,
-                      nudge_y = 0.5,
-                      family = "Palatino",
-                      size = leafSize/3)
+                aes(x = xend, y = y,
+                    label = label, fontface = 2),
+                angle = 90,
+                nudge_y = 0.5,
+                family = "Palatino",
+                size = leafSize / 3)
 
         #adjust coordinates of plot to show labels
         dendroP <- dendroP + coord_cartesian(ylim =
-                                                 c(0,
-                                                   max(dendSegsLabelled$y+1)))
+                c(0, max(dendSegsLabelled$y + 1)))
 
     }
 
@@ -2632,10 +2616,10 @@ plotDendro <- function(tree,
 #' the specified branch point.
 #' @examples
 #' # Generate simulated single-cell dataset using celda
-#' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+#' sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
 #' # Celda clustering into 5 clusters & 10 modules
-#' cm <- celda_CG(sim_counts$counts, K=5, L=10, verbose=FALSE)
+#' cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
 #'
 #' # Get features matrix and cluster assignments
 #' factorized <- factorizeMatrix(sim_counts$counts, cm)
@@ -2647,19 +2631,20 @@ plotDendro <- function(tree,
 #'
 #' # Plot example heatmap
 #' plotMarkerHeatmap(DecTree, sim_counts$counts, branchPoint = "top_level",
-#'   featureLabels = paste0("L",clusters(cm)$y))
+#'     featureLabels = paste0("L",clusters(cm)$y))
 #'
 #' @export
 plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
-                              topFeatures = 10, silent = FALSE){
+    topFeatures = 10, silent = FALSE) {
 
     #get branch point to plot
     branch <- tree$branchPoints[[branchPoint]]
 
     #check that user entered valid branch point name
-    if(is.null(branch)){
-        stop("Invalid branch point.
-         Branch point name should match one of those in tree$branchPoints.")
+    if (is.null(branch)) {
+        stop("Invalid branch point.",
+            " Branch point name should match one of those",
+            " in tree$branchPoints.")
     }
 
     #convert counts matrix to matrix (e.g. from dgCMatrix)
@@ -2669,32 +2654,31 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     marker <- unique(branch$feature)
 
     #add feature labels
-    if('featureLabels' %in% names(tree)){
+    if ('featureLabels' %in% names(tree)) {
         featureLabels <- tree$featureLabels
     }
 
     #check that feature labels are provided
-    if(missing(featureLabels) &
-       !('featureLabels' %in% names(tree)) &
-       (sum(marker %in% rownames(counts)) != length(marker))){
+    if (missing(featureLabels) &
+            !('featureLabels' %in% names(tree)) &
+            (sum(marker %in% rownames(counts)) != length(marker))) {
         stop("Please provide feature labels, i.e. gene cluster labels")
-    }
-    else{
-        if(missing(featureLabels) &
-           !('featureLabels' %in% names(tree)) &
-           (sum(marker %in% rownames(counts)) == length(marker))){
+    } else {
+        if (missing(featureLabels) &
+                !('featureLabels' %in% names(tree)) &
+                (sum(marker %in% rownames(counts)) == length(marker))) {
             featureLabels == rownames(counts)
         }
     }
 
     #make sure feature labels match the table
-    if(!all(branch$feature %in% featureLabels)){
-        stop("Provided feature labels don't match those in the tree.
-             Please check the feature names in the tree's rules' table.")
+    if (!all(branch$feature %in% featureLabels)) {
+        stop("Provided feature labels don't match those in the tree.",
+        " Please check the feature names in the tree's rules' table.")
     }
 
     #if top-level in metaclusters tree
-    if(branchPoint == "top_level"){
+    if (branchPoint == "top_level") {
         #get unique metaclusters
         metaclusters <- unique(branch$metacluster)
 
@@ -2702,15 +2686,15 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         whichFeatures <- c()
 
         #loop over unique metaclusters
-        for(meta in metaclusters){
+        for (meta in metaclusters) {
 
             #subset table
-            curMeta <- branch[branch$metacluster==meta,]
+            curMeta <- branch[branch$metacluster == meta, ]
 
             #if we have gene-level info in the tree
-            if("gene" %in% names(branch)){
+            if ("gene" %in% names(branch)) {
                 #sort by gene AUC score
-                curMeta <- curMeta[order(curMeta$geneAUC, decreasing = TRUE),]
+                curMeta <- curMeta[order(curMeta$geneAUC, decreasing = TRUE), ]
 
                 #get genes
                 genes <- unique(curMeta$gene)
@@ -2723,15 +2707,14 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
 
                 #get features with non-zero variance to avoid clustering error
                 markerGenes <- .removeZeroVariance(counts,
-                                                   cells = which(
-                                                       tree$metaclusterLabels %in%
-                                                           unique(curMeta$metacluster)),
-                                                   markers = markerGenes)
+                    cells = which(
+                        tree$metaclusterLabels %in%
+                            unique(curMeta$metacluster)),
+                    markers = markerGenes)
 
                 #add to list of features
                 whichFeatures <- c(whichFeatures, markerGenes)
-            }
-            else{
+            } else {
                 #current markers
                 curMarker <- unique(curMeta$feature)
 
@@ -2740,10 +2723,10 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
 
                 #get features with non-zero variance to avoid error
                 markerGenes <- .removeZeroVariance(counts,
-                                                   cells = which(
-                                                       tree$metaclusterLabels %in%
-                                                           unique(curMeta$metacluster)),
-                                                   markers = markerGenes)
+                    cells = which(
+                        tree$metaclusterLabels %in%
+                            unique(curMeta$metacluster)),
+                    markers = markerGenes)
 
                 #add to list of features
                 whichFeatures <- c(whichFeatures, markerGenes)
@@ -2757,58 +2740,56 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
 
         #order the markers for metaclusters
         allMarkers <- setNames(as.list(colOrder$groupName), colOrder$groupName)
-        allMarkers <- lapply(allMarkers, function(x){
-            unique(branch[branch$metacluster==x,"feature"])
+        allMarkers <- lapply(allMarkers, function(x) {
+            unique(branch[branch$metacluster == x, "feature"])
         })
         rowOrder <- data.frame(groupName = unlist(allMarkers),
-                               groupIndex = seq_along(unlist(allMarkers)))
+            groupIndex = seq_along(unlist(allMarkers)))
         toRemove <- which(!rowOrder$groupName %in% featureLabels[whichFeatures])
-        if(length(toRemove) > 0){
-            rowOrder <- rowOrder[-toRemove,]
+        if (length(toRemove) > 0) {
+            rowOrder <- rowOrder[-toRemove, ]
         }
 
         #sort cells according to metacluster size
         x <- tree$metaclusterLabels
         y <- colOrder$groupName
-        sortedCells <- seq(ncol(counts))[order(match(x,y))]
+        sortedCells <- seq(ncol(counts))[order(match(x, y))]
 
         #create heatmap with only the markers
-        return(
-            plotHeatmap(counts = counts, z = tree$metaclusterLabels,
-                        y = featureLabels, featureIx=whichFeatures,
-                        cellIx = sortedCells, showNamesFeature = TRUE,
-                        main = "Top-level", silent = silent,
-                        treeheightFeature = 0, colGroupOrder = colOrder,
-                        rowGroupOrder = rowOrder, treeheightCell = 0)
-        )
+        return(plotHeatmap(counts = counts, z = tree$metaclusterLabels,
+            y = featureLabels, featureIx=whichFeatures,
+            cellIx = sortedCells, showNamesFeature = TRUE,
+            main = "Top-level", silent = silent,
+            treeheightFeature = 0, colGroupOrder = colOrder,
+            rowGroupOrder = rowOrder, treeheightCell = 0))
     }
 
     #if balanced split
-    if(branch$statUsed[1] == "Split"){
+    if (branch$statUsed[1] == "Split") {
         #keep entries for balanced split only (in case of alt. split)
         split <- branch$feature[1]
-        branch <- branch[branch$feature == split,]
+        branch <- branch[branch$feature == split, ]
 
         #get up-regulated and down-regulated classes
-        upClasses <- unique(branch[branch$direction==1, "class"])
-        downClasses <- unique(branch[branch$direction==(-1), "class"])
+        upClasses <- unique(branch[branch$direction == 1, "class"])
+        downClasses <- unique(branch[branch$direction == (-1), "class"])
 
         #re-order cells to keep up and down separate on the heatmap
         reorderedCells <- c((which(tree$classLabels %in% upClasses)
-                             [order(tree$classLabels[
-                                 tree$classLabels %in% upClasses])]),
-                            (which(tree$classLabels %in% downClasses)
-                             [order(tree$classLabels[
-                                 tree$classLabels %in% downClasses])]))
+            [order(tree$classLabels[
+                tree$classLabels %in% upClasses])]),
+            (which(tree$classLabels %in% downClasses)
+                [order(tree$classLabels[
+                    tree$classLabels %in% downClasses])]))
 
         #cell annotation based on split
         cellAnno <- data.frame(split = rep("Down-regulated", ncol(counts)),
-                               stringsAsFactors = FALSE)
+            stringsAsFactors = FALSE)
         cellAnno$split[which(tree$classLabels %in% upClasses)] <- "Up-regulated"
         rownames(cellAnno) <- colnames(counts)
 
         #if we have gene-level info in the tree
-        if(("gene" %in% names(branch))){
+        if (("gene" %in% names(branch))) {
             #get genes
             genes <- unique(branch$gene)
 
@@ -2820,39 +2801,39 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
 
             #get features with non-zero variance to avoid error
             whichFeatures <- .removeZeroVariance(counts,
-                                                 cells = which(
-                                                     tree$classLabels %in%
-                                                         unique(branch$class)),
-                                                 markers = whichFeatures)
+                cells = which(
+                    tree$classLabels %in%
+                        unique(branch$class)),
+                markers = whichFeatures)
 
             #create heatmap with only the split feature and split classes
             return(plotHeatmap(counts = counts, z = tree$classLabels,
-                               y=featureLabels, featureIx=whichFeatures,
-                               cellIx = reorderedCells, clusterCell = FALSE,
-                               showNamesFeature = TRUE, main = branchPoint,
-                               silent = silent, treeheightFeature = 0,
-                               treeheightCell = 0, annotationCell = cellAnno))
-        }
-        else{
+                y=featureLabels, featureIx=whichFeatures,
+                cellIx = reorderedCells, clusterCell = FALSE,
+                showNamesFeature = TRUE, main = branchPoint,
+                silent = silent, treeheightFeature = 0,
+                treeheightCell = 0, annotationCell = cellAnno))
+        } else {
 
             #get features with non-zero variance to avoid error
-            whichFeatures <- .removeZeroVariance(counts, cells = reorderedCells,
-                                                 markers = which(
-                                                     featureLabels==branch$feature[1]))
+            whichFeatures <- .removeZeroVariance(counts,
+                cells = reorderedCells,
+                markers = which(
+                    featureLabels==branch$feature[1]))
 
             #create heatmap with only the split feature and split classes
             return(plotHeatmap(counts = counts, z = tree$classLabels,
-                               y=featureLabels, featureIx=whichFeatures,
-                               cellIx = reorderedCells, clusterCell = FALSE,
-                               showNamesFeature = TRUE, main = branchPoint,
-                               silent = silent, treeheightFeature = 0,
-                               treeheightCell = 0, annotationCell = cellAnno))
+                y=featureLabels, featureIx=whichFeatures,
+                cellIx = reorderedCells, clusterCell = FALSE,
+                showNamesFeature = TRUE, main = branchPoint,
+                silent = silent, treeheightFeature = 0,
+                treeheightCell = 0, annotationCell = cellAnno))
         }
 
     }
 
     #if one-off split
-    if(branch$statUsed[1] == "One-off"){
+    if (branch$statUsed[1] == "One-off") {
 
         #get unique classes
         classes <- unique(branch$class)
@@ -2861,13 +2842,13 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
         whichFeatures <- c()
 
         #loop over unique classes
-        for(class in classes){
+        for (class in classes) {
 
             #subset table
-            curClass <- branch[branch$class==class & branch$direction==1,]
+            curClass <- branch[branch$class == class & branch$direction == 1, ]
 
             #if we have gene-level info in the tree
-            if(("gene" %in% names(branch))){
+            if (("gene" %in% names(branch))) {
                 #get genes
                 genes <- unique(curClass$gene)
 
@@ -2879,10 +2860,10 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
 
                 #get features with non-zero variance to avoid error
                 markerGenes <- .removeZeroVariance(counts,
-                                                   cells = which(
-                                                       tree$classLabels %in%
-                                                           unique(curClass$class)),
-                                                   markers = markerGenes)
+                    cells = which(
+                        tree$classLabels %in%
+                            unique(curClass$class)),
+                    markers = markerGenes)
 
                 #add to list of features
                 whichFeatures <- c(whichFeatures, markerGenes)
@@ -2893,9 +2874,9 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
                 markerGenes <- .removeZeroVariance(
                     counts,
                     cells = which(tree$classLabels %in%
-                                      unique(curClass$class)),
+                            unique(curClass$class)),
                     markers = which(featureLabels %in%
-                                        unique(curClass$feature))
+                            unique(curClass$feature))
                 )
 
                 #add to list of features
@@ -2905,41 +2886,41 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
 
         #order the clusters such that up-regulated come first
         colOrder <- data.frame(groupName = unique(
-            branch[order(branch$direction, decreasing = T),"class"]),
+            branch[order(branch$direction, decreasing = T), "class"]),
             groupIndex = seq_along(unique(branch$class)))
 
         #order the markers for clusters
         allMarkers <- setNames(as.list(colOrder$groupName), colOrder$groupName)
         allMarkers <- lapply(allMarkers, function(x){
-            unique(branch[branch$class==x & branch$direction==1,"feature"])
+            unique(branch[branch$class == x & branch$direction == 1,"feature"])
         })
         rowOrder <- data.frame(groupName = unlist(allMarkers),
-                               groupIndex = seq_along(unlist(allMarkers)))
+            groupIndex = seq_along(unlist(allMarkers)))
         toRemove <- which(!rowOrder$groupName %in% featureLabels[whichFeatures])
-        if(length(toRemove) > 0){
-            rowOrder <- rowOrder[-toRemove,]
+        if (length(toRemove) > 0) {
+            rowOrder <- rowOrder[-toRemove, ]
         }
 
         #sort cells according to metacluster size
         x <- tree$classLabels#[tree$classLabels %in% unique(branch$class)]
         y <- colOrder$groupName
-        sortedCells <- seq(ncol(counts))[order(match(x,y))]
+        sortedCells <- seq(ncol(counts))[order(match(x, y))]
         sortedCells <- sortedCells[seq(sum(tree$classLabels %in% classes))]
 
         #create heatmap with only the split features and split classes
         return(plotHeatmap(counts = counts, z = tree$classLabels,
-                           y = featureLabels, featureIx=whichFeatures,
-                           cellIx = sortedCells,
-                           showNamesFeature = TRUE, main = branchPoint,
-                           silent = silent, treeheightFeature = 0,
-                           colGroupOrder = colOrder, rowGroupOrder = rowOrder,
-                           treeheightCell = 0))
+            y = featureLabels, featureIx=whichFeatures,
+            cellIx = sortedCells,
+            showNamesFeature = TRUE, main = branchPoint,
+            silent = silent, treeheightFeature = 0,
+            colGroupOrder = colOrder, rowGroupOrder = rowOrder,
+            treeheightCell = 0))
     }
 
 }
 
 #helper function to identify zero-variance genes in a counts matrix
-.removeZeroVariance <- function(counts, cells, markers){
+.removeZeroVariance <- function(counts, cells, markers) {
     #subset counts matrix
     counts <- counts[, cells]
 
@@ -2953,9 +2934,9 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     zeroVarianceMarkers <- intersect(zeroVarianceGenes, markers)
 
     #return indices of marker genes without zero-variance
-    if(length(zeroVarianceMarkers) > 0)
+    if (length(zeroVarianceMarkers) > 0) {
         return(markers[-which(markers %in% zeroVarianceMarkers)])
-    else
+    } else {
         return(markers)
+    }
 }
-

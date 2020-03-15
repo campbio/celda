@@ -35,7 +35,8 @@ cell type) and all the clusters within that metacluster (e.g. subtypes).}
 \item{featureLabels}{Vector of feature assignments, e.g. which cluster
 does each gene belong to? Useful when using clusters of features
 (e.g. gene modules or Seurat PCs) and user wishes to expand tree results
-to individual features (e.g. score individual genes within marker gene modules).}
+to individual features (e.g. score individual genes within marker gene
+modules).}
 
 \item{counts}{Numeric counts matrix. Useful when using clusters
 of features (e.g. gene modules) and user wishes to expand tree results to
