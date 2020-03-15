@@ -57,6 +57,6 @@ DecTree <- findMarkersTree(features,class,threshold = 1)
 
 # Plot example heatmap
 plotMarkerHeatmap(DecTree, sim_counts$counts, branchPoint = "top_level",
-featureLabels = paste0("L",clusters(cm)$y))
+  featureLabels = paste0("L",clusters(cm)$y))
 
 }

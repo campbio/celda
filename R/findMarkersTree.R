@@ -2647,7 +2647,7 @@ plotDendro <- function(tree,
 #'
 #' # Plot example heatmap
 #' plotMarkerHeatmap(DecTree, sim_counts$counts, branchPoint = "top_level",
-#' featureLabels = paste0("L",clusters(cm)$y))
+#'   featureLabels = paste0("L",clusters(cm)$y))
 #'
 #' @export
 plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
