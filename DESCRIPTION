@@ -52,19 +52,19 @@ Imports:
     SingleCellExperiment,
     dbscan,
     DelayedArray,
-    Ringo
+    Ringo,
+    Matrix,
+    M3DExampleData
 Suggests:
     testthat,
     knitr,
     roxygen2,
     rmarkdown,
-    Matrix,
     biomaRt,
     covr,
-    M3DExampleData,
     BiocManager,
     BiocStyle
-LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+LinkingTo: RcppArmadillo, Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
