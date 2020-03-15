@@ -88,7 +88,8 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1,
 
 
 # Collapse (1-)Gene x Cell count vector into cell-type-marker by cluster matrix
-# with each element being the cells% in that cluster shows at least one marker in that cell type
+# with each element being the cells% in that cluster shows at least one marker
+#  in that cell type
 .vctrRowProjectColCollapse <- function(sub_vector, genePresented, z,
     threshold = 1) {
     K <- max(z)
@@ -123,9 +124,9 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1,
 
     # convert matrix into dgCMatrix if it is not
     ij_pair <- nonzero(sub_counts)
-    index_filter = ij_pair[["val"]] >= threshold
-    iR = ij_pair[["row"]] = ij_pair[["row"]][index_filter]
-    iC = ij_pair[["col"]] = ij_pair[["col"]][index_filter]
+    index_filter <- ij_pair[["val"]] >= threshold
+    iR <- ij_pair[["row"]] <- ij_pair[["row"]][index_filter]
+    iC <- ij_pair[["col"]] <- ij_pair[["col"]][index_filter]
     i_celltype <- plyr::mapvalues(iR, from = genePresented[, "geneMarkers"],
         to = genePresented[, "cellType"])
 
@@ -188,8 +189,8 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1,
         geneMarkers[, "geneMarkers"] <- factor(geneMarkers[, "geneMarkers"],
             levels = orders)
     }
-    levels(geneMarkers[, "geneMarkers"]) <- 1:length(levels(geneMarkers[,
-        "geneMarkers"]))
+    levels(geneMarkers[, "geneMarkers"]) <- seq(length(levels(geneMarkers[,
+        "geneMarkers"])))
 
     return(geneMarkers)
 }

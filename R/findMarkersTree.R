@@ -1936,7 +1936,7 @@ getDecisions <- function(rules, features) {
             ruleClass$sample <- samp[ruleClass$feature]
 
             # For multiple direction == 1, use one with the top stat
-            if (sum(ruleClass$direction == 1) > 1){
+            if (sum(ruleClass$direction == 1) > 1) {
                 ruleClass <- ruleClass[order(
                     ruleClass$direction
                     , decreasing = T), ]
