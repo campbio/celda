@@ -52,6 +52,7 @@ Imports:
     SingleCellExperiment,
     dbscan,
     DelayedArray,
+    Ringo,
     Matrix,
     M3DExampleData
 Suggests:
