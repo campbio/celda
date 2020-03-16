@@ -73,17 +73,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// nonzero
-SEXP nonzero(NumericMatrix R_counts);
-RcppExport SEXP _celda_nonzero(SEXP R_countsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type R_counts(R_countsSEXP);
-    rcpp_result_gen = Rcpp::wrap(nonzero(R_counts));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cG_calcGibbsProbY_Simple
 NumericVector cG_calcGibbsProbY_Simple(const IntegerMatrix counts, IntegerVector nGbyTS, IntegerMatrix nTSbyC, IntegerVector nbyTS, IntegerVector nbyG, const IntegerVector y, const int L, const int index, const double gamma, const double beta, const double delta);
 RcppExport SEXP _celda_cG_calcGibbsProbY_Simple(SEXP countsSEXP, SEXP nGbyTSSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP indexSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP deltaSEXP) {
@@ -222,6 +211,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// nonzero
+SEXP nonzero(NumericMatrix R_counts);
+RcppExport SEXP _celda_nonzero(SEXP R_countsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type R_counts(R_countsSEXP);
+    rcpp_result_gen = Rcpp::wrap(nonzero(R_counts));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _colSumByGroup(SEXP, SEXP);
 RcppExport SEXP _colSumByGroup_numeric(SEXP, SEXP);
@@ -236,7 +236,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_decontXLogLik", (DL_FUNC) &_celda_decontXLogLik, 6},
     {"_celda_decontXInitialize", (DL_FUNC) &_celda_decontXInitialize, 4},
     {"_celda_calculateNativeMatrix", (DL_FUNC) &_celda_calculateNativeMatrix, 9},
-    {"_celda_nonzero", (DL_FUNC) &_celda_nonzero, 1},
     {"_celda_cG_calcGibbsProbY_Simple", (DL_FUNC) &_celda_cG_calcGibbsProbY_Simple, 11},
     {"_celda_cG_CalcGibbsProbY_ori", (DL_FUNC) &_celda_cG_CalcGibbsProbY_ori, 13},
     {"_celda_cG_CalcGibbsProbY_fastRow", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fastRow, 13},
@@ -245,6 +244,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_fastNormProp", (DL_FUNC) &_celda_fastNormProp, 2},
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},
     {"_celda_fastNormPropSqrt", (DL_FUNC) &_celda_fastNormPropSqrt, 2},
+    {"_celda_nonzero", (DL_FUNC) &_celda_nonzero, 1},
     {"_colSumByGroup",         (DL_FUNC) &_colSumByGroup,         2},
     {"_colSumByGroup_numeric", (DL_FUNC) &_colSumByGroup_numeric, 2},
     {"_colSumByGroupChange",   (DL_FUNC) &_colSumByGroupChange,   4},

@@ -35,8 +35,7 @@ cell type) and all the clusters within that metacluster (e.g. subtypes).}
 \item{featureLabels}{Vector of feature assignments, e.g. which cluster
 does each gene belong to? Useful when using clusters of features
 (e.g. gene modules or Seurat PCs) and user wishes to expand tree results
-to individual features (e.g. score individual genes within marker gene
-modules).}
+to individual features (e.g. score individual genes within marker gene modules).}
 
 \item{counts}{Numeric counts matrix. Useful when using clusters
 of features (e.g. gene modules) and user wishes to expand tree results to
@@ -89,7 +88,7 @@ A named list with six elements:
     this rule is applied to.
   }
  \item dendro - A dendrogram object of the decision tree output. Plot with
- plotDendro()
+ plotMarkerDendro()
  \item classLabels - A vector of the class labels used in the model, i.e.
   cell cluster labels.
  \item metaclusterLabels - A vector of the metacluster labels
@@ -124,7 +123,7 @@ Create a decision tree that identifies gene markers for given
 sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
 # Celda clustering into 5 clusters & 10 modules
-cm <- celda_CG(sim_counts$counts, K=5, L=10, verbose=FALSE)
+cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
 
 # Get features matrix and cluster assignments
 factorized <- factorizeMatrix(sim_counts$counts, cm)
@@ -135,5 +134,5 @@ class <- clusters(cm)$z
 DecTree <- findMarkersTree(features, class)
 
 # Plot dendrogram
-plotDendro(DecTree)
+plotMarkerDendro(DecTree)
 }

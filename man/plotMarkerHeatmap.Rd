@@ -42,7 +42,7 @@ Creates heatmap for a specified branch point in a marker tree.
 }
 \examples{
 # Generate simulated single-cell dataset using celda
-sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
+sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
 # Celda clustering into 5 clusters & 10 modules
 cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
@@ -53,10 +53,11 @@ features <- factorized$proportions$cell
 class <- clusters(cm)$z
 
 # Generate Decision Tree
-DecTree <- findMarkersTree(features,class,threshold = 1)
+DecTree <- findMarkersTree(features, class, threshold = 1)
 
 # Plot example heatmap
-plotMarkerHeatmap(DecTree, sim_counts$counts, branchPoint = "top_level",
-    featureLabels = paste0("L",clusters(cm)$y))
-
+plotMarkerHeatmap(DecTree, sim_counts$counts,
+  branchPoint = "top_level",
+  featureLabels = paste0("L", clusters(cm)$y)
+)
 }

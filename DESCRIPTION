@@ -13,7 +13,6 @@ Depends:
     R (>= 3.6)
 VignetteBuilder: knitr
 Imports:
-    stats,
     plyr,
     foreach,
     ggplot2,
@@ -46,15 +45,14 @@ Imports:
     dendextend,
     ggdendro,
     pROC,
-    magrittr,
     scater (>= 1.14.4),
     scran,
     SingleCellExperiment,
     dbscan,
     DelayedArray,
-    Ringo,
-    Matrix,
-    M3DExampleData
+    Seurat,
+    stringr,
+    Matrix
 Suggests:
     testthat,
     knitr,
@@ -63,7 +61,9 @@ Suggests:
     biomaRt,
     covr,
     BiocManager,
-    BiocStyle
+    BiocStyle,
+    M3DExampleData,
+    TENxPBMCData
 LinkingTo: RcppArmadillo, Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
