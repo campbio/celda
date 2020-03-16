@@ -1,6 +1,6 @@
 ---
 title: "Decontamination of ambient RNA in single-cell RNA-seq with DecontX on 10X PBMC4k data" 
-author: "Shiyi Yang, Joshua D. Campbell"
+author: "Shiyi Yang, Zhe Wang, Joshua D. Campbell"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
@@ -42,17 +42,7 @@ colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep="_")
 
 To run decontX with a SingleCellExperiment object, simply use the following command. 
 
-```{r}
+```{r, eval=TRUE, message=TRUE}
 pbmc4k = decontX(x = pbmc4k) 
 ```
 
-
-
-# Examining decontX output
-There are 4 attributes of DecontX results: 
-(1) runParams: parameters used for estimating contamination
-(2) estimates: parameters, decontaminated counts as well as other intermediate results estimated during contamination estimation
-(3) contamination: cell level contamination
-(4) z: cell cluster label 
-
-# Plotting decontX results
