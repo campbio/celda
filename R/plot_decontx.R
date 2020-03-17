@@ -89,7 +89,8 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1,
 
 
 # Collapse (1-)Gene x Cell count vector into cell-type-marker by cluster matrix
-# with each element being the cells% in that cluster shows at least one marker in that cell type
+# with each element being the cells% in that cluster shows at least one marker
+# in that cell type
 .vctrRowProjectColCollapse <- function(sub_vector, genePresented, z,
     threshold = 1) {
 
@@ -113,7 +114,8 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1,
 
 
 # Collapse Gene x Cell count matrix into cell-type-marker by cluster matrix
-# with each element being the cells% in that cluster shows at least one marker in that cell type
+# with each element being the cells% in that cluster shows at least one marker
+# in that cell type
 .mtxRowProjectColCollapse <- function(sub_counts, genePresented, z,
     threshold = 1) {
 
