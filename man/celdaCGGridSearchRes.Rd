@@ -4,7 +4,9 @@
 \name{celdaCGGridSearchRes}
 \alias{celdaCGGridSearchRes}
 \title{celdaCGGridSearchRes}
-\format{An object as returned from celdaGridSearch()}
+\format{
+An object as returned from celdaGridSearch()
+}
 \usage{
 celdaCGGridSearchRes
 }

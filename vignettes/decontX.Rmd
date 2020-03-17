@@ -34,7 +34,7 @@ DecontX can take either `SingleCellExperiment` object from package [SingleCellEx
 We will utlize the 10X PBMC 4K dataset as an example. This can be easily retrieved from the package [TENxPBMCData](http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html). Make sure the the column names are set before running decontX.
 
 ```{r, eval=TRUE, message=FALSE}
-library(TENxPBMCData)  
+library(TENxPBMCData)
 pbmc4k <- TENxPBMCData("pbmc4k")
 colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep="_")
 ```

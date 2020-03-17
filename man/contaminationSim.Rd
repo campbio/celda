@@ -4,7 +4,9 @@
 \name{contaminationSim}
 \alias{contaminationSim}
 \title{contaminationSim}
-\format{A list}
+\format{
+A list
+}
 \usage{
 contaminationSim
 }

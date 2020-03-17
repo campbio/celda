@@ -376,6 +376,8 @@ celda_C <- function(counts,
             verbose = verbose)
     }
 
+
+
     bestResult <- methods::new("celda_C",
         clusters = list(z = bestResult$z),
         params = list(K = as.integer(bestResult$K),
