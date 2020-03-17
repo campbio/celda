@@ -4,7 +4,9 @@
 \name{celdaCMod}
 \alias{celdaCMod}
 \title{celdaCMod}
-\format{A celda_C object}
+\format{
+A celda_C object
+}
 \usage{
 celdaCMod
 }

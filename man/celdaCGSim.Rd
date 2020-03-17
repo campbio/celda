@@ -4,7 +4,9 @@
 \name{celdaCGSim}
 \alias{celdaCGSim}
 \title{celdaCGSim}
-\format{A list of counts and properties as returned from simulateCells().}
+\format{
+A list of counts and properties as returned from simulateCells().
+}
 \usage{
 celdaCGSim
 }
