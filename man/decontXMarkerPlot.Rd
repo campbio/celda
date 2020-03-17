@@ -17,9 +17,11 @@ decontXMarkerPlot(
 \arguments{
 \item{counts}{Matrix of counts}
 
-\item{z}{a vector. Cell cluster label, same length as the column numbers of the count matrix}
+\item{z}{a vector. Cell cluster label, same length as the column numbers of
+the count matrix}
 
-\item{geneMarkers}{a dataframe of marker genes which corresponding to their cell types}
+\item{geneMarkers}{a dataframe of marker genes which corresponding to their
+cell types}
 
 \item{threshold}{default as 1.}
 
@@ -27,9 +29,10 @@ decontXMarkerPlot(
 
 \item{textLabelSize}{default as 3}
 
-\item{precision}{default as 2. Precision of percentage of cells showing the marker gene shown on the barplot}
+\item{precision}{default as 2. Precision of percentage of cells showing the
+marker gene shown on the barplot}
 }
 \description{
 Barplot that shows the percentage of cells within subpopulations
-with detectable levels of given marker genes
+ with detectable levels of given marker genes
 }
