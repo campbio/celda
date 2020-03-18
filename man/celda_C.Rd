@@ -5,7 +5,8 @@
 \title{Cell clustering with Celda}
 \usage{
 celda_C(
-  counts,
+  x,
+  useAssay = "counts",
   sampleLabel = NULL,
   K,
   alpha = 1,
@@ -25,8 +26,13 @@ celda_C(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment} object or a
+\link{matrix} object containing the feature expression counts (integers).
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
@@ -74,7 +80,7 @@ cells will be split into sqrt(K) populations and then each popluation will
 be subsequently split into another sqrt(K) populations. With 'predefined',
 values in `zInit` will be used to initialize `z`. Default 'split'.}
 
-\item{countChecksum}{"Character. An MD5 checksum for the `counts` matrix.
+\item{countChecksum}{Character. An MD5 checksum for the `counts` matrix.
 Default NULL.}
 
 \item{zInit}{Integer vector. Sets initial starting values of z. If NULL,
@@ -87,8 +93,11 @@ can only be used when `initialize = 'random'`. Default NULL.}
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class `celda_C` with the cell population clusters
- stored in `z`.
+A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata} slot.
+ Columns \code{sample_label} and \code{cell_cluster} in
+ \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+ population clusters.
 }
 \description{
 Clusters the columns of a count matrix containing single-cell
@@ -96,7 +105,7 @@ Clusters the columns of a count matrix containing single-cell
 }
 \examples{
 data(celdaCSim)
-celdaCMod <- celda_C(celdaCSim$counts,
+sce <- celda_C(celdaCSim$counts,
     K = celdaCSim$K,
     sampleLabel = celdaCSim$sampleLabel)
 }
