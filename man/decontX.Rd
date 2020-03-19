@@ -6,6 +6,8 @@
 \alias{decontX,ANY-method}
 \title{Contamination estimation with decontX}
 \usage{
+decontX(x, ...)
+
 \S4method{decontX}{SingleCellExperiment}(
   x,
   assayName = "counts",
@@ -44,6 +46,8 @@
 with the matrix located in the assay slot under \code{assayName}.
 Cells in each batch will be subsetted and converted to a sparse matrix
 of class \code{dgCMatrix} from package \link{Matrix} before analysis.}
+
+\item{...}{For the generic, further arguments to pass to each method.}
 
 \item{assayName}{Character. Name of the assay to use if \code{x} is a
 \linkS4class{SingleCellExperiment}.}
@@ -93,8 +97,6 @@ a default value of 12345 is used. If NULL, no calls to
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
-
-\item{...}{For the generic, further arguments to pass to each method.}
 }
 \value{
 If \code{x} is a matrix-like object, a list will be returned
