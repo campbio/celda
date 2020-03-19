@@ -166,7 +166,7 @@ decontXMarkerPlot <- function(counts, z, geneMarkers, threshold = 1,
     storage.mode(binary_CTbyC) <- "integer"
     nC_CTbyZ <- .colSumByGroup(binary_CTbyC, z, K)
     rownames(nC_CTbyZ) <- rownames(ng_CTbyC)
-    colnames(nC_CTbyZ) <- seqs(K)
+    colnames(nC_CTbyZ) <- seq(K)
 
     pct_CTbyZ <- sweep(nC_CTbyZ, MARGIN = 2, STATS = table(z), FUN = "/")
 
