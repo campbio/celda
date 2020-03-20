@@ -1,8 +1,9 @@
 #' @title Cell clustering with Celda
 #' @description Clusters the columns of a count matrix containing single-cell
 #'  data into K subpopulations.
-#' @param x A \link[SingleCellExperiment]{SingleCellExperiment} object or a
-#'  \link{matrix} object containing the feature expression counts (integers).
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
@@ -140,7 +141,7 @@ celda_C <- function(x,
                 reorder = TRUE))
     }
 
-    sce <- .createSCEceldaC(counts,
+    sce <- .createSCEceldaC(celdaCMod,
         sce,
         xClass,
         useAssay,
@@ -611,14 +612,16 @@ celda_C <- function(x,
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @param ... Additional parameters.
-#' @return List. Contains the simulated matrix `counts`, cell population
-#'  clusters `z`, sample assignments `sampleLabel`, and input parameters.
+#' @return A \link[SingleCellExperiment]{SingleCellExperiment} object with
+#'  simulated count matrix stored in the "counts" assay slot. Function
+#'  parameter settings are stored in the \link[S4Vectors]{metadata} slot.
+#'  Columns \code{sample_label} and \code{cell_cluster} in
+#'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
+#'  cell population clusters.
 #' @seealso `celda_G()` for simulating feature modules and `celda_CG()` for
 #'  simulating feature modules and cell populations.
 #' @examples
-#' celdaCSim <- simulateCells(model = "celda_C", K = 10)
-#' simCounts <- celdaCSim$counts
+#' sce <- simulateCells(model = "celda_C", K = 10)
 #' @rawNamespace import(stats, except = c(start, end))
 #' @export
 simulateCellscelda_C <- function(model,
@@ -629,8 +632,7 @@ simulateCellscelda_C <- function(model,
     K = 5,
     alpha = 1,
     beta = 1,
-    seed = 12345,
-    ...) {
+    seed = 12345) {
 
     if (is.null(seed)) {
         res <- .simulateCellscelda_C(model = model,
@@ -640,8 +642,7 @@ simulateCellscelda_C <- function(model,
             G = G,
             K = K,
             alpha = alpha,
-            beta = beta,
-            ...)
+            beta = beta)
     } else {
         res <- with_seed(seed,
             .simulateCellscelda_C(model = model,
@@ -651,11 +652,12 @@ simulateCellscelda_C <- function(model,
                 G = G,
                 K = K,
                 alpha = alpha,
-                beta = beta,
-                ...))
+                beta = beta))
     }
 
-    return(res)
+    sce <- .createSCEsimulateCellsCeldaC(res, seed)
+
+    return(sce)
 }
 
 
@@ -666,8 +668,7 @@ simulateCellscelda_C <- function(model,
     G = 100,
     K = 5,
     alpha = 1,
-    beta = 1,
-    ...) {
+    beta = 1) {
 
     phi <- .rdirichlet(K, rep(beta, G))
     theta <- .rdirichlet(S, rep(alpha, K))
@@ -720,6 +721,7 @@ simulateCellscelda_C <- function(model,
     return(list(z = clusters(result)$z,
         counts = .processCounts(cellCounts),
         sampleLabel = cellSampleLabel,
+        G = G,
         K = K,
         alpha = alpha,
         beta = beta,
@@ -1453,7 +1455,7 @@ setMethod("featureModuleLookup", signature(celdaMod = "celda_C"),
     })
 
 
-.createSCEceldaC <- function(counts,
+.createSCEceldaC <- function(celdaCMod,
     sce,
     xClass,
     useAssay,
@@ -1471,8 +1473,7 @@ setMethod("featureModuleLookup", signature(celdaMod = "celda_C"),
     countChecksum,
     zInit,
     logfile,
-    verbose,
-    celdaCMod) {
+    verbose) {
 
     # add metadata
     S4Vectors::metadata(sce)[["celda_parameters"]] <- list(
@@ -1506,6 +1507,34 @@ setMethod("featureModuleLookup", signature(celdaMod = "celda_C"),
         celdaCMod@sampleLabel
     SummarizedExperiment::colData(sce)["cell_cluster"] <-
         celdaCMod@clusters$z
+
+    return(sce)
+}
+
+
+.createSCEsimulateCellsCeldaC <- function(simList, seed) {
+    sce <- SingleCellExperiment::SingleCellExperiment(
+        assays = list(counts = simList$counts))
+
+    # add metadata
+    S4Vectors::metadata(sce)[["simulateCellscelda_C"]] <- list(
+        model = "celda_C",
+        sampleLevels = celdaCMod@names$sample,
+        cellClusterLevels = sort(unique(simList$z)),
+        S = simList$S,
+        CRange = simList$CRange,
+        NRange = simList$NRange,
+        G = simList$G,
+        K = simList$K,
+        alpha = simList$alpha,
+        beta = simList$beta,
+        seed = seed)
+
+    SummarizedExperiment::rowData(sce)["row_name"] <- rownames(simList$counts)
+    SummarizedExperiment::colData(sce)["column_name"] <-
+        colnames(simList$counts)
+    SummarizedExperiment::colData(sce)["sample_label"] <- simList$sampleLabel
+    SummarizedExperiment::colData(sce)["cell_cluster"] <- simList$z
 
     return(sce)
 }

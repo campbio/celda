@@ -13,8 +13,7 @@ simulateCellscelda_C(
   K = 5,
   alpha = 1,
   beta = 1,
-  seed = 12345,
-  ...
+  seed = 12345
 )
 }
 \arguments{
@@ -43,12 +42,14 @@ each feature in each cell population. Default 1.}
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
-
-\item{...}{Additional parameters.}
 }
 \value{
-List. Contains the simulated matrix `counts`, cell population
- clusters `z`, sample assignments `sampleLabel`, and input parameters.
+A \link[SingleCellExperiment]{SingleCellExperiment} object with
+ simulated count matrix stored in the "counts" assay slot. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata} slot.
+ Columns \code{sample_label} and \code{cell_cluster} in
+ \link[SummarizedExperiment]{colData} contain simulated sample labels and
+ cell population clusters.
 }
 \description{
 Generates a simulated counts matrix, cell subpopulation
@@ -56,8 +57,7 @@ Generates a simulated counts matrix, cell subpopulation
  celda_C model.
 }
 \examples{
-celdaCSim <- simulateCells(model = "celda_C", K = 10)
-simCounts <- celdaCSim$counts
+sce <- simulateCells(model = "celda_C", K = 10)
 }
 \seealso{
 `celda_G()` for simulating feature modules and `celda_CG()` for

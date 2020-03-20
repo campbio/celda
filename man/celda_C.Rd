@@ -26,8 +26,9 @@ celda_C(
 )
 }
 \arguments{
-\item{x}{A \link[SingleCellExperiment]{SingleCellExperiment} object or a
-\link{matrix} object containing the feature expression counts (integers).
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
