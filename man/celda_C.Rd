@@ -6,26 +6,7 @@
 \alias{celda_C,matrix-method}
 \title{Cell clustering with Celda}
 \usage{
-celda_C(
-  x,
-  useAssay,
-  sampleLabel,
-  K,
-  alpha,
-  beta,
-  algorithm,
-  stopIter,
-  maxIter,
-  splitOnIter,
-  splitOnLast,
-  seed,
-  nchains,
-  zInitialize,
-  countChecksum,
-  zInit,
-  logfile,
-  verbose
-)
+celda_C(x, ...)
 
 \S4method{celda_C}{SingleCellExperiment}(
   x,
