@@ -122,8 +122,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
 
   ## Add results into column annotation
   colData(x) <- cbind(colData(x),
-    decontX_Contamination = result$contamination,
-    decontX_Clusters = result$z
+    decontX_contamination = result$contamination,
+    decontX_clusters = result$z
   )
 
   ## Put estimated UMAPs into SCE if z was estimated with Celda/UMAP
@@ -416,6 +416,7 @@ setReplaceMethod(
       eta = res$eta,
       delta = res$delta,
       theta = res$theta,
+      contamination = res$contamination,
       logLikelihood = res$logLikelihood,
       UMAP = res$UMAP,
       z = res$z,
@@ -522,41 +523,43 @@ setReplaceMethod(
   nC <- ncol(counts)
   deconMethod <- "clustering"
 
-  ## Generate cell cluster labels if none are provided
+  ## Generating UMAP and cell cluster labels if none are provided
   umap <- NULL
   if (is.null(z)) {
-    .logMessages(
-      date(),
-      ".... Estimating cell types with Celda",
-      logfile = logfile,
-      append = TRUE,
-      verbose = verbose
-    )
-    ## Always uses clusters for DecontX estimation
-    # deconMethod <- "background"
+    m <- ".... Generating UMAP and estimating cell types"
+    estimateCellTypes <- TRUE
+  } else {
+    m <- ".... Generating UMAP"  
+    estimateCellTypes <- FALSE
+  }
+  .logMessages(
+    date(),
+    m,
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
 
-    varGenes <- .processvarGenes(varGenes)
-    dbscanEps <- .processdbscanEps(dbscanEps)
-    L <- .processL(L)
+  varGenes <- .processvarGenes(varGenes)
+  dbscanEps <- .processdbscanEps(dbscanEps)
 
-    celda.init <- .decontxInitializeZ(
-      object = counts,
-      varGenes = varGenes,
-      L = L,
-      dbscanEps = dbscanEps,
-      verbose = verbose,
-      seed = seed,
-      logfile = logfile
-    )
-    z <- celda.init$z
-    umap <- celda.init$umap
-    colnames(umap) <- c(
+  celda.init <- .decontxInitializeZ(
+    object = counts,
+    varGenes = varGenes,
+    dbscanEps = dbscanEps,
+    estimateCellTypes = estimateCellTypes,
+    seed = seed
+  )
+  if(is.null(z)) {
+    z <- celda.init$z 
+  }
+  umap <- celda.init$umap
+  colnames(umap) <- c(
       "DecontX_UMAP_1",
       "DecontX_UMAP_2"
-    )
-    rownames(umap) <- colnames(counts)
-  }
-
+  )
+  rownames(umap) <- colnames(counts)
+  
   z <- .processCellLabels(z, numCells = nC)
   K <- length(unique(z))
 
@@ -875,10 +878,65 @@ addLogLikelihood <- function(llA, llB) {
   return(ll)
 }
 
+.decontxInitializeZ <- function(object,
+                                varGenes = 2000,
+                                dbscanEps = 1,
+                                estimateCellTypes = TRUE,
+                                seed = 12345) {
+  if (!is(object, "SingleCellExperiment")) {
+    sce <- SingleCellExperiment::SingleCellExperiment(
+      assays = list(counts = object))
+  }
+  sce <- scater::logNormCounts(sce, log = TRUE)
+  
+  if (nrow(sce) <= varGenes) {
+    topVariableGenes <- seq_len(nrow(sce))
+  } else if (nrow(sce) > varGenes) {
+    sce.var <- scran::modelGeneVar(sce)
+    topVariableGenes <- order(sce.var$bio,
+                              decreasing = TRUE
+    )[seq(varGenes)]
+  }
+  sce <- sce[topVariableGenes, ]
+  
+  if(!is.null(seed)) {
+    with_seed(seed, 
+              resUmap <- scater::calculateUMAP(sce, n_threads = 1))
+  } else {
+    resUmap <- scater::calculateUMAP(sce, n_threads = 1)
+  }
+  
+  z <- NULL
+  if(isTRUE(estimateCellTypes)) {
+    # Find clusters with dbSCAN
+    totalClusters <- 1
+    iter <- 1
+    while (totalClusters <= 1 & dbscanEps > 0 & iter < 10) {
+      resDbscan <- dbscan::dbscan(resUmap, dbscanEps)
+      dbscanEps <- dbscanEps - (0.25 * dbscanEps)
+      totalClusters <- length(unique(resDbscan$cluster))
+      iter <- iter + 1
+    }
+    
+    # If dbscan was not able to get more than 2 clusters,
+    # use kmeans to force 2 clusters as a last resort
+    if(totalClusters == 1) {
+      cl <- kmeans(t(logcounts(sce)), 2)
+      z <- cl$cluster
+    } else {
+      z <- resDbscan$cluster
+    }
+  }
+  
+  return(list(
+    "z" = z,
+    "umap" = resUmap
+  ))    
+}
 
 
 ## Initialization of cell labels for DecontX when they are not given
-.decontxInitializeZ <-
+.decontxInitializeZ_prevous <-
   function(object, # object is either a sce object or a count matrix
            varGenes = 5000,
            L = 50,
