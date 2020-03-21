@@ -67,39 +67,145 @@
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @importFrom withr with_seed
 #' @export
-celda_C <- function(x,
-    useAssay = "counts",
-    sampleLabel = NULL,
-    K,
-    alpha = 1,
-    beta = 1,
-    algorithm = c("EM", "Gibbs"),
-    stopIter = 10,
-    maxIter = 200,
-    splitOnIter = 10,
-    splitOnLast = TRUE,
-    seed = 12345,
-    nchains = 3,
-    zInitialize = c("split", "random", "predefined"),
-    countChecksum = NULL,
-    zInit = NULL,
-    logfile = NULL,
-    verbose = TRUE) {
+setGeneric("celda_C",
+    function(x,
+        useAssay,
+        sampleLabel,
+        K,
+        alpha,
+        beta,
+        algorithm,
+        stopIter,
+        maxIter,
+        splitOnIter,
+        splitOnLast,
+        seed,
+        nchains,
+        zInitialize,
+        countChecksum,
+        zInit,
+        logfile,
+        verbose) {standardGeneric("celda_C")})
 
-    if (is.matrix(x)) {
-        xClass <- "matrix"
-        counts <- x
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = counts))
-    } else if (class(x) == "SingleCellExperiment") {
+
+#' @rdname celda_C
+#' @export
+setMethod("celda_C",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        sampleLabel = NULL,
+        K,
+        alpha = 1,
+        beta = 1,
+        algorithm = c("EM", "Gibbs"),
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        zInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        zInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
+
         xClass <- "SingleCellExperiment"
         counts <- SummarizedExperiment::assay(x, i = useAssay)
-        sce <- x
-    } else {
-        stop("Invalid 'x' argument! Must be a SCE or matrix object.")
+
+        sce <- .celdaCWithSeed(counts = counts,
+            sce = x,
+            sampleLabel = sampleLabel,
+            K = K,
+            alpha = alpha,
+            beta = beta,
+            algorithm = algorithm,
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            zInitialize = zInitialize,
+            countChecksum = countChecksum,
+            zInit = zInit,
+            logfile = logfile,
+            verbose = verbose)
+        return(sce)
     }
+)
+
+
+#' @rdname celda_C
+#' @export
+setMethod("celda_C",
+    signature(x = "matrix"),
+    function(x,
+        sampleLabel = NULL,
+        K,
+        alpha = 1,
+        beta = 1,
+        algorithm = c("EM", "Gibbs"),
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        zInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        zInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
+
+        xClass <- "matrix"
+        sce <- SingleCellExperiment::SingleCellExperiment(
+            assays = list(counts = x))
+        sce <- .celdaCWithSeed(counts = x,
+            sce = sce,
+            sampleLabel = sampleLabel,
+            K = K,
+            alpha = alpha,
+            beta = beta,
+            algorithm = algorithm,
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            zInitialize = zInitialize,
+            countChecksum = countChecksum,
+            zInit = zInit,
+            logfile = logfile,
+            verbose = verbose)
+        return(sce)
+    }
+)
+
+
+.celdaCWithSeed <- function(counts,
+    sce,
+    sampleLabel,
+    K,
+    alpha,
+    beta,
+    algorithm,
+    stopIter,
+    maxIter,
+    splitOnIter,
+    splitOnLast,
+    seed,
+    nchains,
+    zInitialize,
+    countChecksum,
+    zInit,
+    logfile,
+    verbose) {
 
     .validateCounts(counts)
+
     if (is.null(seed)) {
         celdaCMod <- .celda_C(counts,
             sampleLabel,
@@ -111,7 +217,6 @@ celda_C <- function(x,
             maxIter,
             splitOnIter,
             splitOnLast,
-            seed,
             nchains,
             zInitialize,
             countChecksum,
@@ -131,7 +236,6 @@ celda_C <- function(x,
                 maxIter,
                 splitOnIter,
                 splitOnLast,
-                seed,
                 nchains,
                 zInitialize,
                 countChecksum,
@@ -175,7 +279,6 @@ celda_C <- function(x,
     maxIter = 200,
     splitOnIter = 10,
     splitOnLast = TRUE,
-    seed = 12345,
     nchains = 3,
     zInitialize = c("split", "random", "predefined"),
     countChecksum = NULL,

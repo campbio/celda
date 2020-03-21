@@ -2,11 +2,54 @@
 % Please edit documentation in R/celda_C.R
 \name{celda_C}
 \alias{celda_C}
+\alias{celda_C,SingleCellExperiment-method}
+\alias{celda_C,matrix-method}
 \title{Cell clustering with Celda}
 \usage{
 celda_C(
   x,
+  useAssay,
+  sampleLabel,
+  K,
+  alpha,
+  beta,
+  algorithm,
+  stopIter,
+  maxIter,
+  splitOnIter,
+  splitOnLast,
+  seed,
+  nchains,
+  zInitialize,
+  countChecksum,
+  zInit,
+  logfile,
+  verbose
+)
+
+\S4method{celda_C}{SingleCellExperiment}(
+  x,
   useAssay = "counts",
+  sampleLabel = NULL,
+  K,
+  alpha = 1,
+  beta = 1,
+  algorithm = c("EM", "Gibbs"),
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  zInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  zInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
+
+\S4method{celda_C}{matrix}(
+  x,
   sampleLabel = NULL,
   K,
   alpha = 1,
