@@ -51,7 +51,8 @@
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
-#'  parameter settings are stored in the \link[S4Vectors]{metadata} slot.
+#'  parameter settings are stored in the \link[S4Vectors]{metadata}
+#'  \code{"celda_parameters"} slot.
 #'  Columns \code{sample_label} and \code{cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters.
@@ -257,6 +258,7 @@ setMethod("celda_C",
 }
 
 
+# celda_C main function
 .celda_C <- function(counts,
     sampleLabel = NULL,
     K,
@@ -714,8 +716,8 @@ setMethod("celda_C",
 #' @examples
 #' sce <- simulateCells(model = "celda_C", K = 10)
 #' @rawNamespace import(stats, except = c(start, end))
-#' @export
-simulateCellscelda_C <- function(model,
+#' @rdname simulateCells
+.simulateCellsMaincelda_C <- function(model,
     S = 5,
     CRange = c(50, 100),
     NRange = c(500, 1000),
@@ -822,88 +824,62 @@ simulateCellscelda_C <- function(model,
 }
 
 
-#' @title Matrix factorization for results from celda_C()
-#' @description Generates factorized matrices showing the contribution of each
-#'  feature in each cell population or each cell population in each sample.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class "celda_C".
-#' @param type Character vector. A vector containing one or more of "counts",
-#'  "proportion", or "posterior". "counts" returns the raw number of counts for
-#'  each factorized matrix. "proportions" returns the normalized probabilities
-#'  for each factorized matrix, which are calculated by dividing the raw counts
-#'  in each factorized matrix by the total counts in each column. "posterior"
-#'  returns the posterior estimates. Default
-#'  `c("counts", "proportion", "posterior")`.
-#' @examples
-#' data(celdaCSim, celdaCMod)
-#' factorizedMatrices <- factorizeMatrix(celdaCSim$counts,
-#'     celdaCMod, "posterior")
-#' @return A list with elements for `counts`, `proportions`, or `posterior`
-#'  probabilities. Each element will be a list containing factorized matrices
-#'  for `module` and `sample`.
-#' @seealso `celda_C()` for clustering cells
-#' @export
-setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
-    function(counts,
-        celdaMod,
-        type = c("counts", "proportion", "posterior")) {
+.factorizeMatrixCelda_C <- function(sce, useAssay, type) {
 
-        counts <- .processCounts(counts)
-        compareCountMatrix(counts, celdaMod)
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-        K <- params(celdaMod)$K
-        z <- clusters(celdaMod)$z
-        alpha <- params(celdaMod)$alpha
-        beta <- params(celdaMod)$beta
-        sampleLabel <- sampleLabel(celdaMod)
-        s <- as.integer(sampleLabel)
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    z <- SummarizedExperiment::colData(sce)$cell_cluster
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    sampleLabel <- SummarizedExperiment::colData(sce)$sample_label
+    s <- as.integer(sampleLabel)
 
-        p <- .cCDecomposeCounts(counts, s, z, K)
-        mCPByS <- p$mCPByS
-        nGByCP <- p$nGByCP
+    p <- .cCDecomposeCounts(counts, s, z, K)
+    mCPByS <- p$mCPByS
+    nGByCP <- p$nGByCP
 
-        KNames <- paste0("K", seq(K))
-        rownames(nGByCP) <- matrixNames(celdaMod)$row
-        colnames(nGByCP) <- KNames
-        rownames(mCPByS) <- KNames
-        colnames(mCPByS) <- matrixNames(celdaMod)$sample
+    KNames <- paste0("K", seq(K))
+    rownames(nGByCP) <- rownames(sce)
+    colnames(nGByCP) <- KNames
+    rownames(mCPByS) <- KNames
+    colnames(mCPByS) <-
+        S4Vectors::metadata(sce)$celda_parameters$sampleLevels
 
-        countsList <- c()
-        propList <- c()
-        postList <- c()
-        res <- list()
+    countsList <- c()
+    propList <- c()
+    postList <- c()
+    res <- list()
 
-        if (any("counts" %in% type)) {
-            countsList <- list(sample = mCPByS, module = nGByCP)
-            res <- c(res, list(counts = countsList))
-        }
+    if (any("counts" %in% type)) {
+        countsList <- list(sample = mCPByS, module = nGByCP)
+        res <- c(res, list(counts = countsList))
+    }
 
-        if (any("proportion" %in% type)) {
-            ## Need to avoid normalizing cell/gene states with zero cells/genes
-            uniqueZ <- sort(unique(z))
-            tempNGByCP <- nGByCP
-            tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
-                normalize = "proportion")
+    if (any("proportion" %in% type)) {
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueZ <- sort(unique(z))
+        tempNGByCP <- nGByCP
+        tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
+            normalize = "proportion")
 
-            propList <- list(sample = normalizeCounts(mCPByS,
-                normalize = "proportion"),
-                module = tempNGByCP)
-            res <- c(res, list(proportions = propList))
-        }
+        propList <- list(sample = normalizeCounts(mCPByS,
+            normalize = "proportion"),
+            module = tempNGByCP)
+        res <- c(res, list(proportions = propList))
+    }
 
-        if (any("posterior" %in% type)) {
-            postList <- list(sample = normalizeCounts(mCPByS + alpha,
-                normalize = "proportion"),
-                module = normalizeCounts(nGByCP + beta,
-                    normalize = "proportion"))
+    if (any("posterior" %in% type)) {
+        postList <- list(sample = normalizeCounts(mCPByS + alpha,
+            normalize = "proportion"),
+            module = normalizeCounts(nGByCP + beta,
+                normalize = "proportion"))
 
-            res <- c(res, posterior = list(postList))
-        }
+        res <- c(res, posterior = list(postList))
+    }
 
-        return(res)
-    })
+    return(res)
+}
 
 
 # Calculate log-likelihood for celda_C model
@@ -938,42 +914,22 @@ setMethod("factorizeMatrix", signature(celdaMod = "celda_C"),
 }
 
 
-#' @title Calculate Celda_C log likelihood
-#' @description Calculates the log likelihood for user-provided cell population
-#'  clusters using the `celda_C()` model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
-#' @param sampleLabel Vector or factor. Denotes the sample label for each cell
-#'  (column) in the count matrix.
-#' @param z Numeric vector. Denotes cell population labels.
-#' @param K Integer. Number of cell populations.
-#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
-#'  to each cell population in each sample. Default 1.
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
-#'  each feature in each cell population. Default 1.
-#' @return Numeric. The log likelihood for the given cluster assignments
-#' @seealso `celda_C()` for clustering cells
-#' @examples
-#' data(celdaCSim)
-#' loglik <- logLikelihoodcelda_C(celdaCSim$counts,
-#'     sampleLabel = celdaCSim$sampleLabel,
-#'     z = celdaCSim$z,
-#'     K = celdaCSim$K,
-#'     alpha = celdaCSim$alpha,
-#'     beta = celdaCSim$beta)
-#'
-#' loglik <- logLikelihood(celdaCSim$counts,
-#'     model = "celda_C",
-#'     sampleLabel = celdaCSim$sampleLabel,
-#'     z = celdaCSim$z,
-#'     K = celdaCSim$K,
-#'     alpha = celdaCSim$alpha,
-#'     beta = celdaCSim$beta)
-#' @export
-logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
+.logLikelihoodcelda_C <- function(sce, useAssay = "counts") {
+
+    if (S4Vectors::metadata(sce)$celda_parameters$model != "celda_C") {
+        stop("metadata(sce)$celda_parameters$model must be 'celda_C'!")
+    }
+
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    sampleLabel <- SummarizedExperiment::colData(sce)$sample_label
+    z <- SummarizedExperiment::colData(sce)$cell_cluster
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
 
     if (sum(z > K) > 0) {
-        stop("An entry in z contains a value greater than the provided K.")
+        stop("Assigned value of cell cluster greater than the total number of",
+            " cell clusters!")
     }
     sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
     s <- as.integer(sampleLabel)
@@ -1032,112 +988,6 @@ logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
         nGByCP = nGByCP,
         nCP = nCP))
 }
-
-
-#' @title Conditional probabilities for cells in subpopulations from a Celda_C
-#'  model
-#' @description Calculates the conditional probability of each cell belonging to
-#'  each subpopulation given all other cell cluster assignments in a `celda_C()`
-#'  result.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_C`.
-#' @param log Logical. If FALSE, then the normalized conditional probabilities
-#'  will be returned. If TRUE, then the unnormalized log probabilities will be
-#'  returned. Default FALSE.
-#' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell subpopulation
-#'  cluster probabilities.
-#' @seealso `celda_C()` for clustering cells
-#' @examples
-#' data(celdaCSim, celdaCMod)
-#' clusterProb <- clusterProbability(celdaCSim$counts, celdaCMod)
-#' @export
-setMethod("clusterProbability", signature(celdaMod = "celda_C"),
-    function(counts, celdaMod, log = FALSE, ...) {
-        z <- clusters(celdaMod)$z
-        sampleLabel <- sampleLabel(celdaMod)
-        s <- as.integer(sampleLabel)
-
-        K <- params(celdaMod)$K
-        alpha <- params(celdaMod)$alpha
-        beta <- params(celdaMod)$beta
-
-        p <- .cCDecomposeCounts(counts, s, z, K)
-
-        nextZ <- .cCCalcGibbsProbZ(counts = counts,
-            mCPByS = p$mCPByS,
-            nGByCP = p$nGByCP,
-            nByC = p$nByC,
-            nCP = p$nCP,
-            z = z,
-            s = s,
-            K = K,
-            nG = p$nG,
-            nM = p$nM,
-            alpha = alpha,
-            beta = beta,
-            doSample = FALSE)
-        zProb <- t(nextZ$probs)
-
-        if (!isTRUE(log)) {
-            zProb <- .normalizeLogProbs(zProb)
-        }
-
-        return(list(zProbability = zProb))
-    })
-
-
-#' @title Calculate the perplexity on new data with a celda_C model
-#' @description Perplexity is a statistical measure of how well a probability
-#'  model can predict new data. Lower perplexity indicates a better model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class "celda_C"
-#' @param newCounts A new counts matrix used to calculate perplexity. If NULL,
-#'  perplexity will be calculated for the 'counts' matrix. Default NULL.
-#' @return Numeric. The perplexity for the provided count data and model.
-#' @seealso `celda_C()` for clustering cells
-#' @examples
-#' data(celdaCSim, celdaCMod)
-#' perplexity <- perplexity(celdaCSim$counts, celdaCMod)
-#' @importFrom matrixStats logSumExp
-#' @export
-setMethod("perplexity", signature(celdaMod = "celda_C"),
-    function(counts, celdaMod, newCounts = NULL) {
-        if (!("celda_C" %in% class(celdaMod))) {
-            stop("The celdaMod provided was not of class celda_C.")
-        }
-
-        counts <- .processCounts(counts)
-        compareCountMatrix(counts, celdaMod)
-
-        if (is.null(newCounts)) {
-            newCounts <- counts
-        } else {
-            newCounts <- .processCounts(newCounts)
-        }
-
-        if (nrow(newCounts) != nrow(counts)) {
-            stop("newCounts should have the same number of rows as counts.")
-        }
-
-        factorized <- factorizeMatrix(counts = counts,
-            celdaMod = celdaMod,
-            type = "posterior")
-        theta <- log(factorized$posterior$sample)
-        phi <- log(factorized$posterior$module)
-        s <- as.integer(sampleLabel(celdaMod))
-
-        # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
-        inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
-        logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
-
-        perplexity <- exp(- (logPx / sum(newCounts)))
-        return(perplexity)
-    })
 
 
 .reorderCelda_C <- function(counts, res) {
