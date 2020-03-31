@@ -27,18 +27,18 @@
 #' @param annotationFeature A data frame for the feature annotations (rows).
 #' @param annotationColor List. Contains color scheme for all annotations. See
 #'  `?pheatmap` for more details.
-#' @param colorScheme "Character. One of ""divergent"" or ""sequential"". A
-#'  ""divergent"" scheme is best for highlighting relative data (denoted by
+#' @param colorScheme Character. One of "divergent" or "sequential". A
+#'  "divergent" scheme is best for highlighting relative data (denoted by
 #'  'colorSchemeCenter') such as gene expression data that has been normalized
-#'  and centered. A ""sequential"" scheme is best for highlighting data that
+#'  and centered. A "sequential" scheme is best for highlighting data that
 #'  are ordered low to high such as raw counts or probabilities. Default
 #'  "divergent".
 #' @param colorSchemeSymmetric Logical. When the colorScheme is "divergent"
 #'  and the data contains both positive and negative numbers, TRUE indicates
 #'  that the color scheme should be symmetric from
-#'  [-max(abs(data)), max(abs(data))]. For example, if the data ranges goes
-#'  from -1.5 to 2, then setting this to TRUE will force the color scheme to
-#'  range from -2 to 2. Default TRUE.
+#'  \code{[-max(abs(data)), max(abs(data))]}. For example, if the data ranges
+#'  goes from -1.5 to 2, then setting this to TRUE will force the color scheme
+#'  to range from -2 to 2. Default TRUE.
 #' @param colorSchemeCenter Numeric. Indicates the center of a "divergent"
 #'  colorScheme. Default 0.
 #' @param col Color for the heatmap.
