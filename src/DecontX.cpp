@@ -1,11 +1,11 @@
-#include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-using namespace Rcpp; using namespace arma;
+#include <RcppEigen.h>
+#include <Rcpp.h>
+// [[Rcpp::depends(RcppEigen)]]
+using namespace Rcpp; 
 
-
-
+  
 // [[Rcpp::export]]
-Rcpp::List decontXEM(const arma::sp_mat& counts,
+Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double>& counts,
                      const NumericVector& counts_colsums,
                      const NumericVector& theta,
                      const NumericMatrix& eta,
@@ -14,19 +14,19 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
                      const double& pseudocount) {
 
   // Perform error checking
-  if(counts.n_cols != theta.size()) {
+  if(counts.cols() != theta.size()) {
     stop("Length of 'theta' must be equal to the number of columns in 'counts'.");
   }
-  if(counts.n_cols != z.size()) {
+  if(counts.cols() != z.size()) {
     stop("Length of 'z' must be equal to the number of columns in 'counts'.");
   }  
-  if(counts.n_cols != counts_colsums.size()) {
+  if(counts.cols() != counts_colsums.size()) {
     stop("Length of 'counts_colsums' must be equal to the number of columns in 'counts'.");
   }    
-  if(counts.n_rows != phi.nrow()) {
+  if(counts.rows() != phi.nrow()) {
     stop("The number of rows in 'phi' must be equal to the number of rows in 'counts'.");
   }
-  if(counts.n_rows != eta.nrow()) {
+  if(counts.rows() != eta.nrow()) {
     stop("The number of rows in 'eta' must be equal to the number of rows in 'counts'.");
   }
   if(phi.ncol() != eta.ncol()) {
@@ -42,9 +42,6 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
   NumericMatrix new_phi(phi.nrow(), phi.ncol());
   NumericMatrix new_eta(eta.nrow(), eta.ncol());
     
-//  std::fill(new_phi.begin(), new_phi.end(), pseudocount);
-//  std::fill(new_eta.begin(), new_eta.end(), pseudocount);
-    
   // Obtaining 'fit_dirichlet' function from MCMCprecision package
   Environment pkg = Environment::namespace_env("MCMCprecision");
   Function f = pkg["fit_dirichlet"];
@@ -58,27 +55,28 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
   double pnative;
   double normp;
   double px;
-  for (arma::sp_mat::const_iterator it = counts.begin(); it != counts.end(); ++it) {
-    i = it.row();
-    j = it.col();
-    x = *it;
-    k = z[j] - 1;
-    
-    // Calculate variational probabilities
-    // Removing the log/exp speeds it up and produces the same result since
-    // there are only 2 probabilities being multiplied
-    
-    //pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
-    //pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
-    pnative = (phi[nr * k + i] + pseudocount) * (theta[j] + pseudocount);
-    pcontamin = (eta[nr * k + i] + pseudocount) * (1 - theta[j] + pseudocount);
-    
-    // Normalize probabilities and add to proper components
-    //normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
-    normp = pnative / (pcontamin + pnative);
-    px = normp * x;
-    new_phi(i,k) += px;
-    native_total(j) += px;
+  for(int j = 0; j < counts.cols(); ++j) {
+    for (Eigen::MappedSparseMatrix<double>::InnerIterator i_(counts, j); i_; ++i_) {
+      i = i_.index();
+      x = i_.value();
+      k = z[j] - 1;
+      
+      // Calculate variational probabilities
+      // Removing the log/exp speeds it up and produces the same result since
+      // there are only 2 probabilities being multiplied
+      
+      //pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
+      //pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
+      pnative = (phi[nr * k + i] + pseudocount) * (theta[j] + pseudocount);
+      pcontamin = (eta[nr * k + i] + pseudocount) * (1 - theta[j] + pseudocount);
+      
+      // Normalize probabilities and add to proper components
+      //normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
+      normp = pnative / (pcontamin + pnative);
+      px = normp * x;
+      new_phi(i,k) += px;
+      native_total(j) += px;
+    }  
   }
   
   // Calculate Eta using Weights from Phi
@@ -116,25 +114,26 @@ Rcpp::List decontXEM(const arma::sp_mat& counts,
 
 
 
+
 // [[Rcpp::export]]
-double decontXLogLik(const arma::sp_mat& counts,
+double decontXLogLik(const Eigen::MappedSparseMatrix<double>& counts,
                      const NumericVector& theta,
                      const NumericMatrix& eta,
                      const NumericMatrix& phi,
                      const IntegerVector& z,
                      const double& pseudocount) {
-
+  
   // Perform error checking
-  if(counts.n_cols != theta.size()) {
+  if(counts.cols() != theta.size()) {
     stop("Length of 'theta' must be equal to the number of columns in 'counts'.");
   }
-  if(counts.n_cols != z.size()) {
+  if(counts.cols() != z.size()) {
     stop("Length of 'z' must be equal to the number of columns in 'counts'.");
   }  
-  if(counts.n_rows != phi.nrow()) {
+  if(counts.rows() != phi.nrow()) {
     stop("The number of rows in 'phi' must be equal to the number of rows in 'counts'.");
   }
-  if(counts.n_rows != eta.nrow()) {
+  if(counts.rows() != eta.nrow()) {
     stop("The number of rows in 'eta' must be equal to the number of rows in 'counts'.");
   }
   if(phi.ncol() != eta.ncol()) {
@@ -143,12 +142,11 @@ double decontXLogLik(const arma::sp_mat& counts,
   if(min(z) < 1 || max(z) > eta.ncol()) {
     stop("The entries in 'z' need to be between 1 and the number of columns in eta and phi.");
   }
-
+  
   // Declare variables and functions
   double loglik = 0;    
-
+  
   int i;
-  int j;
   int k; 
   double x;
   int nr = phi.nrow();
@@ -157,56 +155,57 @@ double decontXLogLik(const arma::sp_mat& counts,
   // ll <- sum(Matrix::t(counts) * log(theta * t(phi)[z, ] +
   //       (1 - theta) * t(eta)[z, ] + 1e-20))
   
-  for (arma::sp_mat::const_iterator it = counts.begin(); it != counts.end(); ++it) {
-    i = it.row();
-    j = it.col();
-    x = *it;
-    k = z[j] - 1;
-    
-    loglik += x * log((phi[nr * k + i] * theta[j]) + (eta[nr * k + i] * (1 - theta[j])) + pseudocount);    
+  for(int j = 0; j < counts.cols(); ++j) {
+    for (Eigen::MappedSparseMatrix<double>::InnerIterator i_(counts, j); i_; ++i_) {
+      i = i_.index();
+      x = i_.value();
+      k = z[j] - 1;
+      
+      loglik += x * log((phi[nr * k + i] * theta[j]) + (eta[nr * k + i] * (1 - theta[j])) + pseudocount);
+    }  
   }
-    
+  
   return loglik;
 }  
 
 
 
 // [[Rcpp::export]]
-Rcpp::List decontXInitialize(const arma::sp_mat& counts,
-                     const NumericVector& theta,
-                     const IntegerVector& z,
-                     const double& pseudocount) {
-
+Rcpp::List decontXInitialize(const Eigen::MappedSparseMatrix<double>& counts,
+                             const NumericVector& theta,
+                             const IntegerVector& z,
+                             const double& pseudocount) {
+  
   // Perform error checking
-  if(counts.n_cols != theta.size()) {
+  if(counts.cols() != theta.size()) {
     stop("Length of 'theta' must be equal to the number of columns in 'counts'.");
   }
-  if(counts.n_cols != z.size()) {
+  if(counts.cols() != z.size()) {
     stop("Length of 'z' must be equal to the number of columns in 'counts'.");
   }  
-
+  
   // Declare variables and functions
-  NumericMatrix new_phi(counts.n_rows, max(z));
-  NumericMatrix new_eta(counts.n_rows, max(z));  
+  NumericMatrix new_phi(counts.rows(), max(z));
+  NumericMatrix new_eta(counts.rows(), max(z));  
   std::fill(new_phi.begin(), new_phi.end(), pseudocount);
   std::fill(new_eta.begin(), new_eta.end(), pseudocount);
-
+  
+  int k;
   int i;
-  int j;
-  int k; 
   double x; 
-    
-  for (arma::sp_mat::const_iterator it = counts.begin(); it != counts.end(); ++it) {
-    i = it.row();
-    j = it.col();
-    x = *it;
-    k = z[j] - 1;
-    
-    new_phi(i,k) += x * theta(j);
+  for(int j = 0; j < counts.cols(); ++j) {
+    for (Eigen::MappedSparseMatrix<double>::InnerIterator i_(counts, j); i_; ++i_) {
+      i = i_.index();
+      x = i_.value();
+      k = z[j] - 1;
+      
+      new_phi(i,k) += x * theta(j);
+    }  
   }
-
+  
   // Calculate Eta using Weights from Phi
   NumericVector phi_rowsum = rowSums(new_phi);
+  int j;
   for(i = 0; i < new_eta.ncol(); i++) {
     for(j = 0; j < new_eta.nrow(); j++) {
       new_eta(j,i) = phi_rowsum[j] - new_phi(j,i);
@@ -220,37 +219,35 @@ Rcpp::List decontXInitialize(const arma::sp_mat& counts,
     new_phi(_,i) = new_phi(_,i) / phi_colsum[i];
     new_eta(_,i) = new_eta(_,i) / eta_colsum[i];
   }
-    
+  
   return Rcpp::List::create(Rcpp::Named("phi") = new_phi,
                             Rcpp::Named("eta") = new_eta);
-
+  
 }  
 
 
 
 
-// [[Rcpp::export]]
-arma::sp_mat calculateNativeMatrix(const arma::sp_mat& counts,
-                     const arma::sp_mat& native_counts,
-                     const NumericVector& theta,
-                     const NumericMatrix& eta,
-                     const NumericMatrix& phi,
-                     const IntegerVector& z,
-                     const IntegerVector row_index,
-                     const IntegerVector col_index,
-                     const double& pseudocount) {
 
+// [[Rcpp::export]]
+Eigen::SparseMatrix<double> calculateNativeMatrix(const Eigen::MappedSparseMatrix<double>& counts,
+                             const NumericVector& theta,
+                             const NumericMatrix& eta,
+                             const NumericMatrix& phi,
+                             const IntegerVector& z,
+                             const double& pseudocount) {
+  
   // Perform error checking
-  if(counts.n_cols != theta.size()) {
+  if(counts.cols() != theta.size()) {
     stop("Length of 'theta' must be equal to the number of columns in 'counts'.");
   }
-  if(counts.n_cols != z.size()) {
+  if(counts.cols() != z.size()) {
     stop("Length of 'z' must be equal to the number of columns in 'counts'.");
   }  
-  if(counts.n_rows != phi.nrow()) {
+  if(counts.rows() != phi.nrow()) {
     stop("The number of rows in 'phi' must be equal to the number of rows in 'counts'.");
   }
-  if(counts.n_rows != eta.nrow()) {
+  if(counts.rows() != eta.nrow()) {
     stop("The number of rows in 'eta' must be equal to the number of rows in 'counts'.");
   }
   if(phi.ncol() != eta.ncol()) {
@@ -259,38 +256,35 @@ arma::sp_mat calculateNativeMatrix(const arma::sp_mat& counts,
   if(min(z) < 1 || max(z) > eta.ncol()) {
     stop("The entries in 'z' need to be between 1 and the number of columns in eta and phi.");
   }
-  if(max(row_index) - 1 > native_counts.n_rows || min(row_index) < 0) {
-    stop("The entries in 'row_index' need to be less than 'nrow(native_counts)' and greater than 0.");
-  }
-  if(max(col_index) - 1 > native_counts.n_cols || min(col_index) < 0) {
-    stop("The entries in 'row_index' need to be less than 'ncol(native_counts)' and greater than 0.");
-  }
 
-  arma::sp_mat native_matrix = native_counts;
+  Eigen::SparseMatrix<double> native_matrix = counts;
   
   int i;
-  int j;
   int k; 
   double x; 
   double pcontamin;
   double pnative;
   double normp;
-  for (arma::sp_mat::const_iterator it = counts.begin(); it != counts.end(); ++it) {
-    i = it.row();
-    j = it.col();
-    x = *it;
-    k = z[j] - 1;
-    
-    // Calculate variational probabilities 
-    pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
-    pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
-    
-    // Normalize probabilities and add to proper components
-    normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
-    native_matrix.at(row_index(i) - 1, col_index(j) - 1) = normp * x;
+  for(int j = 0; j < counts.cols(); ++j) {
+    for (Eigen::MappedSparseMatrix<double>::InnerIterator i_(counts, j); i_; ++i_) {
+      i = i_.index();
+      x = i_.value();
+      k = z[j] - 1;
+      
+      // Calculate variational probabilities 
+      pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
+      pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
+      
+      // Normalize probabilities and add to proper components
+      normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
+      native_matrix.coeffRef(i, j) *= normp;
+    }  
   }
-  
+
   return native_matrix;
 }
+
+
+
 
 

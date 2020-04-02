@@ -79,6 +79,7 @@
 #'  }
 #' }
 #' @examples
+#' \dontrun{
 #' # Generate simulated single-cell dataset using celda
 #' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
@@ -95,6 +96,7 @@
 #'
 #' # Plot dendrogram
 #' plotMarkerDendro(DecTree)
+#' }
 #' @export
 findMarkersTree <- function(features,
                             class,
@@ -2555,6 +2557,7 @@ subUnderscore <- function(x, n) {
 #' @param boxSize Numeric value. Size of rule labels. Default is 7.
 #' @param boxColor Character value. Color of rule labels. Default is black.
 #' @examples
+#' \dontrun{
 #' # Generate simulated single-cell dataset using celda
 #' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
@@ -2571,6 +2574,7 @@ subUnderscore <- function(x, n) {
 #'
 #' # Plot dendrogram
 #' plotMarkerDendro(DecTree)
+#' }
 #' @return A ggplot2 object
 #' @export
 plotMarkerDendro <- function(tree,
@@ -2886,6 +2890,7 @@ plotMarkerDendro <- function(tree,
 #' @return A heatmap visualizing the counts matrix for the cells and genes at
 #' the specified branch point.
 #' @examples
+#' \dontrun{
 #' # Generate simulated single-cell dataset using celda
 #' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
@@ -2905,6 +2910,7 @@ plotMarkerDendro <- function(tree,
 #'   branchPoint = "top_level",
 #'   featureLabels = paste0("L", clusters(cm)$y)
 #' )
+#' }
 #' @export
 plotMarkerHeatmap <-
   function(tree,

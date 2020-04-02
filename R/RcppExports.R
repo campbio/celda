@@ -13,8 +13,8 @@ decontXInitialize <- function(counts, theta, z, pseudocount) {
     .Call('_celda_decontXInitialize', PACKAGE = 'celda', counts, theta, z, pseudocount)
 }
 
-calculateNativeMatrix <- function(counts, native_counts, theta, eta, phi, z, row_index, col_index, pseudocount) {
-    .Call('_celda_calculateNativeMatrix', PACKAGE = 'celda', counts, native_counts, theta, eta, phi, z, row_index, col_index, pseudocount)
+calculateNativeMatrix <- function(counts, theta, eta, phi, z, pseudocount) {
+    .Call('_celda_calculateNativeMatrix', PACKAGE = 'celda', counts, theta, eta, phi, z, pseudocount)
 }
 
 cG_calcGibbsProbY_Simple <- function(counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta) {

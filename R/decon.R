@@ -364,7 +364,6 @@ setReplaceMethod(
       countsBat <- methods::as(countsBat, "dgCMatrix")
     }
 
-
     if (!is.null(z)) {
       zBat <- z[batch == bat]
     }
@@ -402,17 +401,15 @@ setReplaceMethod(
         )
       )
     }
-    estRmat <- calculateNativeMatrix(
+    estRmat.temp <- calculateNativeMatrix(
       counts = countsBat,
-      native_counts = estRmat,
       theta = res$theta,
       eta = res$eta,
-      row_index = seq(nrow(counts)),
-      col_index = which(batch == bat),
       phi = res$phi,
       z = as.integer(res$z),
       pseudocount = 1e-20
     )
+    estRmat[seq(nrow(counts)), which(batch == bat)] <- estRmat.temp
     dimnames(estRmat) <- list(geneNames, allCellNames)
     
     resBatch[[bat]] <- list(

@@ -41,6 +41,7 @@ the specified branch point.
 Creates heatmap for a specified branch point in a marker tree.
 }
 \examples{
+\dontrun{
 # Generate simulated single-cell dataset using celda
 sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
@@ -60,4 +61,5 @@ plotMarkerHeatmap(DecTree, sim_counts$counts,
   branchPoint = "top_level",
   featureLabels = paste0("L", clusters(cm)$y)
 )
+}
 }
