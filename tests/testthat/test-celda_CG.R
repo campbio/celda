@@ -60,7 +60,7 @@ test_that(desc = "Testing clusterProbability with celda_CG", {
 
 test_that(desc = paste0("Testing simulateCells.celda_CG error checking with",
     " low gamma"), {
-        expect_error(simulateCells(model = "celda_CG", gamma = 0.000001))
+        expect_warning(simulateCells(model = "celda_CG", gamma = 0.1))
     })
 
 test_that(desc = paste0("Testing simulateCells.celda_CG, make sure all genes",
@@ -388,9 +388,8 @@ test_that(desc = "Testing topRank with celda_CG", {
 
 # celdaHeatmap
 test_that(desc = "Testing celdaHeatmap with celda_CG", {
-    expect_equal(names(celdaHeatmap(celdaMod = modelCG,
-        counts = celdaCGSim$counts)),
-        c("treeRow", "treeCol", "gtable"))
+  p <- celdaHeatmap(celdaMod = modelCG, counts = celdaCGSim$counts)
+  expect_equal(names(p), c("treeRow", "treeCol", "gtable"))
 })
 
 # moduleHeatmap

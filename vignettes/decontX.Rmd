@@ -1,6 +1,13 @@
 ---
-title: "Decontamination of ambient RNA in single-cell RNA-seq with DecontX on 10X PBMC4k data" 
-author: "Shiyi Yang, Zhe Wang, Joshua D. Campbell"
+title: "Decontamination of ambient RNA in single-cell genomic data with DecontX" 
+author:
+- name: Shiyi (Iris) Yang
+  affiliation: *id
+- name: Zhe Wang
+  affiliation: *id
+- name: Joshua Campbell
+  affiliation: *id
+  email: camp@bu.edu
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:
@@ -31,18 +38,65 @@ DecontX can take either `SingleCellExperiment` object from package [SingleCellEx
 
 
 # Load PBMC4k data from 10X
+
 We will utlize the 10X PBMC 4K dataset as an example. This can be easily retrieved from the package [TENxPBMCData](http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html). Make sure the the column names are set before running decontX.
 
 ```{r, eval=TRUE, message=FALSE}
 library(TENxPBMCData)  
 pbmc4k <- TENxPBMCData("pbmc4k")
 colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep="_")
+rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
 ```
 
 
+# Running decontX
+
 To run decontX with a SingleCellExperiment object, simply use the following command. 
 
-```{r, eval=TRUE, message=TRUE}
-pbmc4k = decontX(x = pbmc4k) 
+```{r, eval=TRUE, message=FALSE}
+pbmc4k <- decontX(x = pbmc4k) 
+```
+
+# Plotting results
+
+
+DecontX creates a UMAP which we can use to plot the cluster labels automatically identified in the analysis. Note that the clustering approach used here is designed to find "broad" cell types rather than individual cell subpopulations within a cell type. 
+
+```{r}
+umap <- reducedDim(pbmc4k, "decontX_UMAP")
+plotDimReduceCluster(umap[,1], umap[,2], cluster = pbmc4k$decontX_clusters)
+```
+The estimated percentage of contamination in each cell can also be plotted on a UMAP.
+
+```{r}
+plotDecontXContamination(pbmc4k)
+```
+
+
+Known marker genes can also be plotted on the UMAP to identify the cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ, S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells, GNLY for NK-cells, and PPBP for megakaryocytes.
+
+```{r}
+temp <- as.matrix(counts(pbmc4k))
+temp <- temp[rowSums(temp) > 0,]
+plotDimReduceFeature(umap[,1], umap[,2], temp, features = c("CD3D", "CD3E", "GNLY", "LYZ", "S100A8", "S100A9", "CD79A", "CD79B", "MS4A1"), exactMatch = TRUE)
+```
+
+
+
+```{r}
+markers <- list(Tcell_Markers=c("CD3E", "CD3D"),
+                    Bcell_Markers=c("CD79A", "CD79B", "MS4A1"), 
+                    Monocyte_Markers=c("S100A8", "S100A9", "LYZ"),
+                    NKcell_Markers="GNLY")
+cellTypeMappings <- list(Tcells=2, Bcells=5, Monocytes=1, NKcells=6)
+plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "counts")
+plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "decontXcounts")
+
+```
+
+
+
+```{r}
+sessionInfo()
 ```
 

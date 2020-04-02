@@ -480,3 +480,91 @@ violinPlot <- function(counts,
         return(p)
     }
 }
+
+
+#' @title Retrieve row index for a set of features
+#' @description This will return indices of features among the rownames or rowData of a
+#' a data.frame, matrix, or a \linkS4class{SummarizedExperiment} object including a
+#' \linkS4class{SingleCellExperiment}. Partial matching (i.e. grepping)
+#' can be used by setting \code{exactMatch = FALSE}.
+#' @param features Character vector of feature names to find in the rows of \code{x}.
+#' @param x A data.frame, matrix, or \linkS4class{SingleCellExperiment} object to search.
+#' @param by Character. Where to search for features in \code{x}. If set to \code{"rownames"}
+#' then the features will be searched for among \code{rownames(x)}. If \code{x} inherits from
+#' class \linkS4class{SummarizedExperiment}, then \code{by} can be one of the fields in
+#' the row annotation data.frame (i.e. one of \code{colnames(rowData(x))}).
+#' @param exactMatch Boolean. Whether to only identify exact matches
+#' or to identify partial matches using \code{\link{grep}}.
+#' @param removeNA Boolean. If set to \code{FALSE}, features not found in \code{x} will be
+#' given \code{NA} and the returned vector will be the same length as \code{features}. If
+#' set to \code{TRUE}, then the \code{NA} values will be removed from the returned vector.
+#' Default \code{FALSE}. 
+#' @return A vector of row indices for the matching features in \code{x}.
+#' @author Yusuke Koga, Joshua Campbell
+#' @seealso '\link[scater]{retrieveFeatureInfo}' from package \code{'scater'} and
+#' \code{link{regex}} for how to use regular expressions when \code{exactMatch = FALSE}.
+#' @examples
+#' data(celdaCGSim)
+#' retrieveFeatureIndex(c("Gene_1", "Gene_5"), celdaCGSim$counts)
+#' retrieveFeatureIndex(c("Gene_1", "Gene_5"), celdaCGSim$counts, exactMatch = FALSE)
+#' @export
+retrieveFeatureIndex <- function(features, x,
+                                 by = "rownames",
+                                 exactMatch = TRUE,
+                                 removeNA = FALSE) {
+  
+  # Extract vector to search through
+  if(by == "rownames") {
+    if(is.null(rownames(x))) {
+      stop("'rownames' of 'x' are 'NULL'. Please set 'rownames' or change 'by' to search a different column in 'x'.")
+    }
+    search <- rownames(x)
+  } else if (length(ncol(x)) > 0) {
+    if(inherits(x, "SummarizedExperiment")) {
+      if(!(by %in% colnames(rowData(x)))) {
+        stop("'by' is not a column in 'rowData(x)'.")
+      }
+      search <- rowData(x)[,by]
+    } else {
+      if(!(by %in% colnames(x))) {
+        stop("'by' is not a column in 'x'.")
+      }
+      search <- x[,by]
+    } 
+  } else {
+    search <- as.character(x)
+  }
+  
+  # Match each element of 'pattern' in vector 'search'
+  if (!isTRUE(exactMatch)) {
+    featuresIndices <- rep(NA, length(features))
+    featuresNotFound <- c()
+    for (i in seq_along(features)) {
+      g <- grep(features[i], search)
+      if (length(g) > 0) {
+        featuresIndices[i] <- g
+      }
+    }
+    
+  } else {
+    featuresIndices <- match(features, search)
+  }
+  
+  featuresNotFound <- 
+  if (sum(is.na(featuresIndices)) > 0) {
+    if (sum(is.na(featuresIndices)) == length(features)) {
+      stop("None of the provided features had matching",
+           " names in 'x'.")
+    }
+    warning("The following features were not present in 'x': ",
+            paste(features[which(is.na(featuresIndices))],
+                  collapse = ","))
+  }
+  
+  if(isTRUE(removeNA)) {
+    featuresIndices <- featuresIndices[!is.na(featuresIndices)]
+  }
+  return(featuresIndices)
+}
+
+

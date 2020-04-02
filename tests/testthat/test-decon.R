@@ -1,31 +1,49 @@
 ## decontXoneBatch
 library(celda)
-context("Testing Deconx")
+context("Testing DecontX functions")
 
-deconSim <- simulateContaminatedMatrix(K = 10, delta = c(1, 5))
+deconSim <- simulateContamination(K = 10, delta = c(1, 5))
 modelDecontXoneBatch <- decontX(deconSim$observedCounts,
         z = deconSim$z,
         maxIter = 2)
 
-deconSim2 <- simulateContaminatedMatrix(K = 10, delta = 5)
+deconSim2 <- simulateContamination(K = 10, delta = 5)
 batchDecontX <- decontX(cbind(deconSim$observedCounts,
     deconSim2$observedCounts),
         z = c(deconSim$z, deconSim2$z),
         batch = rep(seq(2), each = ncol(deconSim$observedCounts)),
         maxIter = 2)
 
-## simulateContaminatedMatrix
-test_that(desc = "Testing simulateContaminatedMatrix", {
+test_that(desc = "Testing simulateContamination", {
     expect_equivalent(object = colSums(deconSim$observedCounts),
         expected = deconSim$NByC)
     expect_equal(object = dim(deconSim$phi),
         expected = dim(deconSim$eta))
     expect_equal(typeof(deconSim$observedCounts), "integer")
-    expect_warning(simulateContaminatedMatrix(K = 101, C = 10))
-    #expect_equal(unique(deconSimKTooLarge$z), seq(ncol(deconSimKTooLarge$eta)))
+    expect_warning(simulateContamination(K = 101, C = 10))
+    expect_error(simulateContamination(K = 3, G = 2, numMarkers = 10))
 })
 
 ## DecontX
+test_that(desc = "Testing DecontX on counts matrix", {
+  s <- simulateContamination()
+  res <- decontX(s$observedCounts)
+  p <- plotDecontXMarkers(s$observedCounts, z=res$z, markers = s$markers)
+  p <- plotDecontXMarkers(res$decontXcounts, z=res$z, markers = s$markers)
+  p <- plotDecontXContamination(res)
+})
+
+test_that(desc = "Testing DecontX on SCE", {
+  s <- simulateContamination()
+  sce <- SingleCellExperiment::SingleCellExperiment(list(counts=s$observedCounts))
+  sce <- decontX(sce)
+  p <- plotDecontXContamination(sce)
+  p <- plotDecontXMarkers(sce, z=s$z, markers = s$markers, assayName = "decontXcounts")
+  
+  newz = paste0("X", s$z)
+  sce$newz2 = newz
+  p <- plotDecontXMarkers(sce, z="newz2", markers = s$markers, assayName = "decontXcounts")
+})
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {
@@ -51,43 +69,3 @@ test_that(desc = "Testing .decontXoneBatch", {
         "Missing value in 'counts' matrix.")
 })
 
-
-## logLikelihood
-#test_that(desc = "Testing logLikelihood.DecontXoneBatch", {
-    # z.process = processCellLabels(deconSim$z,
-    # num.cells=ncol(deconSim$observedCounts) )
-    # expect_equal( decon.calcLL(x=deconSim$observedCounts, z=z.process  ,
-    #    theta=modelDecontXoneBatch$resList$theta,
-    # eta=modelDecontXoneBatch$resList$est.ConDist,
-    # phi=modelDecontXoneBatch$resList$est.GeneDist ),
-    # modelDecontXoneBatch$resList$logLikelihood[
-    # modelDecontXoneBatch$runParams$iteration  ] )
-
-    #cellDistModelBg <- normalizeCounts(
-    #    modelDecontXoneBatchbg$resList$estNativeCounts,
-    #    normalize = "proportion",
-    #    pseudocountNormalize = 1e-20)
-    #bgDistModelBg <- rowSums(deconSim$observedCounts) / sum(deconSim$NByC)
-    #bgDistModelBg <- matrix(rep(bgDistModelBg,
-    #    length(deconSim$NByC)), ncol = length(deconSim$NByC))
-    #expect_equal(.bgCalcLL(counts = deconSim$observedCounts,
-    #    theta = modelDecontXoneBatchbg$resList$theta,
-    #    cellDist = cellDistModelBg,
-    #    bgDist = bgDistModelBg),
-    #    modelDecontXoneBatchbg$resList$logLikelihood[
-    #        modelDecontXoneBatchbg$runParams$iteration])
-#})
-
-## decontamination EM updates
-# test_that( desc = "Testing decontamination EM updates", {
-#    z.process = processCellLabels(deconSim$z,
-# num.cells=ncol(deconSim$observedCounts) )
-#    expect_equal( cD.calcEMDecontamination( counts=deconSim$observedCounts,
-# z=z.process, K=length(unique(deconSim$z)),
-#        theta=modelDecontXoneBatchIter1$resList$theta,
-# phi=modelDecontXoneBatchIter1$resList$est.GeneDist,
-# eta=modelDecontXoneBatchIter1$resList$est.ConDist,
-#        beta=modelDecontXoneBatchIter1$runParams$beta,
-# delta=modelDecontXoneBatchIter1$runParams$delta)$theta,
-# modelDecontXoneBatch$resList$theta )
-# } )

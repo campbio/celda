@@ -17,7 +17,6 @@
   iterLogLik = 10,
   varGenes = 5000,
   dbscanEps = 1,
-  L = 50,
   seed = 12345,
   logfile = NULL,
   verbose = TRUE
@@ -33,7 +32,6 @@
   iterLogLik = 10,
   varGenes = 5000,
   dbscanEps = 1,
-  L = 50,
   seed = 12345,
   logfile = NULL,
   verbose = TRUE
@@ -49,8 +47,8 @@ of class \code{dgCMatrix} from package \link{Matrix} before analysis.}
 \linkS4class{SingleCellExperiment}.}
 
 \item{z}{Numeric or character vector. Cell cluster labels. If NULL,
-Celda will be used to reduce the dimensionality of the dataset
-to 'L' modules, '\link[uwot]{umap}' from the 'uwot' package
+PCA will be used to reduce the dimensionality of the dataset initially,
+'\link[uwot]{umap}' from the 'uwot' package
 will be used to further reduce the dataset to 2 dimenions and
 the '\link[dbscan]{dbscan}' function from the 'dbscan' package
 will be used to identify clusters of broad cell types. Default NULL.}
@@ -69,21 +67,17 @@ to initialize theta. Default 10.}
 difference in the contamination estimates between the previous and
 current iterations is less than this. Default 0.001.}
 
-\item{iterLogLik}{Integer. Calculate log likelihood every 'iterLogLik'
+\item{iterLogLik}{Integer. Calculate log likelihood every \code{iterLogLik}
 iteration. Default 10.}
 
 \item{varGenes}{Integer. The number of variable genes to use in
-Celda clustering. Variability is calcualted using
+dimensionality reduction before clustering. Variability is calcualted using
 \code{\link[scran]{modelGeneVar}} function from the 'scran' package.
 Used only when z is not provided. Default 5000.}
 
 \item{dbscanEps}{Numeric. The clustering resolution parameter
 used in '\link[dbscan]{dbscan}' to estimate broad cell clusters.
 Used only when z is not provided. Default 1.}
-
-\item{L}{Integer. Number of modules for Celda clustering. Used to reduce
-the dimensionality of the dataset before applying UMAP and dbscan.
-Used only when z is not provided. Default 50.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
@@ -116,18 +110,33 @@ If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
 counts will be stored as an assay and can be accessed with
 \code{decontXcounts(x)}. The contamination values and cluster labels
 will be stored in \code{colData(x)}. \code{estimates} and \code{runParams}
-will be stored in \code{metadata(x)$decontX}. If z was not supplied, then
-the UMAPs used to generated cell cluster labels will be stored in
-\code{reducedDims} slot in \code{x}
+will be stored in \code{metadata(x)$decontX}. The UMAPs used to generated
+cell cluster labels will be stored in
+\code{reducedDims} slot in \code{x}.
 }
 \description{
 Identifies contamination from factors such as ambient RNA
 in single cell genomic datasets.
 }
 \examples{
-s <- simulateContaminatedMatrix()
-result <- decontX(s$observedCounts, s$z)
-contamination <- colSums(s$observedCounts - s$nativeCounts) /
-  colSums(s$observedCounts)
-plot(contamination, result$contamination)
+# Generate matrix with contamination
+s <- simulateContamination(seed = 12345)
+
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(list(counts=s$observedCounts))
+sce <- decontX(sce)
+
+# Plot contamination on UMAP
+plotDecontXContamination(sce)
+
+# Plot decontX cluster labels
+umap <- reducedDim(sce)
+plotDimReduceCluster(umap[,1], umap[,2], sce$decontX_clusters)
+
+# Plot expression of marker genes in each cell cluster before decontamination
+s$markers
+plotDecontXMarkers(sce, markers = s$markers, assayName="counts")
+
+# Plot expression of marker genes in each cell cluster after contamination
+plotDecontXMarkers(sce, markers = s$markers, assayName="decontXcounts")
 }

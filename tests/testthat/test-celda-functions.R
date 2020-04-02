@@ -9,7 +9,8 @@ modelCG <- celda_CG(
     K = celdaCGSim$K,
     L = celdaCGSim$L,
     algorithm = "EM",
-    verbose = FALSE)
+    verbose = FALSE,
+    nchains = 1)
 
 factorized <- factorizeMatrix(celdaMod = modelCG, counts = celdaCGSim$counts)
 
