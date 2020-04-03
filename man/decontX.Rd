@@ -12,7 +12,8 @@
   z = NULL,
   batch = NULL,
   maxIter = 500,
-  delta = 10,
+  delta = c(10, 10),
+  estimateDelta = TRUE,
   convergence = 0.001,
   iterLogLik = 10,
   varGenes = 5000,
@@ -27,7 +28,8 @@
   z = NULL,
   batch = NULL,
   maxIter = 500,
-  delta = 10,
+  delta = c(10, 10),
+  estimateDelta = TRUE,
   convergence = 0.001,
   iterLogLik = 10,
   varGenes = 5000,
@@ -60,8 +62,22 @@ should be considered different batches. Default NULL.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
 
-\item{delta}{Numeric. Symmetric Dirichlet concentration parameter
-to initialize theta. Default 10.}
+\item{delta}{Numeric Vector of length 2. Concentration parameters for 
+the Dirichlet prior for the contamination in each cell. The first element
+is the prior for the native counts while the second element is the prior for
+the contamination counts. These essentially act as pseudocounts for the
+native and contamination in each cell. If \code{estimateDelta = TRUE},
+this is only used to produce a random sample of proportions for an initial 
+value of contamination in each cell. Then \code{\link[MCMCprecision]{fit_dirichlet}}
+is used to update \code{delta} in each iteration. 
+If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these 
+values for the entire inference procedure. Fixing \code{delta} and 
+setting a high number in the second element will force \code{decontX}
+to be more aggressive and estimate higher levels of contamination at 
+the expense of potentially removing native expression. Default \code{c(10, 10)}.}
+
+\item{estimateDelta}{Boolean. Whether to update \code{delta} at each 
+iteration.}
 
 \item{convergence}{Numeric. The EM algorithm will be stopped if the maximum
 difference in the contamination estimates between the previous and

@@ -27,8 +27,21 @@
 #' current iterations is less than this. Default 0.001.
 #' @param iterLogLik Integer. Calculate log likelihood every \code{iterLogLik}
 #' iteration. Default 10.
-#' @param delta Numeric. Symmetric Dirichlet concentration parameter
-#' to initialize theta. Default 10.
+#' @param delta Numeric Vector of length 2. Concentration parameters for 
+#' the Dirichlet prior for the contamination in each cell. The first element
+#' is the prior for the native counts while the second element is the prior for
+#' the contamination counts. These essentially act as pseudocounts for the
+#' native and contamination in each cell. If \code{estimateDelta = TRUE},
+#' this is only used to produce a random sample of proportions for an initial 
+#' value of contamination in each cell. Then \code{\link[MCMCprecision]{fit_dirichlet}}
+#' is used to update \code{delta} in each iteration. 
+#' If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these 
+#' values for the entire inference procedure. Fixing \code{delta} and 
+#' setting a high number in the second element will force \code{decontX}
+#' to be more aggressive and estimate higher levels of contamination at 
+#' the expense of potentially removing native expression. Default \code{c(10, 10)}.
+#' @param estimateDelta Boolean. Whether to update \code{delta} at each 
+#' iteration.
 #' @param varGenes Integer. The number of variable genes to use in
 #' dimensionality reduction before clustering. Variability is calcualted using
 #' \code{\link[scran]{modelGeneVar}} function from the 'scran' package.
@@ -106,7 +119,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       z = NULL,
                                                       batch = NULL,
                                                       maxIter = 500,
-                                                      delta = 10,
+                                                      delta = c(10,10),
+                                                      estimateDelta = TRUE,
                                                       convergence = 0.001,
                                                       iterLogLik = 10,
                                                       varGenes = 5000,
@@ -123,6 +137,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     convergence = convergence,
     iterLogLik = iterLogLik,
     delta = delta,
+    estimateDelta = estimateDelta,
     varGenes = varGenes,
     dbscanEps = dbscanEps,
     seed = seed,
@@ -131,10 +146,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   )
 
   ## Add results into column annotation
-  colData(x) <- cbind(colData(x),
-    decontX_contamination = result$contamination,
-    decontX_clusters = result$z
-  )
+  colData(x)$decontX_contamination <- result$contamination
+  colData(x)$decontX_clusters <- result$z
 
   ## Put estimated UMAPs into SCE if z was estimated with Celda/UMAP
   if (is.null(result$runParams$z)) {
@@ -160,7 +173,6 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     }
   }
 
-
   ## Save the rest of the result object into metadata
   decontXcounts(x) <- result$decontXcounts
   result$decontXcounts <- NULL
@@ -175,7 +187,8 @@ setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
                                      maxIter = 500,
-                                     delta = 10,
+                                     delta = c(10, 10),
+                                     estimateDelta = TRUE,
                                      convergence = 0.001,
                                      iterLogLik = 10,
                                      varGenes = 5000,
@@ -191,6 +204,7 @@ setMethod("decontX", "ANY", function(x,
     convergence = convergence,
     iterLogLik = iterLogLik,
     delta = delta,
+    estimateDelta = estimateDelta,
     varGenes = varGenes,
     dbscanEps = dbscanEps,
     seed = seed,
@@ -264,7 +278,8 @@ setReplaceMethod(
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
-                     delta = 10,
+                     delta = c(10, 10),
+                     estimateDelta = TRUE,
                      varGenes = NULL,
                      dbscanEps = NULL,
                      seed = 12345,
@@ -292,6 +307,7 @@ setReplaceMethod(
     batch = batch,
     maxIter = maxIter,
     delta = delta,
+    estimateDelta = estimateDelta,
     convergence = convergence,
     varGenes = varGenes,
     dbscanEps = dbscanEps,
@@ -374,6 +390,7 @@ setReplaceMethod(
         batch = bat,
         maxIter = maxIter,
         delta = delta,
+        estimateDelta = estimateDelta,
         convergence = convergence,
         iterLogLik = iterLogLik,
         logfile = logfile,
@@ -391,6 +408,7 @@ setReplaceMethod(
           batch = bat,
           maxIter = maxIter,
           delta = delta,
+          estimateDelta = estimateDelta,
           convergence = convergence,
           iterLogLik = iterLogLik,
           logfile = logfile,
@@ -509,7 +527,8 @@ setReplaceMethod(
                              z = NULL,
                              batch = NULL,
                              maxIter = 200,
-                             delta = 10,
+                             delta = c(10, 10),
+                             estimateDelta = TRUE,
                              convergence = 0.01,
                              iterLogLik = 10,
                              logfile = NULL,
@@ -518,7 +537,7 @@ setReplaceMethod(
                              dbscanEps = NULL,
                              seed = 12345) {
   .checkCountsDecon(counts)
-  .checkParametersDecon(proportionPrior = delta)
+  .checkDelta(delta)
 
   # nG <- nrow(counts)
   nC <- ncol(counts)
@@ -543,7 +562,7 @@ setReplaceMethod(
 
   varGenes <- .processvarGenes(varGenes)
   dbscanEps <- .processdbscanEps(dbscanEps)
-
+  
   celda.init <- .decontxInitializeZ(
     object = counts,
     varGenes = varGenes,
@@ -578,13 +597,11 @@ setReplaceMethod(
 
   if (deconMethod == "clustering") {
     ## Initialization
-    deltaInit <- delta
     theta <- stats::rbeta(
       n = nC,
-      shape1 = deltaInit,
-      shape2 = deltaInit
+      shape1 = delta[1],
+      shape2 = delta[2]
     )
-
 
     nextDecon <- decontXInitialize(
       counts = counts,
@@ -619,6 +636,8 @@ setReplaceMethod(
         eta = eta,
         theta = theta,
         z = z,
+        estimate_delta = isTRUE(estimateDelta),
+        delta = delta,
         pseudocount = 1e-20
       )
 
@@ -661,7 +680,6 @@ setReplaceMethod(
     }
   }
 
-  #    resConp <- 1 - colSums(nextDecon$estRmat) / colSums(counts)
   resConp <- nextDecon$contamination
   names(resConp) <- colnames(counts)
 
@@ -814,18 +832,6 @@ setReplaceMethod(
       "delta" = deltaV2
     ))
   }
-
-
-
-
-
-## Make sure provided parameters are the right type and value range
-.checkParametersDecon <- function(proportionPrior) {
-  if (length(proportionPrior) > 1 | any(proportionPrior <= 0)) {
-    stop("'delta' should be a single positive value.")
-  }
-}
-
 
 ## Make sure provided count matrix is the right type
 .checkCountsDecon <- function(counts) {
@@ -1052,6 +1058,13 @@ addLogLikelihood <- function(llA, llB) {
     }
   }
   return(dbscanEps)
+}
+
+.checkDelta <- function(delta) {
+  if(!is.numeric(delta) | length(delta) != 2 | any(delta < 0)) {
+    stop("'delta' needs to be a numeric vector of length 2 containing positive values.")
+  }
+  return(delta)
 }
 
 

@@ -1,4 +1,3 @@
-## decontXoneBatch
 library(celda)
 context("Testing DecontX functions")
 
@@ -7,7 +6,7 @@ modelDecontXoneBatch <- decontX(deconSim$observedCounts,
         z = deconSim$z,
         maxIter = 2)
 
-deconSim2 <- simulateContamination(K = 10, delta = 5)
+deconSim2 <- simulateContamination(K = 10, delta = c(1,5))
 batchDecontX <- decontX(cbind(deconSim$observedCounts,
     deconSim2$observedCounts),
         z = c(deconSim$z, deconSim2$z),
@@ -43,18 +42,15 @@ test_that(desc = "Testing DecontX on SCE", {
   newz = paste0("X", s$z)
   sce$newz2 = newz
   p <- plotDecontXMarkers(sce, z="newz2", markers = s$markers, assayName = "decontXcounts")
+  sce <- decontX(sce, estimateDelta = FALSE)
 })
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {
     expect_error(decontX(x = deconSim$observedCounts,
-        z = deconSim$z,
-        delta = -1),
-        "'delta' should be a single positive value.")
+        z = deconSim$z,delta = c(1,-1)))
     expect_error(decontX(x = deconSim$observedCounts,
-        z = deconSim$z,
-        delta = c(1, 1)),
-        "'delta' should be a single positive value.")
+        z = deconSim$z,delta = c(1,1,1)))
     expect_error(decontX(x = deconSim$observedCounts,
         z = c(deconSim$z, 1)),
         paste0("'z' must be of the same length as the number of cells in the",

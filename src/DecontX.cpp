@@ -11,6 +11,8 @@ Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double>& counts,
                      const NumericMatrix& eta,
                      const NumericMatrix& phi,
                      const IntegerVector& z,
+                     const bool& estimate_delta,
+                     const NumericVector& delta,
                      const double& pseudocount) {
 
   // Perform error checking
@@ -35,7 +37,10 @@ Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double>& counts,
   if(min(z) < 1 || max(z) > eta.ncol()) {
     stop("The entries in 'z' need to be between 1 and the number of columns in eta and phi.");
   }
-
+  if(delta.size() != 2 || sum(delta < 0) > 0) {
+    stop("'delta' must be a numeric vector of length 2 with positive integers.");
+  }
+  
   // Declare variables and functions
   NumericVector new_theta(theta.size());
   NumericVector native_total(theta.size());
@@ -100,14 +105,19 @@ Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double>& counts,
   NumericVector native_prop = 1 - contamination_prop;
   NumericMatrix theta_raw = cbind(native_prop, contamination_prop);
   
-  Rcpp::List result = f(Named("x", theta_raw)); 
-  NumericVector delta = result["alpha"];
-  new_theta = (native_total + delta[0]) / (counts_colsums + result["sum"]);
+  NumericVector new_delta = delta;
+  if(estimate_delta == TRUE) {
+    Rcpp::List result = f(Named("x", theta_raw)); 
+    new_delta = result["alpha"];
+  }
+  
+  // Estimate new theta
+  new_theta = (native_total + new_delta[0]) / (counts_colsums + sum(new_delta));
   
   return Rcpp::List::create(Rcpp::Named("phi") = new_phi,
                             Rcpp::Named("eta") = new_eta,
                             Rcpp::Named("theta") = new_theta,
-                            Rcpp::Named("delta") = delta,
+                            Rcpp::Named("delta") = new_delta,
                             Rcpp::Named("contamination") = contamination_prop);
 }
 
