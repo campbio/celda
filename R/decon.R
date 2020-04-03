@@ -104,6 +104,7 @@
 NULL
 
 #' @export
+#' @rdname decontX
 setGeneric("decontX", function(x, ...) standardGeneric("decontX"))
 
 
