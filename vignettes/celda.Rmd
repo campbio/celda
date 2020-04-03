@@ -16,16 +16,12 @@ date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
     toc: true
+    fig.retina: 1
 vignette: >
   %\VignetteIndexEntry{Analyzing single-cell RNA-seq count data with celda}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r setoptions, eval=TRUE, echo=FALSE}
-library(knitr)
-knitr::opts_chunk$set(dev = "png")
-```
 
 # Introduction
 

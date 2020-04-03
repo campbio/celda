@@ -9,19 +9,15 @@ author:
   affiliation: *id
   email: camp@bu.edu
 date: "`r Sys.Date()`"
-output:
+output: 
   BiocStyle::html_document:
     toc: true
+    fig.retina: 1
 vignette: >
   %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA in single-cell data with DecontX}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
-```{r setoptions, eval=TRUE, echo=FALSE}
-library(knitr)
-knitr::opts_chunk$set(dev = "png")
-```
 
 # Installation
 
