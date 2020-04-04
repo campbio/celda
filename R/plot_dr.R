@@ -18,6 +18,9 @@
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #'  Default 'blue'.
+#' @param midpoint Numeric. The value indicating the midpoint of the
+#' diverging color scheme. If \code{NULL}, defaults to the mean
+#' with 10 percent of values trimmed. Default \code{NULL}.
 #' @param varLabel Character vector. Title for the color legend.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
@@ -49,6 +52,7 @@ plotDimReduceGrid <- function(dim1,
     colorLow = "grey",
     colorMid = NULL,
     colorHigh = "blue",
+    midpoint = NULL,
     varLabel = NULL,
     ncol = NULL,
     headers = NULL) {
@@ -58,8 +62,14 @@ plotDimReduceGrid <- function(dim1,
     df <- df[!naIx, ]
 
     m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
-    colnames(m) <- c(xlab, ylab, "facet", varLabel)
+    colnames(m) <- c(xlab, ylab, "facet", "Expression")
 
+    if(is.null(midpoint)) {
+      midpoint <- mean(m[,4], trim = 0.1)
+    }
+    
+    varLabel <- gsub("_", " ", varLabel)
+    
     if (isFALSE(is.null(headers))) {
         names(headers) <- levels(m$facet)
         headers <- ggplot2::as_labeller(headers)
@@ -68,13 +78,13 @@ plotDimReduceGrid <- function(dim1,
             ggplot2::aes_string(x = xlab, y = ylab)) +
             ggplot2::geom_point(stat = "identity",
                 size = size,
-                ggplot2::aes_string(color = varLabel)) +
+                ggplot2::aes_string(color = m$Expression)) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(low = colorLow,
                 high = colorHigh,
                 mid = colorMid,
-                midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
-                name = gsub("_", " ", varLabel)) +
+                midpoint = midpoint,
+                name = varLabel) +
             ggplot2::theme(strip.background = ggplot2::element_blank(),
                 panel.grid.major = ggplot2::element_blank(),
                 panel.grid.minor = ggplot2::element_blank(),
@@ -92,14 +102,14 @@ plotDimReduceGrid <- function(dim1,
             ggplot2::aes_string(x = xlab, y = ylab)) +
             ggplot2::geom_point(stat = "identity",
                 size = size,
-                ggplot2::aes_string(color = varLabel)) +
+                ggplot2::aes_string(color = m$Expression)) +
             ggplot2::facet_wrap(~ facet) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(low = colorLow,
                 high = colorHigh,
                 mid = colorMid,
-                midpoint = (max(m[, 4]) + min(m[, 4])) / 2,
-                name = gsub("_", " ", varLabel)) +
+                midpoint = midpoint,
+                name = varLabel) +
             ggplot2::theme(strip.background = ggplot2::element_blank(),
                 panel.grid.major = ggplot2::element_blank(),
                 panel.grid.minor = ggplot2::element_blank(),
@@ -127,17 +137,19 @@ plotDimReduceGrid <- function(dim1,
 #'  reduction output.
 #' @param counts Integer matrix. Rows represent features and columns
 #'  represent cells.
-#' @param features Character vector. Uses these genes for plotting.
+#' @param features Character vector. Features in the rownames of counts to plot.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
-#'  used as labels. Otherwise, these headers are used to label the genes.
+#'  used as labels. Otherwise, these headers are used to label the features.
 #' @param normalize Logical. Whether to normalize the columns of `counts`.
-#'  Default TRUE.
+#'  Default \code{FALSE}. 
+#' @param zscore Logical. Whether to scale each feature to have a mean 0
+#' and standard deviation of 1. Default \code{TRUE}.
 #' @param exactMatch Logical. Whether an exact match or a partial match using
-#'  `grep()` is used to look up the feature in the rownames of the counts
+#'  \code{grep()} is used to look up the feature in the rownames of the counts
 #'   matrix. Default TRUE.
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for the data. This threshold is applied after row scaling.
-#'  Set to NULL to disable. Default c(-2,2).
+#'  Set to NULL to disable. Default \code{c(-1,1)}.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -147,6 +159,9 @@ plotDimReduceGrid <- function(dim1,
 #'  will be used to signify the midpoint on the scale. Default 'white'.
 #' @param colorHigh Character. A color available from `colors()`. The color
 #'  will be used to signify the highest values on the scale. Default 'red'.
+#' @param midpoint Numeric. The value indicating the midpoint of the
+#' diverging color scheme. If \code{NULL}, defaults to the mean
+#' with 10 percent of values trimmed. Default \code{NULL}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @return The plot as a ggplot object
@@ -158,6 +173,7 @@ plotDimReduceGrid <- function(dim1,
 #' plotDimReduceFeature(dim1 = celdaTsne[, 1],
 #'     dim2 = celdaTsne[, 2],
 #'     counts = celdaCGSim$counts,
+#'     normalize = TRUE,
 #'     features = c("Gene_99"),
 #'     exactMatch = TRUE)
 #' }
@@ -167,107 +183,81 @@ plotDimReduceFeature <- function(dim1,
     counts,
     features,
     headers = NULL,
-    normalize = TRUE,
+    normalize = FALSE,
+    zscore = TRUE,
     exactMatch = TRUE,
-    trim = c(-2, 2),
+    trim = c(-1, 1),
     size = 1,
     xlab = "Dimension_1",
     ylab = "Dimension_2",
-    colorLow = "blue",
+    colorLow = "blue4",
     colorMid = "white",
-    colorHigh = "red",
+    colorHigh = "firebrick1",
+    midpoint = NULL,
     ncol = NULL) {
 
-    if (isFALSE(is.null(headers))) {
-        if (length(headers) != length(features)) {
-            stop("Headers ",
-                headers,
-                " should be the same length as features ",
-                features)
-        }
-
-        if (isFALSE(exactMatch)) {
-            warning("exactMatch is FALSE. headers will not be used!")
-            headers <- NULL
-        }
+  # Perform checks
+  if (is.null(features)) {
+    stop("at least one feature is required to create a plot")
+  }
+  
+  if (isFALSE(is.null(headers))) {
+    if (length(headers) != length(features)) {
+      stop("Headers ",
+           headers,
+           " should be the same length as features ",
+           features)
     }
-
-    if (isTRUE(normalize)) {
-        counts <- normalizeCounts(counts,
-            transformationFun = sqrt,
-            scaleFun = base::scale)
+    
+    if (isFALSE(exactMatch)) {
+      warning("exactMatch is FALSE. headers will not be used!")
+      headers <- NULL
     }
-
-    if (is.null(features)) {
-        stop("at least one feature is required to create a plot")
+  }
+  
+  ## Normalize data if needed
+  if (isTRUE(normalize)) {
+    counts <- normalizeCounts(counts, transformationFun = sqrt)
+  }
+  
+  # After normalization, features can be selected
+  featuresIx <- retrieveFeatureIndex(features,
+                                     counts,
+                                     by = "rownames",
+                                     exactMatch = exactMatch)
+  counts <- as.matrix(counts[featuresIx, , drop = FALSE])
+  
+  # Scale/zscore data if needed
+  varLabel <- "Expression"
+  if(isTRUE(zscore)) {
+    counts <- t(scale(t(counts)))
+    varLabel <- "Scaled\nExpression"
+  }
+  
+  if (!is.null(trim)) {
+    if (length(trim) != 2) {
+      stop("'trim' should be a 2 element vector",
+           "specifying the lower and upper boundaries")
     }
-
-    if (!is.null(trim)) {
-        if (length(trim) != 2) {
-            stop("'trim' should be a 2 element vector",
-                "specifying the lower and upper boundaries")
-        }
-        trim <- sort(trim)
-        counts[counts < trim[1]] <- trim[1]
-        counts[counts > trim[2]] <- trim[2]
-        }
-
-    varLabel <- "Expression"
-    if (!isTRUE(exactMatch)) {
-        featuresIndices <- c()
-        notFound <- c()
-        for (gene in features) {
-            featuresIndices <-
-                c(featuresIndices, grep(gene, rownames(counts)))
-            if (length(grep(gene, rownames(counts))) == 0) {
-                notFound <- c(notFound, gene)
-            }
-        }
-        counts <- counts[featuresIndices, , drop = FALSE]
-        if (length(notFound) > 0) {
-            if (length(notFound) == length(features)) {
-                stop("None of the provided features had",
-                    "matching rownames in the provided counts matrix.")
-            }
-            warning("The following features were not",
-                "present in the provided count matrix: ",
-                paste(notFound,
-                    sep = "",
-                    collapse = ","))
-        }
-    } else {
-        featuresNotFound <- setdiff(features,
-            intersect(features, rownames(counts)))
-        if (length(featuresNotFound) > 0) {
-            if (length(featuresNotFound) == length(features)) {
-                stop("None of the provided features had matching",
-                    "rownames in the provided counts matrix.")
-            }
-            warning("The following features were not present in",
-                "the provided count matrix: ",
-                paste(featuresNotFound,
-                    sep = "",
-                    collapse = ","))
-            if (isFALSE(is.null(headers))) {
-                whichHeadersNotFound <- which(featuresNotFound == features)
-                headers <- headers[-whichHeadersNotFound]
-            }
-        }
-        featuresFound <- setdiff(features, featuresNotFound)
-        counts <- counts[featuresFound, , drop = FALSE]
-    }
-    plotDimReduceGrid(dim1,
-        dim2,
-        counts,
-        size,
-        xlab,
-        ylab,
-        colorLow,
-        colorMid,
-        colorHigh,
-        varLabel,
-        ncol,
-        headers)
+    trim <- sort(trim)
+    counts[counts < trim[1]] <- trim[1]
+    counts[counts > trim[2]] <- trim[2]
+  }
+  
+  
+  plotDimReduceGrid(dim1 = dim1,
+                    dim2 = dim2,
+                    matrix = counts,
+                    size = size,
+                    xlab = xlab,
+                    ylab = ylab,
+                    colorLow = colorLow,
+                    colorMid = colorMid,
+                    colorHigh = colorHigh,
+                    varLabel = varLabel,
+                    midpoint = midpoint,
+                    ncol = ncol,
+                    headers = headers)
 }
 
 
@@ -355,17 +345,17 @@ plotDimReduceModule <-
         }
 
         rownames(matrix) <- paste0("L", rownames(matrix))
-        plotDimReduceGrid(dim1,
-            dim2,
-            matrix,
-            size,
-            xlab,
-            ylab,
-            colorLow,
-            colorMid,
-            colorHigh,
-            varLabel,
-            ncol)
+        plotDimReduceGrid(dim1 = dim1,
+            dim2 = dim2,
+            matrix = matrix,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            colorLow = colorLow,
+            colorMid = colorMid,
+            colorHigh = colorHigh,
+            varLabel = varLabel,
+            ncol = ncol)
     }
 
 

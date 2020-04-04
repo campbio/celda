@@ -188,6 +188,7 @@ plotDimReduceModule(dim1 = tsne[, 1],
 plotDimReduceFeature(dim1 = tsne[, 1],
     dim2 = tsne[, 2],
     counts = simCounts$counts,
+    normalize = TRUE,
     features = "Gene_1")
 ```
 

@@ -84,9 +84,9 @@ plotDecontXContamination(pbmc4k)
 Known marker genes can also be plotted on the UMAP to identify the cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ, S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells, GNLY for NK-cells, and PPBP for megakaryocytes.
 
 ```{r, }
-temp <- as.matrix(counts(pbmc4k))
-temp <- temp[rowSums(temp) > 0,]
-plotDimReduceFeature(umap[,1], umap[,2], temp, features = c("CD3D", "CD3E", "GNLY", "LYZ", "S100A8", "S100A9", "CD79A", "CD79B", "MS4A1"), exactMatch = TRUE)
+library(scater)
+pbmc4k <- logNormCounts(pbmc4k)
+plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k), features = c("CD3D", "CD3E", "GNLY", "LYZ", "S100A8", "S100A9", "CD79A", "CD79B", "MS4A1"), exactMatch = TRUE)
 ```
 
 ## Barplot of markers detected in cell clusters

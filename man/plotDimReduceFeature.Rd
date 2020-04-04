@@ -10,15 +10,17 @@ plotDimReduceFeature(
   counts,
   features,
   headers = NULL,
-  normalize = TRUE,
+  normalize = FALSE,
+  zscore = TRUE,
   exactMatch = TRUE,
-  trim = c(-2, 2),
+  trim = c(-1, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "blue",
+  colorLow = "blue4",
   colorMid = "white",
-  colorHigh = "red",
+  colorHigh = "firebrick1",
+  midpoint = NULL,
   ncol = NULL
 )
 }
@@ -32,21 +34,24 @@ reduction output.}
 \item{counts}{Integer matrix. Rows represent features and columns
 represent cells.}
 
-\item{features}{Character vector. Uses these genes for plotting.}
+\item{features}{Character vector. Features in the rownames of counts to plot.}
 
 \item{headers}{Character vector. If `NULL`, the corresponding rownames are
-used as labels. Otherwise, these headers are used to label the genes.}
+used as labels. Otherwise, these headers are used to label the features.}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`.
-Default TRUE.}
+Default \code{FALSE}.}
+
+\item{zscore}{Logical. Whether to scale each feature to have a mean 0
+and standard deviation of 1. Default \code{TRUE}.}
 
 \item{exactMatch}{Logical. Whether an exact match or a partial match using
-`grep()` is used to look up the feature in the rownames of the counts
+\code{grep()} is used to look up the feature in the rownames of the counts
  matrix. Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for the data. This threshold is applied after row scaling.
-Set to NULL to disable. Default c(-2,2).}
+Set to NULL to disable. Default \code{c(-1,1)}.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -62,6 +67,10 @@ will be used to signify the midpoint on the scale. Default 'white'.}
 
 \item{colorHigh}{Character. A color available from `colors()`. The color
 will be used to signify the highest values on the scale. Default 'red'.}
+
+\item{midpoint}{Numeric. The value indicating the midpoint of the
+diverging color scheme. If \code{NULL}, defaults to the mean
+with 10 percent of values trimmed. Default \code{NULL}.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
@@ -83,6 +92,7 @@ celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
 plotDimReduceFeature(dim1 = celdaTsne[, 1],
     dim2 = celdaTsne[, 2],
     counts = celdaCGSim$counts,
+    normalize = TRUE,
     features = c("Gene_99"),
     exactMatch = TRUE)
 }
