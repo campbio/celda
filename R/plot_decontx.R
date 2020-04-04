@@ -91,8 +91,9 @@ plotDecontXContamination <- function(x,
 #' \code{list(Tcells=c(1, 2), Bcells=7)} would recode clusters 1 and 2 to "Tcells"
 #' and cluster 7 to "Bcells". Note that if this is used, clusters in \code{z} not found
 #' in \code{groupClusters} will be excluded from the barplot. Default \code{NULL}.
-#' @param assayName Character. Name of the assay to use for the counts if \code{x} is a
-#' \linkS4class{SingleCellExperiment}.
+#' @param assayName Character. Name of the assay to plot if \code{x} is a
+#' \linkS4class{SingleCellExperiment}. If more than one assay is listed, then 
+#' side-by-side barplots will be generated. Default \code{c("counts", "decontXcounts")}.
 #' @param z Character, Integer, or Vector. Used to get the cluster labels for each cell. 
 #' If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL}, then 
 #' the cluster labels from \code{\link{decontX}} will be retived from the
@@ -110,7 +111,6 @@ plotDecontXContamination <- function(x,
 #' be considered detected in a cell. Default 1.
 #' @param ncol Integer. Number of columns to make in the plot.
 #' Default \code{round(sqrt(length(markers))}. 
-#' @param color Character. Color to make the bars. Default \code{"red3"}.
 #' @param labelBars Boolean. Whether to display percentages above each bar Default
 #' \code{TRUE}.
 #' @param labelSize Numeric. Size of the percentage labels in the barplot. Default 3.
@@ -119,11 +119,14 @@ plotDecontXContamination <- function(x,
 #' @seealso See \code{\link{decontX}} for a full example of how to estimate
 #' and plot contamination. 
 #' @export
-plotDecontXMarkers <- function(x, markers, groupClusters = NULL, assayName = "counts",
+plotDecontXMarkers <- function(x, markers, groupClusters = NULL,
+                               assayName = c("counts", "decontXcounts"),
                                z = NULL, by = "rownames",  threshold = 1,
                                ncol = round(sqrt(length(markers))),
-                               color = "red3", labelBars = TRUE, labelSize = 3) {
+                               labelBars = TRUE, labelSize = 3) {
 
+    legend <- "none"
+    
     # Process z and convert to a factor
     if(is.null(z) & inherits(x, "SingleCellExperiment")) {
       if(!("decontX_clusters" %in% colnames(SummarizedExperiment::colData(x)))) {
@@ -195,36 +198,44 @@ plotDecontXMarkers <- function(x, markers, groupClusters = NULL, assayName = "co
     geneMarkerCellTypeIndex <- geneMarkerCellTypeIndex[!na.ix]
     geneMarkerIndex <- geneMarkerIndex[!na.ix]
     
-    # Get counts matrix and convert to DelayedMatrix
     if(inherits(x, "SingleCellExperiment")) {
-      counts <- SummarizedExperiment::assay(x[geneMarkerIndex,], assayName)
+      # If 'x' is SingleCellExperiment, then get percentage
+      # for each matrix in 'assayName'
+      df.list <- list()
+      for(i in seq_along(assayName)) {
+        counts <- SummarizedExperiment::assay(x[geneMarkerIndex,], assayName[i])  
+        df <- .calculateDecontXBarplotPercent(counts,
+                                        z,
+                                        geneMarkerCellTypeIndex,
+                                        threshold)
+        df.list[[i]] <- cbind(df, assay = assayName[i])
+      }
+      df <- do.call(rbind, df.list)
+      assay <- as.factor(df$assay)
+      if(length(assayName) > 1) {
+        legend <- "right"
+      }
     } else {
+      ## If 'x' is matrix, then calculate percentages directly
       counts <- x[geneMarkerIndex,]
+      df <- .calculateDecontXBarplotPercent(counts,
+                                            z,
+                                            geneMarkerCellTypeIndex,
+                                            threshold)
+      assay <- "red3"
+      legend <- "none"
     }
-    counts <- DelayedArray::DelayedArray(counts)
-    
-    # Convert to boolean matrix and sum markers in same cell type
-    # The "+ 0" is to convert boolean to numeric
-    counts <- counts >= threshold
-    countsByMarker <- DelayedArray::rowsum(counts + 0, geneMarkerCellTypeIndex)
-    countsByCellType <- DelayedArray::colsum((countsByMarker > 0) + 0, z)
-    
-    # Calculate percentages within each cell cluster
-    zTotals <- tabulate(z)
-    percentByCellType <- round(sweep(countsByCellType, 2, zTotals, "/") * 100)
-    
+
     # Build data.frame for ggplots
-    df <- reshape2::melt(percentByCellType,
-                                          varnames = c("markers", "cellType"),
-                                          value.name = "percent")
     df <- cbind(df, cellTypeLabels = names(groupClusters)[df$cellType])
     df$cellTypeLabels <- factor(df$cellTypeLabels, levels = names(groupClusters))
     df <- cbind(df, markerLabels = names(markers)[df$markers])
     df$markerLabels <- factor(df$markerLabels, levels = names(markers))
     
     plt <- ggplot2::ggplot(df, ggplot2::aes(x = df$cellTypeLabels,
-        y = df$percent)) +
-        ggplot2::geom_bar(stat = "identity", fill = color) +
+        y = df$percent, fill = assay)) +
+        ggplot2::geom_bar(stat = "identity",
+                position = position_dodge2(width = 0.9, preserve = "single")) +
         ggplot2::xlab(xlab) +
         ggplot2::ylab(paste0("Percentage of cells expressing markers")) +
         ggplot2::facet_wrap(. ~ df$markerLabels, ncol = ncol) +
@@ -232,7 +243,7 @@ plotDecontXMarkers <- function(x, markers, groupClusters = NULL, assayName = "co
             panel.background = ggplot2::element_rect(fill = "white",
                 color = "grey"),
             panel.grid = ggplot2::element_line("grey"),
-            legend.position = "none",
+            legend.position = legend,
             legend.key = ggplot2::element_rect(fill = "white",
                 color = "white"),
             panel.grid.minor = ggplot2::element_blank(),
@@ -248,9 +259,31 @@ plotDecontXMarkers <- function(x, markers, groupClusters = NULL, assayName = "co
 
     if(isTRUE(labelBars)){
       plt <- plt + ggplot2::geom_text(aes(x = df$cellTypeLabels,
-                                          y = df$percent + 2.5,
-                                          label = df$percent),
-                                      size = labelSize)
+                  y = df$percent + 2.5,
+                  label = df$percent),
+                  position = position_dodge2(width = 0.9, preserve = "single"),
+                  size = labelSize)
     }
     return(plt)
+}
+
+.calculateDecontXBarplotPercent <- function(counts, z, geneMarkerCellTypeIndex, threshold) {
+
+  # Get counts matrix and convert to DelayedMatrix
+  counts <- DelayedArray::DelayedArray(counts)
+  
+  # Convert to boolean matrix and sum markers in same cell type
+  # The "+ 0" is to convert boolean to numeric
+  counts <- counts >= threshold
+  countsByMarker <- DelayedArray::rowsum(counts + 0, geneMarkerCellTypeIndex)
+  countsByCellType <- DelayedArray::colsum((countsByMarker > 0) + 0, z)
+  
+  # Calculate percentages within each cell cluster
+  zTotals <- tabulate(z)
+  percentByCellType <- round(sweep(countsByCellType, 2, zTotals, "/") * 100)
+  df <- reshape2::melt(percentByCellType,
+                       varnames = c("markers", "cellType"),
+                       value.name = "percent")
+  
+  return(df)
 }

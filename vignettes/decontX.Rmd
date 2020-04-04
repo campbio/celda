@@ -19,6 +19,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Introduction
+Droplet-based microfluidic devices have become widely used to perform single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in the cell suspension can be aberrantly counted along with a cell’s native mRNA and result in cross-contamination of transcripts between different cell populations. DecontX is a Bayesian method to estimate and remove contamination in individual cells. DecontX assumes the observed expression of a cell is a mixture of counts from two multinomial distributions: (1) a distribution of native transcript counts from the cell’s actual population and (2) a distribution of contaminating transcript counts from all other cell populations captured in the assay. Overall, computational decontamination of single cell counts can aid in downstream clustering and visualization.
+
 # Installation
 
 celda can be installed from Bioconductor:
@@ -104,8 +107,14 @@ We can then look to see how much DecontX removed aberrant expression of marker g
 plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "decontXcounts")
 ```
 
-Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells. Some important considerations when making barplots:
+Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells.
+The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the `assayName` parameter. This ooption only available if the data is stored in `SingleCellExperiment` object.
 
+```{r barplotBoth}
+plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = c("counts", "decontXcounts"))
+```
+
+Some important considerations when using this barplot function:
 * Cell clusters can be renamed and re-grouped using the `groupCluster` parameter, which also needs to be a named list. If `groupCluster` is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set `cellTypeMappings <- list(NK_Tcells=c(2,6), Bcells=5, Monocytes=1)`
 * The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
 * If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 

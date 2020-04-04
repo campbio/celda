@@ -8,12 +8,11 @@ plotDecontXMarkers(
   x,
   markers,
   groupClusters = NULL,
-  assayName = "counts",
+  assayName = c("counts", "decontXcounts"),
   z = NULL,
   by = "rownames",
   threshold = 1,
   ncol = round(sqrt(length(markers))),
-  color = "red3",
   labelBars = TRUE,
   labelSize = 3
 )
@@ -34,8 +33,9 @@ one of the marker genes in the list.}
 and cluster 7 to "Bcells". Note that if this is used, clusters in \code{z} not found
 in \code{groupClusters} will be excluded from the barplot. Default \code{NULL}.}
 
-\item{assayName}{Character. Name of the assay to use for the counts if \code{x} is a
-\linkS4class{SingleCellExperiment}.}
+\item{assayName}{Character. Name of the assay to plot if \code{x} is a
+\linkS4class{SingleCellExperiment}. If more than one assay is listed, then 
+side-by-side barplots will be generated. Default \code{c("counts", "decontXcounts")}.}
 
 \item{z}{Character, Integer, or Vector. Used to get the cluster labels for each cell. 
 If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL}, then 
@@ -57,8 +57,6 @@ be considered detected in a cell. Default 1.}
 
 \item{ncol}{Integer. Number of columns to make in the plot.
 Default \code{round(sqrt(length(markers))}.}
-
-\item{color}{Character. Color to make the bars. Default \code{"red3"}.}
 
 \item{labelBars}{Boolean. Whether to display percentages above each bar Default
 \code{TRUE}.}
