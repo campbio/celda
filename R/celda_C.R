@@ -1005,14 +1005,15 @@ setMethod("celda_C",
 }
 
 
-#' @title tSNE for celda_C
-#' @description Embeds cells in two dimensions using tSNE based on a `celda_C`
+#' @title t-Distributed Stochastic Neighbor Embedding (t-SNE) for celda
+#'  \code{SCE} object
+#' @description Embeds cells in two dimensions using t-SNE based on a celda
 #'  model. PCA on the normalized counts is used to reduce the number of
-#'  features before applying tSNE.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_C`.
+#'  features before applying t-SNE.
+#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
+#'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
 #'  requires more memory. If NULL, no subsampling will be performed.
@@ -1031,13 +1032,20 @@ setMethod("celda_C",
 #' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
 #'  expression
 #' @examples
-#' data(celdaCSim, celdaCMod)
-#' tsneRes <- celdaTsne(celdaCSim$counts, celdaCMod)
-#' @return A two column matrix of t-SNE coordinates
+#' data(sceCelda_CG)
+#' tsneRes <- celdaTsne(sceCelda_CG)
+#' @return \code{sce} with t-SNE coordinates (columns celdatSNE1 & celdatSNE2)
+#'  added to \link[SummarizedExperiment]{colData}.
 #' @export
-setMethod("celdaTsne", signature(celdaMod = "celda_C"),
-    function(counts,
-        celdaMod,
+setGeneric("celdaTsne",
+    function(sce, ...) {
+        standardGeneric("celdaTsne")
+    })
+
+
+setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
+    function(sce,
+        useAssay = "counts",
         maxCells = NULL,
         minClusterSize = 100,
         initialDims = 20,
@@ -1046,8 +1054,8 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
         seed = 12345) {
 
         if (is.null(seed)) {
-            res <- .celdaTsneC(counts = counts,
-                celdaMod = celdaMod,
+            res <- .celdaTsne(sce = sce,
+                useAssay = useAssay,
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
                 initialDims = initialDims,
@@ -1055,8 +1063,8 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
                 maxIter = maxIter)
         } else {
             with_seed(seed,
-                res <- .celdaTsneC(counts = counts,
-                    celdaMod = celdaMod,
+                res <- .celdaTsne(sce = sce,
+                    useAssay = useAssay,
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
                     initialDims = initialDims,
@@ -1064,34 +1072,45 @@ setMethod("celdaTsne", signature(celdaMod = "celda_C"),
                     maxIter = maxIter))
         }
 
-        return(res)
+        SummarizedExperiment::colData(sce)["celdatSNE1"] <- res$tSNE1
+        SummarizedExperiment::colData(sce)["celdatSNE2"] <- res$tSNE2
+        return(sce)
     })
 
 
-.celdaTsneC <- function(counts,
-    celdaMod,
-    maxCells = NULL,
-    minClusterSize = 100,
-    initialDims = 20,
-    perplexity = 20,
-    maxIter = 2500) {
+.celdaTsne <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    initialDims,
+    perplexity,
+    maxIter) {
 
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(counts,
-        celdaMod,
-        maxCells,
-        minClusterSize)
+    celdaMod <- celdaModel(sce)
 
-    res <- .calculateTsne(preparedCountInfo$norm,
-        perplexity = perplexity,
-        maxIter = maxIter,
-        doPca = TRUE,
-        initialDims = initialDims)
+    if (celdaMod == "celda_C") {
+        preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce,
+            useAssay,
+            maxCells,
+            minClusterSize)
 
-    final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-    final[preparedCountInfo$cellIx, ] <- res
-    rownames(final) <- colnames(counts)
-    colnames(final) <- c("tSNE1", "tSNE_2")
-    return(final)
+        res <- .calculateTsne(preparedCountInfo$norm,
+            perplexity = perplexity,
+            maxIter = maxIter,
+            doPca = TRUE,
+            initialDims = initialDims)
+
+        final <- matrix(NA, nrow = ncol(sce), ncol = 2)
+        final[preparedCountInfo$cellIx, ] <- res
+        rownames(final) <- colnames(sce)
+        colnames(final) <- c("tSNE1", "tSNE2")
+        return(final)
+    } else if (celdaMod == "celda_G") {
+
+    } else if (celdaMod == "celda_CG") {
+
+    }
+
 }
 
 
@@ -1217,23 +1236,25 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 }
 
 
-.prepareCountsForDimReductionCeldaC <- function(counts,
-    celdaMod,
-    maxCells = NULL,
-    minClusterSize = 100) {
+.prepareCountsForDimReductionCeldaC <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize) {
 
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    compareCountMatrix(counts, celdaMod)
+    #compareCountMatrix(counts, celdaMod)
 
     ## Checking if maxCells and minClusterSize will work
     if (!is.null(maxCells)) {
       if ((maxCells < ncol(counts)) &
-            (maxCells / minClusterSize < params(celdaMod)$K)) {
+            (maxCells / minClusterSize <
+                    S4Vectors::metadata(sce)$celda_parameters$K)) {
 
         stop("Cannot distribute ",
             maxCells,
             " cells among ",
-            params(celdaMod)$K,
+            S4Vectors::metadata(sce)$celda_parameters$K,
             " clusters while maintaining a minumum of ",
             minClusterSize,
             " cells per cluster. Try increasing 'maxCells' or decreasing",
@@ -1248,7 +1269,8 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(clusters(celdaMod)$z, params(celdaMod)$K)
+        zTa <- tabulate(clusters(sce),
+            S4Vectors::metadata(sce)$celda_parameters$K)
 
         ## Number of cells that can be sampled from each cluster without
         ## going below the minimum threshold
@@ -1266,7 +1288,7 @@ setMethod("celdaUmap", signature(celdaMod = "celda_C"),
 
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
-            zInclude[sample(which(clusters(celdaMod)$z == i),
+            zInclude[sample(which(clusters(sce) == i),
                 clusterNToSample[i])] <- FALSE
         }
     }

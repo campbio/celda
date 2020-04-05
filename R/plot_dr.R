@@ -488,10 +488,10 @@ plotDimReduceCluster <- function(dim1,
 # input in tSNE. Default 50.
 #' @importFrom Rtsne Rtsne
 .calculateTsne <- function(norm,
-    perplexity = 20,
-    maxIter = 2500,
-    doPca = FALSE,
-    initialDims = 50) {
+    perplexity,
+    maxIter,
+    doPca,
+    initialDims) {
 
     res <- Rtsne::Rtsne(
         norm,

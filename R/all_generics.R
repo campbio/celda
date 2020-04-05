@@ -250,7 +250,8 @@ setMethod("celdaModel",
             },
             error = function(e) {
                 message("S4Vectors::metadata(sce)$celda_parameters$model must",
-                    " exist")
+                    " exist! Try running celda model (celda_C, celda_CG, or",
+                    " celda_G) first.")
                 stop(e)
             })
     })
@@ -467,6 +468,7 @@ setGeneric("celdaHeatmap",
 #' celdaHeatmap(sceCelda_C)
 #' @return list A list containing dendrograms and the heatmap grob
 #' @export
+#' @rdname celdaHeatmap
 setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", featureIx = NULL, nfeatures = 25, ...) {
 
