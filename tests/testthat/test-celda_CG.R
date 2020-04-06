@@ -388,34 +388,34 @@ test_that(desc = "Testing topRank with celda_CG", {
 
 # celdaHeatmap
 test_that(desc = "Testing celdaHeatmap with celda_CG", {
-  p <- celdaHeatmap(celdaMod = modelCG, counts = celdaCGSim$counts)
-  expect_equal(names(p), c("treeRow", "treeCol", "gtable"))
+  plt <- celdaHeatmap(celdaMod = modelCG, counts = celdaCGSim$counts)
+  expect_equal(names(plt), c("treeRow", "treeCol", "gtable"))
 })
 
 # moduleHeatmap
 test_that(desc = "Checking moduleHeatmap to see if it runs", {
-    expect_equal(names(moduleHeatmap(celdaCGSim$counts,
+    expect_equal(names(plt <- moduleHeatmap(celdaCGSim$counts,
         celdaMod = modelCG,
         featureModule = c(2, 3),
         topCells = 500)),
         c("treeRow", "treeCol", "gtable"))
-    expect_equal(names(moduleHeatmap(celdaCGSim$counts,
+    expect_equal(names(plt <- moduleHeatmap(celdaCGSim$counts,
         celdaMod = modelCG,
         topFeatures = 15,
         topCells = 15,
         normalizedCounts = NA)),
         c("treeRow", "treeCol", "gtable"))
-    expect_equal(names(moduleHeatmap(celdaCGSim$counts,
+    expect_equal(names(plt <- moduleHeatmap(celdaCGSim$counts,
         celdaMod = modelCG,
         topFeatures = 15,
         topCells = NULL,
         normalizedCounts = NA)),
         c("treeRow", "treeCol", "gtable"))
-    expect_error(moduleHeatmap(counts = "counts",
+    expect_error(plt <- moduleHeatmap(counts = "counts",
         celdaMod = modelCG,
         featureModule = c(2, 3)),
         "'counts' should be a numeric count matrix")
-    expect_error(moduleHeatmap(counts = celdaCGSim$counts,
+    expect_error(plt <- moduleHeatmap(counts = celdaCGSim$counts,
         celdaMod = "model",
         featureModule = c(2, 3)),
         "'celdaMod' should be an object of class celda_G or celda_CG")
@@ -486,7 +486,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
         maxIter = 50,
         celdaMod = modelCG,
         maxCells = 500)
-    expect_equal(names(plotDimReduceCluster(dim1 = celdaTsne[, 1],
+    expect_equal(names(plt <- plotDimReduceCluster(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         cluster = as.factor(modelCG@clusters$z),
         specificClusters = c(1, 2, 3))),
@@ -500,7 +500,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
             "plot_env",
             "labels",
             "guides"))
-    expect_equal(names(plotDimReduceCluster(
+    expect_equal(names(plt <- plotDimReduceCluster(
         dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         cluster = as.factor(modelCG@clusters$z),
@@ -516,7 +516,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
             "plot_env",
             "labels",
             "guides"))
-    expect_equal(names(plotDimReduceModule(
+    expect_equal(names(plt <- plotDimReduceModule(
         dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
@@ -531,7 +531,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
             "facet",
             "plot_env",
             "labels"))
-    expect_equal(names(plotDimReduceModule(dim1 = celdaTsne[, 1],
+    expect_equal(names(plt <- plotDimReduceModule(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         celdaMod = modelCG,
@@ -546,7 +546,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
             "facet",
             "plot_env",
             "labels"))
-    expect_equal(names(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_equal(names(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = c("Gene_99"),
@@ -560,7 +560,7 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
             "facet",
             "plot_env",
             "labels"))
-    expect_equal(names(plotDimReduceFeature(
+    expect_equal(names(plt <- plotDimReduceFeature(
         dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
@@ -575,23 +575,23 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
             "facet",
             "plot_env",
             "labels"))
-    expect_error(plotDimReduceModule(dim1 = celdaTsne[, 1],
+    expect_error(plt <- plotDimReduceModule(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         celdaMod = modelCG,
         modules = c(11, 12)))
-    expect_error(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_error(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = NULL,
         exactMatch = TRUE))
-    expect_error(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_error(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = c("Gene_99"),
         trim = 2,
         exactMatch = TRUE))
-    expect_error(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_error(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = c("Nonexistent_Gene"),
@@ -599,17 +599,17 @@ test_that(desc = "Testing plotDimReduce* with celda_CG", {
 
     # Check cases when there are some or all features not present in the counts
     # matrix
-    expect_error(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_error(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = c("Nonexistent_Gene"),
         exactMatch = TRUE))
-    expect_warning(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_warning(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = c("Gene_99", "Nonexistent_Gene"),
         exactMatch = TRUE))
-    expect_warning(plotDimReduceFeature(dim1 = celdaTsne[, 1],
+    expect_warning(plt <- plotDimReduceFeature(dim1 = celdaTsne[, 1],
         dim2 = celdaTsne[, 2],
         counts = celdaCGSim$counts,
         features = c("Gene_99", "Nonexistent_Gene"),
@@ -663,7 +663,7 @@ test_that(desc = paste0("Testing celdaUmap with celda_CG when model class is",
     " changed, should error"), {
         modelX <- modelCG
         class(modelX) <- "celda_X"
-        expect_error(celdaUmap(counts = celdaCGSim$counts, celdaMod = modelX),
+        expect_error(plt <- celdaUmap(counts = celdaCGSim$counts, celdaMod = modelX),
             "unable to find")
     })
 
@@ -812,8 +812,8 @@ test_that(desc = "Testing perplexity.celda_CG", {
 #     expect_equal(ncol(table), 10)
 # })
 
-test_that(desc = "Testing violinPlot", {
-    violin <- violinPlot(counts = celdaCGSim$counts,
+test_that(desc = "Testing plotCeldaViolin", {
+    violin <- plotCeldaViolin(counts = celdaCGSim$counts,
         celdaMod = modelCG,
         features = "Gene_1")
     expect_equal(names(violin),

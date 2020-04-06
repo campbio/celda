@@ -2790,9 +2790,9 @@ plotMarkerDendro <- function(tree,
 
     # Add metacluster labels to top of plot
     dendroP <- dendroP +
-      geom_text(
+      ggplot2::geom_text(
         data = metaclusterText,
-        aes(
+        ggplot2::aes(
           x = metaclusterText$xend,
           y = metaclusterText$y,
           label = metaclusterText$label,
@@ -2805,7 +2805,7 @@ plotMarkerDendro <- function(tree,
       )
 
     # adjust coordinates of plot to show labels
-    dendroP <- dendroP + coord_cartesian(
+    dendroP <- dendroP + ggplot2::coord_cartesian(
       ylim =
         c(
           0,

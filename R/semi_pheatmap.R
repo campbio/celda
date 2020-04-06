@@ -1790,7 +1790,7 @@ semiPheatmap <- function(mat,
         grid.draw(gt)
     }
 
-    invisible(list(treeRow = treeRow,
+    return(list(treeRow = treeRow,
         treeCol = treeCol,
         gtable = gt))
 }

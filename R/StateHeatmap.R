@@ -127,7 +127,7 @@ moduleHeatmap <- function(counts,
         }
     }
 
-    plotHeatmap(
+    plt <- plotHeatmap(
         filteredNormCounts,
         z = zToPlot,
         y = clusters(celdaMod)$y[geneIx],
@@ -137,4 +137,5 @@ moduleHeatmap <- function(counts,
         clusterFeature = FALSE,
         clusterCell = FALSE,
         annotationColor = anno_cell_colors)
+    return(plt)
 }

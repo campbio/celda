@@ -12,12 +12,16 @@ date: "`r Sys.Date()`"
 output: 
   BiocStyle::html_document:
     toc: true
-    fig.retina: 1
+    fig.retina: 0.5
 vignette: >
   %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA in single-cell data with DecontX}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 # Introduction
 Droplet-based microfluidic devices have become widely used to perform single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in the cell suspension can be aberrantly counted along with a cell’s native mRNA and result in cross-contamination of transcripts between different cell populations. DecontX is a Bayesian method to estimate and remove contamination in individual cells. DecontX assumes the observed expression of a cell is a mixture of counts from two multinomial distributions: (1) a distribution of native transcript counts from the cell’s actual population and (2) a distribution of contaminating transcript counts from all other cell populations captured in the assay. Overall, computational decontamination of single cell counts can aid in downstream clustering and visualization.
@@ -98,27 +102,47 @@ markers <- list(Tcell_Markers=c("CD3E", "CD3D"),
                     Monocyte_Markers=c("S100A8", "S100A9", "LYZ"),
                     NKcell_Markers="GNLY")
 cellTypeMappings <- list(Tcells=2, Bcells=5, Monocytes=1, NKcells=6)
-plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "counts")
+plotDecontXMarkerPercentage(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "counts")
 ```
 
 We can then look to see how much DecontX removed aberrant expression of marker genes in each cell type by changing the `assayName` to `decontXcounts`:
 
 ```{r barplotDecontCounts}
-plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "decontXcounts")
+plotDecontXMarkerPercentage(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "decontXcounts")
 ```
 
 Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells.
 The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the `assayName` parameter. This ooption only available if the data is stored in `SingleCellExperiment` object.
 
 ```{r barplotBoth}
-plotDecontXMarkers(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = c("counts", "decontXcounts"))
+plotDecontXMarkerPercentage(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = c("counts", "decontXcounts"))
 ```
 
-Some important considerations when using this barplot function:
-* Cell clusters can be renamed and re-grouped using the `groupCluster` parameter, which also needs to be a named list. If `groupCluster` is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set `cellTypeMappings <- list(NK_Tcells=c(2,6), Bcells=5, Monocytes=1)`
-* The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
-* If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 
+Some helpful hints when using `plotDecontXMarkerPercentage`:
 
+1. Cell clusters can be renamed and re-grouped using the `groupCluster` parameter, which also needs to be a named list. If `groupCluster` is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set `cellTypeMappings <- list(NK_Tcells=c(2,6), Bcells=5, Monocytes=1)`
+2. The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
+3. If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 
+
+## Violin plot to compare distributions of original can decontaminated counts
+Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `DecontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
+
+```{r plotDecontXMarkerExpression}
+plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]], groupClusters = cellTypeMappings, ncol = 3)
+```
+
+Some helfpul hints when using `plotDecontXMarkerExpression`:
+1. `groupClusters` works the same way as in `plotDecontXMarkerPercentage`.
+2. This function will plot each pair of marker and cluster (or cell type specified by `groupClusters`). Therefore, you may want to keep the number of markers small in each plot and call the function multiple times for different sets of marker genes. 
+3. You can also plot the individual points by setting `plotDots = TRUE` and/or log tranform the points on the fly by setting `log1p = TRUE`. 
+4. This function can plot any assay in a `SingleCellExperiment`. Therefore you could also examine normalized expression of the original and decontaminated counts. For example:
+
+
+```{r plot_norm_counts, eval = FALSE}
+pbmc4k <- scater::logNormCounts(pbmc4k, exprs_values = "decontXcounts", name="dlogcounts")
+
+plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]], groupClusters = cellTypeMappings, ncol = 3, assayName = c("logcounts", "dlogcounts"))
+```
 
 
 # Other important notes

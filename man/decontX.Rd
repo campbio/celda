@@ -151,10 +151,19 @@ plotDecontXContamination(sce)
 umap <- reducedDim(sce)
 plotDimReduceCluster(umap[,1], umap[,2], sce$decontX_clusters)
 
-# Plot expression of marker genes in each cell cluster before decontamination
+# Plot percentage of marker genes detected
+# in each cell cluster before decontamination
 s$markers
-plotDecontXMarkers(sce, markers = s$markers, assayName="counts")
+plotDecontXMarkerPercentage(sce, markers = s$markers, assayName="counts")
 
-# Plot expression of marker genes in each cell cluster after contamination
-plotDecontXMarkers(sce, markers = s$markers, assayName="decontXcounts")
+# Plot percentage of marker genes detected
+# in each cell cluster after contamination
+plotDecontXMarkerPercentage(sce, markers = s$markers, assayName="decontXcounts")
+
+# Plot percentage of marker genes detected in each cell
+# comparing original and decontaminated counts side-by-side
+plotDecontXMarkerPercentage(sce, markers = s$markers, assayName=c("counts", "decontXcounts"))
+
+# Plot raw counts of indiviual markers genes before and after decontamination
+plotDecontXMarkerExpression(sce, unlist(s$markers))
 }

@@ -27,8 +27,9 @@ test_that(desc = "Testing simulateContamination", {
 test_that(desc = "Testing DecontX on counts matrix", {
   s <- simulateContamination()
   res <- decontX(s$observedCounts)
-  p <- plotDecontXMarkers(s$observedCounts, z=res$z, markers = s$markers)
-  p <- plotDecontXMarkers(res$decontXcounts, z=res$z, markers = s$markers)
+  p <- plotDecontXMarkerPercentage(s$observedCounts, z=res$z, markers = s$markers)
+  p <- plotDecontXMarkerPercentage(res$decontXcounts, z=res$z, markers = s$markers)
+  p <- plotDecontXMarkerExpression(s$observedCounts, s$markers[[1]], z=s$z)
   p <- plotDecontXContamination(res)
 })
 
@@ -37,11 +38,11 @@ test_that(desc = "Testing DecontX on SCE", {
   sce <- SingleCellExperiment::SingleCellExperiment(list(counts=s$observedCounts))
   sce <- decontX(sce)
   p <- plotDecontXContamination(sce)
-  p <- plotDecontXMarkers(sce, z=s$z, markers = s$markers, assayName = "decontXcounts")
-  
+  p <- plotDecontXMarkerPercentage(sce, z=s$z, markers = s$markers, assayName = "decontXcounts")
+  p <- plotDecontXMarkerExpression(sce, s$markers[[1]])
   newz = paste0("X", s$z)
   sce$newz2 = newz
-  p <- plotDecontXMarkers(sce, z="newz2", markers = s$markers, assayName = "decontXcounts")
+  p <- plotDecontXMarkerPercentage(sce, z="newz2", markers = s$markers, assayName = "decontXcounts")
   sce <- decontX(sce, estimateDelta = FALSE)
 })
 

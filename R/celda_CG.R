@@ -1290,10 +1290,11 @@ setMethod("celdaHeatmap", signature(celdaMod = "celda_CG"),
         norm <- normalizeCounts(counts,
                 normalize = "proportion",
                 transformationFun = sqrt)
-        plotHeatmap(norm[ix, ],
+        plt <- plotHeatmap(norm[ix, ],
             z = clusters(celdaMod)$z,
             y = clusters(celdaMod)$y[ix],
             ...)
+        return(plt)
     })
 
 

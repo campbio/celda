@@ -461,8 +461,8 @@ plotDimReduceCluster <- function(dim1,
                 size = labelSize)
     }
     if (!is.null(x = groupBy)) {
-        g <- g + facet_wrap(facets = vars(!!sym(x = "Sample"))) +
-            theme(strip.background = element_blank())
+        g <- g + ggplot2::facet_wrap(facets = ggplot2::vars(!!ggplot2::sym(x = "Sample"))) +
+            ggplot2::theme(strip.background = ggplot2::element_blank())
     }
     return(g)
 }
@@ -539,3 +539,70 @@ plotDimReduceCluster <- function(dim1,
             n_threads = cores, n_sgd_threads = 1, pca = doPCA, ...)
     return(res)
 }
+
+
+
+#' @title Feature Expression Violin Plot
+#' @description Outputs a violin plot for feature expression data.
+#' @param counts Integer matrix. Rows represent features and columns represent
+#'  cells.
+#' @param celdaMod Celda object of class "celda_G" or "celda_CG".
+#' @param features Character vector. Uses these genes for plotting.
+#' @param exactMatch Logical. Whether an exact match or a partial match using
+#'  \code{grep()} is used to look up the feature in the rownames of the counts
+#'   matrix. Default \code{TRUE}.
+#' @param plotDots Boolean. If \code{TRUE}, the
+#'  expression of features will be plotted as points in addition to the violin
+#'  curve. Default \code{TRUE}.
+#' @param dotSize Numeric. Size of points if \code{plotDots = TRUE}.
+#' Default \code{0.1}.
+#' @return Violin plot for each feature, grouped by celda cluster
+#' @examples
+#' data(celdaCGSim, celdaCGMod)
+#' plotCeldaViolin(counts = celdaCGSim$counts,
+#'     celdaMod = celdaCGMod, features = "Gene_1")
+#' @export
+plotCeldaViolin <- function(counts,
+                       celdaMod,
+                       features,
+                       exactMatch = TRUE,
+                       plotDots = TRUE,
+                       dotSize = 0.1) {
+  
+  cluster <- clusters(celdaMod)$z
+  
+  featuresIx <- retrieveFeatureIndex(features,
+                                     counts,
+                                     by = "rownames",
+                                     exactMatch = exactMatch)
+  dataFeature <- as.matrix(counts[featuresIx, , drop = FALSE])
+  dataFeature <- as.data.frame(t(dataFeature))
+  df <- cbind(cluster, dataFeature)
+  df$cluster <- as.factor(df$cluster)
+  m <- reshape2::melt(df, id.vars = c("cluster"))
+  colnames(m) <- c("Cluster", "Feature", "Expression")
+  colorPal <- distinctColors(length(unique(cluster)))
+  
+  p <- ggplot2::ggplot(m,
+                       ggplot2::aes_string(
+                         x = "Cluster",
+                         y = "Expression",
+                         fill = "Cluster")) +
+    ggplot2::facet_wrap(~ Feature) +
+    ggplot2::geom_violin(trim = TRUE, scale = "width") +
+    ggplot2::scale_fill_manual(values = colorPal) +
+    ggplot2::theme(
+      strip.background = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.spacing = grid::unit(0, "lines"),
+      panel.background = ggplot2::element_blank(),
+      axis.line = ggplot2::element_line(colour = "black"))
+  
+  if(isTRUE(plotDots)) {
+    p <- p + ggplot2::geom_jitter(height = 0, size = dotSize)
+  }
+  
+  return(p)
+}
+

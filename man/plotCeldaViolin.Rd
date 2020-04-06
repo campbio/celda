@@ -25,9 +25,12 @@ cells.}
 \code{grep()} is used to look up the feature in the rownames of the counts
  matrix. Default \code{TRUE}.}
 
-\item{plotDots}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, the
+\item{plotDots}{Boolean. If \code{TRUE}, the
 expression of features will be plotted as points in addition to the violin
-curve. Default TRUE.}
+curve. Default \code{TRUE}.}
+
+\item{dotSize}{Numeric. Size of points if \code{plotDots = TRUE}.
+Default \code{0.1}.}
 }
 \value{
 Violin plot for each feature, grouped by celda cluster
