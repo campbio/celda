@@ -232,7 +232,8 @@ findMarkersTree <- function(features,
 
     # consecutive one-offs break the code(tricky to find 1st balanced split)
     if (consecutiveOneoff) {
-      stop("Cannot use metaclusters if consecutive one-offs are allowed.",
+      stop(
+        "Cannot use metaclusters if consecutive one-offs are allowed.",
         " Please set the consecutiveOneoff parameter to FALSE."
       )
     }
@@ -313,8 +314,10 @@ findMarkersTree <- function(features,
 
     # Check that cell types match class labels
     if (mean(unlist(metaclusters) %in% unique(class)) != 1) {
-      stop("Provided cell types do not match class labels. ",
-        "Please check the 'metaclusters' argument.")
+      stop(
+        "Provided cell types do not match class labels. ",
+        "Please check the 'metaclusters' argument."
+      )
     }
 
     # Create vector with metacluster labels
@@ -372,10 +375,12 @@ findMarkersTree <- function(features,
       topLevel <- tree[[1]][[1]]
       if (topLevel$statUsed == "One-off") {
         markerThreshold[[as.character(tmpThreshold)]] <-
-          unlist(lapply(topLevel[seq(length(topLevel) - 3)],
+          unlist(lapply(
+            topLevel[seq(length(topLevel) - 3)],
             function(marker) {
               return(marker$group1Consensus)
-            }))
+            }
+          ))
       }
 
       # if no more balanced split
@@ -807,8 +812,10 @@ findMarkersTree <- function(features,
 
       # simplify top-level in rules tables to only up-regulated markers
       tree$rules <- lapply(tree$rules, function(rule) {
-        return(rule[-intersect(which(rule$level == 1),
-          which(rule$direction == (-1))), ])
+        return(rule[-intersect(
+          which(rule$level == 1),
+          which(rule$direction == (-1))
+        ), ])
       })
 
       ## add gene-level info to rules tables
@@ -833,9 +840,9 @@ findMarkersTree <- function(features,
           # don't forget top-level
           if (class$level[i] == 1) {
             genesAUC <- collapsedBranches[collapsedBranches$feature ==
-                class$feature[i] &
-                collapsedBranches$level == class$level[i] &
-                collapsedBranches$class == class$metacluster[i], ]
+              class$feature[i] &
+              collapsedBranches$level == class$level[i] &
+              collapsedBranches$class == class$metacluster[i], ]
           }
 
           # merge table
@@ -1277,7 +1284,7 @@ findMarkersTree <- function(features,
 
           # Check that there is still more than one class
           group2Classes <- levels(droplevels(class[rownames(features) %in%
-              group2Samples]))
+            group2Samples]))
           if (length(group2Classes) > 1) {
             # Create branch from this split
             branch2 <- .wrapBranchHybrid(
@@ -1676,8 +1683,10 @@ findMarkersTree <- function(features,
       # Get value at this point
       ValueCeiling <- featValuesKeep[ModF1Index]
       ValueWhich <- which(featValuesSort == ValueCeiling)
-      ModF1Value <- mean(c(featValuesSort[ValueWhich],
-        featValuesSort[ValueWhich + 1]))
+      ModF1Value <- mean(c(
+        featValuesSort[ValueWhich],
+        featValuesSort[ValueWhich + 1]
+      ))
     } else {
       ModF1Max <- 0
       ModF1Value <- NA
@@ -1860,10 +1869,12 @@ findMarkersTree <- function(features,
 # Function to calculate density information gain
 .infoGainDensity <- function(splitVector, X, features, DET) {
   # Get Subsets of the feature matrix
-  sRFeat <- features[as.logical(rowSums(X[, splitVector, drop = F])),
-    , drop = F]
-  sLFeat <- features[as.logical(rowSums(X[, !splitVector, drop = F])),
-    , drop = F]
+  sRFeat <- features[as.logical(rowSums(X[, splitVector, drop = F])), ,
+    drop = F
+  ]
+  sLFeat <- features[as.logical(rowSums(X[, !splitVector, drop = F])), ,
+    drop = F
+  ]
 
   # Get pseudo-determinant of covariance matrices
   DETR <- .psdet(stats::cov(sRFeat))
@@ -2350,8 +2361,10 @@ getDecisions <- function(rules, features) {
     ))
 
     # Add attributes
-    classLabels <- names(matCollapse[subUnderscore(matCollapse,
-      ncharX(i)) == i])
+    classLabels <- names(matCollapse[subUnderscore(
+      matCollapse,
+      ncharX(i)
+    ) == i])
     members <- length(classLabels)
 
     # Add height, set to one if leaf
@@ -2525,7 +2538,8 @@ subUnderscore <- function(x, n) {
     # Generate list of rules for each class
     if (topLevelMeta) {
       orderedClass <- unique(class2featuresIndices[
-        class2featuresIndices$direction == 1, "class"])
+        class2featuresIndices$direction == 1, "class"
+      ])
     }
     else {
       orderedClass <- levels(class)
@@ -2924,7 +2938,8 @@ plotMarkerHeatmap <-
 
     # check that user entered valid branch point name
     if (is.null(branch)) {
-      stop("Invalid branch point.",
+      stop(
+        "Invalid branch point.",
         " Branch point name should match one of those in tree$branchPoints."
       )
     }
@@ -2956,8 +2971,10 @@ plotMarkerHeatmap <-
 
     # make sure feature labels match the table
     if (!all(branch$feature %in% featureLabels)) {
-      stop("Provided feature labels don't match those in the tree.",
-        " Please check the feature names in the tree's rules' table.")
+      stop(
+        "Provided feature labels don't match those in the tree.",
+        " Please check the feature names in the tree's rules' table."
+      )
     }
 
     # if top-level in metaclusters tree
@@ -3220,8 +3237,10 @@ plotMarkerHeatmap <-
 
       # order the clusters such that up-regulated come first
       colOrder <- data.frame(
-        groupName = unique(branch[order(branch$direction, decreasing = T),
-          "class"]),
+        groupName = unique(branch[
+          order(branch$direction, decreasing = T),
+          "class"
+        ]),
         groupIndex = seq_along(unique(branch$class))
       )
 

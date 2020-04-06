@@ -663,7 +663,8 @@ test_that(desc = paste0("Testing celdaUmap with celda_CG when model class is",
     " changed, should error"), {
         modelX <- modelCG
         class(modelX) <- "celda_X"
-        expect_error(plt <- celdaUmap(counts = celdaCGSim$counts, celdaMod = modelX),
+        expect_error(plt <- celdaUmap(counts = celdaCGSim$counts,
+                                      celdaMod = modelX),
             "unable to find")
     })
 

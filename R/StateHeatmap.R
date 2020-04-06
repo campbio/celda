@@ -40,102 +40,113 @@
 #' @importFrom methods .hasSlot
 #' @export
 moduleHeatmap <- function(counts,
-    celdaMod,
-    featureModule = 1,
-    topCells = 100,
-    topFeatures = NULL,
-    normalizedCounts = NA,
-    scaleRow = scale,
-    showFeaturenames = TRUE) {
+                          celdaMod,
+                          featureModule = 1,
+                          topCells = 100,
+                          topFeatures = NULL,
+                          normalizedCounts = NA,
+                          scaleRow = scale,
+                          showFeaturenames = TRUE) {
 
-    # Input checks
-    if (is.null(counts) || !is.matrix(counts) & !is.data.frame(counts)) {
-        stop("'counts' should be a numeric count matrix")
+  # Input checks
+  if (is.null(counts) || !is.matrix(counts) & !is.data.frame(counts)) {
+    stop("'counts' should be a numeric count matrix")
+  }
+  if (is.null(celdaMod) || !methods::is(celdaMod, "celda_G") &
+    !methods::is(celdaMod, "celda_CG")) {
+    stop("'celdaMod' should be an object of class celda_G or celda_CG")
+  }
+  compareCountMatrix(counts, celdaMod)
+
+  # factorize counts matrix
+  factorizedMatrix <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
+
+  # take topRank
+  if (!is.null(topFeatures) && (is.numeric(topFeatures)) |
+    is.integer(topFeatures)) {
+    topRanked <- topRank(
+      matrix = factorizedMatrix$proportions$module,
+      n = topFeatures
+    )
+  } else {
+    topRanked <- topRank(
+      matrix = factorizedMatrix$proportions$module,
+      n = nrow(factorizedMatrix$proportions$module)
+    )
+  }
+
+  # filter topRank using featureModule into featureIndices
+  featureIndices <- lapply(
+    featureModule,
+    function(module) {
+      topRanked$index[[module]]
     }
-    if (is.null(celdaMod) || !methods::is(celdaMod, "celda_G") &
-        !methods::is(celdaMod, "celda_CG")) {
-        stop("'celdaMod' should be an object of class celda_G or celda_CG")
-    }
-    compareCountMatrix(counts, celdaMod)
+  )
+  featureIndices <- unlist(featureIndices)
 
-    # factorize counts matrix
-    factorizedMatrix <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
+  # Determine cell order from factorizedMatrix$proportions$cell
+  cellStates <- factorizedMatrix$proportions$cell
+  cellStates <- cellStates[featureModule, , drop = FALSE]
 
-    # take topRank
-    if (!is.null(topFeatures) && (is.numeric(topFeatures)) |
-        is.integer(topFeatures)) {
-        topRanked <- topRank(matrix = factorizedMatrix$proportions$module,
-            n = topFeatures)
+  singleModule <- cellStates[1, ]
+  singleModuleOrdered <- order(singleModule, decreasing = TRUE)
+
+  if (!is.null(topCells)) {
+    if (topCells * 2 < ncol(cellStates)) {
+      cellIndices <- c(
+        utils::head(singleModuleOrdered, n = topCells),
+        utils::tail(singleModuleOrdered, n = topCells)
+      )
     } else {
-        topRanked <- topRank(matrix = factorizedMatrix$proportions$module,
-            n = nrow(factorizedMatrix$proportions$module))
+      cellIndices <- singleModuleOrdered
     }
+  } else {
+    cellIndices <- singleModuleOrdered
+  }
 
-    # filter topRank using featureModule into featureIndices
-    featureIndices <- lapply(featureModule,
-        function(module) {
-            topRanked$index[[module]]
-        })
-    featureIndices <- unlist(featureIndices)
+  cellIndices <- rev(cellIndices)
+  if (is.na(normalizedCounts)) {
+    normCounts <- normalizeCounts(counts,
+      normalize = "proportion",
+      transformationFun = sqrt
+    )
+  } else {
+    normCounts <- normalizedCounts
+  }
 
-    # Determine cell order from factorizedMatrix$proportions$cell
-    cellStates <- factorizedMatrix$proportions$cell
-    cellStates <- cellStates[featureModule, , drop = FALSE]
+  # filter counts based on featureIndices
+  filteredNormCounts <-
+    normCounts[featureIndices, cellIndices, drop = FALSE]
 
-    singleModule <- cellStates[1, ]
-    singleModuleOrdered <- order(singleModule, decreasing = TRUE)
+  filteredNormCounts <-
+    filteredNormCounts[rowSums(filteredNormCounts > 0) > 0, , drop = FALSE]
 
-    if (!is.null(topCells)) {
-        if (topCells * 2 < ncol(cellStates)) {
-            cellIndices <- c(
-                utils::head(singleModuleOrdered, n = topCells),
-                utils::tail(singleModuleOrdered, n = topCells))
-        } else {
-            cellIndices <- singleModuleOrdered
-        }
-    } else {
-        cellIndices <- singleModuleOrdered
+  geneIx <- match(rownames(filteredNormCounts), matrixNames(celdaMod)$row)
+  cellIx <- match(colnames(filteredNormCounts), matrixNames(celdaMod)$column)
+  zToPlot <- c()
+  anno_cell_colors <- NULL
+  if (class(celdaMod)[1] == "celda_CG") {
+    if (methods::.hasSlot(celdaMod, "clusters")) {
+      cell <-
+        distinctColors(length(unique(clusters(celdaMod)$z)))[
+          sort(unique(clusters(celdaMod)$z[cellIx]))
+        ]
+      names(cell) <- sort(unique(clusters(celdaMod)$z[cellIx]))
+      anno_cell_colors <- list(cell = cell)
+      zToPlot <- clusters(celdaMod)$z[cellIndices]
     }
+  }
 
-    cellIndices <- rev(cellIndices)
-    if (is.na(normalizedCounts)) {
-      normCounts <- normalizeCounts(counts, normalize = "proportion",
-          transformationFun = sqrt)
-    } else {
-        normCounts <- normalizedCounts
-    }
-
-    # filter counts based on featureIndices
-    filteredNormCounts <-
-        normCounts[featureIndices, cellIndices, drop = FALSE]
-
-    filteredNormCounts <-
-        filteredNormCounts[rowSums(filteredNormCounts > 0) > 0, , drop = FALSE]
-
-    geneIx <- match(rownames(filteredNormCounts), matrixNames(celdaMod)$row)
-    cellIx <- match(colnames(filteredNormCounts), matrixNames(celdaMod)$column)
-    zToPlot <- c()
-    anno_cell_colors <- NULL
-    if (class(celdaMod)[1] == "celda_CG") {
-        if (methods::.hasSlot(celdaMod, "clusters")) {
-            cell <-
-              distinctColors(length(unique(clusters(celdaMod)$z)))[
-                  sort(unique(clusters(celdaMod)$z[cellIx]))]
-            names(cell) <- sort(unique(clusters(celdaMod)$z[cellIx]))
-            anno_cell_colors <- list(cell = cell)
-            zToPlot <- clusters(celdaMod)$z[cellIndices]
-        }
-    }
-
-    plt <- plotHeatmap(
-        filteredNormCounts,
-        z = zToPlot,
-        y = clusters(celdaMod)$y[geneIx],
-        scaleRow = scaleRow,
-        colorScheme = "divergent",
-        showNamesFeature = showFeaturenames,
-        clusterFeature = FALSE,
-        clusterCell = FALSE,
-        annotationColor = anno_cell_colors)
-    return(plt)
+  plt <- plotHeatmap(
+    filteredNormCounts,
+    z = zToPlot,
+    y = clusters(celdaMod)$y[geneIx],
+    scaleRow = scaleRow,
+    colorScheme = "divergent",
+    showNamesFeature = showFeaturenames,
+    clusterFeature = FALSE,
+    clusterCell = FALSE,
+    annotationColor = anno_cell_colors
+  )
+  return(plt)
 }

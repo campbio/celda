@@ -27,20 +27,22 @@
 #' current iterations is less than this. Default 0.001.
 #' @param iterLogLik Integer. Calculate log likelihood every \code{iterLogLik}
 #' iteration. Default 10.
-#' @param delta Numeric Vector of length 2. Concentration parameters for 
+#' @param delta Numeric Vector of length 2. Concentration parameters for
 #' the Dirichlet prior for the contamination in each cell. The first element
 #' is the prior for the native counts while the second element is the prior for
 #' the contamination counts. These essentially act as pseudocounts for the
 #' native and contamination in each cell. If \code{estimateDelta = TRUE},
-#' this is only used to produce a random sample of proportions for an initial 
-#' value of contamination in each cell. Then \code{\link[MCMCprecision]{fit_dirichlet}}
-#' is used to update \code{delta} in each iteration. 
-#' If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these 
-#' values for the entire inference procedure. Fixing \code{delta} and 
+#' this is only used to produce a random sample of proportions for an initial
+#' value of contamination in each cell. Then
+#' \code{\link[MCMCprecision]{fit_dirichlet}} is used to update
+#' \code{delta} in each iteration.
+#' If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these
+#' values for the entire inference procedure. Fixing \code{delta} and
 #' setting a high number in the second element will force \code{decontX}
-#' to be more aggressive and estimate higher levels of contamination at 
-#' the expense of potentially removing native expression. Default \code{c(10, 10)}.
-#' @param estimateDelta Boolean. Whether to update \code{delta} at each 
+#' to be more aggressive and estimate higher levels of contamination at
+#' the expense of potentially removing native expression.
+#' Default \code{c(10, 10)}.
+#' @param estimateDelta Boolean. Whether to update \code{delta} at each
 #' iteration.
 #' @param varGenes Integer. The number of variable genes to use in
 #' dimensionality reduction before clustering. Variability is calcualted using
@@ -83,32 +85,35 @@
 #' @examples
 #' # Generate matrix with contamination
 #' s <- simulateContamination(seed = 12345)
-#' 
+#'
 #' library(SingleCellExperiment)
-#' sce <- SingleCellExperiment(list(counts=s$observedCounts))
+#' sce <- SingleCellExperiment(list(counts = s$observedCounts))
 #' sce <- decontX(sce)
-#' 
+#'
 #' # Plot contamination on UMAP
 #' plotDecontXContamination(sce)
-#' 
+#'
 #' # Plot decontX cluster labels
 #' umap <- reducedDim(sce)
-#' plotDimReduceCluster(umap[,1], umap[,2], sce$decontX_clusters)
-#' 
+#' plotDimReduceCluster(umap[, 1], umap[, 2], sce$decontX_clusters)
+#'
 #' # Plot percentage of marker genes detected
 #' # in each cell cluster before decontamination
 #' s$markers
-#' plotDecontXMarkerPercentage(sce, markers = s$markers, assayName="counts")
-#' 
+#' plotDecontXMarkerPercentage(sce, markers = s$markers, assayName = "counts")
+#'
 #' # Plot percentage of marker genes detected
 #' # in each cell cluster after contamination
-#' plotDecontXMarkerPercentage(sce, markers = s$markers, assayName="decontXcounts")
-#' 
+#' plotDecontXMarkerPercentage(sce, markers = s$markers,
+#'                             assayName = "decontXcounts")
+#'
 #' # Plot percentage of marker genes detected in each cell
 #' # comparing original and decontaminated counts side-by-side
-#' plotDecontXMarkerPercentage(sce, markers = s$markers, assayName=c("counts", "decontXcounts"))
-#' 
-#' # Plot raw counts of indiviual markers genes before and after decontamination
+#' plotDecontXMarkerPercentage(sce, markers = s$markers,
+#'                             assayName = c("counts", "decontXcounts"))
+#'
+#' # Plot raw counts of indiviual markers genes before
+#' # and after decontamination
 #' plotDecontXMarkerExpression(sce, unlist(s$markers))
 NULL
 
@@ -129,7 +134,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       z = NULL,
                                                       batch = NULL,
                                                       maxIter = 500,
-                                                      delta = c(10,10),
+                                                      delta = c(10, 10),
                                                       estimateDelta = TRUE,
                                                       convergence = 0.001,
                                                       iterLogLik = 10,
@@ -439,7 +444,7 @@ setReplaceMethod(
     )
     estRmat[seq(nrow(counts)), which(batch == bat)] <- estRmat.temp
     dimnames(estRmat) <- list(geneNames, allCellNames)
-    
+
     resBatch[[bat]] <- list(
       z = res$z,
       phi = res$phi,
@@ -459,7 +464,6 @@ setReplaceMethod(
     } else {
       returnZ[batch == bat] <- res$z
     }
-
   }
   names(resBatch) <- batchIndex
 
@@ -488,7 +492,7 @@ setReplaceMethod(
     seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
     if (seed.class == "HDF5ArraySeed") {
       returnResult$decontXcounts <-
-          methods::as(returnResult$decontXcounts, "HDF5Matrix")
+        methods::as(returnResult$decontXcounts, "HDF5Matrix")
     } else {
       if (isTRUE(methods::canCoerce(returnResult$decontXcounts, seed.class))) {
         returnResult$decontXcounts <-
@@ -499,7 +503,7 @@ setReplaceMethod(
       DelayedArray::DelayedArray(returnResult$decontXcounts)
   } else {
     try({
-        if (methods::canCoerce(returnResult$decontXcounts, class(counts))) {
+      if (methods::canCoerce(returnResult$decontXcounts, class(counts))) {
           returnResult$decontXcounts <-
             methods::as(returnResult$decontXcounts, class(counts))
         }
@@ -559,7 +563,7 @@ setReplaceMethod(
     m <- ".... Generating UMAP and estimating cell types"
     estimateCellTypes <- TRUE
   } else {
-    m <- ".... Generating UMAP"  
+    m <- ".... Generating UMAP"
     estimateCellTypes <- FALSE
   }
   .logMessages(
@@ -572,7 +576,7 @@ setReplaceMethod(
 
   varGenes <- .processvarGenes(varGenes)
   dbscanEps <- .processdbscanEps(dbscanEps)
-  
+
   celda.init <- .decontxInitializeZ(
     object = counts,
     varGenes = varGenes,
@@ -580,16 +584,16 @@ setReplaceMethod(
     estimateCellTypes = estimateCellTypes,
     seed = seed
   )
-  if(is.null(z)) {
-    z <- celda.init$z 
+  if (is.null(z)) {
+    z <- celda.init$z
   }
   umap <- celda.init$umap
   colnames(umap) <- c(
-      "DecontX_UMAP_1",
-      "DecontX_UMAP_2"
+    "DecontX_UMAP_1",
+    "DecontX_UMAP_2"
   )
   rownames(umap) <- colnames(counts)
-  
+
   z <- .processCellLabels(z, numCells = nC)
   K <- length(unique(z))
 
@@ -638,7 +642,6 @@ setReplaceMethod(
     counts.colsums <- Matrix::colSums(counts)
     while (iter <= maxIter & !isTRUE(converged) &
       numIterWithoutImprovement <= stopIter) {
-
       nextDecon <- decontXEM(
         counts = counts,
         counts_colsums = counts.colsums,
@@ -902,29 +905,32 @@ addLogLikelihood <- function(llA, llB) {
                                 seed = 12345) {
   if (!is(object, "SingleCellExperiment")) {
     sce <- SingleCellExperiment::SingleCellExperiment(
-      assays = list(counts = object))
+      assays = list(counts = object)
+    )
   }
   sce <- scater::logNormCounts(sce, log = TRUE)
-  
+
   if (nrow(sce) <= varGenes) {
     topVariableGenes <- seq_len(nrow(sce))
   } else if (nrow(sce) > varGenes) {
     sce.var <- scran::modelGeneVar(sce)
     topVariableGenes <- order(sce.var$bio,
-                              decreasing = TRUE
+      decreasing = TRUE
     )[seq(varGenes)]
   }
   sce <- sce[topVariableGenes, ]
-  
-  if(!is.null(seed)) {
-    with_seed(seed, 
-              resUmap <- scater::calculateUMAP(sce, n_threads = 1))
+
+  if (!is.null(seed)) {
+    with_seed(
+      seed,
+      resUmap <- scater::calculateUMAP(sce, n_threads = 1)
+    )
   } else {
     resUmap <- scater::calculateUMAP(sce, n_threads = 1)
   }
-  
+
   z <- NULL
-  if(isTRUE(estimateCellTypes)) {
+  if (isTRUE(estimateCellTypes)) {
     # Find clusters with dbSCAN
     totalClusters <- 1
     iter <- 1
@@ -934,21 +940,21 @@ addLogLikelihood <- function(llA, llB) {
       totalClusters <- length(unique(resDbscan$cluster))
       iter <- iter + 1
     }
-    
+
     # If dbscan was not able to get more than 2 clusters,
     # use kmeans to force 2 clusters as a last resort
-    if(totalClusters == 1) {
+    if (totalClusters == 1) {
       cl <- kmeans(t(SingleCellExperiment::logcounts(sce)), 2)
       z <- cl$cluster
     } else {
       z <- resDbscan$cluster
     }
   }
-  
+
   return(list(
     "z" = z,
     "umap" = resUmap
-  ))    
+  ))
 }
 
 
@@ -969,7 +975,7 @@ addLogLikelihood <- function(llA, llB) {
 
     sce <- sce[Matrix::rowSums(SingleCellExperiment::counts(sce)) > 0, ]
     sce <- scater::logNormCounts(sce, log = TRUE)
-    #sce <- scater::normalize(sce)
+    # sce <- scater::normalize(sce)
 
 
     if (nrow(sce) <= varGenes) {
@@ -997,12 +1003,15 @@ addLogLikelihood <- function(llA, llB) {
     ## Celda clustering using recursive module splitting
     L <- min(L, nrow(countsFiltered))
     if (is.null(seed)) {
-    initialModuleSplit <- recursiveSplitModule(countsFiltered,
-      initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
+      initialModuleSplit <- recursiveSplitModule(countsFiltered,
+        initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE
+      )
     } else {
-      with_seed(seed, initialModuleSplit <- recursiveSplitModule(countsFiltered,
-        initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE)
-    )}
+      with_seed(seed,
+                initialModuleSplit <- recursiveSplitModule(countsFiltered,
+        initialL = L, maxL = L, perplexity = FALSE, verbose = FALSE
+      ))
+    }
     initialModel <- subsetCeldaList(initialModuleSplit, list(L = L))
 
     .logMessages(
@@ -1071,8 +1080,9 @@ addLogLikelihood <- function(llA, llB) {
 }
 
 .checkDelta <- function(delta) {
-  if(!is.numeric(delta) | length(delta) != 2 | any(delta < 0)) {
-    stop("'delta' needs to be a numeric vector of length 2 containing positive values.")
+  if (!is.numeric(delta) | length(delta) != 2 | any(delta < 0)) {
+    stop("'delta' needs to be a numeric vector of length 2",
+         " containing positive values.")
   }
   return(delta)
 }
@@ -1089,21 +1099,23 @@ addLogLikelihood <- function(llA, llB) {
 #'  one for real expression, the other one for contamination, as well as other
 #'  parameters used in the simulation which can be useful for running
 #'  decontamination.
-#' @param C Integer. Number of cells to be simulated. Default to be 300.
-#' @param G Integer. Number of genes to be simulated. Default to be 100.
-#' @param K Integer. Number of cell populations to be simulated. Default 3.
+#' @param C Integer. Number of cells to be simulated. Default \code{300}.
+#' @param G Integer. Number of genes to be simulated. Default \code{100}.
+#' @param K Integer. Number of cell populations to be simulated.
+#' Default \code{3}.
 #' @param NRange Integer vector. A vector of length 2 that specifies the lower
 #'  and upper bounds of the number of counts generated for each cell. Default
-#'  c(500, 1000).
-#' @param beta Numeric. Concentration parameter for Phi. Default 0.1.
-#' @param delta Numeric or Numeric vector. Concentration parameter for Theta. If
-#'  input as a single numeric value, symmetric values for beta distribution are
-#'  specified; if input as a vector of lenght 2, the two values will be the
-#'  shape1 and shape2 paramters of the beta distribution respectively.
-#'  Default c(1, 5).
-#' @param numMarkers Integer. Number of markers for each cell population. Default 3.
-#' @param seed Integer. Passed to \code{\link[withr]{with_seed}}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
+#'  \code{c(500, 1000)}.
+#' @param beta Numeric. Concentration parameter for Phi. Default \code{0.1}.
+#' @param delta Numeric or Numeric vector. Concentration parameter for Theta.
+#'  If input as a single numeric value, symmetric values for beta
+#'  distribution are specified; if input as a vector of lenght 2, the two
+#'  values will be the shape1 and shape2 paramters of the beta distribution
+#'  respectively. Default \code{c(1, 5)}.
+#' @param numMarkers Integer. Number of markers for each cell population.
+#' Default \code{3}.
+#' @param seed Integer. Passed to \code{\link[withr]{with_seed}}.
+#' For reproducibility, a default value of 12345 is used. If NULL, no calls to
 #'  \code{\link[withr]{with_seed}} are made.
 #' @return A list containing the \code{nativeMatirx} (real expression),
 #' \code{observedMatrix} (real expression + contamination), as well as other
@@ -1113,13 +1125,13 @@ addLogLikelihood <- function(llA, llB) {
 #' contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 #' @export
 simulateContamination <- function(C = 300,
-                                       G = 100,
-                                       K = 3,
-                                       NRange = c(500, 1000),
-                                       beta = 0.1,
-                                       delta = c(1, 10),
-                                       numMarkers = 3,
-                                       seed = 12345) {
+                                  G = 100,
+                                  K = 3,
+                                  NRange = c(500, 1000),
+                                  beta = 0.1,
+                                  delta = c(1, 10),
+                                  numMarkers = 3,
+                                  seed = 12345) {
   if (is.null(seed)) {
     res <- .simulateContaminatedMatrix(
       C = C,
@@ -1199,20 +1211,22 @@ simulateContamination <- function(C = 300,
 
   ## Select random genes to be markers in each cell population
   ## by setting their values to zero.
-  if(K * numMarkers > G) {
-    stop("The number of markers ('numMarkers') times the number of cell populations ('K') cannot be greater than the number of genes ('G').")
+  if (K * numMarkers > G) {
+    stop("The number of markers ('numMarkers') times the number of cell",
+         " populations ('K') cannot be greater than the number of",
+         " genes ('G').")
   }
   markerKIndex <- rep(seq(K), each = numMarkers)
   markerRowIndex <- sample(seq(G), numMarkers * K)
-  for(i in seq(K)){
+  for (i in seq(K)) {
     ix <- markerRowIndex[markerKIndex == i]
-    phi[i, ix] <- max(phi[i,])
-    for(j in setdiff(seq(K), i)) {
+    phi[i, ix] <- max(phi[i, ])
+    for (j in setdiff(seq(K), i)) {
       phi[j, ix] <- 0
     }
   }
   phi <- prop.table(phi, margin = 1)
-  
+
   ## sample real expressed count matrix
   cellRmat <- vapply(seq(C), function(i) {
     stats::rmultinom(1, size = rNbyC[i], prob = phi[z[i], ])
@@ -1220,14 +1234,14 @@ simulateContamination <- function(C = 300,
 
   rownames(cellRmat) <- paste0("Gene_", seq(G))
   colnames(cellRmat) <- paste0("Cell_", seq(C))
-  
+
   ## Get list of marker names
   markerNames <- list()
-  for(i in seq(K)){
+  for (i in seq(K)) {
     markerNames[[i]] <- rownames(cellRmat)[markerRowIndex[markerKIndex == i]]
   }
   names(markerNames) <- paste0("CellType_", seq(K), "_Markers")
-  
+
   ## sample contamination count matrix
   nGByK <-
     rowSums(cellRmat) - .colSumByGroup(cellRmat, group = z, K = K)
@@ -1238,7 +1252,7 @@ simulateContamination <- function(C = 300,
   }, integer(G))
   cellOmat <- cellRmat + cellCmat
   contamination <- colSums(cellCmat) / colSums(cellOmat)
-  
+
   rownames(cellOmat) <- paste0("Gene_", seq(G))
   colnames(cellOmat) <- paste0("Cell_", seq(C))
 

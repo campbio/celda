@@ -20,82 +20,88 @@
 #' class <- clusters(cm)$z
 #' # Generate Decision Tree
 #' DecTree <- findMarkers(features,
-#'     class,
-#'     oneoffMetric = "modified F1",
-#'     threshold = 1,
-#'     consecutiveOneoff = FALSE)
+#'   class,
+#'   oneoffMetric = "modified F1",
+#'   threshold = 1,
+#'   consecutiveOneoff = FALSE
+#' )
 #'
 #' # Get sample estimates in training data
 #' getDecisions(DecTree$rules, features)
 #' }
 #' @export
 getDecisions <- function(rules, features) {
-    features <- t(features)
-    votes <- apply(features, 1, .predictClass, rules)
-    return(votes)
+  features <- t(features)
+  votes <- apply(features, 1, .predictClass, rules)
+  return(votes)
 }
 
 # Function to predict class from list of rules
 .predictClass <- function(samp, rules) {
 
-    # Initilize possible classes and level
-    classes <- names(rules)
-        level <- 1
+  # Initilize possible classes and level
+  classes <- names(rules)
+  level <- 1
 
-    # Set maximum levele possible to prevent infinity run
-    maxLevel <- max(unlist(lapply(rules, function(ruleSet) {
-        ruleSet$level
-    })))
+  # Set maximum levele possible to prevent infinity run
+  maxLevel <- max(unlist(lapply(rules, function(ruleSet) {
+    ruleSet$level
+  })))
 
-    while (length(classes) > 1 & level <= maxLevel) {
+  while (length(classes) > 1 & level <= maxLevel) {
 
-        # Get possible classes
-        clLogical <- unlist(lapply(classes, function(cl, rules, level, samp) {
+    # Get possible classes
+    clLogical <- unlist(lapply(classes, function(cl, rules, level, samp) {
 
-            # Get the rules for this class
-            ruleClass <- rules[[cl]]
+      # Get the rules for this class
+      ruleClass <- rules[[cl]]
 
-            # Get the rules for this level
-            ruleClass <- ruleClass[ruleClass$level == level, , drop = FALSE]
+      # Get the rules for this level
+      ruleClass <- ruleClass[ruleClass$level == level, , drop = FALSE]
 
-            # Subset class for the features at this level
-            ruleClass$sample <- samp[ruleClass$feature]
+      # Subset class for the features at this level
+      ruleClass$sample <- samp[ruleClass$feature]
 
-            # For multiple direction == 1, use one with the top stat
-            if (sum(ruleClass$direction == 1) > 1) {
-                ruleClass <- ruleClass[order(
-                    ruleClass$direction
-                    , decreasing = T), ]
-                ruleClass <- ruleClass[c(which.max(
-                    ruleClass$stat[ruleClass$direction == 1]),
-                    which(ruleClass$direction == -1)), , drop = FALSE]
-            }
+      # For multiple direction == 1, use one with the top stat
+      if (sum(ruleClass$direction == 1) > 1) {
+        ruleClass <- ruleClass[order(
+          ruleClass$direction,
+          decreasing = T
+        ), ]
+        ruleClass <- ruleClass[c(
+          which.max(
+            ruleClass$stat[ruleClass$direction == 1]
+          ),
+          which(ruleClass$direction == -1)
+        ), , drop = FALSE]
+      }
 
-            # Check for followed rules
-            ruleClass$check <- ruleClass$sample >= ruleClass$value
-            ruleClass$check[ruleClass$direction == -1] <- !ruleClass$check[
-                ruleClass$direction == -1]
+      # Check for followed rules
+      ruleClass$check <- ruleClass$sample >= ruleClass$value
+      ruleClass$check[ruleClass$direction == -1] <- !ruleClass$check[
+        ruleClass$direction == -1
+      ]
 
-            # Check that all rules were followed
-            ruleFollowed <- mean(
-                ruleClass$check & ruleClass$direction == 1) > 0 |
-                mean(ruleClass$check) == 1
+      # Check that all rules were followed
+      ruleFollowed <- mean(
+        ruleClass$check & ruleClass$direction == 1
+      ) > 0 |
+        mean(ruleClass$check) == 1
 
-            return(ruleFollowed)
+      return(ruleFollowed)
+    }, rules, level, samp))
 
-        }, rules, level, samp))
+    # Subset possible classes
+    classes <- classes[clLogical]
 
-        # Subset possible classes
-        classes <- classes[clLogical]
+    # Add level
+    level <- level + 1
+  }
 
-        # Add level
-        level <- level + 1
-    }
-
-    # Return if only one class selected
-    if (length(classes) == 1) {
-        return(classes)
-    } else {
-        return(NA)
-    }
+  # Return if only one class selected
+  if (length(classes) == 1) {
+    return(classes)
+  } else {
+    return(NA)
+  }
 }

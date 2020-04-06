@@ -1,13 +1,13 @@
 setClass(
-    "celdaModel",
-    representation(
-        params = "list",
-        # K, L, model priors, checksum
-        names = "list",
-        completeLogLik = "numeric",
-        finalLogLik = "numeric",
-        clusters = "list"
-    )
+  "celdaModel",
+  representation(
+    params = "list",
+    # K, L, model priors, checksum
+    names = "list",
+    completeLogLik = "numeric",
+    finalLogLik = "numeric",
+    clusters = "list"
+  )
 ) # z and or y
 
 
@@ -22,10 +22,12 @@ setClass(
 #' data(celdaCGMod)
 #' params(celdaCGMod)
 #' @export
-setGeneric("params",
-    function(celdaMod) {
-        standardGeneric("params")
-    })
+setGeneric(
+  "params",
+  function(celdaMod) {
+    standardGeneric("params")
+  }
+)
 #' @title Get parameter values provided for celdaModel creation
 #' @description Retrieves the K/L, model priors (e.g. alpha, beta),
 #'  and count matrix checksum parameters provided during the creation of the
@@ -38,10 +40,11 @@ setGeneric("params",
 #' params(celdaCGMod)
 #' @export
 setMethod("params",
-    signature = c(celdaMod = "celdaModel"),
-    function(celdaMod) {
-        celdaMod@params
-    })
+  signature = c(celdaMod = "celdaModel"),
+  function(celdaMod) {
+    celdaMod@params
+  }
+)
 
 
 #' @title Get feature, cell and sample names from a celdaModel
@@ -54,10 +57,12 @@ setMethod("params",
 #' data(celdaCGMod)
 #' matrixNames(celdaCGMod)
 #' @export
-setGeneric("matrixNames",
-    function(celdaMod) {
-        standardGeneric("matrixNames")
-    })
+setGeneric(
+  "matrixNames",
+  function(celdaMod) {
+    standardGeneric("matrixNames")
+  }
+)
 #' @title Get feature, cell and sample names from a celdaModel
 #' @description Retrieves the row, column, and sample names used to generate a
 #'  celdaModel.
@@ -69,10 +74,11 @@ setGeneric("matrixNames",
 #' matrixNames(celdaCGMod)
 #' @export
 setMethod("matrixNames",
-    signature = c(celdaMod = "celdaModel"),
-    function(celdaMod) {
-        celdaMod@names
-    })
+  signature = c(celdaMod = "celdaModel"),
+  function(celdaMod) {
+    celdaMod@names
+  }
+)
 
 
 #' @title Get log-likelihood history
@@ -85,10 +91,12 @@ setMethod("matrixNames",
 #' data(celdaCGMod)
 #' logLikelihoodHistory(celdaCGMod)
 #' @export
-setGeneric("logLikelihoodHistory",
-    function(celdaMod) {
-        standardGeneric("logLikelihoodHistory")
-    })
+setGeneric(
+  "logLikelihoodHistory",
+  function(celdaMod) {
+    standardGeneric("logLikelihoodHistory")
+  }
+)
 #' @title Get log-likelihood history
 #' @description Retrieves the complete log-likelihood from all iterations of
 #'  Gibbs sampling used to generate a celdaModel.
@@ -100,10 +108,11 @@ setGeneric("logLikelihoodHistory",
 #' logLikelihoodHistory(celdaCGMod)
 #' @export
 setMethod("logLikelihoodHistory",
-    signature = c(celdaMod = "celdaModel"),
-    function(celdaMod) {
-        celdaMod@completeLogLik
-    })
+  signature = c(celdaMod = "celdaModel"),
+  function(celdaMod) {
+    celdaMod@completeLogLik
+  }
+)
 
 
 #' @title Get the log-likelihood
@@ -116,10 +125,12 @@ setMethod("logLikelihoodHistory",
 #' data(celdaCGMod)
 #' bestLogLikelihood(celdaCGMod)
 #' @export
-setGeneric("bestLogLikelihood",
-    function(celdaMod) {
-        standardGeneric("bestLogLikelihood")
-    })
+setGeneric(
+  "bestLogLikelihood",
+  function(celdaMod) {
+    standardGeneric("bestLogLikelihood")
+  }
+)
 #' @title Get the log-likelihood
 #' @description Retrieves the final log-likelihood from all iterations of Gibbs
 #'  sampling used to generate a celdaModel.
@@ -131,10 +142,11 @@ setGeneric("bestLogLikelihood",
 #' bestLogLikelihood(celdaCGMod)
 #' @export
 setMethod("bestLogLikelihood",
-    signature = c(celdaMod = "celdaModel"),
-    function(celdaMod) {
-        celdaMod@finalLogLik
-    })
+  signature = c(celdaMod = "celdaModel"),
+  function(celdaMod) {
+    celdaMod@finalLogLik
+  }
+)
 
 
 #' @title Get clustering outcomes from a celdaModel
@@ -147,10 +159,12 @@ setMethod("bestLogLikelihood",
 #' data(celdaCGMod)
 #' clusters(celdaCGMod)
 #' @export
-setGeneric("clusters",
-    function(celdaMod) {
-        standardGeneric("clusters")
-    })
+setGeneric(
+  "clusters",
+  function(celdaMod) {
+    standardGeneric("clusters")
+  }
+)
 #' @title Get clustering outcomes from a celdaModel
 #' @description Returns the z / y results corresponding to the cell / gene
 #'  cluster labels determined by the provided celdaModel.
@@ -162,15 +176,17 @@ setGeneric("clusters",
 #' clusters(celdaCGMod)
 #' @export
 setMethod("clusters",
-    signature = c(celdaMod = "celdaModel"),
-    function(celdaMod) {
-        return(celdaMod@clusters)
-    })
+  signature = c(celdaMod = "celdaModel"),
+  function(celdaMod) {
+    return(celdaMod@clusters)
+  }
+)
 
 
 setClass("celda_C",
-    representation(sampleLabel = "factor"),
-    contains = "celdaModel")
+  representation(sampleLabel = "factor"),
+  contains = "celdaModel"
+)
 
 
 #' @title Get sampleLabels from a celdaModel
@@ -183,10 +199,12 @@ setClass("celda_C",
 #' data(celdaCGMod)
 #' sampleLabel(celdaCGMod)
 #' @export
-setGeneric("sampleLabel",
-    function(celdaMod) {
-        standardGeneric("sampleLabel")
-    })
+setGeneric(
+  "sampleLabel",
+  function(celdaMod) {
+    standardGeneric("sampleLabel")
+  }
+)
 #' @title Get sampleLabels from a celdaModel
 #' @description Returns the sampleLabels for the count matrix provided for
 #'  generation of a given celdaModel.
@@ -198,10 +216,11 @@ setGeneric("sampleLabel",
 #' sampleLabel(celdaCGMod)
 #' @export
 setMethod("sampleLabel",
-    signature = c(celdaMod = "celdaModel"),
-    function(celdaMod) {
-        celdaMod@sampleLabel
-    })
+  signature = c(celdaMod = "celdaModel"),
+  function(celdaMod) {
+    celdaMod@sampleLabel
+  }
+)
 
 
 setClass("celda_G", contains = "celdaModel")
@@ -209,13 +228,13 @@ setClass("celda_G", contains = "celdaModel")
 setClass("celda_CG", contains = c("celda_C", "celda_G"))
 
 setClass(
-    "celdaList",
-    representation(
-        runParams = "data.frame",
-        resList = "list",
-        countChecksum = "character",
-        perplexity = "matrix"
-    )
+  "celdaList",
+  representation(
+    runParams = "data.frame",
+    resList = "list",
+    countChecksum = "character",
+    perplexity = "matrix"
+  )
 )
 
 
@@ -231,10 +250,12 @@ setClass(
 #' data(celdaCGGridSearchRes)
 #' runParams(celdaCGGridSearchRes)
 #' @export
-setGeneric("runParams",
-    function(celdaList) {
-        standardGeneric("runParams")
-    })
+setGeneric(
+  "runParams",
+  function(celdaList) {
+    standardGeneric("runParams")
+  }
+)
 #' @title Get run parameters provided to `celdaGridSearch()`
 #' @description Returns details on the clustering parameters, and model priors
 #'  provided to `celdaGridSearch()` when the provided celdaList was
@@ -248,10 +269,11 @@ setGeneric("runParams",
 #' runParams(celdaCGGridSearchRes)
 #' @export
 setMethod("runParams",
-    signature = c(celdaList = "celdaList"),
-    function(celdaList) {
-        celdaList@runParams
-    })
+  signature = c(celdaList = "celdaList"),
+  function(celdaList) {
+    celdaList@runParams
+  }
+)
 
 
 #' @title Get final celdaModels from a celdaList
@@ -263,10 +285,12 @@ setMethod("runParams",
 #' data(celdaCGGridSearchRes)
 #' celdaCGGridModels <- resList(celdaCGGridSearchRes)
 #' @export
-setGeneric("resList",
-    function(celdaList) {
-        standardGeneric("resList")
-    })
+setGeneric(
+  "resList",
+  function(celdaList) {
+    standardGeneric("resList")
+  }
+)
 #' @title Get final celdaModels from a celdaList
 #' @description Returns all models generated during a `celdaGridSearch()` run.
 #' @param celdaList An object of class celdaList.
@@ -277,10 +301,11 @@ setGeneric("resList",
 #' celdaCGGridModels <- resList(celdaCGGridSearchRes)
 #' @export
 setMethod("resList",
-    signature = c(celdaList = "celdaList"),
-    function(celdaList) {
-        celdaList@resList
-    })
+  signature = c(celdaList = "celdaList"),
+  function(celdaList) {
+    celdaList@resList
+  }
+)
 
 
 #' @title Get perplexity for every model in a celdaList
@@ -293,10 +318,12 @@ setMethod("resList",
 #' data(celdaCGGridSearchRes)
 #' celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
 #' @export
-setGeneric("celdaPerplexity",
-    function(celdaList) {
-        standardGeneric("celdaPerplexity")
-    })
+setGeneric(
+  "celdaPerplexity",
+  function(celdaList) {
+    standardGeneric("celdaPerplexity")
+  }
+)
 #' @title Get perplexity for every model in a celdaList
 #' @description Returns perplexity for each model in a celdaList as calculated
 #'  by `perplexity().`
@@ -308,10 +335,11 @@ setGeneric("celdaPerplexity",
 #' celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
 #' @export
 setMethod("celdaPerplexity",
-    signature = c(celdaList = "celdaList"),
-    function(celdaList) {
-        celdaList@perplexity
-    })
+  signature = c(celdaList = "celdaList"),
+  function(celdaList) {
+    celdaList@perplexity
+  }
+)
 
 
 #' @title Append two celdaList objects
@@ -323,27 +351,32 @@ setMethod("celdaPerplexity",
 #' @param list2 A celda_list object to be joined with list_1
 #' @examples
 #' data(celdaCGGridSearchRes)
-#' appendedList <- appendCeldaList(celdaCGGridSearchRes,
-#'     celdaCGGridSearchRes)
+#' appendedList <- appendCeldaList(
+#'   celdaCGGridSearchRes,
+#'   celdaCGGridSearchRes
+#' )
 #' @importFrom methods new
 #' @export
 appendCeldaList <- function(list1, list2) {
-    if (!is.element("celdaList", class(list1)) |
-            !is.element("celdaList", class(list2))) {
-        stop("Both parameters to appendCeldaList must be of class celdaList.")
-    }
-    if (!(countChecksum(list1) == countChecksum(list2))) {
-        warning("Provided lists have different countChecksums and may have",
-            " been generated from different count matrices. Using checksum",
-            " from first list...")
-    }
-    newList <- methods::new(
-        "celdaList",
-        runParams = rbind(runParams(list1), runParams(list2)),
-        resList = c(resList(list1), resList(list2)),
-        countChecksum = countChecksum(list1),
-        perplexity = matrix(nrow = 0, ncol = 0))
-    return(newList)
+  if (!is.element("celdaList", class(list1)) |
+    !is.element("celdaList", class(list2))) {
+    stop("Both parameters to appendCeldaList must be of class celdaList.")
+  }
+  if (!(countChecksum(list1) == countChecksum(list2))) {
+    warning(
+      "Provided lists have different countChecksums and may have",
+      " been generated from different count matrices. Using checksum",
+      " from first list..."
+    )
+  }
+  newList <- methods::new(
+    "celdaList",
+    runParams = rbind(runParams(list1), runParams(list2)),
+    resList = c(resList(list1), resList(list2)),
+    countChecksum = countChecksum(list1),
+    perplexity = matrix(nrow = 0, ncol = 0)
+  )
+  return(newList)
 }
 
 
@@ -357,10 +390,12 @@ appendCeldaList <- function(list1, list2) {
 #' data(celdaCGGridSearchRes)
 #' countChecksum <- countChecksum(celdaCGGridSearchRes)
 #' @export
-setGeneric("countChecksum",
-    function(celdaList) {
-        standardGeneric("countChecksum")
-    })
+setGeneric(
+  "countChecksum",
+  function(celdaList) {
+    standardGeneric("countChecksum")
+  }
+)
 #' @title Get the MD5 hash of the count matrix from the celdaList
 #' @description Returns the MD5 hash of the count matrix used to generate the
 #'  celdaList.
@@ -372,10 +407,11 @@ setGeneric("countChecksum",
 #' countChecksum <- countChecksum(celdaCGGridSearchRes)
 #' @export
 setMethod("countChecksum",
-    signature = c(celdaList = "celdaList"),
-    function(celdaList) {
-        celdaList@countChecksum
-    })
+  signature = c(celdaList = "celdaList"),
+  function(celdaList) {
+    celdaList@countChecksum
+  }
+)
 
 ################################################################################
 # Generics
@@ -399,10 +435,11 @@ setMethod("countChecksum",
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export
 setGeneric("celdaHeatmap",
-    signature = "celdaMod",
-    function(counts, celdaMod, featureIx, ...) {
-        standardGeneric("celdaHeatmap")
-    })
+  signature = "celdaMod",
+  function(counts, celdaMod, featureIx, ...) {
+    standardGeneric("celdaHeatmap")
+  }
+)
 
 #' @title Calculate LogLikelihood
 #' @description Calculate a log-likelihood for a user-provided cluster
@@ -416,19 +453,20 @@ setGeneric("celdaHeatmap",
 #' @examples
 #' data(celdaCGSim)
 #' loglik <- logLikelihood(celdaCGSim$counts,
-#'     model = "celda_CG",
-#'     sampleLabel = celdaCGSim$sampleLabel,
-#'     z = celdaCGSim$z, y = celdaCGSim$y,
-#'     K = celdaCGSim$K, L = celdaCGSim$L,
-#'     alpha = celdaCGSim$alpha, beta = celdaCGSim$beta,
-#'     gamma = celdaCGSim$gamma, delta = celdaCGSim$delta
+#'   model = "celda_CG",
+#'   sampleLabel = celdaCGSim$sampleLabel,
+#'   z = celdaCGSim$z, y = celdaCGSim$y,
+#'   K = celdaCGSim$K, L = celdaCGSim$L,
+#'   alpha = celdaCGSim$alpha, beta = celdaCGSim$beta,
+#'   gamma = celdaCGSim$gamma, delta = celdaCGSim$delta
 #' )
 #' @export
 #'
 #'
 logLikelihood <- function(counts, model, ...) {
-    do.call(paste0("logLikelihood", model),
-        args = list(counts = counts, ...))
+  do.call(paste0("logLikelihood", model),
+    args = list(counts = counts, ...)
+  )
 }
 
 
@@ -448,10 +486,11 @@ logLikelihood <- function(counts, model, ...) {
 #' @return A numeric vector of the cluster assignment probabilties
 #' @export
 setGeneric("clusterProbability",
-    signature = "celdaMod",
-    function(counts, celdaMod, log = FALSE, ...) {
-        standardGeneric("clusterProbability")
-    })
+  signature = "celdaMod",
+  function(counts, celdaMod, log = FALSE, ...) {
+    standardGeneric("clusterProbability")
+  }
+)
 
 
 #' @title Calculate the perplexity from a single celdaModel
@@ -469,10 +508,11 @@ setGeneric("clusterProbability",
 #' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
 #' @export
 setGeneric("perplexity",
-    signature = "celdaMod",
-    function(counts, celdaMod, newCounts = NULL) {
-        standardGeneric("perplexity")
-    })
+  signature = "celdaMod",
+  function(counts, celdaMod, newCounts = NULL) {
+    standardGeneric("perplexity")
+  }
+)
 
 
 #' @title Simulate count data from the celda generative models.
@@ -491,7 +531,7 @@ setGeneric("perplexity",
 #' dim(celdaCGSim$counts)
 #' @export
 simulateCells <- function(model, ...) {
-    do.call(paste0("simulateCells", model), args = list(...))
+  do.call(paste0("simulateCells", model), args = list(...))
 }
 
 
@@ -510,18 +550,19 @@ simulateCells <- function(model, ...) {
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' factorizedMatrices <- factorizeMatrix(
-#'     celdaCGSim$counts, celdaCGMod,
-#'     "posterior"
+#'   celdaCGSim$counts, celdaCGMod,
+#'   "posterior"
 #' )
 #' @return A list of lists of the types of factorized matrices specified
 #' @export
 setGeneric("factorizeMatrix",
-    signature = "celdaMod",
-    function(counts,
-        celdaMod,
-        type = c("counts", "proportion", "posterior")) {
-        standardGeneric("factorizeMatrix")
-    })
+  signature = "celdaMod",
+  function(counts,
+           celdaMod,
+           type = c("counts", "proportion", "posterior")) {
+    standardGeneric("factorizeMatrix")
+  }
+)
 
 #' @title Renders probability and relative expression heatmaps to visualize the
 #'  relationship between feature modules and cell populations.
@@ -539,10 +580,11 @@ setGeneric("factorizeMatrix",
 #' @return A grob containing the specified plots
 #' @export
 setGeneric("celdaProbabilityMap",
-    signature = "celdaMod",
-    function(counts, celdaMod, ...) {
-        standardGeneric("celdaProbabilityMap")
-    })
+  signature = "celdaMod",
+  function(counts, celdaMod, ...) {
+    standardGeneric("celdaProbabilityMap")
+  }
+)
 
 
 #' @title Embeds cells in two dimensions using tSNE based on celda_CG results.
@@ -570,20 +612,21 @@ setGeneric("celdaProbabilityMap",
 #' tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
 #' @export
 setGeneric("celdaTsne",
-    signature = "celdaMod",
-    function(counts,
-        celdaMod,
-        maxCells = 25000,
-        minClusterSize = 100,
-        initialDims = 20,
-        modules = NULL,
-        perplexity = 20,
-        maxIter = 2500,
-        ...) {
-        # counts = processCounts(counts)
-        # compareCountMatrix(counts, celdaMod)
-        standardGeneric("celdaTsne")
-    })
+  signature = "celdaMod",
+  function(counts,
+           celdaMod,
+           maxCells = 25000,
+           minClusterSize = 100,
+           initialDims = 20,
+           modules = NULL,
+           perplexity = 20,
+           maxIter = 2500,
+           ...) {
+    # counts = processCounts(counts)
+    # compareCountMatrix(counts, celdaMod)
+    standardGeneric("celdaTsne")
+  }
+)
 
 
 #' @title Embeds cells in two dimensions using umap.
@@ -608,16 +651,17 @@ setGeneric("celdaTsne",
 #' umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
 #' @export
 setGeneric("celdaUmap",
-    signature = "celdaMod",
-    function(counts,
-        celdaMod,
-        maxCells = NULL,
-        minClusterSize = 100,
-        modules = NULL,
-        seed = 12345,
-        ...) {
-        standardGeneric("celdaUmap")
-    })
+  signature = "celdaMod",
+  function(counts,
+           celdaMod,
+           maxCells = NULL,
+           minClusterSize = 100,
+           modules = NULL,
+           seed = 12345,
+           ...) {
+    standardGeneric("celdaUmap")
+  }
+)
 
 
 #' @title Obtain the gene module of a gene of interest
@@ -636,11 +680,13 @@ setGeneric("celdaUmap",
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' featureModuleLookup(
-#'     counts = celdaCGSim$counts,
-#'     celdaMod = celdaCGMod, "Gene_1")
+#'   counts = celdaCGSim$counts,
+#'   celdaMod = celdaCGMod, "Gene_1"
+#' )
 #' @export
 setGeneric("featureModuleLookup",
-    signature = "celdaMod",
-    function(counts, celdaMod, feature, exactMatch = TRUE) {
-        standardGeneric("featureModuleLookup")
-    })
+  signature = "celdaMod",
+  function(counts, celdaMod, feature, exactMatch = TRUE) {
+    standardGeneric("featureModuleLookup")
+  }
+)

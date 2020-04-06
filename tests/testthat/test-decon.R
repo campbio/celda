@@ -6,7 +6,7 @@ modelDecontXoneBatch <- decontX(deconSim$observedCounts,
         z = deconSim$z,
         maxIter = 2)
 
-deconSim2 <- simulateContamination(K = 10, delta = c(1,5))
+deconSim2 <- simulateContamination(K = 10, delta = c(1, 5))
 batchDecontX <- decontX(cbind(deconSim$observedCounts,
     deconSim2$observedCounts),
         z = c(deconSim$z, deconSim2$z),
@@ -27,31 +27,44 @@ test_that(desc = "Testing simulateContamination", {
 test_that(desc = "Testing DecontX on counts matrix", {
   s <- simulateContamination()
   res <- decontX(s$observedCounts)
-  p <- plotDecontXMarkerPercentage(s$observedCounts, z=res$z, markers = s$markers)
-  p <- plotDecontXMarkerPercentage(res$decontXcounts, z=res$z, markers = s$markers)
-  p <- plotDecontXMarkerExpression(s$observedCounts, s$markers[[1]], z=s$z)
+  p <- plotDecontXMarkerPercentage(s$observedCounts,
+                                   z = res$z,
+                                   markers = s$markers)
+  p <- plotDecontXMarkerPercentage(res$decontXcounts,
+                                   z = res$z,
+                                   markers = s$markers)
+  p <- plotDecontXMarkerExpression(s$observedCounts,
+                                   s$markers[[1]],
+                                   z = s$z)
   p <- plotDecontXContamination(res)
 })
 
 test_that(desc = "Testing DecontX on SCE", {
   s <- simulateContamination()
-  sce <- SingleCellExperiment::SingleCellExperiment(list(counts=s$observedCounts))
+  sce <- SingleCellExperiment::SingleCellExperiment(
+                               list(counts = s$observedCounts))
   sce <- decontX(sce)
   p <- plotDecontXContamination(sce)
-  p <- plotDecontXMarkerPercentage(sce, z=s$z, markers = s$markers, assayName = "decontXcounts")
+  p <- plotDecontXMarkerPercentage(sce,
+                                   z = s$z,
+                                   markers = s$markers,
+                                   assayName = "decontXcounts")
   p <- plotDecontXMarkerExpression(sce, s$markers[[1]])
-  newz = paste0("X", s$z)
-  sce$newz2 = newz
-  p <- plotDecontXMarkerPercentage(sce, z="newz2", markers = s$markers, assayName = "decontXcounts")
+  newz <- paste0("X", s$z)
+  sce$newz2 <- newz
+  p <- plotDecontXMarkerPercentage(sce,
+                                   z = "newz2",
+                                   markers = s$markers,
+                                   assayName = "decontXcounts")
   sce <- decontX(sce, estimateDelta = FALSE)
 })
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {
     expect_error(decontX(x = deconSim$observedCounts,
-        z = deconSim$z,delta = c(1,-1)))
+        z = deconSim$z, delta = c(1, -1)))
     expect_error(decontX(x = deconSim$observedCounts,
-        z = deconSim$z,delta = c(1,1,1)))
+        z = deconSim$z, delta = c(1, 1, 1)))
     expect_error(decontX(x = deconSim$observedCounts,
         z = c(deconSim$z, 1)),
         paste0("'z' must be of the same length as the number of cells in the",
@@ -65,4 +78,3 @@ test_that(desc = "Testing .decontXoneBatch", {
     expect_error(.decontXoneBatch(counts = countsNA, z = deconSim$z),
         "Missing value in 'counts' matrix.")
 })
-
