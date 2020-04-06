@@ -468,11 +468,15 @@ retrieveFeatureIndex <- function(features, x,
   # Match each element of 'pattern' in vector 'search'
   if (!isTRUE(exactMatch)) {
     featuresIndices <- rep(NA, length(features))
-    featuresNotFound <- c()
     for (i in seq_along(features)) {
       g <- grep(features[i], search)
-      if (length(g) > 0) {
+      if (length(g) == 1) {
         featuresIndices[i] <- g
+      } else if (length(g) > 1) {
+        warning("Feature '", features[i], "' matched multiple items in '",
+                by, "': ", paste(search[g], collapse = ","),
+                ". Only the first match will be selected.")
+        featuresIndices[i] <- g[1]
       }
     }
     
@@ -480,11 +484,19 @@ retrieveFeatureIndex <- function(features, x,
     featuresIndices <- match(features, search)
   }
   
-  featuresNotFound <- 
   if (sum(is.na(featuresIndices)) > 0) {
     if (sum(is.na(featuresIndices)) == length(features)) {
-      stop("None of the provided features had matching",
-           " names in 'x'.")
+      if(isTRUE(exactMatch)) {
+        stop("None of the provided features had matching",
+             " items in '", by, "' within 'x'. ",
+             "Check the spelling or try setting",
+             " 'exactMatch = FALSE'.")
+      } else {
+        stop("None of the provided features had matching",
+             " items in '", by, "' within 'x'. ",
+             "Check the spelling and make sure 'by' is set",
+             " to the appropriate place in 'x'.")
+      }
     }
     warning("The following features were not present in 'x': ",
             paste(features[which(is.na(featuresIndices))],

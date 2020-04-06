@@ -10,8 +10,9 @@ plotDecontXMarkerPercentage(
   groupClusters = NULL,
   assayName = c("counts", "decontXcounts"),
   z = NULL,
-  by = "rownames",
   threshold = 1,
+  exactMatch = TRUE,
+  by = "rownames",
   ncol = round(sqrt(length(markers))),
   labelBars = TRUE,
   labelSize = 3
@@ -47,13 +48,17 @@ is a counts matrix, then \code{z} will need to be a vector the same length as
 the number of columns in \code{x} that indicate the cluster to which each cell
 belongs. Default \code{NULL}.}
 
+\item{threshold}{Numeric. Markers greater than or equal to this value will
+be considered detected in a cell. Default 1.}
+
+\item{exactMatch}{Boolean. Whether to only identify exact matches
+for the markers or to identify partial matches using \code{\link{grep}}. See
+\code{\link{retrieveFeatureIndex}} for more details. Default \code{TRUE}.}
+
 \item{by}{Character. Where to search for the markers if \code{x} is a
 \linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}} for
 more details. If \code{x} is a matrix, then this must be set to \code{"rownames"}.
 Default \code{"rownames"}.}
-
-\item{threshold}{Numeric. Markers greater than or equal to this value will
-be considered detected in a cell. Default 1.}
 
 \item{ncol}{Integer. Number of columns to make in the plot.
 Default \code{round(sqrt(length(markers))}.}

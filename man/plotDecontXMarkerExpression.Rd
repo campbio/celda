@@ -10,8 +10,9 @@ plotDecontXMarkerExpression(
   groupClusters = NULL,
   assayName = c("counts", "decontXcounts"),
   z = NULL,
-  log1p = FALSE,
+  exactMatch = TRUE,
   by = "rownames",
+  log1p = FALSE,
   ncol = NULL,
   plotDots = FALSE,
   dotSize = 0.1
@@ -43,14 +44,18 @@ is a counts matrix, then \code{z} will need to be a vector the same length as
 the number of columns in \code{x} that indicate the cluster to which each cell
 belongs. Default \code{NULL}.}
 
-\item{log1p}{Boolean. Whether to apply the function \code{log1p} to the data
-before plotting. This function will add a pseudocount of 1 and then log 
-transform the expression values. Default \code{FALSE}.}
+\item{exactMatch}{Boolean. Whether to only identify exact matches
+for the markers or to identify partial matches using \code{\link{grep}}. See
+\code{\link{retrieveFeatureIndex}} for more details Default \code{TRUE}.}
 
 \item{by}{Character. Where to search for the markers if \code{x} is a
 \linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}} for
 more details. If \code{x} is a matrix, then this must be set to \code{"rownames"}.
 Default \code{"rownames"}.}
+
+\item{log1p}{Boolean. Whether to apply the function \code{log1p} to the data
+before plotting. This function will add a pseudocount of 1 and then log 
+transform the expression values. Default \code{FALSE}.}
 
 \item{ncol}{Integer. Number of columns to make in the plot.
 Default \code{NULL}.}

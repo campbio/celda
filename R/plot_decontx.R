@@ -103,12 +103,15 @@ plotDecontXContamination <- function(x,
 #' is a counts matrix, then \code{z} will need to be a vector the same length as
 #' the number of columns in \code{x} that indicate the cluster to which each cell
 #' belongs. Default \code{NULL}.
+#' @param threshold Numeric. Markers greater than or equal to this value will
+#' be considered detected in a cell. Default 1.
+#' @param exactMatch Boolean. Whether to only identify exact matches
+#' for the markers or to identify partial matches using \code{\link{grep}}. See
+#' \code{\link{retrieveFeatureIndex}} for more details. Default \code{TRUE}.
 #' @param by Character. Where to search for the markers if \code{x} is a
 #' \linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}} for
 #' more details. If \code{x} is a matrix, then this must be set to \code{"rownames"}.
 #' Default \code{"rownames"}.
-#' @param threshold Numeric. Markers greater than or equal to this value will
-#' be considered detected in a cell. Default 1.
 #' @param ncol Integer. Number of columns to make in the plot.
 #' Default \code{round(sqrt(length(markers))}. 
 #' @param labelBars Boolean. Whether to display percentages above each bar Default
@@ -121,7 +124,8 @@ plotDecontXContamination <- function(x,
 #' @export
 plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
                                assayName = c("counts", "decontXcounts"),
-                               z = NULL, by = "rownames",  threshold = 1,
+                               z = NULL, threshold = 1,
+                               exactMatch = TRUE, by = "rownames", 
                                ncol = round(sqrt(length(markers))),
                                labelBars = TRUE, labelSize = 3) {
 
@@ -135,7 +139,8 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
                                            z = z,
                                            markers = markers,
                                            groupClusters = groupClusters,
-                                           by = by)
+                                           by = by,
+                                           exactMatch = exactMatch)
     x <- temp$x
     z <- temp$z
     geneMarkerIndex <- temp$geneMarkerIndex
@@ -238,13 +243,16 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
 #' is a counts matrix, then \code{z} will need to be a vector the same length as
 #' the number of columns in \code{x} that indicate the cluster to which each cell
 #' belongs. Default \code{NULL}.
-#' @param log1p Boolean. Whether to apply the function \code{log1p} to the data
-#' before plotting. This function will add a pseudocount of 1 and then log 
-#' transform the expression values. Default \code{FALSE}. 
+#' @param exactMatch Boolean. Whether to only identify exact matches
+#' for the markers or to identify partial matches using \code{\link{grep}}. See
+#' \code{\link{retrieveFeatureIndex}} for more details Default \code{TRUE}.
 #' @param by Character. Where to search for the markers if \code{x} is a
 #' \linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}} for
 #' more details. If \code{x} is a matrix, then this must be set to \code{"rownames"}.
 #' Default \code{"rownames"}.
+#' @param log1p Boolean. Whether to apply the function \code{log1p} to the data
+#' before plotting. This function will add a pseudocount of 1 and then log 
+#' transform the expression values. Default \code{FALSE}. 
 #' @param ncol Integer. Number of columns to make in the plot.
 #' Default \code{NULL}. 
 #' @param plotDots Boolean. If \code{TRUE}, the
@@ -259,15 +267,17 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
 #' @export
 plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
                                         assayName = c("counts", "decontXcounts"),
-                                        z = NULL, log1p = FALSE,
-                                        by = "rownames", ncol = NULL,
+                                        z = NULL, exactMatch = TRUE,
+                                        by = "rownames", log1p = FALSE,
+                                        ncol = NULL,
                                         plotDots = FALSE, dotSize = 0.1){
   legend <- "none"
   temp <- .processPlotDecontXMarkerInupt(x = x,
                                  z = z,
                                  markers = markers,
                                  groupClusters = groupClusters,
-                                 by = by)
+                                 by = by,
+                                 exactMatch = exactMatch)
   x <- temp$x
   z <- temp$z
   geneMarkerIndex <- temp$geneMarkerIndex
@@ -309,22 +319,25 @@ plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
     df$Expression <- log1p(df$Expression)
     ylab <- "Expression (log1p)"
   }
-
+  Expression <- df$Expression
+  Marker <- df$Marker
+  Assay <- df$assay
+  Cluster <- df$Cluster
   if(!is.null(groupClusters)) {
-    df <- cbind(df, Cell_Type = names(groupClusters)[df$Cluster])
-    df$Cell_Type <- factor(df$Cell_Type, levels = names(groupClusters))
-    plt <- ggplot2::ggplot(df, ggplot2::aes(x = df$Cell_Type,
-                                            y = df$Expression,
-                                            fill = df$assay)) +
-      ggplot2::facet_wrap( ~ df$Cell_Type + df$Marker,
+    df <- cbind(df, Cell_Type = names(groupClusters)[Cluster])
+    Cell_Type <- factor(df$Cell_Type, levels = names(groupClusters))
+    plt <- ggplot2::ggplot(df, ggplot2::aes(x = Cell_Type,
+                                            y = Expression,
+                                            fill = Assay)) +
+      ggplot2::facet_wrap( ~ Cell_Type + Marker,
                            scales = "free",
                            labeller = ggplot2::label_context,
                            ncol = ncol) 
   } else {
-    plt <- ggplot2::ggplot(df, ggplot2::aes(x = df$Cluster,
-                                            y = df$Expression,
-                                            fill = df$assay)) +
-      ggplot2::facet_wrap( ~ df$Cluster + df$Marker,
+    plt <- ggplot2::ggplot(df, ggplot2::aes(x = Cluster,
+                                            y = Expression,
+                                            fill = Assay)) +
+      ggplot2::facet_wrap( ~ Cluster + Marker,
                            scales = "free",
                            labeller = ggplot2::label_context,
                            ncol = ncol)
@@ -348,7 +361,8 @@ plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
 
 
 
-.processPlotDecontXMarkerInupt <- function(x, z, markers, groupClusters, by) {
+.processPlotDecontXMarkerInupt <- function(x, z, markers, groupClusters,
+                                           by, exactMatch) {
   
   # Process z and convert to a factor
   if(is.null(z) & inherits(x, "SingleCellExperiment")) {
@@ -409,7 +423,8 @@ plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
   geneMarkerIndex <- retrieveFeatureIndex(unlist(markers),
                                           x,
                                           by = by,
-                                          removeNA = FALSE)
+                                          removeNA = FALSE,
+                                          exactMatch = exactMatch)
   
   # Remove genes that did not match
   na.ix <- is.na(geneMarkerIndex)
