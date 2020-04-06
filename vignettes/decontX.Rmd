@@ -2,7 +2,7 @@
 title: "Decontamination of ambient RNA in single-cell genomic data with DecontX" 
 author:
 - name: Shiyi (Iris) Yang
-  affiliation: *id
+  affiliation: &id Boston University School of Medicine
 - name: Zhe Wang
   affiliation: *id
 - name: Joshua Campbell
@@ -10,9 +10,8 @@ author:
   email: camp@bu.edu
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::html_document:
+  BiocStyle::pdf_document:
     toc: true
-    fig.retina: 0.5
 vignette: >
   %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA in single-cell data with DecontX}
   %\VignetteEngine{knitr::rmarkdown}
@@ -20,7 +19,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, dev = "png")
 ```
 
 # Introduction
@@ -72,7 +71,7 @@ The contamination can be found in the `colData(pbmc4k)$decontX_contamination` an
 ## Cluster labels on UMAP
 DecontX creates a UMAP which we can use to plot the cluster labels automatically identified in the analysis. Note that the clustering approach used here is designed to find "broad" cell types rather than individual cell subpopulations within a cell type. 
 
-```{r}
+```{r UMAP_Clusters}
 umap <- reducedDim(pbmc4k, "decontX_UMAP")
 plotDimReduceCluster(umap[,1], umap[,2], cluster = pbmc4k$decontX_clusters)
 ```
@@ -162,7 +161,7 @@ Setting a higher value in the second element of delta and `estimateDelta = FALSE
 ```{r newDecontX, eval=TRUE, message=FALSE}
 pbmc4k.delta <- decontX(pbmc4k, delta=c(9, 20), estimateDelta = FALSE)
 
-plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination, xlab="Estimated priors", ylab="Setting prior with higher contamination")
+plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination, xlab="DecontX estimated priors", ylab="Setting priors to estimate higher contamination")
 abline(0, 1, col="red", lwd=2)
 ```
 

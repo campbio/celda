@@ -14,17 +14,16 @@ author:
   email: camp@bu.edu
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::html_document:
+  BiocStyle::pdf_document:
     toc: true
-    fig.retina: 0.5
 vignette: >
-  %\VignetteIndexEntry{Analyzing single-cell RNA-seq count data with celda}
+  %\VignetteIndexEntry{Analysis of single-cell genomic data with celda}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, dev = "png")
 ```
 
 # Introduction
