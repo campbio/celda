@@ -16,29 +16,31 @@ simulateContamination(
 )
 }
 \arguments{
-\item{C}{Integer. Number of cells to be simulated. Default to be 300.}
+\item{C}{Integer. Number of cells to be simulated. Default \code{300}.}
 
-\item{G}{Integer. Number of genes to be simulated. Default to be 100.}
+\item{G}{Integer. Number of genes to be simulated. Default \code{100}.}
 
-\item{K}{Integer. Number of cell populations to be simulated. Default 3.}
+\item{K}{Integer. Number of cell populations to be simulated.
+Default \code{3}.}
 
 \item{NRange}{Integer vector. A vector of length 2 that specifies the lower
 and upper bounds of the number of counts generated for each cell. Default
-c(500, 1000).}
+\code{c(500, 1000)}.}
 
-\item{beta}{Numeric. Concentration parameter for Phi. Default 0.1.}
+\item{beta}{Numeric. Concentration parameter for Phi. Default \code{0.1}.}
 
-\item{delta}{Numeric or Numeric vector. Concentration parameter for Theta. If
-input as a single numeric value, symmetric values for beta distribution are
-specified; if input as a vector of lenght 2, the two values will be the
-shape1 and shape2 paramters of the beta distribution respectively.
-Default c(1, 5).}
+\item{delta}{Numeric or Numeric vector. Concentration parameter for Theta.
+If input as a single numeric value, symmetric values for beta
+distribution are specified; if input as a vector of lenght 2, the two
+values will be the shape1 and shape2 paramters of the beta distribution
+respectively. Default \code{c(1, 5)}.}
 
-\item{numMarkers}{Integer. Number of markers for each cell population. Default 3.}
+\item{numMarkers}{Integer. Number of markers for each cell population.
+Default \code{3}.}
 
-\item{seed}{Integer. Passed to \code{\link[withr]{with_seed}}. For reproducibility,
-a default value of 12345 is used. If NULL, no calls to
-\code{\link[withr]{with_seed}} are made.}
+\item{seed}{Integer. Passed to \code{\link[withr]{with_seed}}.
+For reproducibility, a default value of 12345 is used. If NULL, no calls to
+ \code{\link[withr]{with_seed}} are made.}
 }
 \value{
 A list containing the \code{nativeMatirx} (real expression),

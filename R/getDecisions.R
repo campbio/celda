@@ -66,7 +66,7 @@ getDecisions <- function(rules, features) {
       if (sum(ruleClass$direction == 1) > 1) {
         ruleClass <- ruleClass[order(
           ruleClass$direction,
-          decreasing = T
+          decreasing = TRUE
         ), ]
         ruleClass <- ruleClass[c(
           which.max(

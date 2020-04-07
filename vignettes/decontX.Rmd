@@ -89,7 +89,11 @@ Known marker genes can also be plotted on the UMAP to identify the cell types fo
 ```{r, }
 library(scater)
 pbmc4k <- logNormCounts(pbmc4k)
-plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k), features = c("CD3D", "CD3E", "GNLY", "LYZ", "S100A8", "S100A9", "CD79A", "CD79B", "MS4A1"), exactMatch = TRUE)
+plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k),
+                     features = c("CD3D", "CD3E", "GNLY",
+                                  "LYZ", "S100A8", "S100A9",
+                                  "CD79A", "CD79B", "MS4A1"),
+                     exactMatch = TRUE)
 ```
 
 ## Barplot of markers detected in cell clusters
@@ -101,20 +105,26 @@ markers <- list(Tcell_Markers=c("CD3E", "CD3D"),
                     Monocyte_Markers=c("S100A8", "S100A9", "LYZ"),
                     NKcell_Markers="GNLY")
 cellTypeMappings <- list(Tcells=2, Bcells=5, Monocytes=1, NKcells=6)
-plotDecontXMarkerPercentage(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "counts")
+plotDecontXMarkerPercentage(pbmc4k, markers = markers,
+                            groupClusters = cellTypeMappings,
+                            assayName = "counts")
 ```
 
 We can then look to see how much DecontX removed aberrant expression of marker genes in each cell type by changing the `assayName` to `decontXcounts`:
 
 ```{r barplotDecontCounts}
-plotDecontXMarkerPercentage(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = "decontXcounts")
+plotDecontXMarkerPercentage(pbmc4k, markers = markers,
+                            groupClusters = cellTypeMappings,
+                            assayName = "decontXcounts")
 ```
 
 Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells.
 The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the `assayName` parameter. This ooption only available if the data is stored in `SingleCellExperiment` object.
 
 ```{r barplotBoth}
-plotDecontXMarkerPercentage(pbmc4k, markers = markers, groupClusters = cellTypeMappings, assayName = c("counts", "decontXcounts"))
+plotDecontXMarkerPercentage(pbmc4k, markers = markers,
+                            groupClusters = cellTypeMappings,
+                            assayName = c("counts", "decontXcounts"))
 ```
 
 Some helpful hints when using `plotDecontXMarkerPercentage`:
@@ -127,7 +137,9 @@ Some helpful hints when using `plotDecontXMarkerPercentage`:
 Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `DecontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
 
 ```{r plotDecontXMarkerExpression}
-plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]], groupClusters = cellTypeMappings, ncol = 3)
+plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
+                            groupClusters = cellTypeMappings,
+                            ncol = 3)
 ```
 
 Some helfpul hints when using `plotDecontXMarkerExpression`:
@@ -138,9 +150,14 @@ Some helfpul hints when using `plotDecontXMarkerExpression`:
 
 
 ```{r plot_norm_counts, eval = FALSE}
-pbmc4k <- scater::logNormCounts(pbmc4k, exprs_values = "decontXcounts", name="dlogcounts")
+pbmc4k <- scater::logNormCounts(pbmc4k,
+                                exprs_values = "decontXcounts",
+                                name="dlogcounts")
 
-plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]], groupClusters = cellTypeMappings, ncol = 3, assayName = c("logcounts", "dlogcounts"))
+plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
+                            groupClusters = cellTypeMappings,
+                            ncol = 3,
+                            assayName = c("logcounts", "dlogcounts"))
 ```
 
 
@@ -161,7 +178,9 @@ Setting a higher value in the second element of delta and `estimateDelta = FALSE
 ```{r newDecontX, eval=TRUE, message=FALSE}
 pbmc4k.delta <- decontX(pbmc4k, delta=c(9, 20), estimateDelta = FALSE)
 
-plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination, xlab="DecontX estimated priors", ylab="Setting priors to estimate higher contamination")
+plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination,
+     xlab="DecontX estimated priors",
+     ylab="Setting priors to estimate higher contamination")
 abline(0, 1, col="red", lwd=2)
 ```
 

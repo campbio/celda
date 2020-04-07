@@ -1122,7 +1122,8 @@ setMethod(
       normalize = "proportion",
       transformationFun = sqrt
     )
-    plotHeatmap(norm[featureIx, ], z = clusters(celdaMod)$z, ...)
+    plt <- plotHeatmap(norm[featureIx, ], z = clusters(celdaMod)$z, ...)
+    invisible(plt)
   }
 )
 

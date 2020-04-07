@@ -19,42 +19,51 @@ plotDecontXMarkerExpression(
 )
 }
 \arguments{
-\item{x}{Either a \linkS4class{SingleCellExperiment} or a matrix-like object of counts.}
+\item{x}{Either a \linkS4class{SingleCellExperiment}
+or a matrix-like object of counts.}
 
-\item{markers}{Character Vector or List. A character vector or list of character vectors
+\item{markers}{Character Vector or List. A character vector
+or list of character vectors
 with the names of the marker genes of interest.}
 
-\item{groupClusters}{List. A named list that allows cell clusters labels coded in
+\item{groupClusters}{List. A named list that allows
+cell clusterslabels coded in
 \code{z} to be regrouped and renamed on the fly. For example,
-\code{list(Tcells=c(1, 2), Bcells=7)} would recode clusters 1 and 2 to "Tcells"
-and cluster 7 to "Bcells". Note that if this is used, clusters in \code{z} not found
+\code{list(Tcells=c(1, 2), Bcells=7)} would recode clusters
+1 and 2 to "Tcells"
+and cluster 7 to "Bcells". Note that if this is used, clusters
+in \code{z} not found
 in \code{groupClusters} will be excluded. Default \code{NULL}.}
 
-\item{assayName}{Character vector. Name(s) of the assay(s) to plot if \code{x} is a
-\linkS4class{SingleCellExperiment}. If more than one assay is listed, then 
-side-by-side violin plots will be generated. Default \code{c("counts", "decontXcounts")}.}
+\item{assayName}{Character vector. Name(s) of the assay(s) to
+plot if \code{x} is a
+\linkS4class{SingleCellExperiment}. If more than one assay is listed, then
+side-by-side violin plots will be generated.
+Default \code{c("counts", "decontXcounts")}.}
 
-\item{z}{Character, Integer, or Vector. Indicates the cluster labels for each cell. 
-If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL}, then 
-the cluster labels from \code{\link{decontX}} will be retived from the
+\item{z}{Character, Integer, or Vector.
+Indicates the cluster labels for each cell.
+If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL},
+then the cluster labels from \code{\link{decontX}} will be retived from the
 \code{colData} of \code{x} (i.e. \code{colData(x)$decontX_clusters}).
-If \code{z} is a single character or integer, then that column will be retrived
-from \code{colData} of \code{x}. (i.e. \code{colData(x)[,z]}). If \code{x}
-is a counts matrix, then \code{z} will need to be a vector the same length as
-the number of columns in \code{x} that indicate the cluster to which each cell
-belongs. Default \code{NULL}.}
+If \code{z} is a single character or integer, then that column will be
+retrived from \code{colData} of \code{x}. (i.e. \code{colData(x)[,z]}).
+If \code{x} is a counts matrix, then \code{z} will need to be a vector
+the same length as the number of columns in \code{x} that indicate
+the cluster to which each cell belongs. Default \code{NULL}.}
 
 \item{exactMatch}{Boolean. Whether to only identify exact matches
-for the markers or to identify partial matches using \code{\link{grep}}. See
-\code{\link{retrieveFeatureIndex}} for more details Default \code{TRUE}.}
+for the markers or to identify partial matches using \code{\link{grep}}.
+See \code{\link{retrieveFeatureIndex}} for more details.
+Default \code{TRUE}.}
 
 \item{by}{Character. Where to search for the markers if \code{x} is a
-\linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}} for
-more details. If \code{x} is a matrix, then this must be set to \code{"rownames"}.
-Default \code{"rownames"}.}
+\linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}}
+for more details. If \code{x} is a matrix, then this must be set to
+\code{"rownames"}. Default \code{"rownames"}.}
 
 \item{log1p}{Boolean. Whether to apply the function \code{log1p} to the data
-before plotting. This function will add a pseudocount of 1 and then log 
+before plotting. This function will add a pseudocount of 1 and then log
 transform the expression values. Default \code{FALSE}.}
 
 \item{ncol}{Integer. Number of columns to make in the plot.

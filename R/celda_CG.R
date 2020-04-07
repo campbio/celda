@@ -1390,7 +1390,7 @@ setMethod(
       y = clusters(celdaMod)$y[ix],
       ...
     )
-    return(plt)
+    invisible(plt)
   }
 )
 

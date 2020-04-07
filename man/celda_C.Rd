@@ -97,8 +97,9 @@ Clusters the columns of a count matrix containing single-cell
 \examples{
 data(celdaCSim)
 celdaCMod <- celda_C(celdaCSim$counts,
-    K = celdaCSim$K,
-    sampleLabel = celdaCSim$sampleLabel)
+  K = celdaCSim$K,
+  sampleLabel = celdaCSim$sampleLabel
+)
 }
 \seealso{
 `celda_G()` for feature clustering and `celda_CG()` for simultaneous

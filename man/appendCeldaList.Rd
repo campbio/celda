@@ -21,6 +21,8 @@ Returns a single celdaList representing the combination of two
 }
 \examples{
 data(celdaCGGridSearchRes)
-appendedList <- appendCeldaList(celdaCGGridSearchRes,
-    celdaCGGridSearchRes)
+appendedList <- appendCeldaList(
+  celdaCGGridSearchRes,
+  celdaCGGridSearchRes
+)
 }

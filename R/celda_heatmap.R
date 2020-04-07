@@ -322,5 +322,5 @@ plotHeatmap <- function(counts,
     grid::grid.draw(sp$gtable)
   }
 
-  return(sp)
+  invisible(sp)
 }

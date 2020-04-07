@@ -66,21 +66,23 @@ should be considered different batches. Default NULL.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
 
-\item{delta}{Numeric Vector of length 2. Concentration parameters for 
+\item{delta}{Numeric Vector of length 2. Concentration parameters for
 the Dirichlet prior for the contamination in each cell. The first element
 is the prior for the native counts while the second element is the prior for
 the contamination counts. These essentially act as pseudocounts for the
 native and contamination in each cell. If \code{estimateDelta = TRUE},
-this is only used to produce a random sample of proportions for an initial 
-value of contamination in each cell. Then \code{\link[MCMCprecision]{fit_dirichlet}}
-is used to update \code{delta} in each iteration. 
-If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these 
-values for the entire inference procedure. Fixing \code{delta} and 
+this is only used to produce a random sample of proportions for an initial
+value of contamination in each cell. Then
+\code{\link[MCMCprecision]{fit_dirichlet}} is used to update
+\code{delta} in each iteration.
+If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these
+values for the entire inference procedure. Fixing \code{delta} and
 setting a high number in the second element will force \code{decontX}
-to be more aggressive and estimate higher levels of contamination at 
-the expense of potentially removing native expression. Default \code{c(10, 10)}.}
+to be more aggressive and estimate higher levels of contamination at
+the expense of potentially removing native expression.
+Default \code{c(10, 10)}.}
 
-\item{estimateDelta}{Boolean. Whether to update \code{delta} at each 
+\item{estimateDelta}{Boolean. Whether to update \code{delta} at each
 iteration.}
 
 \item{convergence}{Numeric. The EM algorithm will be stopped if the maximum
@@ -141,7 +143,7 @@ in single cell genomic datasets.
 s <- simulateContamination(seed = 12345)
 
 library(SingleCellExperiment)
-sce <- SingleCellExperiment(list(counts=s$observedCounts))
+sce <- SingleCellExperiment(list(counts = s$observedCounts))
 sce <- decontX(sce)
 
 # Plot contamination on UMAP
@@ -149,21 +151,24 @@ plotDecontXContamination(sce)
 
 # Plot decontX cluster labels
 umap <- reducedDim(sce)
-plotDimReduceCluster(umap[,1], umap[,2], sce$decontX_clusters)
+plotDimReduceCluster(umap[, 1], umap[, 2], sce$decontX_clusters)
 
 # Plot percentage of marker genes detected
 # in each cell cluster before decontamination
 s$markers
-plotDecontXMarkerPercentage(sce, markers = s$markers, assayName="counts")
+plotDecontXMarkerPercentage(sce, markers = s$markers, assayName = "counts")
 
 # Plot percentage of marker genes detected
 # in each cell cluster after contamination
-plotDecontXMarkerPercentage(sce, markers = s$markers, assayName="decontXcounts")
+plotDecontXMarkerPercentage(sce, markers = s$markers,
+                            assayName = "decontXcounts")
 
 # Plot percentage of marker genes detected in each cell
 # comparing original and decontaminated counts side-by-side
-plotDecontXMarkerPercentage(sce, markers = s$markers, assayName=c("counts", "decontXcounts"))
+plotDecontXMarkerPercentage(sce, markers = s$markers,
+                            assayName = c("counts", "decontXcounts"))
 
-# Plot raw counts of indiviual markers genes before and after decontamination
+# Plot raw counts of indiviual markers genes before
+# and after decontamination
 plotDecontXMarkerExpression(sce, unlist(s$markers))
 }

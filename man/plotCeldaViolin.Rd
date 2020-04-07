@@ -40,6 +40,8 @@ Outputs a violin plot for feature expression data.
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
-plotCeldaViolin(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod, features = "Gene_1")
+plotCeldaViolin(
+  counts = celdaCGSim$counts,
+  celdaMod = celdaCGMod, features = "Gene_1"
+)
 }

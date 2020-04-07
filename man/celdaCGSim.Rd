@@ -14,6 +14,6 @@ celdaCGSim
 An example simulated count matrix from the celda_CG model.
 }
 \examples{
-celdaCGSim = simulateCells("celda_CG")
+celdaCGSim <- simulateCells("celda_CG")
 }
 \keyword{datasets}

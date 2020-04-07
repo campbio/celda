@@ -25,21 +25,21 @@ cells. This matrix should be the same as the one used to generate
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
 randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-requires more memory. Default 25000.}
+requires more memory. Default \code{25000}.}
 
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
-threshold. Default 100.}
+threshold. Default \code{100}.}
 
 \item{initialDims}{integer. The number of dimensions that should be retained
-in the initial PCA step. Default 20.}
+in the initial PCA step. Default \code{20}.}
 
 \item{modules}{Integer vector. Determines which features modules to use for
 tSNE. If NULL, all modules will be used. Default NULL.}
 
-\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default 20.}
+\item{perplexity}{Numeric. Perplexity parameter for tSNE. Default \code{20}.}
 
 \item{maxIter}{Integer. Maximum number of iterations in tSNE generation.
-Default 2500.}
+Default \code{2500}.}
 
 \item{...}{Additional parameters.}
 }

@@ -72,11 +72,14 @@ Create a scatterplot for each row of a normalized
 \examples{
 \donttest{
 data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
+celdaTsne <- celdaTsne(
+  counts = celdaCGSim$counts,
+  celdaMod = celdaCGMod
+)
 plotDimReduceModule(
-    dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-    counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-    modules = c("1", "2"))
+  dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
+  counts = celdaCGSim$counts, celdaMod = celdaCGMod,
+  modules = c("1", "2")
+)
 }
 }

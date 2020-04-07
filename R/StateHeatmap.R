@@ -148,5 +148,5 @@ moduleHeatmap <- function(counts,
     clusterCell = FALSE,
     annotationColor = anno_cell_colors
   )
-  return(plt)
+  invisible(plt)
 }

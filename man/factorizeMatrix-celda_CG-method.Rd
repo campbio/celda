@@ -40,8 +40,10 @@ Generates factorized matrices showing the contribution of each
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
-factorizedMatrices <- factorizeMatrix(celdaCGSim$counts,
-    celdaCGMod, "posterior")
+factorizedMatrices <- factorizeMatrix(
+  celdaCGSim$counts,
+  celdaCGMod, "posterior"
+)
 }
 \seealso{
 `celda_CG()` for clustering features and cells

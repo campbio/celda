@@ -54,27 +54,29 @@ Calculates the log likelihood for user-provided cell population
 \examples{
 data(celdaCGSim)
 loglik <- logLikelihoodcelda_CG(celdaCGSim$counts,
-    sampleLabel = celdaCGSim$sampleLabel,
-    z = celdaCGSim$z,
-    y = celdaCGSim$y,
-    K = celdaCGSim$K,
-    L = celdaCGSim$L,
-    alpha = celdaCGSim$alpha,
-    beta = celdaCGSim$beta,
-    gamma = celdaCGSim$gamma,
-    delta = celdaCGSim$delta)
+  sampleLabel = celdaCGSim$sampleLabel,
+  z = celdaCGSim$z,
+  y = celdaCGSim$y,
+  K = celdaCGSim$K,
+  L = celdaCGSim$L,
+  alpha = celdaCGSim$alpha,
+  beta = celdaCGSim$beta,
+  gamma = celdaCGSim$gamma,
+  delta = celdaCGSim$delta
+)
 
 loglik <- logLikelihood(celdaCGSim$counts,
-    model = "celda_CG",
-    sampleLabel = celdaCGSim$sampleLabel,
-    z = celdaCGSim$z,
-    y = celdaCGSim$y,
-    K = celdaCGSim$K,
-    L = celdaCGSim$L,
-    alpha = celdaCGSim$alpha,
-    beta = celdaCGSim$beta,
-    gamma = celdaCGSim$gamma,
-    delta = celdaCGSim$delta)
+  model = "celda_CG",
+  sampleLabel = celdaCGSim$sampleLabel,
+  z = celdaCGSim$z,
+  y = celdaCGSim$y,
+  K = celdaCGSim$K,
+  L = celdaCGSim$L,
+  alpha = celdaCGSim$alpha,
+  beta = celdaCGSim$beta,
+  gamma = celdaCGSim$gamma,
+  delta = celdaCGSim$delta
+)
 }
 \seealso{
 `celda_CG()` for clustering features and cells

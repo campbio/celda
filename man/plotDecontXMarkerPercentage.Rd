@@ -19,33 +19,47 @@ plotDecontXMarkerPercentage(
 )
 }
 \arguments{
-\item{x}{Either a \linkS4class{SingleCellExperiment} or a matrix-like object of counts.}
+\item{x}{Either a \linkS4class{SingleCellExperiment} or
+a matrix-like object of counts.}
 
-\item{markers}{List. A named list indicating the marker genes for each cell type of
+\item{markers}{List. A named list indicating the marker genes
+for each cell type of
 interest. Multiple markers can be supplied for each cell type. For example,
-\code{list(Tcell_Markers=c("CD3E", "CD3D"), Bcell_Markers=c("CD79A", "CD79B", "MS4A1")}
-would specify markers for human T-cells and B-cells. A cell will be considered 
-"positive" for a cell type if it has a count greater than \code{threshold} for at least
-one of the marker genes in the list.}
+\code{list(Tcell_Markers=c("CD3E", "CD3D"),
+Bcell_Markers=c("CD79A", "CD79B", "MS4A1")}
+would specify markers for human T-cells and B-cells.
+A cell will be considered
+"positive" for a cell type if it has a count greater than \code{threshold}
+for at least one of the marker genes in the list.}
 
-\item{groupClusters}{List. A named list that allows cell clusters labels coded in
+\item{groupClusters}{List. A named list that allows
+cell clusters labels coded in
 \code{z} to be regrouped and renamed on the fly. For example,
-\code{list(Tcells=c(1, 2), Bcells=7)} would recode clusters 1 and 2 to "Tcells"
-and cluster 7 to "Bcells". Note that if this is used, clusters in \code{z} not found
-in \code{groupClusters} will be excluded from the barplot. Default \code{NULL}.}
+\code{list(Tcells=c(1, 2), Bcells=7)} would recode
+clusters 1 and 2 to "Tcells"
+and cluster 7 to "Bcells". Note that if this is
+used, clusters in \code{z} not found
+in \code{groupClusters} will be excluded from the barplot.
+Default \code{NULL}.}
 
-\item{assayName}{Character vector. Name(s) of the assay(s) to plot if \code{x} is a
-\linkS4class{SingleCellExperiment}. If more than one assay is listed, then 
-side-by-side barplots will be generated. Default \code{c("counts", "decontXcounts")}.}
+\item{assayName}{Character vector. Name(s) of the assay(s) to
+plot if \code{x} is a
+\linkS4class{SingleCellExperiment}. If more than one assay
+is listed, then side-by-side barplots will be generated.
+Default \code{c("counts", "decontXcounts")}.}
 
-\item{z}{Character, Integer, or Vector. Indicates the cluster labels for each cell. 
-If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL}, then 
-the cluster labels from \code{\link{decontX}} will be retived from the
+\item{z}{Character, Integer, or Vector. Indicates the cluster labels
+for each cell.
+If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL},
+then the cluster labels from \code{\link{decontX}} will be retived from the
 \code{colData} of \code{x} (i.e. \code{colData(x)$decontX_clusters}).
-If \code{z} is a single character or integer, then that column will be retrived
+If \code{z} is a single character or integer,
+then that column will be retrived
 from \code{colData} of \code{x}. (i.e. \code{colData(x)[,z]}). If \code{x}
-is a counts matrix, then \code{z} will need to be a vector the same length as
-the number of columns in \code{x} that indicate the cluster to which each cell
+is a counts matrix, then \code{z} will need
+to be a vector the same length as
+the number of columns in \code{x} that indicate
+the cluster to which each cell
 belongs. Default \code{NULL}.}
 
 \item{threshold}{Numeric. Markers greater than or equal to this value will
@@ -56,17 +70,18 @@ for the markers or to identify partial matches using \code{\link{grep}}. See
 \code{\link{retrieveFeatureIndex}} for more details. Default \code{TRUE}.}
 
 \item{by}{Character. Where to search for the markers if \code{x} is a
-\linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}} for
-more details. If \code{x} is a matrix, then this must be set to \code{"rownames"}.
-Default \code{"rownames"}.}
+\linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}}
+for more details. If \code{x} is a matrix,
+then this must be set to \code{"rownames"}.Default \code{"rownames"}.}
 
 \item{ncol}{Integer. Number of columns to make in the plot.
 Default \code{round(sqrt(length(markers))}.}
 
-\item{labelBars}{Boolean. Whether to display percentages above each bar Default
-\code{TRUE}.}
+\item{labelBars}{Boolean. Whether to display percentages above each bar
+Default \code{TRUE}.}
 
-\item{labelSize}{Numeric. Size of the percentage labels in the barplot. Default 3.}
+\item{labelSize}{Numeric. Size of the percentage labels in the barplot.
+Default 3.}
 }
 \value{
 Returns a \code{ggplot} object.
@@ -74,7 +89,7 @@ Returns a \code{ggplot} object.
 \description{
 Generates a barplot that shows the percentage of
 cells within clusters or cell types that have detectable levels
-of given marker genes. Can be used to view the expression of 
+of given marker genes. Can be used to view the expression of
 marker genes in different cell types before and after
 decontamination with \code{\link{decontX}}.
 }

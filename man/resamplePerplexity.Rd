@@ -36,6 +36,7 @@ Calculates the perplexity of each model's cluster assignments
 data(celdaCGSim, celdaCGGridSearchRes)
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
-  celdaCGGridSearchRes)
+  celdaCGGridSearchRes
+)
 plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

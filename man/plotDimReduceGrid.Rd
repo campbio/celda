@@ -68,16 +68,19 @@ Creates a scatterplot given two dimensions from a data
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
+celdaTsne <- celdaTsne(
+  counts = celdaCGSim$counts,
+  celdaMod = celdaCGMod
+)
 plotDimReduceGrid(celdaTsne[, 1],
-    celdaTsne[, 2],
-    matrix = celdaCGSim$counts,
-    xlab = "Dimension1",
-    ylab = "Dimension2",
-    varLabel = "tsne",
-    size = 1,
-    colorLow = "grey",
-    colorMid = NULL,
-    colorHigh = "blue")
+  celdaTsne[, 2],
+  matrix = celdaCGSim$counts,
+  xlab = "Dimension1",
+  ylab = "Dimension2",
+  varLabel = "tsne",
+  size = 1,
+  colorLow = "grey",
+  colorMid = NULL,
+  colorHigh = "blue"
+)
 }
