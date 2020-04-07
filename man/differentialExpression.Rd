@@ -50,6 +50,8 @@ Uses MAST to find differentially expressed features for
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
-clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
-    celdaCGMod, c1 = c(1, 2))
+clusterDiffexpRes <- differentialExpression(celdaCGSim$counts,
+  celdaCGMod,
+  c1 = c(1, 2)
+)
 }

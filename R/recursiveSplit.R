@@ -1,75 +1,75 @@
 .singleSplitZ <- function(counts,
-    z,
-    s,
-    K,
-    minCell = 3,
-    alpha = 1,
-    beta = 1) {
+                          z,
+                          s,
+                          K,
+                          minCell = 3,
+                          alpha = 1,
+                          beta = 1) {
+  zTa <- tabulate(z, K)
+  zToSplit <- which(zTa > minCell)
+  bestZ <- z
+  bestLl <- -Inf
+  for (i in zToSplit) {
+    clustLabel <- .celda_C(
+      counts[, z == i, drop = FALSE],
+      K = 2,
+      zInitialize = "random",
+      splitOnIter = -1,
+      splitOnLast = FALSE,
+      verbose = FALSE
+    )
 
-    zTa <- tabulate(z, K)
-    zToSplit <- which(zTa > minCell)
-    bestZ <- z
-    bestLl <- -Inf
-    for (i in zToSplit) {
-        clustLabel <- .celda_C(
-            counts[, z == i, drop = FALSE],
-            K = 2,
-            zInitialize = "random",
-            splitOnIter = -1,
-            splitOnLast = FALSE,
-            verbose = FALSE)
+    if (length(unique(clusters(clustLabel)$z)) == 2) {
+      ix <- z == i
+      newZ <- z
+      newZ[ix] <- ifelse(clusters(clustLabel)$z == 2, i, K)
+      ll <- logLikelihoodcelda_C(counts, s, newZ, K, alpha, beta)
 
-        if (length(unique(clusters(clustLabel)$z)) == 2) {
-            ix <- z == i
-            newZ <- z
-            newZ[ix] <- ifelse(clusters(clustLabel)$z == 2, i, K)
-            ll <- logLikelihoodcelda_C(counts, s, newZ, K, alpha, beta)
-
-            if (ll > bestLl) {
-                bestZ <- newZ
-                bestLl <- ll
-            }
-        }
+      if (ll > bestLl) {
+        bestZ <- newZ
+        bestLl <- ll
+      }
     }
-    return(list(ll = bestLl, z = bestZ))
+  }
+  return(list(ll = bestLl, z = bestZ))
 }
 
 .singleSplitY <- function(counts,
-    y,
-    L,
-    minFeature = 3,
-    beta = 1,
-    delta = 1,
-    gamma = 1) {
+                          y,
+                          L,
+                          minFeature = 3,
+                          beta = 1,
+                          delta = 1,
+                          gamma = 1) {
+  yTa <- tabulate(y, L)
+  yToSplit <- which(yTa > minFeature)
 
-    yTa <- tabulate(y, L)
-    yToSplit <- which(yTa > minFeature)
+  bestY <- y
+  bestLl <- -Inf
+  # previousY <- y
+  for (i in yToSplit) {
+    clustLabel <- .celda_G(counts[y == i, , drop = FALSE],
+      L = 2,
+      yInitialize = "random",
+      splitOnIter = -1,
+      splitOnLast = FALSE,
+      nchains = 1,
+      verbose = FALSE
+    )
 
-    bestY <- y
-    bestLl <- -Inf
-    # previousY <- y
-    for (i in yToSplit) {
-        clustLabel <- .celda_G(counts[y == i, , drop = FALSE],
-            L = 2,
-            yInitialize = "random",
-            splitOnIter = -1,
-            splitOnLast = FALSE,
-            nchains = 1,
-            verbose = FALSE)
+    if (length(unique(clusters(clustLabel)$y)) == 2) {
+      ix <- y == i
+      newY <- y
+      newY[ix] <- ifelse(clusters(clustLabel)$y == 2, i, L)
+      ll <- logLikelihoodcelda_G(counts, newY, L, beta, delta, gamma)
 
-        if (length(unique(clusters(clustLabel)$y)) == 2) {
-            ix <- y == i
-            newY <- y
-            newY[ix] <- ifelse(clusters(clustLabel)$y == 2, i, L)
-            ll <- logLikelihoodcelda_G(counts, newY, L, beta, delta, gamma)
-
-            if (ll > bestLl) {
-                bestY <- newY
-                bestLl <- ll
-            }
-        }
+      if (ll > bestLl) {
+        bestY <- newY
+        bestLl <- ll
+      }
     }
-    return(list(ll = bestLl, y = bestY))
+  }
+  return(list(ll = bestLl, y = bestY))
 }
 
 
@@ -138,420 +138,456 @@
 #' ## Alternatively, first identify features modules using
 #' ## `recursiveSplitModule()`
 #' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-#'     initialL = 3, maxL = 15)
+#'   initialL = 3, maxL = 15
+#' )
 #' plotGridSearchPerplexity(moduleSplit)
 #' moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
 #'
 #' ## Then use module labels for initialization in `recursiveSplitCell()` to
 #' ## produce `celda_CG` bi-clustering models
 #' cellSplit <- recursiveSplitCell(celdaCGSim$counts,
-#'     initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y)
+#'   initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y
+#' )
 #' plotGridSearchPerplexity(cellSplit)
 #' celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
 #' @export
 recursiveSplitCell <- function(counts,
-    sampleLabel = NULL,
-    initialK = 5,
-    maxK = 25,
-    tempL = NULL,
-    yInit = NULL,
-    alpha = 1,
-    beta = 1,
-    delta = 1,
-    gamma = 1,
-    minCell = 3,
-    reorder = TRUE,
-    perplexity = TRUE,
-    logfile = NULL,
-    verbose = TRUE) {
+                               sampleLabel = NULL,
+                               initialK = 5,
+                               maxK = 25,
+                               tempL = NULL,
+                               yInit = NULL,
+                               alpha = 1,
+                               beta = 1,
+                               delta = 1,
+                               gamma = 1,
+                               minCell = 3,
+                               reorder = TRUE,
+                               perplexity = TRUE,
+                               logfile = NULL,
+                               verbose = TRUE) {
+  .logMessages(paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = FALSE,
+    verbose = verbose
+  )
+  .logMessages("Starting recursive cell population splitting.",
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages(paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
 
-    .logMessages(paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = FALSE,
-        verbose = verbose)
-    .logMessages("Starting recursive cell population splitting.",
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
-    .logMessages(paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
+  startTime <- Sys.time()
+  counts <- .processCounts(counts)
+  countChecksum <- .createCountChecksum(counts)
 
-    startTime <- Sys.time()
-    counts <- .processCounts(counts)
-    countChecksum <- .createCountChecksum(counts)
+  sampleLabel <- .processSampleLabels(sampleLabel, numCells = ncol(counts))
+  s <- as.integer(sampleLabel)
+  names <- list(
+    row = rownames(counts),
+    column = colnames(counts),
+    sample = levels(sampleLabel)
+  )
 
-    sampleLabel <- .processSampleLabels(sampleLabel, numCells = ncol(counts))
-    s <- as.integer(sampleLabel)
-    names <- list(row = rownames(counts),
-        column = colnames(counts),
-        sample = levels(sampleLabel))
+  if (!is.null(yInit)) {
+    # Create collapsed module matrix
+    L <- length(unique(yInit))
+    .logMessages(date(),
+      ".. Collapsing to",
+      L,
+      "modules",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    overallY <- .initializeCluster(L, nrow(counts), initial = yInit)
+    countsY <- .rowSumByGroup(counts, overallY, L)
 
-    if (!is.null(yInit)) {
-        # Create collapsed module matrix
-        L <- length(unique(yInit))
-        .logMessages(date(),
-            ".. Collapsing to",
-            L,
-            "modules",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile)
-        overallY <- .initializeCluster(L, nrow(counts), initial = yInit)
-        countsY <- .rowSumByGroup(counts, overallY, L)
+    # Create initial model with initialK and predifined y labels
+    .logMessages(date(),
+      ".. Initializing with",
+      initialK,
+      "populations",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    modelInitial <- .celda_CG(counts,
+      sampleLabel = s,
+      K = as.integer(initialK),
+      L = as.integer(L),
+      zInitialize = "split",
+      yInitialize = "predefined",
+      nchains = 1,
+      yInit = overallY,
+      alpha = alpha,
+      beta = beta,
+      gamma = gamma,
+      delta = delta,
+      verbose = FALSE,
+      reorder = reorder
+    )
+    currentK <- length(unique(clusters(modelInitial)$z)) + 1
+    overallZ <- clusters(modelInitial)$z
+    resList <- list(modelInitial)
+    while (currentK <= maxK) {
+      # previousY <- overallY
+      tempSplit <- .singleSplitZ(countsY,
+        overallZ,
+        s,
+        currentK,
+        minCell = 3,
+        alpha = alpha,
+        beta = beta
+      )
+      tempModel <- .celda_CG(counts,
+        sampleLabel = s,
+        K = as.integer(currentK),
+        L = as.integer(L),
+        yInit = overallY,
+        zInit = tempSplit$z,
+        nchains = 1,
+        zInitialize = "predefined",
+        yInitialize = "predefined",
+        splitOnLast = FALSE,
+        stopIter = 5,
+        alpha = alpha,
+        beta = beta,
+        gamma = gamma,
+        delta = delta,
+        verbose = FALSE,
+        reorder = reorder
+      )
 
-        # Create initial model with initialK and predifined y labels
-        .logMessages(date(),
-            ".. Initializing with",
-            initialK,
-            "populations",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile)
-        modelInitial <- .celda_CG(counts,
-            sampleLabel = s,
-            K = as.integer(initialK),
+      # Calculate new decomposed counts matrix with new module labels
+      # overallY = clusters(tempModel)$y
+      # p = .cGReDecomposeCounts(counts, overallY, previousY, countsY,
+      # nByG, L = as.integer(L))
+      # countsY = p$nTSByC
+
+      # If the number of clusters is still "currentK", then keep the
+      # reordering, otherwise keep the previous configuration
+      if (length(unique(clusters(tempModel)$z)) == currentK) {
+        overallZ <- clusters(tempModel)$z
+      } else {
+        overallZ <- tempSplit$z
+        ll <- logLikelihoodcelda_CG(
+          counts,
+          s,
+          overallZ,
+          clusters(tempModel)$y,
+          currentK,
+          L,
+          alpha,
+          beta,
+          delta,
+          gamma
+        )
+        tempModel <- methods::new("celda_CG",
+          clusters = list(z = overallZ, y = clusters(tempModel)$y),
+          params = list(
+            K = as.integer(currentK),
             L = as.integer(L),
-            zInitialize = "split",
-            yInitialize = "predefined",
-            nchains = 1,
-            yInit = overallY,
             alpha = alpha,
             beta = beta,
-            gamma = gamma,
             delta = delta,
-            verbose = FALSE,
-            reorder = reorder)
-        currentK <- length(unique(clusters(modelInitial)$z)) + 1
-        overallZ <- clusters(modelInitial)$z
-        resList <- list(modelInitial)
-        while (currentK <= maxK) {
-            # previousY <- overallY
-            tempSplit <- .singleSplitZ(countsY,
-                overallZ,
-                s,
-                currentK,
-                minCell = 3,
-                alpha = alpha,
-                beta = beta)
-            tempModel <- .celda_CG(counts,
-                sampleLabel = s,
-                K = as.integer(currentK),
-                L = as.integer(L),
-                yInit = overallY,
-                zInit = tempSplit$z,
-                nchains = 1,
-                zInitialize = "predefined",
-                yInitialize = "predefined",
-                splitOnLast = FALSE,
-                stopIter = 5,
-                alpha = alpha,
-                beta = beta,
-                gamma = gamma,
-                delta = delta,
-                verbose = FALSE,
-                reorder = reorder)
-
-            # Calculate new decomposed counts matrix with new module labels
-            # overallY = clusters(tempModel)$y
-            # p = .cGReDecomposeCounts(counts, overallY, previousY, countsY,
-            # nByG, L = as.integer(L))
-            # countsY = p$nTSByC
-
-            # If the number of clusters is still "currentK", then keep the
-            # reordering, otherwise keep the previous configuration
-            if (length(unique(clusters(tempModel)$z)) == currentK) {
-                overallZ <- clusters(tempModel)$z
-            } else {
-                overallZ <- tempSplit$z
-                ll <- logLikelihoodcelda_CG(counts,
-                    s,
-                    overallZ,
-                    clusters(tempModel)$y,
-                    currentK,
-                    L,
-                    alpha,
-                    beta,
-                    delta,
-                    gamma
-                )
-                tempModel <- methods::new("celda_CG",
-                    clusters = list(z = overallZ, y = clusters(tempModel)$y),
-                    params = list(K = as.integer(currentK),
-                        L = as.integer(L),
-                        alpha = alpha,
-                        beta = beta,
-                        delta = delta,
-                        gamma = gamma,
-                        countChecksum = countChecksum
-                    ),
-                    finalLogLik = ll,
-                    sampleLabel = sampleLabel,
-                    names = names
-                )
-            }
-
-            resList <- c(resList, list(tempModel))
-            .logMessages(date(),
-                ".. Current cell population",
-                currentK,
-                "| logLik:",
-                bestLogLikelihood(tempModel),
-                append = TRUE,
-                verbose = verbose,
-                logfile = logfile
-            )
-            currentK <- length(unique(overallZ)) + 1
-        }
-
-        runK <- vapply(resList, function(mod) {
-            params(mod)$K
-        }, integer(1))
-        runL <- vapply(resList, function(mod) {
-            params(mod)$L
-        }, integer(1))
-        runParams <- data.frame(index = seq.int(1, length(resList)),
-            L = as.integer(runL),
-            K = as.integer(runK),
-            stringsAsFactors = FALSE)
-    } else if (!is.null(tempL)) {
-        L <- tempL
-        .logMessages(date(),
-            ".. Collapsing to",
-            L,
-            "temporary modules",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile
+            gamma = gamma,
+            countChecksum = countChecksum
+          ),
+          finalLogLik = ll,
+          sampleLabel = sampleLabel,
+          names = names
         )
-        tempY <- .initializeSplitY(counts,
-            L = as.integer(L),
-            tempK = max(100, maxK),
-            minFeature = 3)
-        tempY <- as.integer(as.factor(tempY))
-        L <- length(unique(tempY)) # Recalculate in case some modules are empty
-        countsY <- .rowSumByGroup(counts, tempY, L)
+      }
 
-        # Create initial model with initialK
-        .logMessages(date(),
-            ".. Initializing with",
-            initialK,
-            "populations",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile
-        )
-        modelInitial <- .celda_C(countsY,
-            sampleLabel = s,
-            K = as.integer(initialK),
-            zInitialize = "split",
-            nchains = 1,
-            alpha = alpha,
-            beta = beta,
-            verbose = FALSE,
-            reorder = reorder)
-        currentK <- length(unique(clusters(modelInitial)$z)) + 1
-        overallZ <- clusters(modelInitial)$z
-        ll <- logLikelihoodcelda_C(counts, s, overallZ, currentK,
-            alpha, beta)
-        modelInitial@params$countChecksum <- countChecksum
-        modelInitial@completeLogLik <- ll
-        modelInitial@finalLogLik <- ll
-
-        resList <- list(modelInitial)
-        while (currentK <= maxK) {
-            # Find next best split, then do a new celda_C run with that split
-            tempSplit <- .singleSplitZ(countsY,
-                overallZ,
-                s,
-                currentK,
-                minCell = 3,
-                alpha = alpha,
-                beta = beta)
-            tempModel <- .celda_C(countsY,
-                sampleLabel = s,
-                K = as.integer(currentK),
-                nchains = 1,
-                zInitialize = "random",
-                alpha = alpha,
-                beta = beta,
-                stopIter = 5,
-                splitOnLast = FALSE,
-                verbose = FALSE,
-                zInit = tempSplit$z,
-                reorder = reorder)
-
-            # Handle rare cases where a population has no cells after running
-            # the model
-            if (length(unique(clusters(tempModel)$z)) == currentK) {
-                overallZ <- clusters(tempModel)$z
-            } else {
-                overallZ <- tempSplit$z
-            }
-
-            # Need to change below line to use decompose counts to save time
-            ll <- logLikelihoodcelda_C(counts, s, overallZ, currentK,
-                alpha, beta)
-            tempModel <- methods::new("celda_C",
-                clusters = list(z = overallZ),
-                params = list(K = as.integer(currentK),
-                    alpha = alpha,
-                    beta = beta,
-                    countChecksum = countChecksum),
-                finalLogLik = ll,
-                sampleLabel = sampleLabel,
-                names = names
-            )
-
-            resList <- c(resList, list(tempModel))
-            .logMessages(date(),
-                ".. Current cell population",
-                currentK,
-                "| logLik:",
-                bestLogLikelihood(tempModel),
-                append = TRUE,
-                verbose = verbose,
-                logfile = logfile
-            )
-            currentK <- length(unique(overallZ)) + 1
-        }
-
-        runK <- vapply(resList, function(mod) {
-            params(mod)$K
-        }, integer(1))
-        runParams <- data.frame(index = seq.int(1, length(resList)),
-            K = as.integer(runK),
-            stringsAsFactors = FALSE
-        )
-    } else {
-        # Create initial model with initialK
-        .logMessages(date(),
-            ".. Initializing with",
-            initialK,
-            "populations",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile)
-        modelInitial <- .celda_C(counts,
-            sampleLabel = s,
-            K = as.integer(initialK),
-            zInitialize = "split",
-            nchains = 1,
-            alpha = alpha,
-            beta = beta,
-            verbose = FALSE,
-            reorder = reorder)
-        currentK <- length(unique(clusters(modelInitial)$z)) + 1
-        overallZ <- clusters(modelInitial)$z
-        resList <- list(modelInitial)
-        while (currentK <= maxK) {
-            tempSplit <- .singleSplitZ(counts,
-                overallZ,
-                s,
-                currentK,
-                minCell = 3,
-                alpha = alpha,
-                beta = beta)
-            tempModel <- .celda_C(counts,
-                sampleLabel = s,
-                K = as.integer(currentK),
-                nchains = 1,
-                zInitialize = "random",
-                alpha = alpha,
-                beta = beta,
-                stopIter = 5,
-                splitOnLast = FALSE,
-                verbose = FALSE,
-                zInit = tempSplit$z,
-                reorder = reorder)
-
-            if (length(unique(clusters(tempModel)$z)) == currentK) {
-                overallZ <- clusters(tempModel)$z
-            } else {
-                overallZ <- tempSplit$z
-                ll <-
-                    logLikelihoodcelda_C(counts, s, overallZ,
-                        currentK, alpha, beta)
-                tempModel <- methods::new("celda_C",
-                    clusters = list(z = overallZ),
-                    params = list(K = as.integer(currentK),
-                        alpha = alpha,
-                        beta = beta,
-                        countChecksum = countChecksum),
-                    finalLogLik = ll,
-                    sampleLabel = sampleLabel,
-                    names = names
-                )
-            }
-
-            resList <- c(resList, list(tempModel))
-            .logMessages(date(),
-                ".. Current cell population",
-                currentK,
-                "| logLik:",
-                bestLogLikelihood(tempModel),
-                append = TRUE,
-                verbose = verbose,
-                logfile = logfile
-            )
-            currentK <- length(unique(overallZ)) + 1
-        }
-
-        runK <- vapply(resList, function(mod) {
-            params(mod)$K
-        }, integer(1))
-        runParams <- data.frame(index = seq.int(1, length(resList)),
-            K = as.integer(runK),
-            stringsAsFactors = FALSE
-        )
+      resList <- c(resList, list(tempModel))
+      .logMessages(date(),
+        ".. Current cell population",
+        currentK,
+        "| logLik:",
+        bestLogLikelihood(tempModel),
+        append = TRUE,
+        verbose = verbose,
+        logfile = logfile
+      )
+      currentK <- length(unique(overallZ)) + 1
     }
 
-    # Summarize paramters of different models
-    logliks <- vapply(resList, function(mod) {
-        bestLogLikelihood(mod)
-    }, double(1))
-    runParams <- data.frame(runParams,
-        log_likelihood = logliks,
-        stringsAsFactors = FALSE)
-
-    celdaRes <- methods::new("celdaList",
-        runParams = runParams,
-        resList = resList,
-        countChecksum = countChecksum
+    runK <- vapply(resList, function(mod) {
+      params(mod)$K
+    }, integer(1))
+    runL <- vapply(resList, function(mod) {
+      params(mod)$L
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      L = as.integer(runL),
+      K = as.integer(runK),
+      stringsAsFactors = FALSE
     )
+  } else if (!is.null(tempL)) {
+    L <- tempL
+    .logMessages(date(),
+      ".. Collapsing to",
+      L,
+      "temporary modules",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    tempY <- .initializeSplitY(counts,
+      L = as.integer(L),
+      tempK = max(100, maxK),
+      minFeature = 3
+    )
+    tempY <- as.integer(as.factor(tempY))
+    L <- length(unique(tempY)) # Recalculate in case some modules are empty
+    countsY <- .rowSumByGroup(counts, tempY, L)
 
-    if (isTRUE(perplexity)) {
-        .logMessages(date(),
-            ".. Calculating perplexity",
-            append = TRUE,
-            verbose = verbose,
-            logfile = NULL
-        )
-        celdaRes <- resamplePerplexity(counts, celdaRes)
+    # Create initial model with initialK
+    .logMessages(date(),
+      ".. Initializing with",
+      initialK,
+      "populations",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    modelInitial <- .celda_C(countsY,
+      sampleLabel = s,
+      K = as.integer(initialK),
+      zInitialize = "split",
+      nchains = 1,
+      alpha = alpha,
+      beta = beta,
+      verbose = FALSE,
+      reorder = reorder
+    )
+    currentK <- length(unique(clusters(modelInitial)$z)) + 1
+    overallZ <- clusters(modelInitial)$z
+    ll <- logLikelihoodcelda_C(
+      counts, s, overallZ, currentK,
+      alpha, beta
+    )
+    modelInitial@params$countChecksum <- countChecksum
+    modelInitial@completeLogLik <- ll
+    modelInitial@finalLogLik <- ll
+
+    resList <- list(modelInitial)
+    while (currentK <= maxK) {
+      # Find next best split, then do a new celda_C run with that split
+      tempSplit <- .singleSplitZ(countsY,
+        overallZ,
+        s,
+        currentK,
+        minCell = 3,
+        alpha = alpha,
+        beta = beta
+      )
+      tempModel <- .celda_C(countsY,
+        sampleLabel = s,
+        K = as.integer(currentK),
+        nchains = 1,
+        zInitialize = "random",
+        alpha = alpha,
+        beta = beta,
+        stopIter = 5,
+        splitOnLast = FALSE,
+        verbose = FALSE,
+        zInit = tempSplit$z,
+        reorder = reorder
+      )
+
+      # Handle rare cases where a population has no cells after running
+      # the model
+      if (length(unique(clusters(tempModel)$z)) == currentK) {
+        overallZ <- clusters(tempModel)$z
+      } else {
+        overallZ <- tempSplit$z
+      }
+
+      # Need to change below line to use decompose counts to save time
+      ll <- logLikelihoodcelda_C(
+        counts, s, overallZ, currentK,
+        alpha, beta
+      )
+      tempModel <- methods::new("celda_C",
+        clusters = list(z = overallZ),
+        params = list(
+          K = as.integer(currentK),
+          alpha = alpha,
+          beta = beta,
+          countChecksum = countChecksum
+        ),
+        finalLogLik = ll,
+        sampleLabel = sampleLabel,
+        names = names
+      )
+
+      resList <- c(resList, list(tempModel))
+      .logMessages(date(),
+        ".. Current cell population",
+        currentK,
+        "| logLik:",
+        bestLogLikelihood(tempModel),
+        append = TRUE,
+        verbose = verbose,
+        logfile = logfile
+      )
+      currentK <- length(unique(overallZ)) + 1
     }
-    endTime <- Sys.time()
-    .logMessages(
-        paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
-    .logMessages(
-        "Completed recursive cell population splitting. Total time:",
-        format(difftime(endTime, startTime)),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
-    .logMessages(
-        paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-    )
 
-    return(celdaRes)
+    runK <- vapply(resList, function(mod) {
+      params(mod)$K
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      K = as.integer(runK),
+      stringsAsFactors = FALSE
+    )
+  } else {
+    # Create initial model with initialK
+    .logMessages(date(),
+      ".. Initializing with",
+      initialK,
+      "populations",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    modelInitial <- .celda_C(counts,
+      sampleLabel = s,
+      K = as.integer(initialK),
+      zInitialize = "split",
+      nchains = 1,
+      alpha = alpha,
+      beta = beta,
+      verbose = FALSE,
+      reorder = reorder
+    )
+    currentK <- length(unique(clusters(modelInitial)$z)) + 1
+    overallZ <- clusters(modelInitial)$z
+    resList <- list(modelInitial)
+    while (currentK <= maxK) {
+      tempSplit <- .singleSplitZ(counts,
+        overallZ,
+        s,
+        currentK,
+        minCell = 3,
+        alpha = alpha,
+        beta = beta
+      )
+      tempModel <- .celda_C(counts,
+        sampleLabel = s,
+        K = as.integer(currentK),
+        nchains = 1,
+        zInitialize = "random",
+        alpha = alpha,
+        beta = beta,
+        stopIter = 5,
+        splitOnLast = FALSE,
+        verbose = FALSE,
+        zInit = tempSplit$z,
+        reorder = reorder
+      )
+
+      if (length(unique(clusters(tempModel)$z)) == currentK) {
+        overallZ <- clusters(tempModel)$z
+      } else {
+        overallZ <- tempSplit$z
+        ll <-
+          logLikelihoodcelda_C(
+            counts, s, overallZ,
+            currentK, alpha, beta
+          )
+        tempModel <- methods::new("celda_C",
+          clusters = list(z = overallZ),
+          params = list(
+            K = as.integer(currentK),
+            alpha = alpha,
+            beta = beta,
+            countChecksum = countChecksum
+          ),
+          finalLogLik = ll,
+          sampleLabel = sampleLabel,
+          names = names
+        )
+      }
+
+      resList <- c(resList, list(tempModel))
+      .logMessages(date(),
+        ".. Current cell population",
+        currentK,
+        "| logLik:",
+        bestLogLikelihood(tempModel),
+        append = TRUE,
+        verbose = verbose,
+        logfile = logfile
+      )
+      currentK <- length(unique(overallZ)) + 1
+    }
+
+    runK <- vapply(resList, function(mod) {
+      params(mod)$K
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      K = as.integer(runK),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  # Summarize paramters of different models
+  logliks <- vapply(resList, function(mod) {
+    bestLogLikelihood(mod)
+  }, double(1))
+  runParams <- data.frame(runParams,
+    log_likelihood = logliks,
+    stringsAsFactors = FALSE
+  )
+
+  celdaRes <- methods::new("celdaList",
+    runParams = runParams,
+    resList = resList,
+    countChecksum = countChecksum
+  )
+
+  if (isTRUE(perplexity)) {
+    .logMessages(date(),
+      ".. Calculating perplexity",
+      append = TRUE,
+      verbose = verbose,
+      logfile = NULL
+    )
+    celdaRes <- resamplePerplexity(counts, celdaRes)
+  }
+  endTime <- Sys.time()
+  .logMessages(
+    paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages(
+    "Completed recursive cell population splitting. Total time:",
+    format(difftime(endTime, startTime)),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages(
+    paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  return(celdaRes)
 }
 
 
@@ -609,7 +645,8 @@ recursiveSplitCell <- function(counts,
 #' ## Create models that range from L=3 to L=20 by recursively splitting modules
 #' ## into two
 #' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-#'     initialL = 3, maxL = 20)
+#'   initialL = 3, maxL = 20
+#' )
 #'
 #' ## Example results with perplexity
 #' plotGridSearchPerplexity(moduleSplit)
@@ -618,378 +655,396 @@ recursiveSplitCell <- function(counts,
 #' celdaMod <- subsetCeldaList(moduleSplit, list(L = 10))
 #' @export
 recursiveSplitModule <- function(counts,
-    initialL = 10,
-    maxL = 100,
-    tempK = 100,
-    zInit = NULL,
-    sampleLabel = NULL,
-    alpha = 1,
-    beta = 1,
-    delta = 1,
-    gamma = 1,
-    minFeature = 3,
-    reorder = TRUE,
-    perplexity = TRUE,
-    verbose = TRUE,
-    logfile = NULL) {
+                                 initialL = 10,
+                                 maxL = 100,
+                                 tempK = 100,
+                                 zInit = NULL,
+                                 sampleLabel = NULL,
+                                 alpha = 1,
+                                 beta = 1,
+                                 delta = 1,
+                                 gamma = 1,
+                                 minFeature = 3,
+                                 reorder = TRUE,
+                                 perplexity = TRUE,
+                                 verbose = TRUE,
+                                 logfile = NULL) {
+  .logMessages(paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = FALSE,
+    verbose = verbose
+  )
+  .logMessages("Starting recursive module splitting.",
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages(paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  startTime <- Sys.time()
 
-    .logMessages(paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = FALSE,
-        verbose = verbose)
-    .logMessages("Starting recursive module splitting.",
-        logfile = logfile,
+  counts <- .processCounts(counts)
+  countChecksum <- .createCountChecksum(counts)
+  names <-
+    list(row = rownames(counts), column = colnames(counts))
+  sampleLabel <- .processSampleLabels(sampleLabel,
+    numCells = ncol(counts)
+  )
+  s <- as.integer(sampleLabel)
+
+  if (!is.null(zInit)) {
+    # Create collapsed module matrix
+    K <- length(unique(zInit))
+    .logMessages(
+      date(),
+      ".. Collapsing to",
+      K,
+      "cell populations",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    overallZ <- .initializeCluster(
+      N = K,
+      len = ncol(counts),
+      initial = zInit
+    )
+    countsZ <- .colSumByGroup(counts, overallZ, K)
+
+    # Create initial model with initialL and predifined z labels
+    .logMessages(date(),
+      ".. Initializing with",
+      initialL,
+      "modules",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    modelInitial <- .celda_CG(counts,
+      sampleLabel = s,
+      L = initialL,
+      K = K,
+      zInitialize = "predefined",
+      yInitialize = "split",
+      nchains = 1,
+      zInit = overallZ,
+      alpha = alpha,
+      beta = beta,
+      gamma = gamma,
+      delta = delta,
+      verbose = FALSE,
+      reorder = reorder
+    )
+    currentL <- length(unique(clusters(modelInitial)$y)) + 1
+    overallY <- clusters(modelInitial)$y
+
+    resList <- list(modelInitial)
+    while (currentL <= maxL) {
+      # Allow features to cluster further with celda_CG
+      tempSplit <- .singleSplitY(
+        countsZ,
+        overallY,
+        currentL,
+        minFeature = 3,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+      )
+      tempModel <- .celda_CG(
+        counts,
+        L = currentL,
+        K = K,
+        stopIter = 5,
+        splitOnIter = -1,
+        splitOnLast = FALSE,
+        nchains = 1,
+        verbose = FALSE,
+        yInitialize = "predefined",
+        zInitialize = "predefined",
+        yInit = tempSplit$y,
+        zInit = overallZ,
+        reorder = reorder
+      )
+      overallY <- clusters(tempModel)$y
+
+      ## Add new model to results list and increment L
+      .logMessages(
+        date(),
+        ".. Created module",
+        currentL,
+        "| logLik:",
+        bestLogLikelihood(tempModel),
         append = TRUE,
-        verbose = verbose)
-    .logMessages(paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
-    startTime <- Sys.time()
-
-    counts <- .processCounts(counts)
-    countChecksum <- .createCountChecksum(counts)
-    names <-
-        list(row = rownames(counts), column = colnames(counts))
-    sampleLabel <- .processSampleLabels(sampleLabel,
-        numCells = ncol(counts))
-    s <- as.integer(sampleLabel)
-
-    if (!is.null(zInit)) {
-        # Create collapsed module matrix
-        K <- length(unique(zInit))
-        .logMessages(
-            date(),
-            ".. Collapsing to",
-            K,
-            "cell populations",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile
-        )
-        overallZ <- .initializeCluster(N = K,
-            len = ncol(counts),
-            initial = zInit)
-        countsZ <- .colSumByGroup(counts, overallZ, K)
-
-        # Create initial model with initialL and predifined z labels
-        .logMessages(date(),
-            ".. Initializing with",
-            initialL,
-            "modules",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile)
-        modelInitial <- .celda_CG(counts,
-            sampleLabel = s,
-            L = initialL,
-            K = K,
-            zInitialize = "predefined",
-            yInitialize = "split",
-            nchains = 1,
-            zInit = overallZ,
-            alpha = alpha,
-            beta = beta,
-            gamma = gamma,
-            delta = delta,
-            verbose = FALSE,
-            reorder = reorder)
-        currentL <- length(unique(clusters(modelInitial)$y)) + 1
-        overallY <- clusters(modelInitial)$y
-
-        resList <- list(modelInitial)
-        while (currentL <= maxL) {
-            # Allow features to cluster further with celda_CG
-            tempSplit <- .singleSplitY(
-                countsZ,
-                overallY,
-                currentL,
-                minFeature = 3,
-                beta = beta,
-                delta = delta,
-                gamma = gamma)
-            tempModel <- .celda_CG(
-                counts,
-                L = currentL,
-                K = K,
-                stopIter = 5,
-                splitOnIter = -1,
-                splitOnLast = FALSE,
-                nchains = 1,
-                verbose = FALSE,
-                yInitialize = "predefined",
-                zInitialize = "predefined",
-                yInit = tempSplit$y,
-                zInit = overallZ,
-                reorder = reorder
-            )
-            overallY <- clusters(tempModel)$y
-
-            ## Add new model to results list and increment L
-            .logMessages(
-                date(),
-                ".. Created module",
-                currentL,
-                "| logLik:",
-                bestLogLikelihood(tempModel),
-                append = TRUE,
-                verbose = verbose,
-                logfile = NULL
-            )
-            resList <- c(resList, list(tempModel))
-            currentL <- currentL + 1
-        }
-
-        runK <- vapply(resList, function(mod) {
-            params(mod)$K
-        }, integer(1))
-        runL <- vapply(resList, function(mod) {
-            params(mod)$L
-        }, integer(1))
-        runParams <- data.frame(
-            index = seq.int(1, length(resList)),
-            L = runL,
-            K = runK,
-            stringsAsFactors = FALSE
-        )
-    } else if (!is.null(tempK)) {
-        K <- tempK
-        .logMessages(
-            date(),
-            ".. Collapsing to",
-            K,
-            "temporary cell populations",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile
-        )
-        z <- .initializeSplitZ(counts,
-            K = K,
-            minCell = 3)
-        countsZ <- .colSumByGroup(counts, z, length(unique(z)))
-
-        .logMessages(
-            date(),
-            ".. Initializing with",
-            initialL,
-            "modules",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile
-        )
-        modelInitial <- .celda_G(
-            countsZ,
-            L = initialL,
-            nchains = 1,
-            verbose = FALSE)
-
-        currentL <- length(unique(clusters(modelInitial)$y)) + 1
-        overallY <- clusters(modelInitial)$y
-
-        ## Decomposed counts for full count matrix
-        p <- .cGDecomposeCounts(counts, overallY, currentL)
-        nTSByC <- p$nTSByC
-        nByTS <- p$nByTS
-        nGByTS <- p$nGByTS
-        nByG <- p$nByG
-        nG <- p$nG
-        nM <- p$nM
-
-        resList <- list(modelInitial)
-        while (currentL <= maxL) {
-            # Allow features to cluster further
-            previousY <- overallY
-            tempSplit <- .singleSplitY(
-                countsZ,
-                overallY,
-                currentL,
-                minFeature = 3,
-                beta = beta,
-                delta = delta,
-                gamma = gamma)
-            tempModel <- .celda_G(
-                countsZ,
-                L = currentL,
-                stopIter = 5,
-                splitOnIter = -1,
-                splitOnLast = FALSE,
-                nchains = 1,
-                verbose = FALSE,
-                yInitialize = "predefined",
-                yInit = tempSplit$y,
-                reorder = reorder
-            )
-            overallY <- clusters(tempModel)$y
-
-            # Adjust decomposed count matrices
-            p <- .cGReDecomposeCounts(counts,
-                overallY,
-                previousY,
-                nTSByC,
-                nByG,
-                L = currentL)
-            nTSByC <- p$nTSByC
-            nByTS <- p$nByTS
-            nGByTS <- p$nGByTS
-            previousY <- overallY
-
-            ## Create the final model object with correct info on full counts
-            ## matrix
-            tempModel@finalLogLik <- .cGCalcLL(
-                nTSByC = nTSByC,
-                nByTS = nByTS,
-                nByG = nByG,
-                nGByTS = nGByTS,
-                nM = nM,
-                nG = nG,
-                L = currentL,
-                beta = beta,
-                delta = delta,
-                gamma = gamma
-            )
-            tempModel@completeLogLik <- bestLogLikelihood(tempModel)
-            tempModel@params$countChecksum <- countChecksum
-            tempModel@names <- names
-
-            ## Add extra row/column for next round of L
-            nTSByC <- rbind(nTSByC, rep(0L, ncol(nTSByC)))
-            nByTS <- c(nByTS, 0L)
-            nGByTS <- c(nGByTS, 0L)
-
-            ## Add new model to results list and increment L
-            .logMessages(
-                date(),
-                ".. Created module",
-                currentL,
-                "| logLik:",
-                bestLogLikelihood(tempModel),
-                append = TRUE,
-                verbose = verbose,
-                logfile = NULL
-            )
-            resList <- c(resList, list(tempModel))
-            currentL <- currentL + 1
-        }
-
-        runL <- vapply(resList, function(mod) {
-            params(mod)$L
-        }, integer(1))
-        runParams <- data.frame(
-            index = seq.int(1, length(resList)),
-            L = runL,
-            stringsAsFactors = FALSE
-        )
-    } else {
-        .logMessages(
-            date(),
-            ".. Initializing with",
-            initialL,
-            "modules",
-            append = TRUE,
-            verbose = verbose,
-            logfile = logfile
-        )
-        modelInitial <- .celda_G(
-            counts,
-            L = initialL,
-            maxIter = 20,
-            nchains = 1,
-            verbose = FALSE)
-        overallY <- clusters(modelInitial)$y
-        currentL <- length(unique(overallY)) + 1
-
-        ## Perform splitting for y labels
-        resList <- list(modelInitial)
-        while (currentL <= maxL) {
-            # Allow features to cluster further
-            previousY <- overallY
-            tempSplit <- .singleSplitY(
-                counts,
-                overallY,
-                currentL,
-                minFeature = 3,
-                beta = beta,
-                delta = delta,
-                gamma = gamma)
-            tempModel <- .celda_G(
-                counts,
-                L = currentL,
-                stopIter = 5,
-                splitOnIter = -1,
-                splitOnLast = FALSE,
-                nchains = 1,
-                verbose = FALSE,
-                yInitialize = "predefined",
-                yInit = tempSplit$y,
-                reorder = reorder
-            )
-            overallY <- clusters(tempModel)$y
-
-            ## Add new model to results list and increment L
-            .logMessages(
-                date(),
-                ".. Created module",
-                currentL,
-                "| logLik:",
-                bestLogLikelihood(tempModel),
-                append = TRUE,
-                verbose = verbose,
-                logfile = NULL
-            )
-            resList <- c(resList, list(tempModel))
-            currentL <- currentL + 1
-        }
-
-        runL <- vapply(resList, function(mod) {
-            params(mod)$L
-        }, integer(1))
-        runParams <- data.frame(
-            index = seq.int(1, length(resList)),
-            L = runL,
-            stringsAsFactors = FALSE
-        )
+        verbose = verbose,
+        logfile = NULL
+      )
+      resList <- c(resList, list(tempModel))
+      currentL <- currentL + 1
     }
 
-    ## Summarize paramters of different models
-    logliks <- vapply(resList, function(mod) {
-        bestLogLikelihood(mod)
-    }, double(1))
-    runParams <- data.frame(runParams,
-        log_likelihood = logliks,
-        stringsAsFactors = FALSE)
+    runK <- vapply(resList, function(mod) {
+      params(mod)$K
+    }, integer(1))
+    runL <- vapply(resList, function(mod) {
+      params(mod)$L
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      L = runL,
+      K = runK,
+      stringsAsFactors = FALSE
+    )
+  } else if (!is.null(tempK)) {
+    K <- tempK
+    .logMessages(
+      date(),
+      ".. Collapsing to",
+      K,
+      "temporary cell populations",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    z <- .initializeSplitZ(counts,
+      K = K,
+      minCell = 3
+    )
+    countsZ <- .colSumByGroup(counts, z, length(unique(z)))
 
-    celdaRes <- methods::new(
-        "celdaList",
-        runParams = runParams,
-        resList = resList,
-        countChecksum = countChecksum
+    .logMessages(
+      date(),
+      ".. Initializing with",
+      initialL,
+      "modules",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    modelInitial <- .celda_G(
+      countsZ,
+      L = initialL,
+      nchains = 1,
+      verbose = FALSE
     )
 
-    if (isTRUE(perplexity)) {
-        .logMessages(
-            date(),
-            ".. Calculating perplexity",
-            append = TRUE,
-            verbose = verbose,
-            logfile = NULL
-        )
-        celdaRes <- resamplePerplexity(counts, celdaRes)
+    currentL <- length(unique(clusters(modelInitial)$y)) + 1
+    overallY <- clusters(modelInitial)$y
+
+    ## Decomposed counts for full count matrix
+    p <- .cGDecomposeCounts(counts, overallY, currentL)
+    nTSByC <- p$nTSByC
+    nByTS <- p$nByTS
+    nGByTS <- p$nGByTS
+    nByG <- p$nByG
+    nG <- p$nG
+    nM <- p$nM
+
+    resList <- list(modelInitial)
+    while (currentL <= maxL) {
+      # Allow features to cluster further
+      previousY <- overallY
+      tempSplit <- .singleSplitY(
+        countsZ,
+        overallY,
+        currentL,
+        minFeature = 3,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+      )
+      tempModel <- .celda_G(
+        countsZ,
+        L = currentL,
+        stopIter = 5,
+        splitOnIter = -1,
+        splitOnLast = FALSE,
+        nchains = 1,
+        verbose = FALSE,
+        yInitialize = "predefined",
+        yInit = tempSplit$y,
+        reorder = reorder
+      )
+      overallY <- clusters(tempModel)$y
+
+      # Adjust decomposed count matrices
+      p <- .cGReDecomposeCounts(counts,
+        overallY,
+        previousY,
+        nTSByC,
+        nByG,
+        L = currentL
+      )
+      nTSByC <- p$nTSByC
+      nByTS <- p$nByTS
+      nGByTS <- p$nGByTS
+      previousY <- overallY
+
+      ## Create the final model object with correct info on full counts
+      ## matrix
+      tempModel@finalLogLik <- .cGCalcLL(
+        nTSByC = nTSByC,
+        nByTS = nByTS,
+        nByG = nByG,
+        nGByTS = nGByTS,
+        nM = nM,
+        nG = nG,
+        L = currentL,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+      )
+      tempModel@completeLogLik <- bestLogLikelihood(tempModel)
+      tempModel@params$countChecksum <- countChecksum
+      tempModel@names <- names
+
+      ## Add extra row/column for next round of L
+      nTSByC <- rbind(nTSByC, rep(0L, ncol(nTSByC)))
+      nByTS <- c(nByTS, 0L)
+      nGByTS <- c(nGByTS, 0L)
+
+      ## Add new model to results list and increment L
+      .logMessages(
+        date(),
+        ".. Created module",
+        currentL,
+        "| logLik:",
+        bestLogLikelihood(tempModel),
+        append = TRUE,
+        verbose = verbose,
+        logfile = NULL
+      )
+      resList <- c(resList, list(tempModel))
+      currentL <- currentL + 1
     }
 
-    endTime <- Sys.time()
-    .logMessages(paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
-    .logMessages("Completed recursive module splitting. Total time:",
-        format(difftime(endTime, startTime)),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
-    .logMessages(paste(rep("=", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
+    runL <- vapply(resList, function(mod) {
+      params(mod)$L
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      L = runL,
+      stringsAsFactors = FALSE
+    )
+  } else {
+    .logMessages(
+      date(),
+      ".. Initializing with",
+      initialL,
+      "modules",
+      append = TRUE,
+      verbose = verbose,
+      logfile = logfile
+    )
+    modelInitial <- .celda_G(
+      counts,
+      L = initialL,
+      maxIter = 20,
+      nchains = 1,
+      verbose = FALSE
+    )
+    overallY <- clusters(modelInitial)$y
+    currentL <- length(unique(overallY)) + 1
 
-    return(celdaRes)
+    ## Perform splitting for y labels
+    resList <- list(modelInitial)
+    while (currentL <= maxL) {
+      # Allow features to cluster further
+      previousY <- overallY
+      tempSplit <- .singleSplitY(
+        counts,
+        overallY,
+        currentL,
+        minFeature = 3,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+      )
+      tempModel <- .celda_G(
+        counts,
+        L = currentL,
+        stopIter = 5,
+        splitOnIter = -1,
+        splitOnLast = FALSE,
+        nchains = 1,
+        verbose = FALSE,
+        yInitialize = "predefined",
+        yInit = tempSplit$y,
+        reorder = reorder
+      )
+      overallY <- clusters(tempModel)$y
+
+      ## Add new model to results list and increment L
+      .logMessages(
+        date(),
+        ".. Created module",
+        currentL,
+        "| logLik:",
+        bestLogLikelihood(tempModel),
+        append = TRUE,
+        verbose = verbose,
+        logfile = NULL
+      )
+      resList <- c(resList, list(tempModel))
+      currentL <- currentL + 1
+    }
+
+    runL <- vapply(resList, function(mod) {
+      params(mod)$L
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      L = runL,
+      stringsAsFactors = FALSE
+    )
+  }
+
+  ## Summarize paramters of different models
+  logliks <- vapply(resList, function(mod) {
+    bestLogLikelihood(mod)
+  }, double(1))
+  runParams <- data.frame(runParams,
+    log_likelihood = logliks,
+    stringsAsFactors = FALSE
+  )
+
+  celdaRes <- methods::new(
+    "celdaList",
+    runParams = runParams,
+    resList = resList,
+    countChecksum = countChecksum
+  )
+
+  if (isTRUE(perplexity)) {
+    .logMessages(
+      date(),
+      ".. Calculating perplexity",
+      append = TRUE,
+      verbose = verbose,
+      logfile = NULL
+    )
+    celdaRes <- resamplePerplexity(counts, celdaRes)
+  }
+
+  endTime <- Sys.time()
+  .logMessages(paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages("Completed recursive module splitting. Total time:",
+    format(difftime(endTime, startTime)),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages(paste(rep("=", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  return(celdaRes)
 }

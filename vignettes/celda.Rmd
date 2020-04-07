@@ -14,13 +14,17 @@ author:
   email: camp@bu.edu
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::html_document:
+  BiocStyle::pdf_document:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{Analyzing single-cell RNA-seq count data with celda}
+  %\VignetteIndexEntry{Analysis of single-cell genomic data with celda}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dev = "png")
+```
 
 # Introduction
 
@@ -187,6 +191,7 @@ plotDimReduceModule(dim1 = tsne[, 1],
 plotDimReduceFeature(dim1 = tsne[, 1],
     dim2 = tsne[, 2],
     counts = simCounts$counts,
+    normalize = TRUE,
     features = "Gene_1")
 ```
 
@@ -356,7 +361,7 @@ celdaModel <- subsetCeldaList(celdaList = cgs, params = list(K = 5, L = 10))
 
 If the "bestOnly" parameter is set to FALSE in the `celdaGridSearch`, then the `selectBestModel` function can be used to select the chains with the lowest log likelihoods within each combination of parameters. Alternatively, users can use select a specific chain by specifying the index within the `subsetCeldaList` function.
 
-```{r, message=FALSE}
+```{r, eval = FALSE, message=FALSE}
 cgs <- celdaGridSearch(simCounts$counts,
     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
     cores = 1,

@@ -93,7 +93,8 @@ data(celdaCGSim)
 ## Create models that range from L=3 to L=20 by recursively splitting modules
 ## into two
 moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-    initialL = 3, maxL = 20)
+  initialL = 3, maxL = 20
+)
 
 ## Example results with perplexity
 plotGridSearchPerplexity(moduleSplit)

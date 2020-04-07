@@ -33,19 +33,21 @@ Calculates the log likelihood for user-provided feature module
 \examples{
 data(celdaGSim)
 loglik <- logLikelihoodcelda_G(celdaGSim$counts,
-    y = celdaGSim$y,
-    L = celdaGSim$L,
-    beta = celdaGSim$beta,
-    delta = celdaGSim$delta,
-    gamma = celdaGSim$gamma)
+  y = celdaGSim$y,
+  L = celdaGSim$L,
+  beta = celdaGSim$beta,
+  delta = celdaGSim$delta,
+  gamma = celdaGSim$gamma
+)
 
 loglik <- logLikelihood(celdaGSim$counts,
-    model = "celda_G",
-    y = celdaGSim$y,
-    L = celdaGSim$L,
-    beta = celdaGSim$beta,
-    delta = celdaGSim$delta,
-    gamma = celdaGSim$gamma)
+  model = "celda_G",
+  y = celdaGSim$y,
+  L = celdaGSim$L,
+  beta = celdaGSim$beta,
+  delta = celdaGSim$delta,
+  gamma = celdaGSim$gamma
+)
 }
 \seealso{
 `celda_G()` for clustering features

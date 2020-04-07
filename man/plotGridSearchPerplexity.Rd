@@ -24,6 +24,7 @@ data(celdaCGSim, celdaCGGridSearchRes)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
-  celdaCGGridSearchRes)
+  celdaCGGridSearchRes
+)
 plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

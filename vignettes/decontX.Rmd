@@ -1,0 +1,193 @@
+---
+title: "Decontamination of ambient RNA in single-cell genomic data with DecontX" 
+author:
+- name: Shiyi (Iris) Yang
+  affiliation: &id Boston University School of Medicine
+- name: Zhe Wang
+  affiliation: *id
+- name: Joshua Campbell
+  affiliation: *id
+  email: camp@bu.edu
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::pdf_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA in single-cell data with DecontX}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dev = "png")
+```
+
+# Introduction
+Droplet-based microfluidic devices have become widely used to perform single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in the cell suspension can be aberrantly counted along with a cell’s native mRNA and result in cross-contamination of transcripts between different cell populations. DecontX is a Bayesian method to estimate and remove contamination in individual cells. DecontX assumes the observed expression of a cell is a mixture of counts from two multinomial distributions: (1) a distribution of native transcript counts from the cell’s actual population and (2) a distribution of contaminating transcript counts from all other cell populations captured in the assay. Overall, computational decontamination of single cell counts can aid in downstream clustering and visualization.
+
+# Installation
+
+celda can be installed from Bioconductor:
+
+```{r install, eval= FALSE}
+if (!requireNamespace("BiocManager", quietly=TRUE)) {
+    install.packages("BiocManager")}
+BiocManager::install("celda")
+```
+
+The package can be loaded using the `library` command.
+
+```{r load, eval=TRUE, message=FALSE}
+library(celda)
+```
+
+DecontX can take either `SingleCellExperiment` object from package [SingleCellExperiment package](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) or a single counts matrix as input. `decontX` will attempt to convert any input matrix to class `dgCMatrix` from package [Matrix](https://cran.r-project.org/web/packages/Matrix/index.html) before beginning any analyses.
+
+
+# Load PBMC4k data from 10X
+
+We will utlize the 10X PBMC 4K dataset as an example. This can be easily retrieved from the package [TENxPBMCData](http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html). Make sure the the column names are set before running decontX.
+
+```{r load_10X, eval=TRUE, message=FALSE}
+library(TENxPBMCData)  
+pbmc4k <- TENxPBMCData("pbmc4k")
+colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep="_")
+rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
+```
+
+
+# Running decontX
+
+To run decontX with a SingleCellExperiment object, simply use the following command. 
+
+```{r decontX, eval=TRUE, message=FALSE}
+pbmc4k <- decontX(x = pbmc4k) 
+```
+
+The contamination can be found in the `colData(pbmc4k)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(pbmc4k)`. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. 
+
+# Plotting DecontX results
+
+## Cluster labels on UMAP
+DecontX creates a UMAP which we can use to plot the cluster labels automatically identified in the analysis. Note that the clustering approach used here is designed to find "broad" cell types rather than individual cell subpopulations within a cell type. 
+
+```{r UMAP_Clusters}
+umap <- reducedDim(pbmc4k, "decontX_UMAP")
+plotDimReduceCluster(umap[,1], umap[,2], cluster = pbmc4k$decontX_clusters)
+```
+
+## Contamination on UMAP
+The percentage of contamination in each cell can be plotting on the UMAP to visualize what what clusters may have higher levels of ambient RNA.
+
+```{r}
+plotDecontXContamination(pbmc4k)
+```
+
+## Expression of markers on UMAP
+Known marker genes can also be plotted on the UMAP to identify the cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ, S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells, GNLY for NK-cells, and PPBP for megakaryocytes.
+
+```{r, }
+library(scater)
+pbmc4k <- logNormCounts(pbmc4k)
+plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k),
+                     features = c("CD3D", "CD3E", "GNLY",
+                                  "LYZ", "S100A8", "S100A9",
+                                  "CD79A", "CD79B", "MS4A1"),
+                     exactMatch = TRUE)
+```
+
+## Barplot of markers detected in cell clusters
+The percetage of cells within a cluster that have detectable expression of marker genes can be displayed in a barplot. Markers for cell types need to be supplied in a named list. First, the detection of marker genes in the original `counts` assay is shown:
+
+```{r barplotCounts}
+markers <- list(Tcell_Markers=c("CD3E", "CD3D"),
+                    Bcell_Markers=c("CD79A", "CD79B", "MS4A1"), 
+                    Monocyte_Markers=c("S100A8", "S100A9", "LYZ"),
+                    NKcell_Markers="GNLY")
+cellTypeMappings <- list(Tcells=2, Bcells=5, Monocytes=1, NKcells=6)
+plotDecontXMarkerPercentage(pbmc4k, markers = markers,
+                            groupClusters = cellTypeMappings,
+                            assayName = "counts")
+```
+
+We can then look to see how much DecontX removed aberrant expression of marker genes in each cell type by changing the `assayName` to `decontXcounts`:
+
+```{r barplotDecontCounts}
+plotDecontXMarkerPercentage(pbmc4k, markers = markers,
+                            groupClusters = cellTypeMappings,
+                            assayName = "decontXcounts")
+```
+
+Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells.
+The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the `assayName` parameter. This ooption only available if the data is stored in `SingleCellExperiment` object.
+
+```{r barplotBoth}
+plotDecontXMarkerPercentage(pbmc4k, markers = markers,
+                            groupClusters = cellTypeMappings,
+                            assayName = c("counts", "decontXcounts"))
+```
+
+Some helpful hints when using `plotDecontXMarkerPercentage`:
+
+1. Cell clusters can be renamed and re-grouped using the `groupCluster` parameter, which also needs to be a named list. If `groupCluster` is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set `cellTypeMappings <- list(NK_Tcells=c(2,6), Bcells=5, Monocytes=1)`
+2. The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
+3. If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 
+
+## Violin plot to compare distributions of original can decontaminated counts
+Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `DecontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
+
+```{r plotDecontXMarkerExpression}
+plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
+                            groupClusters = cellTypeMappings,
+                            ncol = 3)
+```
+
+Some helfpul hints when using `plotDecontXMarkerExpression`:
+1. `groupClusters` works the same way as in `plotDecontXMarkerPercentage`.
+2. This function will plot each pair of marker and cluster (or cell type specified by `groupClusters`). Therefore, you may want to keep the number of markers small in each plot and call the function multiple times for different sets of marker genes. 
+3. You can also plot the individual points by setting `plotDots = TRUE` and/or log tranform the points on the fly by setting `log1p = TRUE`. 
+4. This function can plot any assay in a `SingleCellExperiment`. Therefore you could also examine normalized expression of the original and decontaminated counts. For example:
+
+
+```{r plot_norm_counts, eval = FALSE}
+pbmc4k <- scater::logNormCounts(pbmc4k,
+                                exprs_values = "decontXcounts",
+                                name="dlogcounts")
+
+plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
+                            groupClusters = cellTypeMappings,
+                            ncol = 3,
+                            assayName = c("logcounts", "dlogcounts"))
+```
+
+
+# Other important notes
+
+## Choosing appropriate cell clusters
+The ability of DecontX to accurately identify contamination is dependent on the cell cluster labels. DecontX assumes that contamination for a cell cluster comes from combination of counts from all other clusters. The default clustering approach used by DecontX tends to select fewer clusters that represent broader cell types. For example, all T-cells tend to be clustered together rather than splitting naive and cytotoxic T-cells into separate clusters. Custom cell type labels can be suppled via the `z` parameter if some cells are not being clustered appropriately by the default method.
+
+## Adjusting the priors to influence contamination estimates
+There are ways to force `decontX` to estimate more or less contamination across a dataset by manipulating the priors. The `delta` parameter is a numeric vector of length two. It is the concentration parameter for the Dirichlet distribution which serves as the prior for the proportions of native and contamination counts in each cell. The first element is the prior for the proportion of native counts while the second element is the prior for the proportion of contamination counts. These essentially act as pseudocounts for the native and contamination in each cell. If `estimateDelta = TRUE`, `delta` is only used to produce a random sample of proportions for an initial value of contamination in each cell. Then `delta` is updated in each iteration. If `estimateDelta = FALSE`, then `delta` is fixed with these values for the entire inference procedure. Fixing `delta` and setting a high number in the second element will force `decontX` to be more aggressive and estimate higher levels of contamination in each cell at the expense of potentially removing native expression. For example, in the previous PBMC example, we can see what the estimated `delta` was by looking in the estimates:
+
+```{r findDelta}
+metadata(pbmc4k)$decontX$estimates$all_cells$delta
+```
+
+Setting a higher value in the second element of delta and `estimateDelta = FALSE` will force `decontX` to estimate higher levels of contamination per cell:
+
+```{r newDecontX, eval=TRUE, message=FALSE}
+pbmc4k.delta <- decontX(pbmc4k, delta=c(9, 20), estimateDelta = FALSE)
+
+plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination,
+     xlab="DecontX estimated priors",
+     ylab="Setting priors to estimate higher contamination")
+abline(0, 1, col="red", lwd=2)
+```
+
+
+# Session Information
+
+```{r}
+sessionInfo()
+```
+

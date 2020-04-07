@@ -21,53 +21,55 @@
 #' topFeatureNamesForCell <- topRanksPerCell$names[1]
 #' @export
 topRank <- function(matrix,
-    n = 25,
-    margin = 2,
-    threshold = 0,
-    decreasing = TRUE) {
+                    n = 25,
+                    margin = 2,
+                    threshold = 0,
+                    decreasing = TRUE) {
+  if (is.null(threshold) || is.na(threshold)) {
+    threshold <- min(matrix) - 1
+  }
 
-    if (is.null(threshold) || is.na(threshold)) {
-        threshold <- min(matrix) - 1
+  # Function to sort values in a vector and return 'n' top results
+  # If there are not 'n' top results above 'thresh', then the
+  # number of entries in 'v' that are above 'thresh' will be returned
+  .topFunction <- function(v, n, thresh) {
+    vAboveThresh <- sum(v > thresh)
+    nToSelect <- min(vAboveThresh, n)
+
+    h <- NA
+    if (nToSelect > 0) {
+      h <- utils::head(order(v, decreasing = decreasing), nToSelect)
     }
+    return(h)
+  }
 
-    # Function to sort values in a vector and return 'n' top results
-    # If there are not 'n' top results above 'thresh', then the
-    # number of entries in 'v' that are above 'thresh' will be returned
-    .topFunction <- function(v, n, thresh) {
-        vAboveThresh <- sum(v > thresh)
-        nToSelect <- min(vAboveThresh, n)
+  # Parse top ranked indices from matrix
+  topIx <-
+    base::apply(matrix, margin, .topFunction, thresh = threshold, n = n)
 
-        h <- NA
-        if (nToSelect > 0) {
-            h <- utils::head(order(v, decreasing = decreasing), nToSelect)
-        }
-        return(h)
-    }
+  # Convert to list if apply converted to a matrix because all
+  # elements had the same length
+  if (is.matrix(topIx)) {
+    topIx <- lapply(seq(ncol(topIx)), function(i) {
+      topIx[, i]
+    })
+    names(topIx) <- dimnames(matrix)[[margin]]
+  }
 
-    # Parse top ranked indices from matrix
-    topIx <-
-        base::apply(matrix, margin, .topFunction, thresh = threshold, n = n)
+  # Parse names from returned margin
+  oppositeMargin <-
+    ifelse(margin - 1 > 0, margin - 1, length(dim(matrix)))
+  topNames <- NULL
+  namesToParse <- dimnames(matrix)[[oppositeMargin]]
+  if (!is.null(namesToParse) & all(!is.na(topIx))) {
+    topNames <- lapply(
+      seq(length(topIx)),
+      function(i) {
+        ifelse(is.na(topIx[[i]]), NA, namesToParse[topIx[[i]]])
+      }
+    )
+    names(topNames) <- names(topIx)
+  }
 
-    # Convert to list if apply converted to a matrix because all
-    # elements had the same length
-    if (is.matrix(topIx)) {
-        topIx <- lapply(seq(ncol(topIx)), function(i)
-            topIx[, i])
-        names(topIx) <- dimnames(matrix)[[margin]]
-    }
-
-    # Parse names from returned margin
-    oppositeMargin <-
-        ifelse(margin - 1 > 0, margin - 1, length(dim(matrix)))
-    topNames <- NULL
-    namesToParse <- dimnames(matrix)[[oppositeMargin]]
-    if (!is.null(namesToParse) & all(!is.na(topIx))) {
-        topNames <- lapply(seq(length(topIx)),
-            function(i) {
-                ifelse(is.na(topIx[[i]]), NA, namesToParse[topIx[[i]]])
-            })
-        names(topNames) <- names(topIx)
-    }
-
-    return(list(index = topIx, names = topNames))
+  return(list(index = topIx, names = topNames))
 }

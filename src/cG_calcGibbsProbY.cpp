@@ -1,6 +1,6 @@
 #include <Rcpp.h>
 using namespace Rcpp;
-
+// [[Rcpp::depends(Rcpp)]]
 
 //Contains a version that is more simple to implement and understand as it matches the equations more directly 
 // However it is many times slower. It is useful to use as a sanity check when modifying the faster function. 

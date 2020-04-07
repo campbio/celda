@@ -119,10 +119,11 @@ Clusters the rows and columns of a count matrix containing
 \examples{
 data(celdaCGSim)
 celdaMod <- celda_CG(celdaCGSim$counts,
-    K = celdaCGSim$K,
-    L = celdaCGSim$L,
-    sampleLabel = celdaCGSim$sampleLabel,
-    nchains = 1)
+  K = celdaCGSim$K,
+  L = celdaCGSim$L,
+  sampleLabel = celdaCGSim$sampleLabel,
+  nchains = 1
+)
 }
 \seealso{
 `celda_G()` for feature clustering and `celda_C()` for clustering

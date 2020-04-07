@@ -11,8 +11,8 @@ runParams(celdaList)
 }
 \value{
 Data Frame. Contains details on the various K/L parameters, chain
- parameters, and final log-likelihoods derived for each model in the provided
- celdaList.
+ parameters, and final log-likelihoods derived for each model in the
+ provided celdaList.
 }
 \description{
 Returns details on the clustering parameters, and model priors

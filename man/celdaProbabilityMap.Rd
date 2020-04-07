@@ -2,8 +2,8 @@
 % Please edit documentation in R/all_generics.R
 \name{celdaProbabilityMap}
 \alias{celdaProbabilityMap}
-\title{Renders probability and relative expression heatmaps to visualize the
- relationship between feature modules and cell populations.}
+\title{Renders probability and relative expression heatmaps to visualize
+the relationship between feature modules and cell populations.}
 \usage{
 celdaProbabilityMap(counts, celdaMod, ...)
 }

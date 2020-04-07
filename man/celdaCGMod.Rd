@@ -15,9 +15,10 @@ celda_CG results generated from celdaCGSim
 }
 \examples{
 data(celdaCGSim)
-celdaCGMod = celda_CG(celdaCGSim$counts,
-    K = celdaCGSim$K,
-    L = celdaCGSim$L,
-    nchains = 1)
+celdaCGMod <- celda_CG(celdaCGSim$counts,
+  K = celdaCGSim$K,
+  L = celdaCGSim$L,
+  nchains = 1
+)
 }
 \keyword{datasets}

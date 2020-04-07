@@ -15,12 +15,13 @@ Example results of celdaGridSearch on celdaCGSim
 }
 \examples{
 data(celdaCGSim)
-celdaCGGridSearchRes = celdaGridSearch(celdaCGSim$counts,
-    model = "celda_CG",
-    paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-    paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-    bestOnly = TRUE,
-    nchains = 1,
-    cores = 2)
+celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
+  model = "celda_CG",
+  paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+  paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+  bestOnly = TRUE,
+  nchains = 1,
+  cores = 2
+)
 }
 \keyword{datasets}

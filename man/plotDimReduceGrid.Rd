@@ -8,13 +8,14 @@ plotDimReduceGrid(
   dim1,
   dim2,
   matrix,
-  size,
-  xlab,
-  ylab,
-  colorLow,
-  colorMid,
-  colorHigh,
-  varLabel,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "grey",
+  colorMid = NULL,
+  colorHigh = "blue",
+  midpoint = NULL,
+  varLabel = NULL,
   ncol = NULL,
   headers = NULL
 )
@@ -46,6 +47,10 @@ The color will be used to signify the midpoint on the scale.}
 The color will be used to signify the highest values on the scale.
 Default 'blue'.}
 
+\item{midpoint}{Numeric. The value indicating the midpoint of the
+diverging color scheme. If \code{NULL}, defaults to the mean
+with 10 percent of values trimmed. Default \code{NULL}.}
+
 \item{varLabel}{Character vector. Title for the color legend.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
@@ -63,16 +68,19 @@ Creates a scatterplot given two dimensions from a data
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
+celdaTsne <- celdaTsne(
+  counts = celdaCGSim$counts,
+  celdaMod = celdaCGMod
+)
 plotDimReduceGrid(celdaTsne[, 1],
-    celdaTsne[, 2],
-    matrix = celdaCGSim$counts,
-    xlab = "Dimension1",
-    ylab = "Dimension2",
-    varLabel = "tsne",
-    size = 1,
-    colorLow = "grey",
-    colorMid = NULL,
-    colorHigh = "blue")
+  celdaTsne[, 2],
+  matrix = celdaCGSim$counts,
+  xlab = "Dimension1",
+  ylab = "Dimension2",
+  varLabel = "tsne",
+  size = 1,
+  colorLow = "grey",
+  colorMid = NULL,
+  colorHigh = "blue"
+)
 }

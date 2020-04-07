@@ -23,6 +23,7 @@ Plots perplexity as a function of the gene (L) clusters as
 data(celdaCGSim, celdaCGGridSearchRes)
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
-  celdaCGGridSearchRes)
+  celdaCGGridSearchRes
+)
 plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

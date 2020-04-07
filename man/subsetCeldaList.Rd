@@ -24,8 +24,10 @@ Select a subset of models from a `celdaList` object generated
 }
 \examples{
 data(celdaCGGridSearchRes)
-resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(K = 5,
-    L = 10))
+resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(
+  K = 5,
+  L = 10
+))
 }
 \seealso{
 `celdaGridSearch()` can run Celda with multiple parameters and
