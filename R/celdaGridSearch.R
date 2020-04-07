@@ -40,188 +40,219 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(celdaCGSim)
-#' #' ## Run various combinations of parameters with 'celdaGridSearch'
+#' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
-#'     model = "celda_CG",
-#'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-#'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-#'     bestOnly = TRUE,
-#'     nchains = 1,
-#'     cores = 2)
+#'   model = "celda_CG",
+#'   paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+#'   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+#'   bestOnly = TRUE,
+#'   nchains = 1,
+#'   cores = 1
+#' )
 #' }
 #' @export
 celdaGridSearch <- function(counts,
+                            model,
+                            paramsTest,
+                            paramsFixed = NULL,
+                            maxIter = 200,
+                            nchains = 3,
+                            cores = 1,
+                            bestOnly = TRUE,
+                            perplexity = TRUE,
+                            verbose = TRUE,
+                            logfilePrefix = "Celda") {
+
+  ## Check parameters
+  .validateCounts(counts)
+
+  modelParams <- as.list(formals(model))
+  if (!all(names(paramsTest) %in% names(modelParams))) {
+    badParams <- setdiff(names(paramsTest), names(modelParams))
+    stop(
+      "The following elements in 'paramsTest' are not arguments of '",
+      model,
+      "': ",
+      paste(badParams, collapse = ",")
+    )
+  }
+
+  if (!is.null(paramsFixed) &&
+    !all(names(paramsFixed) %in% names(modelParams))) {
+    badParams <- setdiff(names(paramsFixed), names(modelParams))
+    stop(
+      "The following elements in 'paramsFixed' are not arguments",
+      " of '",
+      model,
+      "': ",
+      paste(badParams, collapse = ",")
+    )
+  }
+
+  modelParamsRequired <- setdiff(
+    names(modelParams[modelParams == ""]),
+    "counts"
+  )
+
+  if (!all(modelParamsRequired %in% c(
+    names(paramsTest),
+    names(paramsFixed)
+  ))) {
+    missing.params <- setdiff(
+      modelParamsRequired,
+      c(names(paramsTest), names(paramsFixed))
+    )
+    stop(
+      "The following arguments are not in 'paramsTest' or 'paramsFixed'",
+      " but are required for '",
+      model,
+      "': ",
+      paste(missing.params, collapse = ",")
+    )
+  }
+
+  if (any(c("z.init", "y.init", "sampleLabel") %in% names(paramsTest))) {
+    stop(
+      "Setting parameters such as 'z.init', 'y.init', and 'sampleLabel'",
+      " in 'paramsTest' is not currently supported."
+    )
+  }
+
+  if (any(c("nchains") %in% names(paramsTest))) {
+    warning(
+      "Parameter 'nchains' should not be used within the paramsTest",
+      " list"
+    )
+    paramsTest[["nchains"]] <- NULL
+  }
+
+  # Set up parameter combinations for each individual chain
+  runParams <- base::expand.grid(c(
+    chain = list(seq_len(nchains)),
+    paramsTest
+  ))
+  runParams <- cbind(index = seq_len(nrow(runParams)), runParams)
+
+  .logMessages(paste(rep("-", 50), collapse = ""),
+    logfile = NULL,
+    append = FALSE,
+    verbose = verbose
+  )
+
+  .logMessages("Starting celdaGridSearch with",
     model,
-    paramsTest,
-    paramsFixed = NULL,
-    maxIter = 200,
-    nchains = 3,
-    cores = 1,
-    bestOnly = TRUE,
-    perplexity = TRUE,
-    verbose = TRUE,
-    logfilePrefix = "Celda") {
+    logfile = NULL,
+    append = TRUE,
+    verbose = verbose
+  )
 
-    ## Check parameters
-    .validateCounts(counts)
+  .logMessages("Number of cores:",
+    cores,
+    logfile = NULL,
+    append = TRUE,
+    verbose = verbose
+  )
 
-    modelParams <- as.list(formals(model))
-    if (!all(names(paramsTest) %in% names(modelParams))) {
-        badParams <- setdiff(names(paramsTest), names(modelParams))
-        stop("The following elements in 'paramsTest' are not arguments of '",
-            model,
-            "': ",
-            paste(badParams, collapse = ","))
+  .logMessages(paste(rep("-", 50), collapse = ""),
+    logfile = NULL,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  startTime <- Sys.time()
+
+  # An MD5 checksum of the count matrix. Passed to models so
+  # later on, we can check on celda_* model objects which
+  # count matrix was used.
+  counts <- .processCounts(counts)
+  countChecksum <- .createCountChecksum(counts)
+
+  ## Use DoParallel to loop through each combination of parameters
+  cl <- parallel::makeCluster(cores)
+  doParallel::registerDoParallel(cl)
+  i <- NULL # Setting visible binding for R CMD CHECK
+  resList <- foreach(
+    i = seq_len(nrow(runParams)),
+    .export = model,
+    .combine = c,
+    .multicombine = TRUE
+  ) %dopar% {
+
+    ## Set up chain parameter list
+    current.run <- c(runParams[i, ])
+    chainParams <- list()
+    for (j in names(paramsTest)) {
+      chainParams[[j]] <- current.run[[j]]
     }
-
-    if (!is.null(paramsFixed) &&
-            !all(names(paramsFixed) %in% names(modelParams))) {
-        badParams <- setdiff(names(paramsFixed), names(modelParams))
-        stop("The following elements in 'paramsFixed' are not arguments",
-            " of '",
-            model,
-            "': ",
-            paste(badParams, collapse = ","))
-    }
-
-    modelParamsRequired <- setdiff(names(modelParams[modelParams == ""]),
-        "counts")
-
-    if (!all(modelParamsRequired %in% c(names(paramsTest),
-        names(paramsFixed)))) {
-        missing.params <- setdiff(modelParamsRequired,
-            c(names(paramsTest), names(paramsFixed)))
-        stop("The following arguments are not in 'paramsTest' or 'paramsFixed'",
-            " but are required for '",
-            model,
-            "': ",
-            paste(missing.params, collapse = ","))
-    }
-
-    if (any(c("z.init", "y.init", "sampleLabel") %in% names(paramsTest))) {
-        stop("Setting parameters such as 'z.init', 'y.init', and 'sampleLabel'",
-            " in 'paramsTest' is not currently supported.")
-    }
-
-    if (any(c("nchains") %in% names(paramsTest))) {
-        warning("Parameter 'nchains' should not be used within the paramsTest",
-            " list")
-        paramsTest[["nchains"]] <- NULL
-    }
-
-    # Set up parameter combinations for each individual chain
-    runParams <- base::expand.grid(c(chain = list(seq_len(nchains)),
-        paramsTest))
-    runParams <- cbind(index = seq_len(nrow(runParams)), runParams)
-
-    .logMessages(paste(rep("-", 50), collapse = ""),
-        logfile = NULL,
-        append = FALSE,
-        verbose = verbose)
-
-    .logMessages("Starting celdaGridSearch with",
-        model,
-        logfile = NULL,
-        append = TRUE,
-        verbose = verbose)
-
-    .logMessages("Number of cores:",
-        cores,
-        logfile = NULL,
-        append = TRUE,
-        verbose = verbose)
-
-    .logMessages(paste(rep("-", 50), collapse = ""),
-        logfile = NULL,
-        append = TRUE,
-        verbose = verbose)
-
-    startTime <- Sys.time()
-
-    # An MD5 checksum of the count matrix. Passed to models so
-    # later on, we can check on celda_* model objects which
-    # count matrix was used.
-    counts <- .processCounts(counts)
-    countChecksum <- .createCountChecksum(counts)
-
-    ## Use DoParallel to loop through each combination of parameters
-    cl <- parallel::makeCluster(cores)
-    doParallel::registerDoParallel(cl)
-    i <- NULL # Setting visible binding for R CMD CHECK
-    resList <- foreach(i = seq_len(nrow(runParams)),
-        .export = model,
-        .combine = c,
-        .multicombine = TRUE) %dopar% {
-
-            ## Set up chain parameter list
-            current.run <- c(runParams[i, ])
-            chainParams <- list()
-            for (j in names(paramsTest)) {
-                chainParams[[j]] <- current.run[[j]]
-            }
-            chainParams$counts <- counts
-            chainParams$maxIter <- maxIter
-            chainParams$nchain <- 1
-            chainParams$countChecksum <- countChecksum
-            chainParams$verbose <- verbose
-            chainParams$logfile <- paste0(logfilePrefix,
-                "_",
-                paste(paste(
-                    colnames(runParams), runParams[i, ], sep = "-"
-                ), collapse = "_"),
-                "_log.txt")
-
-            ## Run model
-            res <- do.call(model, c(chainParams, paramsFixed))
-            return(list(res))
-        }
-    parallel::stopCluster(cl)
-
-    logliks <- vapply(resList, function(mod) {
-        bestLogLikelihood(mod)
-    }, double(1))
-    runParams <- cbind(runParams, logLikelihood = logliks)
-
-    celdaRes <- methods::new(
-        "celdaList",
-        runParams = runParams,
-        resList = resList,
-        countChecksum = countChecksum
+    chainParams$counts <- counts
+    chainParams$maxIter <- maxIter
+    chainParams$nchain <- 1
+    chainParams$countChecksum <- countChecksum
+    chainParams$verbose <- verbose
+    chainParams$logfile <- paste0(
+      logfilePrefix,
+      "_",
+      paste(paste(
+        colnames(runParams), runParams[i, ],
+        sep = "-"
+      ), collapse = "_"),
+      "_log.txt"
     )
 
-    if (isTRUE(bestOnly)) {
-        celdaRes <- selectBestModel(celdaRes, asList = TRUE)
-    }
+    ## Run model
+    res <- do.call(model, c(chainParams, paramsFixed))
+    return(list(res))
+  }
+  parallel::stopCluster(cl)
 
-    if (isTRUE(perplexity)) {
-        .logMessages(
-            date(),
-            ".. Calculating perplexity",
-            append = TRUE,
-            verbose = verbose,
-            logfile = NULL
-        )
-        celdaRes <- resamplePerplexity(counts, celdaRes)
-    }
+  logliks <- vapply(resList, function(mod) {
+    bestLogLikelihood(mod)
+  }, double(1))
+  runParams <- cbind(runParams, logLikelihood = logliks)
 
-    endTime <- Sys.time()
-    .logMessages(paste(rep("-", 50), collapse = ""),
-        logfile = NULL,
-        append = TRUE,
-        verbose = verbose)
-    .logMessages("Completed celdaGridSearch. Total time:",
-        format(difftime(endTime, startTime)),
-        logfile = NULL,
-        append = TRUE,
-        verbose = verbose)
-    .logMessages(paste(rep("-", 50), collapse = ""),
-        logfile = NULL,
-        append = TRUE,
-        verbose = verbose)
+  celdaRes <- methods::new(
+    "celdaList",
+    runParams = runParams,
+    resList = resList,
+    countChecksum = countChecksum
+  )
 
-    return(celdaRes)
+  if (isTRUE(bestOnly)) {
+    celdaRes <- selectBestModel(celdaRes, asList = TRUE)
+  }
+
+  if (isTRUE(perplexity)) {
+    .logMessages(
+      date(),
+      ".. Calculating perplexity",
+      append = TRUE,
+      verbose = verbose,
+      logfile = NULL
+    )
+    celdaRes <- resamplePerplexity(counts, celdaRes)
+  }
+
+  endTime <- Sys.time()
+  .logMessages(paste(rep("-", 50), collapse = ""),
+    logfile = NULL,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages("Completed celdaGridSearch. Total time:",
+    format(difftime(endTime, startTime)),
+    logfile = NULL,
+    append = TRUE,
+    verbose = verbose
+  )
+  .logMessages(paste(rep("-", 50), collapse = ""),
+    logfile = NULL,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  return(celdaRes)
 }
 
 
@@ -243,44 +274,50 @@ celdaGridSearch <- function(counts,
 #'  combination of parameters.
 #' @examples
 #' data(celdaCGGridSearchRes)
-#' resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(K = 5,
-#'     L = 10))
+#' resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(
+#'   K = 5,
+#'   L = 10
+#' ))
 #' @export
 subsetCeldaList <- function(celdaList, params) {
-    if (!methods::is(celdaList, "celdaList")) {
-        stop("celdaList parameter was not of class celdaList.")
-    }
+  if (!methods::is(celdaList, "celdaList")) {
+    stop("celdaList parameter was not of class celdaList.")
+  }
 
-    ## Check for bad parameter names
-    if (!all(names(params) %in% colnames(runParams(celdaList)))) {
-        badParams <- setdiff(names(params), colnames(runParams(celdaList)))
-        stop("The following elements in 'params' are not columns in runParams",
-            " (celdaList) ",
-            paste(badParams, collapse = ","))
-    }
+  ## Check for bad parameter names
+  if (!all(names(params) %in% colnames(runParams(celdaList)))) {
+    badParams <- setdiff(names(params), colnames(runParams(celdaList)))
+    stop(
+      "The following elements in 'params' are not columns in runParams",
+      " (celdaList) ",
+      paste(badParams, collapse = ",")
+    )
+  }
 
-    ## Subset 'runParams' based on items in 'params'
-    newRunParams <- runParams(celdaList)
-    for (i in names(params)) {
-        newRunParams <-
-            subset(newRunParams, newRunParams[, i] %in% params[[i]])
+  ## Subset 'runParams' based on items in 'params'
+  newRunParams <- runParams(celdaList)
+  for (i in names(params)) {
+    newRunParams <-
+      subset(newRunParams, newRunParams[, i] %in% params[[i]])
 
-        if (nrow(newRunParams) == 0) {
-            stop("No runs matched the criteria given in 'params'. Check",
-                " 'runParams(celdaList)' for complete list of parameters used",
-                " to generate 'celdaList'.")
-        }
+    if (nrow(newRunParams) == 0) {
+      stop(
+        "No runs matched the criteria given in 'params'. Check",
+        " 'runParams(celdaList)' for complete list of parameters used",
+        " to generate 'celdaList'."
+      )
     }
+  }
 
-    ## Get index of selected models, subset celdaList, and return
-    ix <- match(newRunParams$index, runParams(celdaList)$index)
-    if (length(ix) == 1) {
-        return(resList(celdaList)[[ix]])
-    } else {
-        celdaList@runParams <- as.data.frame(newRunParams)
-        celdaList@resList <- resList(celdaList)[ix]
-        return(celdaList)
-    }
+  ## Get index of selected models, subset celdaList, and return
+  ix <- match(newRunParams$index, runParams(celdaList)$index)
+  if (length(ix) == 1) {
+    return(resList(celdaList)[[ix]])
+  } else {
+    celdaList@runParams <- as.data.frame(newRunParams)
+    celdaList@resList <- resList(celdaList)[ix]
+    return(celdaList)
+  }
 }
 
 
@@ -306,25 +343,29 @@ subsetCeldaList <- function(celdaList, params) {
 #' @importFrom data.table as.data.table
 #' @export
 selectBestModel <- function(celdaList, asList = FALSE) {
-    if (!methods::is(celdaList, "celdaList"))
-        stop("celdaList parameter was not of class celdaList.")
+  if (!methods::is(celdaList, "celdaList")) {
+    stop("celdaList parameter was not of class celdaList.")
+  }
 
-    logLikelihood <- NULL
-    group <- setdiff(colnames(runParams(celdaList)),
-        c("index", "chain", "logLikelihood", "mean_perplexity"))
-    dt <- data.table::as.data.table(runParams(celdaList))
-    newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
-        by = group])
-    newRunParams <- newRunParams[, colnames(runParams(celdaList))]
+  logLikelihood <- NULL
+  group <- setdiff(
+    colnames(runParams(celdaList)),
+    c("index", "chain", "logLikelihood", "mean_perplexity")
+  )
+  dt <- data.table::as.data.table(runParams(celdaList))
+  newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
+    by = group
+  ])
+  newRunParams <- newRunParams[, colnames(runParams(celdaList))]
 
-    ix <- match(newRunParams$index, runParams(celdaList)$index)
-    if (nrow(newRunParams) == 1 & !asList) {
-        return(resList(celdaList)[[ix]])
-    } else {
-        celdaList@runParams <- as.data.frame(newRunParams)
-        celdaList@resList <- resList(celdaList)[ix]
-        return(celdaList)
-    }
+  ix <- match(newRunParams$index, runParams(celdaList)$index)
+  if (nrow(newRunParams) == 1 & !asList) {
+    return(resList(celdaList)[[ix]])
+  } else {
+    celdaList@runParams <- as.data.frame(newRunParams)
+    celdaList@resList <- resList(celdaList)[ix]
+    return(celdaList)
+  }
 }
 
 
@@ -335,13 +376,21 @@ selectBestModel <- function(celdaList, asList = FALSE) {
 #' celda()
 #' @return None
 celda <- function() {
-    message("celda_C: Clusters the columns of a count matrix containing",
-        " single-cell data into K subpopulations.")
-    message("celda_G: Clusters the rows of a count matrix containing",
-        " single-cell data into L modules.")
-    message("celda_CG: Clusters the rows and columns of a count matrix",
-        " containing single-cell data into L modules and K subpopulations,",
-        " respectively.")
-    message("celdaGridSearch: Run Celda with different combinations of",
-        " parameters and multiple chains in parallel.")
+  message(
+    "celda_C: Clusters the columns of a count matrix containing",
+    " single-cell data into K subpopulations."
+  )
+  message(
+    "celda_G: Clusters the rows of a count matrix containing",
+    " single-cell data into L modules."
+  )
+  message(
+    "celda_CG: Clusters the rows and columns of a count matrix",
+    " containing single-cell data into L modules and K subpopulations,",
+    " respectively."
+  )
+  message(
+    "celdaGridSearch: Run Celda with different combinations of",
+    " parameters and multiple chains in parallel."
+  )
 }

@@ -33,19 +33,21 @@ Calculates the log likelihood for user-provided cell population
 \examples{
 data(celdaCSim)
 loglik <- logLikelihoodcelda_C(celdaCSim$counts,
-    sampleLabel = celdaCSim$sampleLabel,
-    z = celdaCSim$z,
-    K = celdaCSim$K,
-    alpha = celdaCSim$alpha,
-    beta = celdaCSim$beta)
+  sampleLabel = celdaCSim$sampleLabel,
+  z = celdaCSim$z,
+  K = celdaCSim$K,
+  alpha = celdaCSim$alpha,
+  beta = celdaCSim$beta
+)
 
 loglik <- logLikelihood(celdaCSim$counts,
-    model = "celda_C",
-    sampleLabel = celdaCSim$sampleLabel,
-    z = celdaCSim$z,
-    K = celdaCSim$K,
-    alpha = celdaCSim$alpha,
-    beta = celdaCSim$beta)
+  model = "celda_C",
+  sampleLabel = celdaCSim$sampleLabel,
+  z = celdaCSim$z,
+  K = celdaCSim$K,
+  alpha = celdaCSim$alpha,
+  beta = celdaCSim$beta
+)
 }
 \seealso{
 `celda_C()` for clustering cells

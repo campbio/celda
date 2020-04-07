@@ -41,10 +41,11 @@ features <- factorized$proportions$cell
 class <- clusters(cm)$z
 # Generate Decision Tree
 DecTree <- findMarkers(features,
-    class,
-    oneoffMetric = "modified F1",
-    threshold = 1,
-    consecutiveOneoff = FALSE)
+  class,
+  oneoffMetric = "modified F1",
+  threshold = 1,
+  consecutiveOneoff = FALSE
+)
 
 # Get sample estimates in training data
 getDecisions(DecTree$rules, features)

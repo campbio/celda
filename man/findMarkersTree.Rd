@@ -120,6 +120,7 @@ Create a decision tree that identifies gene markers for given
  balanced metric to determine rules for identifying sets of similar clusters.
 }
 \examples{
+\dontrun{
 # Generate simulated single-cell dataset using celda
 sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
@@ -136,4 +137,5 @@ DecTree <- findMarkersTree(features, class)
 
 # Plot dendrogram
 plotMarkerDendro(DecTree)
+}
 }

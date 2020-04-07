@@ -6,18 +6,20 @@
 \alias{decontX,ANY-method}
 \title{Contamination estimation with decontX}
 \usage{
+decontX(x, ...)
+
 \S4method{decontX}{SingleCellExperiment}(
   x,
   assayName = "counts",
   z = NULL,
   batch = NULL,
   maxIter = 500,
-  delta = 10,
+  delta = c(10, 10),
+  estimateDelta = TRUE,
   convergence = 0.001,
   iterLogLik = 10,
   varGenes = 5000,
   dbscanEps = 1,
-  L = 50,
   seed = 12345,
   logfile = NULL,
   verbose = TRUE
@@ -28,12 +30,12 @@
   z = NULL,
   batch = NULL,
   maxIter = 500,
-  delta = 10,
+  delta = c(10, 10),
+  estimateDelta = TRUE,
   convergence = 0.001,
   iterLogLik = 10,
   varGenes = 5000,
   dbscanEps = 1,
-  L = 50,
   seed = 12345,
   logfile = NULL,
   verbose = TRUE
@@ -45,12 +47,14 @@ with the matrix located in the assay slot under \code{assayName}.
 Cells in each batch will be subsetted and converted to a sparse matrix
 of class \code{dgCMatrix} from package \link{Matrix} before analysis.}
 
+\item{...}{For the generic, further arguments to pass to each method.}
+
 \item{assayName}{Character. Name of the assay to use if \code{x} is a
 \linkS4class{SingleCellExperiment}.}
 
 \item{z}{Numeric or character vector. Cell cluster labels. If NULL,
-Celda will be used to reduce the dimensionality of the dataset
-to 'L' modules, '\link[uwot]{umap}' from the 'uwot' package
+PCA will be used to reduce the dimensionality of the dataset initially,
+'\link[uwot]{umap}' from the 'uwot' package
 will be used to further reduce the dataset to 2 dimenions and
 the '\link[dbscan]{dbscan}' function from the 'dbscan' package
 will be used to identify clusters of broad cell types. Default NULL.}
@@ -62,28 +66,40 @@ should be considered different batches. Default NULL.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
 
-\item{delta}{Numeric. Symmetric Dirichlet concentration parameter
-to initialize theta. Default 10.}
+\item{delta}{Numeric Vector of length 2. Concentration parameters for
+the Dirichlet prior for the contamination in each cell. The first element
+is the prior for the native counts while the second element is the prior for
+the contamination counts. These essentially act as pseudocounts for the
+native and contamination in each cell. If \code{estimateDelta = TRUE},
+this is only used to produce a random sample of proportions for an initial
+value of contamination in each cell. Then
+\code{\link[MCMCprecision]{fit_dirichlet}} is used to update
+\code{delta} in each iteration.
+If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these
+values for the entire inference procedure. Fixing \code{delta} and
+setting a high number in the second element will force \code{decontX}
+to be more aggressive and estimate higher levels of contamination at
+the expense of potentially removing native expression.
+Default \code{c(10, 10)}.}
+
+\item{estimateDelta}{Boolean. Whether to update \code{delta} at each
+iteration.}
 
 \item{convergence}{Numeric. The EM algorithm will be stopped if the maximum
 difference in the contamination estimates between the previous and
 current iterations is less than this. Default 0.001.}
 
-\item{iterLogLik}{Integer. Calculate log likelihood every 'iterLogLik'
+\item{iterLogLik}{Integer. Calculate log likelihood every \code{iterLogLik}
 iteration. Default 10.}
 
 \item{varGenes}{Integer. The number of variable genes to use in
-Celda clustering. Variability is calcualted using
+dimensionality reduction before clustering. Variability is calcualted using
 \code{\link[scran]{modelGeneVar}} function from the 'scran' package.
 Used only when z is not provided. Default 5000.}
 
 \item{dbscanEps}{Numeric. The clustering resolution parameter
 used in '\link[dbscan]{dbscan}' to estimate broad cell clusters.
 Used only when z is not provided. Default 1.}
-
-\item{L}{Integer. Number of modules for Celda clustering. Used to reduce
-the dimensionality of the dataset before applying UMAP and dbscan.
-Used only when z is not provided. Default 50.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
@@ -93,8 +109,6 @@ a default value of 12345 is used. If NULL, no calls to
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
-
-\item{...}{For the generic, further arguments to pass to each method.}
 }
 \value{
 If \code{x} is a matrix-like object, a list will be returned
@@ -116,18 +130,45 @@ If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
 counts will be stored as an assay and can be accessed with
 \code{decontXcounts(x)}. The contamination values and cluster labels
 will be stored in \code{colData(x)}. \code{estimates} and \code{runParams}
-will be stored in \code{metadata(x)$decontX}. If z was not supplied, then
-the UMAPs used to generated cell cluster labels will be stored in
-\code{reducedDims} slot in \code{x}
+will be stored in \code{metadata(x)$decontX}. The UMAPs used to generated
+cell cluster labels will be stored in
+\code{reducedDims} slot in \code{x}.
 }
 \description{
 Identifies contamination from factors such as ambient RNA
 in single cell genomic datasets.
 }
 \examples{
-s <- simulateContaminatedMatrix()
-result <- decontX(s$observedCounts, s$z)
-contamination <- colSums(s$observedCounts - s$nativeCounts) /
-  colSums(s$observedCounts)
-plot(contamination, result$contamination)
+# Generate matrix with contamination
+s <- simulateContamination(seed = 12345)
+
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(list(counts = s$observedCounts))
+sce <- decontX(sce)
+
+# Plot contamination on UMAP
+plotDecontXContamination(sce)
+
+# Plot decontX cluster labels
+umap <- reducedDim(sce)
+plotDimReduceCluster(umap[, 1], umap[, 2], sce$decontX_clusters)
+
+# Plot percentage of marker genes detected
+# in each cell cluster before decontamination
+s$markers
+plotDecontXMarkerPercentage(sce, markers = s$markers, assayName = "counts")
+
+# Plot percentage of marker genes detected
+# in each cell cluster after contamination
+plotDecontXMarkerPercentage(sce, markers = s$markers,
+                            assayName = "decontXcounts")
+
+# Plot percentage of marker genes detected in each cell
+# comparing original and decontaminated counts side-by-side
+plotDecontXMarkerPercentage(sce, markers = s$markers,
+                            assayName = c("counts", "decontXcounts"))
+
+# Plot raw counts of indiviual markers genes before
+# and after decontamination
+plotDecontXMarkerExpression(sce, unlist(s$markers))
 }

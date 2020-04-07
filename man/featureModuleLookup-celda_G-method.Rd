@@ -29,9 +29,11 @@ Finds the module assignments of given features in a `celda_G()`
 }
 \examples{
 data(celdaGSim, celdaGMod)
-module <- featureModuleLookup(celdaGSim$counts,
-    celdaGMod,
-    c("Gene_1", "Gene_XXX"))
+module <- featureModuleLookup(
+  celdaGSim$counts,
+  celdaGMod,
+  c("Gene_1", "Gene_XXX")
+)
 }
 \seealso{
 `celda_G()` for clustering features

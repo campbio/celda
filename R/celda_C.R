@@ -303,384 +303,381 @@ setMethod("celda_C",
     sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
     s <- as.integer(sampleLabel)
 
-    algorithm <- match.arg(algorithm)
-    if (algorithm == "EM") {
-        stopIter <- 1
+      z <- .initializeCluster(K,
+        ncol(counts),
+        initial = zInit,
+        fixed = NULL
+      )
+    } else if (zInitialize == "split") {
+      z <- .initializeSplitZ(counts,
+        K = K,
+        alpha = alpha,
+        beta = beta
+      )
+    } else {
+      z <- .initializeCluster(K,
+        ncol(counts),
+        initial = NULL,
+        fixed = NULL
+      )
     }
 
-    algorithmFun <- ifelse(algorithm == "Gibbs",
-        ".cCCalcGibbsProbZ",
-        ".cCCalcEMProbZ")
-    zInitialize <- match.arg(zInitialize)
+    zBest <- z
 
-    allChains <- seq(nchains)
+    ## Calculate counts one time up front
+    p <- .cCDecomposeCounts(counts, s, z, K)
+    nS <- p$nS
+    nG <- p$nG
+    nM <- p$nM
+    mCPByS <- p$mCPByS
+    nGByCP <- p$nGByCP
+    nCP <- p$nCP
+    nByC <- p$nByC
 
-    bestResult <- NULL
-    for (i in allChains) {
-        ## Initialize cluster labels
+    ll <- .cCCalcLL(
+      mCPByS = mCPByS,
+      nGByCP = nGByCP,
+      s = s,
+      K = K,
+      nS = nS,
+      nG = nG,
+      alpha = alpha,
+      beta = beta
+    )
+
+    iter <- 1L
+    numIterWithoutImprovement <- 0L
+    doCellSplit <- TRUE
+    while (iter <= maxIter & numIterWithoutImprovement <= stopIter) {
+      nextZ <- do.call(algorithmFun, list(
+        counts = counts,
+        mCPByS = mCPByS,
+        nGByCP = nGByCP,
+        nByC = nByC,
+        nCP = nCP,
+        z = z,
+        s = s,
+        K = K,
+        nG = nG,
+        nM = nM,
+        alpha = alpha,
+        beta = beta
+      ))
+
+      mCPByS <- nextZ$mCPByS
+      nGByCP <- nextZ$nGByCP
+      nCP <- nextZ$nCP
+      z <- nextZ$z
+
+      ## Perform split on i-th iteration of no improvement in log
+      ## likelihood
+      tempLl <- .cCCalcLL(
+        mCPByS = mCPByS,
+        nGByCP = nGByCP,
+        s = s,
+        K = K,
+        nS = nS,
+        nG = nG,
+        alpha = alpha,
+        beta = beta
+      )
+
+      if (K > 2 & iter != maxIter &
+        ((((numIterWithoutImprovement == stopIter &
+          !all(tempLl > ll))) & isTRUE(splitOnLast)) |
+          (splitOnIter > 0 & iter %% splitOnIter == 0 &
+            isTRUE(doCellSplit)))) {
         .logMessages(date(),
-            ".. Initializing 'z' in chain",
-            i,
-            "with",
-            paste0("'", zInitialize, "' "),
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose)
+          " .... Determining if any cell clusters should be split.",
+          logfile = logfile,
+          append = TRUE,
+          sep = "",
+          verbose = verbose
+        )
 
-        if (zInitialize == "predefined") {
-            if (is.null(zInit)) {
-                stop("'zInit' needs to specified when initilize.z == 'given'.")
-            }
+        res <- .cCSplitZ(
+          counts,
+          mCPByS,
+          nGByCP,
+          nCP,
+          s,
+          z,
+          K,
+          nS,
+          nG,
+          alpha,
+          beta,
+          zProb = t(nextZ$probs),
+          maxClustersToTry = K,
+          minCell = 3
+        )
 
-            z <- .initializeCluster(K,
-                ncol(counts),
-                initial = zInit,
-                fixed = NULL)
-        } else if (zInitialize == "split") {
-            z <- .initializeSplitZ(counts,
-                    K = K,
-                    alpha = alpha,
-                    beta = beta)
+        .logMessages(res$message,
+          logfile = logfile,
+          append = TRUE,
+          verbose = verbose
+        )
+
+        # Reset convergence counter if a split occured
+        if (!isTRUE(all.equal(z, res$z))) {
+          numIterWithoutImprovement <- 0L
+          doCellSplit <- TRUE
         } else {
-            z <- .initializeCluster(K,
-                    ncol(counts),
-                    initial = NULL,
-                    fixed = NULL)
+          doCellSplit <- FALSE
         }
 
+        ## Re-calculate variables
+        z <- res$z
+        mCPByS <- res$mCPByS
+        nGByCP <- res$nGByCP
+        nCP <- res$nCP
+      }
+
+      ## Calculate complete likelihood
+      tempLl <- .cCCalcLL(
+        mCPByS = mCPByS,
+        nGByCP = nGByCP,
+        s = s,
+        K = K,
+        nS = nS,
+        nG = nG,
+        alpha = alpha,
+        beta = beta
+      )
+
+      if ((all(tempLl > ll)) | iter == 1) {
         zBest <- z
+        llBest <- tempLl
+        numIterWithoutImprovement <- 1L
+      } else {
+        numIterWithoutImprovement <- numIterWithoutImprovement + 1L
+      }
 
-        ## Calculate counts one time up front
-        p <- .cCDecomposeCounts(counts, s, z, K)
-        nS <- p$nS
-        nG <- p$nG
-        nM <- p$nM
-        mCPByS <- p$mCPByS
-        nGByCP <- p$nGByCP
-        nCP <- p$nCP
-        nByC <- p$nByC
+      ll <- c(ll, tempLl)
 
-        ll <- .cCCalcLL(mCPByS = mCPByS,
-                nGByCP = nGByCP,
-                s = s,
-                K = K,
-                nS = nS,
-                nG = nG,
-                alpha = alpha,
-                beta = beta)
-
-        iter <- 1L
-        numIterWithoutImprovement <- 0L
-        doCellSplit <- TRUE
-        while (iter <= maxIter & numIterWithoutImprovement <= stopIter) {
-            nextZ <- do.call(algorithmFun, list(
-                counts = counts,
-                mCPByS = mCPByS,
-                nGByCP = nGByCP,
-                nByC = nByC,
-                nCP = nCP,
-                z = z,
-                s = s,
-                K = K,
-                nG = nG,
-                nM = nM,
-                alpha = alpha,
-                beta = beta))
-
-            mCPByS <- nextZ$mCPByS
-            nGByCP <- nextZ$nGByCP
-            nCP <- nextZ$nCP
-            z <- nextZ$z
-
-            ## Perform split on i-th iteration of no improvement in log
-            ## likelihood
-            tempLl <- .cCCalcLL(mCPByS = mCPByS,
-                    nGByCP = nGByCP,
-                    s = s,
-                    K = K,
-                    nS = nS,
-                    nG = nG,
-                    alpha = alpha,
-                    beta = beta)
-
-            if (K > 2 & iter != maxIter &
-                ((((numIterWithoutImprovement == stopIter &
-                    !all(tempLl > ll))) & isTRUE(splitOnLast)) |
-                        (splitOnIter > 0 & iter %% splitOnIter == 0 &
-                            isTRUE(doCellSplit)))) {
-
-                .logMessages(date(),
-                    " .... Determining if any cell clusters should be split.",
-                    logfile = logfile,
-                    append = TRUE,
-                    sep = "",
-                    verbose = verbose)
-
-                res <- .cCSplitZ(
-                    counts,
-                    mCPByS,
-                    nGByCP,
-                    nCP,
-                    s,
-                    z,
-                    K,
-                    nS,
-                    nG,
-                    alpha,
-                    beta,
-                    zProb = t(nextZ$probs),
-                    maxClustersToTry = K,
-                    minCell = 3)
-
-                .logMessages(res$message,
-                    logfile = logfile,
-                    append = TRUE,
-                    verbose = verbose)
-
-                # Reset convergence counter if a split occured
-                if (!isTRUE(all.equal(z, res$z))) {
-                    numIterWithoutImprovement <- 0L
-                    doCellSplit <- TRUE
-                } else {
-                    doCellSplit <- FALSE
-                }
-
-                ## Re-calculate variables
-                z <- res$z
-                mCPByS <- res$mCPByS
-                nGByCP <- res$nGByCP
-                nCP <- res$nCP
-            }
-
-            ## Calculate complete likelihood
-            tempLl <- .cCCalcLL(mCPByS = mCPByS,
-                    nGByCP = nGByCP,
-                    s = s,
-                    K = K,
-                    nS = nS,
-                    nG = nG,
-                    alpha = alpha,
-                    beta = beta)
-
-            if ((all(tempLl > ll)) | iter == 1) {
-                zBest <- z
-                llBest <- tempLl
-                numIterWithoutImprovement <- 1L
-            } else {
-                numIterWithoutImprovement <- numIterWithoutImprovement + 1L
-            }
-
-            ll <- c(ll, tempLl)
-
-            .logMessages(date(),
-                ".... Completed iteration:",
-                iter,
-                "| logLik:",
-                tempLl,
-                logfile = logfile,
-                append = TRUE,
-                verbose = verbose)
-            iter <- iter + 1
-        }
-
-        names <- list(row = rownames(counts),
-            column = colnames(counts),
-            sample = levels(sampleLabel))
-
-        result <- list(z = zBest,
-            completeLogLik = ll,
-            finalLogLik = llBest,
-            K = K,
-            sampleLabel = sampleLabel,
-            alpha = alpha,
-            beta = beta,
-            countChecksum = countChecksum,
-            names = names)
-
-        if (is.null(bestResult) ||
-            result$finalLogLik > bestResult$finalLogLik) {
-
-            bestResult <- result
-        }
-
-        .logMessages(date(),
-            ".. Finished chain",
-            i,
-            logfile = logfile,
-            append = TRUE,
-            verbose = verbose)
+      .logMessages(date(),
+        ".... Completed iteration:",
+        iter,
+        "| logLik:",
+        tempLl,
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+      )
+      iter <- iter + 1
     }
 
-    bestResult <- methods::new("celda_C",
-        clusters = list(z = bestResult$z),
-        params = list(K = as.integer(bestResult$K),
-            alpha = bestResult$alpha,
-            beta = bestResult$beta,
-            countChecksum = bestResult$countChecksum),
-        sampleLabel = bestResult$sampleLabel,
-        completeLogLik = bestResult$completeLogLik,
-        finalLogLik = bestResult$finalLogLik,
-        names = bestResult$names)
+    names <- list(
+      row = rownames(counts),
+      column = colnames(counts),
+      sample = levels(sampleLabel)
+    )
 
-    if (isTRUE(reorder)) {
-        bestResult <- .reorderCelda_C(counts = counts, res = bestResult)
+    result <- list(
+      z = zBest,
+      completeLogLik = ll,
+      finalLogLik = llBest,
+      K = K,
+      sampleLabel = sampleLabel,
+      alpha = alpha,
+      beta = beta,
+      countChecksum = countChecksum,
+      names = names
+    )
+
+    if (is.null(bestResult) ||
+      result$finalLogLik > bestResult$finalLogLik) {
+      bestResult <- result
     }
 
-    endTime <- Sys.time()
-    .logMessages(paste(rep("-", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
+    .logMessages(date(),
+      ".. Finished chain",
+      i,
+      logfile = logfile,
+      append = TRUE,
+      verbose = verbose
+    )
+  }
 
-    .logMessages("Completed Celda_C. Total time:",
-        format(difftime(endTime, startTime)),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
+  bestResult <- methods::new("celda_C",
+    clusters = list(z = bestResult$z),
+    params = list(
+      K = as.integer(bestResult$K),
+      alpha = bestResult$alpha,
+      beta = bestResult$beta,
+      countChecksum = bestResult$countChecksum
+    ),
+    sampleLabel = bestResult$sampleLabel,
+    completeLogLik = bestResult$completeLogLik,
+    finalLogLik = bestResult$finalLogLik,
+    names = bestResult$names
+  )
 
-    .logMessages(paste(rep("-", 50), collapse = ""),
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose)
+  if (isTRUE(reorder)) {
+    bestResult <- .reorderCelda_C(counts = counts, res = bestResult)
+  }
 
-    return(bestResult)
+  endTime <- Sys.time()
+  .logMessages(paste(rep("-", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  .logMessages("Completed Celda_C. Total time:",
+    format(difftime(endTime, startTime)),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  .logMessages(paste(rep("-", 50), collapse = ""),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
+
+  return(bestResult)
 }
 
 
 # Gibbs sampling for the celda_C Model
 .cCCalcGibbsProbZ <- function(counts,
-    mCPByS,
-    nGByCP,
-    nByC,
-    nCP,
-    z,
-    s,
-    K,
-    nG,
-    nM,
-    alpha,
-    beta,
-    doSample = TRUE) {
+                              mCPByS,
+                              nGByCP,
+                              nByC,
+                              nCP,
+                              z,
+                              s,
+                              K,
+                              nG,
+                              nM,
+                              alpha,
+                              beta,
+                              doSample = TRUE) {
 
-    ## Set variables up front outside of loop
-    probs <- matrix(NA, ncol = nM, nrow = K)
+  ## Set variables up front outside of loop
+  probs <- matrix(NA, ncol = nM, nrow = K)
 
-    ix <- sample(seq(nM))
-    for (i in ix) {
-        ## Subtract cell counts from current population assignment
-        #nGByCP1 <- nGByCP
-        #nGByCP1[, z[i]] <- nGByCP[, z[i]] - counts[, i]
-        #nGByCP1 <- .colSums(lgamma(nGByCP1 + beta), nrow(nGByCP), ncol(nGByCP))
+  ix <- sample(seq(nM))
+  for (i in ix) {
+    ## Subtract cell counts from current population assignment
+    # nGByCP1 <- nGByCP
+    # nGByCP1[, z[i]] <- nGByCP[, z[i]] - counts[, i]
+    # nGByCP1 <- .colSums(lgamma(nGByCP1 + beta), nrow(nGByCP), ncol(nGByCP))
 
-        #nCP1 <- nCP
-        #nCP1[z[i]] <- nCP1[z[i]] - nByC[i]
-        #nCP1 <- lgamma(nCP1 + (nG * beta))
+    # nCP1 <- nCP
+    # nCP1[z[i]] <- nCP1[z[i]] - nByC[i]
+    # nCP1 <- lgamma(nCP1 + (nG * beta))
 
-        ## Add cell counts to all other populations
-        #nGByCP2 <- nGByCP
-        #otherIx <- seq(K)[-z[i]]
-        #nGByCP2[, otherIx] <- nGByCP2[, otherIx] + counts[, i]
-        #nGByCP2 <- .colSums(lgamma(nGByCP2 + beta), nrow(nGByCP), ncol(nGByCP))
+    ## Add cell counts to all other populations
+    # nGByCP2 <- nGByCP
+    # otherIx <- seq(K)[-z[i]]
+    # nGByCP2[, otherIx] <- nGByCP2[, otherIx] + counts[, i]
+    # nGByCP2 <- .colSums(lgamma(nGByCP2 + beta), nrow(nGByCP), ncol(nGByCP))
 
-        #nCP2 <- nCP
-        #nCP2[otherIx] <- nCP2[otherIx] + nByC[i]
-        #nCP2 <- lgamma(nCP2 + (nG * beta))
+    # nCP2 <- nCP
+    # nCP2[otherIx] <- nCP2[otherIx] + nByC[i]
+    # nCP2 <- lgamma(nCP2 + (nG * beta))
 
 
-        mCPByS[z[i], s[i]] <- mCPByS[z[i], s[i]] - 1L
+    mCPByS[z[i], s[i]] <- mCPByS[z[i], s[i]] - 1L
 
-        ## Calculate probabilities for each state
-        ## when consider a specific cluster fo this cell,
-        ##   no need to calculate cells in other cluster
-        for (j in seq_len(K)) {
-            #otherIx <- seq(K)[-j]
-            if (j != z[i]) { # when j is not current population assignment
-                ## Theta simplified
-                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) +
-                # if adding this cell -- Phi Numerator
-                sum(lgamma(nGByCP[, j] + counts[, i] + beta)) -
-                # if adding this cell -- Phi Denominator
-                lgamma(nCP[j] + nByC[i] + nG * beta) -
-                # if without this cell -- Phi Numerator
-                sum(lgamma(nGByCP[, j] + beta)) +
-                # if without this cell -- Phi Denominator
-                lgamma(nCP[j] + nG * beta)
-                #sum(nGByCP1[otherIx]) + ## Phi Numerator (other cells)
-                #nGByCP2[j] - ## Phi Numerator (current cell)
-                #sum(nCP1[otherIx]) - ## Phi Denominator (other cells)
-                #nCP2[j] - ## Phi Denominator (current cell)
-            } else {  # when j is current population assignment
-                ## Theta simplified
-                probs[j, i] <- log(mCPByS[j, s[i]] + alpha) +
-                sum(lgamma(nGByCP[, j] + beta)) -
-                lgamma(nCP[j] + nG * beta) -
-                sum(lgamma(nGByCP[, j] - counts[, i] + beta)) +
-                lgamma(nCP[j] - nByC[i] + nG * beta)
-
-            }
-
-        }
-
-        ## Sample next state and add back counts
-        prevZ <- z[i]
-        if (isTRUE(doSample))
-            z[i] <- .sampleLl(probs[, i])
-
-        if (prevZ != z[i]) {
-            nGByCP[, prevZ] <- nGByCP[, prevZ] - counts[, i]
-            nGByCP[, z[i]] <- nGByCP[, z[i]] + counts[, i]
-
-            nCP[prevZ] <- nCP[prevZ] - nByC[i]
-            nCP[z[i]] <- nCP[z[i]] + nByC[i]
-        }
-        mCPByS[z[i], s[i]] <- mCPByS[z[i], s[i]] + 1L
+    ## Calculate probabilities for each state
+    ## when consider a specific cluster fo this cell,
+    ##   no need to calculate cells in other cluster
+    for (j in seq_len(K)) {
+      # otherIx <- seq(K)[-j]
+      if (j != z[i]) { # when j is not current population assignment
+        ## Theta simplified
+        probs[j, i] <- log(mCPByS[j, s[i]] + alpha) +
+          # if adding this cell -- Phi Numerator
+          sum(lgamma(nGByCP[, j] + counts[, i] + beta)) -
+          # if adding this cell -- Phi Denominator
+          lgamma(nCP[j] + nByC[i] + nG * beta) -
+          # if without this cell -- Phi Numerator
+          sum(lgamma(nGByCP[, j] + beta)) +
+          # if without this cell -- Phi Denominator
+          lgamma(nCP[j] + nG * beta)
+        # sum(nGByCP1[otherIx]) + ## Phi Numerator (other cells)
+        # nGByCP2[j] - ## Phi Numerator (current cell)
+        # sum(nCP1[otherIx]) - ## Phi Denominator (other cells)
+        # nCP2[j] - ## Phi Denominator (current cell)
+      } else { # when j is current population assignment
+        ## Theta simplified
+        probs[j, i] <- log(mCPByS[j, s[i]] + alpha) +
+          sum(lgamma(nGByCP[, j] + beta)) -
+          lgamma(nCP[j] + nG * beta) -
+          sum(lgamma(nGByCP[, j] - counts[, i] + beta)) +
+          lgamma(nCP[j] - nByC[i] + nG * beta)
+      }
     }
 
-    return(list(mCPByS = mCPByS,
-        nGByCP = nGByCP,
-        nCP = nCP,
-        z = z,
-        probs = probs))
+    ## Sample next state and add back counts
+    prevZ <- z[i]
+    if (isTRUE(doSample)) {
+      z[i] <- .sampleLl(probs[, i])
+    }
+
+    if (prevZ != z[i]) {
+      nGByCP[, prevZ] <- nGByCP[, prevZ] - counts[, i]
+      nGByCP[, z[i]] <- nGByCP[, z[i]] + counts[, i]
+
+      nCP[prevZ] <- nCP[prevZ] - nByC[i]
+      nCP[z[i]] <- nCP[z[i]] + nByC[i]
+    }
+    mCPByS[z[i], s[i]] <- mCPByS[z[i], s[i]] + 1L
+  }
+
+  return(list(
+    mCPByS = mCPByS,
+    nGByCP = nGByCP,
+    nCP = nCP,
+    z = z,
+    probs = probs
+  ))
 }
 
 
 .cCCalcEMProbZ <- function(counts,
-    mCPByS,
-    nGByCP,
-    nByC,
-    nCP,
-    z,
-    s,
-    K,
-    nG,
-    nM,
-    alpha,
-    beta,
-    doSample = TRUE) {
+                           mCPByS,
+                           nGByCP,
+                           nByC,
+                           nCP,
+                           z,
+                           s,
+                           K,
+                           nG,
+                           nM,
+                           alpha,
+                           beta,
+                           doSample = TRUE) {
 
-    ## Expectation given current cell population labels
-    theta <- fastNormPropLog(mCPByS, alpha)
-    phi <- fastNormPropLog(nGByCP, beta)
+  ## Expectation given current cell population labels
+  theta <- fastNormPropLog(mCPByS, alpha)
+  phi <- fastNormPropLog(nGByCP, beta)
 
-    ## Maximization to find best label for each cell
-    probs <- eigenMatMultInt(phi, counts) + theta[, s]
+  ## Maximization to find best label for each cell
+  probs <- eigenMatMultInt(phi, counts) + theta[, s]
 
-    if (isTRUE(doSample)) {
-        zPrevious <- z
-        z <- apply(probs, 2, which.max)
+  if (isTRUE(doSample)) {
+    zPrevious <- z
+    z <- apply(probs, 2, which.max)
 
-        ## Recalculate counts based on new label
-        p <- .cCReDecomposeCounts(counts, s, z, zPrevious, nGByCP, K)
-        mCPByS <- p$mCPByS
-        nGByCP <- p$nGByCP
-        nCP <- p$nCP
-    }
+    ## Recalculate counts based on new label
+    p <- .cCReDecomposeCounts(counts, s, z, zPrevious, nGByCP, K)
+    mCPByS <- p$mCPByS
+    nGByCP <- p$nGByCP
+    nCP <- p$nCP
+  }
 
-    return(list(mCPByS = mCPByS,
-        nGByCP = nGByCP,
-        nCP = nCP,
-        z = z,
-        probs = probs))
+  return(list(
+    mCPByS = mCPByS,
+    nGByCP = nGByCP,
+    nCP = nCP,
+    z = z,
+    probs = probs
+  ))
 }
 
 
@@ -884,33 +881,33 @@ setMethod("celda_C",
 
 # Calculate log-likelihood for celda_C model
 .cCCalcLL <- function(mCPByS,
-    nGByCP,
-    s,
-    z,
-    K,
-    nS,
-    nG,
-    alpha,
-    beta) {
+                      nGByCP,
+                      s,
+                      z,
+                      K,
+                      nS,
+                      nG,
+                      alpha,
+                      beta) {
 
-    ## Calculate for "Theta" component
-    a <- nS * lgamma(K * alpha)
-    b <- sum(lgamma(mCPByS + alpha))
-    c <- -nS * K * lgamma(alpha)
-    d <- -sum(lgamma(colSums(mCPByS + alpha)))
+  ## Calculate for "Theta" component
+  a <- nS * lgamma(K * alpha)
+  b <- sum(lgamma(mCPByS + alpha))
+  c <- -nS * K * lgamma(alpha)
+  d <- -sum(lgamma(colSums(mCPByS + alpha)))
 
-    thetaLl <- a + b + c + d
+  thetaLl <- a + b + c + d
 
-    ## Calculate for "Phi" component
-    a <- K * lgamma(nG * beta)
-    b <- sum(lgamma(nGByCP + beta))
-    c <- -K * nG * lgamma(beta)
-    d <- -sum(lgamma(colSums(nGByCP + beta)))
+  ## Calculate for "Phi" component
+  a <- K * lgamma(nG * beta)
+  b <- sum(lgamma(nGByCP + beta))
+  c <- -K * nG * lgamma(beta)
+  d <- -sum(lgamma(colSums(nGByCP + beta)))
 
-    phiLl <- a + b + c + d
+  phiLl <- a + b + c + d
 
-    final <- thetaLl + phiLl
-    return(final)
+  final <- thetaLl + phiLl
+  return(final)
 }
 
 
@@ -956,52 +953,59 @@ setMethod("celda_C",
 # @param z Numeric vector. Denotes cell population labels.
 # @param K Integer. Number of cell populations.
 .cCDecomposeCounts <- function(counts, s, z, K) {
-    nS <- length(unique(s))
-    nG <- nrow(counts)
-    nM <- ncol(counts)
+  nS <- length(unique(s))
+  nG <- nrow(counts)
+  nM <- ncol(counts)
 
-    mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
-        ncol = nS)
-    nGByCP <- .colSumByGroup(counts, group = z, K = K)
-    nCP <- as.integer(colSums(nGByCP))
-    nByC <- as.integer(colSums(counts))
+  mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
+    ncol = nS
+  )
+  nGByCP <- .colSumByGroup(counts, group = z, K = K)
+  nCP <- as.integer(colSums(nGByCP))
+  nByC <- as.integer(colSums(counts))
 
-    return(list(mCPByS = mCPByS,
-            nGByCP = nGByCP,
-            nCP = nCP,
-            nByC = nByC,
-            nS = nS,
-            nG = nG,
-            nM = nM))
+  return(list(
+    mCPByS = mCPByS,
+    nGByCP = nGByCP,
+    nCP = nCP,
+    nByC = nByC,
+    nS = nS,
+    nG = nG,
+    nM = nM
+  ))
 }
 
 
 .cCReDecomposeCounts <- function(counts, s, z, previousZ, nGByCP, K) {
-    ## Recalculate counts based on new label
-    nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
-    nS <- length(unique(s))
-    mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
-        ncol = nS)
-    nCP <- as.integer(colSums(nGByCP))
+  ## Recalculate counts based on new label
+  nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
+  nS <- length(unique(s))
+  mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
+    ncol = nS
+  )
+  nCP <- as.integer(colSums(nGByCP))
 
-    return(list(mCPByS = mCPByS,
-        nGByCP = nGByCP,
-        nCP = nCP))
+  return(list(
+    mCPByS = mCPByS,
+    nGByCP = nGByCP,
+    nCP = nCP
+  ))
 }
 
 
 .reorderCelda_C <- function(counts, res) {
-    if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
-        res@clusters$z <- as.integer(as.factor(clusters(res)$z))
-        fm <- factorizeMatrix(counts = counts, celdaMod = res)
-        uniqueZ <- sort(unique(clusters(res)$z))
-        d <- .cosineDist(fm$posterior$module[, uniqueZ])
-        h <- stats::hclust(d, method = "complete")
-        res <- recodeClusterZ(res,
-            from = h$order,
-            to = seq(length(h$order)))
-    }
-    return(res)
+  if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
+    res@clusters$z <- as.integer(as.factor(clusters(res)$z))
+    fm <- factorizeMatrix(counts = counts, celdaMod = res)
+    uniqueZ <- sort(unique(clusters(res)$z))
+    d <- .cosineDist(fm$posterior$module[, uniqueZ])
+    h <- stats::hclust(d, method = "complete")
+    res <- recodeClusterZ(res,
+      from = h$order,
+      to = seq(length(h$order))
+    )
+  }
+  return(res)
 }
 
 
@@ -1242,7 +1246,26 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
         pca = pca,
         initialDims = initialDims,
         cores = cores,
-        ...)
+        ...
+      )
+    } else {
+      with_seed(
+        seed,
+        res <- .celdaUmapC(
+          counts = counts,
+          celdaMod = celdaMod,
+          maxCells = maxCells,
+          minClusterSize = minClusterSize,
+          nNeighbors = nNeighbors,
+          minDist = minDist,
+          spread = spread,
+          pca = pca,
+          initialDims = initialDims,
+          cores = cores,
+          ...
+        )
+      )
+    }
 
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
@@ -1307,12 +1330,14 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                 clusterNToSample[i])] <- FALSE
         }
     }
+  }
 
-    cellIx <- which(zInclude)
-    norm <- t(normalizeCounts(counts[, cellIx],
-        normalize = "proportion",
-        transformationFun = sqrt))
-    return(list(norm = norm, cellIx = cellIx))
+  cellIx <- which(zInclude)
+  norm <- t(normalizeCounts(counts[, cellIx],
+    normalize = "proportion",
+    transformationFun = sqrt
+  ))
+  return(list(norm = norm, cellIx = cellIx))
 }
 
 

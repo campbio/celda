@@ -17,19 +17,20 @@ cells. This matrix should be the same as the one used to generate
 feature names.}
 
 \item{exactMatch}{Logical. Whether to look for exactMatch of the gene name
-within counts matrix. Default TRUE.}
+within counts matrix. Default \code{TRUE}.}
 }
 \value{
-List. Each entry corresponds to the feature module determined for the
- provided features
+List. Each entry corresponds to the feature module determined for
+the provided features.
 }
 \description{
-This function will output the corresponding feature module for a
- specified list of genes from a celdaModel.
+This function will output the corresponding feature module for
+a specified list of genes from a celdaModel.
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
 featureModuleLookup(
-    counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod, "Gene_1")
+  counts = celdaCGSim$counts,
+  celdaMod = celdaCGMod, "Gene_1"
+)
 }

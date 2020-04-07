@@ -36,8 +36,10 @@ Generates factorized matrices showing the contribution of each
 }
 \examples{
 data(celdaCSim, celdaCMod)
-factorizedMatrices <- factorizeMatrix(celdaCSim$counts,
-    celdaCMod, "posterior")
+factorizedMatrices <- factorizeMatrix(
+  celdaCSim$counts,
+  celdaCMod, "posterior"
+)
 }
 \seealso{
 `celda_C()` for clustering cells

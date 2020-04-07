@@ -16,44 +16,50 @@
 #' @examples
 #' library(M3DExampleData)
 #' counts <- M3DExampleData::Mmus_example_list$data
-#' #subset 100 genes for fast clustering
+#' # subset 100 genes for fast clustering
 #' counts <- counts[1500:2000, ]
-#' #cluster genes into 10 modules for quick demo
+#' # cluster genes into 10 modules for quick demo
 #' cm <- celda_G(counts = as.matrix(counts), L = 10, verbose = FALSE)
 #' gse <- geneSetEnrich(counts,
-#'     cm,
-#'     databases = c('GO_Biological_Process_2018','GO_Molecular_Function_2018'))
+#'   cm,
+#'   databases = c("GO_Biological_Process_2018", "GO_Molecular_Function_2018")
+#' )
 #' @importFrom enrichR enrichr
 #' @importFrom enrichR listEnrichrDbs
 #' @export
 geneSetEnrich <- function(counts, celdaModel, databases, fdr = 0.05) {
-    #check for correct celda object
-    if (!(class(celdaModel) %in% c("celda_G", "celda_CG"))) {
-        stop("No gene modules in celda object. ",
-            "Please provide object of class celda_G or celda_CG.")
-    }
+  # check for correct celda object
+  if (!(class(celdaModel) %in% c("celda_G", "celda_CG"))) {
+    stop(
+      "No gene modules in celda object. ",
+      "Please provide object of class celda_G or celda_CG."
+    )
+  }
 
-    #initialize list with one entry for each gene module
-    modules <- vector("list", length = params(celdaModel)$L)
+  # initialize list with one entry for each gene module
+  modules <- vector("list", length = params(celdaModel)$L)
 
-    #create dataframe with gene-module associations
-    genes <- data.frame(gene = rownames(counts),
-        module = clusters(celdaModel)$y)
+  # create dataframe with gene-module associations
+  genes <- data.frame(
+    gene = rownames(counts),
+    module = clusters(celdaModel)$y
+  )
 
-    #iterate over each module, get genes in that module, add to list
-    for (i in seq_len(params(celdaModel)$L)) {
-        modules[[i]] <- as.character(genes[genes$module == i, "gene"])
-    }
+  # iterate over each module, get genes in that module, add to list
+  for (i in seq_len(params(celdaModel)$L)) {
+    modules[[i]] <- as.character(genes[genes$module == i, "gene"])
+  }
 
-    #enrichment analysis
-    enrichment <- lapply(modules, function(module) {
-        invisible(utils::capture.output(table <- enrichR::enrichr(
-            genes = module,
-            databases = databases)))
-        table <- Reduce(f = rbind, x = table)
-        table[table$Adjusted.P.value < fdr, "Term"]
-    })
+  # enrichment analysis
+  enrichment <- lapply(modules, function(module) {
+    invisible(utils::capture.output(table <- enrichR::enrichr(
+      genes = module,
+      databases = databases
+    )))
+    table <- Reduce(f = rbind, x = table)
+    table[table$Adjusted.P.value < fdr, "Term"]
+  })
 
-    #return results as a list
-    return(enrichment)
+  # return results as a list
+  return(enrichment)
 }

@@ -25,11 +25,11 @@ Calculate a log-likelihood for a user-provided cluster
 \examples{
 data(celdaCGSim)
 loglik <- logLikelihood(celdaCGSim$counts,
-    model = "celda_CG",
-    sampleLabel = celdaCGSim$sampleLabel,
-    z = celdaCGSim$z, y = celdaCGSim$y,
-    K = celdaCGSim$K, L = celdaCGSim$L,
-    alpha = celdaCGSim$alpha, beta = celdaCGSim$beta,
-    gamma = celdaCGSim$gamma, delta = celdaCGSim$delta
+  model = "celda_CG",
+  sampleLabel = celdaCGSim$sampleLabel,
+  z = celdaCGSim$z, y = celdaCGSim$y,
+  K = celdaCGSim$K, L = celdaCGSim$L,
+  alpha = celdaCGSim$alpha, beta = celdaCGSim$beta,
+  gamma = celdaCGSim$gamma, delta = celdaCGSim$delta
 )
 }

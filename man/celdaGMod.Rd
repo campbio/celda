@@ -15,6 +15,6 @@ celda_G results generated from celdaGsim
 }
 \examples{
 data(celdaGSim)
-celdaGMod = celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
+celdaGMod <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 }
 \keyword{datasets}

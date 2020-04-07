@@ -22,7 +22,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @title celdaCGSim
 #' @format A list of counts and properties as returned from simulateCells().
 #' @examples
-#' celdaCGSim = simulateCells("celda_CG")
+#' celdaCGSim <- simulateCells("celda_CG")
 "celdaCGSim"
 
 
@@ -32,10 +32,11 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @format A celda_CG object
 #' @examples
 #' data(celdaCGSim)
-#' celdaCGMod = celda_CG(celdaCGSim$counts,
-#'     K = celdaCGSim$K,
-#'     L = celdaCGSim$L,
-#'     nchains = 1)
+#' celdaCGMod <- celda_CG(celdaCGSim$counts,
+#'   K = celdaCGSim$K,
+#'   L = celdaCGSim$L,
+#'   nchains = 1
+#' )
 "celdaCGMod"
 
 
@@ -44,13 +45,14 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @format An object as returned from celdaGridSearch()
 #' @examples
 #' data(celdaCGSim)
-#' celdaCGGridSearchRes = celdaGridSearch(celdaCGSim$counts,
-#'     model = "celda_CG",
-#'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-#'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-#'     bestOnly = TRUE,
-#'     nchains = 1,
-#'     cores = 2)
+#' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
+#'   model = "celda_CG",
+#'   paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+#'   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+#'   bestOnly = TRUE,
+#'   nchains = 1,
+#'   cores = 2
+#' )
 "celdaCGGridSearchRes"
 
 
@@ -59,7 +61,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @title celdaCSim
 #' @format A list of counts and properties as returned from simulateCells().
 #' @examples
-#' celdaCSim = simulateCells("celda_C")
+#' celdaCSim <- simulateCells("celda_C")
 "celdaCSim"
 
 
@@ -69,7 +71,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @format A celda_C object
 #' @examples
 #' data(celdaCSim)
-#' celdaCMod = celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
+#' celdaCMod <- celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
 "celdaCMod"
 
 
@@ -78,7 +80,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @title celdaGSim
 #' @format A list of counts and properties as returned from simulateCells()
 #' @examples
-#' celdaGSim = simulateCells("celda_G")
+#' celdaGSim <- simulateCells("celda_G")
 "celdaGSim"
 
 #' celda_G results generated from celdaGsim
@@ -87,7 +89,7 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @format A celda_G object
 #' @examples
 #' data(celdaGSim)
-#' celdaGMod = celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
+#' celdaGMod <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 "celdaGMod"
 
 

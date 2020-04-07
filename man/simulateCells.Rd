@@ -20,8 +20,8 @@ List. Contains the simulated counts matrix, derived cell cluster
 This function generates a list containing a simulated counts
  matrix, as well as various parameters used in the simulation which can be
  useful for running celda. The user must provide the desired model
- (one of celda_C, celda_G, celda_CG) as well as any desired tuning parameters
- for those model's simulation functions as detailed below.
+ (one of celda_C, celda_G, celda_CG) as well as any desired tuning
+ parameters for those model's simulation functions as detailed below.
 }
 \examples{
 data(celdaCGSim)

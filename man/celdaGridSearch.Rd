@@ -68,16 +68,17 @@ Run Celda with different combinations of parameters and
  from each chain will be sent to a log file but not be displayed in stdout.
 }
 \examples{
-\donttest{
+\dontrun{
 data(celdaCGSim)
-#' ## Run various combinations of parameters with 'celdaGridSearch'
+## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
-    model = "celda_CG",
-    paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-    paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-    bestOnly = TRUE,
-    nchains = 1,
-    cores = 2)
+  model = "celda_CG",
+  paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+  paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+  bestOnly = TRUE,
+  nchains = 1,
+  cores = 1
+)
 }
 }
 \seealso{

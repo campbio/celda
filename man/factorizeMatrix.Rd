@@ -2,8 +2,8 @@
 % Please edit documentation in R/all_generics.R
 \name{factorizeMatrix}
 \alias{factorizeMatrix}
-\title{Generate factorized matrices showing each feature's influence on cell
- / gene clustering}
+\title{Generate factorized matrices showing each feature's influence on
+cell / gene clustering}
 \usage{
 factorizeMatrix(
   counts,
@@ -19,23 +19,23 @@ cells. This matrix should be the same as the one used to generate
 \item{celdaMod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
 
 \item{type}{A character vector containing one or more of "counts",
-"proportions", or "posterior". "counts" returns the raw number of counts for
-each entry in each matrix. "proportions" returns the counts matrix where
-each vector is normalized to a probability distribution. "posterior" returns
-the posterior estimates which include the addition of the Dirichlet
-concentration parameter (essentially as a pseudocount).}
+"proportions", or "posterior". "counts" returns the raw number of counts
+for each entry in each matrix. "proportions" returns the counts matrix
+where each vector is normalized to a probability distribution. "posterior"
+returns the posterior estimates which include the addition of the
+Dirichlet concentration parameter (essentially as a pseudocount).}
 }
 \value{
 A list of lists of the types of factorized matrices specified
 }
 \description{
-Generate factorized matrices showing each feature's influence on cell
- / gene clustering
+Generate factorized matrices showing each feature's influence on
+cell / gene clustering
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
 factorizedMatrices <- factorizeMatrix(
-    celdaCGSim$counts, celdaCGMod,
-    "posterior"
+  celdaCGSim$counts, celdaCGMod,
+  "posterior"
 )
 }
