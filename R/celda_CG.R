@@ -1,8 +1,13 @@
 #' @title Cell and feature clustering with Celda
 #' @description Clusters the rows and columns of a count matrix containing
 #'  single-cell data into L modules and K subpopulations, respectively.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
 #' @param K Integer. Number of cell populations.
@@ -57,19 +62,23 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @return An object of class `celda_CG` with the cell populations clusters
-#'  stored in `z` and feature module clusters stored in `y`.
+#' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
+#'  parameter settings are stored in the \link[S4Vectors]{metadata}
+#'  \code{"celda_parameters"} slot.
+#'  Columns \code{sample_label} and \code{cell_cluster} in
+#'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+#'  population clusters. Column \code{feature_module} in
+#'  \link[SummarizedExperiment]{rowData} contain feature modules.
 #' @seealso `celda_G()` for feature clustering and `celda_C()` for clustering
 #'  cells. `celdaGridSearch()` can be used to run multiple values of K/L and
 #'  multiple chains in parallel.
 #' @examples
 #' data(celdaCGSim)
-#' celdaMod <- celda_CG(celdaCGSim$counts,
-#'   K = celdaCGSim$K,
-#'   L = celdaCGSim$L,
-#'   sampleLabel = celdaCGSim$sampleLabel,
-#'   nchains = 1
-#' )
+#' sce <- celda_CG(celdaCGSim$counts,
+#'     K = celdaCGSim$K,
+#'     L = celdaCGSim$L,
+#'     sampleLabel = celdaCGSim$sampleLabel,
+#'     nchains = 1)
 #' @import Rcpp RcppEigen
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @export

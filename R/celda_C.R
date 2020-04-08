@@ -63,7 +63,8 @@
 #' data(celdaCSim)
 #' sce <- celda_C(celdaCSim$counts,
 #'     K = celdaCSim$K,
-#'     sampleLabel = celdaCSim$sampleLabel)
+#'     sampleLabel = celdaCSim$sampleLabel,
+#'     nchains = 1)
 #' @import Rcpp RcppEigen
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @importFrom withr with_seed
@@ -302,6 +303,37 @@ setMethod("celda_C",
 
     sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
     s <- as.integer(sampleLabel)
+
+    algorithm <- match.arg(algorithm)
+    if (algorithm == "EM") {
+      stopIter <- 1
+    }
+
+    algorithmFun <- ifelse(algorithm == "Gibbs",
+      ".cCCalcGibbsProbZ",
+      ".cCCalcEMProbZ"
+    )
+    zInitialize <- match.arg(zInitialize)
+
+    allChains <- seq(nchains)
+
+    bestResult <- NULL
+    for (i in allChains) {
+      ## Initialize cluster labels
+      .logMessages(date(),
+        ".. Initializing 'z' in chain",
+        i,
+        "with",
+        paste0("'", zInitialize, "' "),
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+      )
+
+      if (zInitialize == "predefined") {
+        if (is.null(zInit)) {
+          stop("'zInit' needs to specified when initilize.z == 'given'.")
+        }
 
       z <- .initializeCluster(K,
         ncol(counts),
