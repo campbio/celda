@@ -133,7 +133,7 @@ Some helpful hints when using `plotDecontXMarkerPercentage`:
 2. The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
 3. If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 
 
-## Violin plot to compare distributions of original can decontaminated counts
+## Violin plot to compare the distributions of original can decontaminated counts
 Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `DecontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
 
 ```{r plotDecontXMarkerExpression}
@@ -144,7 +144,7 @@ plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
 
 Some helfpul hints when using `plotDecontXMarkerExpression`:
 1. `groupClusters` works the same way as in `plotDecontXMarkerPercentage`.
-2. This function will plot each pair of marker and cluster (or cell type specified by `groupClusters`). Therefore, you may want to keep the number of markers small in each plot and call the function multiple times for different sets of marker genes. 
+2. This function will plot each pair of markers and clusters (or cell type specified by `groupClusters`). Therefore, you may want to keep the number of markers small in each plot and call the function multiple times for different sets of marker genes. 
 3. You can also plot the individual points by setting `plotDots = TRUE` and/or log tranform the points on the fly by setting `log1p = TRUE`. 
 4. This function can plot any assay in a `SingleCellExperiment`. Therefore you could also examine normalized expression of the original and decontaminated counts. For example:
 
