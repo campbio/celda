@@ -133,7 +133,7 @@ Some helpful hints when using `plotDecontXMarkerPercentage`:
 2. The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
 3. If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 
 
-## Violin plot to compare the distributions of original can decontaminated counts
+## Violin plot to compare the distributions of original and decontaminated counts
 Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `DecontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
 
 ```{r plotDecontXMarkerExpression}
