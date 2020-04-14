@@ -82,86 +82,229 @@
 #' @import Rcpp RcppEigen
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
-celda_CG <- function(counts,
-                     sampleLabel = NULL,
-                     K,
-                     L,
-                     alpha = 1,
-                     beta = 1,
-                     delta = 1,
-                     gamma = 1,
-                     algorithm = c("EM", "Gibbs"),
-                     stopIter = 10,
-                     maxIter = 200,
-                     splitOnIter = 10,
-                     splitOnLast = TRUE,
-                     seed = 12345,
-                     nchains = 3,
-                     zInitialize = c("split", "random", "predefined"),
-                     yInitialize = c("split", "random", "predefined"),
-                     countChecksum = NULL,
-                     zInit = NULL,
-                     yInit = NULL,
-                     logfile = NULL,
-                     verbose = TRUE) {
-  .validateCounts(counts)
-  if (is.null(seed)) {
-    res <- .celda_CG(
-      counts,
-      sampleLabel,
-      K,
-      L,
-      alpha,
-      beta,
-      delta,
-      gamma,
-      algorithm,
-      stopIter,
-      maxIter,
-      splitOnIter,
-      splitOnLast,
-      nchains,
-      zInitialize,
-      yInitialize,
-      countChecksum,
-      zInit,
-      yInit,
-      logfile,
-      verbose,
-      reorder = TRUE
-    )
-  } else {
-    with_seed(
-      seed,
-      res <- .celda_CG(
-        counts,
-        sampleLabel,
+setGeneric("celda_CG", function(x, ...) {standardGeneric("celda_CG")})
+
+
+#' @rdname celda_CG
+#' @export
+setMethod("celda_CG",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        sampleLabel = NULL,
         K,
         L,
-        alpha,
-        beta,
-        delta,
-        gamma,
-        algorithm,
-        stopIter,
-        maxIter,
-        splitOnIter,
-        splitOnLast,
-        nchains,
-        zInitialize,
-        yInitialize,
-        countChecksum,
-        zInit,
-        yInit,
-        logfile,
-        verbose,
-        reorder = TRUE
-      )
-    )
-  }
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        algorithm = c("EM", "Gibbs"),
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        zInitialize = c("split", "random", "predefined"),
+        yInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        zInit = NULL,
+        yInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
 
-  return(res)
+        xClass <- "SingleCellExperiment"
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        sce <- .celdaCGWithSeed(counts = counts,
+            xClass = xClass,
+            useAssay = useAssay,
+            sce = x,
+            sampleLabel = sampleLabel,
+            K = K,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            algorithm = match.arg(algorithm),
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            zInitialize = match.arg(zInitialize),
+            yInitialize = match.arg(zInitialize),
+            countChecksum = countChecksum,
+            zInit = zInit,
+            yInit = yInit,
+            logfile = logfile,
+            verbose = verbose)
+        return(sce)
+    }
+)
+
+
+#' @rdname celda_CG
+#' @export
+setMethod("celda_CG",
+    signature(x = "matrix"),
+    function(x,
+        sampleLabel = NULL,
+        K,
+        L,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        algorithm = c("EM", "Gibbs"),
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        zInitialize = c("split", "random", "predefined"),
+        yInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        zInit = NULL,
+        yInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
+
+        xClass <- "matrix"
+        useAssay <- NULL
+        sce <- SingleCellExperiment::SingleCellExperiment(
+            assays = list(counts = x))
+        sce <- .celdaCGWithSeed(counts = x,
+            xClass = xClass,
+            useAssay = useAssay,
+            sce = sce,
+            sampleLabel = sampleLabel,
+            K = K,
+            alpha = alpha,
+            beta = beta,
+            algorithm = match.arg(algorithm),
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            zInitialize = match.arg(zInitialize),
+            countChecksum = countChecksum,
+            zInit = zInit,
+            logfile = logfile,
+            verbose = verbose)
+        return(sce)
+    }
+)
+
+
+.celdaCGWithSeed <- function(counts,
+    xClass,
+    useAssay,
+    sce,
+    sampleLabel,
+    K,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    algorithm,
+    stopIter,
+    maxIter,
+    splitOnIter,
+    splitOnLast,
+    seed,
+    nchains,
+    zInitialize,
+    yInitialize,
+    countChecksum,
+    zInit,
+    yInit,
+    logfile,
+    verbose) {
+
+    .validateCounts(counts)
+
+    if (is.null(seed)) {
+        celdaCGMod <- .celda_CG(
+            counts = counts,
+            sampleLabel = sampleLabel,
+            K = K,
+            L = L,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            algorithm = algorithm,
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            nchains = nchains,
+            zInitialize = zInitialize,
+            yInitialize = yInitialize,
+            countChecksum = countChecksum,
+            zInit = zInit,
+            yInit = yInit,
+            logfile = logfile,
+            verbose = verbose,
+            reorder = TRUE
+        )
+    } else {
+        with_seed(
+            seed,
+            celdaCGMod <- .celda_CG(
+                counts = counts,
+                sampleLabel = sampleLabel,
+                K = K,
+                L = L,
+                alpha = alpha,
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                algorithm = algorithm,
+                stopIter = stopIter,
+                maxIter = maxIter,
+                splitOnIter = splitOnIter,
+                splitOnLast = splitOnLast,
+                nchains = nchains,
+                zInitialize = zInitialize,
+                yInitialize = yInitialize,
+                countChecksum = countChecksum,
+                zInit = zInit,
+                yInit = yInit,
+                logfile = logfile,
+                verbose = verbose,
+                reorder = TRUE
+            )
+        )
+    }
+
+    sce <- .createSCEceldaCG(celdaCMod = celdaCMod,
+        sce = sce,
+        xClass = xClass,
+        useAssay = useAssay,
+        K = K,
+        alpha = alpha,
+        beta = beta,
+        algorithm = algorithm,
+        stopIter = stopIter,
+        maxIter = maxIter,
+        splitOnIter = splitOnIter,
+        splitOnLast = splitOnLast,
+        seed = seed,
+        nchains = nchains,
+        zInitialize = zInitialize,
+        countChecksum = countChecksum,
+        zInit = zInit,
+        logfile = logfile,
+        verbose = verbose)
+    return(sce)
 }
+
 
 .celda_CG <- function(counts,
                       sampleLabel = NULL,
@@ -884,24 +1027,18 @@ simulateCellscelda_CG <- function(model,
 #'   celdaCGSim$counts,
 #'   celdaCGMod, "posterior"
 #' )
-#' @export
-setMethod(
-  "factorizeMatrix", signature(celdaMod = "celda_CG"),
-  function(counts,
-           celdaMod,
-           type = c("counts", "proportion", "posterior")) {
-    counts <- .processCounts(counts)
-    compareCountMatrix(counts, celdaMod)
+.factorizeMatrixCelda_CG <- function(sce, useAssay, type) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    K <- params(celdaMod)$K
-    L <- params(celdaMod)$L
-    z <- clusters(celdaMod)$z
-    y <- clusters(celdaMod)$y
-    alpha <- params(celdaMod)$alpha
-    beta <- params(celdaMod)$beta
-    delta <- params(celdaMod)$delta
-    gamma <- params(celdaMod)$gamma
-    sampleLabel <- sampleLabel(celdaMod)
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    z <- SummarizedExperiment::colData(sce)$cell_cluster
+    y <- SummarizedExperiment::rowData(sce)$feature_module
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+    sampleLabel <- SummarizedExperiment::colData(sce)$sample_label
     s <- as.integer(sampleLabel)
 
     ## Calculate counts one time up front
@@ -922,12 +1059,12 @@ setMethod(
 
     LNames <- paste0("L", seq(L))
     KNames <- paste0("K", seq(K))
-    colnames(nTSByC) <- matrixNames(celdaMod)$column
+    colnames(nTSByC) <- colnames(sce)
     rownames(nTSByC) <- LNames
     colnames(nGByTS) <- LNames
-    rownames(nGByTS) <- matrixNames(celdaMod)$row
+    rownames(nGByTS) <- rownames(sce)
     rownames(mCPByS) <- KNames
-    colnames(mCPByS) <- matrixNames(celdaMod)$sample
+    colnames(mCPByS) <- S4Vectors::metadata(sce)$celda_parameters$sampleLevels
     colnames(nTSByCP) <- KNames
     rownames(nTSByCP) <- LNames
 
@@ -937,65 +1074,65 @@ setMethod(
     res <- list()
 
     if (any("counts" %in% type)) {
-      countsList <- list(
-        sample = mCPByS,
-        cellPopulation = nTSByCP,
-        cell = nTSByC,
-        module = nGByTS,
-        geneDistribution = nGByTS
-      )
-      res <- c(res, list(counts = countsList))
+        countsList <- list(
+            sample = mCPByS,
+            cellPopulation = nTSByCP,
+            cell = nTSByC,
+            module = nGByTS,
+            geneDistribution = nGByTS
+        )
+        res <- c(res, list(counts = countsList))
     }
 
     if (any("proportion" %in% type)) {
-      ## Need to avoid normalizing cell/gene states with zero cells/genes
-      uniqueZ <- sort(unique(z))
-      tempNTSByCP <- nTSByCP
-      tempNTSByCP[, uniqueZ] <- normalizeCounts(tempNTSByCP[, uniqueZ],
-        normalize = "proportion"
-      )
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueZ <- sort(unique(z))
+        tempNTSByCP <- nTSByCP
+        tempNTSByCP[, uniqueZ] <- normalizeCounts(tempNTSByCP[, uniqueZ],
+            normalize = "proportion"
+        )
 
-      uniqueY <- sort(unique(y))
-      tempNGByTS <- nGByTS
-      tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
-        normalize = "proportion"
-      )
-      tempNGByTS <- nGByTS / sum(nGByTS)
+        uniqueY <- sort(unique(y))
+        tempNGByTS <- nGByTS
+        tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
+            normalize = "proportion"
+        )
+        tempNGByTS <- nGByTS / sum(nGByTS)
 
-      propList <- list(
-        sample = normalizeCounts(mCPByS,
-          normalize = "proportion"
-        ),
-        cellPopulation = tempNTSByCP,
-        cell = normalizeCounts(nTSByC, normalize = "proportion"),
-        module = tempNGByTS,
-        geneDistribution = tempNGByTS
-      )
-      res <- c(res, list(proportions = propList))
+        propList <- list(
+            sample = normalizeCounts(mCPByS,
+                normalize = "proportion"
+            ),
+            cellPopulation = tempNTSByCP,
+            cell = normalizeCounts(nTSByC, normalize = "proportion"),
+            module = tempNGByTS,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, list(proportions = propList))
     }
 
     if (any("posterior" %in% type)) {
-      gs <- nGByTS
-      gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
-      gs <- normalizeCounts(gs, normalize = "proportion")
-      tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
+        gs <- nGByTS
+        gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
+        gs <- normalizeCounts(gs, normalize = "proportion")
+        tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
 
-      postList <- list(
-        sample = normalizeCounts(mCPByS + alpha,
-          normalize = "proportion"
-        ),
-        cellPopulation = normalizeCounts(nTSByCP + beta,
-          normalize = "proportion"
-        ),
-        module = gs,
-        geneDistribution = tempNGByTS
-      )
-      res <- c(res, posterior = list(postList))
+        postList <- list(
+            sample = normalizeCounts(mCPByS + alpha,
+                normalize = "proportion"
+            ),
+            cellPopulation = normalizeCounts(nTSByCP + beta,
+                normalize = "proportion"
+            ),
+            module = gs,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, posterior = list(postList))
     }
 
     return(res)
-  }
-)
+}
+
 
 # Calculate the loglikelihood for the celda_CG model
 .cCGCalcLL <- function(K,
@@ -1203,19 +1340,18 @@ logLikelihoodcelda_CG <- function(counts,
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
-#' @export
-setMethod(
-  "clusterProbability", signature(celdaMod = "celda_CG"),
-  function(counts, celdaMod, log = FALSE, ...) {
-    s <- as.integer(sampleLabel(celdaMod))
-    z <- clusters(celdaMod)$z
-    K <- params(celdaMod)$K
-    y <- clusters(celdaMod)$y
-    L <- params(celdaMod)$L
-    alpha <- params(celdaMod)$alpha
-    delta <- params(celdaMod)$delta
-    beta <- params(celdaMod)$beta
-    gamma <- params(celdaMod)$gamma
+.clusterProbabilityCeldaCG <- function(sce, useAssay, log) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    s <- as.integer(sampleLabel(sce))
+    z <- clusters(sce)
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    y <- modules(sce)
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
 
     p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
     lgbeta <- lgamma(seq(0, max(p$nCP)) + beta)
@@ -1223,49 +1359,48 @@ setMethod(
     lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
 
     nextZ <- .cCCalcGibbsProbZ(
-      counts = p$nTSByC,
-      mCPByS = p$mCPByS,
-      nGByCP = p$nTSByCP,
-      nCP = p$nCP,
-      nByC = p$nByC,
-      z = z,
-      s = s,
-      K = K,
-      nG = L,
-      nM = p$nM,
-      alpha = alpha,
-      beta = beta,
-      doSample = FALSE
+        counts = p$nTSByC,
+        mCPByS = p$mCPByS,
+        nGByCP = p$nTSByCP,
+        nCP = p$nCP,
+        nByC = p$nByC,
+        z = z,
+        s = s,
+        K = K,
+        nG = L,
+        nM = p$nM,
+        alpha = alpha,
+        beta = beta,
+        doSample = FALSE
     )
     zProb <- t(nextZ$probs)
 
     ## Gibbs sampling for each gene
     nextY <- .cGCalcGibbsProbY(
-      counts = p$nGByCP,
-      nTSByC = p$nTSByCP,
-      nByTS = p$nByTS,
-      nGByTS = p$nGByTS,
-      nByG = p$nByG,
-      y = y,
-      L = L,
-      nG = p$nG,
-      lgbeta = lgbeta,
-      lgdelta = lgdelta,
-      lggamma = lggamma,
-      delta = delta,
-      doSample = FALSE
+        counts = p$nGByCP,
+        nTSByC = p$nTSByCP,
+        nByTS = p$nByTS,
+        nGByTS = p$nGByTS,
+        nByG = p$nByG,
+        y = y,
+        L = L,
+        nG = p$nG,
+        lgbeta = lgbeta,
+        lgdelta = lgdelta,
+        lggamma = lggamma,
+        delta = delta,
+        doSample = FALSE
     )
 
     yProb <- t(nextY$probs)
 
     if (!isTRUE(log)) {
-      zProb <- .normalizeLogProbs(zProb)
-      yProb <- .normalizeLogProbs(yProb)
+        zProb <- .normalizeLogProbs(zProb)
+        yProb <- .normalizeLogProbs(yProb)
     }
 
     return(list(zProbability = zProb, yProbability = yProb))
-  }
-)
+}
 
 
 #' @title Calculate the perplexity on new data with a celda_CG model
@@ -1908,3 +2043,71 @@ setMethod(
     return(list)
   }
 )
+
+
+.createSCEceldaCG <- function(celdaCGMod,
+    sce,
+    xClass,
+    useAssay,
+    K,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    algorithm,
+    stopIter,
+    maxIter,
+    splitOnIter,
+    splitOnLast,
+    seed,
+    nchains,
+    zInitialize,
+    yInitialize,
+    countChecksum,
+    zInit,
+    yInit,
+    logfile,
+    verbose) {
+
+    # add metadata
+    S4Vectors::metadata(sce)[["celda_parameters"]] <- list(
+        model = "celda_CG",
+        xClass = xClass,
+        useAssay = useAssay,
+        sampleLevels = celdaCGMod@names$sample,
+        K = celdaCGMod@params$K,
+        L = celdaCGMod@params$L,
+        alpha = celdaCGMod@params$alpha,
+        beta = celdaCGMod@params$beta,
+        delta = celdaCGMod@params$delta,
+        gamma = celdaCGMod@params$gamma,
+        algorithm = algorithm,
+        stopIter = stopIter,
+        maxIter = maxIter,
+        splitOnIter = splitOnIter,
+        splitOnLast = splitOnLast,
+        seed = seed,
+        nchains = nchains,
+        zInitialize = zInitialize,
+        yInitialize = yInitialize,
+        countChecksum = celdaCGMod@params$countChecksum,
+        zInit = zInit,
+        logfile = logfile,
+        verbose = verbose,
+        completeLogLik = celdaCGMod@completeLogLik,
+        finalLogLik = celdaCGMod@finalLogLik,
+        cellClusterLevels = sort(unique(celdaCGMod@clusters$z)),
+        featureModuleLevels = sort(unique(celdaCGMod@clusters$y)))
+
+    SummarizedExperiment::rowData(sce)["row_name"] <- celdaCGMod@names$row
+    SummarizedExperiment::colData(sce)["column_name"] <-
+        celdaCGMod@names$column
+    SummarizedExperiment::colData(sce)["sample_label"] <-
+        celdaCGMod@sampleLabel
+    SummarizedExperiment::colData(sce)["cell_cluster"] <-
+        celdaCGMod@clusters$z
+    SummarizedExperiment::rowData(sce)["feature_module"] <-
+        celdaCGMod@clusters$y
+
+    return(sce)
+}

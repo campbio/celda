@@ -1025,6 +1025,41 @@ setMethod("celda_C",
 }
 
 
+.clusterProbabilityCeldaC <- function(sce, useAssay, log) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    z <- clusters(sce)
+    s <- as.integer(sampleLabel(sce))
+
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+
+    p <- .cCDecomposeCounts(counts, s, z, K)
+
+    nextZ <- .cCCalcGibbsProbZ(counts = counts,
+        mCPByS = p$mCPByS,
+        nGByCP = p$nGByCP,
+        nByC = p$nByC,
+        nCP = p$nCP,
+        z = z,
+        s = s,
+        K = K,
+        nG = p$nG,
+        nM = p$nM,
+        alpha = alpha,
+        beta = beta,
+        doSample = FALSE)
+    zProb <- t(nextZ$probs)
+
+    if (!isTRUE(log)) {
+        zProb <- .normalizeLogProbs(zProb)
+    }
+
+    return(list(zProbability = zProb))
+}
+
+
 .reorderCelda_C <- function(counts, res) {
   if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
     res@clusters$z <- as.integer(as.factor(clusters(res)$z))
@@ -1280,24 +1315,6 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
         cores = cores,
         ...
       )
-    } else {
-      with_seed(
-        seed,
-        res <- .celdaUmapC(
-          counts = counts,
-          celdaMod = celdaMod,
-          maxCells = maxCells,
-          minClusterSize = minClusterSize,
-          nNeighbors = nNeighbors,
-          minDist = minDist,
-          spread = spread,
-          pca = pca,
-          initialDims = initialDims,
-          cores = cores,
-          ...
-        )
-      )
-    }
 
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
@@ -1362,7 +1379,6 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                 clusterNToSample[i])] <- FALSE
         }
     }
-  }
 
   cellIx <- which(zInclude)
   norm <- t(normalizeCounts(counts[, cellIx],
