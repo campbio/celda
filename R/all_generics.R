@@ -170,7 +170,7 @@ setGeneric("clusters",
 setMethod("clusters",
     signature(sce = "SingleCellExperiment"),
     function(sce) {
-        return(SummarizedExperiment::colData(sce)$cell_cluster)
+        return(SummarizedExperiment::colData(sce)$celda_cell_cluster)
     })
 
 
@@ -183,7 +183,7 @@ setGeneric("clusters<-",
 #' @export
 setReplaceMethod("clusters", signature(sce = "SingleCellExperiment"),
     function(sce, value) {
-        SummarizedExperiment::colData(sce)$cell_cluster <- value
+        SummarizedExperiment::colData(sce)$celda_cell_cluster <- value
         return(sce)
     })
 
@@ -208,7 +208,7 @@ setGeneric("modules",
 setMethod("modules",
     signature(sce = "SingleCellExperiment"),
     function(sce) {
-        return(SummarizedExperiment::rowData(sce)$feature_module)
+        return(SummarizedExperiment::rowData(sce)$celda_feature_module)
     })
 
 
@@ -221,7 +221,7 @@ setGeneric("modules<-",
 #' @export
 setReplaceMethod("modules", signature(sce = "SingleCellExperiment"),
     function(sce, value) {
-        SummarizedExperiment::rowData(sce)$feature_module <- value
+        SummarizedExperiment::rowData(sce)$celda_feature_module <- value
         return(sce)
     })
 
@@ -597,6 +597,10 @@ setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
         if (S4Vectors::metadata(sce)$celda_parameters$model == "celda_C") {
             ll <- .logLikelihoodcelda_C(sce = sce, useAssay = useAssay)
             return(ll)
+        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
+                "celda_CG") {
+            ll <- .logLikelihoodcelda_CG(sce = sce, useAssay = useAssay)
+            return(ll)
         }
 
         stop("metadata(sce)$celda_parameters$model must be 'celda_C'!")
@@ -606,8 +610,9 @@ setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
 #' @title Get the conditional probabilities of cell in subpopulations from celda
 #'  model
 #' @description Calculate the conditional probability of each cell belonging to
-#'  each subpopulation given all other cell cluster assignments in a celda
-#'  model.
+#'  each subpopulation given all other cell cluster assignments or/and
+#'  each feature belonging to each module given all other feature cluster
+#'  assignments in a celda model.
 #' @param sce A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
@@ -621,7 +626,7 @@ setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
 #' data(sceCelda_CG)
 #' clusterProb <- clusterProbability(sceCelda_CG, log = TRUE)
 #' @return A list containging a matrix for the conditional cell subpopulation
-#'  cluster probabilities.
+#'  cluster and feature module probabilities.
 #' @export
 setGeneric("clusterProbability",
     function(sce, ...) {
@@ -689,23 +694,12 @@ setMethod("perplexity", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts") {
 
         if (S4Vectors::metadata(sce)$celda_parameters$model == "celda_C") {
-            counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-
-            counts <- .processCounts(counts)
-
-            factorized <- factorizeMatrix(sce = sce,
-                useAssay = useAssay,
-                type = "posterior")
-            theta <- log(factorized$posterior$sample)
-            phi <- log(factorized$posterior$module)
-            s <- as.integer(sampleLabel(sce))
-
-            inner.log.prob <- eigenMatMultInt(phi, Counts) + theta[, s]
-            logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
-
-            perplexity <- exp(- (logPx / sum(Counts)))
-            return(perplexity)
+            p <- .perplexityCelda_C(sce = sce, useAssay = useAssay)
+            return(p)
+        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
+                "celda_CG") {
+            p <- .perplexityCelda_CG(sce = sce, useAssay = useAssay)
+            return(p)
         } else {
             stop("metadata(sce)$celda_parameters$model is not 'celda_C',",
                 " 'celda_G', or 'celda_CG'!")
@@ -782,6 +776,10 @@ setMethod("factorizeMatrix", signature(sce = "SingleCellExperiment"),
             res <- .factorizeMatrixCelda_CG(sce = sce, useAssay = useAssay,
                 type = type)
             return(res)
+        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
+                "celda_G") {
+            res <- .factorizeMatrixCelda_G(sce = sce, useAssay = useAssay,
+                type = type)
         }
     })
 

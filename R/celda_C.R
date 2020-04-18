@@ -53,7 +53,7 @@
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
-#'  Columns \code{sample_label} and \code{cell_cluster} in
+#'  Columns \code{sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters.
 #' @seealso `celda_G()` for feature clustering and `celda_CG()` for simultaneous
@@ -737,7 +737,7 @@ setMethod("celda_C",
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object with
 #'  simulated count matrix stored in the "counts" assay slot. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata} slot.
-#'  Columns \code{sample_label} and \code{cell_cluster} in
+#'  Columns \code{sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
 #'  cell population clusters.
 #' @seealso `celda_G()` for simulating feature modules and `celda_CG()` for
@@ -858,10 +858,10 @@ setMethod("celda_C",
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
-    z <- SummarizedExperiment::colData(sce)$cell_cluster
+    z <- clusters(sce)
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    sampleLabel <- SummarizedExperiment::colData(sce)$sample_label
+    sampleLabel <- sampleLabel(sce)
     s <- as.integer(sampleLabel)
 
     p <- .cCDecomposeCounts(counts, s, z, K)
@@ -945,13 +945,9 @@ setMethod("celda_C",
 
 .logLikelihoodcelda_C <- function(sce, useAssay = "counts") {
 
-    if (S4Vectors::metadata(sce)$celda_parameters$model != "celda_C") {
-        stop("metadata(sce)$celda_parameters$model must be 'celda_C'!")
-    }
-
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    sampleLabel <- SummarizedExperiment::colData(sce)$sample_label
-    z <- SummarizedExperiment::colData(sce)$cell_cluster
+    sampleLabel <- sampleLabel(sce)
+    z <- clusters(sce)
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
@@ -1057,6 +1053,25 @@ setMethod("celda_C",
     }
 
     return(list(zProbability = zProb))
+}
+
+
+.perplexityCelda_C <- function(sce, useAssay) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
+
+    factorized <- factorizeMatrix(sce = sce,
+        useAssay = useAssay,
+        type = "posterior")
+    theta <- log(factorized$posterior$sample)
+    phi <- log(factorized$posterior$module)
+    s <- as.integer(sampleLabel(sce))
+
+    inner.log.prob <- eigenMatMultInt(phi, Counts) + theta[, s]
+    logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
+
+    perplexity <- exp(- (logPx / sum(Counts)))
+    return(perplexity)
 }
 
 
@@ -1539,7 +1554,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         celdaCMod@names$column
     SummarizedExperiment::colData(sce)["sample_label"] <-
         celdaCMod@sampleLabel
-    SummarizedExperiment::colData(sce)["cell_cluster"] <-
+    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
         celdaCMod@clusters$z
 
     return(sce)
@@ -1551,9 +1566,9 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         assays = list(counts = simList$counts))
 
     # add metadata
-    S4Vectors::metadata(sce)[["simulateCellscelda_C"]] <- list(
+    S4Vectors::metadata(sce)[["celda_simulateCellscelda_C"]] <- list(
         model = "celda_C",
-        sampleLevels = celdaCMod@names$sample,
+        sampleLevels = as.character(unique(simList$sampleLabel)),
         cellClusterLevels = sort(unique(simList$z)),
         S = simList$S,
         CRange = simList$CRange,
@@ -1568,7 +1583,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     SummarizedExperiment::colData(sce)["column_name"] <-
         colnames(simList$counts)
     SummarizedExperiment::colData(sce)["sample_label"] <- simList$sampleLabel
-    SummarizedExperiment::colData(sce)["cell_cluster"] <- simList$z
+    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
 
     return(sce)
 }

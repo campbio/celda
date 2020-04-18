@@ -65,7 +65,7 @@
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
-#'  Columns \code{sample_label} and \code{cell_cluster} in
+#'  Columns \code{sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters. Column \code{feature_module} in
 #'  \link[SummarizedExperiment]{rowData} contain feature modules.
@@ -811,55 +811,59 @@ setMethod("celda_CG",
 #'  simulating feature modules.
 #' @examples
 #' celdaCGSim <- simulateCells(model = "celda_CG")
-#' @export
-simulateCellscelda_CG <- function(model,
-                                  S = 5,
-                                  CRange = c(50, 100),
-                                  NRange = c(500, 1000),
-                                  G = 100,
-                                  K = 5,
-                                  L = 10,
-                                  alpha = 1,
-                                  beta = 1,
-                                  gamma = 5,
-                                  delta = 1,
-                                  seed = 12345,
-                                  ...) {
-  if (is.null(seed)) {
-    res <- .simulateCellscelda_CG(
-      model = model,
-      S = S,
-      CRange = CRange,
-      NRange = NRange,
-      G = G,
-      K = K,
-      L = L,
-      alpha = alpha,
-      beta = beta,
-      gamma = gamma,
-      delta = delta,
-      ...
-    )
-  } else {
-    with_seed(
-      seed,
-      res <- .simulateCellscelda_CG(
-        model = model,
-        S = S,
-        CRange = CRange,
-        NRange = NRange,
-        G = G,
-        K = K,
-        L = L,
-        alpha = alpha,
-        beta = beta,
-        gamma = gamma,
-        delta = delta,
-        ...
-      )
-    )
-  }
-  return(res)
+#' @rdname simulateCells
+.simulateCellsMaincelda_CG <- function(model,
+    S = 5,
+    CRange = c(50, 100),
+    NRange = c(500, 1000),
+    G = 100,
+    K = 5,
+    L = 10,
+    alpha = 1,
+    beta = 1,
+    gamma = 5,
+    delta = 1,
+    seed = 12345,
+    ...) {
+
+    if (is.null(seed)) {
+        res <- .simulateCellscelda_CG(
+            model = model,
+            S = S,
+            CRange = CRange,
+            NRange = NRange,
+            G = G,
+            K = K,
+            L = L,
+            alpha = alpha,
+            beta = beta,
+            gamma = gamma,
+            delta = delta,
+            ...
+        )
+    } else {
+        with_seed(
+            seed,
+            res <- .simulateCellscelda_CG(
+                model = model,
+                S = S,
+                CRange = CRange,
+                NRange = NRange,
+                G = G,
+                K = K,
+                L = L,
+                alpha = alpha,
+                beta = beta,
+                gamma = gamma,
+                delta = delta,
+                ...
+            )
+        )
+    }
+
+    sce <- .createSCEsimulateCellsCeldaCG(res, seed)
+
+    return(res)
 }
 
 
@@ -984,8 +988,9 @@ simulateCellscelda_CG <- function(model,
   return(list(
     z = clusters(result)$z,
     y = clusters(result)$y,
-    sampleLabel = cellSampleLabel,
     counts = cellCounts,
+    sampleLabel = cellSampleLabel,
+    G = G,
     K = K,
     L = L,
     CRange = CRange,
@@ -999,46 +1004,18 @@ simulateCellscelda_CG <- function(model,
 }
 
 
-#' @title Matrix factorization for results from celda_CG
-#' @description Generates factorized matrices showing the contribution of each
-#'  feature in each module, each module in each cell and/or cell population,
-#'  and each cell population in each sample.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda model. Options are "celda_C" or "celda_CG". Celda
-#'  object of class "celda_CG".
-#' @param type Character vector. A vector containing one or more of "counts",
-#'  "proportion", or "posterior". "counts" returns the raw number of counts for
-#'  each factorized matrix. "proportions" returns the normalized probabilities
-#'  for each factorized matrix, which are calculated by dividing the raw counts
-#'  in each factorized matrix by the total counts in each column. "posterior"
-#'  returns the posterior estimates. Default
-#'  `c("counts", "proportion", "posterior")`.
-#' @return A list with elements for `counts`, `proportions`, or `posterior`
-#'  probabilities. Each element will be a list containing factorized matrices
-#'  for `module`, `cellPopulation`, and `sample`. Additionally, the
-#'  contribution of each module in each individual cell will be included in the
-#'  `cell` element of `counts` and `proportions` elements.
-#' @seealso `celda_CG()` for clustering features and cells
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' factorizedMatrices <- factorizeMatrix(
-#'   celdaCGSim$counts,
-#'   celdaCGMod, "posterior"
-#' )
 .factorizeMatrixCelda_CG <- function(sce, useAssay, type) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     L <- S4Vectors::metadata(sce)$celda_parameters$L
-    z <- SummarizedExperiment::colData(sce)$cell_cluster
-    y <- SummarizedExperiment::rowData(sce)$feature_module
+    z <- clusters(sce)
+    y <- modules(sce)
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-    sampleLabel <- SummarizedExperiment::colData(sce)$sample_label
+    sampleLabel <- sampleLabel(sce)
     s <- as.integer(sampleLabel)
 
     ## Calculate counts one time up front
@@ -1274,6 +1251,50 @@ logLikelihoodcelda_CG <- function(counts,
 }
 
 
+.logLikelihoodcelda_CG <- function(sce, useAssay = "counts") {
+
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    sampleLabel <- sampleLabel(sce)
+    z <- clusters(sce)
+    y <- modules(sce)
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    delta = S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma = S4Vectors::metadata(sce)$celda_parameters$gamma
+
+    if (sum(z > K) > 0) {
+        stop("Assigned value of cell cluster greater than the total number of",
+            " cell clusters!")
+    }
+    if (sum(y > L) > 0) {
+        stop("Assigned value of feature module greater than the total number",
+            " of feature modules!")
+    }
+
+    sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
+    s <- as.integer(sampleLabel)
+    p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
+    final <- .cCGCalcLL(
+        K = K,
+        L = L,
+        mCPByS = p$mCPByS,
+        nTSByCP = p$nTSByCP,
+        nByG = p$nByG,
+        nByTS = p$nByTS,
+        nGByTS = p$nGByTS,
+        nS = p$nS,
+        nG = p$nG,
+        alpha = alpha,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+    )
+    return(final)
+}
+
+
 # Takes raw counts matrix and converts it to a series of matrices needed for
 # log likelihood calculation
 # @param counts Integer matrix. Rows represent features and columns represent
@@ -1320,26 +1341,6 @@ logLikelihoodcelda_CG <- function(counts,
 }
 
 
-#' @title Conditional probabilities for cells and features from a Celda_CG
-#'  model
-#' @description Calculates the conditional probability of each cell belonging
-#'  to each subpopulation given all other cell cluster assignments as well as
-#'  each feature belonging to each module given all other feature cluster
-#'  assignments in a `celda_CG()` result.
-#' @param celdaMod Celda object of class `celda_CG`.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param log Logical. If FALSE, then the normalized conditional probabilities
-#'  will be returned. If TRUE, then the unnormalized log probabilities will be
-#'  returned. Default FALSE.
-#' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell and feature
-#'  cluster probabilities.
-#' @seealso `celda_CG()` for clustering features and cells
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
 .clusterProbabilityCeldaCG <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
@@ -1403,46 +1404,13 @@ logLikelihoodcelda_CG <- function(counts,
 }
 
 
-#' @title Calculate the perplexity on new data with a celda_CG model
-#' @description Perplexity is a statistical measure of how well a probability
-#'  model can predict new data. Lower perplexity indicates a better model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class "celda_C", "celda_G" or "celda_CG".
-#' @param newCounts A new counts matrix used to calculate perplexity. If NULL,
-#'  perplexity will be calculated for the 'counts' matrix. Default NULL.
-#' @return Numeric. The perplexity for the provided count data and model.
-#' @seealso `celda_CG()` for clustering features and cells
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
-#' @importFrom matrixStats logSumExp
-#' @export
-setMethod(
-  "perplexity", signature(celdaMod = "celda_CG"),
-  function(counts, celdaMod, newCounts = NULL) {
-    if (!("celda_CG" %in% class(celdaMod))) {
-      stop("The celdaMod provided was not of class celda_CG.")
-    }
-
+.perplexityCelda_CG <- function(sce, useAssay) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    compareCountMatrix(counts, celdaMod)
 
-    if (is.null(newCounts)) {
-      newCounts <- counts
-    } else {
-      newCounts <- .processCounts(newCounts)
-    }
-    if (nrow(newCounts) != nrow(counts)) {
-      stop("newCounts should have the same number of rows as counts.")
-    }
-
-    factorized <- factorizeMatrix(
-      counts = counts,
-      celdaMod = celdaMod,
-      type = c("posterior", "counts")
-    )
+    factorized <- factorizeMatrix(sce = sce,
+        useAssay = useAssay,
+        type = c("posterior"))
 
     theta <- log(factorized$posterior$sample)
     phi <- factorized$posterior$cellPopulation
@@ -1460,8 +1428,7 @@ setMethod(
     # + sum(etaProb)
     perplexity <- exp(- (log.px / sum(newCounts)))
     return(perplexity)
-  }
-)
+}
 
 
 .reorderCeldaCG <- function(counts, res) {
@@ -2104,10 +2071,42 @@ setMethod(
         celdaCGMod@names$column
     SummarizedExperiment::colData(sce)["sample_label"] <-
         celdaCGMod@sampleLabel
-    SummarizedExperiment::colData(sce)["cell_cluster"] <-
+    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
         celdaCGMod@clusters$z
     SummarizedExperiment::rowData(sce)["feature_module"] <-
         celdaCGMod@clusters$y
+
+    return(sce)
+}
+
+.createSCEsimulateCellsCeldaCG <- function(simList, seed) {
+    sce <- SingleCellExperiment::SingleCellExperiment(
+        assays = list(counts = simList$counts))
+
+    # add metadata
+    S4Vectors::metadata(sce)[["celda_simulateCellscelda_CG"]] <- list(
+        model = "celda_CG",
+        sampleLevels = as.character(unique(simList$sampleLabel)),
+        cellClusterLevels = sort(unique(simList$z)),
+        featureModuleLevels = sort(unique(simList$y)),
+        S = simList$S,
+        CRange = simList$CRange,
+        NRange = simList$NRange,
+        G = simList$G,
+        K = simList$K,
+        L = simList$L,
+        alpha = simList$alpha,
+        beta = simList$beta,
+        gamma = simList$gamma,
+        delta = simList$delta,
+        seed = seed)
+
+    SummarizedExperiment::rowData(sce)["row_name"] <- rownames(simList$counts)
+    SummarizedExperiment::colData(sce)["column_name"] <-
+        colnames(simList$counts)
+    SummarizedExperiment::colData(sce)["sample_label"] <- simList$sampleLabel
+    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
+    SummarizedExperiment::rowData(sce)["celda_feature_module"] <- simList$y
 
     return(sce)
 }
