@@ -513,8 +513,8 @@ setMethod("countChecksum",
 #'  \code{sce} containing celda_C model result returned by \link{celda_C}.}
 #' @param nfeatures Integer. Maximum number of features to select for each
 #'  gene module. Default 25. \strong{Only used for \code{sce} containing
-#'  celda_CG or celda_G model results returned by \link{celda_C} or
-#'  \link{celda_CG}.}
+#'  celda_CG or celda_G model results returned by \link{celda_CG} or
+#'  \link{celda_G}.}
 #' @param ... Additional parameters passed to \link{plotHeatmap}.
 #' @examples
 #' data(sceCelda_CG)
@@ -537,32 +537,27 @@ setGeneric("celdaHeatmap",
 #' @rdname celdaHeatmap
 setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", featureIx = NULL, nfeatures = 25, ...) {
-
         if (celdaModel(sce) == "celda_C") {
-            counts <- SummarizedExperiment::assay(sce, i = useAssay)
-            norm <- normalizeCounts(counts,
-                normalize = "proportion",
-                transformationFun = sqrt)
-
-            if (is.null(featureIx)) {
-                return(plotHeatmap(norm,
-                    z = clusters(sce), ...))
-            }
-
-            return(plotHeatmap(norm[featureIx, ],
-                z = clusters(sce), ...))
-        } else if (celdaModel(sce) %in% c("celda_G", "celda_CG")) {
-
-            # fm <- factorizeMatrix(counts, celdaMod, type = "proportion")
-            # top <- celda::topRank(fm$proportions$module, n = nfeatures)
-            # ix <- unlist(top$index)
-            # norm <- normalizeCounts(counts,
-            #     normalize = "proportion",
-            #     transformationFun = sqrt)
-            # plotHeatmap(norm[ix, ],
-            #     z = clusters(celdaMod)$z,
-            #     y = clusters(celdaMod)$y[ix],
-            #     ...)
+            g <- .celdaHeatmapCelda_C(sce = sce,
+                useAssay = useAssay,
+                featureIx = featureIx,
+                ...)
+            return(g)
+        } else if (celdaModel(sce) == "celda_CG") {
+            g <- .celdaHeatmapCelda_CG(sce = sce,
+                useAssay = useAssay,
+                featureIx = featureIx,
+                ...)
+            return(g)
+        } else if (celdaModel(sce) == "celda_G") {
+            g <- .celdaHeatmapCelda_G(sce = sce,
+                useAssay = useAssay,
+                featureIx = featureIx,
+                ...)
+            return(g)
+        } else {
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
     })
 
@@ -594,16 +589,19 @@ setGeneric("logLikelihood",
 #' @export
 setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts") {
-        if (S4Vectors::metadata(sce)$celda_parameters$model == "celda_C") {
+        if (celdaModel(sce) == "celda_C") {
             ll <- .logLikelihoodcelda_C(sce = sce, useAssay = useAssay)
             return(ll)
-        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
-                "celda_CG") {
+        } else if (celdaModel(sce) == "celda_CG") {
             ll <- .logLikelihoodcelda_CG(sce = sce, useAssay = useAssay)
             return(ll)
+        } else if (celdaModel(sce) == "celda_G") {
+            ll <- .logLikelihoodcelda_G(sce = sce, useAssay = useAssay)
+            return(ll)
+        } else {
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
-
-        stop("metadata(sce)$celda_parameters$model must be 'celda_C'!")
     })
 
 
@@ -643,19 +641,17 @@ setGeneric("clusterProbability",
 setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", log = FALSE) {
 
-        if (S4Vectors::metadata(sce)$celda_parameters$model == "celda_C") {
+        if (celdaModel(sce) == "celda_C") {
             cp <- .clusterProbabilityCeldaC(sce = sce,
                 useAssay = useAssay,
                 log = log)
             return(cp)
-        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
-                "celda_CG") {
+        } else if (celdaModel(sce) == "celda_CG") {
             cp <- .clusterProbabilityCeldaCG(sce = sce,
                 useAssay = useAssay,
                 log = log)
             return(cp)
-        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
-                "celda_G") {
+        } else if (celdaModel(sce) == "celda_G") {
             cp <- .clusterProbabilityCeldaG(sce = sce,
                 useAssay = useAssay,
                 log = log)
@@ -693,16 +689,18 @@ setGeneric("perplexity",
 setMethod("perplexity", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts") {
 
-        if (S4Vectors::metadata(sce)$celda_parameters$model == "celda_C") {
+        if (celdaModel(sce) == "celda_C") {
             p <- .perplexityCelda_C(sce = sce, useAssay = useAssay)
             return(p)
-        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
-                "celda_CG") {
+        } else if (celdaModel(sce) == "celda_CG") {
             p <- .perplexityCelda_CG(sce = sce, useAssay = useAssay)
             return(p)
+        } else if (celdaModel(sce) == "celda_G") {
+            p <- .perplexityCelda_G(sce = sce, useAssay = useAssay)
+            return(p)
         } else {
-            stop("metadata(sce)$celda_parameters$model is not 'celda_C',",
-                " 'celda_G', or 'celda_CG'!")
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
     })
 
@@ -767,19 +765,20 @@ setMethod("factorizeMatrix", signature(sce = "SingleCellExperiment"),
         useAssay = "counts",
         type = c("counts", "proportion", "posterior")) {
 
-        if (S4Vectors::metadata(sce)$celda_parameters$model == "celda_C") {
+        if (celdaModel(sce) == "celda_C") {
             res <- .factorizeMatrixCelda_C(sce = sce, useAssay = useAssay,
                 type = type)
             return(res)
-        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
-                "celda_CG") {
+        } else if (celdaModel(sce) == "celda_CG") {
             res <- .factorizeMatrixCelda_CG(sce = sce, useAssay = useAssay,
                 type = type)
             return(res)
-        } else if (S4Vectors::metadata(sce)$celda_parameters$model ==
-                "celda_G") {
+        } else if (celdaModel(sce) == "celda_G") {
             res <- .factorizeMatrixCelda_G(sce = sce, useAssay = useAssay,
                 type = type)
+        } else {
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
     })
 

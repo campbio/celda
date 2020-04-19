@@ -1091,6 +1091,24 @@ setMethod("celda_C",
 }
 
 
+.celdaHeatmapCelda_C <- function(sce,
+    useAssay, featureIx, ...) {
+
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    norm <- normalizeCounts(counts,
+        normalize = "proportion",
+        transformationFun = sqrt)
+
+    if (is.null(featureIx)) {
+        return(plotHeatmap(norm,
+            z = clusters(sce), ...))
+    }
+
+    return(plotHeatmap(norm[featureIx, ],
+        z = clusters(sce), ...))
+}
+
+
 #' @title t-Distributed Stochastic Neighbor Embedding (t-SNE) dimension
 #'  reduction for celda \code{SCE} object
 #' @description Embeds cells in two dimensions using \link[Rtsne]{Rtsne} based

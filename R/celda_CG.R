@@ -1469,41 +1469,22 @@ logLikelihoodcelda_CG <- function(counts,
 }
 
 
-#' @title Heatmap for celda_CG
-#' @description Renders an expression heatmap to visualize `celda_CG()` results.
-#'  The top `nfeatures` for each module will be included in the heatmap.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate.
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_CG`.
-#' @param nfeatures Integer. Maximum number of features to select for each
-#'  module. Default 25.
-#' @param ... Additional parameters.
-#' @seealso `celda_CG()` for clustering features and cells and `celdaTsne()`
-#'  for generating 2-dimensional coordinates.
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaHeatmap(celdaCGSim$counts, celdaCGMod)
-#' @return A list containing dendrograms and the heatmap grob
-#' @export
-setMethod(
-  "celdaHeatmap", signature(celdaMod = "celda_CG"),
-  function(counts, celdaMod, nfeatures = 25, ...) {
-    fm <- factorizeMatrix(counts, celdaMod, type = "proportion")
+.celdaHeatmapCelda_CG <- function(sce, useAssay, nfeatures, ...) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    fm <- factorizeMatrix(sce = sce, useAssay = useAssay, type = "proportion")
     top <- celda::topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
     norm <- normalizeCounts(counts,
-      normalize = "proportion",
-      transformationFun = sqrt
+        normalize = "proportion",
+        transformationFun = sqrt
     )
     plt <- plotHeatmap(norm[ix, ],
-      z = clusters(celdaMod)$z,
-      y = clusters(celdaMod)$y[ix],
-      ...
+        z = clusters(celdaMod)$z,
+        y = clusters(celdaMod)$y[ix],
+        ...
     )
     invisible(plt)
-  }
-)
+}
 
 
 #' @title tSNE for celda_CG
