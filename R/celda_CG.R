@@ -1164,94 +1164,7 @@ setMethod("celda_CG",
 }
 
 
-#' @title Calculate Celda_CG log likelihood
-#' @description Calculates the log likelihood for user-provided cell population
-#'  and feature module clusters using the `celda_CG()` model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
-#' @param sampleLabel Vector or factor. Denotes the sample label for each cell
-#'  (column) in the count matrix.
-#' @param z Numeric vector. Denotes cell population labels.
-#' @param y Numeric vector. Denotes feature module labels.
-#' @param K Integer. Number of cell populations.
-#' @param L Integer. Number of feature modules.
-#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
-#'  to each cell population in each sample. Default 1.
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
-#'  each feature module in each cell population. Default 1.
-#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to
-#'  each feature in each module. Default 1.
-#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
-#'  the number of features in each module. Default 1.
-#' @return The log likelihood for the given cluster assignments
-#' @seealso `celda_CG()` for clustering features and cells
-#' @examples
-#' data(celdaCGSim)
-#' loglik <- logLikelihoodcelda_CG(celdaCGSim$counts,
-#'   sampleLabel = celdaCGSim$sampleLabel,
-#'   z = celdaCGSim$z,
-#'   y = celdaCGSim$y,
-#'   K = celdaCGSim$K,
-#'   L = celdaCGSim$L,
-#'   alpha = celdaCGSim$alpha,
-#'   beta = celdaCGSim$beta,
-#'   gamma = celdaCGSim$gamma,
-#'   delta = celdaCGSim$delta
-#' )
-#'
-#' loglik <- logLikelihood(celdaCGSim$counts,
-#'   model = "celda_CG",
-#'   sampleLabel = celdaCGSim$sampleLabel,
-#'   z = celdaCGSim$z,
-#'   y = celdaCGSim$y,
-#'   K = celdaCGSim$K,
-#'   L = celdaCGSim$L,
-#'   alpha = celdaCGSim$alpha,
-#'   beta = celdaCGSim$beta,
-#'   gamma = celdaCGSim$gamma,
-#'   delta = celdaCGSim$delta
-#' )
-#' @export
-logLikelihoodcelda_CG <- function(counts,
-                                  sampleLabel,
-                                  z,
-                                  y,
-                                  K,
-                                  L,
-                                  alpha,
-                                  beta,
-                                  delta,
-                                  gamma) {
-  if (sum(z > K) > 0) {
-    stop("An entry in z contains a value greater than the provided K.")
-  }
-  if (sum(y > L) > 0) {
-    stop("An entry in y contains a value greater than the provided L.")
-  }
-
-  sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
-  s <- as.integer(sampleLabel)
-  p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
-  final <- .cCGCalcLL(
-    K = K,
-    L = L,
-    mCPByS = p$mCPByS,
-    nTSByCP = p$nTSByCP,
-    nByG = p$nByG,
-    nByTS = p$nByTS,
-    nGByTS = p$nGByTS,
-    nS = p$nS,
-    nG = p$nG,
-    alpha = alpha,
-    beta = beta,
-    delta = delta,
-    gamma = gamma
-  )
-  return(final)
-}
-
-
-.logLikelihoodcelda_CG <- function(sce, useAssay = "counts") {
+.logLikelihoodcelda_CG <- function(sce, useAssay) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     sampleLabel <- sampleLabel(sce)
@@ -1487,109 +1400,31 @@ logLikelihoodcelda_CG <- function(counts,
 }
 
 
-#' @title tSNE for celda_CG
-#' @description Embeds cells in two dimensions using tSNE based on a `celda_CG`
-#'  model. tSNE is run on module probabilities to reduce the number of features
-#'  instead of using PCA. Module probabilities square-root trasformed before
-#'  applying tSNE.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_CG`.
-#' @param maxCells Integer. Maximum number of cells to plot. Cells will be
-#'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. If NULL, no subsampling will be performed.
-#'  Default NULL.
-#' @param minClusterSize Integer. Do not subsample cell clusters below this
-#'  threshold. Default 100.
-#' @param initialDims Integer. PCA will be used to reduce the dimentionality
-#'  of the dataset. The top 'initialDims' principal components will be used
-#'  for tSNE. Default 20.
-#' @param modules Integer vector. Determines which features modules to use for
-#'  tSNE. If NULL, all modules will be used. Default NULL.
-#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
-#' @param maxIter Integer. Maximum number of iterations in tSNE generation.
-#'  Default 2500.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @seealso `celda_CG()` for clustering features and cells  and `celdaHeatmap()`
-#'  for displaying expression
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
-#' @return A two column matrix of t-SNE coordinates
-#' @export
-setMethod(
-  "celdaTsne", signature(celdaMod = "celda_CG"),
-  function(counts,
-           celdaMod,
-           maxCells = NULL,
-           minClusterSize = 100,
-           initialDims = 20,
-           modules = NULL,
-           perplexity = 20,
-           maxIter = 2500,
-           seed = 12345) {
-    if (is.null(seed)) {
-      res <- .celdaTsneCG(
-        counts = counts,
-        celdaMod = celdaMod,
-        maxCells = maxCells,
-        minClusterSize = minClusterSize,
-        initialDims = initialDims,
-        modules = modules,
-        perplexity = perplexity,
-        maxIter = maxIter
-      )
-    } else {
-      with_seed(
-        seed,
-        res <- .celdaTsneCG(
-          counts = counts,
-          celdaMod = celdaMod,
-          maxCells = maxCells,
-          minClusterSize = minClusterSize,
-          initialDims = initialDims,
-          modules = modules,
-          perplexity = perplexity,
-          maxIter = maxIter
-        )
-      )
-    }
-
-    return(res)
-  }
-)
-
-
-.celdaTsneCG <- function(counts,
-                         celdaMod,
-                         maxCells = NULL,
-                         minClusterSize = 100,
-                         initialDims = 20,
-                         modules = NULL,
-                         perplexity = 20,
-                         maxIter = 2500) {
-  preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
-    counts,
-    celdaMod,
+.celdaTsneCG <- function(sce,
+    useAssay,
     maxCells,
     minClusterSize,
-    modules
-  )
-  norm <- preparedCountInfo$norm
-  res <- .calculateTsne(norm,
-    doPca = FALSE,
-    perplexity = perplexity,
-    maxIter = maxIter,
-    initialDims = initialDims
-  )
-  final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-  final[preparedCountInfo$cellIx, ] <- res
-  rownames(final) <- colnames(counts)
-  colnames(final) <- c("tSNE_1", "tSNE_2")
-  return(final)
+    initialDims,
+    modules,
+    perplexity,
+    maxIter) {
+
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce = sce,
+        useAssay = useAssay,
+        maxCells = maxCells,
+        minClusterSize = minClusterSize,
+        modules = modules)
+    norm <- preparedCountInfo$norm
+    res <- .calculateTsne(norm,
+        doPca = FALSE,
+        perplexity = perplexity,
+        maxIter = maxIter,
+        initialDims = initialDims)
+    final <- matrix(NA, nrow = ncol(sce), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- res
+    rownames(final) <- colnames(sce)
+    colnames(final) <- c("tSNE1", "tSNE2")
+    return(final)
 }
 
 
@@ -1720,126 +1555,94 @@ setMethod(
 }
 
 
-.prepareCountsForDimReductionCeldaCG <- function(counts,
-                                                 celdaMod,
-                                                 maxCells = NULL,
-                                                 minClusterSize = 100,
-                                                 modules = NULL) {
+.prepareCountsForDimReductionCeldaCG <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    modules) {
 
-  ## Checking if maxCells and minClusterSize will work
-  if (!is.null(maxCells)) {
-    if ((maxCells < ncol(counts)) &
-      (maxCells / minClusterSize < params(celdaMod)$K)) {
-      stop(
-        "Cannot distribute ",
-        maxCells,
-        " cells among ",
-        params(celdaMod)$K,
-        " clusters while maintaining a minumum of ",
-        minClusterSize,
-        " cells per cluster. Try increasing 'maxCells' or",
-        " decreasing 'minClusterSize'."
-      )
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    ## Checking if maxCells and minClusterSize will work
+    if (!is.null(maxCells)) {
+        if ((maxCells < ncol(counts)) &
+                (maxCells / minClusterSize <
+                        S4Vectors::metadata(sce)$celda_parameters$K)) {
+            stop("Cannot distribute ",
+                maxCells,
+                " cells among ",
+                S4Vectors::metadata(sce)$celda_parameters$K,
+                " clusters while maintaining a minumum of ",
+                minClusterSize,
+                " cells per cluster. Try increasing 'maxCells' or",
+                " decreasing 'minClusterSize'.")
+        }
+    } else {
+        maxCells <- ncol(counts)
     }
-  } else {
-    maxCells <- ncol(counts)
-  }
 
-  fm <- factorizeMatrix(
-    counts = counts,
-    celdaMod = celdaMod,
-    type = "counts"
-  )
-  modulesToUse <- seq(nrow(fm$counts$cell))
-  if (!is.null(modules)) {
-    if (!all(modules %in% modulesToUse)) {
-      stop(
-        "'modules' must be a vector of numbers between 1 and ",
-        modulesToUse,
-        "."
-      )
+    fm <- factorizeMatrix(sce,
+        useAssay,
+        type = "counts")
+    modulesToUse <- seq(nrow(fm$counts$cell))
+    if (!is.null(modules)) {
+        if (!all(modules %in% modulesToUse)) {
+            stop("'modules' must be a vector of numbers between 1 and ",
+                modulesToUse,
+                ".")
+        }
+        modulesToUse <- modules
     }
-    modulesToUse <- modules
-  }
 
-  ## Select a subset of cells to sample if greater than 'maxCells'
-  totalCellsToRemove <- ncol(counts) - maxCells
-  zInclude <- rep(TRUE, ncol(counts))
+    ## Select a subset of cells to sample if greater than 'maxCells'
+    totalCellsToRemove <- ncol(counts) - maxCells
+    zInclude <- rep(TRUE, ncol(counts))
 
-  if (totalCellsToRemove > 0) {
-    zTa <- tabulate(clusters(celdaMod)$z, params(celdaMod)$K)
+    if (totalCellsToRemove > 0) {
+        zTa <- tabulate(clusters(sce),
+            S4Vectors::metadata(sce)$celda_parameters$K)
 
-    ## Number of cells that can be sampled from each cluster without
-    ## going below the minimum threshold
-    clusterCellsToSample <- zTa - minClusterSize
-    clusterCellsToSample[clusterCellsToSample < 0] <- 0
+        ## Number of cells that can be sampled from each cluster without
+        ## going below the minimum threshold
+        clusterCellsToSample <- zTa - minClusterSize
+        clusterCellsToSample[clusterCellsToSample < 0] <- 0
 
-    ## Number of cells to sample after exluding smaller clusters
-    ## Rounding can cause number to be off by a few, so ceiling is used
-    ## with a second round of subtraction
-    clusterNToSample <- ceiling((clusterCellsToSample /
-      sum(clusterCellsToSample)) * totalCellsToRemove)
-    diff <- sum(clusterNToSample) - totalCellsToRemove
-    clusterNToSample[which.max(clusterNToSample)] <-
-      clusterNToSample[which.max(clusterNToSample)] - diff
+        ## Number of cells to sample after exluding smaller clusters
+        ## Rounding can cause number to be off by a few, so ceiling is used
+        ## with a second round of subtraction
+        clusterNToSample <- ceiling((clusterCellsToSample /
+                sum(clusterCellsToSample)) * totalCellsToRemove)
+        diff <- sum(clusterNToSample) - totalCellsToRemove
+        clusterNToSample[which.max(clusterNToSample)] <-
+            clusterNToSample[which.max(clusterNToSample)] - diff
 
-    ## Perform sampling for each cluster
-    for (i in which(clusterNToSample > 0)) {
-      zInclude[sample(
-        which(clusters(celdaMod)$z == i),
-        clusterNToSample[i]
-      )] <- FALSE
+        ## Perform sampling for each cluster
+        for (i in which(clusterNToSample > 0)) {
+            zInclude[sample(
+                which(clusters(sce) == i),
+                clusterNToSample[i]
+            )] <- FALSE
+        }
     }
-  }
-  cellIx <- which(zInclude)
+    cellIx <- which(zInclude)
 
-  norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
-    normalize = "proportion",
-    transformationFun = sqrt
-  ))
-  return(list(norm = norm, cellIx = cellIx))
+    norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
+        normalize = "proportion",
+        transformationFun = sqrt
+    ))
+    return(list(norm = norm, cellIx = cellIx))
 }
 
 
-#' @title Probability map for a celda_CG model
-#' @description Renders probability and relative expression heatmaps to
-#'  visualize the relationship between features and cell populations or cell
-#'  populations and samples.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_CG`.
-#' @param level Character. One of 'cellPopulation' or 'sample'.
-#'  'cellPopulation' will display the absolute probabilities and relative
-#'  normalized expression of each module in each cell population. 'sample'
-#'  will display the absolute probabilities and relative normalized abundance
-#'  of each cell population in each sample. Default 'cellPopulation'.
-#' @param ... Additional parameters.
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
-#' @return A grob containing the specified plots
-#' @importFrom gridExtra grid.arrange
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom grDevices colorRampPalette
-#' @seealso `celda_CG()` for clustering features and cells
-#' @export
-setMethod(
-  "celdaProbabilityMap", signature(celdaMod = "celda_CG"),
-  function(counts, celdaMod, level = c("cellPopulation", "sample"), ...) {
+.celdaProbabilityMapCG <- function(sce, useAssay, level) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    compareCountMatrix(counts, celdaMod)
 
-    level <- match.arg(level)
-    factorized <- factorizeMatrix(celdaMod = celdaMod, counts = counts)
-    zInclude <- which(tabulate(
-      clusters(celdaMod)$z,
-      params(celdaMod)$K
-    ) > 0)
-    yInclude <- which(tabulate(
-      clusters(celdaMod)$y,
-      params(celdaMod)$L
-    ) > 0)
+    factorized <- factorizeMatrix(sce, useAssay)
+    zInclude <- which(tabulate(clusters(sce),
+        S4Vectors::metadata(sce)$celda_parameters$K) > 0)
+    yInclude <- which(tabulate(modules(celdaMod),
+        S4Vectors::metadata(sce)$celda_parameters$L) > 0)
 
     if (level == "cellPopulation") {
       pop <- factorized$proportions$cellPopulation[yInclude,

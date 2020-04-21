@@ -563,8 +563,9 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
 
 
 #' @title Calculate the Log-likelihood of celda model
-#' @description Calculate the log-likelihood for a user-provided cluster
-#'  assignment on the count matrix, per the desired celda model.
+#' @description Calculate the log-likelihood for user-provided cell population
+#'  and feature module cluster
+#'  assignments on the count matrix, per the desired celda model.
 #' @param sce A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
@@ -742,7 +743,7 @@ simulateCells <- function(model, ...) {
 #'  in each factorized matrix by the total counts in each column. "posterior"
 #'  returns the posterior estimates which include the addition of the Dirichlet
 #'  concentration parameter (essentially as a pseudocount). Default
-#'  \code{c("counts", "proportion", "posterior")}.
+#'  \code{"counts"}.
 #' @examples
 #' data(sceCelda_CG)
 #' factorizedMatrices <- factorizeMatrix(sceCelda_CG, type = "posterior")
@@ -909,3 +910,346 @@ setGeneric("featureModuleLookup",
     standardGeneric("featureModuleLookup")
   }
 )
+
+
+#' @title t-Distributed Stochastic Neighbor Embedding (t-SNE) dimension
+#'  reduction for celda \code{sce} object
+#' @description Embeds cells in two dimensions using \link[Rtsne]{Rtsne} based
+#'  on a celda model. For celda_C \code{sce} objects, PCA on the normalized
+#'  counts is used to reduce the number of features before applying t-SNE. For
+#'  celda_CG \code{sce} objects, tSNE is run on module probabilities to reduce
+#'  the number of features instead of using PCA. Module probabilities are
+#'  square-root transformed before applying tSNE.
+#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
+#'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
+#' @param maxCells Integer. Maximum number of cells to plot. Cells will be
+#'  randomly subsampled if \code{ncol(counts) > maxCells}. Larger numbers of
+#'  cells requires more memory. If \code{NULL}, no subsampling will be
+#'  performed. Default \code{NULL}.
+#' @param minClusterSize Integer. Do not subsample cell clusters below this
+#'  threshold. Default 100.
+#' @param initialDims Integer. PCA will be used to reduce the dimentionality
+#'  of the dataset. The top 'initialDims' principal components will be used
+#'  for tSNE. Default 20.
+#' @param modules Integer vector. Determines which feature modules to use for
+#'  tSNE. If \code{NULL}, all modules will be used. Default \code{NULL}.
+#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
+#' @param maxIter Integer. Maximum number of iterations in tSNE generation.
+#'  Default 2500.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
+#' @examples
+#' data(sceCelda_CG)
+#' tsneRes <- celdaTsne(sceCelda_CG)
+#' @return \code{sce} with t-SNE coordinates
+#'  (columns "celdatSNE1" & "celdatSNE2") added to
+#'  \code{\link[SummarizedExperiment]{colData}(sce)}.
+#' @export
+setGeneric("celdaTsne",
+    function(sce, ...) {
+        standardGeneric("celdaTsne")
+    })
+
+
+#' @rdname celdaTsne
+#' @export
+setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
+    function(sce,
+        useAssay = "counts",
+        maxCells = NULL,
+        minClusterSize = 100,
+        initialDims = 20,
+        modules = NULL,
+        perplexity = 20,
+        maxIter = 2500,
+        seed = 12345) {
+
+        if (is.null(seed)) {
+            res <- .celdaTsne(sce = sce,
+                useAssay = useAssay,
+                maxCells = maxCells,
+                minClusterSize = minClusterSize,
+                initialDims = initialDims,
+                modules = modules,
+                perplexity = perplexity,
+                maxIter = maxIter)
+        } else {
+            with_seed(seed,
+                res <- .celdaTsne(sce = sce,
+                    useAssay = useAssay,
+                    maxCells = maxCells,
+                    minClusterSize = minClusterSize,
+                    initialDims = initialDims,
+                    modules = modules,
+                    perplexity = perplexity,
+                    maxIter = maxIter))
+        }
+
+        SummarizedExperiment::colData(sce)["celdatSNE1"] <- res$tSNE1
+        SummarizedExperiment::colData(sce)["celdatSNE2"] <- res$tSNE2
+        return(sce)
+    })
+
+
+.celdaTsne <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    initialDims,
+    modules,
+    perplexity,
+    maxIter) {
+
+    celdaMod <- celdaModel(sce)
+
+    if (celdaMod == "celda_C") {
+        res <- .celdaTsneC(sce = sce,
+            useAssay = useAssay,
+            maxCells = maxCells,
+            minClusterSize = minClusterSize,
+            initialDims = initialDims,
+            perplexity = perplexity,
+            maxIter = maxIter)
+    } else if (celdaMod == "celda_CG") {
+        res <- .celdaTsneCG(sce = sce,
+            useAssay = useAssay,
+            maxCells = maxCells,
+            minClusterSize = minClusterSize,
+            initialDims = initialDims,
+            modules = modules,
+            perplexity = perplexity,
+            maxIter = maxIter)
+    } else if (celdaMod == "celda_G") {
+
+
+
+    } else {
+        stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+            " one of 'celda_C', 'celda_G', or 'celda_CG'")
+    }
+    return(res)
+
+}
+
+
+.celdaTsneC <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    initialDims,
+    perplexity,
+    maxIter) {
+
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce,
+        useAssay,
+        maxCells,
+        minClusterSize)
+
+    res <- .calculateTsne(preparedCountInfo$norm,
+        perplexity = perplexity,
+        maxIter = maxIter,
+        doPca = TRUE,
+        initialDims = initialDims)
+
+    final <- matrix(NA, nrow = ncol(sce), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- res
+    rownames(final) <- colnames(sce)
+    colnames(final) <- c("tSNE1", "tSNE2")
+    return(final)
+}
+
+
+#' @title Uniform Manifold Approximation and Projection (UMAP) dimension
+#'  reduction for celda \code{SCE} object
+#' @description Embeds cells in two dimensions using \link[uwot]{umap} based on
+#'  a celda model. PCA on the normalized counts is used to reduce the number of
+#'  features before applying umap.
+#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
+#'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
+#' @param maxCells Integer. Maximum number of cells to plot. Cells will be
+#'  randomly subsampled if \code{ncol(sce) > maxCells}. Larger numbers of cells
+#'  requires more memory. If NULL, no subsampling will be performed.
+#'  Default NULL.
+#' @param minClusterSize Integer. Do not subsample cell clusters below this
+#'  threshold. Default 100.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
+#' @param nNeighbors The size of local neighborhood used for
+#'   manifold approximation. Larger values result in more global
+#'   views of the manifold, while smaller values result in more
+#'   local data being preserved. Default 30.
+#'   See \link[uwot]{umap} for more information.
+#' @param minDist The effective minimum distance between embedded points.
+#'   Smaller values will result in a more clustered/clumped
+#'   embedding where nearby points on the manifold are drawn
+#'   closer together, while larger values will result on a more
+#'   even dispersal of points. Default 0.2.
+#'   See \link[uwot]{umap} for more information.
+#' @param spread The effective scale of embedded points. In combination with
+#'  \code{min_dist}, this determines how clustered/clumped the
+#'   embedded points are. Default 1. See \link[uwot]{umap} for more information.
+#' @param pca Logical. Whether to perform
+#' dimensionality reduction with PCA before UMAP.
+#' @param initialDims Integer. Number of dimensions from PCA to use as
+#' input in UMAP. Default 50.
+#' @param cores Number of threads to use. Default 1.
+#' @param ... Additional parameters to pass to \link[uwot]{umap}.
+#' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
+#'  expression.
+#' @examples
+#' data(sceCelda_CG)
+#' umapRes <- celdaUmap(sceCelda_CG)
+#' @return \code{sce} with UMAP coordinates
+#'  (columns "celdaUMAP1" & "celdaUMAP2") added to
+#'  \code{\link[SummarizedExperiment]{colData}(sce)}.
+#' @export
+setGeneric("celdaUmap",
+    function(sce, ...) {
+        standardGeneric("celdaUmap")
+    })
+
+
+#' @rdname celdaUmap
+#' @export
+setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
+    function(sce,
+        useAssay = "counts",
+        maxCells = NULL,
+        minClusterSize = 100,
+        seed = 12345,
+        nNeighbors = 30,
+        minDist = 0.75,
+        spread = 1,
+        pca = TRUE,
+        initialDims = 50,
+        cores = 1,
+        ...) {
+
+        if (is.null(seed)) {
+            res <- .celdaUmapC(sce = sce,
+                useAssay = useAssay,
+                maxCells = maxCells,
+                minClusterSize = minClusterSize,
+                nNeighbors = nNeighbors,
+                minDist = minDist,
+                spread = spread,
+                pca = pca,
+                initialDims = initialDims,
+                cores = cores,
+                ...)
+        } else {
+            with_seed(seed,
+                res <- .celdaUmapC(sce = sce,
+                    useAssay = useAssay,
+                    maxCells = maxCells,
+                    minClusterSize = minClusterSize,
+                    nNeighbors = nNeighbors,
+                    minDist = minDist,
+                    spread = spread,
+                    pca = pca,
+                    initialDims = initialDims,
+                    cores = cores,
+                    ...))
+        }
+
+        SummarizedExperiment::colData(sce)["celdaUMAP1"] <- res$UMAP1
+        SummarizedExperiment::colData(sce)["celdaUMAP2"] <- res$UMAP2
+        return(sce)
+    })
+
+
+.celdaUmapC <- function(sce,
+    useAssay,
+    maxCells = NULL,
+    minClusterSize = 100,
+    nNeighbors = 30,
+    minDist = 0.2,
+    spread = 1,
+    pca = TRUE,
+    initialDims = 50,
+    cores = 1,
+    ...) {
+
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce,
+        useAssay,
+        maxCells,
+        minClusterSize)
+    umapRes <- .calculateUmap(preparedCountInfo$norm,
+        nNeighbors = nNeighbors,
+        minDist = minDist,
+        spread = spread,
+        pca = pca,
+        initialDims = initialDims,
+        cores = cores,
+        ...
+    )
+
+    final <- matrix(NA, nrow = ncol(sce), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- umapRes
+    rownames(final) <- colnames(sce)
+    colnames(final) <- c("UMAP1", "UMAP2")
+    return(final)
+}
+
+
+#' @title Probability map for a celda model
+#' @description Renders probability and relative expression heatmaps to
+#'  visualize the relationship between features and cell populations (or cell
+#'  populations and samples).
+#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
+#'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
+#' @param level Character. One of "cellPopulation" or "Sample".
+#'  "cellPopulation" will display the absolute probabilities and relative
+#'  normalized expression of each module in each cell population.
+#'  \strong{\code{level = "cellPopulation"} only works for celda_CG \code{sce}
+#'  objects}. "sample" will display the absolute probabilities and relative
+#'  normalized abundance of each cell population in each sample. Default
+#'  "cellPopulation".
+#' @param ... Additional parameters.
+#' @seealso \link{celda_C} for clustering cells. \link{celda_CG} for
+#'  clustering features and cells
+#' @examples
+#' data(sceCelda_CG)
+#' celdaProbabilityMap(sceCelda_CG)
+#' @return A grob containing the specified plots
+#' @export
+setGeneric("celdaProbabilityMap",
+    function(sce, ...) {
+        standardGeneric("celdaProbabilityMap")
+    })
+
+
+#' @rdname celdaProbabilityMap
+#' @importFrom gridExtra grid.arrange
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom grDevices colorRampPalette
+#' @export
+setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
+    function(sce, useAssay = "counts", level = c("cellPopulation", "sample")) {
+        level <- match.arg(level)
+        if (celdaModel(sce) == "celda_C") {
+            if (level == "cellPopulation") {
+                warning("'level' has been set to 'sample'")
+            }
+            pm <- .celdaProbabilityMapC(sce = sce, useAssay = useAssay,
+                level = "sample")
+        } else if (celdaModel(sce) == "celda_CG") {
+            pm <- .celdaProbabilityMapCG(sce = sce, useAssay = useAssay,
+                level = level)
+        } else if (celdaModel(sce) == "celda_G") {
+            pm <- .celdaProbabilityMapG(sce = sce, useAssay = useAssay,
+                level = level)
+        } else {
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'")
+        }
+        return(pm)
+    })
