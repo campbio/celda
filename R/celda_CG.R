@@ -1400,158 +1400,37 @@ setMethod("celda_CG",
 }
 
 
-.celdaTsneCG <- function(sce,
-    useAssay,
-    maxCells,
-    minClusterSize,
-    initialDims,
-    modules,
-    perplexity,
-    maxIter) {
+.celdaUmapCG <- function(counts,
+    celdaMod,
+    maxCells = NULL,
+    minClusterSize = 100,
+    modules = NULL,
+    nNeighbors = nNeighbors,
+    minDist = minDist,
+    spread = spread,
+    cores = cores,
+    ...) {
 
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce = sce,
-        useAssay = useAssay,
-        maxCells = maxCells,
-        minClusterSize = minClusterSize,
-        modules = modules)
-    norm <- preparedCountInfo$norm
-    res <- .calculateTsne(norm,
-        doPca = FALSE,
-        perplexity = perplexity,
-        maxIter = maxIter,
-        initialDims = initialDims)
-    final <- matrix(NA, nrow = ncol(sce), ncol = 2)
-    final[preparedCountInfo$cellIx, ] <- res
-    rownames(final) <- colnames(sce)
-    colnames(final) <- c("tSNE1", "tSNE2")
-    return(final)
-}
-
-
-#' @title umap for celda_CG
-#' @description Embeds cells in two dimensions using umap based on a `celda_CG`
-#'  model. umap is run on module probabilities to reduce the number of features
-#'  instead of using PCA. Module probabilities square-root trasformed before
-#'  applying tSNE.
-#'
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_CG`.
-#' @param maxCells Integer. Maximum number of cells to plot. Cells will be
-#'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. If NULL, no subsampling will be performed.
-#'  Default NULL.
-#' @param minClusterSize Integer. Do not subsample cell clusters below this
-#'  threshold. Default 100.
-#' @param modules Integer vector. Determines which features modules to use for
-#'  UMAP. If NULL, all modules will be used. Default NULL.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @param nNeighbors The size of local neighborhood used for
-#'   manifold approximation. Larger values result in more global
-#'   views of the manifold, while smaller values result in more
-#'   local data being preserved. Default 30.
-#'   See `?uwot::umap` for more information.
-#' @param minDist The effective minimum distance between embedded points.
-#'   Smaller values will result in a more clustered/clumped
-#'   embedding where nearby points on the manifold are drawn
-#'   closer together, while larger values will result on a more
-#'   even dispersal of points. Default 0.2.
-#'   See `?uwot::umap` for more information.
-#' @param spread The effective scale of embedded points. In combination with
-#'   ‘min_dist’, this determines how clustered/clumped the
-#'   embedded points are. Default 1.
-#'   See `?uwot::umap` for more information.
-#' @param cores Number of threads to use. Default 1.
-#' @param ... Other parameters to pass to `uwot::umap`.
-#' @seealso `celda_CG()` for clustering features and cells and `celdaHeatmap()`
-#'  for displaying expression.
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' umapRes <- celdaUmap(celdaCGSim$counts, celdaCGMod)
-#' @return A two column matrix of umap coordinates
-#' @export
-setMethod(
-  "celdaUmap",
-  signature(celdaMod = "celda_CG"), function(counts,
-                                             celdaMod,
-                                             maxCells = NULL,
-                                             minClusterSize = 100,
-                                             modules = NULL,
-                                             seed = 12345,
-                                             nNeighbors = 30,
-                                             minDist = 0.75,
-                                             spread = 1,
-                                             cores = 1,
-                                             ...) {
-    if (is.null(seed)) {
-      res <- .celdaUmapCG(
-        counts = counts,
-        celdaMod = celdaMod,
-        maxCells = maxCells,
-        minClusterSize = minClusterSize,
-        modules = modules,
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
+        counts,
+        celdaMod,
+        maxCells,
+        minClusterSize,
+        modules
+    )
+    umapRes <- .calculateUmap(preparedCountInfo$norm,
         nNeighbors = nNeighbors,
         minDist = minDist,
         spread = spread,
         cores = cores,
         ...
-      )
-    } else {
-      with_seed(
-        seed,
-        res <- .celdaUmapCG(
-          counts = counts,
-          celdaMod = celdaMod,
-          maxCells = maxCells,
-          minClusterSize = minClusterSize,
-          modules = modules,
-          nNeighbors = nNeighbors,
-          minDist = minDist,
-          spread = spread,
-          cores = cores,
-          ...
-        )
-      )
-    }
+    )
 
-    return(res)
-  }
-)
-
-
-.celdaUmapCG <- function(counts,
-                         celdaMod,
-                         maxCells = NULL,
-                         minClusterSize = 100,
-                         modules = NULL,
-                         nNeighbors = nNeighbors,
-                         minDist = minDist,
-                         spread = spread,
-                         cores = cores,
-                         ...) {
-  preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
-    counts,
-    celdaMod,
-    maxCells,
-    minClusterSize,
-    modules
-  )
-  umapRes <- .calculateUmap(preparedCountInfo$norm,
-    nNeighbors = nNeighbors,
-    minDist = minDist,
-    spread = spread,
-    cores = cores,
-    ...
-  )
-
-  final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-  final[preparedCountInfo$cellIx, ] <- umapRes
-  rownames(final) <- colnames(counts)
-  colnames(final) <- c("UMAP_1", "UMAP_2")
-  return(final)
+    final <- matrix(NA, nrow = ncol(counts), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- umapRes
+    rownames(final) <- colnames(counts)
+    colnames(final) <- c("UMAP_1", "UMAP_2")
+    return(final)
 }
 
 
@@ -1742,60 +1621,6 @@ setMethod(
 )
 
 
-#' @title Lookup the module of a feature
-#' @description Finds the module assignments of given features in a `celda_G()`
-#'  model
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Model of class `celda_CG`.
-#' @param feature Character vector. The module assignemnts will be found for
-#'  feature names in this vector.
-#' @param exactMatch Logical. Whether an exact match or a partial match using
-#'  `grep()` is used to look up the feature in the rownames of the counts
-#'  matrix. Default TRUE.
-#' @return List. Each element contains the module of the provided feature.
-#' @seealso `celda_CG()` for clustering features and cells
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' module <- featureModuleLookup(
-#'   celdaCGSim$counts,
-#'   celdaCGMod,
-#'   c("Gene_1", "Gene_XXX")
-#' )
-#' @export
-setMethod(
-  "featureModuleLookup", signature(celdaMod = "celda_CG"),
-  function(counts, celdaMod, feature, exactMatch = TRUE) {
-    list <- list()
-    if (!isTRUE(exactMatch)) {
-      featureGrep <- c()
-      for (x in seq(length(feature))) {
-        featureGrep <- c(featureGrep, rownames(counts)[grep(
-          feature[x],
-          rownames(counts)
-        )])
-      }
-      feature <- featureGrep
-    }
-    for (x in seq(length(feature))) {
-      if (feature[x] %in% rownames(counts)) {
-        list[x] <- clusters(celdaMod)$y[which(rownames(counts) ==
-          feature[x])]
-      } else {
-        list[x] <- paste0(
-          "No feature was identified matching '",
-          feature[x],
-          "'."
-        )
-      }
-    }
-    names(list) <- feature
-    return(list)
-  }
-)
-
-
 .createSCEceldaCG <- function(celdaCGMod,
     sce,
     xClass,
@@ -1862,6 +1687,7 @@ setMethod(
 
     return(sce)
 }
+
 
 .createSCEsimulateCellsCeldaCG <- function(simList, seed) {
     sce <- SingleCellExperiment::SingleCellExperiment(

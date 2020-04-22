@@ -769,11 +769,9 @@ setMethod("factorizeMatrix", signature(sce = "SingleCellExperiment"),
         if (celdaModel(sce) == "celda_C") {
             res <- .factorizeMatrixCelda_C(sce = sce, useAssay = useAssay,
                 type = type)
-            return(res)
         } else if (celdaModel(sce) == "celda_CG") {
             res <- .factorizeMatrixCelda_CG(sce = sce, useAssay = useAssay,
                 type = type)
-            return(res)
         } else if (celdaModel(sce) == "celda_G") {
             res <- .factorizeMatrixCelda_G(sce = sce, useAssay = useAssay,
                 type = type)
@@ -781,6 +779,7 @@ setMethod("factorizeMatrix", signature(sce = "SingleCellExperiment"),
             stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
+        return(res)
     })
 
 
@@ -886,30 +885,79 @@ setGeneric("celdaUmap",
 
 #' @title Obtain the gene module of a gene of interest
 #' @description This function will output the corresponding feature module for
-#' a specified list of genes from a celdaModel.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Model of class "celda_G" or "celda_CG".
+#'  a specified vector of genes from a celda_CG or celda_G celdaModel.
+#'  \code{feature} must match the rownames of \code{sce}.
+#' @param sce A \linkS4class{SingleCellExperiment} object returned by
+#'  \link{celda_G}, or \link{celda_CG}, with the matrix
+#'  located in the \code{useAssay} assay slot.
+#'  Rows represent features and columns represent cells.
 #' @param feature Character vector. Identify feature modules for the specified
-#'  feature names.
+#'  feature names. \code{feature} must match the rownames of \code{sce}.
 #' @param exactMatch Logical. Whether to look for exactMatch of the gene name
 #'  within counts matrix. Default \code{TRUE}.
 #' @return List. Each entry corresponds to the feature module determined for
 #' the provided features.
-#' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' featureModuleLookup(
-#'   counts = celdaCGSim$counts,
-#'   celdaMod = celdaCGMod, "Gene_1"
-#' )
 #' @export
 setGeneric("featureModuleLookup",
-  signature = "celdaMod",
-  function(counts, celdaMod, feature, exactMatch = TRUE) {
-    standardGeneric("featureModuleLookup")
-  }
+    function(sce, ...) {standardGeneric("featureModuleLookup")})
+
+
+#' @examples
+#' data(sceCelda_CG)
+#' module <- featureModuleLookup(sce = sceCelda_CG,
+#'     feature = c("Gene_1", "Gene_XXX"))
+#' @export
+#' @rdname featureModuleLookup
+setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
+    function(sce,
+        feature,
+        exactMatch = TRUE) {
+
+        if (celdaModel(sce) == "celda_CG") {
+            featureList <- .featureModuleLookupCG(sce = sce, feature = feature,
+                exactMatch = exactMatch)
+        } else if (celdaModel(sce) == "celda_G") {
+            featureList <- .featureModuleLookupG(sce = sce, feature = feature,
+                exactMatch = exactMatch)
+        } else {
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_G', or 'celda_CG'")
+        }
+        return(featureList)
+    }
 )
+
+
+.featureModuleLookupCG <- function(sce,
+    feature,
+    exactMatch) {
+
+    list <- list()
+    if (!isTRUE(exactMatch)) {
+        featureGrep <- c()
+        for (x in seq(length(feature))) {
+            featureGrep <- c(featureGrep, rownames(sce)[grep(
+                feature[x],
+                rownames(sce)
+            )])
+        }
+        feature <- featureGrep
+    }
+    for (x in seq(length(feature))) {
+        if (feature[x] %in% rownames(sce)) {
+            list[x] <- modules(sce)[which(rownames(sce) ==
+                    feature[x])]
+        } else {
+            list[x] <- paste0(
+                "No feature was identified matching '",
+                feature[x],
+                "'."
+            )
+        }
+    }
+    names(list) <- feature
+    return(list)
+}
 
 
 #' @title t-Distributed Stochastic Neighbor Embedding (t-SNE) dimension
@@ -945,7 +993,7 @@ setGeneric("featureModuleLookup",
 #' data(sceCelda_CG)
 #' tsneRes <- celdaTsne(sceCelda_CG)
 #' @return \code{sce} with t-SNE coordinates
-#'  (columns "celdatSNE1" & "celdatSNE2") added to
+#'  (columns "celda_tSNE1" & "celda_tSNE2") added to
 #'  \code{\link[SummarizedExperiment]{colData}(sce)}.
 #' @export
 setGeneric("celdaTsne",
@@ -988,8 +1036,8 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
                     maxIter = maxIter))
         }
 
-        SummarizedExperiment::colData(sce)["celdatSNE1"] <- res$tSNE1
-        SummarizedExperiment::colData(sce)["celdatSNE2"] <- res$tSNE2
+        SummarizedExperiment::colData(sce)["celda_tSNE1"] <- res$tSNE1
+        SummarizedExperiment::colData(sce)["celda_tSNE2"] <- res$tSNE2
         return(sce)
     })
 
@@ -1062,11 +1110,42 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
 }
 
 
+.celdaTsneCG <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    initialDims,
+    modules,
+    perplexity,
+    maxIter) {
+
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce = sce,
+        useAssay = useAssay,
+        maxCells = maxCells,
+        minClusterSize = minClusterSize,
+        modules = modules)
+    norm <- preparedCountInfo$norm
+    res <- .calculateTsne(norm,
+        doPca = FALSE,
+        perplexity = perplexity,
+        maxIter = maxIter,
+        initialDims = initialDims)
+    final <- matrix(NA, nrow = ncol(sce), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- res
+    rownames(final) <- colnames(sce)
+    colnames(final) <- c("tSNE1", "tSNE2")
+    return(final)
+}
+
+
 #' @title Uniform Manifold Approximation and Projection (UMAP) dimension
-#'  reduction for celda \code{SCE} object
+#'  reduction for celda \code{sce} object
 #' @description Embeds cells in two dimensions using \link[uwot]{umap} based on
-#'  a celda model. PCA on the normalized counts is used to reduce the number of
-#'  features before applying umap.
+#'  a celda model. For celda_C \code{sce} objects, PCA on the normalized counts
+#'  is used to reduce the number of features before applying UMAP. For celda_CG
+#'  \code{sce} object, UMAP is run on module probabilities to reduce the number
+#'  of features instead of using PCA. Module probabilities are square-root
+#'  transformed before applying UMAP.
 #' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
@@ -1095,18 +1174,17 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
 #'  \code{min_dist}, this determines how clustered/clumped the
 #'   embedded points are. Default 1. See \link[uwot]{umap} for more information.
 #' @param pca Logical. Whether to perform
-#' dimensionality reduction with PCA before UMAP.
+#' dimensionality reduction with PCA before UMAP. Only works for celda_C
+#'  \code{sce} objects.
 #' @param initialDims Integer. Number of dimensions from PCA to use as
-#' input in UMAP. Default 50.
+#' input in UMAP. Default 50. Only works for celda_C \code{sce} objects.
 #' @param cores Number of threads to use. Default 1.
 #' @param ... Additional parameters to pass to \link[uwot]{umap}.
-#' @seealso `celda_C()` for clustering cells and `celdaHeatmap()` for displaying
-#'  expression.
 #' @examples
 #' data(sceCelda_CG)
 #' umapRes <- celdaUmap(sceCelda_CG)
 #' @return \code{sce} with UMAP coordinates
-#'  (columns "celdaUMAP1" & "celdaUMAP2") added to
+#'  (columns "celda_UMAP1" & "celda_UMAP2") added to
 #'  \code{\link[SummarizedExperiment]{colData}(sce)}.
 #' @export
 setGeneric("celdaUmap",
@@ -1122,6 +1200,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
         useAssay = "counts",
         maxCells = NULL,
         minClusterSize = 100,
+        modules = NULL,
         seed = 12345,
         nNeighbors = 30,
         minDist = 0.75,
@@ -1132,10 +1211,12 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
         ...) {
 
         if (is.null(seed)) {
-            res <- .celdaUmapC(sce = sce,
+            res <- .celdaUmap(sce = sce,
                 useAssay = useAssay,
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
+                modules = modules,
+                seed = seed,
                 nNeighbors = nNeighbors,
                 minDist = minDist,
                 spread = spread,
@@ -1145,10 +1226,12 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                 ...)
         } else {
             with_seed(seed,
-                res <- .celdaUmapC(sce = sce,
+                res <- .celdaUmap(sce = sce,
                     useAssay = useAssay,
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
+                    modules = modules,
+                    seed = seed,
                     nNeighbors = nNeighbors,
                     minDist = minDist,
                     spread = spread,
@@ -1158,22 +1241,75 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                     ...))
         }
 
-        SummarizedExperiment::colData(sce)["celdaUMAP1"] <- res$UMAP1
-        SummarizedExperiment::colData(sce)["celdaUMAP2"] <- res$UMAP2
+        SummarizedExperiment::colData(sce)["celda_UMAP1"] <- res$UMAP1
+        SummarizedExperiment::colData(sce)["celda_UMAP2"] <- res$UMAP2
         return(sce)
     })
 
 
+.celdaUMAP <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    modules,
+    seed,
+    nNeighbors,
+    minDist,
+    spread,
+    pca,
+    initialDims,
+    cores,
+    ...) {
+
+    celdaMod <- celdaModel(sce)
+
+    if (celdaMod == "celda_C") {
+        res <- .celdaUmapC(sce = sce,
+            useAssay = useAssay,
+            maxCells = maxCells,
+            minClusterSize = minClusterSize,
+            nNeighbors = nNeighbors,
+            minDist = minDist,
+            spread = spread,
+            pca = pca,
+            initialDims = initialDims,
+            cores = cores,
+            ...)
+    } else if (celdaMod == "celda_CG") {
+        res <- .celdaUmapCG(sce = sce,
+            useAssay = useAssay,
+            maxCells = maxCells,
+            minClusterSize = minClusterSize,
+            modules = modules,
+            seed = seed,
+            nNeighbors = nNeighbors,
+            minDist = minDist,
+            spread = spread,
+            cores = cores,
+            ...)
+    } else if (celdaMod == "celda_G") {
+
+
+
+    } else {
+        stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+            " one of 'celda_C', 'celda_G', or 'celda_CG'")
+    }
+    return(res)
+
+}
+
+
 .celdaUmapC <- function(sce,
     useAssay,
-    maxCells = NULL,
-    minClusterSize = 100,
-    nNeighbors = 30,
-    minDist = 0.2,
-    spread = 1,
-    pca = TRUE,
-    initialDims = 50,
-    cores = 1,
+    maxCells,
+    minClusterSize,
+    nNeighbors,
+    minDist,
+    spread,
+    pca,
+    initialDims,
+    cores,
     ...) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce,
@@ -1189,6 +1325,38 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
         cores = cores,
         ...
     )
+
+    final <- matrix(NA, nrow = ncol(sce), ncol = 2)
+    final[preparedCountInfo$cellIx, ] <- umapRes
+    rownames(final) <- colnames(sce)
+    colnames(final) <- c("UMAP1", "UMAP2")
+    return(final)
+}
+
+
+.celdaUmapCG <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    modules,
+    seed,
+    nNeighbors,
+    minDist,
+    spread,
+    cores,
+    ...) {
+
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce,
+        useAssay,
+        maxCells,
+        minClusterSize,
+        modules)
+    umapRes <- .calculateUmap(preparedCountInfo$norm,
+        nNeighbors = nNeighbors,
+        minDist = minDist,
+        spread = spread,
+        cores = cores,
+        ...)
 
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
