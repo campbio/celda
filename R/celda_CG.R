@@ -789,40 +789,6 @@ setMethod("celda_CG",
 }
 
 
-#' @title Simulate cells from the celda_CG model
-#' @description Generates a simulated counts matrix, cell subpopulation
-#'  clusters, sample labels, and feature module clusters according to the
-#'  generative process of the celda_CG model.
-#' @param model Character. Options available in `celda::availableModels`.
-#' @param S Integer. Number of samples to simulate. Default 5.
-#' @param CRange Integer vector. A vector of length 2 that specifies the lower
-#'  and upper bounds of the number of cells to be generated in each sample.
-#'  Default c(50, 100).
-#' @param NRange Integer vector. A vector of length 2 that specifies the lower
-#'  and upper bounds of the number of counts generated for each cell. Default
-#'  c(500, 1000).
-#' @param G Integer. The total number of features to be simulated. Default 100.
-#' @param K Integer. Number of cell populations. Default 5.
-#' @param L Integer. Number of feature modules. Default 10.
-#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
-#'  to each cell population in each sample. Default 1.
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
-#'  each feature module in each cell population. Default 1.
-#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
-#'  the number of features in each module. Default 5.
-#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to
-#'  each feature in each module. Default 1.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @return List. Contains the simulated matrix `counts`, cell population
-#'  clusters `z`, feature module clusters `y`, sample assignments `sampleLabel`,
-#'  and input parameters.
-#' @seealso `celda_C()` for simulating cell subpopulations and `celda_G()` for
-#'  simulating feature modules.
-#' @examples
-#' celdaCGSim <- simulateCells(model = "celda_CG")
-#' @rdname simulateCells
 .simulateCellsMaincelda_CG <- function(model,
     S = 5,
     CRange = c(50, 100),
@@ -848,8 +814,7 @@ setMethod("celda_CG",
             alpha = alpha,
             beta = beta,
             gamma = gamma,
-            delta = delta
-        )
+            delta = delta)
     } else {
         with_seed(
             seed,
@@ -993,8 +958,8 @@ setMethod("celda_CG",
   result <- .reorderCeldaCG(counts = cellCounts, res = result)
 
   return(list(
-    z = clusters(result)$z,
-    y = clusters(result)$y,
+    z = celdaMod@clusters$z,
+    y = celdaMod@clusters$y,
     counts = cellCounts,
     sampleLabel = cellSampleLabel,
     G = G,
@@ -1353,14 +1318,14 @@ setMethod("celda_CG",
 
 .reorderCeldaCG <- function(counts, res) {
   # Reorder K
-  if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
-    res@clusters$z <- as.integer(as.factor(clusters(res)$z))
+  if (params(res)$K > 2 & isTRUE(length(unique(celdaMod@clusters$z)) > 1)) {
+    res@clusters$z <- as.integer(as.factor(celdaMod@clusters$z))
     fm <- factorizeMatrix(
       counts = counts,
       celdaMod = res,
       type = "posterior"
     )
-    uniqueZ <- sort(unique(clusters(res)$z))
+    uniqueZ <- sort(unique(celdaMod@clusters$z))
     d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
     h <- stats::hclust(d, method = "complete")
 
@@ -1371,14 +1336,14 @@ setMethod("celda_CG",
   }
 
   # Reorder L
-  if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
-    res@clusters$y <- as.integer(as.factor(clusters(res)$y))
+  if (params(res)$L > 2 & isTRUE(length(unique(celdaMod@clusters$y)) > 1)) {
+    res@clusters$y <- as.integer(as.factor(celdaMod@clusters$y))
     fm <- factorizeMatrix(
       counts = counts,
       celdaMod = res,
       type = "posterior"
     )
-    uniqueY <- sort(unique(clusters(res)$y))
+    uniqueY <- sort(unique(celdaMod@clusters$y))
     cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
     d <- .cosineDist(cs)
     h <- stats::hclust(d, method = "complete")
@@ -1399,8 +1364,8 @@ setMethod("celda_CG",
         transformationFun = sqrt
     )
     plt <- plotHeatmap(norm[ix, ],
-        z = clusters(celdaMod)$z,
-        y = clusters(celdaMod)$y[ix],
+        z = celdaMod@clusters$z,
+        y = celdaMod@clusters$y[ix],
         ...
     )
     invisible(plt)

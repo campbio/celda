@@ -707,22 +707,115 @@ setMethod("perplexity", signature(sce = "SingleCellExperiment"),
 
 
 #' @title Simulate count data from the celda generative models.
-#' @description This function generates a list containing a simulated counts
-#'  matrix, as well as various parameters used in the simulation which can be
-#'  useful for running celda. The user must provide the desired model
-#'  (one of celda_C, celda_G, celda_CG) as well as any desired tuning
-#'  parameters for those model's simulation functions as detailed below.
-#' @param model Character. Options available in `celda::availableModels`.
-#' @param ... Additional parameters.
-#' @return List. Contains the simulated counts matrix, derived cell cluster
-#'  assignments, the provided parameters, and estimated Dirichlet distribution
-#'  parameters for the model.
+#' @description This function generates a \linkS4class{SingleCellExperiment}
+#'  containing a simulated counts matrix in the \code{"counts"} assay slot, as
+#'  well as various parameters used in the simulation which can be
+#'  useful for running celda and are stored in \code{metadata} slot. The user
+#'  must provide the desired model (one of celda_C, celda_G, celda_CG) as well
+#'  as any desired tuning parameters for those model's simulation functions
+#'  as detailed below.
+#' @param model Character. Options available in \code{celda::availableModels}.
+#'  Can be one of \code{"celda_CG"}, \code{"celda_C"}, or \code{"celda_G"}.
+#'  Default \code{"celda_CG"}.
+#' @param S Integer. Number of samples to simulate. Default 5. Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_C"}.
+#' @param CRange Integer vector. A vector of length 2 that specifies the lower
+#'  and upper bounds of the number of cells to be generated in each sample.
+#'  Default c(50, 100). Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_C"}.
+#' @param NRange Integer vector. A vector of length 2 that specifies the lower
+#'  and upper bounds of the number of counts generated for each cell. Default
+#'  c(500, 1000).
+#' @param C Integer. Number of cells to simulate. Default 100. Only used if
+#'  \code{model} is \code{"celda_G"}.
+#' @param G Integer. The total number of features to be simulated. Default 100.
+#' @param K Integer. Number of cell populations. Default 5. Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_C"}.
+#' @param L Integer. Number of feature modules. Default 10. Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_G"}.
+#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
+#'  to each cell population in each sample. Default 1. Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_C"}.
+#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
+#'  each feature module in each cell population. Default 1.
+#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
+#'  the number of features in each module. Default 5. Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_G"}.
+#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to
+#'  each feature in each module. Default 1. Only used if
+#'  \code{model} is one of \code{"celda_CG"} or \code{"celda_G"}.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
+#' @return A \link[SingleCellExperiment]{SingleCellExperiment} object with
+#'  simulated count matrix stored in the "counts" assay slot. Function
+#'  parameter settings are stored in the \link[S4Vectors]{metadata} slot. For
+#'  \code{"celda_CG"} and \code{"celda_C"} models,
+#'  columns \code{sample_label} and \code{celda_cell_cluster} in
+#'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
+#'  cell population clusters. For \code{"celda_CG"} and \code{"celda_G"}
+#'  models, column \code{celda_feature_module} in
+#'  \link[SummarizedExperiment]{rowData} contains simulated gene modules.
 #' @examples
-#' data(celdaCGSim)
-#' dim(celdaCGSim$counts)
+#' sce <- simulateCells()
 #' @export
-simulateCells <- function(model, ...) {
-    do.call(paste0(".simulateCellsMain", model), args = list(...))
+simulateCells <- function(
+    model = c("celda_CG", "celda_C", "celda_G"),
+    S = 5,
+    CRange = c(50, 100),
+    NRange = c(500, 1000),
+    C = 100,
+    G = 100,
+    K = 5,
+    L = 10,
+    alpha = 1,
+    beta = 1,
+    gamma = 5,
+    delta = 1,
+    seed = 12345) {
+
+    model <- match.arg(model)
+
+    if (model == "celda_C") {
+        sce <- .simulateCellsMaincelda_C(model = model,
+            S = S,
+            CRange = CRange,
+            NRange = NRange,
+            G = G,
+            K = K,
+            alpha = alpha,
+            beta = beta,
+            seed = seed)
+    } else if (model == "celda_CG") {
+        sce <- .simulateCellsMaincelda_CG(
+            model = model,
+            S = S,
+            CRange = CRange,
+            NRange = NRange,
+            G = G,
+            K = K,
+            L = L,
+            alpha = alpha,
+            beta = beta,
+            gamma = gamma,
+            delta = delta,
+            seed = seed)
+    } else if (model == "celda_G") {
+        sce <- .simulateCellsMaincelda_G(
+            model = model,
+            C = C,
+            L = L,
+            NRange = NRange,
+            G = G,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            seed = seed)
+    } else {
+        stop("'model' must be one of 'celda_C', 'celda_G', or 'celda_CG'")
+    }
+
+    return(sce)
 }
 
 

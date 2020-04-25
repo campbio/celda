@@ -713,39 +713,6 @@ setMethod("celda_C",
 }
 
 
-#' @title Simulate cells from the celda_C model
-#' @description Generates a simulated counts matrix, cell subpopulation
-#'  clusters, and sample labels according to the generative process of the
-#'  celda_C model.
-#' @param model Character. Options available in `celda::availableModels`.
-#' @param S Integer. Number of samples to simulate. Default 5.
-#' @param CRange Vector of length 2 given the range (min, max) of number of
-#'  cells for each sample to be randomly generated from the uniform
-#'  distribution. Default c(50, 100).
-#' @param NRange Integer vector. A vector of length 2 that specifies the lower
-#'  and upper bounds of the number of counts generated for each cell. Default
-#'  c(500, 1000).
-#' @param G Integer. The total number of features to be simulated. Default 100.
-#' @param K Integer. Number of cell populations. Default 5.
-#' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
-#'  to each cell population in each sample. Default 1.
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
-#'  each feature in each cell population. Default 1.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @return A \link[SingleCellExperiment]{SingleCellExperiment} object with
-#'  simulated count matrix stored in the "counts" assay slot. Function
-#'  parameter settings are stored in the \link[S4Vectors]{metadata} slot.
-#'  Columns \code{sample_label} and \code{celda_cell_cluster} in
-#'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
-#'  cell population clusters.
-#' @seealso `celda_G()` for simulating feature modules and `celda_CG()` for
-#'  simulating feature modules and cell populations.
-#' @examples
-#' sce <- simulateCells(model = "celda_C", K = 10)
-#' @rawNamespace import(stats, except = c(start, end))
-#' @rdname simulateCells
 .simulateCellsMaincelda_C <- function(model,
     S = 5,
     CRange = c(50, 100),
@@ -840,8 +807,8 @@ setMethod("celda_C",
     class(result) <- "celda_C"
     result <- .reorderCelda_C(counts = cellCounts, res = result)
 
-    return(list(z = clusters(result)$z,
-        counts = .processCounts(cellCounts),
+    return(list(z = celdaMod@clusters$z,
+        counts = cellCounts,
         sampleLabel = cellSampleLabel,
         G = G,
         K = K,
@@ -1076,10 +1043,10 @@ setMethod("celda_C",
 
 
 .reorderCelda_C <- function(counts, res) {
-  if (params(res)$K > 2 & isTRUE(length(unique(clusters(res)$z)) > 1)) {
-    res@clusters$z <- as.integer(as.factor(clusters(res)$z))
+  if (params(res)$K > 2 & isTRUE(length(unique(celdaMod@clusters$z)) > 1)) {
+    res@clusters$z <- as.integer(as.factor(celdaMod@clusters$z))
     fm <- factorizeMatrix(counts = counts, celdaMod = res)
-    uniqueZ <- sort(unique(clusters(res)$z))
+    uniqueZ <- sort(unique(celdaMod@clusters$z))
     d <- .cosineDist(fm$posterior$module[, uniqueZ])
     h <- stats::hclust(d, method = "complete")
     res <- recodeClusterZ(res,
