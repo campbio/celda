@@ -1,8 +1,13 @@
 #' @title Feature clustering with Celda
 #' @description Clusters the rows of a count matrix containing single-cell data
 #'  into L modules.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
 #' @param L Integer. Number of feature modules.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
 #'  each feature module in each cell. Default 1.
@@ -42,72 +47,198 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @return An object of class `celda_G` with the feature module clusters stored
 #'  in `y`.
-#' @seealso `celda_C()` for cell clustering and `celda_CG()` for simultaneous
-#'  clustering of features and cells. `celdaGridSearch()` can be used to run
-#'  multiple values of L and multiple chains in parallel.
+#' @seealso \link{celda_C} for cell clustering and \link{celda_CG} for
+#'  simultaneous clustering of features and cells. \link{celdaGridSearch} can
+#'  be used to run multiple values of L and multiple chains in parallel.
 #' @examples
 #' data(celdaGSim)
-#' celdaMod <- celda_G(celdaGSim$counts, L = celdaGSim$L)
+#' sce <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 #' @export
-celda_G <- function(counts,
-                    L,
-                    beta = 1,
-                    delta = 1,
-                    gamma = 1,
-                    stopIter = 10,
-                    maxIter = 200,
-                    splitOnIter = 10,
-                    splitOnLast = TRUE,
-                    seed = 12345,
-                    nchains = 3,
-                    yInitialize = c("split", "random", "predefined"),
-                    countChecksum = NULL,
-                    yInit = NULL,
-                    logfile = NULL,
-                    verbose = TRUE) {
-  .validateCounts(counts)
-  if (is.null(seed)) {
-    res <- .celda_G(counts,
-      L,
-      beta,
-      delta,
-      gamma,
-      stopIter,
-      maxIter,
-      splitOnIter,
-      splitOnLast,
-      nchains,
-      yInitialize,
-      countChecksum,
-      yInit,
-      logfile,
-      verbose,
-      reorder = TRUE
-    )
-  } else {
-    with_seed(
-      seed,
-      res <- .celda_G(counts,
-        L,
-        beta,
-        delta,
-        gamma,
-        stopIter,
-        maxIter,
-        splitOnIter,
-        splitOnLast,
-        nchains,
-        yInitialize,
-        countChecksum,
-        yInit,
-        logfile,
-        verbose,
-        reorder = TRUE
-      )
-    )
-  }
+setGeneric("celda_G", function(x, ...) {standardGeneric("celda_G")})
 
-  return(res)
+
+#' @rdname celda_G
+#' @export
+setMethod("celda_G",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        L,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        yInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        yInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
+
+        xClass <- "SingleCellExperiment"
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        sce <- .celdaGWithSeed(counts = counts,
+            xClass = xClass,
+            useAssay = useAssay,
+            sce = x,
+            L = L,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            yInitialize = match.arg(yInitialize),
+            countChecksum = countChecksum,
+            yInit = yInit,
+            logfile = logfile,
+            verbose = verbose)
+        return(sce)
+    }
+)
+
+
+#' @rdname celda_G
+#' @export
+setMethod("celda_G",
+    signature(x = "matrix"),
+    function(x,
+        L,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        yInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        yInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
+
+        xClass <- "matrix"
+        useAssay <- NULL
+        sce <- SingleCellExperiment::SingleCellExperiment(
+            assays = list(counts = x))
+        sce <- .celdaGWithSeed(counts = x,
+            xClass = xClass,
+            useAssay = useAssay,
+            sce = x,
+            L = L,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            yInitialize = match.arg(yInitialize),
+            countChecksum = countChecksum,
+            yInit = yInit,
+            logfile = logfile,
+            verbose = verbose)
+        return(sce)
+    }
+)
+
+
+.celdaGWithSeed <- function(counts,
+    xClass,
+    useAssay,
+    sce,
+    L,
+    beta,
+    delta,
+    gamma,
+    stopIter,
+    maxIter,
+    splitOnIter,
+    splitOnLast,
+    seed,
+    nchains,
+    yInitialize,
+    countChecksum,
+    yInit,
+    logfile,
+    verbose) {
+
+    .validateCounts(counts)
+
+    if (is.null(seed)) {
+        celdaGMod <- .celda_G(counts = counts,
+            L = L,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            stopIter = stopIter,
+            maxIter = maxIter,
+            splitOnIter = splitOnIter,
+            splitOnLast = splitOnLast,
+            seed = seed,
+            nchains = nchains,
+            yInitialize = yInitialize,
+            countChecksum = countChecksum,
+            yInit = yInit,
+            logfile = logfile,
+            verbose = verbose,
+            reorder = TRUE)
+    } else {
+        with_seed(
+            seed,
+            celdaGMod <- .celda_G(counts = counts,
+                L = L,
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                stopIter = stopIter,
+                maxIter = maxIter,
+                splitOnIter = splitOnIter,
+                splitOnLast = splitOnLast,
+                seed = seed,
+                nchains = nchains,
+                yInitialize = yInitialize,
+                countChecksum = countChecksum,
+                yInit = yInit,
+                logfile = logfile,
+                verbose = verbose,
+                reorder = TRUE)
+        )
+    }
+
+    sce <- .createSCEceldaG(celdaGMod = celdaGMod,
+        sce = sce,
+        xClass = xClass,
+        useAssay = useAssay,
+        L = L,
+        beta = beta,
+        delta = delta,
+        gamma = gamma,
+        algorithm = algorithm,
+        stopIter = stopIter,
+        maxIter = maxIter,
+        splitOnIter = splitOnIter,
+        splitOnLast = splitOnLast,
+        seed = seed,
+        nchains = nchains,
+        yInitialize = yInitialize,
+        countChecksum = countChecksum,
+        yInit = yInit,
+        logfile = logfile,
+        verbose = verbose)
+    return(sce)
 }
 
 
@@ -1396,3 +1527,59 @@ setMethod(
     return(featList)
   }
 )
+
+
+.createSCEceldaG <- function(celdaGMod,
+    sce,
+    xClass,
+    useAssay,
+    L,
+    beta,
+    delta,
+    gamma,
+    algorithm,
+    stopIter,
+    maxIter,
+    splitOnIter,
+    splitOnLast,
+    seed,
+    nchains,
+    yInitialize,
+    countChecksum,
+    yInit,
+    logfile,
+    verbose) {
+
+    # add metadata
+    S4Vectors::metadata(sce)[["celda_parameters"]] <- list(
+        model = "celda_G",
+        xClass = xClass,
+        useAssay = useAssay,
+        L = celdaCGMod@params$L,
+        beta = celdaCGMod@params$beta,
+        delta = celdaCGMod@params$delta,
+        gamma = celdaCGMod@params$gamma,
+        algorithm = algorithm,
+        stopIter = stopIter,
+        maxIter = maxIter,
+        splitOnIter = splitOnIter,
+        splitOnLast = splitOnLast,
+        seed = seed,
+        nchains = nchains,
+        yInitialize = yInitialize,
+        countChecksum = celdaCGMod@params$countChecksum,
+        yInit = yInit,
+        logfile = logfile,
+        verbose = verbose,
+        completeLogLik = celdaCGMod@completeLogLik,
+        finalLogLik = celdaCGMod@finalLogLik,
+        featureModuleLevels = sort(unique(celdaCGMod@clusters$y)))
+
+    SummarizedExperiment::rowData(sce)["row_name"] <- celdaCGMod@names$row
+    SummarizedExperiment::colData(sce)["column_name"] <-
+        celdaCGMod@names$column
+    SummarizedExperiment::rowData(sce)["feature_module"] <-
+        celdaCGMod@clusters$y
+
+    return(sce)
+}

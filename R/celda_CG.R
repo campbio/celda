@@ -69,9 +69,9 @@
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters. Column \code{feature_module} in
 #'  \link[SummarizedExperiment]{rowData} contain feature modules.
-#' @seealso `celda_G()` for feature clustering and `celda_C()` for clustering
-#'  cells. `celdaGridSearch()` can be used to run multiple values of K/L and
-#'  multiple chains in parallel.
+#' @seealso \link{celda_G} for feature clustering and \link{celda_C} for
+#'  clustering cells. \link{celdaGridSearch} can be used to run multiple
+#'  values of K/L and multiple chains in parallel.
 #' @examples
 #' data(celdaCGSim)
 #' sce <- celda_CG(celdaCGSim$counts,
@@ -122,6 +122,7 @@ setMethod("celda_CG",
             sce = x,
             sampleLabel = sampleLabel,
             K = K,
+            L = L,
             alpha = alpha,
             beta = beta,
             delta = delta,
@@ -134,7 +135,7 @@ setMethod("celda_CG",
             seed = seed,
             nchains = nchains,
             zInitialize = match.arg(zInitialize),
-            yInitialize = match.arg(zInitialize),
+            yInitialize = match.arg(yInitialize),
             countChecksum = countChecksum,
             zInit = zInit,
             yInit = yInit,
@@ -182,8 +183,11 @@ setMethod("celda_CG",
             sce = sce,
             sampleLabel = sampleLabel,
             K = K,
+            L = L,
             alpha = alpha,
             beta = beta,
+            delta = delta,
+            gamma = gamma,
             algorithm = match.arg(algorithm),
             stopIter = stopIter,
             maxIter = maxIter,
@@ -192,8 +196,10 @@ setMethod("celda_CG",
             seed = seed,
             nchains = nchains,
             zInitialize = match.arg(zInitialize),
+            yInitialize = match.arg(yInitialize),
             countChecksum = countChecksum,
             zInit = zInit,
+            yInit = yInit,
             logfile = logfile,
             verbose = verbose)
         return(sce)
@@ -207,6 +213,7 @@ setMethod("celda_CG",
     sce,
     sampleLabel,
     K,
+    L,
     alpha,
     beta,
     delta,
@@ -283,13 +290,16 @@ setMethod("celda_CG",
         )
     }
 
-    sce <- .createSCEceldaCG(celdaCMod = celdaCMod,
+    sce <- .createSCEceldaCG(celdaCGMod = celdaCGMod,
         sce = sce,
         xClass = xClass,
         useAssay = useAssay,
         K = K,
+        L = L,
         alpha = alpha,
         beta = beta,
+        delta = delta,
+        gamma = gamma,
         algorithm = algorithm,
         stopIter = stopIter,
         maxIter = maxIter,
@@ -298,8 +308,10 @@ setMethod("celda_CG",
         seed = seed,
         nchains = nchains,
         zInitialize = zInitialize,
+        yInitialize = yInitialize,
         countChecksum = countChecksum,
         zInit = zInit,
+        yInit = yInit,
         logfile = logfile,
         verbose = verbose)
     return(sce)
@@ -803,7 +815,6 @@ setMethod("celda_CG",
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @param ... Additional parameters.
 #' @return List. Contains the simulated matrix `counts`, cell population
 #'  clusters `z`, feature module clusters `y`, sample assignments `sampleLabel`,
 #'  and input parameters.
@@ -823,8 +834,7 @@ setMethod("celda_CG",
     beta = 1,
     gamma = 5,
     delta = 1,
-    seed = 12345,
-    ...) {
+    seed = 12345) {
 
     if (is.null(seed)) {
         res <- .simulateCellscelda_CG(
@@ -838,8 +848,7 @@ setMethod("celda_CG",
             alpha = alpha,
             beta = beta,
             gamma = gamma,
-            delta = delta,
-            ...
+            delta = delta
         )
     } else {
         with_seed(
@@ -855,8 +864,7 @@ setMethod("celda_CG",
                 alpha = alpha,
                 beta = beta,
                 gamma = gamma,
-                delta = delta,
-                ...
+                delta = delta
             )
         )
     }
@@ -877,8 +885,7 @@ setMethod("celda_CG",
                                    alpha = alpha,
                                    beta = beta,
                                    gamma = gamma,
-                                   delta = delta,
-                                   ...) {
+                                   delta = delta) {
 
   ## Number of cells per sample
   nC <- sample(seq(CRange[1], CRange[2]), size = S, replace = TRUE)
@@ -1626,6 +1633,7 @@ setMethod("celda_CG",
     xClass,
     useAssay,
     K,
+    L,
     alpha,
     beta,
     delta,
@@ -1668,6 +1676,7 @@ setMethod("celda_CG",
         yInitialize = yInitialize,
         countChecksum = celdaCGMod@params$countChecksum,
         zInit = zInit,
+        yInit = yInit,
         logfile = logfile,
         verbose = verbose,
         completeLogLik = celdaCGMod@completeLogLik,
