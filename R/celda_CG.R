@@ -958,8 +958,8 @@ setMethod("celda_CG",
   result <- .reorderCeldaCG(counts = cellCounts, res = result)
 
   return(list(
-    z = celdaMod@clusters$z,
-    y = celdaMod@clusters$y,
+    z = result@clusters$z,
+    y = result@clusters$y,
     counts = cellCounts,
     sampleLabel = cellSampleLabel,
     G = G,
@@ -1306,51 +1306,71 @@ setMethod("celda_CG",
 
     etaProb <- log(eta) * nGByTS
     geneByPopProb <- log(psi %*% phi)
-    innerLogProb <- eigenMatMultInt(geneByPopProb, newCounts) + theta[, s]
-    # innerLogProb = (t(geneByPopProb) %*% newCounts) + theta[, s]
+    innerLogProb <- eigenMatMultInt(geneByPopProb, counts) + theta[, s]
+    # innerLogProb = (t(geneByPopProb) %*% counts) + theta[, s]
 
     log.px <- sum(apply(innerLogProb, 2, matrixStats::logSumExp))
     # + sum(etaProb)
-    perplexity <- exp(- (log.px / sum(newCounts)))
+    perplexity <- exp(- (log.px / sum(counts)))
     return(perplexity)
 }
 
 
 .reorderCeldaCG <- function(counts, res) {
-  # Reorder K
-  if (params(res)$K > 2 & isTRUE(length(unique(celdaMod@clusters$z)) > 1)) {
-    res@clusters$z <- as.integer(as.factor(celdaMod@clusters$z))
-    fm <- factorizeMatrix(
-      counts = counts,
-      celdaMod = res,
-      type = "posterior"
-    )
-    uniqueZ <- sort(unique(celdaMod@clusters$z))
-    d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
-    h <- stats::hclust(d, method = "complete")
 
-    res <- recodeClusterZ(res,
-      from = h$order,
-      to = seq(length(h$order))
-    )
-  }
+    xClass <- "matrix"
+    useAssay <- NULL
+    sce <- SingleCellExperiment::SingleCellExperiment(
+        assays = list(counts = counts))
 
-  # Reorder L
-  if (params(res)$L > 2 & isTRUE(length(unique(celdaMod@clusters$y)) > 1)) {
-    res@clusters$y <- as.integer(as.factor(celdaMod@clusters$y))
-    fm <- factorizeMatrix(
-      counts = counts,
-      celdaMod = res,
-      type = "posterior"
-    )
-    uniqueY <- sort(unique(celdaMod@clusters$y))
-    cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
-    d <- .cosineDist(cs)
-    h <- stats::hclust(d, method = "complete")
+    sce <- .createSCEceldaCG(celdaCGMod = res,
+        sce = sce,
+        xClass = xClass,
+        useAssay = useAssay,
+        K = params(res)$K,
+        L = params(res)$L,
+        alpha = params(a)$alpha,
+        beta = params(a)$beta,
+        delta = params(a)$delta,
+        gamma = params(a)$gamma,
+        algorithm = NULL,
+        stopIter = NULL,
+        maxIter = NULL,
+        splitOnIter = NULL,
+        splitOnLast = NULL,
+        seed = NULL,
+        nchains = NULL,
+        zInitialize = NULL,
+        yInitialize = NULL,
+        countChecksum = NULL,
+        zInit = NULL,
+        yInit = NULL,
+        logfile = NULL,
+        verbose = NULL)
 
-    res <- recodeClusterY(res, from = h$order, to = seq(length(h$order)))
-  }
-  return(res)
+    # Reorder K
+    if (params(res)$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
+        res@clusters$z <- as.integer(as.factor(res@clusters$z))
+        fm <- factorizeMatrix(sce, useAssay = "counts", type = "posterior")
+        uniqueZ <- sort(unique(res@clusters$z))
+        d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
+        h <- stats::hclust(d, method = "complete")
+
+        res <- .recodeClusterZ(res, from = h$order, to = seq(length(h$order)))
+    }
+
+    # Reorder L
+    if (params(res)$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
+        res@clusters$y <- as.integer(as.factor(res@clusters$y))
+        fm <- factorizeMatrix(sce, useAssay = "counts", type = "posterior")
+        uniqueY <- sort(unique(res@clusters$y))
+        cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
+        d <- .cosineDist(cs)
+        h <- stats::hclust(d, method = "complete")
+
+        res <- .recodeClusterY(res, from = h$order, to = seq(length(h$order)))
+    }
+    return(res)
 }
 
 
@@ -1364,8 +1384,8 @@ setMethod("celda_CG",
         transformationFun = sqrt
     )
     plt <- plotHeatmap(norm[ix, ],
-        z = celdaMod@clusters$z,
-        y = celdaMod@clusters$y[ix],
+        z = clusters(sce),
+        y = modules(sce)[ix],
         ...
     )
     invisible(plt)

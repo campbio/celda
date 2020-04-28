@@ -121,55 +121,87 @@ normalizeCounts <- function(counts,
 
 
 #' @title Recode cell cluster labels
-#' @description Recode cell subpopulaton clusters using a mapping in the `from`
-#'  and `to` arguments.
-#' @param celdaMod Celda object of class `celda_C` or `celda_CG`.
-#' @param from Numeric vector. Unique values in the range of seq(K) that
-#'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of seq(K) that
-#'  correspond to the new cluster labels.
-#' @return Celda object with cell subpopulation clusters, with class
-#'  corresponding to that of `celdaMod`.
+#' @description Recode cell subpopulaton clusters using a mapping in the
+#'  \code{from} and \code{to} arguments.
+#' @param sce \linkS4class{SingleCellExperiment} object returned from
+#'  \link{celda_C} or \link{celda_CG}. Must contain column
+#'  \code{celda_cell_cluster} in \link[SummarizedExperiment]{colData}.
+#' @param from Numeric vector. Unique values in the range of
+#'  \code{seq(clusters(sce))} that correspond to the original cluster labels in
+#'  \code{sce).
+#' @param to Numeric vector. Unique values in the range of
+#'  \code{seq(clusters(sce))} that correspond to the new cluster labels.
+#' @return \linkS4class{SingleCellExperiment} object with recoded cell cluster
+#'  labels.
 #' @examples
-#' data(celdaCGMod)
-#' celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+#' data(sceCelda_CG)
+#' sceReorderedZ <- recodeClusterZ(sceCelda_CG, c(1, 3), c(3, 1))
 #' @importFrom plyr mapvalues
 #' @export
-recodeClusterZ <- function(celdaMod, from, to) {
-  if (length(setdiff(from, to)) != 0) {
-    stop("All values in 'from' must have a mapping in 'to'")
-  }
-  if (is.null(clusters(celdaMod)$z)) {
-    stop("Provided celdaMod argument does not have a z attribute")
-  }
-  celdaMod@clusters$z <- plyr::mapvalues(clusters(celdaMod)$z, from, to)
-  return(celdaMod)
+recodeClusterZ <- function(sce, from, to) {
+    if (length(setdiff(from, to)) != 0) {
+        stop("All values in 'from' must have a mapping in 'to'")
+    }
+    if (is.null(clusters(sce))) {
+        stop("Provided 'sce' argument does not have a 'celda_cell_cluster'",
+            " column in 'colData(sce)'")
+    }
+    clusters(sce) <- plyr::mapvalues(clusters(sce), from, to)
+    return(sce)
 }
 
 
-#' @title Recode feature module clusters
+.recodeClusterZ <- function(celdaMod, from, to) {
+    if (length(setdiff(from, to)) != 0) {
+        stop("All values in 'from' must have a mapping in 'to'")
+    }
+    if (is.null(clusters(celdaMod)$z)) {
+        stop("Provided celdaMod argument does not have a z attribute")
+    }
+    celdaMod@clusters$z <- plyr::mapvalues(clusters(celdaMod)$z, from, to)
+    return(celdaMod)
+}
+
+
+#' @title Recode feature module labels
 #' @description Recode feature module clusters using a mapping in the
-#'  `from` and `to` arguments.
-#' @param celdaMod Celda object of class `celda_G` or `celda_CG`.
-#' @param from Numeric vector. Unique values in the range of seq(L) that
-#'  correspond to the original cluster labels in `celdaMod`.
-#' @param to Numeric vector. Unique values in the range of seq(L) that
-#'  correspond to the new cluster labels.
-#' @return Celda object with recoded feature module clusters, with class
-#'  corresponding to that of `celdaMod`.
+#'  \code{from} and \code{to} arguments.
+#' @param sce \linkS4class{SingleCellExperiment} object returned from
+#'  \link{celda_G} or \link{celda_CG}. Must contain column
+#'  \code{celda_feature_module} in \link[SummarizedExperiment]{rowData}.
+#' @param from Numeric vector. Unique values in the range of
+#'  \code{seq(modules(sce))} that correspond to the original module labels
+#'  in \code{sce}.
+#' @param to Numeric vector. Unique values in the range of
+#'  \code{seq(modules(sce))} that correspond to the new module labels.
+#' @return @return \linkS4class{SingleCellExperiment} object with recoded
+#'  feature module labels.
 #' @examples
-#' data(celdaCGMod)
-#' celdaModReorderedY <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
+#' data(sceCelda_CG)
+#' sceReorderedY <- recodeClusterY(sceCelda_CG, c(1, 3), c(3, 1))
 #' @export
-recodeClusterY <- function(celdaMod, from, to) {
-  if (length(setdiff(from, to)) != 0) {
-    stop("All values in 'from' must have a mapping in 'to'")
-  }
-  if (is.null(clusters(celdaMod)$y)) {
-    stop("Provided celdaMod argument does not have a y attribute")
-  }
-  celdaMod@clusters$y <- plyr::mapvalues(clusters(celdaMod)$y, from, to)
-  return(celdaMod)
+recodeClusterY <- function(sce, from, to) {
+    if (length(setdiff(from, to)) != 0) {
+        stop("All values in 'from' must have a mapping in 'to'")
+    }
+    if (is.null(modules(sce))) {
+        stop("Provided 'sce' argument does not have a 'celda_feature_module'",
+            " column in 'rowData(sce)'")
+    }
+    modules(sce) <- plyr::mapvalues(modules(sce), from, to)
+    return(celdaMod)
+}
+
+
+.recodeClusterY <- function(celdaMod, from, to) {
+    if (length(setdiff(from, to)) != 0) {
+        stop("All values in 'from' must have a mapping in 'to'")
+    }
+    if (is.null(clusters(celdaMod)$y)) {
+        stop("Provided celdaMod argument does not have a y attribute")
+    }
+    celdaMod@clusters$y <- plyr::mapvalues(clusters(celdaMod)$y, from, to)
+    return(celdaMod)
 }
 
 

@@ -742,7 +742,7 @@ setMethod("celda_G",
     result <- .reorderCeldaG(counts = cellCounts, res = result)
 
     return(list(
-        y = celdaMod@clusters$y,
+        y = result@clusters$y,
         counts = cellCounts,
         C = C,
         G = G,
@@ -882,60 +882,34 @@ setMethod("celda_G",
 }
 
 
-#' @title Calculate Celda_G log likelihood
-#' @description Calculates the log likelihood for user-provided feature module
-#'  clusters using the `celda_G()` model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
-#' @param y Numeric vector. Denotes feature module labels.
-#' @param L Integer. Number of feature modules.
-#' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
-#'  each feature module in each cell. Default 1.
-#' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount to
-#'  each feature in each module. Default 1.
-#' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount to
-#'  the number of features in each module. Default 1.
-#' @keywords log likelihood
-#' @return The log-likelihood for the given cluster assignments.
-#' @seealso `celda_G()` for clustering features
-#' @examples
-#' data(celdaGSim)
-#' loglik <- logLikelihoodcelda_G(celdaGSim$counts,
-#'   y = celdaGSim$y,
-#'   L = celdaGSim$L,
-#'   beta = celdaGSim$beta,
-#'   delta = celdaGSim$delta,
-#'   gamma = celdaGSim$gamma
-#' )
-#'
-#' loglik <- logLikelihood(celdaGSim$counts,
-#'   model = "celda_G",
-#'   y = celdaGSim$y,
-#'   L = celdaGSim$L,
-#'   beta = celdaGSim$beta,
-#'   delta = celdaGSim$delta,
-#'   gamma = celdaGSim$gamma
-#' )
-#' @export
-logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
-  if (sum(y > L) > 0) {
-    stop("An entry in y contains a value greater than the provided L.")
-  }
-  p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
-  final <- .cGCalcLL(
-    nTSByC = p$nTSByC,
-    nByTS = p$nByTS,
-    nByG = p$nByG,
-    nGByTS = p$nGByTS,
-    nM = p$nM,
-    nG = p$nG,
-    L = L,
-    beta = beta,
-    delta = delta,
-    gamma = gamma
-  )
+.logLikelihoodcelda_G <- function(sce, useAssay) {
 
-  return(final)
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    y <- modules(sce)
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+
+    if (sum(y > L) > 0) {
+        stop("Assigned value of feature module greater than the total number",
+            " of feature modules!")
+    }
+    p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
+    final <- .cGCalcLL(
+        nTSByC = p$nTSByC,
+        nByTS = p$nByTS,
+        nByG = p$nByG,
+        nGByTS = p$nGByTS,
+        nM = p$nM,
+        nG = p$nG,
+        L = L,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+    )
+
+    return(final)
 }
 
 
@@ -947,7 +921,8 @@ logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
 # @param L Integer. Number of feature modules.
 .cGDecomposeCounts <- function(counts, y, L) {
   if (any(y > L)) {
-    stop("Entries in the module clusters 'y' are greater than L.")
+    stop("Assigned value of feature module greater than the total number",
+        " of feature modules!")
   }
   nTSByC <- .rowSumByGroup(counts, group = y, L = L)
   nByG <- as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
@@ -985,104 +960,58 @@ logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
 }
 
 
-#' @title Conditional probabilities for features in modules from a Celda_G model
-#' @description Calculates the conditional probability of each feature belonging
-#'  to each module given all other feature cluster assignments in a `celda_G()`
-#'  result.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_G`.
-#' @param log Logical. If FALSE, then the normalized conditional probabilities
-#'  will be returned. If TRUE, then the unnormalized log probabilities will be
-#'  returned. Default FALSE.
-#' @param ... Additional parameters.
-#' @return A list containging a matrix for the conditional cell cluster
-#'  probabilities.
-#' @seealso `celda_G()` for clustering features
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' clusterProb <- clusterProbability(celdaGSim$counts, celdaGMod)
-#' @export
-setMethod(
-  "clusterProbability", signature(celdaMod = "celda_G"),
-  function(counts, celdaMod, log = FALSE, ...) {
-    y <- clusters(celdaMod)$y
-    L <- params(celdaMod)$L
-    delta <- params(celdaMod)$delta
-    beta <- params(celdaMod)$beta
-    gamma <- params(celdaMod)$gamma
+.clusterProbabilityCeldaG <- function(sce, useAssay, log) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    y <- modules(sce)
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
 
     ## Calculate counts one time up front
     p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
     lgbeta <- lgamma(seq(0, max(.colSums(
-      counts,
-      nrow(counts), ncol(counts)
+        counts,
+        nrow(counts), ncol(counts)
     ))) + beta)
     lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
     lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
 
     nextY <- .cGCalcGibbsProbY(
-      counts = counts,
-      nTSByC = p$nTSByC,
-      nByTS = p$nByTS,
-      nGByTS = p$nGByTS,
-      nByG = p$nByG,
-      y = y,
-      nG = p$nG,
-      L = L,
-      lgbeta = lgbeta,
-      lgdelta = lgdelta,
-      lggamma = lggamma,
-      delta = delta,
-      doSample = FALSE
+        counts = counts,
+        nTSByC = p$nTSByC,
+        nByTS = p$nByTS,
+        nGByTS = p$nGByTS,
+        nByG = p$nByG,
+        y = y,
+        nG = p$nG,
+        L = L,
+        lgbeta = lgbeta,
+        lgdelta = lgdelta,
+        lggamma = lggamma,
+        delta = delta,
+        doSample = FALSE
     )
     yProb <- t(nextY$probs)
 
     if (!isTRUE(log)) {
-      yProb <- .normalizeLogProbs(yProb)
+        yProb <- .normalizeLogProbs(yProb)
     }
 
     return(list(yProbability = yProb))
-  }
-)
+}
 
 
-#' @title Calculate the perplexity on new data with a celda_G model
-#' @description Perplexity is a statistical measure of how well a probability
-#'  model can predict new data. Lower perplexity indicates a better model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class "celda_C"
-#' @param newCounts A new counts matrix used to calculate perplexity. If NULL,
-#'  perplexity will be calculated for the 'counts' matrix. Default NULL.
-#' @return Numeric. The perplexity for the provided count data and model.
-#' @seealso `celda_G()` for clustering features
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' perplexity <- perplexity(celdaGSim$counts, celdaGMod)
-#' @export
-setMethod(
-  "perplexity", signature(celdaMod = "celda_G"),
-  function(counts, celdaMod, newCounts = NULL) {
+.perplexityCelda_G <- function(sce, useAssay) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
     # compareCountMatrix(counts, celdaMod)
 
-    if (is.null(newCounts)) {
-      newCounts <- counts
-    } else {
-      newCounts <- .processCounts(newCounts)
-    }
-    if (nrow(newCounts) != nrow(counts)) {
-      stop("newCounts should have the same number of rows as counts.")
-    }
-
     factorized <- factorizeMatrix(
-      counts = counts,
-      celdaMod = celdaMod,
-      type = c("posterior", "counts")
-    )
+        sce = sce,
+        useAssay = useAssay,
+        type = "posterior")
     psi <- factorized$posterior$module
     phi <- factorized$posterior$cell
     eta <- factorized$posterior$geneDistribution
@@ -1090,34 +1019,57 @@ setMethod(
 
     etaProb <- log(eta) * nGByTS
     # gene.by.cell.prob = log(psi %*% phi)
-    # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+    # logPx = sum(gene.by.cell.prob * counts) # + sum(etaProb)
     logPx <- .perplexityGLogPx(
-      newCounts,
-      phi,
-      psi,
-      clusters(celdaMod)$y,
-      params(celdaMod)$L
+        counts,
+        phi,
+        psi,
+        modules(sce),
+        S4Vectors::metadata(sce)$celda_parameters$L
     ) # + sum(etaProb)
-    perplexity <- exp(- (logPx / sum(newCounts)))
+    perplexity <- exp(- (logPx / sum(counts)))
     return(perplexity)
-  }
-)
+}
 
 
 .reorderCeldaG <- function(counts, res) {
-  if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
-    res@clusters$y <- as.integer(as.factor(clusters(res)$y))
-    fm <- factorizeMatrix(counts = counts, celdaMod = res)
-    uniqueY <- sort(unique(clusters(res)$y))
-    cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
-    d <- .cosineDist(cs)
-    h <- stats::hclust(d, method = "complete")
-    res <- recodeClusterY(res,
-      from = h$order,
-      to = seq(length(h$order))
-    )
-  }
-  return(res)
+    if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
+        res@clusters$y <- as.integer(as.factor(clusters(res)$y))
+
+        xClass <- "matrix"
+        useAssay <- NULL
+        sce <- SingleCellExperiment::SingleCellExperiment(
+            assays = list(counts = counts))
+
+        sce <- .createSCEceldaG(celdaGMod = res,
+            sce = sce,
+            xClass = xClass,
+            useAssay = useAssay,
+            L = params(res)$L,
+            beta = params(a)$beta,
+            delta = params(a)$delta,
+            gamma = params(a)$gamma,
+            algorithm = NULL,
+            stopIter = NULL,
+            maxIter = NULL,
+            splitOnIter = NULL,
+            splitOnLast = NULL,
+            seed = NULL,
+            nchains = NULL,
+            yInitialize = NULL,
+            countChecksum = NULL,
+            yInit = NULL,
+            logfile = NULL,
+            verbose = NULL)
+
+        fm <- factorizeMatrix(sce, useAssay = "counts")
+        uniqueY <- sort(unique(clusters(res)$y))
+        cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
+        d <- .cosineDist(cs)
+        h <- stats::hclust(d, method = "complete")
+        res <- .recodeClusterY(res, from = h$order, to = seq(length(h$order)))
+    }
+    return(res)
 }
 
 

@@ -146,7 +146,7 @@ setMethod("celda_C",
         verbose = TRUE) {
 
         xClass <- "matrix"
-        useAssay = NULL
+        useAssay <- NULL
         sce <- SingleCellExperiment::SingleCellExperiment(
             assays = list(counts = x))
         sce <- .celdaCWithSeed(counts = x,
@@ -546,7 +546,7 @@ setMethod("celda_C",
   )
 
   if (isTRUE(reorder)) {
-    bestResult <- .reorderCelda_C(counts = counts, res = bestResult)
+    bestResult <- .reorderCeldaC(counts = counts, res = bestResult)
   }
 
   endTime <- Sys.time()
@@ -805,9 +805,9 @@ setMethod("celda_C",
         sampleLabel = cellSampleLabel,
         names = names)
     class(result) <- "celda_C"
-    result <- .reorderCelda_C(counts = cellCounts, res = result)
+    result <- .reorderCeldaC(counts = cellCounts, res = result)
 
-    return(list(z = celdaMod@clusters$z,
+    return(list(z = result@clusters$z,
         counts = cellCounts,
         sampleLabel = cellSampleLabel,
         G = G,
@@ -1042,14 +1042,40 @@ setMethod("celda_C",
 }
 
 
-.reorderCelda_C <- function(counts, res) {
-  if (params(res)$K > 2 & isTRUE(length(unique(celdaMod@clusters$z)) > 1)) {
-    res@clusters$z <- as.integer(as.factor(celdaMod@clusters$z))
-    fm <- factorizeMatrix(counts = counts, celdaMod = res)
-    uniqueZ <- sort(unique(celdaMod@clusters$z))
+.reorderCeldaC <- function(counts, res) {
+  if (params(res)$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
+    res@clusters$z <- as.integer(as.factor(res@clusters$z))
+
+    xClass <- "matrix"
+    useAssay <- NULL
+    sce <- SingleCellExperiment::SingleCellExperiment(
+        assays = list(counts = counts))
+
+    sce <- .createSCEceldaC(celdaCMod = res,
+        sce = sce,
+        xClass = xClass,
+        useAssay = useAssay,
+        K = params(res)$K,
+        alpha = params(a)$alpha,
+        beta = params(a)$beta,
+        algorithm = NULL,
+        stopIter = NULL,
+        maxIter = NULL,
+        splitOnIter = NULL,
+        splitOnLast = NULL,
+        seed = NULL,
+        nchains = NULL,
+        zInitialize = NULL,
+        countChecksum = NULL,
+        zInit = NULL,
+        logfile = NULL,
+        verbose = NULL)
+
+    fm <- factorizeMatrix(sce, useAssay = "counts")
+    uniqueZ <- sort(unique(res@clusters$z))
     d <- .cosineDist(fm$posterior$module[, uniqueZ])
     h <- stats::hclust(d, method = "complete")
-    res <- recodeClusterZ(res,
+    res <- .recodeClusterZ(res,
       from = h$order,
       to = seq(length(h$order))
     )

@@ -562,7 +562,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     })
 
 
-#' @title Calculate the Log-likelihood of celda model
+#' @title Calculate the Log-likelihood of a celda model
 #' @description Calculate the log-likelihood for user-provided cell population
 #'  and feature module cluster
 #'  assignments on the count matrix, per the desired celda model.
@@ -609,7 +609,7 @@ setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
 #' @title Get the conditional probabilities of cell in subpopulations from celda
 #'  model
 #' @description Calculate the conditional probability of each cell belonging to
-#'  each subpopulation given all other cell cluster assignments or/and
+#'  each subpopulation given all other cell cluster assignments and/or
 #'  each feature belonging to each module given all other feature cluster
 #'  assignments in a celda model.
 #' @param sce A \linkS4class{SingleCellExperiment} object returned by
@@ -625,7 +625,7 @@ setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
 #' data(sceCelda_CG)
 #' clusterProb <- clusterProbability(sceCelda_CG, log = TRUE)
 #' @return A list containging a matrix for the conditional cell subpopulation
-#'  cluster and feature module probabilities.
+#'  cluster and/or feature module probabilities.
 #' @export
 setGeneric("clusterProbability",
     function(sce, ...) {
