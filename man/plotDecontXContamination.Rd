@@ -20,7 +20,7 @@ decontX on a count matrix.}
 the first batch in the list will be selected. Default \code{NULL}.}
 
 \item{colorScale}{Character vector. Contains the color spectrum to be passed
-to \link[ggplot2]{scale_colour_gradientn} from package 'ggplot2'. Default
+to \code{scale_colour_gradientn} from package 'ggplot2'. Default
 c("blue","green","yellow","orange","red").}
 
 \item{size}{Numeric. Size of points in the scatterplot. Default 1.}
