@@ -7,7 +7,7 @@
 #' @param batch Character. Batch of cells to plot. If \code{NULL}, then
 #' the first batch in the list will be selected. Default \code{NULL}.
 #' @param colorScale Character vector. Contains the color spectrum to be passed
-#' to \link[ggplot2]{scale_colour_gradientn} from package 'ggplot2'. Default
+#' to \code{scale_colour_gradientn} from package 'ggplot2'. Default
 #' c("blue","green","yellow","orange","red").
 #' @param size Numeric. Size of points in the scatterplot. Default 1.
 #' @return Returns a \code{ggplot} object.
