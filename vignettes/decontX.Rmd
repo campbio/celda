@@ -95,7 +95,7 @@ plotDecontXContamination(pbmc4k)
 ## Expression of markers on UMAP
 Known marker genes can also be plotted on the UMAP to identify the cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ, S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells, GNLY for NK-cells, and PPBP for megakaryocytes.
 
-```{r, }
+```{r, message=FALSE}
 library(scater)
 pbmc4k <- logNormCounts(pbmc4k)
 plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k),
