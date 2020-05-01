@@ -225,8 +225,8 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
   df$markerLabels <- factor(df$markerLabels, levels = names(markers))
 
   plt <- ggplot2::ggplot(df, ggplot2::aes(
-    x = df$cellTypeLabels,
-    y = df$percent, fill = assay
+    x = cellTypeLabels,
+    y = percent, fill = assay
   )) +
     ggplot2::geom_bar(
       stat = "identity",
@@ -261,9 +261,9 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
 
   if (isTRUE(labelBars)) {
     plt <- plt + ggplot2::geom_text(ggplot2::aes(
-      x = df$cellTypeLabels,
-      y = df$percent + 2.5,
-      label = df$percent
+      x = cellTypeLabels,
+      y = percent + 2.5,
+      label = percent
     ),
     position = ggplot2::position_dodge2(width = 0.9, preserve = "single"),
     size = labelSize
