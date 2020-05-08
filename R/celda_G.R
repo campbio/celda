@@ -1127,61 +1127,6 @@ setMethod("celda_G",
 }
 
 
-#' @title Lookup the module of a feature
-#' @description Finds the module assignments of given features in a `celda_G()`
-#'  model.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Model of class `celda_G`.
-#' @param feature Character vector. The module assignemnts will be found for
-#'  feature names in this vector.
-#' @param exactMatch Logical. Whether an exact match or a partial match using
-#'  `grep()` is used to look up the feature in the rownames of the counts
-#'  matrix. Default TRUE.
-#' @return List. Each element contains the module of the provided feature.
-#' @seealso `celda_G()` for clustering features
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' module <- featureModuleLookup(
-#'   celdaGSim$counts,
-#'   celdaGMod,
-#'   c("Gene_1", "Gene_XXX")
-#' )
-#' @export
-setMethod(
-  "featureModuleLookup", signature(celdaMod = "celda_G"),
-  function(counts, celdaMod, feature, exactMatch = TRUE) {
-    if (!isTRUE(exactMatch)) {
-      feature <- unlist(lapply(
-        seq(length(feature)),
-        function(x) {
-          rownames(counts)[grep(feature[x], rownames(counts))]
-        }
-      ))
-    }
-
-    featList <- lapply(
-      seq(length(feature)),
-      function(x) {
-        if (feature[x] %in% rownames(counts)) {
-          return(celdaMod@clusters$y[which(rownames(counts) ==
-            feature[x])])
-        } else {
-          return(paste0(
-            "No feature was identified matching '",
-            feature[x],
-            "'."
-          ))
-        }
-      }
-    )
-    names(featList) <- feature
-    return(featList)
-  }
-)
-
-
 .createSCEceldaG <- function(celdaGMod,
     sce,
     xClass,

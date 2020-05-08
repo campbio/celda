@@ -1048,6 +1048,36 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
 }
 
 
+.featureModuleLookupG <- function(sce, feature, exactMatch) {
+    if (!isTRUE(exactMatch)) {
+        feature <- unlist(lapply(
+            seq(length(feature)),
+            function(x) {
+                rownames(sce)[grep(feature[x], rownames(sce))]
+            }
+        ))
+    }
+
+    featList <- lapply(
+        seq(length(feature)),
+        function(x) {
+            if (feature[x] %in% rownames(sce)) {
+                return(modules(sce)[which(rownames(sce) ==
+                        feature[x])])
+            } else {
+                return(paste0(
+                    "No feature was identified matching '",
+                    feature[x],
+                    "'."
+                ))
+            }
+        }
+    )
+    names(featList) <- feature
+    return(featList)
+}
+
+
 #' @title Uniform Manifold Approximation and Projection (UMAP) dimension
 #'  reduction for celda \code{sce} object
 #' @description Embeds cells in two dimensions using \link[uwot]{umap} based on
