@@ -1033,8 +1033,8 @@ setMethod("celda_G",
 
 
 .reorderCeldaG <- function(counts, res) {
-    if (params(res)$L > 2 & isTRUE(length(unique(clusters(res)$y)) > 1)) {
-        res@clusters$y <- as.integer(as.factor(clusters(res)$y))
+    if (params(res)$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
+        res@clusters$y <- as.integer(as.factor(res@clusters$y))
 
         xClass <- "matrix"
         useAssay <- NULL
@@ -1063,7 +1063,7 @@ setMethod("celda_G",
             verbose = NULL)
 
         fm <- factorizeMatrix(sce, useAssay = "counts")
-        uniqueY <- sort(unique(clusters(res)$y))
+        uniqueY <- sort(unique(res@clusters$y))
         cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -1073,265 +1073,18 @@ setMethod("celda_G",
 }
 
 
-#' @title Heatmap for celda_CG
-#' @description Renders an expression heatmap to visualize `celda_CG()` results.
-#'  The top `nfeatures` for each module will be included in the heatmap.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_G`.
-#' @param nfeatures Integer. Maximum number of features to select for each
-#'  module. Default 25.
-#' @param ... Additional parameters.
-#' @seealso `celda_G()` for clustering features and `celdaTsne()` for
-#'  generating 2-dimensional coordinates.
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' celdaHeatmap(celdaGSim$counts, celdaGMod)
-#' @return list A list containing the dendrograms and the heatmap grob.
-#' @export
-setMethod(
-  "celdaHeatmap", signature(celdaMod = "celda_G"),
-  function(counts, celdaMod, nfeatures = 25, ...) {
-    fm <- factorizeMatrix(counts, celdaMod, type = "proportion")
-    top <- topRank(fm$proportions$module, n = nfeatures)
+.celdaHeatmapCelda_G <- function(sce, useAssay, nfeatures, ...) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    fm <- factorizeMatrix(sce = sce, useAssay = useAssay, type = "proportion")
+    top <- celda::topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
     norm <- normalizeCounts(counts,
-      normalize = "proportion",
-      transformationFun = sqrt
+        normalize = "proportion",
+        transformationFun = sqrt
     )
-    plt <- plotHeatmap(norm[ix, ], y = clusters(celdaMod)$y[ix], ...)
+    plt <- plotHeatmap(norm[ix, ], y = celdaMod@clusters$y[ix], ...)
     invisible(plt)
-  }
-)
-
-#' @title tSNE for celda_G
-#' @description Embeds cells in two dimensions using tSNE based on a `celda_G`
-#'  model. tSNE is run on module probabilities to reduce the number of features
-#'  instead of using PCA. Module probabilities square-root trasformed before
-#'  applying tSNE.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_G`.
-#' @param maxCells Integer. Maximum number of cells to plot. Cells will be
-#'  randomly subsampled if ncol(conts) > maxCells. Larger numbers of cells
-#'  requires more memory. If NULL, no subsampling will be performed.
-#'  Default NULL.
-#' @param minClusterSize Integer. Do not subsample cell clusters below this
-#'  threshold. Default 100.
-#' @param initialDims Integer. PCA will be used to reduce the dimentionality of
-#'  the dataset. The top 'initialDims' principal components will be used for
-#'  tSNE. Default 20.
-#' @param modules Integer vector. Determines which feature modules to use for
-#'  tSNE. If NULL, all modules will be used. Default NULL.
-#' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
-#' @param maxIter Integer. Maximum number of iterations in tSNE generation.
-#'  Default 2500.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @seealso `celda_G()` for clustering features and `celdaHeatmap()` for
-#'  displaying expression
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' tsneRes <- celdaTsne(celdaGSim$counts, celdaGMod)
-#' @return A two column matrix of t-SNE coordinates.
-#' @export
-setMethod(
-  "celdaTsne", signature(celdaMod = "celda_G"),
-  function(counts,
-           celdaMod,
-           maxCells = NULL,
-           minClusterSize = 100,
-           initialDims = 20,
-           modules = NULL,
-           perplexity = 20,
-           maxIter = 2500,
-           seed = 12345) {
-    if (is.null(seed)) {
-      res <- .celdaTsneG(
-        counts = counts,
-        celdaMod = celdaMod,
-        maxCells = maxCells,
-        minClusterSize = minClusterSize,
-        initialDims = initialDims,
-        modules = modules,
-        perplexity = perplexity,
-        maxIter = maxIter
-      )
-    } else {
-      with_seed(
-        seed,
-        res <- .celdaTsneG(
-          counts = counts,
-          celdaMod = celdaMod,
-          maxCells = maxCells,
-          minClusterSize = minClusterSize,
-          initialDims = initialDims,
-          modules = modules,
-          perplexity = perplexity,
-          maxIter = maxIter
-        )
-      )
-    }
-
-    return(res)
-  }
-)
-
-
-.celdaTsneG <- function(counts,
-                        celdaMod,
-                        maxCells = NULL,
-                        minClusterSize = 100,
-                        initialDims = 20,
-                        modules = NULL,
-                        perplexity = 20,
-                        maxIter = 2500) {
-  preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
-    counts,
-    celdaMod,
-    maxCells,
-    minClusterSize,
-    modules
-  )
-  res <- .calculateTsne(preparedCountInfo$norm,
-    doPca = FALSE,
-    perplexity = perplexity,
-    maxIter = maxIter
-  )
-  final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-  final[preparedCountInfo$cellIx, ] <- res
-  rownames(final) <- colnames(counts)
-  colnames(final) <- c("tSNE_1", "tSNE_2")
-  return(final)
-}
-
-
-#' @title umap for celda_G
-#' @description Embeds cells in two dimensions using umap based on a `celda_G`
-#'  model. umap is run on module probabilities to reduce the number of features
-#'  instead of using PCA. Module probabilities square-root trasformed before
-#'  applying tSNE.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celdaMod`.
-#' @param celdaMod Celda object of class `celda_CG`.
-#' @param maxCells Integer. Maximum number of cells to plot. Cells will be
-#'  randomly subsampled if ncol(counts) > maxCells. Larger numbers of cells
-#'  requires more memory. If NULL, no subsampling will be performed.
-#'  Default NULL.
-#' @param minClusterSize Integer. Do not subsample cell clusters below this
-#'  threshold. Default 100.
-#' @param modules Integer vector. Determines which features modules to use for
-#'  UMAP. If NULL, all modules will be used. Default NULL.
-#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
-#'  \link[withr]{with_seed} are made.
-#' @param nNeighbors The size of local neighborhood used for
-#'   manifold approximation. Larger values result in more global
-#'   views of the manifold, while smaller values result in more
-#'   local data being preserved. Default 30.
-#'   See `?uwot::umap` for more information.
-#' @param minDist The effective minimum distance between embedded points.
-#'   Smaller values will result in a more clustered/clumped
-#'   embedding where nearby points on the manifold are drawn
-#'   closer together, while larger values will result on a more
-#'   even dispersal of points. Default 0.2.
-#'   See `?uwot::umap` for more information.
-#' @param spread The effective scale of embedded points. In combination with
-#'   ‘min_dist’, this determines how clustered/clumped the
-#'   embedded points are. Default 1.
-#'   See `?uwot::umap` for more information.
-#' @param cores Number of threads to use. Default 1.
-#' @param ... Other parameters to pass to `uwot::umap`.
-#' @seealso `celda_G()` for clustering features and cells  and `celdaHeatmap()`
-#'  for displaying expression
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' umapRes <- celdaUmap(celdaGSim$counts, celdaGMod)
-#' @return A two column matrix of umap coordinates
-#' @export
-setMethod(
-  "celdaUmap", signature(celdaMod = "celda_G"),
-  function(counts,
-           celdaMod,
-           maxCells = NULL,
-           minClusterSize = 100,
-           modules = NULL,
-           seed = 12345,
-           nNeighbors = 30,
-           minDist = 0.2,
-           spread = 1,
-           cores = 1,
-           ...) {
-    if (is.null(seed)) {
-      res <- .celdaUmapG(
-        counts = counts,
-        celdaMod = celdaMod,
-        maxCells = maxCells,
-        minClusterSize = minClusterSize,
-        modules = modules,
-        nNeighbors = nNeighbors,
-        minDist = minDist,
-        spread = spread,
-        cores = cores,
-        ...
-      )
-    } else {
-      with_seed(
-        seed,
-        res <- .celdaUmapG(
-          counts = counts,
-          celdaMod = celdaMod,
-          maxCells = maxCells,
-          minClusterSize = minClusterSize,
-          modules = modules,
-          nNeighbors = nNeighbors,
-          minDist = minDist,
-          spread = spread,
-          cores = cores,
-          ...
-        )
-      )
-    }
-
-    return(res)
-  }
-)
-
-
-.celdaUmapG <- function(counts,
-                        celdaMod,
-                        maxCells = NULL,
-                        minClusterSize = 100,
-                        modules = NULL,
-                        nNeighbors = nNeighbors,
-                        minDist = minDist,
-                        spread = spread,
-                        cores = cores,
-                        ...) {
-  preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
-    counts,
-    celdaMod,
-    maxCells,
-    minClusterSize,
-    modules
-  )
-  umapRes <- .calculateUmap(preparedCountInfo$norm,
-    nNeighbors = nNeighbors,
-    minDist = minDist,
-    spread = spread,
-    cores = cores,
-    ...
-  )
-
-  final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-  final[preparedCountInfo$cellIx, ] <- umapRes
-  rownames(final) <- colnames(counts)
-  colnames(final) <- c("UMAP_1", "UMAP_2")
-  return(final)
 }
 
 
@@ -1411,7 +1164,7 @@ setMethod(
       seq(length(feature)),
       function(x) {
         if (feature[x] %in% rownames(counts)) {
-          return(clusters(celdaMod)$y[which(rownames(counts) ==
+          return(celdaMod@clusters$y[which(rownames(counts) ==
             feature[x])])
         } else {
           return(paste0(
