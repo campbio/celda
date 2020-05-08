@@ -1173,10 +1173,10 @@ setMethod("celda_G",
         finalLogLik = celdaCGMod@finalLogLik,
         featureModuleLevels = sort(unique(celdaCGMod@clusters$y)))
 
-    SummarizedExperiment::rowData(sce)["row_name"] <- celdaCGMod@names$row
-    SummarizedExperiment::colData(sce)["column_name"] <-
+    SummarizedExperiment::rowData(sce)["rownames"] <- celdaCGMod@names$row
+    SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCGMod@names$column
-    SummarizedExperiment::rowData(sce)["feature_module"] <-
+    SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
         celdaCGMod@clusters$y
 
     return(sce)
@@ -1200,8 +1200,8 @@ setMethod("celda_G",
         delta = simList$delta,
         seed = seed)
 
-    SummarizedExperiment::rowData(sce)["row_name"] <- rownames(simList$counts)
-    SummarizedExperiment::colData(sce)["column_name"] <-
+    SummarizedExperiment::rowData(sce)["rownames"] <- rownames(simList$counts)
+    SummarizedExperiment::colData(sce)["colnames"] <-
         colnames(simList$counts)
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <- simList$y
 

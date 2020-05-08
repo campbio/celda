@@ -151,6 +151,7 @@ recodeClusterZ <- function(sce, from, to) {
 }
 
 
+# for deprecated celda model objects
 .recodeClusterZ <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
@@ -193,6 +194,7 @@ recodeClusterY <- function(sce, from, to) {
 }
 
 
+# for deprecated celda model objects
 .recodeClusterY <- function(celdaMod, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
@@ -426,24 +428,27 @@ distinctColors <- function(n,
 }
 
 
-#' @title Outputting a feature module table
+#' @title Output a feature module table
 #' @description Creates a table that contains the list of features in
 #'  each feature module.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
-#' @param celdaMod Celda object of class "celda_G" or "celda_CG".
+#' @param sce A \linkS4class{SingleCellExperiment} object returned by
+#'  \link{celda_G}, or \link{celda_CG}, with the matrix
+#'  located in the \code{useAssay} assay slot.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
 #' @param outputFile File name for feature module table. If NULL, file will
 #'  not be created. Default NULL.
 #' @return Matrix. Contains a list of features per each column (feature module)
 #' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
+#' data(sceCelda_CG)
+#' featureModuleTable(csceCelda_CG)
 #' @importFrom stringi stri_list2matrix
 #' @export
-featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
-  factorize.matrix <- factorizeMatrix(counts, celdaMod)
+featureModuleTable <- function(sce, useAssay = "counts", outputFile = NULL) {
+  factorize.matrix <- factorizeMatrix(sce, useAssay)
   allGenes <-
-    topRank(factorize.matrix$proportions$module, n = nrow(counts))
+    topRank(factorize.matrix$proportions$module, n = nrow(sce))
   res <- as.data.frame(stringi::stri_list2matrix(allGenes$names))
   res <- apply(res, c(1, 2), function(x) {
     if (is.na(x)) {
@@ -469,7 +474,6 @@ featureModuleTable <- function(counts, celdaMod, outputFile = NULL) {
     )
   }
 }
-
 
 
 #' @title Retrieve row index for a set of features

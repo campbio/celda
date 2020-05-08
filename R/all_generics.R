@@ -252,7 +252,7 @@ setGeneric("sampleLabel",
 setMethod("sampleLabel",
     signature(sce = "SingleCellExperiment"),
     function(sce) {
-        return(SummarizedExperiment::colData(sce)$sample_label)
+        return(SummarizedExperiment::colData(sce)$celda_sample_label)
     })
 
 
@@ -265,7 +265,7 @@ setGeneric("sampleLabel<-",
 #' @export
 setReplaceMethod("sampleLabel", signature(sce = "SingleCellExperiment"),
     function(sce, value) {
-        SummarizedExperiment::colData(sce)$sample_label <- value
+        SummarizedExperiment::colData(sce)$celda_sample_label <- value
         return(sce)
     })
 
@@ -746,7 +746,7 @@ setMethod("perplexity", signature(sce = "SingleCellExperiment"),
 #'  simulated count matrix stored in the "counts" assay slot. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata} slot. For
 #'  \code{"celda_CG"} and \code{"celda_C"} models,
-#'  columns \code{sample_label} and \code{celda_cell_cluster} in
+#'  columns \code{celda_sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
 #'  cell population clusters. For \code{"celda_CG"} and \code{"celda_G"}
 #'  models, column \code{celda_feature_module} in

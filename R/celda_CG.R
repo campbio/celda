@@ -65,9 +65,9 @@
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
-#'  Columns \code{sample_label} and \code{celda_cell_cluster} in
+#'  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
-#'  population clusters. Column \code{feature_module} in
+#'  population clusters. Column \code{celda_feature_module} in
 #'  \link[SummarizedExperiment]{rowData} contain feature modules.
 #' @seealso \link{celda_G} for feature clustering and \link{celda_C} for
 #'  clustering cells. \link{celdaGridSearch} can be used to run multiple
@@ -1669,14 +1669,14 @@ setMethod("celda_CG",
         cellClusterLevels = sort(unique(celdaCGMod@clusters$z)),
         featureModuleLevels = sort(unique(celdaCGMod@clusters$y)))
 
-    SummarizedExperiment::rowData(sce)["row_name"] <- celdaCGMod@names$row
-    SummarizedExperiment::colData(sce)["column_name"] <-
+    SummarizedExperiment::rowData(sce)["rownames"] <- celdaCGMod@names$row
+    SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCGMod@names$column
-    SummarizedExperiment::colData(sce)["sample_label"] <-
+    SummarizedExperiment::colData(sce)["celda_sample_label"] <-
         celdaCGMod@sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
         celdaCGMod@clusters$z
-    SummarizedExperiment::rowData(sce)["feature_module"] <-
+    SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
         celdaCGMod@clusters$y
 
     return(sce)
@@ -1705,10 +1705,11 @@ setMethod("celda_CG",
         delta = simList$delta,
         seed = seed)
 
-    SummarizedExperiment::rowData(sce)["row_name"] <- rownames(simList$counts)
-    SummarizedExperiment::colData(sce)["column_name"] <-
+    SummarizedExperiment::rowData(sce)["rownames"] <- rownames(simList$counts)
+    SummarizedExperiment::colData(sce)["colnames"] <-
         colnames(simList$counts)
-    SummarizedExperiment::colData(sce)["sample_label"] <- simList$sampleLabel
+    SummarizedExperiment::colData(sce)["celda_sample_label"] <-
+        simList$sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <- simList$y
 

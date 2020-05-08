@@ -53,7 +53,7 @@
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
-#'  Columns \code{sample_label} and \code{celda_cell_cluster} in
+#'  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters.
 #' @seealso \link{celda_G} for feature clustering and \link{celda_CG} for
@@ -1263,10 +1263,10 @@ setMethod("celda_C",
         finalLogLik = celdaCMod@finalLogLik,
         cellClusterLevels = sort(unique(celdaCMod@clusters$z)))
 
-    SummarizedExperiment::rowData(sce)["row_name"] <- celdaCMod@names$row
-    SummarizedExperiment::colData(sce)["column_name"] <-
+    SummarizedExperiment::rowData(sce)["rownames"] <- celdaCMod@names$row
+    SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCMod@names$column
-    SummarizedExperiment::colData(sce)["sample_label"] <-
+    SummarizedExperiment::colData(sce)["celda_sample_label"] <-
         celdaCMod@sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
         celdaCMod@clusters$z
@@ -1293,10 +1293,11 @@ setMethod("celda_C",
         beta = simList$beta,
         seed = seed)
 
-    SummarizedExperiment::rowData(sce)["row_name"] <- rownames(simList$counts)
-    SummarizedExperiment::colData(sce)["column_name"] <-
+    SummarizedExperiment::rowData(sce)["rownames"] <- rownames(simList$counts)
+    SummarizedExperiment::colData(sce)["colnames"] <-
         colnames(simList$counts)
-    SummarizedExperiment::colData(sce)["sample_label"] <- simList$sampleLabel
+    SummarizedExperiment::colData(sce)["celda_sample_label"] <-
+        simList$sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
 
     return(sce)
