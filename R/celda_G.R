@@ -1159,7 +1159,7 @@ setMethod(
                         modules = NULL,
                         perplexity = 20,
                         maxIter = 2500) {
-  preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
+  preparedCountInfo <- .prepareCountsForDimReductionCeldaG(
     counts,
     celdaMod,
     maxCells,
@@ -1282,7 +1282,7 @@ setMethod(
                         spread = spread,
                         cores = cores,
                         ...) {
-  preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
+  preparedCountInfo <- .prepareCountsForDimReductionCeldaG(
     counts,
     celdaMod,
     maxCells,
@@ -1305,41 +1305,42 @@ setMethod(
 }
 
 
-.prepareCountsForDimReductionCeldaCG <- function(counts,
-                                                 celdaMod,
-                                                 maxCells = NULL,
-                                                 minClusterSize = 100,
-                                                 modules = NULL) {
-  if (is.null(maxCells) || maxCells > ncol(counts)) {
-    maxCells <- ncol(counts)
-    cellIx <- seq_len(ncol(counts))
-  } else {
-    cellIx <- sample(seq(ncol(counts)), maxCells)
-  }
+.prepareCountsForDimReductionCeldaG <- function(counts,
+    celdaMod,
+    maxCells = NULL,
+    minClusterSize = 100,
+    modules = NULL) {
 
-  fm <- factorizeMatrix(
-    counts = counts,
-    celdaMod = celdaMod,
-    type = "counts"
-  )
-
-  modulesToUse <- seq(nrow(fm$counts$cell))
-  if (!is.null(modules)) {
-    if (!all(modules %in% modulesToUse)) {
-      stop(
-        "'modules' must be a vector of numbers between 1 and ",
-        modulesToUse,
-        "."
-      )
+    if (is.null(maxCells) || maxCells > ncol(counts)) {
+        maxCells <- ncol(counts)
+        cellIx <- seq_len(ncol(counts))
+    } else {
+        cellIx <- sample(seq(ncol(counts)), maxCells)
     }
-    modulesToUse <- modules
-  }
 
-  norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
-    normalize = "proportion",
-    transformationFun = sqrt
-  ))
-  return(list(norm = norm, cellIx = cellIx))
+    fm <- factorizeMatrix(
+        counts = counts,
+        celdaMod = celdaMod,
+        type = "counts"
+    )
+
+    modulesToUse <- seq(nrow(fm$counts$cell))
+    if (!is.null(modules)) {
+        if (!all(modules %in% modulesToUse)) {
+            stop(
+                "'modules' must be a vector of numbers between 1 and ",
+                modulesToUse,
+                "."
+            )
+        }
+        modulesToUse <- modules
+    }
+
+    norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
+        normalize = "proportion",
+        transformationFun = sqrt
+    ))
+    return(list(norm = norm, cellIx = cellIx))
 }
 
 
