@@ -1296,7 +1296,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     cores = cores,
     ...) {
 
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce = sce,
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaG(sce = sce,
         useAssay = useAssay,
         maxCells = maxCells,
         minClusterSize = minClusterSize,
