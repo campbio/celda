@@ -1,18 +1,25 @@
 #' @title Run Celda in parallel with multiple parameters
 #' @description Run Celda with different combinations of parameters and
-#'  multiple chains in parallel. The variable `availableModels` contains the
-#'  potential models that can be utilized. Different parameters to be tested
-#'  should be stored in a list and passed to the argument `paramsTest`. Fixed
-#'  parameters to be used in all models, such as `sampleLabel`, can be passed
-#'  as a list to the argument `paramsFixed`. When `verbose = TRUE`, output
-#'  from each chain will be sent to a log file but not be displayed in stdout.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
-#' @param model Celda model. Options available in `celda::availableModels`.
+#'  multiple chains in parallel. The variable \link{availableModels} contains
+#'  the potential models that can be utilized. Different parameters to be tested
+#'  should be stored in a list and passed to the argument \code{paramsTest}.
+#'  Fixed parameters to be used in all models, such as \code{sampleLabel}, can
+#'  be passed as a list to the argument \code{paramsFixed}. When
+#'  \code{verbose = TRUE}, output from each chain will be sent to a log file
+#'  but not be displayed in stdout.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param model Celda model. Options available in \link{availableModels}.
 #' @param paramsTest List. A list denoting the combinations of parameters to
-#'  run in a celda model. For example, `list(K = seq(5, 10), L = seq(15, 20))`
+#'  run in a celda model. For example,
+#'  \code{list(K = seq(5, 10), L = seq(15, 20))}
 #'  will run all combinations of K from 5 to 10 and L from 15 to 20 in model
-#'  `celda_CG()`.
+#'  \link{celda_CG}.
 #' @param paramsFixed List. A list denoting additional parameters to use in
 #'  each celda model. Default NULL.
 #' @param maxIter Integer. Maximum number of iterations of sampling to
@@ -30,12 +37,14 @@
 #'  execution. Default TRUE.
 #' @param logfilePrefix Character. Prefix for log files from worker threads
 #'  and main process. Default "Celda".
-#' @return Object of class `celdaList`, which contains results for all model
-#'  parameter combinations and summaries of the run parameters
-#' @seealso `celda_G()` for feature clustering, `celda_C()` for clustering of
-#'  cells, and `celda_CG()` for simultaneous clustering of features and cells.
-#'  `subsetCeldaList()` can subset the `celdaList` object. `selectBestModel()`
-#'  can get the best model for each combination of parameters.
+#' @return A \linkS4class{SingleCellExperiment} object. Function
+#'  parameter settings and celda model results are stored in the
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
+#' @seealso \link{celda_G} for feature clustering, \link{celda_C} for
+#'  clustering of cells, and \link{celda_CG} for simultaneous clustering of
+#'  features and cells. \link{subsetCeldaList} can subset the \link{celdaList}
+#'  object. \link{selectBestModel} can get the best model for each combination
+#'  of parameters.
 #' @import foreach
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
@@ -49,11 +58,115 @@
 #'   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
 #'   bestOnly = TRUE,
 #'   nchains = 1,
-#'   cores = 1
+#'   cores = 1,
 #' )
 #' }
 #' @export
-celdaGridSearch <- function(counts,
+setGeneric("celdaGridSearch", function(x, ...) {
+    standardGeneric("celdaGridSearch")})
+
+
+#' @rdname celdaGridSearch
+#' @export
+setMethod("celdaGridSearch",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        model,
+        paramsTest,
+        paramsFixed = NULL,
+        maxIter = 200,
+        nchains = 3,
+        cores = 1,
+        bestOnly = TRUE,
+        perplexity = TRUE,
+        verbose = TRUE,
+        logfilePrefix = "Celda") {
+
+        xClass <- "SingleCellExperiment"
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        celdaList <- .celdaGridSearch(counts = counts,
+            model = model,
+            paramsTest = paramsTest,
+            paramsFixed = paramsFixed,
+            maxIter = maxIter,
+            nchains = nchains,
+            cores = cores,
+            bestOnly = bestOnly,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfilePrefix = logfilePrefix)
+
+        sce <- .createSCEceldaGridSearch(celdaList = celdaList,
+            sce = x,
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            paramsTest = paramsTest,
+            paramsFixed = paramsFixed,
+            maxIter = maxIter,
+            nchains = nchains,
+            cores = cores,
+            bestOnly = bestOnly,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfilePrefix = logfilePrefix)
+        return(sce)
+    })
+
+
+#' @rdname celdaGridSearch
+#' @export
+setMethod("celdaGridSearch",
+    signature(x = "matrix"),
+    function(x,
+        model,
+        paramsTest,
+        paramsFixed = NULL,
+        maxIter = 200,
+        nchains = 3,
+        cores = 1,
+        bestOnly = TRUE,
+        perplexity = TRUE,
+        verbose = TRUE,
+        logfilePrefix = "Celda") {
+
+        xClass <- "matrix"
+        useAssay <- NULL
+        sce <- SingleCellExperiment::SingleCellExperiment(
+            assays = list(counts = x))
+        celdaList <- .celdaGridSearch(counts = x,
+            model = model,
+            paramsTest = paramsTest,
+            paramsFixed = paramsFixed,
+            maxIter = maxIter,
+            nchains = nchains,
+            cores = cores,
+            bestOnly = bestOnly,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfilePrefix = logfilePrefix)
+
+        sce <- .createSCEceldaGridSearch(celdaList = celdaList,
+            sce = sce,
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            paramsTest = paramsTest,
+            paramsFixed = paramsFixed,
+            maxIter = maxIter,
+            nchains = nchains,
+            cores = cores,
+            bestOnly = bestOnly,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfilePrefix = logfilePrefix)
+        return(sce)
+    })
+
+
+.celdaGridSearch <- function(counts,
                             model,
                             paramsTest,
                             paramsFixed = NULL,
@@ -393,4 +506,38 @@ celda <- function() {
     "celdaGridSearch: Run Celda with different combinations of",
     " parameters and multiple chains in parallel."
   )
+}
+
+
+.createSCEceldaGridSearch <- function(celdaList,
+    sce,
+    xClass,
+    useAssay,
+    model,
+    paramsTest,
+    paramsFixed,
+    maxIter,
+    nchains,
+    cores,
+    bestOnly,
+    perplexity,
+    verbose,
+    logfilePrefix) {
+
+    S4Vectors::metadata(sce)[["celda_grid_search"]] <- celdaList
+
+    S4Vectors::metadata(sce)$celda_grid_search@celdaGridSearchParameters <-
+        list(xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            paramsTest = paramsTest,
+            paramsFixed = paramsFixed,
+            maxIter = maxIter,
+            nchains = nchains,
+            cores = cores,
+            bestOnly = bestOnly,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfilePrefix = logfilePrefix)
+    return(sce)
 }

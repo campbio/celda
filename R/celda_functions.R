@@ -447,8 +447,7 @@ distinctColors <- function(n,
 #' @export
 featureModuleTable <- function(sce, useAssay = "counts", outputFile = NULL) {
   factorize.matrix <- factorizeMatrix(sce, useAssay)
-  allGenes <-
-    topRank(factorize.matrix$proportions$module, n = nrow(sce))
+  allGenes <- topRank(factorize.matrix$proportions$module, n = nrow(sce))
   res <- as.data.frame(stringi::stri_list2matrix(allGenes$names))
   res <- apply(res, c(1, 2), function(x) {
     if (is.na(x)) {

@@ -310,14 +310,12 @@ setClass("celda_G", contains = "celdaModel")
 
 setClass("celda_CG", contains = c("celda_C", "celda_G"))
 
-setClass(
-  "celdaList",
-  representation(
-    runParams = "data.frame",
-    resList = "list",
-    countChecksum = "character",
-    perplexity = "matrix"
-  )
+setClass("celdaList",
+    slots = c(runParams = "data.frame",
+        resList = "list",
+        countChecksum = "character",
+        perplexity = "matrix",
+        celdaGridSearchParameters = "list")
 )
 
 
