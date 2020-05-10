@@ -150,7 +150,7 @@ celdaGridSearch <- function(counts,
 
   if (is.null(allSeeds)) {
     runParams <- cbind(runParams,
-      seed = rep("NULL", nrow(runParams) / nchains))
+      seed = rep("NULL", nrow(runParams)))
   } else {
     runParams <- cbind(runParams,
       seed = rep(allSeeds, nrow(runParams) / nchains))
