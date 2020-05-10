@@ -208,6 +208,7 @@ celdaGridSearch <- function(counts,
       chainParams[[j]] <- current.run[[j]]
     }
     chainParams$counts <- counts
+    # silently ignored if allSeeds is NULL!
     chainParams$seed <- allSeeds[ifelse(i %% nchains == 0,
       nchains, i %% nchains)]
     chainParams$maxIter <- maxIter
@@ -227,7 +228,11 @@ celdaGridSearch <- function(counts,
     )
 
     ## Run model
-    res <- do.call(model, c(chainParams, paramsFixed))
+    if (is.null(seed)) {
+      res <- do.call(model, c(chainParams, paramsFixed, list(seed = NULL)))
+    } else {
+      res <- do.call(model, c(chainParams, paramsFixed))
+    }
     return(list(res))
   }
   parallel::stopCluster(cl)
