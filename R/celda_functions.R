@@ -128,7 +128,7 @@ normalizeCounts <- function(counts,
 #'  \code{celda_cell_cluster} in \link[SummarizedExperiment]{colData}.
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(clusters(sce))} that correspond to the original cluster labels in
-#'  \code{sce).
+#'  \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(clusters(sce))} that correspond to the new cluster labels.
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell cluster
@@ -156,10 +156,10 @@ recodeClusterZ <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(clusters(celdaMod)$z)) {
+    if (is.null(celdaMod@clusters$z)) {
         stop("Provided celdaMod argument does not have a z attribute")
     }
-    celdaMod@clusters$z <- plyr::mapvalues(clusters(celdaMod)$z, from, to)
+    celdaMod@clusters$z <- plyr::mapvalues(celdaMod@clusters$z, from, to)
     return(celdaMod)
 }
 
@@ -199,10 +199,10 @@ recodeClusterY <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(clusters(celdaMod)$y)) {
+    if (is.null(celdaMod@clusters$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    celdaMod@clusters$y <- plyr::mapvalues(clusters(celdaMod)$y, from, to)
+    celdaMod@clusters$y <- plyr::mapvalues(celdaMod@clusters$y, from, to)
     return(celdaMod)
 }
 
@@ -224,8 +224,8 @@ recodeClusterY <- function(sce, from, to) {
 compareCountMatrix <- function(counts,
                                celdaMod,
                                errorOnMismatch = TRUE) {
-  if ("y" %in% names(clusters(celdaMod))) {
-    if (nrow(counts) != length(clusters(celdaMod)$y)) {
+  if ("y" %in% names(celdaMod@clusters)) {
+    if (nrow(counts) != length(celdaMod@clusters$y)) {
       stop(
         "The provided celda object was generated from a counts",
         " matrix with a different number of features than the one",
@@ -234,8 +234,8 @@ compareCountMatrix <- function(counts,
     }
   }
 
-  if ("z" %in% names(clusters(celdaMod))) {
-    if (ncol(counts) != length(clusters(celdaMod)$z)) {
+  if ("z" %in% names(celdaMod@clusters)) {
+    if (ncol(counts) != length(celdaMod@clusters$z)) {
       stop(
         "The provided celda object was generated from a counts",
         " matrix with a different number of cells than the one",

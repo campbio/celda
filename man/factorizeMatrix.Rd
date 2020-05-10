@@ -2,40 +2,51 @@
 % Please edit documentation in R/all_generics.R
 \name{factorizeMatrix}
 \alias{factorizeMatrix}
-\title{Generate factorized matrices showing each feature's influence on
-cell / gene clustering}
+\alias{factorizeMatrix,SingleCellExperiment-method}
+\title{Generate factorized matrices showing each feature's influence on cell
+ / gene clustering}
 \usage{
-factorizeMatrix(
-  counts,
-  celdaMod,
+factorizeMatrix(sce, ...)
+
+\S4method{factorizeMatrix}{SingleCellExperiment}(
+  sce,
+  useAssay = "counts",
   type = c("counts", "proportion", "posterior")
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells. This matrix should be the same as the one used to generate
-`celdaMod`.}
+\item{sce}{A \linkS4class{SingleCellExperiment} object returned by
+\link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
+located in the \code{useAssay} assay slot.
+Rows represent features and columns represent cells.}
 
-\item{celdaMod}{Celda object of class "celda_C", "celda_G", or "celda_CG".}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use. Default "counts".}
 
-\item{type}{A character vector containing one or more of "counts",
-"proportions", or "posterior". "counts" returns the raw number of counts
-for each entry in each matrix. "proportions" returns the counts matrix
-where each vector is normalized to a probability distribution. "posterior"
-returns the posterior estimates which include the addition of the
-Dirichlet concentration parameter (essentially as a pseudocount).}
+\item{type}{Character vector. A vector containing one or more of "counts",
+"proportion", or "posterior". "counts" returns the raw number of counts for
+each factorized matrix. "proportions" returns the normalized probabilities
+for each factorized matrix, which are calculated by dividing the raw counts
+in each factorized matrix by the total counts in each column. "posterior"
+returns the posterior estimates which include the addition of the Dirichlet
+concentration parameter (essentially as a pseudocount). Default
+\code{"counts"}.}
 }
 \value{
-A list of lists of the types of factorized matrices specified
+A list with elements for `counts`, `proportions`, or `posterior`
+ probabilities. Each element will be a list containing factorized matrices
+ for `module` and `sample`.
 }
 \description{
-Generate factorized matrices showing each feature's influence on
-cell / gene clustering
+Generates factorized matrices showing the contribution of each
+ feature in each cell population or each cell population in each sample.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-factorizedMatrices <- factorizeMatrix(
-  celdaCGSim$counts, celdaCGMod,
-  "posterior"
-)
+data(sceCelda_CG)
+factorizedMatrices <- factorizeMatrix(sceCelda_CG, type = "posterior")
+data(sceCelda_C)
+factorizedMatrices <- factorizeMatrix(sceCelda_C, type = "posterior")
+}
+\seealso{
+`celda_C()` for clustering cells
 }

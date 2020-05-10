@@ -101,12 +101,23 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 "contaminationSim"
 
 
-#' @title sceCelda_C
-#' @description A \linkS4class{SingleCellExperiment} object containing the results of running \link{celda_C} on \link{celdaCSim}.
+#' @title sceCeldaC
+#' @description A \linkS4class{SingleCellExperiment} object containing the
+#'  results of running \link{celda_C} on \link{celdaCSim}.
 #' @format A \linkS4class{SingleCellExperiment} object
 #' @examples
 #' data(celdaCSim)
-#' sceCelda_C = celda_C(celdaCSim$counts,
+#' sceCeldaC = celda_C(celdaCSim$counts,
 #'     K = celdaCSim$K,
 #'     sampleLabel = celdaCSim$sampleLabel)
-"sceCelda_C"
+"sceCeldaC"
+
+
+#' @title sceCeldaG
+#' @description A \linkS4class{SingleCellExperiment} object containing the
+#'  results of running \link{celda_G} on \link{celdaGSim}.
+#' @format A \linkS4class{SingleCellExperiment} object
+#' @examples
+#' data(celdaGSim)
+#' sceCeldaG = celda_G(celdaGSim$counts, L = celdaGSim$L)
+"sceCeldaG"

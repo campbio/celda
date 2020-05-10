@@ -434,7 +434,7 @@ plotDimReduceModule <-
 #' plotDimReduceCluster(
 #'   dim1 = celdaTsne[, 1],
 #'   dim2 = celdaTsne[, 2],
-#'   cluster = as.factor(clusters(celdaCGMod)$z),
+#'   cluster = as.factor(celdaCGMod@clusters$z),
 #'   specificClusters = c(1, 2, 3)
 #' )
 #' }
@@ -628,7 +628,7 @@ plotCeldaViolin <- function(counts,
                             exactMatch = TRUE,
                             plotDots = TRUE,
                             dotSize = 0.1) {
-  cluster <- clusters(celdaMod)$z
+  cluster <- celdaMod@clusters$z
 
   featuresIx <- retrieveFeatureIndex(features,
     counts,

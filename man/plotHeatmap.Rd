@@ -65,19 +65,19 @@ Default TRUE.}
 \item{clusterCell}{Logical. Determines whether columns should be clustered.
 Default TRUE.}
 
-\item{colorScheme}{"Character. One of ""divergent"" or ""sequential"". A
-""divergent"" scheme is best for highlighting relative data (denoted by
+\item{colorScheme}{Character. One of "divergent" or "sequential". A
+"divergent" scheme is best for highlighting relative data (denoted by
 'colorSchemeCenter') such as gene expression data that has been normalized
-and centered. A ""sequential"" scheme is best for highlighting data that
+and centered. A "sequential" scheme is best for highlighting data that
 are ordered low to high such as raw counts or probabilities. Default
 "divergent".}
 
 \item{colorSchemeSymmetric}{Logical. When the colorScheme is "divergent"
 and the data contains both positive and negative numbers, TRUE indicates
 that the color scheme should be symmetric from
-[-max(abs(data)), max(abs(data))]. For example, if the data ranges goes
-from -1.5 to 2, then setting this to TRUE will force the color scheme to
-range from -2 to 2. Default TRUE.}
+\code{[-max(abs(data)), max(abs(data))]}. For example, if the data ranges
+goes from -1.5 to 2, then setting this to TRUE will force the color scheme
+to range from -2 to 2. Default TRUE.}
 
 \item{colorSchemeCenter}{Numeric. Indicates the center of a "divergent"
 colorScheme. Default 0.}

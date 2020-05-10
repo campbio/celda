@@ -1320,12 +1320,6 @@ setMethod("celda_CG",
         sce = sce,
         xClass = xClass,
         useAssay = useAssay,
-        K = params(res)$K,
-        L = params(res)$L,
-        alpha = params(a)$alpha,
-        beta = params(a)$beta,
-        delta = params(a)$delta,
-        gamma = params(a)$gamma,
         algorithm = NULL,
         stopIter = NULL,
         maxIter = NULL,
@@ -1335,7 +1329,6 @@ setMethod("celda_CG",
         nchains = NULL,
         zInitialize = NULL,
         yInitialize = NULL,
-        countChecksum = NULL,
         zInit = NULL,
         yInit = NULL,
         logfile = NULL,
@@ -1509,101 +1502,101 @@ setMethod("celda_CG",
         S4Vectors::metadata(sce)$celda_parameters$L) > 0)
 
     if (level == "cellPopulation") {
-      pop <- factorized$proportions$cellPopulation[yInclude,
-        zInclude,
-        drop = FALSE
-      ]
-      popNorm <- normalizeCounts(pop,
-        normalize = "proportion",
-        transformationFun = sqrt,
-        scaleFun = base::scale
-      )
-
-      percentile9 <- round(stats::quantile(pop, .9), digits = 2) * 100
-      col1 <- grDevices::colorRampPalette(c(
-        "#FFFFFF",
-        RColorBrewer::brewer.pal(n = 9, name = "Blues")
-      ))(percentile9)
-      col2 <- grDevices::colorRampPalette(c(
-        "#08306B",
-        c(
-          "#006D2C", "Yellowgreen", "Yellow", "Orange",
-          "Red"
+        pop <- factorized$proportions$cellPopulation[yInclude,
+            zInclude,
+            drop = FALSE
+            ]
+        popNorm <- normalizeCounts(pop,
+            normalize = "proportion",
+            transformationFun = sqrt,
+            scaleFun = base::scale
         )
-      ))(100 - percentile9)
-      col <- c(col1, col2)
-      breaks <- seq(0, 1, length.out = length(col))
 
-      g1 <- plotHeatmap(pop,
-        colorScheme = "sequential",
-        scaleRow = NULL,
-        clusterCell = FALSE,
-        clusterFeature = FALSE,
-        showNamesCell = TRUE,
-        showNamesFeature = TRUE,
-        breaks = breaks,
-        col = col,
-        main = "Absolute Probability",
-        silent = TRUE
-      )
-      g2 <- plotHeatmap(popNorm,
-        colorScheme = "divergent",
-        clusterCell = FALSE,
-        clusterFeature = FALSE,
-        showNamesCell = TRUE,
-        showNamesFeature = TRUE,
-        main = "Relative Expression",
-        silent = TRUE
-      )
-      gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2)
-    } else {
-      samp <- factorized$proportions$sample
-      col <- grDevices::colorRampPalette(c(
-        "white",
-        "blue",
-        "#08306B",
-        "#006D2C",
-        "yellowgreen",
-        "yellow",
-        "orange",
-        "red"
-      ))(100)
-      breaks <- seq(0, 1, length.out = length(col))
-      g1 <- plotHeatmap(samp,
-        colorScheme = "sequential",
-        scaleRow = NULL,
-        clusterCell = FALSE,
-        clusterFeature = FALSE,
-        showNamesCell = TRUE,
-        showNamesFeature = TRUE,
-        breaks = breaks,
-        col = col,
-        main = "Absolute Probability",
-        silent = TRUE
-      )
+        percentile9 <- round(stats::quantile(pop, .9), digits = 2) * 100
+        col1 <- grDevices::colorRampPalette(c(
+            "#FFFFFF",
+            RColorBrewer::brewer.pal(n = 9, name = "Blues")
+        ))(percentile9)
+        col2 <- grDevices::colorRampPalette(c(
+            "#08306B",
+            c(
+                "#006D2C", "Yellowgreen", "Yellow", "Orange",
+                "Red"
+            )
+        ))(100 - percentile9)
+        col <- c(col1, col2)
+        breaks <- seq(0, 1, length.out = length(col))
 
-      if (ncol(samp) > 1) {
-        sampNorm <- normalizeCounts(factorized$counts$sample,
-          normalize = "proportion",
-          transformationFun = sqrt,
-          scaleFun = base::scale
+        g1 <- plotHeatmap(pop,
+            colorScheme = "sequential",
+            scaleRow = NULL,
+            clusterCell = FALSE,
+            clusterFeature = FALSE,
+            showNamesCell = TRUE,
+            showNamesFeature = TRUE,
+            breaks = breaks,
+            col = col,
+            main = "Absolute Probability",
+            silent = TRUE
         )
-        g2 <- plotHeatmap(sampNorm,
-          colorScheme = "divergent",
-          clusterCell = FALSE,
-          clusterFeature = FALSE,
-          showNamesCell = TRUE,
-          showNamesFeature = TRUE,
-          main = "Relative Abundance",
-          silent = TRUE
+        g2 <- plotHeatmap(popNorm,
+            colorScheme = "divergent",
+            clusterCell = FALSE,
+            clusterFeature = FALSE,
+            showNamesCell = TRUE,
+            showNamesFeature = TRUE,
+            main = "Relative Expression",
+            silent = TRUE
         )
         gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2)
-      } else {
-        gridExtra::grid.arrange(g1$gtable)
-      }
+    } else {
+        samp <- factorized$proportions$sample
+        col <- grDevices::colorRampPalette(c(
+            "white",
+            "blue",
+            "#08306B",
+            "#006D2C",
+            "yellowgreen",
+            "yellow",
+            "orange",
+            "red"
+        ))(100)
+        breaks <- seq(0, 1, length.out = length(col))
+        g1 <- plotHeatmap(samp,
+            colorScheme = "sequential",
+            scaleRow = NULL,
+            clusterCell = FALSE,
+            clusterFeature = FALSE,
+            showNamesCell = TRUE,
+            showNamesFeature = TRUE,
+            breaks = breaks,
+            col = col,
+            main = "Absolute Probability",
+            silent = TRUE
+        )
+
+        if (ncol(samp) > 1) {
+            sampNorm <- normalizeCounts(factorized$counts$sample,
+                normalize = "proportion",
+                transformationFun = sqrt,
+                scaleFun = base::scale
+            )
+            g2 <- plotHeatmap(sampNorm,
+                colorScheme = "divergent",
+                clusterCell = FALSE,
+                clusterFeature = FALSE,
+                showNamesCell = TRUE,
+                showNamesFeature = TRUE,
+                main = "Relative Abundance",
+                silent = TRUE
+            )
+            gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2)
+        } else {
+            gridExtra::grid.arrange(g1$gtable)
+        }
     }
-  }
-)
+}
+
 
 
 .createSCEceldaCG <- function(celdaCGMod,

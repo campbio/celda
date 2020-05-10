@@ -2,22 +2,33 @@
 % Please edit documentation in R/all_generics.R
 \name{clusters}
 \alias{clusters}
-\title{Get clustering outcomes from a celdaModel}
+\alias{clusters,SingleCellExperiment-method}
+\alias{clusters<-}
+\alias{clusters<-,SingleCellExperiment-method}
+\title{Get or set the cell cluster labels from a celda
+ \link[SingleCellExperiment]{SingleCellExperiment} object}
 \usage{
-clusters(celdaMod)
+clusters(sce)
+
+\S4method{clusters}{SingleCellExperiment}(sce)
+
+clusters(sce) <- value
+
+\S4method{clusters}{SingleCellExperiment}(sce) <- value
 }
 \arguments{
-\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
+\item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
+returned by \link{celda_C}, or \link{celda_CG}.}
 }
 \value{
-List. Contains z (for celda_C and celdaCGModels) and/or y
- (for celda_G and celdaCGModels)
+List. Contains cell cluster z (for celda_C and celda_CG Models)
+ and/or gene module y (for celda_G and celda_CG Models).
 }
 \description{
-Returns the z / y results corresponding to the cell / gene
- cluster labels determined by the provided celdaModel.
+Return or set the cell cluster labels determined
+ by \link{celda_C} or \link{celda_CG} models.
 }
 \examples{
-data(celdaCGMod)
-clusters(celdaCGMod)
+data(sceCelda_CG)
+clusters(sceCelda_CG)
 }

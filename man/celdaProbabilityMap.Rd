@@ -2,29 +2,64 @@
 % Please edit documentation in R/all_generics.R
 \name{celdaProbabilityMap}
 \alias{celdaProbabilityMap}
-\title{Renders probability and relative expression heatmaps to visualize
-the relationship between feature modules and cell populations.}
+\alias{celdaProbabilityMap,SingleCellExperiment-method}
+\title{Renders probability and relative expression heatmaps to visualize the
+ relationship between feature modules and cell populations.}
 \usage{
-celdaProbabilityMap(counts, celdaMod, ...)
+celdaProbabilityMap(sce, ...)
+
+celdaProbabilityMap(sce, ...)
+
+\S4method{celdaProbabilityMap}{SingleCellExperiment}(
+  sce,
+  useAssay = "counts",
+  level = c("cellPopulation", "sample")
+)
 }
 \arguments{
+\item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
+returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
+
+\item{...}{Additional parameters.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use. Default "counts".}
+
+\item{level}{Character. One of "cellPopulation" or "Sample".
+"cellPopulation" will display the absolute probabilities and relative
+normalized expression of each module in each cell population.
+\strong{\code{level = "cellPopulation"} only works for celda_CG \code{sce}
+objects}. "sample" will display the absolute probabilities and relative
+normalized abundance of each cell population in each sample. Default
+"cellPopulation".}
+
 \item{counts}{Integer matrix. Rows represent features and columns represent
 cells. This matrix should be the same as the one used to generate
 `celdaMod`.}
 
 \item{celdaMod}{Celda object of class "celda_C" or "celda_CG".}
-
-\item{...}{Additional parameters.}
 }
 \value{
+A grob containing the specified plots
+
 A grob containing the specified plots
 }
 \description{
 It is often useful to visualize to what degree each feature
 influences each cell cluster. This can also be useful for identifying
 features which may be redundant or unassociated with cell clustering.
+
+Renders probability and relative expression heatmaps to
+ visualize the relationship between features and cell populations (or cell
+ populations and samples).
 }
 \examples{
 data(celdaCGSim, celdaCGMod)
 celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
+data(sceCelda_CG)
+celdaProbabilityMap(sceCelda_CG)
+}
+\seealso{
+\link{celda_C} for clustering cells. \link{celda_CG} for
+ clustering features and cells
 }

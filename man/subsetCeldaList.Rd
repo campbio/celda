@@ -7,10 +7,10 @@
 subsetCeldaList(celdaList, params)
 }
 \arguments{
-\item{celdaList}{celdaList Object of class `celdaList`. An object
-containing celda models returned from `celdaGridSearch`.}
-
 \item{params}{List. List of parameters used to subset celdaList.}
+
+\item{x}{celdaList Object of class `celdaList`. An object
+containing celda models returned from `celdaGridSearch` in older versions.}
 }
 \value{
 A new `celdaList` object containing all models matching the
@@ -22,12 +22,13 @@ A new `celdaList` object containing all models matching the
 Select a subset of models from a `celdaList` object generated
  by `celdaGridSearch()` that match the criteria in the argument `params`.
 }
+\details{
+
+}
 \examples{
 data(celdaCGGridSearchRes)
-resK5L10 <- subsetCeldaList(celdaCGGridSearchRes, params = list(
-  K = 5,
-  L = 10
-))
+resK5L10 <- .subsetCeldaList(celdaCGGridSearchRes,
+  params = list(K = 5, L = 10))
 }
 \seealso{
 `celdaGridSearch()` can run Celda with multiple parameters and

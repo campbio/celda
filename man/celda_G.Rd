@@ -2,10 +2,34 @@
 % Please edit documentation in R/celda_G.R
 \name{celda_G}
 \alias{celda_G}
+\alias{celda_G,SingleCellExperiment-method}
+\alias{celda_G,matrix-method}
 \title{Feature clustering with Celda}
 \usage{
-celda_G(
-  counts,
+celda_G(x, ...)
+
+\S4method{celda_G}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  L,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  yInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  yInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
+
+\S4method{celda_G}{matrix}(
+  x,
   L,
   beta = 1,
   delta = 1,
@@ -24,8 +48,14 @@ celda_G(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
 
 \item{L}{Integer. Number of feature modules.}
 
@@ -89,10 +119,10 @@ Clusters the rows of a count matrix containing single-cell data
 }
 \examples{
 data(celdaGSim)
-celdaMod <- celda_G(celdaGSim$counts, L = celdaGSim$L)
+sce <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 }
 \seealso{
-`celda_C()` for cell clustering and `celda_CG()` for simultaneous
- clustering of features and cells. `celdaGridSearch()` can be used to run
- multiple values of L and multiple chains in parallel.
+\link{celda_C} for cell clustering and \link{celda_CG} for
+ simultaneous clustering of features and cells. \link{celdaGridSearch} can
+ be used to run multiple values of L and multiple chains in parallel.
 }

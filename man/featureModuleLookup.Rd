@@ -2,19 +2,21 @@
 % Please edit documentation in R/all_generics.R
 \name{featureModuleLookup}
 \alias{featureModuleLookup}
+\alias{featureModuleLookup,SingleCellExperiment-method}
 \title{Obtain the gene module of a gene of interest}
 \usage{
-featureModuleLookup(counts, celdaMod, feature, exactMatch = TRUE)
+featureModuleLookup(sce, ...)
+
+\S4method{featureModuleLookup}{SingleCellExperiment}(sce, feature, exactMatch = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells. This matrix should be the same as the one used to generate
-`celdaMod`.}
-
-\item{celdaMod}{Model of class "celda_G" or "celda_CG".}
+\item{sce}{A \linkS4class{SingleCellExperiment} object returned by
+\link{celda_G}, or \link{celda_CG}, with the matrix
+located in the \code{useAssay} assay slot.
+Rows represent features and columns represent cells.}
 
 \item{feature}{Character vector. Identify feature modules for the specified
-feature names.}
+feature names. \code{feature} must match the rownames of \code{sce}.}
 
 \item{exactMatch}{Logical. Whether to look for exactMatch of the gene name
 within counts matrix. Default \code{TRUE}.}
@@ -25,12 +27,11 @@ the provided features.
 }
 \description{
 This function will output the corresponding feature module for
-a specified list of genes from a celdaModel.
+ a specified vector of genes from a celda_CG or celda_G celdaModel.
+ \code{feature} must match the rownames of \code{sce}.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-featureModuleLookup(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod, "Gene_1"
-)
+data(sceCelda_CG)
+module <- featureModuleLookup(sce = sceCelda_CG,
+    feature = c("Gene_1", "Gene_XXX"))
 }

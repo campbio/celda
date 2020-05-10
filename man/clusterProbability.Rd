@@ -2,30 +2,43 @@
 % Please edit documentation in R/all_generics.R
 \name{clusterProbability}
 \alias{clusterProbability}
-\title{Get cluster probability}
+\alias{clusterProbability,SingleCellExperiment-method}
+\title{Get the conditional probabilities of cell in subpopulations from celda
+ model}
 \usage{
-clusterProbability(counts, celdaMod, log = FALSE, ...)
+clusterProbability(sce, ...)
+
+\S4method{clusterProbability}{SingleCellExperiment}(sce, useAssay = "counts", log = FALSE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells. This matrix should be the same as the one used to generate `celdaMod`.}
+\item{sce}{A \linkS4class{SingleCellExperiment} object returned by
+\link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
+located in the \code{useAssay} assay slot.
+Rows represent features and columns represent cells.}
 
-\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use. Default "counts".}
 
-\item{log}{Logical. If FALSE, then the normalized conditional probabilities
-will be returned. If TRUE, then the unnormalized log probabilities will be
-returned. Default FALSE.}
-
-\item{...}{Additional parameters.}
+\item{log}{Logical. If \code{FALSE}, then the normalized conditional
+probabilities will be returned. If \code{TRUE}, then the unnormalized log
+probabilities will be returned. Default \code{FALSE}.}
 }
 \value{
-A numeric vector of the cluster assignment probabilties
+A list containging a matrix for the conditional cell subpopulation
+ cluster and/or feature module probabilities.
 }
 \description{
-Get the probability of the cluster assignments generated during
- a celda run.
+Calculate the conditional probability of each cell belonging to
+ each subpopulation given all other cell cluster assignments and/or
+ each feature belonging to each module given all other feature cluster
+ assignments in a celda model.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-clusterProb <- clusterProbability(celdaCGSim$counts, celdaCGMod)
+data(sceCelda_CG)
+clusterProb <- clusterProbability(sceCelda_CG, log = TRUE)
+data(sceCelda_C)
+clusterProb <- clusterProbability(sceCelda_C)
+}
+\seealso{
+`celda_C()` for clustering cells
 }

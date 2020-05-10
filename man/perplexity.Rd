@@ -2,28 +2,31 @@
 % Please edit documentation in R/all_generics.R
 \name{perplexity}
 \alias{perplexity}
-\title{Calculate the perplexity from a single celdaModel}
+\alias{perplexity,SingleCellExperiment-method}
+\title{Calculate the perplexity of a celda model}
 \usage{
-perplexity(counts, celdaMod, newCounts = NULL)
+perplexity(sce, ...)
+
+\S4method{perplexity}{SingleCellExperiment}(sce, useAssay = "counts")
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells. This matrix should be the same as the one used to generate
-`celdaMod`.}
+\item{sce}{A \linkS4class{SingleCellExperiment} object returned by
+\link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
+located in the \code{useAssay} assay slot.
+Rows represent features and columns represent cells.}
 
-\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
-
-\item{newCounts}{A newCounts matrix used to calculate perplexity. If NULL,
-perplexity will be calculated for the 'counts' matrix. Default NULL.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use. Default "counts".}
 }
 \value{
-Numeric. The perplexity for the provided count data and model.
+Numeric. The perplexity for the provided
+ \linkS4class{SingleCellExperiment}.
 }
 \description{
-Perplexity can be seen as a measure of how well a provided set
- of cluster assignments fit the data being clustered.
+Perplexity is a statistical measure of how well a probability
+ model can predict new data. Lower perplexity indicates a better model.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
+data(sceCelda_CG)
+clusterProb <- clusterProbability(sceCelda_CG)
 }

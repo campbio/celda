@@ -119,8 +119,9 @@ can only be used when `initialize = 'random'`. Default NULL.}
 }
 \value{
 A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
- parameter settings are stored in the \link[S4Vectors]{metadata} slot.
- Columns \code{sample_label} and \code{cell_cluster} in
+ parameter settings are stored in the \link[S4Vectors]{metadata}
+ \code{"celda_parameters"} slot.
+ Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
  population clusters.
 }
@@ -132,10 +133,11 @@ Clusters the columns of a count matrix containing single-cell
 data(celdaCSim)
 sce <- celda_C(celdaCSim$counts,
     K = celdaCSim$K,
-    sampleLabel = celdaCSim$sampleLabel)
+    sampleLabel = celdaCSim$sampleLabel,
+    nchains = 1)
 }
 \seealso{
-`celda_G()` for feature clustering and `celda_CG()` for simultaneous
- clustering of features and cells. `celdaGridSearch()` can be used to run
- multiple values of K and multiple chains in parallel.
+\link{celda_G} for feature clustering and \link{celda_CG} for
+ simultaneous clustering of features and cells. \link{celdaGridSearch} can
+ be used to run multiple values of K and multiple chains in parallel.
 }

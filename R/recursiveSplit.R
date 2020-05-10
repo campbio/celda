@@ -19,10 +19,10 @@
       verbose = FALSE
     )
 
-    if (length(unique(clusters(clustLabel)$z)) == 2) {
+    if (length(unique(clustLabel@clusters$z)) == 2) {
       ix <- z == i
       newZ <- z
-      newZ[ix] <- ifelse(clusters(clustLabel)$z == 2, i, K)
+      newZ[ix] <- ifelse(clustLabel@clusters$z == 2, i, K)
       ll <- logLikelihoodcelda_C(counts, s, newZ, K, alpha, beta)
 
       if (ll > bestLl) {
@@ -57,10 +57,10 @@
       verbose = FALSE
     )
 
-    if (length(unique(clusters(clustLabel)$y)) == 2) {
+    if (length(unique(clustLabel@clusters$y)) == 2) {
       ix <- y == i
       newY <- y
-      newY[ix] <- ifelse(clusters(clustLabel)$y == 2, i, L)
+      newY[ix] <- ifelse(clustLabel@clusters$y == 2, i, L)
       ll <- logLikelihoodcelda_G(counts, newY, L, beta, delta, gamma)
 
       if (ll > bestLl) {
@@ -146,7 +146,7 @@
 #' ## Then use module labels for initialization in `recursiveSplitCell()` to
 #' ## produce `celda_CG` bi-clustering models
 #' cellSplit <- recursiveSplitCell(celdaCGSim$counts,
-#'   initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y
+#'   initialK = 3, maxK = 7, yInit = moduleSplitSelect@clusters$y
 #' )
 #' plotGridSearchPerplexity(cellSplit)
 #' celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
@@ -232,8 +232,8 @@ recursiveSplitCell <- function(counts,
       verbose = FALSE,
       reorder = reorder
     )
-    currentK <- length(unique(clusters(modelInitial)$z)) + 1
-    overallZ <- clusters(modelInitial)$z
+    currentK <- length(unique(modelInitial@clusters$z)) + 1
+    overallZ <- modelInitial@clusters$z
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       # previousY <- overallY
@@ -272,15 +272,15 @@ recursiveSplitCell <- function(counts,
 
       # If the number of clusters is still "currentK", then keep the
       # reordering, otherwise keep the previous configuration
-      if (length(unique(clusters(tempModel)$z)) == currentK) {
-        overallZ <- clusters(tempModel)$z
+      if (length(unique(tempModel@clusters$z)) == currentK) {
+        overallZ <- tempModel@clusters$z
       } else {
         overallZ <- tempSplit$z
         ll <- logLikelihoodcelda_CG(
           counts,
           s,
           overallZ,
-          clusters(tempModel)$y,
+          tempModel@clusters$y,
           currentK,
           L,
           alpha,
@@ -289,7 +289,7 @@ recursiveSplitCell <- function(counts,
           gamma
         )
         tempModel <- methods::new("celda_CG",
-          clusters = list(z = overallZ, y = clusters(tempModel)$y),
+          clusters = list(z = overallZ, y = tempModel@clusters$y),
           params = list(
             K = as.integer(currentK),
             L = as.integer(L),
@@ -368,8 +368,8 @@ recursiveSplitCell <- function(counts,
       verbose = FALSE,
       reorder = reorder
     )
-    currentK <- length(unique(clusters(modelInitial)$z)) + 1
-    overallZ <- clusters(modelInitial)$z
+    currentK <- length(unique(modelInitial@clusters$z)) + 1
+    overallZ <- modelInitial@clusters$z
     ll <- logLikelihoodcelda_C(
       counts, s, overallZ, currentK,
       alpha, beta
@@ -405,8 +405,8 @@ recursiveSplitCell <- function(counts,
 
       # Handle rare cases where a population has no cells after running
       # the model
-      if (length(unique(clusters(tempModel)$z)) == currentK) {
-        overallZ <- clusters(tempModel)$z
+      if (length(unique(tempModel@clusters$z)) == currentK) {
+        overallZ <- tempModel@clusters$z
       } else {
         overallZ <- tempSplit$z
       }
@@ -470,8 +470,8 @@ recursiveSplitCell <- function(counts,
       verbose = FALSE,
       reorder = reorder
     )
-    currentK <- length(unique(clusters(modelInitial)$z)) + 1
-    overallZ <- clusters(modelInitial)$z
+    currentK <- length(unique(modelInitial@clusters$z)) + 1
+    overallZ <- modelInitial@clusters$z
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       tempSplit <- .singleSplitZ(counts,
@@ -496,8 +496,8 @@ recursiveSplitCell <- function(counts,
         reorder = reorder
       )
 
-      if (length(unique(clusters(tempModel)$z)) == currentK) {
-        overallZ <- clusters(tempModel)$z
+      if (length(unique(tempModel@clusters$z)) == currentK) {
+        overallZ <- tempModel@clusters$z
       } else {
         overallZ <- tempSplit$z
         ll <-
@@ -738,8 +738,8 @@ recursiveSplitModule <- function(counts,
       verbose = FALSE,
       reorder = reorder
     )
-    currentL <- length(unique(clusters(modelInitial)$y)) + 1
-    overallY <- clusters(modelInitial)$y
+    currentL <- length(unique(modelInitial@clusters$y)) + 1
+    overallY <- modelInitial@clusters$y
 
     resList <- list(modelInitial)
     while (currentL <= maxL) {
@@ -768,7 +768,7 @@ recursiveSplitModule <- function(counts,
         zInit = overallZ,
         reorder = reorder
       )
-      overallY <- clusters(tempModel)$y
+      overallY <- tempModel@clusters$y
 
       ## Add new model to results list and increment L
       .logMessages(
@@ -830,8 +830,8 @@ recursiveSplitModule <- function(counts,
       verbose = FALSE
     )
 
-    currentL <- length(unique(clusters(modelInitial)$y)) + 1
-    overallY <- clusters(modelInitial)$y
+    currentL <- length(unique(modelInitial@clusters$y)) + 1
+    overallY <- modelInitial@clusters$y
 
     ## Decomposed counts for full count matrix
     p <- .cGDecomposeCounts(counts, overallY, currentL)
@@ -867,7 +867,7 @@ recursiveSplitModule <- function(counts,
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- clusters(tempModel)$y
+      overallY <- tempModel@clusters$y
 
       # Adjust decomposed count matrices
       p <- .cGReDecomposeCounts(counts,
@@ -945,7 +945,7 @@ recursiveSplitModule <- function(counts,
       nchains = 1,
       verbose = FALSE
     )
-    overallY <- clusters(modelInitial)$y
+    overallY <- modelInitial@clusters$y
     currentL <- length(unique(overallY)) + 1
 
     ## Perform splitting for y labels
@@ -974,7 +974,7 @@ recursiveSplitModule <- function(counts,
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- clusters(tempModel)$y
+      overallY <- tempModel@clusters$y
 
       ## Add new model to results list and increment L
       .logMessages(

@@ -81,7 +81,7 @@
     verbose = FALSE,
     reorder = FALSE
   )
-  overallZ <- as.integer(as.factor(clusters(res)$z))
+  overallZ <- as.integer(as.factor(res@clusters$z))
   currentK <- max(overallZ)
 
   counter <- 0
@@ -113,7 +113,7 @@
         splitOnLast = FALSE,
         verbose = FALSE
       )
-      tempZ <- as.integer(as.factor(clusters(clustLabel)$z))
+      tempZ <- as.integer(as.factor(clustLabel@clusters$z))
 
       # Reassign clusters with label > 1
       splitIx <- tempZ > 1
@@ -252,7 +252,7 @@
     verbose = FALSE,
     reorder = FALSE
   )
-  overallY <- as.integer(as.factor(clusters(res)$y))
+  overallY <- as.integer(as.factor(res@clusters$y))
   currentL <- max(overallY)
 
   counter <- 0
@@ -288,7 +288,7 @@
         splitOnLast = FALSE,
         verbose = FALSE
       )
-      tempY <- as.integer(as.factor(clusters(clustLabel)$y))
+      tempY <- as.integer(as.factor(clustLabel@clusters$y))
 
       # Reassign clusters with label > 1
       splitIx <- tempY > 1

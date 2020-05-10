@@ -134,7 +134,7 @@ setMethod("celda_G",
         sce <- .celdaGWithSeed(counts = x,
             xClass = xClass,
             useAssay = useAssay,
-            sce = x,
+            sce = sce,
             L = L,
             beta = beta,
             delta = delta,
@@ -187,7 +187,6 @@ setMethod("celda_G",
             maxIter = maxIter,
             splitOnIter = splitOnIter,
             splitOnLast = splitOnLast,
-            seed = seed,
             nchains = nchains,
             yInitialize = yInitialize,
             countChecksum = countChecksum,
@@ -207,7 +206,6 @@ setMethod("celda_G",
                 maxIter = maxIter,
                 splitOnIter = splitOnIter,
                 splitOnLast = splitOnLast,
-                seed = seed,
                 nchains = nchains,
                 yInitialize = yInitialize,
                 countChecksum = countChecksum,
@@ -222,7 +220,6 @@ setMethod("celda_G",
         sce = sce,
         xClass = xClass,
         useAssay = useAssay,
-        algorithm = algorithm,
         stopIter = stopIter,
         maxIter = maxIter,
         splitOnIter = splitOnIter,
@@ -787,52 +784,51 @@ setMethod("celda_G",
     res <- list()
 
     if (any("counts" %in% type)) {
-      countsList <- list(
-        cell = nTSByC,
-        module = nGByTS,
-        geneDistribution = nGByTS
-      )
-      res <- c(res, list(counts = countsList))
+        countsList <- list(
+            cell = nTSByC,
+            module = nGByTS,
+            geneDistribution = nGByTS
+        )
+        res <- c(res, list(counts = countsList))
     }
 
     if (any("proportion" %in% type)) {
-      ## Need to avoid normalizing cell/gene states with zero cells/genes
-      uniqueY <- sort(unique(y))
-      tempNGByTS <- nGByTS
-      tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
-        normalize = "proportion"
-      )
-      tempNGByTS <- nGByTS / sum(nGByTS)
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueY <- sort(unique(y))
+        tempNGByTS <- nGByTS
+        tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
+            normalize = "proportion"
+        )
+        tempNGByTS <- nGByTS / sum(nGByTS)
 
-      propList <- list(
-        cell = normalizeCounts(nTSByC,
-          normalize = "proportion"
-        ),
-        module = tempNGByTS,
-        geneDistribution = tempNGByTS
-      )
-      res <- c(res, list(proportions = propList))
+        propList <- list(
+            cell = normalizeCounts(nTSByC,
+                normalize = "proportion"
+            ),
+            module = tempNGByTS,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, list(proportions = propList))
     }
 
     if (any("posterior" %in% type)) {
-      gs <- nGByTS
-      gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
-      gs <- normalizeCounts(gs, normalize = "proportion")
-      tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
+        gs <- nGByTS
+        gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
+        gs <- normalizeCounts(gs, normalize = "proportion")
+        tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
 
-      postList <- list(
-        cell = normalizeCounts(nTSByC + beta,
-          normalize = "proportion"
-        ),
-        module = gs,
-        geneDistribution = tempNGByTS
-      )
-      res <- c(res, posterior = list(postList))
+        postList <- list(
+            cell = normalizeCounts(nTSByC + beta,
+                normalize = "proportion"
+            ),
+            module = gs,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, posterior = list(postList))
     }
 
     return(res)
-  }
-)
+}
 
 
 # Calculate log-likelihood of celda_CG model
@@ -1040,11 +1036,6 @@ setMethod("celda_G",
             sce = sce,
             xClass = xClass,
             useAssay = useAssay,
-            L = params(res)$L,
-            beta = params(a)$beta,
-            delta = params(a)$delta,
-            gamma = params(a)$gamma,
-            algorithm = NULL,
             stopIter = NULL,
             maxIter = NULL,
             splitOnIter = NULL,
@@ -1052,7 +1043,6 @@ setMethod("celda_G",
             seed = NULL,
             nchains = NULL,
             yInitialize = NULL,
-            countChecksum = NULL,
             yInit = NULL,
             logfile = NULL,
             verbose = NULL)
@@ -1126,7 +1116,6 @@ setMethod("celda_G",
     sce,
     xClass,
     useAssay,
-    algorithm,
     stopIter,
     maxIter,
     splitOnIter,
@@ -1143,11 +1132,10 @@ setMethod("celda_G",
         model = "celda_G",
         xClass = xClass,
         useAssay = useAssay,
-        L = celdaCGMod@params$L,
-        beta = celdaCGMod@params$beta,
-        delta = celdaCGMod@params$delta,
-        gamma = celdaCGMod@params$gamma,
-        algorithm = algorithm,
+        L = celdaGMod@params$L,
+        beta = celdaGMod@params$beta,
+        delta = celdaGMod@params$delta,
+        gamma = celdaGMod@params$gamma,
         stopIter = stopIter,
         maxIter = maxIter,
         splitOnIter = splitOnIter,
@@ -1155,19 +1143,19 @@ setMethod("celda_G",
         seed = seed,
         nchains = nchains,
         yInitialize = yInitialize,
-        countChecksum = celdaCGMod@params$countChecksum,
+        countChecksum = celdaGMod@params$countChecksum,
         yInit = yInit,
         logfile = logfile,
         verbose = verbose,
-        completeLogLik = celdaCGMod@completeLogLik,
-        finalLogLik = celdaCGMod@finalLogLik,
-        featureModuleLevels = sort(unique(celdaCGMod@clusters$y)))
+        completeLogLik = celdaGMod@completeLogLik,
+        finalLogLik = celdaGMod@finalLogLik,
+        featureModuleLevels = sort(unique(celdaGMod@clusters$y)))
 
-    SummarizedExperiment::rowData(sce)["rownames"] <- celdaCGMod@names$row
+    SummarizedExperiment::rowData(sce)["rownames"] <- celdaGMod@names$row
     SummarizedExperiment::colData(sce)["colnames"] <-
-        celdaCGMod@names$column
+        celdaGMod@names$column
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaCGMod@clusters$y
+        celdaGMod@clusters$y
 
     return(sce)
 }
@@ -1182,7 +1170,7 @@ setMethod("celda_G",
         model = "celda_G",
         featureModuleLevels = sort(unique(simList$y)),
         NRange = simList$NRange,
-        C = simList$C
+        C = simList$C,
         G = simList$G,
         L = simList$L,
         beta = simList$beta,
