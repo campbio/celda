@@ -13,6 +13,7 @@ celdaGridSearch(
   nchains = 3,
   cores = 1,
   bestOnly = TRUE,
+  seed = 12345,
   perplexity = TRUE,
   verbose = TRUE,
   logfilePrefix = "Celda"
@@ -43,6 +44,12 @@ chains. Default 1.}
 \item{bestOnly}{Logical. Whether to return only the chain with the highest
 log likelihood per combination of parameters or return all chains. Default
 TRUE.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. Seed values
+\code{seq(seed, (seed + nchains - 1))} will be supplied to each chain in
+\code{nchains} If NULL, no calls to
+\link[withr]{with_seed} are made.}
 
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
