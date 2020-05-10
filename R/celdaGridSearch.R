@@ -23,6 +23,11 @@
 #' @param bestOnly Logical. Whether to return only the chain with the highest
 #'  log likelihood per combination of parameters or return all chains. Default
 #'  TRUE.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. Seed values
+#'  \code{seq(seed, (seed + nchains - 1))} will be supplied to each chain in
+#'  \code{nchains} If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
@@ -61,6 +66,7 @@ celdaGridSearch <- function(counts,
                             nchains = 3,
                             cores = 1,
                             bestOnly = TRUE,
+                            seed = 12345,
                             perplexity = TRUE,
                             verbose = TRUE,
                             logfilePrefix = "Celda") {
@@ -128,12 +134,27 @@ celdaGridSearch <- function(counts,
     paramsTest[["nchains"]] <- NULL
   }
 
+  # Pre-generate a set of random seeds to be used for each chain
+  if (is.null(seed)) {
+    allSeeds <- NULL
+  } else {
+    allSeeds <- seq(seed, (seed + nchains - 1))
+  }
+
   # Set up parameter combinations for each individual chain
   runParams <- base::expand.grid(c(
     chain = list(seq_len(nchains)),
     paramsTest
   ))
   runParams <- cbind(index = seq_len(nrow(runParams)), runParams)
+
+  if (is.null(allSeeds)) {
+    runParams <- cbind(runParams,
+      seed = rep("NULL", nrow(runParams) / nchains))
+  } else {
+    runParams <- cbind(runParams,
+      seed = rep(allSeeds, nrow(runParams) / nchains))
+  }
 
   .logMessages(paste(rep("-", 50), collapse = ""),
     logfile = NULL,
@@ -187,6 +208,8 @@ celdaGridSearch <- function(counts,
       chainParams[[j]] <- current.run[[j]]
     }
     chainParams$counts <- counts
+    chainParams$seed <- allSeeds[ifelse(i %% nchains == 0,
+      nchains, i %% nchains)]
     chainParams$maxIter <- maxIter
     chainParams$nchain <- 1
     chainParams$countChecksum <- countChecksum
@@ -198,6 +221,8 @@ celdaGridSearch <- function(counts,
         colnames(runParams), runParams[i, ],
         sep = "-"
       ), collapse = "_"),
+      "_Seed-",
+      ifelse(is.null(chainParams$seed), "NULL", chainParams$seed),
       "_log.txt"
     )
 
@@ -231,7 +256,7 @@ celdaGridSearch <- function(counts,
       verbose = verbose,
       logfile = NULL
     )
-    celdaRes <- resamplePerplexity(counts, celdaRes)
+    celdaRes <- resamplePerplexity(counts, celdaRes, seed = seed)
   }
 
   endTime <- Sys.time()
@@ -350,7 +375,7 @@ selectBestModel <- function(celdaList, asList = FALSE) {
   logLikelihood <- NULL
   group <- setdiff(
     colnames(runParams(celdaList)),
-    c("index", "chain", "logLikelihood", "mean_perplexity")
+    c("index", "chain", "logLikelihood", "mean_perplexity", "seed")
   )
   dt <- data.table::as.data.table(runParams(celdaList))
   newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
