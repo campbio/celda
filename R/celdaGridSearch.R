@@ -541,50 +541,97 @@ setMethod("subsetCeldaList",
 
 #' @title Select best chain within each combination of parameters
 #' @description Select the chain with the best log likelihood for each
-#'  combination of tested parameters from a `celdaList` object gererated by
-#'  `celdaGridSearch()`.
-#' @param celdaList Object of class `celdaList`. An object containing celda
-#'  models returned from `celdaGridSearch()`.
-#' @param asList `TRUE` or `FALSE`. Whether to return the best model as a
-#'  `celdaList` object or not. If `FALSE`, return the best model as a
-#'  corresponding `celda_C`, `celda_G` or `celda_CG` object.
-#' @return A new `celdaList` object containing one model with the best log
-#'  likelihood for each set of parameters. If only one set of parameters is in
-#'  the `celdaList`, the best model will be returned directly instead of a
-#'  `celdaList` object.
-#' @seealso `celdaGridSearch()` can run Celda with multiple parameters and
-#'  chains in parallel. `subsetCeldaList()` can subset the `celdaList` object.
+#'  combination of tested parameters from a \code{SCE} object gererated by
+#'  \link{celdaGridSearch} or from a \code{celdaList} object.
+#' @param x Object of class \linkS4class{SingleCellExperiment} or
+#'  \code{celdaList}. An object containing celda
+#'  models returned from \link{celdaGridSearch}.
+#' @param asList \code{TRUE} or \code{FALSE}. Whether to return the
+#'  best model as a
+#'  \code{celdaList} object or not. If \code{FALSE}, return the best model as a
+#'  corresponding celda model object.
+#' @param useAssay A string specifying which \code{assay}
+#'  slot to use if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @return One of
+#' \itemize{
+#'  \item A new \linkS4class{SingleCellExperiment} object containing
+#'  one model with the best log-likelihood for each set of parameters in
+#'  \code{metadata(x)}. If there is only one set of parameters,
+#'  a new \linkS4class{SingleCellExperiment} object
+#'  with the matching model stored in the
+#'  \link[S4Vectors]{metadata}
+#'  \code{"celda_parameters"} slot will be returned. Otherwise, a new
+#'  \linkS4class{SingleCellExperiment} object with the subset models stored
+#'  in the \link[S4Vectors]{metadata}
+#'  \code{"celda_grid_search"} slot will be returned.
+#'  \item A new \code{celdaList} object containing one model with the best
+#'  log-likelihood for each set of parameters. If only one set of parameters
+#'  is in the \code{celdaList}, the best model will be returned directly
+#'  instead of a \code{celdaList} object.}
+#' @seealso \link{celdaGridSearch} \link{subsetCeldaList}
+#' @export
+setGeneric("selectBestModel", function(x, ...) {
+    standardGeneric("selectBestModel")})
+
+
+#' @rdname selectBestModel
+#' @examples
+#' data(sceCeldaCGGridSearch)
+#' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
+#' sce <- selectBestModel(sceCeldaCGGridSearch)
+#' @importFrom data.table as.data.table
+#' @export
+setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
+    function(x, asList = FALSE, useAssay = "counts") {
+        logLikelihood <- NULL
+        group <- setdiff(colnames(runParams(x)),
+            c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
+        dt <- data.table::as.data.table(runParams(celdaList))
+        newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
+            by = group])
+        newRunParams <- newRunParams[, colnames(runParams(celdaList))]
+
+        ix <- match(newRunParams$index, runParams(celdaList)$index)
+        if (nrow(newRunParams) == 1 & !asList) {
+            x <- celdatosce(resList(x)[[ix]],
+                SummarizedExperiment::assay(x, i = useAssay))
+        } else {
+            x@metadata$celda_grid_search@runParams <-
+                as.data.frame(newRunParams)
+            x@metadata$celda_grid_search@resList <- resList(x)[ix]
+        }
+        return(x)
+    }
+)
+
+
 #' @examples
 #' data(celdaCGGridSearchRes)
 #' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 #' cgsBest <- selectBestModel(celdaCGGridSearchRes)
 #' @importFrom data.table as.data.table
 #' @export
-selectBestModel <- function(celdaList, asList = FALSE) {
-  if (!methods::is(celdaList, "celdaList")) {
-    stop("celdaList parameter was not of class celdaList.")
-  }
+setMethod("selectBestModel", signature(x = "celdaList"),
+    function(x, asList = FALSE) {
+        logLikelihood <- NULL
+        group <- setdiff(colnames(runParams(x)),
+            c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
+        dt <- data.table::as.data.table(runParams(x))
+        newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
+            by = group])
+        newRunParams <- newRunParams[, colnames(runParams(x))]
 
-  logLikelihood <- NULL
-  group <- setdiff(
-    colnames(runParams(celdaList)),
-    c("index", "chain", "logLikelihood", "mean_perplexity", "seed")
-  )
-  dt <- data.table::as.data.table(runParams(celdaList))
-  newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
-    by = group
-  ])
-  newRunParams <- newRunParams[, colnames(runParams(celdaList))]
-
-  ix <- match(newRunParams$index, runParams(celdaList)$index)
-  if (nrow(newRunParams) == 1 & !asList) {
-    return(resList(celdaList)[[ix]])
-  } else {
-    celdaList@runParams <- as.data.frame(newRunParams)
-    celdaList@resList <- resList(celdaList)[ix]
-    return(celdaList)
-  }
-}
+        ix <- match(newRunParams$index, runParams(x)$index)
+        if (nrow(newRunParams) == 1 & !asList) {
+            return(resList(x)[[ix]])
+        } else {
+            x@runParams <- as.data.frame(newRunParams)
+            x@resList <- resList(x)[ix]
+            return(x)
+        }
+    }
+)
 
 
 .createSCEceldaGridSearch <- function(celdaList,
