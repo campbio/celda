@@ -112,7 +112,7 @@ moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
 ## Then use module labels for initialization in `recursiveSplitCell()` to
 ## produce `celda_CG` bi-clustering models
 cellSplit <- recursiveSplitCell(celdaCGSim$counts,
-  initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y
+  initialK = 3, maxK = 7, yInit = moduleSplitSelect@clusters$y
 )
 plotGridSearchPerplexity(cellSplit)
 celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))

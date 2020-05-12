@@ -65,7 +65,7 @@ celdaTsne <- celdaTsne(
 plotDimReduceCluster(
   dim1 = celdaTsne[, 1],
   dim2 = celdaTsne[, 2],
-  cluster = as.factor(clusters(celdaCGMod)$z),
+  cluster = as.factor(celdaCGMod@clusters$z),
   specificClusters = c(1, 2, 3)
 )
 }

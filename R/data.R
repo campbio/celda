@@ -121,3 +121,32 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' data(celdaGSim)
 #' sceCeldaG = celda_G(celdaGSim$counts, L = celdaGSim$L)
 "sceCeldaG"
+
+
+#' @title sceCeldaCG
+#' @description A \linkS4class{SingleCellExperiment} object containing the
+#'  results of running \link{celda_CG} on \link{celdaCGSim}.
+#' @format A \linkS4class{SingleCellExperiment} object
+#' @examples
+#' data(celdaCGSim)
+#' sceCeldaCG = celda_CG(celdaCGSim$counts,
+#'     K = celdaCGSim$K,
+#'     L = celdaCGSim$L,
+#'     sampleLabel = celdaCGSim$sampleLabel)
+"sceCeldaCG"
+
+
+#' @title sceCeldaCGGridSearch
+#' @description A \linkS4class{SingleCellExperiment} object containing the
+#'  results of running \link{celdaGridSearch} on \link{celdaCGSim}.
+#' @format A \linkS4class{SingleCellExperiment} object
+#' @examples
+#' data(celdaCGSim)
+#' sceCeldaCGGridSearch <- celdaGridSearch(celdaCGSim$counts,
+#'     model = "celda_CG",
+#'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+#'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+#'     bestOnly = TRUE,
+#'     nchains = 1,
+#'     cores = 1)
+"sceCeldaCGGridSearch"

@@ -149,6 +149,6 @@ Renders a heatmap based on a matrix of counts where rows are
 \examples{
 data(celdaCGSim, celdaCGMod)
 plotHeatmap(celdaCGSim$counts,
-  z = clusters(celdaCGMod)$z, y = clusters(celdaCGMod)$y
+  z = celdaCGMod@clusters$z, y = celdaCGMod@clusters$y
 )
 }

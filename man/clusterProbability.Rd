@@ -34,10 +34,10 @@ Calculate the conditional probability of each cell belonging to
  assignments in a celda model.
 }
 \examples{
-data(sceCelda_CG)
-clusterProb <- clusterProbability(sceCelda_CG, log = TRUE)
-data(sceCelda_C)
-clusterProb <- clusterProbability(sceCelda_C)
+data(sceCeldaCG)
+clusterProb <- clusterProbability(sceCeldaCG, log = TRUE)
+data(sceCeldaC)
+clusterProb <- clusterProbability(sceCeldaC)
 }
 \seealso{
 `celda_C()` for clustering cells

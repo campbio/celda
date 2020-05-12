@@ -134,8 +134,8 @@ normalizeCounts <- function(counts,
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell cluster
 #'  labels.
 #' @examples
-#' data(sceCelda_CG)
-#' sceReorderedZ <- recodeClusterZ(sceCelda_CG, c(1, 3), c(3, 1))
+#' data(sceCeldaCG)
+#' sceReorderedZ <- recodeClusterZ(sceCeldaCG, c(1, 3), c(3, 1))
 #' @importFrom plyr mapvalues
 #' @export
 recodeClusterZ <- function(sce, from, to) {
@@ -178,8 +178,8 @@ recodeClusterZ <- function(sce, from, to) {
 #' @return @return \linkS4class{SingleCellExperiment} object with recoded
 #'  feature module labels.
 #' @examples
-#' data(sceCelda_CG)
-#' sceReorderedY <- recodeClusterY(sceCelda_CG, c(1, 3), c(3, 1))
+#' data(sceCeldaCG)
+#' sceReorderedY <- recodeClusterY(sceCeldaCG, c(1, 3), c(3, 1))
 #' @export
 recodeClusterY <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
@@ -441,8 +441,8 @@ distinctColors <- function(n,
 #'  not be created. Default NULL.
 #' @return Matrix. Contains a list of features per each column (feature module)
 #' @examples
-#' data(sceCelda_CG)
-#' featureModuleTable(csceCelda_CG)
+#' data(sceCeldaCG)
+#' featureModuleTable(csceCeldaCG)
 #' @importFrom stringi stri_list2matrix
 #' @export
 featureModuleTable <- function(sce, useAssay = "counts", outputFile = NULL) {

@@ -1,85 +1,3 @@
-setClass(
-  "celdaModel",
-  representation(
-    params = "list",
-    # K, L, model priors, checksum
-    names = "list",
-    completeLogLik = "numeric",
-    finalLogLik = "numeric",
-    clusters = "list"
-  )
-) # z and or y
-
-
-#' @title Get parameter values provided for celdaModel creation
-#' @description Retrieves the K/L, model priors (e.g. alpha, beta),
-#'  and count matrix checksum parameters provided during the creation of the
-#'  provided celdaModel.
-#' @param celdaMod celdaModel. Options available in `celda::availableModels`.
-#' @return List. Contains the model-specific parameters for the provided celda
-#'  model object depending on its class.
-#' @examples
-#' data(celdaCGMod)
-#' params(celdaCGMod)
-#' @export
-setGeneric(
-  "params",
-  function(celdaMod) {
-    standardGeneric("params")
-  }
-)
-#' @title Get parameter values provided for celdaModel creation
-#' @description Retrieves the K/L, model priors (e.g. alpha, beta),
-#'  and count matrix checksum parameters provided during the creation of the
-#'  provided celdaModel.
-#' @param celdaMod celdaModel. Options available in `celda::availableModels`.
-#' @return List. Contains the model-specific parameters for the provided celda
-#'  model object depending on its class.
-#' @examples
-#' data(celdaCGMod)
-#' params(celdaCGMod)
-#' @export
-setMethod("params",
-  signature = c(celdaMod = "celdaModel"),
-  function(celdaMod) {
-    celdaMod@params
-  }
-)
-
-
-#' @title Get feature, cell and sample names from a celdaModel
-#' @description Retrieves the row, column, and sample names used to generate
-#'  a celdaModel.
-#' @param celdaMod celdaModel. Options available in `celda::availableModels`.
-#' @return List. Contains row, column, and sample character vectors
-#'  corresponding to the values provided when the celdaModel was generated.
-#' @examples
-#' data(celdaCGMod)
-#' matrixNames(celdaCGMod)
-#' @export
-setGeneric(
-  "matrixNames",
-  function(celdaMod) {
-    standardGeneric("matrixNames")
-  }
-)
-#' @title Get feature, cell and sample names from a celdaModel
-#' @description Retrieves the row, column, and sample names used to generate a
-#'  celdaModel.
-#' @param celdaMod celdaModel. Options available in `celda::availableModels`.
-#' @return List. Contains row, column, and sample character vectors
-#'  corresponding to the values provided when the celdaModel was generated.
-#' @examples
-#' data(celdaCGMod)
-#' matrixNames(celdaCGMod)
-#' @export
-setMethod("matrixNames",
-  signature = c(celdaMod = "celdaModel"),
-  function(celdaMod) {
-    celdaMod@names
-  }
-)
-
 
 #' @title Get log-likelihood history
 #' @description Retrieves the complete log-likelihood from all iterations of
@@ -149,125 +67,10 @@ setMethod("bestLogLikelihood",
 )
 
 
-#' @title Get or set the cell cluster labels from a celda
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object
-#' @description Return or set the cell cluster labels determined
-#'  by \link{celda_C} or \link{celda_CG} models.
-#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
-#'  returned by \link{celda_C}, or \link{celda_CG}.
-#' @return List. Contains cell cluster z (for celda_C and celda_CG Models)
-#'  and/or gene module y (for celda_G and celda_CG Models).
-#' @examples
-#' data(sceCelda_CG)
-#' clusters(sceCelda_CG)
-#' @export
-setGeneric("clusters",
-    function(sce) {
-        standardGeneric("clusters")
-    })
-#' @rdname clusters
-#' @export
-setMethod("clusters",
-    signature(sce = "SingleCellExperiment"),
-    function(sce) {
-        return(SummarizedExperiment::colData(sce)$celda_cell_cluster)
-    })
-
-
-#' @rdname clusters
-#' @export
-setGeneric("clusters<-",
-    function(sce, value) standardGeneric("clusters<-")
-)
-#' @rdname clusters
-#' @export
-setReplaceMethod("clusters", signature(sce = "SingleCellExperiment"),
-    function(sce, value) {
-        SummarizedExperiment::colData(sce)$celda_cell_cluster <- value
-        return(sce)
-    })
-
-
-#' @title Get or set the feature module labels from a celda
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object
-#' @description Return or set the feature module cluster labels determined
-#'  by \link{celda_G} or \link{celda_CG} models.
-#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
-#'  returned by \link{celda_G} or \link{celda_CG}.
-#' @return List. Contains feature module y (for celda_G and celda_CG Models).
-#' @examples
-#' data(sceCelda_CG)
-#' modules(sceCelda_CG)
-#' @export
-setGeneric("modules",
-    function(sce) {
-        standardGeneric("modules")
-    })
-#' @rdname modules
-#' @export
-setMethod("modules",
-    signature(sce = "SingleCellExperiment"),
-    function(sce) {
-        return(SummarizedExperiment::rowData(sce)$celda_feature_module)
-    })
-
-
-#' @rdname modules
-#' @export
-setGeneric("modules<-",
-    function(sce, value) standardGeneric("modules<-")
-)
-#' @rdname modules
-#' @export
-setReplaceMethod("modules", signature(sce = "SingleCellExperiment"),
-    function(sce, value) {
-        SummarizedExperiment::rowData(sce)$celda_feature_module <- value
-        return(sce)
-    })
-
-
 setClass("celda_C",
   representation(sampleLabel = "factor"),
   contains = "celdaModel"
 )
-
-
-#' @title Get or set sample labels from a celda
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object
-#' @description Return or set the sample labels for the cells in \code{sce}.
-#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
-#'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
-#' @return Character. Contains the sample labels provided at model creation,
-#'  or those automatically generated by celda.
-#' @examples
-#' data(sceCelda_CG)
-#' sampleLabel(sceCelda_CG)
-#' @export
-setGeneric("sampleLabel",
-    function(sce) {
-        standardGeneric("sampleLabel")
-    })
-#' @rdname sampleLabel
-#' @export
-setMethod("sampleLabel",
-    signature(sce = "SingleCellExperiment"),
-    function(sce) {
-        return(SummarizedExperiment::colData(sce)$celda_sample_label)
-    })
-
-
-#' @rdname sampleLabel
-#' @export
-setGeneric("sampleLabel<-",
-    function(sce, value) standardGeneric("sampleLabel<-")
-)
-#' @rdname sampleLabel
-#' @export
-setReplaceMethod("sampleLabel", signature(sce = "SingleCellExperiment"),
-    function(sce, value) {
-        SummarizedExperiment::colData(sce)$celda_sample_label <- value
-        return(sce)
-    })
 
 
 #' @title Get celda model from a celda
@@ -279,8 +82,8 @@ setReplaceMethod("sampleLabel", signature(sce = "SingleCellExperiment"),
 #' @return Character. The celda model. Can be one of "celda_C", "celda_G", or
 #'  "celda_CG".
 #' @examples
-#' data(sceCelda_CG)
-#' celdaModel(sceCelda_CG)
+#' data(sceCeldaCG)
+#' celdaModel(sceCeldaCG)
 #' @export
 setGeneric("celdaModel",
     function(sce) {
@@ -516,8 +319,8 @@ setMethod("countChecksum",
 #' @param ... Additional parameters passed to \link{plotHeatmap}.
 #' @seealso `celdaTsne()` for generating 2-dimensional tSNE coordinates
 #' @examples
-#' data(sceCelda_CG)
-#' celdaHeatmap(sceCelda_CG)
+#' data(sceCeldaCG)
+#' celdaHeatmap(sceCeldaCG)
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export
 setGeneric("celdaHeatmap",
@@ -569,9 +372,9 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
 #'  provided \linkS4class{SingleCellExperiment}.
 #' @seealso `celda_C()` for clustering cells
 #' @examples
-#' data(sceCelda_C, sceCelda_CG)
-#' loglikC <- logLikelihood(sceCelda_C)
-#' loglikCG <- logLikelihood(sceCelda_CG)
+#' data(sceCeldaC, sceCeldaCG)
+#' loglikC <- logLikelihood(sceCeldaC)
+#' loglikCG <- logLikelihood(sceCeldaCG)
 #' @export
 setGeneric("logLikelihood",
     function(sce, ...) {
@@ -615,8 +418,8 @@ setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
 #'  probabilities will be returned. If \code{TRUE}, then the unnormalized log
 #'  probabilities will be returned. Default \code{FALSE}.
 #' @examples
-#' data(sceCelda_CG)
-#' clusterProb <- clusterProbability(sceCelda_CG, log = TRUE)
+#' data(sceCeldaCG)
+#' clusterProb <- clusterProbability(sceCeldaCG, log = TRUE)
 #' @return A list containging a matrix for the conditional cell subpopulation
 #'  cluster and/or feature module probabilities.
 #' @export
@@ -628,8 +431,8 @@ setGeneric("clusterProbability",
 
 #' @seealso `celda_C()` for clustering cells
 #' @examples
-#' data(sceCelda_C)
-#' clusterProb <- clusterProbability(sceCelda_C)
+#' data(sceCeldaC)
+#' clusterProb <- clusterProbability(sceCeldaC)
 #' @rdname clusterProbability
 #' @export
 setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
@@ -652,49 +455,6 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
             return(cp)
         } else {
             Stop()
-        }
-    })
-
-
-#' @title Calculate the perplexity of a celda model
-#' @description Perplexity is a statistical measure of how well a probability
-#'  model can predict new data. Lower perplexity indicates a better model.
-#' @param sce A \linkS4class{SingleCellExperiment} object returned by
-#'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
-#'  located in the \code{useAssay} assay slot.
-#'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
-#'  slot to use. Default "counts".
-#' @return Numeric. The perplexity for the provided
-#'  \linkS4class{SingleCellExperiment}.
-#' @examples
-#' data(sceCelda_CG)
-#' clusterProb <- clusterProbability(sceCelda_CG)
-#' @export
-setGeneric("perplexity",
-    function(sce, ...) {
-        standardGeneric("perplexity")
-    })
-
-
-#' @importFrom matrixStats logSumExp
-#' @rdname perplexity
-#' @export
-setMethod("perplexity", signature(sce = "SingleCellExperiment"),
-    function(sce, useAssay = "counts") {
-
-        if (celdaModel(sce) == "celda_C") {
-            p <- .perplexityCelda_C(sce = sce, useAssay = useAssay)
-            return(p)
-        } else if (celdaModel(sce) == "celda_CG") {
-            p <- .perplexityCelda_CG(sce = sce, useAssay = useAssay)
-            return(p)
-        } else if (celdaModel(sce) == "celda_G") {
-            p <- .perplexityCelda_G(sce = sce, useAssay = useAssay)
-            return(p)
-        } else {
-            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
-                " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
     })
 
@@ -810,63 +570,6 @@ simulateCells <- function(
 
     return(sce)
 }
-
-
-#' @title Generate factorized matrices showing each feature's influence on cell
-#'  / gene clustering
-#' @description Generates factorized matrices showing the contribution of each
-#'  feature in each cell population or each cell population in each sample.
-#' @param sce A \linkS4class{SingleCellExperiment} object returned by
-#'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
-#'  located in the \code{useAssay} assay slot.
-#'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
-#'  slot to use. Default "counts".
-#' @param type Character vector. A vector containing one or more of "counts",
-#'  "proportion", or "posterior". "counts" returns the raw number of counts for
-#'  each factorized matrix. "proportions" returns the normalized probabilities
-#'  for each factorized matrix, which are calculated by dividing the raw counts
-#'  in each factorized matrix by the total counts in each column. "posterior"
-#'  returns the posterior estimates which include the addition of the Dirichlet
-#'  concentration parameter (essentially as a pseudocount). Default
-#'  \code{"counts"}.
-#' @examples
-#' data(sceCelda_CG)
-#' factorizedMatrices <- factorizeMatrix(sceCelda_CG, type = "posterior")
-#' @return A list with elements for `counts`, `proportions`, or `posterior`
-#'  probabilities. Each element will be a list containing factorized matrices
-#'  for `module` and `sample`.
-#' @export
-setGeneric("factorizeMatrix",
-    function(sce, ...) {standardGeneric("factorizeMatrix")})
-
-
-#' @examples
-#' data(sceCelda_C)
-#' factorizedMatrices <- factorizeMatrix(sceCelda_C, type = "posterior")
-#' @seealso `celda_C()` for clustering cells
-#' @rdname factorizeMatrix
-#' @export
-setMethod("factorizeMatrix", signature(sce = "SingleCellExperiment"),
-    function(sce,
-        useAssay = "counts",
-        type = c("counts", "proportion", "posterior")) {
-
-        if (celdaModel(sce) == "celda_C") {
-            res <- .factorizeMatrixCelda_C(sce = sce, useAssay = useAssay,
-                type = type)
-        } else if (celdaModel(sce) == "celda_CG") {
-            res <- .factorizeMatrixCelda_CG(sce = sce, useAssay = useAssay,
-                type = type)
-        } else if (celdaModel(sce) == "celda_G") {
-            res <- .factorizeMatrixCelda_G(sce = sce, useAssay = useAssay,
-                type = type)
-        } else {
-            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
-                " one of 'celda_C', 'celda_G', or 'celda_CG'")
-        }
-        return(res)
-    })
 
 
 #' @title Renders probability and relative expression heatmaps to visualize the
@@ -989,8 +692,8 @@ setGeneric("featureModuleLookup",
 
 
 #' @examples
-#' data(sceCelda_CG)
-#' module <- featureModuleLookup(sce = sceCelda_CG,
+#' data(sceCeldaCG)
+#' module <- featureModuleLookup(sce = sceCeldaCG,
 #'     feature = c("Gene_1", "Gene_XXX"))
 #' @export
 #' @rdname featureModuleLookup
@@ -1119,8 +822,8 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
 #' @param cores Number of threads to use. Default 1.
 #' @param ... Additional parameters to pass to \link[uwot]{umap}.
 #' @examples
-#' data(sceCelda_CG)
-#' umapRes <- celdaUmap(sceCelda_CG)
+#' data(sceCeldaCG)
+#' umapRes <- celdaUmap(sceCeldaCG)
 #' @return \code{sce} with UMAP coordinates
 #'  (columns "celda_UMAP1" & "celda_UMAP2") added to
 #'  \code{\link[SummarizedExperiment]{colData}(sce)}.
@@ -1363,8 +1066,8 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
 #' @seealso \link{celda_C} for clustering cells. \link{celda_CG} for
 #'  clustering features and cells
 #' @examples
-#' data(sceCelda_CG)
-#' celdaProbabilityMap(sceCelda_CG)
+#' data(sceCeldaCG)
+#' celdaProbabilityMap(sceCeldaCG)
 #' @return A grob containing the specified plots
 #' @export
 setGeneric("celdaProbabilityMap",

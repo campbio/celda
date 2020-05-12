@@ -79,6 +79,6 @@ Embeds cells in two dimensions using \link[Rtsne]{Rtsne} based
 \examples{
 data(celdaCGSim, celdaCGMod)
 tsneRes <- celdaTsne(celdaCGSim$counts, celdaCGMod)
-data(sceCelda_CG)
-tsneRes <- celdaTsne(sceCelda_CG)
+data(sceCeldaCG)
+tsneRes <- celdaTsne(sceCeldaCG)
 }

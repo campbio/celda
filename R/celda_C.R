@@ -1019,9 +1019,20 @@ setMethod("celda_C",
 }
 
 
-.perplexityCelda_C <- function(sce, useAssay) {
+.perplexityCelda_C <- function(sce, useAssay, newCounts) {
+
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
+
+    if (is.null(newCounts)) {
+        newCounts <- counts
+    } else {
+        newCounts <- .processCounts(newCounts)
+    }
+
+    if (nrow(newCounts) != nrow(counts)) {
+        stop("'newCounts' should have the same number of rows as 'sce'.")
+    }
 
     factorized <- factorizeMatrix(sce = sce,
         useAssay = useAssay,
@@ -1030,10 +1041,11 @@ setMethod("celda_C",
     phi <- log(factorized$posterior$module)
     s <- as.integer(sampleLabel(sce))
 
-    inner.log.prob <- eigenMatMultInt(phi, Counts) + theta[, s]
+    # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
+    inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
     logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
 
-    perplexity <- exp(- (logPx / sum(Counts)))
+    perplexity <- exp(- (logPx / sum(newCounts)))
     return(perplexity)
 }
 

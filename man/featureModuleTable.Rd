@@ -26,6 +26,6 @@ Creates a table that contains the list of features in
  each feature module.
 }
 \examples{
-data(sceCelda_CG)
-featureModuleTable(csceCelda_CG)
+data(sceCeldaCG)
+featureModuleTable(csceCeldaCG)
 }

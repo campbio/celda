@@ -27,6 +27,6 @@ Recode feature module clusters using a mapping in the
  \code{from} and \code{to} arguments.
 }
 \examples{
-data(sceCelda_CG)
-sceReorderedY <- recodeClusterY(sceCelda_CG, c(1, 3), c(3, 1))
+data(sceCeldaCG)
+sceReorderedY <- recodeClusterY(sceCeldaCG, c(1, 3), c(3, 1))
 }

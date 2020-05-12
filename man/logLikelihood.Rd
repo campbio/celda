@@ -28,9 +28,9 @@ Calculate the log-likelihood for user-provided cell population
  assignments on the count matrix, per the desired celda model.
 }
 \examples{
-data(sceCelda_C, sceCelda_CG)
-loglikC <- logLikelihood(sceCelda_C)
-loglikCG <- logLikelihood(sceCelda_CG)
+data(sceCeldaC, sceCeldaCG)
+loglikC <- logLikelihood(sceCeldaC)
+loglikCG <- logLikelihood(sceCeldaCG)
 }
 \seealso{
 `celda_C()` for clustering cells

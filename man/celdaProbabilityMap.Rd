@@ -56,8 +56,8 @@ Renders probability and relative expression heatmaps to
 \examples{
 data(celdaCGSim, celdaCGMod)
 celdaProbabilityMap(celdaCGSim$counts, celdaCGMod)
-data(sceCelda_CG)
-celdaProbabilityMap(sceCelda_CG)
+data(sceCeldaCG)
+celdaProbabilityMap(sceCeldaCG)
 }
 \seealso{
 \link{celda_C} for clustering cells. \link{celda_CG} for

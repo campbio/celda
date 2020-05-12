@@ -994,15 +994,23 @@ setMethod("celda_G",
 }
 
 
-.perplexityCelda_G <- function(sce, useAssay) {
+.perplexityCelda_G <- function(sce, useAssay, newCounts) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    # compareCountMatrix(counts, celdaMod)
+
+    if (is.null(newCounts)) {
+        newCounts <- counts
+    } else {
+        newCounts <- .processCounts(newCounts)
+    }
+    if (nrow(newCounts) != nrow(counts)) {
+        stop("newCounts should have the same number of rows as counts.")
+    }
 
     factorized <- factorizeMatrix(
         sce = sce,
         useAssay = useAssay,
-        type = "posterior")
+        type = c("posterior", "counts"))
     psi <- factorized$posterior$module
     phi <- factorized$posterior$cell
     eta <- factorized$posterior$geneDistribution
@@ -1010,15 +1018,15 @@ setMethod("celda_G",
 
     etaProb <- log(eta) * nGByTS
     # gene.by.cell.prob = log(psi %*% phi)
-    # logPx = sum(gene.by.cell.prob * counts) # + sum(etaProb)
+    # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
     logPx <- .perplexityGLogPx(
-        counts,
+        newCounts,
         phi,
         psi,
         modules(sce),
         S4Vectors::metadata(sce)$celda_parameters$L
     ) # + sum(etaProb)
-    perplexity <- exp(- (logPx / sum(counts)))
+    perplexity <- exp(- (logPx / sum(newCounts)))
     return(perplexity)
 }
 
@@ -1073,11 +1081,13 @@ setMethod("celda_G",
 }
 
 
-.prepareCountsForDimReductionCeldaG <- function(counts,
-    celdaMod,
-    maxCells = NULL,
-    minClusterSize = 100,
-    modules = NULL) {
+.prepareCountsForDimReductionCeldaG <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    modules) {
+
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
     if (is.null(maxCells) || maxCells > ncol(counts)) {
         maxCells <- ncol(counts)
@@ -1086,11 +1096,7 @@ setMethod("celda_G",
         cellIx <- sample(seq(ncol(counts)), maxCells)
     }
 
-    fm <- factorizeMatrix(
-        counts = counts,
-        celdaMod = celdaMod,
-        type = "counts"
-    )
+    fm <- factorizeMatrix(sce = sce, useAssay = useAssay, type = "counts")
 
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {

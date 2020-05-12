@@ -28,8 +28,8 @@
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @examples
-#' data(sceCelda_CG)
-#' tsneRes <- celdaTsne(sceCelda_CG)
+#' data(sceCeldaCG)
+#' tsneRes <- celdaTsne(sceCeldaCG)
 #' @return \code{sce} with t-SNE coordinates
 #'  (columns "celda_tSNE1" & "celda_tSNE2") added to
 #'  \code{\link[SummarizedExperiment]{colData}(sce)}.

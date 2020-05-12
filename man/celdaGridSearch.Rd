@@ -33,6 +33,7 @@ celdaGridSearch(x, ...)
   nchains = 3,
   cores = 1,
   bestOnly = TRUE,
+  seed = 12345,
   perplexity = TRUE,
   verbose = TRUE,
   logfilePrefix = "Celda"
@@ -112,7 +113,8 @@ celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
   bestOnly = TRUE,
   nchains = 1,
-  cores = 1)}
+  cores = 1)
+}
 }
 \seealso{
 \link{celda_G} for feature clustering, \link{celda_C} for

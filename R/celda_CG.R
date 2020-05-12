@@ -1282,29 +1282,38 @@ setMethod("celda_CG",
 }
 
 
-.perplexityCelda_CG <- function(sce, useAssay) {
+.perplexityCelda_CG <- function(sce, useAssay, newCounts) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
+    if (is.null(newCounts)) {
+        newCounts <- counts
+    } else {
+        newCounts <- .processCounts(newCounts)
+    }
+    if (nrow(newCounts) != nrow(counts)) {
+        stop("newCounts should have the same number of rows as counts.")
+    }
+
     factorized <- factorizeMatrix(sce = sce,
         useAssay = useAssay,
-        type = c("posterior"))
+        type = c("posterior", "counts"))
 
     theta <- log(factorized$posterior$sample)
     phi <- factorized$posterior$cellPopulation
     psi <- factorized$posterior$module
-    s <- as.integer(sampleLabel(celdaMod))
+    s <- as.integer(sampleLabel(sce))
     eta <- factorized$posterior$geneDistribution
     nGByTS <- factorized$counts$geneDistribution
 
     etaProb <- log(eta) * nGByTS
     geneByPopProb <- log(psi %*% phi)
-    innerLogProb <- eigenMatMultInt(geneByPopProb, counts) + theta[, s]
-    # innerLogProb = (t(geneByPopProb) %*% counts) + theta[, s]
+    innerLogProb <- eigenMatMultInt(geneByPopProb, newCounts) + theta[, s]
+    # innerLogProb = (t(geneByPopProb) %*% newCounts) + theta[, s]
 
     log.px <- sum(apply(innerLogProb, 2, matrixStats::logSumExp))
     # + sum(etaProb)
-    perplexity <- exp(- (log.px / sum(counts)))
+    perplexity <- exp(- (log.px / sum(newCounts)))
     return(perplexity)
 }
 

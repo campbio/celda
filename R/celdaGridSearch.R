@@ -53,7 +53,8 @@
 #' @import foreach
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
-#' @examples \dontrun{
+#' @examples
+#' \dontrun{
 #' data(celdaCGSim)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
@@ -62,7 +63,8 @@
 #'   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
 #'   bestOnly = TRUE,
 #'   nchains = 1,
-#'   cores = 1)}
+#'   cores = 1)
+#' }
 #' @export
 setGeneric("celdaGridSearch", function(x, ...) {
     standardGeneric("celdaGridSearch")})
@@ -90,7 +92,7 @@ setMethod("celdaGridSearch",
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
         celdaList <- .celdaGridSearch(counts = counts,
-            model = model,
+            model = paste0(".", model),
             paramsTest = paramsTest,
             paramsFixed = paramsFixed,
             maxIter = maxIter,
@@ -133,6 +135,7 @@ setMethod("celdaGridSearch",
         nchains = 3,
         cores = 1,
         bestOnly = TRUE,
+        seed = 12345,
         perplexity = TRUE,
         verbose = TRUE,
         logfilePrefix = "Celda") {
@@ -142,7 +145,7 @@ setMethod("celdaGridSearch",
         sce <- SingleCellExperiment::SingleCellExperiment(
             assays = list(counts = x))
         celdaList <- .celdaGridSearch(counts = x,
-            model = model,
+            model = paste0(".", model),
             paramsTest = paramsTest,
             paramsFixed = paramsFixed,
             maxIter = maxIter,
@@ -176,15 +179,15 @@ setMethod("celdaGridSearch",
 .celdaGridSearch <- function(counts,
                             model,
                             paramsTest,
-                            paramsFixed = NULL,
-                            maxIter = 200,
-                            nchains = 3,
-                            cores = 1,
-                            bestOnly = TRUE,
-                            seed = 12345,
-                            perplexity = TRUE,
-                            verbose = TRUE,
-                            logfilePrefix = "Celda") {
+                            paramsFixed,
+                            maxIter,
+                            nchains,
+                            cores,
+                            bestOnly,
+                            seed,
+                            perplexity,
+                            verbose,
+                            logfilePrefix) {
 
   ## Check parameters
   .validateCounts(counts)
@@ -194,7 +197,7 @@ setMethod("celdaGridSearch",
     badParams <- setdiff(names(paramsTest), names(modelParams))
     stop(
       "The following elements in 'paramsTest' are not arguments of '",
-      model,
+      substring(model, 2),
       "': ",
       paste(badParams, collapse = ",")
     )
@@ -206,7 +209,7 @@ setMethod("celdaGridSearch",
     stop(
       "The following elements in 'paramsFixed' are not arguments",
       " of '",
-      model,
+      substring(model, 2),
       "': ",
       paste(badParams, collapse = ",")
     )
@@ -228,7 +231,7 @@ setMethod("celdaGridSearch",
     stop(
       "The following arguments are not in 'paramsTest' or 'paramsFixed'",
       " but are required for '",
-      model,
+      substring(model, 2),
       "': ",
       paste(missing.params, collapse = ",")
     )
@@ -278,7 +281,7 @@ setMethod("celdaGridSearch",
   )
 
   .logMessages("Starting celdaGridSearch with",
-    model,
+    substring(model, 2),
     logfile = NULL,
     append = TRUE,
     verbose = verbose
@@ -323,9 +326,6 @@ setMethod("celdaGridSearch",
       chainParams[[j]] <- current.run[[j]]
     }
     chainParams$counts <- counts
-    # silently ignored if allSeeds is NULL!
-    chainParams$seed <- allSeeds[ifelse(i %% nchains == 0,
-      nchains, i %% nchains)]
     chainParams$maxIter <- maxIter
     chainParams$nchain <- 1
     chainParams$countChecksum <- countChecksum
@@ -344,9 +344,12 @@ setMethod("celdaGridSearch",
 
     ## Run model
     if (is.null(seed)) {
-      res <- do.call(model, c(chainParams, paramsFixed, list(seed = NULL)))
-    } else {
       res <- do.call(model, c(chainParams, paramsFixed))
+    } else {
+      chainSeed <- allSeeds[ifelse(i %% nchains == 0,
+          nchains, i %% nchains)]
+      res <- with_seed(chainSeed,
+          do.call(model, c(chainParams, paramsFixed)))
     }
     return(list(res))
   }
@@ -400,7 +403,7 @@ setMethod("celdaGridSearch",
   return(celdaRes)
 }
 
-#'
+
 #' ################################################################################
 #' # Methods for manipulating celdaList objects                                  #
 #' ################################################################################
@@ -626,6 +629,7 @@ celda <- function() {
     paramsTest,
     paramsFixed,
     maxIter,
+    seed,
     nchains,
     cores,
     bestOnly,

@@ -35,8 +35,8 @@ Render a stylable heatmap of count data based on celda
  clustering results.
 }
 \examples{
-data(sceCelda_CG)
-celdaHeatmap(sceCelda_CG)
+data(sceCeldaCG)
+celdaHeatmap(sceCeldaCG)
 }
 \seealso{
 `celdaTsne()` for generating 2-dimensional tSNE coordinates

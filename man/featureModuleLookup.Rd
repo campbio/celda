@@ -31,7 +31,7 @@ This function will output the corresponding feature module for
  \code{feature} must match the rownames of \code{sce}.
 }
 \examples{
-data(sceCelda_CG)
-module <- featureModuleLookup(sce = sceCelda_CG,
+data(sceCeldaCG)
+module <- featureModuleLookup(sce = sceCeldaCG,
     feature = c("Gene_1", "Gene_XXX"))
 }

@@ -23,6 +23,6 @@ Return the celda model for \code{sce} returned by
  \link{celda_C}, \link{celda_G} or \link{celda_CG}.
 }
 \examples{
-data(sceCelda_CG)
-celdaModel(sceCelda_CG)
+data(sceCeldaCG)
+celdaModel(sceCeldaCG)
 }

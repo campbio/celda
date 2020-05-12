@@ -27,6 +27,6 @@ Recode cell subpopulaton clusters using a mapping in the
  \code{from} and \code{to} arguments.
 }
 \examples{
-data(sceCelda_CG)
-sceReorderedZ <- recodeClusterZ(sceCelda_CG, c(1, 3), c(3, 1))
+data(sceCeldaCG)
+sceReorderedZ <- recodeClusterZ(sceCeldaCG, c(1, 3), c(3, 1))
 }

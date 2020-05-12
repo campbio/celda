@@ -99,6 +99,6 @@ Embeds cells in two dimensions using \link[uwot]{umap} based on
  transformed before applying UMAP.
 }
 \examples{
-data(sceCelda_CG)
-umapRes <- celdaUmap(sceCelda_CG)
+data(sceCeldaCG)
+umapRes <- celdaUmap(sceCeldaCG)
 }
