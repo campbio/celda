@@ -224,7 +224,6 @@ setMethod("celda_G",
         maxIter = maxIter,
         splitOnIter = splitOnIter,
         splitOnLast = splitOnLast,
-        seed = seed,
         nchains = nchains,
         yInitialize = yInitialize,
         yInit = yInit,
@@ -1034,28 +1033,7 @@ setMethod("celda_G",
 .reorderCeldaG <- function(counts, res) {
     if (params(res)$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
         res@clusters$y <- as.integer(as.factor(res@clusters$y))
-
-        xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = counts))
-
-        sce <- .createSCEceldaG(celdaGMod = res,
-            sce = sce,
-            xClass = xClass,
-            useAssay = useAssay,
-            stopIter = NULL,
-            maxIter = NULL,
-            splitOnIter = NULL,
-            splitOnLast = NULL,
-            seed = NULL,
-            nchains = NULL,
-            yInitialize = NULL,
-            yInit = NULL,
-            logfile = NULL,
-            verbose = NULL)
-
-        fm <- factorizeMatrix(sce, useAssay = "counts")
+        fm <- factorizeMatrix(counts, res)
         uniqueY <- sort(unique(res@clusters$y))
         cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
         d <- .cosineDist(cs)
@@ -1068,7 +1046,6 @@ setMethod("celda_G",
 
 .celdaHeatmapCelda_G <- function(sce, useAssay, nfeatures, ...) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
     fm <- factorizeMatrix(sce = sce, useAssay = useAssay, type = "proportion")
     top <- celda::topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
@@ -1126,7 +1103,6 @@ setMethod("celda_G",
     maxIter,
     splitOnIter,
     splitOnLast,
-    seed,
     nchains,
     yInitialize,
     yInit,
@@ -1146,7 +1122,7 @@ setMethod("celda_G",
         maxIter = maxIter,
         splitOnIter = splitOnIter,
         splitOnLast = splitOnLast,
-        seed = seed,
+        seed = celdaGMod@params$seed,
         nchains = nchains,
         yInitialize = yInitialize,
         countChecksum = celdaGMod@params$countChecksum,

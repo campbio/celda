@@ -7,7 +7,7 @@
 \alias{sampleLabel<-,SingleCellExperiment-method}
 \alias{sampleLabel,celdaModel-method}
 \title{Get or set sample labels from a celda
- \link[SingleCellExperiment]{SingleCellExperiment} object}
+ \linkS4class{SingleCellExperiment}  object}
 \usage{
 sampleLabel(x)
 

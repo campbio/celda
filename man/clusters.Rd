@@ -7,7 +7,7 @@
 \alias{clusters<-}
 \alias{clusters<-,SingleCellExperiment-method}
 \title{Get or set the cell cluster labels from a celda
- \link[SingleCellExperiment]{SingleCellExperiment} object or celda model
+ \linkS4class{SingleCellExperiment}  object or celda model
  object.}
 \usage{
 clusters(x)

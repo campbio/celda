@@ -257,6 +257,8 @@ compareCountMatrix <- function(counts,
       " the count matrix used to generate the provided celda result."
     )
   } else if (!res && !errorOnMismatch) {
+    warning("There was a mismatch between the provided count matrix and",
+        " the count matrix used to generate the provided celda result.")
     return(FALSE)
   }
 }

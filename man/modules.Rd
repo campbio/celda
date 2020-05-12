@@ -6,7 +6,7 @@
 \alias{modules<-}
 \alias{modules<-,SingleCellExperiment-method}
 \title{Get or set the feature module labels from a celda
- \link[SingleCellExperiment]{SingleCellExperiment} object.}
+ \linkS4class{SingleCellExperiment}  object.}
 \usage{
 modules(sce)
 

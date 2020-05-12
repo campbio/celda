@@ -299,7 +299,6 @@ setMethod("celda_CG",
         maxIter = maxIter,
         splitOnIter = splitOnIter,
         splitOnLast = splitOnLast,
-        seed = seed,
         nchains = nchains,
         zInitialize = zInitialize,
         yInitialize = yInitialize,
@@ -1319,34 +1318,10 @@ setMethod("celda_CG",
 
 
 .reorderCeldaCG <- function(counts, res) {
-
-    xClass <- "matrix"
-    useAssay <- NULL
-    sce <- SingleCellExperiment::SingleCellExperiment(
-        assays = list(counts = counts))
-
-    sce <- .createSCEceldaCG(celdaCGMod = res,
-        sce = sce,
-        xClass = xClass,
-        useAssay = useAssay,
-        algorithm = NULL,
-        stopIter = NULL,
-        maxIter = NULL,
-        splitOnIter = NULL,
-        splitOnLast = NULL,
-        seed = NULL,
-        nchains = NULL,
-        zInitialize = NULL,
-        yInitialize = NULL,
-        zInit = NULL,
-        yInit = NULL,
-        logfile = NULL,
-        verbose = NULL)
-
     # Reorder K
     if (params(res)$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
         res@clusters$z <- as.integer(as.factor(res@clusters$z))
-        fm <- factorizeMatrix(sce, useAssay = "counts", type = "posterior")
+        fm <- factorizeMatrix(counts, res, type = "posterior")
         uniqueZ <- sort(unique(res@clusters$z))
         d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
         h <- stats::hclust(d, method = "complete")
@@ -1357,7 +1332,7 @@ setMethod("celda_CG",
     # Reorder L
     if (params(res)$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
         res@clusters$y <- as.integer(as.factor(res@clusters$y))
-        fm <- factorizeMatrix(sce, useAssay = "counts", type = "posterior")
+        fm <- factorizeMatrix(counts, res, type = "posterior")
         uniqueY <- sort(unique(res@clusters$y))
         cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
         d <- .cosineDist(cs)
@@ -1617,7 +1592,6 @@ setMethod("celda_CG",
     maxIter,
     splitOnIter,
     splitOnLast,
-    seed,
     nchains,
     zInitialize,
     yInitialize,
@@ -1643,7 +1617,7 @@ setMethod("celda_CG",
         maxIter = maxIter,
         splitOnIter = splitOnIter,
         splitOnLast = splitOnLast,
-        seed = seed,
+        seed = celdaCGMod@params$seed,
         nchains = nchains,
         zInitialize = zInitialize,
         yInitialize = yInitialize,

@@ -1,3 +1,29 @@
+#' @title Celda models
+#' @description List of available Celda models with correpsonding descriptions.
+#' @export
+#' @examples
+#' celda()
+#' @return None
+celda <- function() {
+    message(
+        "celda_C: Clusters the columns of a count matrix containing",
+        " single-cell data into K subpopulations."
+    )
+    message(
+        "celda_G: Clusters the rows of a count matrix containing",
+        " single-cell data into L modules."
+    )
+    message(
+        "celda_CG: Clusters the rows and columns of a count matrix",
+        " containing single-cell data into L modules and K subpopulations,",
+        " respectively."
+    )
+    message(
+        "celdaGridSearch: Run Celda with different combinations of",
+        " parameters and multiple chains in parallel."
+    )
+}
+
 
 #' @title Get log-likelihood history
 #' @description Retrieves the complete log-likelihood from all iterations of
@@ -112,84 +138,6 @@ setMethod("celdaModel",
 setClass("celda_G", contains = "celdaModel")
 
 setClass("celda_CG", contains = c("celda_C", "celda_G"))
-
-setClass("celdaList",
-    slots = c(runParams = "data.frame",
-        resList = "list",
-        countChecksum = "character",
-        perplexity = "matrix",
-        celdaGridSearchParameters = "list")
-)
-
-
-#' @title Get run parameters provided to `celdaGridSearch()`
-#' @description Returns details on the clustering parameters, and model priors
-#'  provided to `celdaGridSearch()` when the provided celdaList was
-#'  created.
-#' @param celdaList An object of class celdaList.
-#' @return Data Frame. Contains details on the various K/L parameters, chain
-#'  parameters, and final log-likelihoods derived for each model in the
-#'  provided celdaList.
-#' @examples
-#' data(celdaCGGridSearchRes)
-#' runParams(celdaCGGridSearchRes)
-#' @export
-setGeneric(
-  "runParams",
-  function(celdaList) {
-    standardGeneric("runParams")
-  }
-)
-#' @title Get run parameters provided to `celdaGridSearch()`
-#' @description Returns details on the clustering parameters, and model priors
-#'  provided to `celdaGridSearch()` when the provided celdaList was
-#'  created.
-#' @param celdaList An object of class celdaList.
-#' @return Data Frame. Contains details on the various K/L parameters, chain
-#'  parameters, and final log-likelihoods derived for each model in the
-#'  provided celdaList.
-#' @examples
-#' data(celdaCGGridSearchRes)
-#' runParams(celdaCGGridSearchRes)
-#' @export
-setMethod("runParams",
-  signature = c(celdaList = "celdaList"),
-  function(celdaList) {
-    celdaList@runParams
-  }
-)
-
-
-#' @title Get final celdaModels from a celdaList
-#' @description Returns all models generated during a `celdaGridSearch()` run.
-#' @param celdaList An object of class celdaList.
-#' @return List. Contains one celdaModel object for each of the parameters
-#'  specified in the `runParams()` of the provided celda list.
-#' @examples
-#' data(celdaCGGridSearchRes)
-#' celdaCGGridModels <- resList(celdaCGGridSearchRes)
-#' @export
-setGeneric(
-  "resList",
-  function(celdaList) {
-    standardGeneric("resList")
-  }
-)
-#' @title Get final celdaModels from a celdaList
-#' @description Returns all models generated during a `celdaGridSearch()` run.
-#' @param celdaList An object of class celdaList.
-#' @return List. Contains one celdaModel object for each of the parameters
-#'  specified in the `runParams()` of the provided celda list.
-#' @examples
-#' data(celdaCGGridSearchRes)
-#' celdaCGGridModels <- resList(celdaCGGridSearchRes)
-#' @export
-setMethod("resList",
-  signature = c(celdaList = "celdaList"),
-  function(celdaList) {
-    celdaList@resList
-  }
-)
 
 
 #' @title Get perplexity for every model in a celdaList

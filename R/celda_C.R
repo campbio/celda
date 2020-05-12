@@ -245,7 +245,6 @@ setMethod("celda_C",
         maxIter = maxIter,
         splitOnIter = splitOnIter,
         splitOnLast = splitOnLast,
-        seed = seed,
         nchains = nchains,
         zInitialize = zInitialize,
         zInit = zInit,
@@ -1053,29 +1052,7 @@ setMethod("celda_C",
 .reorderCeldaC <- function(counts, res) {
   if (params(res)$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
     res@clusters$z <- as.integer(as.factor(res@clusters$z))
-
-    xClass <- "matrix"
-    useAssay <- NULL
-    sce <- SingleCellExperiment::SingleCellExperiment(
-        assays = list(counts = counts))
-
-    sce <- .createSCEceldaC(celdaCMod = res,
-        sce = sce,
-        xClass = xClass,
-        useAssay = useAssay,
-        algorithm = NULL,
-        stopIter = NULL,
-        maxIter = NULL,
-        splitOnIter = NULL,
-        splitOnLast = NULL,
-        seed = NULL,
-        nchains = NULL,
-        zInitialize = NULL,
-        zInit = NULL,
-        logfile = NULL,
-        verbose = NULL)
-
-    fm <- factorizeMatrix(sce, useAssay = "counts")
+    fm <- factorizeMatrix(counts, res)
     uniqueZ <- sort(unique(res@clusters$z))
     d <- .cosineDist(fm$posterior$module[, uniqueZ])
     h <- stats::hclust(d, method = "complete")
@@ -1231,7 +1208,6 @@ setMethod("celda_C",
     maxIter,
     splitOnIter,
     splitOnLast,
-    seed,
     nchains,
     zInitialize,
     zInit,
@@ -1252,7 +1228,7 @@ setMethod("celda_C",
         maxIter = maxIter,
         splitOnIter = splitOnIter,
         splitOnLast = splitOnLast,
-        seed = seed,
+        seed = celdaCMod@params$seed,
         nchains = nchains,
         zInitialize = zInitialize,
         countChecksum = celdaCMod@params$countChecksum,

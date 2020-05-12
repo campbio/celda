@@ -11,8 +11,17 @@ setClass(
 ) # z and or y
 
 
+setClass("celdaList",
+    slots = c(runParams = "data.frame",
+        resList = "list",
+        countChecksum = "character",
+        perplexity = "matrix",
+        celdaGridSearchParameters = "list")
+)
+
+
 #' @title Get or set the cell cluster labels from a celda
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object or celda model
+#'  \linkS4class{SingleCellExperiment}  object or celda model
 #'  object.
 #' @description Return or set the cell cluster labels determined
 #'  by \link{celda_C} or \link{celda_CG} models.
@@ -80,7 +89,7 @@ setReplaceMethod("clusters", signature(x = "SingleCellExperiment"),
 
 
 #' @title Get or set the feature module labels from a celda
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object.
+#'  \linkS4class{SingleCellExperiment}  object.
 #' @description Return or set the feature module cluster labels determined
 #'  by \link{celda_G} or \link{celda_CG} models.
 #' @param sce A \linkS4class{SingleCellExperiment} object returned by
@@ -121,7 +130,7 @@ setReplaceMethod("modules", signature(sce = "SingleCellExperiment"),
 
 
 #' @title Get or set sample labels from a celda
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object
+#'  \linkS4class{SingleCellExperiment}  object
 #' @description Return or set the sample labels for the cells in \code{sce}.
 #' @param x Can be one of
 #'  \itemize{
@@ -242,5 +251,98 @@ setMethod("matrixNames",
     signature = c(celdaMod = "celdaModel"),
     function(celdaMod) {
         celdaMod@names
+    }
+)
+
+
+#' @title Get run parameters from a celda model
+#'  \code{SingleCellExperiment} or \code{celdaList} object
+#' @description Returns details on the clustering parameters and model
+#'  priors from the celdaList object when it was created.
+#' @param x An object of class \linkS4class{SingleCellExperiment}.
+#' @return Data Frame. Contains details on the various K/L parameters, chain
+#'  parameters, seed, and final log-likelihoods derived for each model in the
+#'  provided celdaList.
+#' @export
+setGeneric(
+    "runParams",
+    function(x) {
+        standardGeneric("runParams")
+    }
+)
+
+
+#' @examples
+#' data(sceCeldaCGGridSearch)
+#' runParams(sceCeldaCGGridSearch)
+#' @rdname runParams
+#' @export
+setMethod("runParams",
+    signature(x = "SingleCellExperiment"),
+    function(x) {
+        return(x@metadata$celda_grid_search@runParams)
+    }
+)
+
+
+#' @title Get run parameters from a \code{celdaList} object
+#' @description Returns details on the clustering parameters, and model priors
+#'  from the celdaList object when it was created.
+#' @param x An object of class \code{celdaList}.
+#' @return Data Frame. Contains details on the various K/L parameters, chain
+#'  parameters, seed, and final log-likelihoods derived for each model in the
+#'  provided celdaList.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' runParams(celdaCGGridSearchRes)
+#' @rdname runParams
+#' @export
+setMethod("runParams",
+    signature(x = "celdaList"),
+    function(x) {
+        return(x@runParams)
+    }
+)
+
+
+#' @title Get final celdaModels from a celda model \code{SCE} or celdaList
+#'  object
+#' @description Returns all celda models generated during a
+#'  \link{celdaGridSearch} run.
+#' @param x An object of class \linkS4class{SingleCellExperiment} or
+#'  \code{celdaList}.
+#' @return List. Contains one celdaModel object for each of the parameters
+#'  specified in \code{runParams(x)}.
+#' @export
+setGeneric(
+    "resList",
+    function(x) {
+        standardGeneric("resList")
+    }
+)
+
+
+#' @examples
+#' data(sceCeldaCGGridSearch)
+#' celdaCGGridModels <- resList(sceCeldaCGGridSearch)
+#' @rdname resList
+#' @export
+setMethod("resList",
+    signature(x = "SingleCellExperiment"),
+    function(x) {
+        return(x@metadata$celda_grid_search@resList)
+    }
+)
+
+
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' celdaCGGridModels <- resList(celdaCGGridSearchRes)
+#' @rdname resList
+#' @export
+setMethod("resList",
+    signature(x = "celdaList"),
+    function(x) {
+        return(x@resList)
     }
 )
