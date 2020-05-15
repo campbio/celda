@@ -192,8 +192,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
 #'  for `module` and `sample`.
 #' @rdname factorizeMatrix
 #' @export
-setMethod(
-    "factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
+setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
