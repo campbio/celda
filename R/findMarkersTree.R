@@ -5,7 +5,13 @@
 #'  Splits are determined by one of two metrics at each split: a one-off metric
 #'  to determine rules for identifying clusters by a single feature, and a
 #'  balanced metric to determine rules for identifying sets of similar clusters.
-#' @param features features-by-samples numeric matrix, e.g. counts matrix.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
 #' @param class Vector of cell cluster labels.
 #' @param oneoffMetric A character string. What one-off metric to run, either
 #'  `modified F1` or `pairwise AUC`. Default is 'modified F1'.
@@ -19,7 +25,8 @@
 #' @param counts Numeric counts matrix. Useful when using clusters
 #'  of features (e.g. gene modules) and user wishes to expand tree results to
 #'  individual features (e.g. score individual genes within marker gene
-#'  modules). Row names should be individual feature names.
+#'  modules). Row names should be individual feature names. Ignored if
+#'  \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @param celda A \emph{celda_CG} or \emph{celda_C} object.
 #'  Counts matrix has to be provided as well.
 #' @param seurat A seurat object. Note that the seurat functions
@@ -81,15 +88,15 @@
 #' @examples
 #' \dontrun{
 #' # Generate simulated single-cell dataset using celda
-#' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+#' sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
 #' # Celda clustering into 5 clusters & 10 modules
-#' cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
+#' cm <- celda_CG(sim_counts, K = 5, L = 10, verbose = FALSE)
 #'
 #' # Get features matrix and cluster assignments
-#' factorized <- factorizeMatrix(sim_counts$counts, cm)
+#' factorized <- factorizeMatrix(cm)
 #' features <- factorized$proportions$cell
-#' class <- clusters(cm)$z
+#' class <- celdaClusters(cm)
 #'
 #' # Generate Decision Tree
 #' DecTree <- findMarkersTree(features, class)
@@ -98,83 +105,223 @@
 #' plotMarkerDendro(DecTree)
 #' }
 #' @export
-findMarkersTree <- function(features,
-                            class,
-                            oneoffMetric = c("modified F1", "pairwise AUC"),
-                            metaclusters,
-                            featureLabels,
-                            counts,
-                            celda,
-                            seurat,
-                            threshold = 0.90,
-                            reuseFeatures = FALSE,
-                            altSplit = TRUE,
-                            consecutiveOneoff = FALSE,
-                            autoMetaclusters = TRUE,
-                            seed = 12345) {
-  if (methods::hasArg(celda)) {
-    # check that counts matrix is provided
-    if (!methods::hasArg(counts)) {
-      stop("Please provide counts matrix in addition to celda object.")
-    }
+setGeneric("findMarkersTree", function(x, ...) {
+    standardGeneric("findMarkersTree")})
 
-    # factorize matrix (proportion of each module in each cell)
-    features <-
-      celda::factorizeMatrix(counts, celda)$proportions$cell
 
-    # get class labels
-    class <- celda@clusters$z
+#' @rdname findMarkersTree
+#' @export
+setMethod("findMarkersTree",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        class,
+        oneoffMetric = c("modified F1", "pairwise AUC"),
+        metaclusters,
+        featureLabels,
+        counts,
+        seurat,
+        threshold = 0.90,
+        reuseFeatures = FALSE,
+        altSplit = TRUE,
+        consecutiveOneoff = FALSE,
+        autoMetaclusters = TRUE,
+        seed = 12345) {
 
-    # get feature labels
-    featureLabels <- paste0("L", celda@clusters$y)
-  }
-  else if (methods::hasArg(seurat)) {
-    # get counts matrix from seurat object
-    counts <- as.matrix(seurat@assays$RNA@data)
+        if ("celda_parameters" %in% names(S4Vectors::metadata(x))) {
+            counts <- SummarizedExperiment::assay(x, i = useAssay)
 
-    # get class labels
-    class <- as.character(Seurat::Idents(seurat))
+            # factorize matrix (proportion of each module in each cell)
+            features <- factorizeMatrix(x)$proportions$cell
 
-    # get feature labels
-    featureLabels <-
-      unlist(apply(
-        seurat@reductions$pca@feature.loadings, 1,
-        function(x) {
-          return(names(x)[which(x == max(x))])
+            # get class labels
+            class <- celdaClusters(x)
+
+            # get feature labels
+            featureLabels <- paste0("L", celdaModules(x))
+        } else if (methods::hasArg(seurat)) {
+            # get counts matrix from seurat object
+            counts <- as.matrix(seurat@assays$RNA@data)
+
+            # get class labels
+            class <- as.character(Seurat::Idents(seurat))
+
+            # get feature labels
+            featureLabels <-
+                unlist(apply(
+                    seurat@reductions$pca@feature.loadings, 1,
+                    function(x) {
+                        return(names(x)[which(x == max(x))])
+                    }
+                ))
+
+            # sum counts for each PC in each cell
+            features <-
+                matrix(
+                    unlist(lapply(unique(featureLabels), function(pc) {
+                        colSums(counts[featureLabels == pc, ])
+                    })),
+                    ncol = length(class),
+                    byrow = TRUE,
+                    dimnames = list(unique(featureLabels), colnames(counts))
+                )
+
+            # normalize column-wise (i.e. convert counts to proportions)
+            features <- apply(features, 2, function(x) {
+                x / sum(x)
+            })
         }
-      ))
 
-    # sum counts for each PC in each cell
-    features <-
-      matrix(
-        unlist(lapply(unique(featureLabels), function(pc) {
-          colSums(counts[featureLabels == pc, ])
-        })),
-        ncol = length(class),
-        byrow = TRUE,
-        dimnames = list(unique(featureLabels), colnames(counts))
-      )
+        if (ncol(features) != length(class)) {
+            stop("Number of columns of features must equal length of class")
+        }
 
-    # normalize column-wise (i.e. convert counts to proportions)
-    features <- apply(features, 2, function(x) {
-      x / sum(x)
-    })
-  }
+        if (any(is.na(class))) {
+            stop("NA class values")
+        }
 
-  if (ncol(features) != length(class)) {
-    stop("Number of columns of features must equal length of class")
-  }
+        if (any(is.na(features))) {
+            stop("NA feature values")
+        }
 
-  if (any(is.na(class))) {
-    stop("NA class values")
-  }
+        # Match the oneoffMetric argument
+        oneoffMetric <- match.arg(oneoffMetric)
 
-  if (any(is.na(features))) {
-    stop("NA feature values")
-  }
+        branchPoints <- .findMarkersTree(features = features,
+            class = class,
+            oneoffMetric = oneoffMetric,
+            metaclusters = metaclusters,
+            featureLabels = featureLabels,
+            counts = counts,
+            seurat = seurat,
+            threshold = threshold,
+            reuseFeatures = reuseFeatures,
+            altSplit = altSplit,
+            consecutiveOneoff = consecutiveOneoff,
+            autoMetaclusters = autoMetaclusters,
+            seed = seed)
 
-  # Match the oneoffMetric argument
-  oneoffMetric <- match.arg(oneoffMetric)
+        return(branchPoints)
+    }
+)
+
+
+#' @rdname findMarkersTree
+#' @export
+setMethod("findMarkersTree",
+    signature(x = "matrix"),
+    function(x,
+        class,
+        oneoffMetric = c("modified F1", "pairwise AUC"),
+        metaclusters,
+        featureLabels,
+        counts,
+        celda,
+        seurat,
+        threshold = 0.90,
+        reuseFeatures = FALSE,
+        altSplit = TRUE,
+        consecutiveOneoff = FALSE,
+        autoMetaclusters = TRUE,
+        seed = 12345) {
+
+        features <- x
+
+        if (methods::hasArg(celda)) {
+            # check that counts matrix is provided
+            if (!methods::hasArg(counts)) {
+                stop("Please provide counts matrix in addition to",
+                    " celda object.")
+            }
+
+            # factorize matrix (proportion of each module in each cell)
+            features <- factorizeMatrix(counts, celda)$proportions$cell
+
+            # get class labels
+            class <- celda@celdaClusters$z
+
+            # get feature labels
+            featureLabels <- paste0("L", celda@celdaClusters$y)
+        } else if (methods::hasArg(seurat)) {
+            # get counts matrix from seurat object
+            counts <- as.matrix(seurat@assays$RNA@data)
+
+            # get class labels
+            class <- as.character(Seurat::Idents(seurat))
+
+            # get feature labels
+            featureLabels <-
+                unlist(apply(
+                    seurat@reductions$pca@feature.loadings, 1,
+                    function(x) {
+                        return(names(x)[which(x == max(x))])
+                    }
+                ))
+
+            # sum counts for each PC in each cell
+            features <-
+                matrix(
+                    unlist(lapply(unique(featureLabels), function(pc) {
+                        colSums(counts[featureLabels == pc, ])
+                    })),
+                    ncol = length(class),
+                    byrow = TRUE,
+                    dimnames = list(unique(featureLabels), colnames(counts))
+                )
+
+            # normalize column-wise (i.e. convert counts to proportions)
+            features <- apply(features, 2, function(x) {
+                x / sum(x)
+            })
+        }
+
+        if (ncol(features) != length(class)) {
+            stop("Number of columns of features must equal length of class")
+        }
+
+        if (any(is.na(class))) {
+            stop("NA class values")
+        }
+
+        if (any(is.na(features))) {
+            stop("NA feature values")
+        }
+
+        # Match the oneoffMetric argument
+        oneoffMetric <- match.arg(oneoffMetric)
+
+        branchPoints <- .findMarkersTree(features = features,
+            class = class,
+            oneoffMetric = oneoffMetric,
+            metaclusters = metaclusters,
+            featureLabels = featureLabels,
+            counts = counts,
+            seurat = seurat,
+            threshold = threshold,
+            reuseFeatures = reuseFeatures,
+            altSplit = altSplit,
+            consecutiveOneoff = consecutiveOneoff,
+            autoMetaclusters = autoMetaclusters,
+            seed = seed)
+
+        return(branchPoints)
+    }
+)
+
+
+.findMarkersTree <- function(features,
+    class,
+    oneoffMetric,
+    metaclusters,
+    featureLabels,
+    counts,
+    seurat,
+    threshold,
+    reuseFeatures,
+    altSplit,
+    consecutiveOneoff,
+    autoMetaclusters,
+    seed) {
 
   # Transpose features
   features <- t(features)
@@ -939,6 +1086,7 @@ findMarkersTree <- function(features,
     return(tree)
   }
 }
+
 
 # helper function to create table for each branch point in the tree
 .createBranchPoints <-
@@ -2888,7 +3036,7 @@ plotMarkerDendro <- function(tree,
 
 #' @title Generate heatmap for a marker decision tree
 #' @description Creates heatmap for a specified branch point in a marker tree.
-#' @param tree A decision tree from CELDA's \emph{findMarkersTree} function.
+#' @param tree A decision tree returned from \link{findMarkersTree} function.
 #' @param counts Numeric matrix. Gene-by-cell counts matrix.
 #' @param branchPoint Character. Name of branch point to plot heatmap for.
 #' Name should match those in \emph{tree$branchPoints}.
@@ -2906,28 +3054,26 @@ plotMarkerDendro <- function(tree,
 #' @examples
 #' \dontrun{
 #' # Generate simulated single-cell dataset using celda
-#' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+#' sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
 #' # Celda clustering into 5 clusters & 10 modules
-#' cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
+#' cm <- celda_CG(sim_counts, K = 5, L = 10, verbose = FALSE)
 #'
 #' # Get features matrix and cluster assignments
-#' factorized <- factorizeMatrix(sim_counts$counts, cm)
+#' factorized <- factorizeMatrix(cm)
 #' features <- factorized$proportions$cell
-#' class <- clusters(cm)$z
+#' class <- celdaClusters(cm)
 #'
 #' # Generate Decision Tree
 #' DecTree <- findMarkersTree(features, class, threshold = 1)
 #'
 #' # Plot example heatmap
-#' plotMarkerHeatmap(DecTree, sim_counts$counts,
+#' plotMarkerHeatmap(DecTree, assay(sim_counts),
 #'   branchPoint = "top_level",
-#'   featureLabels = paste0("L", clusters(cm)$y)
-#' )
+#'   featureLabels = paste0("L", celdaModules(cm)))
 #' }
 #' @export
-plotMarkerHeatmap <-
-  function(tree,
+plotMarkerHeatmap <- function(tree,
            counts,
            branchPoint,
            featureLabels,

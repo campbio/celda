@@ -79,8 +79,8 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
 
         K <- params(celdaMod)$K
         L <- params(celdaMod)$L
-        z <- clusters(celdaMod)$z
-        y <- clusters(celdaMod)$y
+        z <- celdaClusters(celdaMod)$z
+        y <- celdaClusters(celdaMod)$y
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
@@ -201,7 +201,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
         compareCountMatrix(counts, celdaMod)
 
         K <- params(celdaMod)$K
-        z <- clusters(celdaMod)$z
+        z <- celdaClusters(celdaMod)$z
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
@@ -282,7 +282,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
         # compareCountMatrix(counts, celdaMod)
 
         L <- params(celdaMod)$L
-        y <- clusters(celdaMod)$y
+        y <- celdaClusters(celdaMod)$y
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma

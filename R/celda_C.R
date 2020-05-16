@@ -527,7 +527,7 @@ setMethod("celda_C",
   }
 
   bestResult <- methods::new("celda_C",
-    clusters = list(z = bestResult$z),
+    celdaClusters = list(z = bestResult$z),
     params = list(
       K = as.integer(bestResult$K),
       alpha = bestResult$alpha,
@@ -792,7 +792,7 @@ setMethod("celda_C",
         sample = unique(cellSampleLabel))
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_C",
-        clusters = list(z = z),
+        celdaClusters = list(z = z),
         params = list(K = as.integer(K),
             alpha = alpha,
             beta = beta,
@@ -802,7 +802,7 @@ setMethod("celda_C",
     class(result) <- "celda_C"
     result <- .reorderCeldaC(counts = cellCounts, res = result)
 
-    return(list(z = result@clusters$z,
+    return(list(z = result@celdaClusters$z,
         counts = cellCounts,
         sampleLabel = cellSampleLabel,
         G = G,
@@ -820,7 +820,7 @@ setMethod("celda_C",
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
-    z <- clusters(sce)
+    z <- celdaClusters(sce)
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     sampleLabel <- sampleLabel(sce)
@@ -909,7 +909,7 @@ setMethod("celda_C",
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     sampleLabel <- sampleLabel(sce)
-    z <- clusters(sce)
+    z <- celdaClusters(sce)
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
@@ -986,7 +986,7 @@ setMethod("celda_C",
 .clusterProbabilityCeldaC <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    z <- clusters(sce)
+    z <- celdaClusters(sce)
     s <- as.integer(sampleLabel(sce))
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
@@ -1050,10 +1050,10 @@ setMethod("celda_C",
 
 
 .reorderCeldaC <- function(counts, res) {
-  if (params(res)$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
-    res@clusters$z <- as.integer(as.factor(res@clusters$z))
+  if (params(res)$K > 2 & isTRUE(length(unique(res@celdaClusters$z)) > 1)) {
+    res@celdaClusters$z <- as.integer(as.factor(res@celdaClusters$z))
     fm <- factorizeMatrix(counts, res)
-    uniqueZ <- sort(unique(res@clusters$z))
+    uniqueZ <- sort(unique(res@celdaClusters$z))
     d <- .cosineDist(fm$posterior$module[, uniqueZ])
     h <- stats::hclust(d, method = "complete")
     res <- .recodeClusterZ(res,
@@ -1075,11 +1075,11 @@ setMethod("celda_C",
 
     if (is.null(featureIx)) {
         return(plotHeatmap(norm,
-            z = clusters(sce), ...))
+            z = celdaClusters(sce), ...))
     }
 
     return(plotHeatmap(norm[featureIx, ],
-        z = clusters(sce), ...))
+        z = celdaClusters(sce), ...))
 }
 
 
@@ -1115,7 +1115,7 @@ setMethod("celda_C",
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(clusters(sce),
+        zTa <- tabulate(celdaClusters(sce),
             S4Vectors::metadata(sce)$celda_parameters$K)
 
         ## Number of cells that can be sampled from each cluster without
@@ -1134,7 +1134,7 @@ setMethod("celda_C",
 
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
-            zInclude[sample(which(clusters(sce) == i),
+            zInclude[sample(which(celdaClusters(sce) == i),
                 clusterNToSample[i])] <- FALSE
         }
     }
@@ -1152,7 +1152,7 @@ setMethod("celda_C",
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
-    zInclude <- which(tabulate(clusters(sce),
+    zInclude <- which(tabulate(celdaClusters(sce),
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
 
     factorized <- factorizeMatrix(sce = sce, useAssay = useAssay)
@@ -1237,7 +1237,7 @@ setMethod("celda_C",
         verbose = verbose,
         completeLogLik = celdaCMod@completeLogLik,
         finalLogLik = celdaCMod@finalLogLik,
-        cellClusterLevels = sort(unique(celdaCMod@clusters$z)))
+        cellClusterLevels = sort(unique(celdaCMod@celdaClusters$z)))
 
     SummarizedExperiment::rowData(sce)["rownames"] <- celdaCMod@names$row
     SummarizedExperiment::colData(sce)["colnames"] <-
@@ -1245,7 +1245,7 @@ setMethod("celda_C",
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
         celdaCMod@sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaCMod@clusters$z
+        celdaCMod@celdaClusters$z
 
     return(sce)
 }

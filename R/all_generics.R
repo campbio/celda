@@ -745,6 +745,8 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
 #'  Default NULL.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
+#' @param modules Integer vector. Determines which features modules to use for
+#'  UMAP. If NULL, all modules will be used. Default NULL.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.

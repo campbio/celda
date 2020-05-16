@@ -740,7 +740,7 @@ setMethod("celda_CG",
 
   ## Peform reordering on final Z and Y assigments:
   bestResult <- methods::new("celda_CG",
-    clusters = list(z = zBest, y = yBest),
+    celdaClusters = list(z = zBest, y = yBest),
     params = list(
       K = as.integer(K),
       L = as.integer(L),
@@ -933,7 +933,7 @@ setMethod("celda_CG",
   )
   countChecksum <- .createCountChecksum(cellCounts)
   result <- methods::new("celda_CG",
-    clusters = list(z = z, y = y),
+    celdaClusters = list(z = z, y = y),
     params = list(
       K = as.integer(K),
       L = as.integer(L),
@@ -950,8 +950,8 @@ setMethod("celda_CG",
   result <- .reorderCeldaCG(counts = cellCounts, res = result)
 
   return(list(
-    z = result@clusters$z,
-    y = result@clusters$y,
+    z = result@celdaClusters$z,
+    y = result@celdaClusters$y,
     counts = cellCounts,
     sampleLabel = cellSampleLabel,
     G = G,
@@ -973,8 +973,8 @@ setMethod("celda_CG",
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     L <- S4Vectors::metadata(sce)$celda_parameters$L
-    z <- clusters(sce)
-    y <- modules(sce)
+    z <- celdaClusters(sce)
+    y <- celdaModules(sce)
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
@@ -1132,8 +1132,8 @@ setMethod("celda_CG",
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     sampleLabel <- sampleLabel(sce)
-    z <- clusters(sce)
-    y <- modules(sce)
+    z <- celdaClusters(sce)
+    y <- celdaModules(sce)
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
@@ -1222,9 +1222,9 @@ setMethod("celda_CG",
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
     s <- as.integer(sampleLabel(sce))
-    z <- clusters(sce)
+    z <- celdaClusters(sce)
     K <- S4Vectors::metadata(sce)$celda_parameters$K
-    y <- modules(sce)
+    y <- celdaModules(sce)
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
@@ -1319,10 +1319,10 @@ setMethod("celda_CG",
 
 .reorderCeldaCG <- function(counts, res) {
     # Reorder K
-    if (params(res)$K > 2 & isTRUE(length(unique(res@clusters$z)) > 1)) {
-        res@clusters$z <- as.integer(as.factor(res@clusters$z))
+    if (params(res)$K > 2 & isTRUE(length(unique(res@celdaClusters$z)) > 1)) {
+        res@celdaClusters$z <- as.integer(as.factor(res@celdaClusters$z))
         fm <- factorizeMatrix(counts, res, type = "posterior")
-        uniqueZ <- sort(unique(res@clusters$z))
+        uniqueZ <- sort(unique(res@celdaClusters$z))
         d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
         h <- stats::hclust(d, method = "complete")
 
@@ -1330,10 +1330,10 @@ setMethod("celda_CG",
     }
 
     # Reorder L
-    if (params(res)$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
-        res@clusters$y <- as.integer(as.factor(res@clusters$y))
+    if (params(res)$L > 2 & isTRUE(length(unique(res@celdaClusters$y)) > 1)) {
+        res@celdaClusters$y <- as.integer(as.factor(res@celdaClusters$y))
         fm <- factorizeMatrix(counts, res, type = "posterior")
-        uniqueY <- sort(unique(res@clusters$y))
+        uniqueY <- sort(unique(res@celdaClusters$y))
         cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -1354,8 +1354,8 @@ setMethod("celda_CG",
         transformationFun = sqrt
     )
     plt <- plotHeatmap(norm[ix, ],
-        z = clusters(sce),
-        y = modules(sce)[ix],
+        z = celdaClusters(sce),
+        y = celdaModules(sce)[ix],
         ...
     )
     invisible(plt)
@@ -1440,7 +1440,7 @@ setMethod("celda_CG",
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(clusters(sce),
+        zTa <- tabulate(celdaClusters(sce),
             S4Vectors::metadata(sce)$celda_parameters$K)
 
         ## Number of cells that can be sampled from each cluster without
@@ -1460,7 +1460,7 @@ setMethod("celda_CG",
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
             zInclude[sample(
-                which(clusters(sce) == i),
+                which(celdaClusters(sce) == i),
                 clusterNToSample[i]
             )] <- FALSE
         }
@@ -1480,9 +1480,9 @@ setMethod("celda_CG",
     counts <- .processCounts(counts)
 
     factorized <- factorizeMatrix(sce, useAssay)
-    zInclude <- which(tabulate(clusters(sce),
+    zInclude <- which(tabulate(celdaClusters(sce),
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
-    yInclude <- which(tabulate(modules(celdaMod),
+    yInclude <- which(tabulate(celdaModules(celdaMod),
         S4Vectors::metadata(sce)$celda_parameters$L) > 0)
 
     if (level == "cellPopulation") {
@@ -1628,8 +1628,8 @@ setMethod("celda_CG",
         verbose = verbose,
         completeLogLik = celdaCGMod@completeLogLik,
         finalLogLik = celdaCGMod@finalLogLik,
-        cellClusterLevels = sort(unique(celdaCGMod@clusters$z)),
-        featureModuleLevels = sort(unique(celdaCGMod@clusters$y)))
+        cellClusterLevels = sort(unique(celdaCGMod@celdaClusters$z)),
+        featureModuleLevels = sort(unique(celdaCGMod@celdaClusters$y)))
 
     SummarizedExperiment::rowData(sce)["rownames"] <- celdaCGMod@names$row
     SummarizedExperiment::colData(sce)["colnames"] <-
@@ -1637,9 +1637,9 @@ setMethod("celda_CG",
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
         celdaCGMod@sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaCGMod@clusters$z
+        celdaCGMod@celdaClusters$z
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaCGMod@clusters$y
+        celdaCGMod@celdaClusters$y
 
     return(sce)
 }

@@ -5,7 +5,7 @@
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells. Must contain cluster
-#'  labels in \code{clusters(x)} if \code{x} is a
+#'  labels in \code{celdaClusters(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
@@ -58,35 +58,36 @@ setMethod("differentialExpression",
             stop("'c1' should be a numeric vector of cell cluster(s)")
         }
 
-        cdiff <- setdiff(c1, clusters(x))
+        cdiff <- setdiff(c1, celdaClusters(x))
 
         if (length(cdiff) > 0) {
             warning("cluster ", cdiff, "in 'c1' does not exist in",
-                " 'clusters(x)'!")
+                " 'celdaClusters(x)'!")
             if (length(cdiff) == length(c1)) {
-                stop("All clusters in 'c1' does not exist in 'clusters(x)'!")
+                stop("All clusters in 'c1' does not exist in",
+                    " 'celdaClusters(x)'!")
             }
         }
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(c2)) {
-            c2 <- sort(setdiff(unique(clusters(x)), c1))
+            c2 <- sort(setdiff(unique(celdaClusters(x)), c1))
         }
         if (length(c1) > 1) {
             cells1 <- SummarizedExperiment::colData(x)$colnames[
-                which(clusters(x) %in% c1)]
+                which(celdaClusters(x) %in% c1)]
         } else {
             cells1 <- SummarizedExperiment::colData(x)$colnames[
-                which(clusters(x) == c1)]
+                which(celdaClusters(x) == c1)]
         }
 
         if (length(c2) > 1) {
             cells2 <- SummarizedExperiment::colData(x)$colnames[
-                which(clusters(x) %in% c2)]
+                which(celdaClusters(x) %in% c2)]
         } else {
             cells2 <- SummarizedExperiment::colData(x)$colnames[
-                which(clusters(x) == c2)]
+                which(celdaClusters(x) == c2)]
         }
 
         mat <- counts[, c(cells1, cells2)]
@@ -172,39 +173,39 @@ setMethod("differentialExpression",
             stop("'c1' should be a numeric vector of cell cluster(s)")
         }
 
-        cdiff <- setdiff(c1, clusters(celdaMod)$z)
+        cdiff <- setdiff(c1, celdaClusters(celdaMod)$z)
 
         if (length(cdiff) > 0) {
             warning("cluster ", cdiff, "in 'c1' does not exist in",
-                " 'clusters(celdaMod)$z'!")
+                " 'celdaClusters(celdaMod)$z'!")
             if (length(cdiff) == length(c1)) {
                 stop("All clusters in 'c1' does not exist in",
-                    " 'clusters(celdaMod)$z'!")
+                    " 'celdaClusters(celdaMod)$z'!")
             }
         }
 
         compareCountMatrix(x, celdaMod)
 
         if (is.null(c2)) {
-            c2 <- sort(setdiff(unique(clusters(celdaMod)$z), c1))
+            c2 <- sort(setdiff(unique(celdaClusters(celdaMod)$z), c1))
         }
         if (length(c1) > 1) {
             cells1 <- matrixNames(celdaMod)$column[which(
-                clusters(celdaMod)$z %in% c1
+                celdaClusters(celdaMod)$z %in% c1
             )]
         } else {
             cells1 <- matrixNames(celdaMod)$column[which(
-                clusters(celdaMod)$z == c1
+                celdaClusters(celdaMod)$z == c1
             )]
         }
 
         if (length(c2) > 1) {
             cells2 <- matrixNames(celdaMod)$column[which(
-                clusters(celdaMod)$z %in% c2
+                celdaClusters(celdaMod)$z %in% c2
             )]
         } else {
             cells2 <- matrixNames(celdaMod)$column[which(
-                clusters(celdaMod)$z == c2
+                celdaClusters(celdaMod)$z == c2
             )]
         }
 

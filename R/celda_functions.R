@@ -127,12 +127,12 @@ normalizeCounts <- function(counts,
 #'  \link{celda_C} or \link{celda_CG}. Must contain column
 #'  \code{celda_cell_cluster} in \link[SummarizedExperiment]{colData}.
 #' @param from Numeric vector. Unique values in the range of
-#'  \code{seq(clusters(sce))} that correspond to the original cluster labels in
-#'  \code{sce}.
+#'  \code{seq(celdaClusters(sce))} that correspond to the original cluster
+#'  labels in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
-#'  \code{seq(clusters(sce))} that correspond to the new cluster labels.
-#' @return \linkS4class{SingleCellExperiment} object with recoded cell cluster
-#'  labels.
+#'  \code{seq(celdaClusters(sce))} that correspond to the new cluster labels.
+#' @return \linkS4class{SingleCellExperiment} object with recoded cell
+#'  cluster labels.
 #' @examples
 #' data(sceCeldaCG)
 #' sceReorderedZ <- recodeClusterZ(sceCeldaCG, c(1, 3), c(3, 1))
@@ -142,11 +142,11 @@ recodeClusterZ <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(clusters(sce))) {
+    if (is.null(celdaClusters(sce))) {
         stop("Provided 'sce' argument does not have a 'celda_cell_cluster'",
             " column in 'colData(sce)'")
     }
-    clusters(sce) <- plyr::mapvalues(clusters(sce), from, to)
+    celdaClusters(sce) <- plyr::mapvalues(celdaClusters(sce), from, to)
     return(sce)
 }
 
@@ -156,10 +156,11 @@ recodeClusterZ <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@clusters$z)) {
+    if (is.null(celdaMod@celdaClusters$z)) {
         stop("Provided celdaMod argument does not have a z attribute")
     }
-    celdaMod@clusters$z <- plyr::mapvalues(celdaMod@clusters$z, from, to)
+    celdaMod@celdaClusters$z <- plyr::mapvalues(celdaMod@celdaClusters$z,
+        from, to)
     return(celdaMod)
 }
 
@@ -171,10 +172,10 @@ recodeClusterZ <- function(sce, from, to) {
 #'  \link{celda_G} or \link{celda_CG}. Must contain column
 #'  \code{celda_feature_module} in \link[SummarizedExperiment]{rowData}.
 #' @param from Numeric vector. Unique values in the range of
-#'  \code{seq(modules(sce))} that correspond to the original module labels
+#'  \code{seq(celdaModules(sce))} that correspond to the original module labels
 #'  in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
-#'  \code{seq(modules(sce))} that correspond to the new module labels.
+#'  \code{seq(celdaModules(sce))} that correspond to the new module labels.
 #' @return @return \linkS4class{SingleCellExperiment} object with recoded
 #'  feature module labels.
 #' @examples
@@ -185,11 +186,11 @@ recodeClusterY <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(modules(sce))) {
+    if (is.null(celdaModules(sce))) {
         stop("Provided 'sce' argument does not have a 'celda_feature_module'",
             " column in 'rowData(sce)'")
     }
-    modules(sce) <- plyr::mapvalues(modules(sce), from, to)
+    celdaModules(sce) <- plyr::mapvalues(celdaModules(sce), from, to)
     return(celdaMod)
 }
 
@@ -199,10 +200,11 @@ recodeClusterY <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@clusters$y)) {
+    if (is.null(celdaMod@celdaClusters$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    celdaMod@clusters$y <- plyr::mapvalues(celdaMod@clusters$y, from, to)
+    celdaMod@celdaClusters$y <- plyr::mapvalues(celdaMod@celdaClusters$y,
+        from, to)
     return(celdaMod)
 }
 
@@ -224,8 +226,8 @@ recodeClusterY <- function(sce, from, to) {
 compareCountMatrix <- function(counts,
                                celdaMod,
                                errorOnMismatch = TRUE) {
-  if ("y" %in% names(celdaMod@clusters)) {
-    if (nrow(counts) != length(celdaMod@clusters$y)) {
+  if ("y" %in% names(celdaMod@celdaClusters)) {
+    if (nrow(counts) != length(celdaMod@celdaClusters$y)) {
       stop(
         "The provided celda object was generated from a counts",
         " matrix with a different number of features than the one",
@@ -234,8 +236,8 @@ compareCountMatrix <- function(counts,
     }
   }
 
-  if ("z" %in% names(celdaMod@clusters)) {
-    if (ncol(counts) != length(celdaMod@clusters$z)) {
+  if ("z" %in% names(celdaMod@celdaClusters)) {
+    if (ncol(counts) != length(celdaMod@celdaClusters$z)) {
       stop(
         "The provided celda object was generated from a counts",
         " matrix with a different number of cells than the one",

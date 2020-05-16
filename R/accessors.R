@@ -6,7 +6,7 @@ setClass(
         names = "list",
         completeLogLik = "numeric",
         finalLogLik = "numeric",
-        clusters = "list"
+        celdaClusters = "list"
     )
 ) # z and or y
 
@@ -42,17 +42,17 @@ setClass("celdaList",
 #'  Models) and/or feature module labels (for celda_G and celdaCG Models).}
 #' @examples
 #' data(sceCeldaCG)
-#' clusters(sceCeldaCG)
+#' celdaClusters(sceCeldaCG)
 #' @export
-setGeneric("clusters",
+setGeneric("celdaClusters",
     function(x) {
-        standardGeneric("clusters")
+        standardGeneric("celdaClusters")
     })
 
 
-#' @rdname clusters
+#' @rdname celdaClusters
 #' @export
-setMethod("clusters",
+setMethod("celdaClusters",
     signature(x = "SingleCellExperiment"),
     function(x) {
         return(SummarizedExperiment::colData(x)$celda_cell_cluster)
@@ -61,27 +61,27 @@ setMethod("clusters",
 
 #' @examples
 #' data(celdaCGMod)
-#' clusters(celdaCGMod)
-#' @rdname clusters
+#' celdaClusters(celdaCGMod)
+#' @rdname celdaClusters
 #' @export
-setMethod("clusters",
+setMethod("celdaClusters",
     signature(x = "celdaModel"),
     function(x) {
-        return(x@clusters)
+        return(x@celdaClusters)
     }
 )
 
 
-#' @rdname clusters
+#' @rdname celdaClusters
 #' @export
-setGeneric("clusters<-",
-    function(x, value) standardGeneric("clusters<-")
+setGeneric("celdaClusters<-",
+    function(x, value) standardGeneric("celdaClusters<-")
 )
 
 
-#' @rdname clusters
+#' @rdname celdaClusters
 #' @export
-setReplaceMethod("clusters", signature(x = "SingleCellExperiment"),
+setReplaceMethod("celdaClusters", signature(x = "SingleCellExperiment"),
     function(x, value) {
         SummarizedExperiment::colData(x)$celda_cell_cluster <- value
         return(x)
@@ -100,29 +100,29 @@ setReplaceMethod("clusters", signature(x = "SingleCellExperiment"),
 #'  feature in x.
 #' @examples
 #' data(celdaCGMod)
-#' modules(celdaCGMod)
+#' celdaModules(celdaCGMod)
 #' @export
-setGeneric("modules",
+setGeneric("celdaModules",
     function(sce) {
-        standardGeneric("modules")
+        standardGeneric("celdaModules")
     })
-#' @rdname modules
+#' @rdname celdaModules
 #' @export
-setMethod("modules",
+setMethod("celdaModules",
     signature(sce = "SingleCellExperiment"),
     function(sce) {
         return(SummarizedExperiment::rowData(sce)$celda_feature_module)
     })
 
 
-#' @rdname modules
+#' @rdname celdaModules
 #' @export
-setGeneric("modules<-",
-    function(sce, value) standardGeneric("modules<-")
+setGeneric("celdaModules<-",
+    function(sce, value) standardGeneric("celdaModules<-")
 )
-#' @rdname modules
+#' @rdname celdaModules
 #' @export
-setReplaceMethod("modules", signature(sce = "SingleCellExperiment"),
+setReplaceMethod("celdaModules", signature(sce = "SingleCellExperiment"),
     function(sce, value) {
         SummarizedExperiment::rowData(sce)$celda_feature_module <- value
         return(sce)

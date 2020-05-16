@@ -497,7 +497,7 @@ setMethod("celda_G",
   }
 
   bestResult <- methods::new("celda_G",
-    clusters = list(y = yBest),
+    celdaClusters = list(y = yBest),
     params = list(
       L = as.integer(L),
       beta = beta,
@@ -720,7 +720,7 @@ setMethod("celda_G",
     )
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_G",
-        clusters = list(y = y),
+        celdaClusters = list(y = y),
         params = list(
             L = as.integer(L),
             beta = beta,
@@ -733,7 +733,7 @@ setMethod("celda_G",
     result <- .reorderCeldaG(counts = cellCounts, res = result)
 
     return(list(
-        y = result@clusters$y,
+        y = result@celdaClusters$y,
         counts = cellCounts,
         C = C,
         G = G,
@@ -752,7 +752,7 @@ setMethod("celda_G",
     # compareCountMatrix(counts, celdaMod)
 
     L <- S4Vectors::metadata(sce)$celda_parameters$L
-    y <- modules(sce)
+    y <- celdaModules(sce)
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
@@ -875,7 +875,7 @@ setMethod("celda_G",
 .logLikelihoodcelda_G <- function(sce, useAssay) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    y <- modules(sce)
+    y <- celdaModules(sce)
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
@@ -953,7 +953,7 @@ setMethod("celda_G",
 .clusterProbabilityCeldaG <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    y <- modules(sce)
+    y <- celdaModules(sce)
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
@@ -1022,7 +1022,7 @@ setMethod("celda_G",
         newCounts,
         phi,
         psi,
-        modules(sce),
+        celdaModules(sce),
         S4Vectors::metadata(sce)$celda_parameters$L
     ) # + sum(etaProb)
     perplexity <- exp(- (logPx / sum(newCounts)))
@@ -1031,10 +1031,10 @@ setMethod("celda_G",
 
 
 .reorderCeldaG <- function(counts, res) {
-    if (params(res)$L > 2 & isTRUE(length(unique(res@clusters$y)) > 1)) {
-        res@clusters$y <- as.integer(as.factor(res@clusters$y))
+    if (params(res)$L > 2 & isTRUE(length(unique(res@celdaClusters$y)) > 1)) {
+        res@celdaClusters$y <- as.integer(as.factor(res@celdaClusters$y))
         fm <- factorizeMatrix(counts, res)
-        uniqueY <- sort(unique(res@clusters$y))
+        uniqueY <- sort(unique(res@celdaClusters$y))
         cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -1053,7 +1053,7 @@ setMethod("celda_G",
         normalize = "proportion",
         transformationFun = sqrt
     )
-    plt <- plotHeatmap(norm[ix, ], y = celdaMod@clusters$y[ix], ...)
+    plt <- plotHeatmap(norm[ix, ], y = celdaMod@celdaClusters$y[ix], ...)
     invisible(plt)
 }
 
@@ -1131,13 +1131,13 @@ setMethod("celda_G",
         verbose = verbose,
         completeLogLik = celdaGMod@completeLogLik,
         finalLogLik = celdaGMod@finalLogLik,
-        featureModuleLevels = sort(unique(celdaGMod@clusters$y)))
+        featureModuleLevels = sort(unique(celdaGMod@celdaClusters$y)))
 
     SummarizedExperiment::rowData(sce)["rownames"] <- celdaGMod@names$row
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaGMod@names$column
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaGMod@clusters$y
+        celdaGMod@celdaClusters$y
 
     return(sce)
 }
