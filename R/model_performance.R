@@ -4,18 +4,69 @@
 #'  given the provided countMatrix, as well as resamplings of that count
 #'  matrix, providing a distribution of perplexities and a better sense of the
 #'  quality of a given K/L choice.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells. This matrix should be the same as the one used to generate
-#'  `celda.mod`.
-#' @param celdaList Object of class 'celdaList'.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment} returned from \link{celdaGridSearch}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells. Must contain
+#'  "celda_grid_search" slot in \code{metadata(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param celdaList Object of class 'celdaList'. Used only if \code{x} is a
+#'  matrix object.
 #' @param resample Integer. The number of times to resample the counts matrix
 #'  for evaluating perplexity. Default 5.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @return celdaList. Returns the provided `celdaList` with a `perplexity`
+#' @return A \linkS4class{SingleCellExperiment} object or
+#'  \code{celdaList} object with a \code{perplexity}
 #'  property, detailing the perplexity of all K/L combinations that appeared in
 #'  the celdaList's models.
+#' @export
+setGeneric("resamplePerplexity", function(x, ...) {
+    standardGeneric("resamplePerplexity")})
+
+
+#' @rdname resamplePerplexity
+#' @examples
+#' data(sceCeldaCGGridSearch)
+#' sce <- resamplePerplexity(sceCeldaCGGridSearch)
+#' plotGridSearchPerplexity(sce)
+#' @export
+setMethod("resamplePerplexity",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        celdaList,
+        resample = 5,
+        seed = 12345) {
+
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+        celdaList <- S4Vectors::metadata(x)$celda_grid_search
+        if (is.null(seed)) {
+            res <- .resamplePerplexity(
+                counts = counts,
+                celdaList = celdaList,
+                resample = resample)
+        } else {
+            with_seed(seed,
+                res <- .resamplePerplexity(
+                    counts = counts,
+                    celdaList = celdaList,
+                    resample = resample)
+            )
+        }
+
+        S4Vectors::metadata(x)$celda_grid_search <- res
+        return(x)
+    }
+)
+
+
+#' @rdname resamplePerplexity
+#' @examples
 #' @examples
 #' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
@@ -24,29 +75,29 @@
 #' )
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-resamplePerplexity <- function(counts,
-                               celdaList,
-                               resample = 5,
-                               seed = 12345) {
-  if (is.null(seed)) {
-    res <- .resamplePerplexity(
-      counts = counts,
-      celdaList = celdaList,
-      resample = resample
-    )
-  } else {
-    with_seed(
-      seed,
-      res <- .resamplePerplexity(
-        counts = counts,
-        celdaList = celdaList,
-        resample = resample
-      )
-    )
-  }
+setMethod("resamplePerplexity",
+    signature(x = "matrix"),
+    function(x,
+        celdaList,
+        resample = 5,
+        seed = 12345) {
 
-  return(res)
-}
+        if (is.null(seed)) {
+            res <- .resamplePerplexity(
+                counts = x,
+                celdaList = celdaList,
+                resample = resample)
+        } else {
+            with_seed(seed,
+                res <- .resamplePerplexity(
+                    counts = x,
+                    celdaList = celdaList,
+                    resample = resample))
+        }
+
+        return(res)
+    }
+)
 
 
 .resamplePerplexity <- function(counts,
@@ -82,45 +133,55 @@ resamplePerplexity <- function(counts,
 #' @title Visualize perplexity of a list of celda models
 #' @description Visualize perplexity of every model in a celdaList, by unique
 #'  K/L combinations
-#' @param celdaList Object of class 'celdaList'.
-#' @param sep Numeric. Breaks in the x axis of the resulting plo.t.
+#' @param x A \linkS4class{SingleCellExperiment} object returned from
+#'  \link{celdaGridSearch} or an object of class \code{celdaList}.
+#' @param sep Numeric. Breaks in the x axis of the resulting plot.
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
+#' @export
+setGeneric("plotGridSearchPerplexity", function(x, ...) {
+    standardGeneric("plotGridSearchPerplexity")})
+
+
+#' @rdname plotGridSearchPerplexity
+#' @examples
+#' data(sceCeldaCGGridSearch)
+#' sce <- resamplePerplexity(sceCeldaCGGridSearch)
+#' plotGridSearchPerplexity(sce)
+#' @export
+setMethod("plotGridSearchPerplexity",
+    signature(x = "SingleCellExperiment"),
+    function(x, sep = 1) {
+        celdaList <- S4Vectors::metadata(x)$celda_grid_search
+        g <- do.call(paste0(".plotGridSearchPerplexity",
+            as.character(class(resList(x)[[1]]))),
+            args = list(celdaList, sep))
+        return(g)
+    }
+)
+
+
+#' @rdname plotGridSearchPerplexity
 #' @examples
 #' data(celdaCGSim, celdaCGGridSearchRes)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
-#'   celdaCGGridSearchRes
-#' )
+#'   celdaCGGridSearchRes)
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
-plotGridSearchPerplexity <- function(celdaList, sep = 1) {
-  do.call(paste0(
-    "plotGridSearchPerplexity",
-    as.character(class(resList(celdaList)[[1]]))
-  ),
-  args = list(celdaList, sep)
-  )
-}
+setMethod("plotGridSearchPerplexity",
+    signature(x = "celdaList"),
+    function(x, sep = 1) {
+       g <- do.call(paste0(".plotGridSearchPerplexity",
+            as.character(class(resList(x)[[1]]))),
+            args = list(x, sep))
+       return(g)
+    }
+)
 
 
-#' @title Plot perplexity as a function of K and L from celda_CG models
-#' @description This function plots perplexity as a function of the cell/gene
-#'  (K/L) clusters as generated by celdaGridSearch().
-#' @param celdaList Object of class 'celdaList'.
-#' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @return A ggplot plot object showing perplexity as a function of clustering
-#'  parameters.
-#' @examples
-#' data(celdaCGSim, celdaCGGridSearchRes)
-#' celdaCGGridSearchRes <- resamplePerplexity(
-#'   celdaCGSim$counts,
-#'   celdaCGGridSearchRes
-#' )
-#' plotGridSearchPerplexity(celdaCGGridSearchRes)
-#' @export
-plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
+.plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
   if (!all(c("K", "L") %in% colnames(runParams(celdaList)))) {
     stop("runParams(celdaList) needs K and L columns.")
   }
@@ -204,22 +265,7 @@ plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
 }
 
 
-#' @title Plot perplexity as a function of K from celda_C models
-#' @description Plots perplexity as a function of the cell (K) clusters as
-#'   generated by celdaGridSearch().
-#' @param celdaList Object of class 'celdaList'.
-#' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @return A ggplot plot object showing perplexity as a function of clustering
-#'   parameters.
-#' @examples
-#' data(celdaCGSim, celdaCGGridSearchRes)
-#' celdaCGGridSearchRes <- resamplePerplexity(
-#'   celdaCGSim$counts,
-#'   celdaCGGridSearchRes
-#' )
-#' plotGridSearchPerplexity(celdaCGGridSearchRes)
-#' @export
-plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
+.plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
   if (!all(c("K") %in% colnames(runParams(celdaList)))) {
     stop("runParams(celdaList) needs the column K.")
   }
@@ -265,22 +311,7 @@ plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
 }
 
 
-#' @title Plot perplexity as a function of L from a celda_G model
-#' @description Plots perplexity as a function of the gene (L) clusters as
-#'   generated by celdaGridSearch().
-#' @param celdaList Object of class 'celdaList'.
-#' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @return A ggplot plot object showing perplexity as a function of clustering
-#'   parameters.
-#' @examples
-#' data(celdaCGSim, celdaCGGridSearchRes)
-#' celdaCGGridSearchRes <- resamplePerplexity(
-#'   celdaCGSim$counts,
-#'   celdaCGGridSearchRes
-#' )
-#' plotGridSearchPerplexity(celdaCGGridSearchRes)
-#' @export
-plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
+.plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
   if (!all(c("L") %in% colnames(runParams(celdaList)))) {
     stop("runParams(celdaList) needs the column L.")
   }

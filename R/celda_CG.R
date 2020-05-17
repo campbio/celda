@@ -7,7 +7,7 @@
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
 #' @param K Integer. Number of cell populations.

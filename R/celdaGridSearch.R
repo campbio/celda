@@ -37,7 +37,7 @@
 #'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
-#'  `resamplePerplexity()`. Default TRUE.
+#'  \link{resamplePerplexity}. Default TRUE.
 #' @param verbose Logical. Whether to print log messages during celda chain
 #'  execution. Default TRUE.
 #' @param logfilePrefix Character. Prefix for log files from worker threads
