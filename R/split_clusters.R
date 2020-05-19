@@ -46,7 +46,7 @@
       splitOnLast = FALSE,
       verbose = FALSE
     )
-    clustSplit[[i]] <- clustLabel@clusters$z
+    clustSplit[[i]] <- celdaClusters(clustLabel)$z
   }
 
   ## Find second best assignment give current assignments for each cell
@@ -203,7 +203,7 @@
       splitOnLast = FALSE,
       verbose = FALSE
     )
-    clustSplit[[i]] <- clustLabel@clusters$z
+    clustSplit[[i]] <- celdaClusters(clustLabel)$z
   }
 
   ## Find second best assignment give current assignments for each cell
@@ -396,7 +396,7 @@
         splitOnLast = FALSE,
         verbose = FALSE
       )
-      tempZ[ix] <- clustLabel@clusters$z + currentTopZ
+      tempZ[ix] <- celdaClusters(clustLabel)$z + currentTopZ
     }
     currentTopZ <- max(tempZ, na.rm = TRUE)
   }
@@ -439,7 +439,7 @@
       splitOnLast = FALSE,
       verbose = FALSE
     )
-    clustSplit[[i]] <- clustLabel@clusters$y
+    clustSplit[[i]] <- celdaClusters(clustLabel)$y
   }
 
   ## Find second best assignment give current assignments for each cell
@@ -632,7 +632,7 @@
       splitOnLast = FALSE,
       verbose = FALSE
     )
-    clustSplit[[i]] <- clustLabel@clusters$y
+    clustSplit[[i]] <- celdaClusters(clustLabel)$y
   }
 
   ## Find second best assignment give current assignments for each cell

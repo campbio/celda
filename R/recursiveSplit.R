@@ -134,7 +134,9 @@
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
-#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+#'  the list will be of class \code{celda_C} if \code{yInit = NULL} or
+#'  \code{celda_CG} if \code{zInit} is set.
 #' @seealso \link{recursiveSplitModule} for recursive splitting of feature
 #'  modules.
 #' @export
@@ -824,23 +826,27 @@ setMethod("recursiveSplitCell",
 
 
 #' @title Recursive module splitting
-#'
-#' @description Uses the `celda_G` model to cluster features into modules for
-#'  a range of possible L's. The module labels of the previous "L-1" model are
-#'  used as the initial values in the current model with L modules. The best
+#' @description Uses the \link{celda_G} model to cluster features into modules
+#'  for a range of possible L's. The module labels of the previous "L-1" model
+#'  are used as the initial values in the current model with L modules. The best
 #'  split of an existing module is found to create the L-th module. This
 #'  procedure is much faster than randomly initializing each model with a
 #'  different L.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
 #' @param initialL Integer. Minimum number of modules to try.
 #' @param maxL Integer. Maximum number of modules to try.
 #' @param tempK Integer. Number of temporary cell populations to identify and
-#'  use in module splitting. Only used if `zInit=NULL` Collapsing cells to a
-#'  relatively smaller number of cell popluations will increase the speed of
-#'  module clustering and tend to produce better modules. This number should be
-#'  larger than the number of true cell populations expected in the dataset.
-#'  Default 100.
+#'  use in module splitting. Only used if \code{zInit = NULL} Collapsing cells
+#'  to a relatively smaller number of cell popluations will increase the
+#'  speed of module clustering and tend to produce better modules. This number
+#'  should be larger than the number of true cell populations expected in the
+#'  dataset. Default 100.
 #' @param zInit Integer vector. Collapse cells to cell populations based on
 #'  labels in `zInit` and then perform module splitting. If NULL, no
 #'  collapasing will be performed unless `tempK` is specified. Default NULL.
@@ -867,11 +873,13 @@ setMethod("recursiveSplitCell",
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
-#' @return Object of class `celda_list`, which contains results for all model
-#'  parameter combinations and summaries of the run parameters. The models in
-#'  the list will be of class `celda_G` if `zInit=NULL` or `celda_CG` if
-#'  `zInit` is set.
-#' @seealso `recursiveSplitCell()` for recursive splitting of cell populations.
+#' @return A \linkS4class{SingleCellExperiment} object. Function
+#'  parameter settings and celda model results are stored in the
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+#'  the list will be of class \link{celda_G} if \code{zInit = NULL} or
+#'  \link{celda_CG} if \code{zInit} is set.
+#' @seealso \code{recursiveSplitCell} for recursive splitting of cell
+#'  populations.
 #' @export
 setGeneric("recursiveSplitModule", function(x, ...) {
     standardGeneric("recursiveSplitModule")})
