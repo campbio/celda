@@ -191,7 +191,7 @@ recodeClusterY <- function(sce, from, to) {
             " column in 'rowData(sce)'")
     }
     celdaModules(sce) <- plyr::mapvalues(celdaModules(sce), from, to)
-    return(celdaMod)
+    return(sce)
 }
 
 
@@ -203,7 +203,7 @@ recodeClusterY <- function(sce, from, to) {
     if (is.null(celdaMod@celdaClusters$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    celdaMod@celdaClusters$y <- plyr::mapvalues(celdaMod@celdaClusters$y,
+    celdaMod@celdaClusters$y <- plyr::mapvalues(celdaClusters(celdaMod)$y,
         from, to)
     return(celdaMod)
 }

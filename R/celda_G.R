@@ -872,15 +872,7 @@ setMethod("celda_G",
 }
 
 
-.logLikelihoodcelda_G <- function(sce, useAssay) {
-
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    y <- celdaModules(sce)
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-
+.logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
     if (sum(y > L) > 0) {
         stop("Assigned value of feature module greater than the total number",
             " of feature modules!")
@@ -1053,7 +1045,7 @@ setMethod("celda_G",
         normalize = "proportion",
         transformationFun = sqrt
     )
-    plt <- plotHeatmap(norm[ix, ], y = celdaMod@celdaClusters$y[ix], ...)
+    plt <- plotHeatmap(norm[ix, ], y = celdaModules(sce)[ix], ...)
     invisible(plt)
 }
 

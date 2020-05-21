@@ -587,12 +587,13 @@ setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
         logLikelihood <- NULL
         group <- setdiff(colnames(runParams(x)),
             c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
-        dt <- data.table::as.data.table(runParams(celdaList))
+        runParams <- S4Vectors::metadata(x)$celda_grid_search@runParams
+        dt <- data.table::as.data.table(runParams)
         newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
             by = group])
-        newRunParams <- newRunParams[, colnames(runParams(celdaList))]
+        newRunParams <- newRunParams[, colnames(runParams)]
 
-        ix <- match(newRunParams$index, runParams(celdaList)$index)
+        ix <- match(newRunParams$index, runParams$index)
         if (nrow(newRunParams) == 1 & !asList) {
             x <- celdatosce(resList(x)[[ix]],
                 SummarizedExperiment::assay(x, i = useAssay))

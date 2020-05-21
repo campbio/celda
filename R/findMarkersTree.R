@@ -749,7 +749,7 @@ setMethod("findMarkersTree",
       })))
       addDepth <- maxDepth - attributes(dendro)$height
 
-      dendro <- dendrapply(dendro, function(node, addDepth) {
+      dendro <- stats::dendrapply(dendro, function(node, addDepth) {
         if (attributes(node)$height > 1) {
           attributes(node)$height <- attributes(node)$height +
             addDepth + 1
@@ -802,7 +802,7 @@ setMethod("findMarkersTree",
       metaclusterDendro <- newTrees[[metacluster]]$dendro
 
       # Adjust labels, member count, and midpoint of nodes
-      dendro <- dendrapply(dendro, function(node) {
+      dendro <- stats::dendrapply(dendro, function(node) {
         # Check if in right branch
         if (metacluster %in%
           as.character(attributes(node)$classLabels)) {
@@ -852,7 +852,7 @@ setMethod("findMarkersTree",
       )))$height
       metaclusterHeight <-
         attributes(metaclusterDendro)$height
-      metaclusterDendro <- dendrapply(
+      metaclusterDendro <- stats::dendrapply(
         metaclusterDendro,
         function(node,
                  parentHeight,
@@ -1756,7 +1756,7 @@ setMethod("findMarkersTree",
     )
 
     # Create data.matrix
-    X <- model.matrix(~ 0 + classSort)
+    X <- stats::model.matrix(~ 0 + classSort)
 
     # Get cumulative sums
     sRCounts <- apply(X, 2, cumsum)
@@ -1848,8 +1848,7 @@ setMethod("findMarkersTree",
   }
 
 # Run Information Gain (probability + density) on a single feature
-.splitMetricIGpIGd <-
-  function(feat, class, features, rPerf = FALSE) {
+.splitMetricIGpIGd <- function(feat, class, features, rPerf = FALSE) {
     # Get number of samples
     len <- length(class)
 
@@ -1871,7 +1870,7 @@ setMethod("findMarkersTree",
     )
 
     # Create data.matrix
-    X <- model.matrix(~ 0 + classSort)
+    X <- stats::model.matrix(~ 0 + classSort)
 
     # Get cumulative sums
     sRCounts <- apply(X, 2, cumsum)
@@ -3196,8 +3195,8 @@ plotMarkerHeatmap <- function(tree,
       )
 
       # order the markers for metaclusters
-      allMarkers <-
-        setNames(as.list(colOrder$groupName), colOrder$groupName)
+      allMarkers <- stats::setNames(as.list(colOrder$groupName),
+          colOrder$groupName)
       allMarkers <- lapply(allMarkers, function(x) {
         unique(branch[branch$metacluster == x, "feature"])
       })
@@ -3391,8 +3390,8 @@ plotMarkerHeatmap <- function(tree,
       )
 
       # order the markers for clusters
-      allMarkers <-
-        setNames(as.list(colOrder$groupName), colOrder$groupName)
+      allMarkers <- stats::setNames(as.list(colOrder$groupName),
+          colOrder$groupName)
       allMarkers <- lapply(allMarkers, function(x) {
         unique(branch[branch$class == x & branch$direction == 1, "feature"])
       })
@@ -3443,7 +3442,7 @@ plotMarkerHeatmap <- function(tree,
   counts <- t(scale(t(counts)))
 
   # get indices of genes which have NA
-  zeroVarianceGenes <- which(!complete.cases(counts))
+  zeroVarianceGenes <- which(!stats::complete.cases(counts))
 
   # find overlap between zero-variance genes and marker genes
   zeroVarianceMarkers <- intersect(zeroVarianceGenes, markers)

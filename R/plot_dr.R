@@ -67,7 +67,7 @@ setMethod("plotDimReduceGrid",
 
         matrix <- SummarizedExperiment::assay(x, i = useAssay)
 
-        g < .plotDimReduceGrid(dim1 = dim1,
+        g <- .plotDimReduceGrid(dim1 = dim1,
             dim2 = dim2,
             matrix = matrix,
             size = size,
@@ -317,7 +317,7 @@ setMethod("plotDimReduceFeature",
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
-        g < .plotDimReduceFeature(dim1 = dim1,
+        g <- .plotDimReduceFeature(dim1 = dim1,
             dim2 = dim2,
             counts = counts,
             features = features,
@@ -373,7 +373,7 @@ setMethod("plotDimReduceFeature",
         midpoint = NULL,
         ncol = NULL) {
 
-        g < .plotDimReduceFeature(dim1 = dim1,
+        g <- .plotDimReduceFeature(dim1 = dim1,
             dim2 = dim2,
             counts = x,
             features = features,

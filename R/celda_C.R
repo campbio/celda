@@ -204,7 +204,7 @@ setMethod("celda_C",
             alpha = alpha,
             beta = beta,
             algorithm = algorithm,
-            stopIter = stopiter,
+            stopIter = stopIter,
             maxIter = maxIter,
             splitOnIter = splitOnIter,
             splitOnLast = splitOnLast,
@@ -223,7 +223,7 @@ setMethod("celda_C",
                 alpha = alpha,
                 beta = beta,
                 algorithm = algorithm,
-                stopIter = stopiter,
+                stopIter = stopIter,
                 maxIter = maxIter,
                 splitOnIter = splitOnIter,
                 splitOnLast = splitOnLast,
@@ -905,15 +905,7 @@ setMethod("celda_C",
 }
 
 
-.logLikelihoodcelda_C <- function(sce, useAssay) {
-
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    sampleLabel <- sampleLabel(sce)
-    z <- celdaClusters(sce)
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-
+.logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
     if (sum(z > K) > 0) {
         stop("Assigned value of cell cluster greater than the total number of",
             " cell clusters!")
@@ -921,7 +913,8 @@ setMethod("celda_C",
     sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
     s <- as.integer(sampleLabel)
     p <- .cCDecomposeCounts(counts, s, z, K)
-    final <- .cCCalcLL(mCPByS = p$mCPByS,
+    final <- .cCCalcLL(
+        mCPByS = p$mCPByS,
         nGByCP = p$nGByCP,
         s = s,
         z = z,
@@ -929,7 +922,8 @@ setMethod("celda_C",
         nS = p$nS,
         nG = p$nG,
         alpha = alpha,
-        beta = beta)
+        beta = beta
+    )
     return(final)
 }
 

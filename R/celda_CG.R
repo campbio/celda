@@ -1128,18 +1128,16 @@ setMethod("celda_CG",
 }
 
 
-.logLikelihoodcelda_CG <- function(sce, useAssay) {
-
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    sampleLabel <- sampleLabel(sce)
-    z <- celdaClusters(sce)
-    y <- celdaModules(sce)
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    delta = S4Vectors::metadata(sce)$celda_parameters$delta
-    gamma = S4Vectors::metadata(sce)$celda_parameters$gamma
+.logLikelihoodcelda_CG <- function(counts,
+    sampleLabel,
+    z,
+    y,
+    K,
+    L,
+    alpha,
+    beta,
+    delta,
+    gamma) {
 
     if (sum(z > K) > 0) {
         stop("Assigned value of cell cluster greater than the total number of",
@@ -1166,8 +1164,7 @@ setMethod("celda_CG",
         alpha = alpha,
         beta = beta,
         delta = delta,
-        gamma = gamma
-    )
+        gamma = gamma)
     return(final)
 }
 
@@ -1482,7 +1479,7 @@ setMethod("celda_CG",
     factorized <- factorizeMatrix(sce, useAssay)
     zInclude <- which(tabulate(celdaClusters(sce),
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
-    yInclude <- which(tabulate(celdaModules(celdaMod),
+    yInclude <- which(tabulate(celdaModules(sce),
         S4Vectors::metadata(sce)$celda_parameters$L) > 0)
 
     if (level == "cellPopulation") {

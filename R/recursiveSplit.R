@@ -867,6 +867,9 @@ setMethod("recursiveSplitCell",
 #'  clustering after each model has been created. If FALSE, module numbers will
 #'  correspond to the split which created the module (i.e. 'L15' was created at
 #'  split 15, 'L16' was created at split 16, etc.). Default TRUE.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
@@ -913,6 +916,7 @@ setMethod("recursiveSplitModule",
         gamma = 1,
         minFeature = 3,
         reorder = TRUE,
+        seed = 12345,
         perplexity = TRUE,
         verbose = TRUE,
         logfile = NULL) {
@@ -996,6 +1000,7 @@ setMethod("recursiveSplitModule",
         gamma = 1,
         minFeature = 3,
         reorder = TRUE,
+        seed = 12345,
         perplexity = TRUE,
         verbose = TRUE,
         logfile = NULL) {

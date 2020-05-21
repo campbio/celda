@@ -307,47 +307,149 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
 
 
 #' @title Calculate the Log-likelihood of a celda model
-#' @description Calculate the log-likelihood for user-provided cell population
-#'  and feature module cluster
-#'  assignments on the count matrix, per the desired celda model.
-#' @param sce A \linkS4class{SingleCellExperiment} object returned by
+#' @description Calculate the log-likelihood for cell population
+#'  and feature module cluster assignments on the count matrix, per celda model.
+#' @param x A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param celdaMod celda model object. Ignored if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object.
 #' @return The log-likelihood of the cluster assignment for the
 #'  provided \linkS4class{SingleCellExperiment}.
 #' @seealso `celda_C()` for clustering cells
-#' @examples
-#' data(sceCeldaC, sceCeldaCG)
-#' loglikC <- logLikelihood(sceCeldaC)
-#' loglikCG <- logLikelihood(sceCeldaCG)
 #' @export
 setGeneric("logLikelihood",
-    function(sce, ...) {
+    function(x, ...) {
         standardGeneric("logLikelihood")
     })
 
 
 #' @rdname logLikelihood
+#' @examples
+#' data(sceCeldaC, sceCeldaCG)
+#' loglikC <- logLikelihood(sceCeldaC)
+#' loglikCG <- logLikelihood(sceCeldaCG)
 #' @export
-setMethod("logLikelihood", signature(sce = "SingleCellExperiment"),
-    function(sce, useAssay = "counts") {
-        if (celdaModel(sce) == "celda_C") {
-            ll <- .logLikelihoodcelda_C(sce = sce, useAssay = useAssay)
-            return(ll)
-        } else if (celdaModel(sce) == "celda_CG") {
-            ll <- .logLikelihoodcelda_CG(sce = sce, useAssay = useAssay)
-            return(ll)
-        } else if (celdaModel(sce) == "celda_G") {
-            ll <- .logLikelihoodcelda_G(sce = sce, useAssay = useAssay)
-            return(ll)
+setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
+    function(x, useAssay = "counts") {
+
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+        sampleLabel <- sampleLabel(x)
+        z <- celdaClusters(x)
+        y <- celdaModules(x)
+        K <- S4Vectors::metadata(x)$celda_parameters$K
+        L <- S4Vectors::metadata(x)$celda_parameters$L
+        alpha <- S4Vectors::metadata(x)$celda_parameters$alpha
+        beta <- S4Vectors::metadata(x)$celda_parameters$beta
+        delta = S4Vectors::metadata(x)$celda_parameters$delta
+        gamma = S4Vectors::metadata(x)$celda_parameters$gamma
+
+        if (celdaModel(x) == "celda_C") {
+            ll <- .logLikelihoodcelda_C(counts = counts,
+                sampleLabel = sampleLabel,
+                z = z,
+                K = K,
+                alpha = alpha,
+                beta = beta)
+        } else if (celdaModel(x) == "celda_CG") {
+            ll <- .logLikelihoodcelda_CG(counts = counts,
+                sampleLabel = sampleLabel,
+                z = z,
+                y = y,
+                K = K,
+                L = L,
+                alpha = alpha,
+                beta = beta,
+                delta = delta,
+                gamma = gamma)
+        } else if (celdaModel(x) == "celda_G") {
+            ll <- .logLikelihoodcelda_G(counts = counts,
+                y = y,
+                L = L,
+                beta = beta,
+                delta = delta,
+                gamma = gamma)
         } else {
-            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
-                " one of 'celda_C', 'celda_G', or 'celda_CG'")
+            stop("S4Vectors::metadata(x)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'!")
         }
-    })
+        return(ll)
+    }
+)
+
+
+#' @rdname logLikelihood
+#' @export
+setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_C"),
+    function(x, celdaMod) {
+        sampleLabel <- sampleLabel(celdaMod)
+        z = celdaClusters(celdaMod)$z
+        K = params(celdaMod)$K
+        alpha = params(celdaMod)$alpha
+        beta = params(celdaMod)$beta
+
+        ll <- .logLikelihoodcelda_C(counts = x,
+            sampleLabel = sampleLabel,
+            z = z,
+            K = K,
+            alpha = alpha,
+            beta = beta)
+        return(ll)
+    }
+)
+
+
+#' @rdname logLikelihood
+#' @export
+setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_G"),
+    function(x, celdaMod) {
+        y <- celdaClusters(celdaMod)$y
+        L <- params(celdaMod)$L
+        beta = params(celdaMod)$beta
+        delta = params(celdaMod)$delta
+        gamma = params(celdaMod)$gamma
+
+        ll <- .logLikelihoodcelda_G(counts = x,
+            y = y,
+            L = L,
+            beta = beta,
+            delta = delta,
+            gamma = gamma)
+        return(ll)
+    }
+)
+
+
+#' @rdname logLikelihood
+#' @export
+setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
+    function(x, celdaMod) {
+        sampleLabel <- sampleLabel(celdaMod)
+        z <- celdaClusters(celdaMod)$z
+        y <- celdaClusters(celdaMod)$y
+        K <- params(celdaMod)$K
+        L <- params(celdaMod)$L
+        alpha = params(celdaMod)$alpha
+        beta = params(celdaMod)$beta
+        delta = params(celdaMod)$delta
+        gamma = params(celdaMod)$gamma
+
+        ll <- .logLikelihoodcelda_CG(counts = x,
+            sampleLabel = sampleLabel,
+            z = z,
+            y = y,
+            K = K,
+            L = L,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma)
+        return(ll)
+    }
+)
 
 
 #' @title Get the conditional probabilities of cell in subpopulations from celda
@@ -402,7 +504,8 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
                 log = log)
             return(cp)
         } else {
-            Stop()
+            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+                " one of 'celda_C', 'celda_G', or 'celda_CG'!")
         }
     })
 
@@ -838,7 +941,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     })
 
 
-.celdaUMAP <- function(sce,
+.celdaUmap <- function(sce,
     useAssay,
     maxCells,
     minClusterSize,
@@ -1043,12 +1146,9 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         } else if (celdaModel(sce) == "celda_CG") {
             pm <- .celdaProbabilityMapCG(sce = sce, useAssay = useAssay,
                 level = level)
-        } else if (celdaModel(sce) == "celda_G") {
-            pm <- .celdaProbabilityMapG(sce = sce, useAssay = useAssay,
-                level = level)
         } else {
             stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
-                " one of 'celda_C', 'celda_G', or 'celda_CG'")
+                " one of 'celda_C', or 'celda_CG'!")
         }
         return(pm)
     })

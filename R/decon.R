@@ -946,7 +946,7 @@ addLogLikelihood <- function(llA, llB) {
     # If dbscan was not able to get more than 2 clusters,
     # use kmeans to force 2 clusters as a last resort
     if (totalClusters == 1) {
-      cl <- kmeans(t(SingleCellExperiment::logcounts(sce)), 2)
+      cl <- stats::kmeans(t(SingleCellExperiment::logcounts(sce)), 2)
       z <- cl$cluster
     } else {
       z <- resDbscan$cluster
