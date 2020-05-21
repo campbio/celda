@@ -12,11 +12,11 @@ recodeClusterY(sce, from, to)
 \code{celda_feature_module} in \link[SummarizedExperiment]{rowData}.}
 
 \item{from}{Numeric vector. Unique values in the range of
-\code{seq(modules(sce))} that correspond to the original module labels
+\code{seq(celdaModules(sce))} that correspond to the original module labels
 in \code{sce}.}
 
 \item{to}{Numeric vector. Unique values in the range of
-\code{seq(modules(sce))} that correspond to the new module labels.}
+\code{seq(celdaModules(sce))} that correspond to the new module labels.}
 }
 \value{
 @return \linkS4class{SingleCellExperiment} object with recoded

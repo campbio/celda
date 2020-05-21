@@ -81,7 +81,7 @@
     verbose = FALSE,
     reorder = FALSE
   )
-  overallZ <- as.integer(as.factor(res@clusters$z))
+  overallZ <- as.integer(as.factor(celdaClusters(res)$z))
   currentK <- max(overallZ)
 
   counter <- 0
@@ -112,7 +112,7 @@
         splitOnIter = -1,
         splitOnLast = FALSE,
         verbose = FALSE)
-      tempZ <- as.integer(as.factor(clustLabel@clusters$z))
+      tempZ <- as.integer(as.factor(celdaClusters(clustLabel)$z))
 
       # Reassign clusters with label > 1
       splitIx <- tempZ > 1
@@ -245,7 +245,7 @@
     splitOnLast = FALSE,
     verbose = FALSE,
     reorder = FALSE)
-  overallY <- as.integer(as.factor(res@clusters$y))
+  overallY <- as.integer(as.factor(celdaClusters(res)$y))
   currentL <- max(overallY)
 
   counter <- 0
@@ -281,7 +281,7 @@
         splitOnLast = FALSE,
         verbose = FALSE
       )
-      tempY <- as.integer(as.factor(clustLabel@clusters$y))
+      tempY <- as.integer(as.factor(celdaClusters(clustLabel)$y))
 
       # Reassign clusters with label > 1
       splitIx <- tempY > 1

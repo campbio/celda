@@ -2,18 +2,39 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceGrid}
 \alias{plotDimReduceGrid}
+\alias{plotDimReduceGrid,SingleCellExperiment-method}
+\alias{plotDimReduceGrid,matrix-method}
 \title{Mapping the dimensionality reduction plot}
 \usage{
-plotDimReduceGrid(
+plotDimReduceGrid(x, ...)
+
+\S4method{plotDimReduceGrid}{SingleCellExperiment}(
   dim1,
   dim2,
-  matrix,
+  x,
+  useAssay = "counts",
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "grey",
-  colorMid = NULL,
-  colorHigh = "blue",
+  colorLow = "blue4",
+  colorMid = "white",
+  colorHigh = "firebrick1",
+  midpoint = NULL,
+  varLabel = NULL,
+  ncol = NULL,
+  headers = NULL
+)
+
+\S4method{plotDimReduceGrid}{matrix}(
+  dim1,
+  dim2,
+  x,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorMid = "white",
+  colorHigh = "firebrick1",
   midpoint = NULL,
   varLabel = NULL,
   ncol = NULL,
@@ -21,14 +42,19 @@ plotDimReduceGrid(
 )
 }
 \arguments{
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Each
+row of the matrix will be plotted as a separate facet.}
+
 \item{dim1}{Numeric vector. First dimension from data dimensionality
 reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimensionality
 reduction output.}
 
-\item{matrix}{Numeric matrix. Each row of the matrix will be plotted as
-a separate facet.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -38,14 +64,15 @@ a separate facet.}
 
 \item{colorLow}{Character. A color available from `colors()`.
 The color will be used to signify the lowest values on the scale.
-Default 'grey'.}
+Default "blue4".}
 
 \item{colorMid}{Character. A color available from `colors()`.
-The color will be used to signify the midpoint on the scale.}
+The color will be used to signify the midpoint on the scale. Default
+"white".}
 
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
-Default 'blue'.}
+Default "firebrick1".}
 
 \item{midpoint}{Numeric. The value indicating the midpoint of the
 diverging color scheme. If \code{NULL}, defaults to the mean
@@ -67,20 +94,20 @@ Creates a scatterplot given two dimensions from a data
  dimensionality reduction tool (e.g tSNE) output.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
+data(sceCeldaCG)
+celdaTsne <- celdaTsne(sceCeldaCG)
 plotDimReduceGrid(celdaTsne[, 1],
   celdaTsne[, 2],
-  matrix = celdaCGSim$counts,
+  x = sceCeldaCG,
   xlab = "Dimension1",
   ylab = "Dimension2",
-  varLabel = "tsne",
-  size = 1,
-  colorLow = "grey",
-  colorMid = NULL,
-  colorHigh = "blue"
-)
+  varLabel = "tSNE")
+data(sceCeldaCG)
+celdaTsne <- celdaTsne(sceCeldaCG)
+plotDimReduceGrid(celdaTsne[, 1],
+  celdaTsne[, 2],
+  x = counts(sceCeldaCG),
+  xlab = "Dimension1",
+  ylab = "Dimension2",
+  varLabel = "tSNE")
 }

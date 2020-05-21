@@ -2,12 +2,37 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceFeature}
 \alias{plotDimReduceFeature}
+\alias{plotDimReduceFeature,SingleCellExperiment-method}
+\alias{plotDimReduceFeature,matrix-method}
 \title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
-plotDimReduceFeature(
+plotDimReduceFeature(x, ...)
+
+\S4method{plotDimReduceFeature}{SingleCellExperiment}(
   dim1,
   dim2,
-  counts,
+  x,
+  useAssay = "counts",
+  features,
+  headers = NULL,
+  normalize = FALSE,
+  zscore = TRUE,
+  exactMatch = TRUE,
+  trim = c(-1, 1),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorMid = "white",
+  colorHigh = "firebrick1",
+  midpoint = NULL,
+  ncol = NULL
+)
+
+\S4method{plotDimReduceFeature}{matrix}(
+  dim1,
+  dim2,
+  x,
   features,
   headers = NULL,
   normalize = FALSE,
@@ -25,14 +50,19 @@ plotDimReduceFeature(
 )
 }
 \arguments{
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Rows
+represent features and columns represent cells.}
+
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimensionality
 reduction output.}
 
-\item{counts}{Integer matrix. Rows represent features and columns
-represent cells.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
 \item{features}{Character vector. Features in the rownames of counts to plot.}
 
@@ -86,18 +116,25 @@ Create a scatterplot for each row of a normalized gene
 }
 \examples{
 \donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
+data(sceCeldaCG)
+celdaTsne <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(
   dim1 = celdaTsne[, 1],
   dim2 = celdaTsne[, 2],
-  counts = celdaCGSim$counts,
+  x = sceCeldaCG,
   normalize = TRUE,
   features = c("Gene_99"),
-  exactMatch = TRUE
-)
+  exactMatch = TRUE)
+}
+\donttest{
+data(sceCeldaCG)
+celdaTsne <- celdaTsne(sceCeldaCG)
+plotDimReduceFeature(
+  dim1 = celdaTsne[, 1],
+  dim2 = celdaTsne[, 2],
+  x = counts(sceCeldaCG),
+  normalize = TRUE,
+  features = c("Gene_99"),
+  exactMatch = TRUE)
 }
 }

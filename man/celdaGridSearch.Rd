@@ -75,12 +75,12 @@ TRUE.}
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. Seed values
 \code{seq(seed, (seed + nchains - 1))} will be supplied to each chain in
-\code{nchains} If NULL, no calls to
+\code{nchains}. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
-`resamplePerplexity()`. Default TRUE.}
+\link{resamplePerplexity}. Default TRUE.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain
 execution. Default TRUE.}

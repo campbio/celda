@@ -265,19 +265,19 @@ setMethod("moduleHeatmap",
         if (class(celdaMod)[1] == "celda_CG") {
             if (methods::.hasSlot(celdaMod, "clusters")) {
                 cell <-
-                    distinctColors(length(unique(celdaMod@clusters$z)))[
-                        sort(unique(celdaMod@clusters$z[cellIx]))
+                    distinctColors(length(unique(celdaClusters(celdaMod)$z)))[
+                        sort(unique(celdaClusters(celdaMod)$z[cellIx]))
                         ]
-                names(cell) <- sort(unique(celdaMod@clusters$z[cellIx]))
+                names(cell) <- sort(unique(celdaClusters(celdaMod)$z[cellIx]))
                 anno_cell_colors <- list(cell = cell)
-                zToPlot <- celdaMod@clusters$z[cellIndices]
+                zToPlot <- celdaClusters(celdaMod)$z[cellIndices]
             }
         }
 
         plt <- plotHeatmap(
             filteredNormCounts,
             z = zToPlot,
-            y = celdaMod@clusters$y[geneIx],
+            y = celdaClusters(celdaMod)$y[geneIx],
             scaleRow = scaleRow,
             colorScheme = "divergent",
             showNamesFeature = showFeaturenames,

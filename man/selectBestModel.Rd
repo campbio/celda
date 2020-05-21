@@ -3,11 +3,14 @@
 \name{selectBestModel}
 \alias{selectBestModel}
 \alias{selectBestModel,SingleCellExperiment-method}
+\alias{selectBestModel,celdaList-method}
 \title{Select best chain within each combination of parameters}
 \usage{
 selectBestModel(x, ...)
 
 \S4method{selectBestModel}{SingleCellExperiment}(x, asList = FALSE, useAssay = "counts")
+
+\S4method{selectBestModel}{celdaList}(x, asList = FALSE)
 }
 \arguments{
 \item{x}{Object of class \linkS4class{SingleCellExperiment} or
@@ -50,6 +53,9 @@ Select the chain with the best log likelihood for each
 data(sceCeldaCGGridSearch)
 ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 sce <- selectBestModel(sceCeldaCGGridSearch)
+data(celdaCGGridSearchRes)
+## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
+cgsBest <- selectBestModel(celdaCGGridSearchRes)
 }
 \seealso{
 \link{celdaGridSearch} \link{subsetCeldaList}

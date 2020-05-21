@@ -67,7 +67,6 @@ setMethod("resamplePerplexity",
 
 #' @rdname resamplePerplexity
 #' @examples
-#' @examples
 #' data(celdaCGSim, celdaCGGridSearchRes)
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,

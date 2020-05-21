@@ -2,10 +2,23 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotCeldaViolin}
 \alias{plotCeldaViolin}
+\alias{plotCeldaViolin,SingleCellExperiment-method}
+\alias{plotCeldaViolin,matrix-method}
 \title{Feature Expression Violin Plot}
 \usage{
-plotCeldaViolin(
-  counts,
+plotCeldaViolin(x, ...)
+
+\S4method{plotCeldaViolin}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  features,
+  exactMatch = TRUE,
+  plotDots = TRUE,
+  dotSize = 0.1
+)
+
+\S4method{plotCeldaViolin}{matrix}(
+  x,
   celdaMod,
   features,
   exactMatch = TRUE,
@@ -14,10 +27,13 @@ plotCeldaViolin(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Rows
+represent features and columns represent cells.}
 
-\item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
 \item{features}{Character vector. Uses these genes for plotting.}
 
@@ -31,6 +47,9 @@ curve. Default \code{TRUE}.}
 
 \item{dotSize}{Numeric. Size of points if \code{plotDots = TRUE}.
 Default \code{0.1}.}
+
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
+\code{x} is a matrix object.}
 }
 \value{
 Violin plot for each feature, grouped by celda cluster
@@ -39,9 +58,9 @@ Violin plot for each feature, grouped by celda cluster
 Outputs a violin plot for feature expression data.
 }
 \examples{
+data(sceCeldaCG)
+plotCeldaViolin(x = sceCeldaCG, features = "Gene_1")
 data(celdaCGSim, celdaCGMod)
-plotCeldaViolin(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod, features = "Gene_1"
-)
+plotCeldaViolin(counts = celdaCGSim$counts, celdaMod = celdaCGMod,
+   features = "Gene_1")
 }

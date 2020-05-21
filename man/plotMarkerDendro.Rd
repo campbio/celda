@@ -50,7 +50,7 @@ cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
 # Get features matrix and cluster assignments
 factorized <- factorizeMatrix(sim_counts$counts, cm)
 features <- factorized$proportions$cell
-class <- clusters(cm)$z
+class <- celdaClusters(cm)
 
 # Generate Decision Tree
 DecTree <- findMarkersTree(features, class, threshold = 1)

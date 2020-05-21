@@ -185,7 +185,7 @@ setMethod(
             newCounts,
             phi,
             psi,
-            clusters(celdaMod)$y,
+            celdaClusters(celdaMod)$y,
             params(celdaMod)$L
         ) # + sum(etaProb)
         perplexity <- exp(- (logPx / sum(newCounts)))

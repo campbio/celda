@@ -2,14 +2,21 @@
 % Please edit documentation in R/model_performance.R
 \name{plotGridSearchPerplexity}
 \alias{plotGridSearchPerplexity}
+\alias{plotGridSearchPerplexity,SingleCellExperiment-method}
+\alias{plotGridSearchPerplexity,celdaList-method}
 \title{Visualize perplexity of a list of celda models}
 \usage{
-plotGridSearchPerplexity(celdaList, sep = 1)
+plotGridSearchPerplexity(x, ...)
+
+\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, sep = 1)
+
+\S4method{plotGridSearchPerplexity}{celdaList}(x, sep = 1)
 }
 \arguments{
-\item{celdaList}{Object of class 'celdaList'.}
+\item{x}{A \linkS4class{SingleCellExperiment} object returned from
+\link{celdaGridSearch} or an object of class \code{celdaList}.}
 
-\item{sep}{Numeric. Breaks in the x axis of the resulting plo.t.}
+\item{sep}{Numeric. Breaks in the x axis of the resulting plot.}
 }
 \value{
 A ggplot plot object showing perplexity as a function of clustering
@@ -20,11 +27,13 @@ Visualize perplexity of every model in a celdaList, by unique
  K/L combinations
 }
 \examples{
+data(sceCeldaCGGridSearch)
+sce <- resamplePerplexity(sceCeldaCGGridSearch)
+plotGridSearchPerplexity(sce)
 data(celdaCGSim, celdaCGGridSearchRes)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
-  celdaCGGridSearchRes
-)
+  celdaCGGridSearchRes)
 plotGridSearchPerplexity(celdaCGGridSearchRes)
 }

@@ -1196,10 +1196,9 @@ setMethod("recursiveSplitModule",
       gamma = gamma,
       delta = delta,
       verbose = FALSE,
-      reorder = reorder
-    )
-    currentL <- length(unique(celdaClusters(modelInitial)y)) + 1
-    overallY <- celdaClusters(modelInitial)y
+      reorder = reorder)
+    currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
+    overallY <- celdaClusters(modelInitial)$y
 
     resList <- list(modelInitial)
     while (currentL <= maxL) {

@@ -2729,7 +2729,7 @@ subUnderscore <- function(x, n) {
 #' # Get features matrix and cluster assignments
 #' factorized <- factorizeMatrix(sim_counts$counts, cm)
 #' features <- factorized$proportions$cell
-#' class <- clusters(cm)$z
+#' class <- celdaClusters(cm)
 #'
 #' # Generate Decision Tree
 #' DecTree <- findMarkersTree(features, class, threshold = 1)

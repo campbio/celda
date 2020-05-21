@@ -12,15 +12,15 @@ recodeClusterZ(sce, from, to)
 \code{celda_cell_cluster} in \link[SummarizedExperiment]{colData}.}
 
 \item{from}{Numeric vector. Unique values in the range of
-\code{seq(clusters(sce))} that correspond to the original cluster labels in
-\code{sce}.}
+\code{seq(celdaClusters(sce))} that correspond to the original cluster
+labels in \code{sce}.}
 
 \item{to}{Numeric vector. Unique values in the range of
-\code{seq(clusters(sce))} that correspond to the new cluster labels.}
+\code{seq(celdaClusters(sce))} that correspond to the new cluster labels.}
 }
 \value{
-\linkS4class{SingleCellExperiment} object with recoded cell cluster
- labels.
+\linkS4class{SingleCellExperiment} object with recoded cell
+ cluster labels.
 }
 \description{
 Recode cell subpopulaton clusters using a mapping in the

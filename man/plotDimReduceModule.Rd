@@ -2,37 +2,59 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceModule}
 \alias{plotDimReduceModule}
+\alias{plotDimReduceModule,SingleCellExperiment-method}
+\alias{plotDimReduceModule,matrix-method}
 \title{Plotting the Celda module probability on a
  dimensionality reduction plot}
 \usage{
-plotDimReduceModule(
+plotDimReduceModule(x, ...)
+
+\S4method{plotDimReduceModule}{SingleCellExperiment}(
   dim1,
   dim2,
-  counts,
+  x,
+  useAssay = "counts",
+  modules = NULL,
+  rescale = TRUE,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorMid = "white",
+  colorHigh = "firebrick1",
+  ncol = NULL
+)
+
+\S4method{plotDimReduceModule}{matrix}(
+  dim1,
+  dim2,
+  x,
   celdaMod,
   modules = NULL,
   rescale = TRUE,
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "grey",
-  colorMid = NULL,
-  colorHigh = "blue",
+  colorLow = "blue4",
+  colorMid = "white",
+  colorHigh = "firebrick1",
   ncol = NULL
 )
 }
 \arguments{
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Rows
+represent features and columns represent cells.}
+
 \item{dim1}{Numeric vector.
 First dimension from data dimensionality reduction output.}
 
 \item{dim2}{Numeric vector.
 Second dimension from data dimensionality reduction output.}
 
-\item{counts}{Integer matrix.
-Rows represent features and columns represent cells.
-This matrix should be the same as the one used to generate `celdaMod`.}
-
-\item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
 \item{modules}{Character vector. Module(s) from celda model to be plotted.
 e.g. c("1", "2").}
@@ -48,17 +70,21 @@ Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
 
 \item{colorLow}{Character. A color available from `colors()`.
 The color will be used to signify the lowest values on the scale.
-Default 'grey'.}
+Default "blue4".}
 
 \item{colorMid}{Character. A color available from `colors()`.
-The color will be used to signify the midpoint on the scale.}
+The color will be used to signify the midpoint on the scale. Default
+"white".}
 
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
-Default 'blue'.}
+Default "firebrick1".}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
+
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
+\code{x} is a matrix object.}
 }
 \value{
 The plot as a ggplot object
@@ -71,15 +97,22 @@ Create a scatterplot for each row of a normalized
 }
 \examples{
 \donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
+data(sceCeldaCG)
+celdaTsne <- celdaTsne(sceCeldaCG)
 plotDimReduceModule(
-  dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-  counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-  modules = c("1", "2")
-)
+  dim1 = celdaTsne[, 1],
+  dim2 = celdaTsne[, 2],
+  x = sceCeldaCG,
+  modules = c("1", "2"))
+}
+\donttest{
+data(sceCeldaCG, celdaCGMod)
+celdaTsne <- celdaTsne(sceCeldaCG)
+plotDimReduceModule(
+  dim1 = celdaTsne[, 1],
+  dim2 = celdaTsne[, 2],
+  x = counts(sceCeldaCG),
+  celdaMod = celdaCGMod,
+  modules = c("1", "2"))
 }
 }

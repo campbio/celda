@@ -2,10 +2,25 @@
 % Please edit documentation in R/StateHeatmap.R
 \name{moduleHeatmap}
 \alias{moduleHeatmap}
+\alias{moduleHeatmap,SingleCellExperiment-method}
+\alias{moduleHeatmap,matrix-method}
 \title{Heatmap for featureModules}
 \usage{
-moduleHeatmap(
-  counts,
+moduleHeatmap(x, ...)
+
+\S4method{moduleHeatmap}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  featureModule = 1,
+  topCells = 100,
+  topFeatures = NULL,
+  normalizedCounts = NA,
+  scaleRow = scale,
+  showFeaturenames = TRUE
+)
+
+\S4method{moduleHeatmap}{matrix}(
+  x,
   celdaMod,
   featureModule = 1,
   topCells = 100,
@@ -16,11 +31,14 @@ moduleHeatmap(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells. This matrix should be the same as the one used to generate
-`celdaMod`.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
 
-\item{celdaMod}{Celda object of class `celda_G` or `celda_CG`.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
 \item{featureModule}{Integer Vector. The featureModule(s) to display.
 Multiple modules can be included in a vector.}
@@ -50,6 +68,9 @@ Default `scale`.}
 
 \item{showFeaturenames}{Logical. Wheter feature names should be displayed.
 Default TRUE.}
+
+\item{celdaMod}{Celda object of class \link{celda_G} or \link{celda_CG}. Used
+only if \code{x} is a matrix object.}
 }
 \value{
 A list containing row and column dendrograms as well as a gtable for
@@ -64,6 +85,8 @@ Renders a heatmap for selected featureModules. Cells are
  on the top to the lowest probability on the bottom.
 }
 \examples{
+data(celdaCGSim, celdaCGMod)
+moduleHeatmap(celdaCGSim$counts, celdaCGMod)
 data(celdaCGSim, celdaCGMod)
 moduleHeatmap(celdaCGSim$counts, celdaCGMod)
 }

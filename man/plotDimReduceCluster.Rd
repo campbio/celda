@@ -2,12 +2,29 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceCluster}
 \alias{plotDimReduceCluster}
+\alias{plotDimReduceCluster,SingleCellExperiment-method}
+\alias{plotDimReduceCluster,vector-method}
 \title{Plotting the cell labels on a dimensionality reduction plot}
 \usage{
-plotDimReduceCluster(
+plotDimReduceCluster(x, ...)
+
+\S4method{plotDimReduceCluster}{SingleCellExperiment}(
   dim1,
   dim2,
-  cluster,
+  x,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  specificClusters = NULL,
+  labelClusters = FALSE,
+  groupBy = NULL,
+  labelSize = 3.5
+)
+
+\S4method{plotDimReduceCluster}{vector}(
+  dim1,
+  dim2,
+  x,
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -18,13 +35,16 @@ plotDimReduceCluster(
 )
 }
 \arguments{
+\item{x}{Integer vector of cell cluster labels or a
+\linkS4class{SingleCellExperiment} object
+containing cluster labels for each cell in \code{"celda_cell_cluster"}
+column in \code{colData(x)}.}
+
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data
 dimensionality reduction output.}
-
-\item{cluster}{Integer vector. Contains cluster labels for each cell.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -45,6 +65,8 @@ If NULL, all samples will be plotted together. Default NULL.}
 
 \item{labelSize}{Numeric. Sets size of label if labelClusters is TRUE.
 Default 3.5.}
+
+\item{cluster}{Integer vector. Contains cluster labels for each cell.}
 }
 \value{
 The plot as a ggplot object
@@ -57,16 +79,21 @@ Create a scatterplot for each row of a normalized
 }
 \examples{
 \donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
+data(sceCeldaCG)
+celdaTsne <- celdaTsne(sceCeldaCG)
 plotDimReduceCluster(
   dim1 = celdaTsne[, 1],
   dim2 = celdaTsne[, 2],
-  cluster = as.factor(celdaCGMod@clusters$z),
-  specificClusters = c(1, 2, 3)
-)
+  x = sceCeldaCG,
+  specificClusters = c(1, 2, 3))
+}
+\donttest{
+data(sceCeldaCG, celdaCGMod)
+celdaTsne <- celdaTsne(sceCeldaCG)
+plotDimReduceCluster(
+  dim1 = celdaTsne[, 1],
+  dim2 = celdaTsne[, 2],
+  x = celdaClusters(celdaCGMod),
+  specificClusters = c(1, 2, 3))
 }
 }

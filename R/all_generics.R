@@ -682,7 +682,7 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
     }
     for (x in seq(length(feature))) {
         if (feature[x] %in% rownames(sce)) {
-            list[x] <- modules(sce)[which(rownames(sce) ==
+            list[x] <- celdaModules(sce)[which(rownames(sce) ==
                     feature[x])]
         } else {
             list[x] <- paste0(
@@ -711,7 +711,7 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
         seq(length(feature)),
         function(x) {
             if (feature[x] %in% rownames(sce)) {
-                return(modules(sce)[which(rownames(sce) ==
+                return(celdaModules(sce)[which(rownames(sce) ==
                         feature[x])])
             } else {
                 return(paste0(

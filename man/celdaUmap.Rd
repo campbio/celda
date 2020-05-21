@@ -43,7 +43,7 @@ Default NULL.}
 threshold. Default 100.}
 
 \item{modules}{Integer vector. Determines which features modules to use for
-tSNE. If NULL, all modules will be used. Default NULL.}
+UMAP. If NULL, all modules will be used. Default NULL.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to

@@ -47,7 +47,7 @@
 #'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
 #' @seealso \link{celda_G} for feature clustering, \link{celda_C} for
 #'  clustering of cells, and \link{celda_CG} for simultaneous clustering of
-#'  features and cells. \link{subsetCeldaList} can subset the \link{celdaList}
+#'  features and cells. \link{subsetCeldaList} can subset the \code{celdaList}
 #'  object. \link{selectBestModel} can get the best model for each combination
 #'  of parameters.
 #' @import foreach
@@ -606,6 +606,7 @@ setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
 )
 
 
+#' @rdname selectBestModel
 #' @examples
 #' data(celdaCGGridSearchRes)
 #' ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
