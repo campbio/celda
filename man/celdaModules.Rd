@@ -21,6 +21,9 @@ celdaModules(sce) <- value
 \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
+
+\item{value}{Character vector of feature module labels for replacements.
+Works only if \code{x} is a \linkS4class{SingleCellExperiment} object.}
 }
 \value{
 Character vector. Contains feature module labels for each

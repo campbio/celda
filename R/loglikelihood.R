@@ -196,9 +196,6 @@ setMethod("logLikelihoodHistory",
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
-#' @examples
-#' data(celdaCGMod)
-#' bestLogLikelihood(celdaCGMod)
 #' @export
 setGeneric(
     "bestLogLikelihood",
@@ -214,7 +211,7 @@ setGeneric(
 #' bestLogLikelihood(sceCeldaCG)
 #' @export
 setMethod("bestLogLikelihood",
-    signature(x = "celdaModel"),
+    signature(x = "SingleCellExperiment"),
     function(x) {
         fll <- S4Vectors::metadata(x)$celda_parameters$finalLogLik
         return(fll)

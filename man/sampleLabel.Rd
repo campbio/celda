@@ -28,7 +28,8 @@ located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.
 \item A celda model object.}}
 
-\item{value}{Character vector of sample lables for replacements.}
+\item{value}{Character vector of sample labels for replacements. Works
+only is \code{x} is a \linkS4class{SingleCellExperiment} object.}
 }
 \value{
 Character vector. Contains the sample labels provided at model

@@ -138,7 +138,7 @@ setMethod("moduleHeatmap",
         anno_cell_colors <- NULL
         if (S4Vectors::metadata(x)$celda_parameters$model == "celda_CG") {
             if ("celda_cell_cluster" %in%
-                    colnames(SummarizedExperiment::colData(sce))) {
+                    colnames(SummarizedExperiment::colData(x))) {
                 cell <-
                     distinctColors(length(unique(celdaClusters(x))))[
                         sort(unique(celdaClusters(x)[cellIx]))]

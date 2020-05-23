@@ -2,12 +2,13 @@
 % Please edit documentation in R/loglikelihood.R
 \name{bestLogLikelihood}
 \alias{bestLogLikelihood}
+\alias{bestLogLikelihood,SingleCellExperiment-method}
 \alias{bestLogLikelihood,celdaModel-method}
 \title{Get the log-likelihood}
 \usage{
 bestLogLikelihood(x)
 
-\S4method{bestLogLikelihood}{celdaModel}(x)
+\S4method{bestLogLikelihood}{SingleCellExperiment}(x)
 
 \S4method{bestLogLikelihood}{celdaModel}(x)
 }
@@ -25,8 +26,6 @@ Retrieves the final log-likelihood from all iterations of Gibbs
  sampling used to generate a celdaModel.
 }
 \examples{
-data(celdaCGMod)
-bestLogLikelihood(celdaCGMod)
 data(sceCeldaCG)
 bestLogLikelihood(sceCeldaCG)
 data(celdaCGMod)

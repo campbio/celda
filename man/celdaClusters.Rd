@@ -28,6 +28,9 @@ celdaClusters(x) <- value
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.
 \item Celda model object.}}
+
+\item{value}{Character vector of cell cluster labels for replacements. Works
+only if \code{x} is a \linkS4class{SingleCellExperiment} object.}
 }
 \value{
 One of

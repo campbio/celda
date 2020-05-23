@@ -2,137 +2,127 @@
 library(celda)
 context("Testing celda_C")
 
-celdaCSim <- simulateCells("celda_C", K = 10)
-modelC <- celda_C(counts = celdaCSim$counts,
-    sampleLabel = celdaCSim$sampleLabel,
-    K = celdaCSim$K,
+sceceldaCSim <- simulateCells("celda_C", K = 10)
+K <- S4Vectors::metadata(sceceldaCSim)$celda_simulateCellscelda_C$K
+counts <- SummarizedExperiment::assay(sce, "counts")
+sce <- celda_C(sceceldaCSim,
+    sampleLabel = sampleLabel(sceceldaCSim),
+    K = K,
     algorithm = "EM",
     verbose = FALSE)
-factorized <- factorizeMatrix(counts = celdaCSim$counts, celdaMod = modelC)
+factorized <- factorizeMatrix(sce)
 
 # celda_C
 test_that(desc = "Testing simulation and celda_C model", {
-    expect_equal(typeof(celdaCSim$counts), "integer")
+    expect_equal(typeof(counts), "integer")
     expect_true(all(sweep(factorized$counts$sample,
         2,
         colSums(factorized$counts$sample),
         "/") == factorized$proportions$sample))
-    expect_true(ncol(factorized$proportions$module) == modelC@params$K)
-    expect_true(all(is.numeric(logLikelihoodHistory(celdaMod = modelC))))
-    # expect_equal(max(logLikelihoodHistory(celdaMod = modelC)),
-    #     bestLogLikelihood(modelC))
+    expect_true(ncol(factorized$proportions$module) == K)
+    expect_true(all(is.numeric(logLikelihoodHistory(sce))))
+    expect_equal(max(logLikelihoodHistory(sce)), bestLogLikelihood(sce))
 
     # GitHub #347
-    numericCounts <- celdaCSim$counts
+    numericCounts <- counts
     storage.mode(numericCounts) <- "numeric"
-    expect_true(is(celda_C(counts = celdaCSim$counts,
-        sampleLabel = celdaCSim$sampleLabel,
-        K = celdaCSim$K,
+    expect_true(is(celda_C(counts,
+        sampleLabel = sampleLabel(sceceldaCSim),
+        K = K,
         algorithm = "EM",
         verbose = FALSE,
         maxIter = 2),
-        "celda_C"))
+        "SingleCellExperiment"))
 })
 
 # clusterProbability
 test_that(desc = "Testing clusterProbability with celda_C", {
-    expect_true(all(round(rowSums(
-        clusterProbability(modelC, counts = celdaCSim$counts)[[1]]
-    )) == 1))
+    expect_true(all(round(rowSums(clusterProbability(sce)[[1]])) == 1))
 })
 
 # celdaGridSearch and perplexity calculations
-# test_that(desc = "Testing celdaGridSearch with celda_C", {
-#     celdaCRes <- celdaGridSearch(counts = celdaCSim$counts,
-#         model = "celda_C",
-#         nchains = 2,
-#         paramsTest = list(K = c(5, 6)),
-#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel),
-#         maxIter = 2,
-#         verbose = FALSE,
-#         bestOnly = FALSE,
-#         perplexity = FALSE)
-#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
-#         model = "celda_C",
-#         paramsTest = list(K = c(4, 5), M = c(3, 4)),
-#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel),
-#         bestOnly = FALSE),
-#         paste0("The following elements in 'paramsTest' are not arguments of",
-#             " 'celda_C': M"))
-#
-#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
-#         model = "celda_C",
-#         nchains = 1,
-#         maxIter = 1,
-#         paramsTest = list(K = c(4, 5), sampleLabel = "Sample"),
-#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel)),
-#         paste0("Setting parameters such as 'z.init', 'y.init', and",
-#             "'sampleLabel' in 'paramsTest' is not currently supported."))
-#
-#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
-#         model = "celda_C",
-#         nchains = 1,
-#         maxIter = 1,
-#         paramsTest = list(),
-#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel)),
-#         paste0("The following arguments are not in 'paramsTest' or",
-#             " 'paramsFixed' but are required for 'celda_C': K"))
-#
-#     expect_error(celdaGridSearch(counts = celdaCSim$counts,
-#         model = "celda_C",
-#         nchains = 1,
-#         maxIter = 1,
-#         paramsTest = list(K = c(9, 10)),
-#         paramsFixed = list(sampleLabel = celdaCSim$sampleLabel,
-#             xxx = "xxx")),
-#         paste0("The following elements in 'paramsFixed' are not arguments",
-#             "of 'celda_C': xxx"))
-#
-#     expect_true(class(celdaCRes)[1] == "celdaList")
-#     expect_equal(names(runParams(celdaCRes)),
-#         c("index", "chain", "K", "log_likelihood"))
-#     expect_error(plotGridSearchPerplexity(celdaCRes))
-#
-#     celdaCRes <- resamplePerplexity(celdaCSim$counts, celdaCRes, resample = 2)
-#     expect_equal(is.null(celdaCRes@perplexity), FALSE)
-#     expect_true(is(celdaCRes, "celdaList"))
-#     expect_error(resamplePerplexity(celdaCSim$counts,
-#         celdaCRes, resample = "2"))
-#     expect_error(resamplePerplexity(celdaCSim$counts,
-#         "celdaCRes", resample = 2))
-#
-#     plotObj <- plotGridSearchPerplexity(celdaCRes)
-#     expect_is(plotObj, "ggplot")
-#
-#     celdaCResIndex1 <- subsetCeldaList(celdaCRes, params = list(index = 1))
-#     expect_true(all(is(celdaCResIndex1, "celda_C") &&
-#             !is(celdaCResIndex1, "celda_list")))
-#
-#     expect_error(subsetCeldaList(celdaCRes, params = list(K = 11)))
-#     expect_error(subsetCeldaList(celdaCRes, params = list(K = 5, M = 10)))
-#
-#     celdaCResK5 <- subsetCeldaList(celdaCRes, params = list(K = 5))
-#     modelC2 <- selectBestModel(celdaCResK5)
-#     res <- perplexity(celdaCSim$counts, modelC)
-#     res2 <- perplexity(celdaCSim$counts, modelC,
-#         newCounts = celdaCSim$counts + 1)
-#
-#     expect_error(res <- perplexity.celda_C(celdaCSim$counts,
-#         modelC,
-#         newCounts = celdaCSim$counts[-1, ]))
-# })
+test_that(desc = "Testing celdaGridSearch with celda_C", {
+    celdaCResList <- celdaGridSearch(sceceldaCSim,
+        model = "celda_C",
+        nchains = 2,
+        paramsTest = list(K = c(5, 6)),
+        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim)),
+        maxIter = 2,
+        verbose = FALSE,
+        bestOnly = FALSE,
+        perplexity = FALSE)
+    expect_error(celdaGridSearch(sceceldaCSim,
+        model = "celda_C",
+        paramsTest = list(K = c(4, 5), M = c(3, 4)),
+        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim)),
+        bestOnly = FALSE),
+        paste0("The following elements in 'paramsTest' are not arguments of",
+            " 'celda_C': M"))
+
+    expect_error(celdaGridSearch(sceceldaCSim,
+        model = "celda_C",
+        nchains = 1,
+        maxIter = 1,
+        paramsTest = list(K = c(4, 5), sampleLabel = "Sample"),
+        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim))),
+        paste0("Setting parameters such as 'z.init', 'y.init', and",
+            " 'sampleLabel' in 'paramsTest' is not currently supported."))
+
+    expect_error(celdaGridSearch(sceceldaCSim,
+        model = "celda_C",
+        nchains = 1,
+        maxIter = 1,
+        paramsTest = list(),
+        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim))),
+        paste0("The following arguments are not in 'paramsTest' or",
+            " 'paramsFixed' but are required for 'celda_C': K"))
+
+    expect_error(celdaGridSearch(sceceldaCSim,
+        model = "celda_C",
+        nchains = 1,
+        maxIter = 1,
+        paramsTest = list(K = c(9, 10)),
+        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim),
+            xxx = "xxx")),
+        paste0("The following elements in 'paramsFixed' are not arguments",
+            " of 'celda_C': xxx"))
+
+    expect_true(class(S4Vectors::metadata(
+        celdaCResList)$celda_grid_search)[1] == "celdaList")
+    expect_equal(names(runParams(celdaCResList)),
+        c("index", "chain", "K", "seed", "logLikelihood"))
+    expect_error(plotGridSearchPerplexity(celdaCResList))
+
+    celdaCResList <- resamplePerplexity(celdaCResList, resample = 2)
+    expect_equal(is.null(celdaCResList@metadata$celda_grid_search@perplexity),
+        FALSE)
+    expect_true(is(celdaCResList, "SingleCellExperiment"))
+    expect_error(resamplePerplexity(celdaCResList, resample = "2"),
+        "Provided resample parameter was not numeric.")
+
+    plotObj <- plotGridSearchPerplexity(celdaCResList)
+    expect_is(plotObj, "ggplot")
+
+    celdaCResIndex1 <- subsetCeldaList(celdaCResList, params = list(index = 1))
+
+    expect_true(all("celda_grid_search" %in% names(celdaCResList@metadata) &&
+            "celda_parameters" %in% names(celdaCResIndex1@metadata)))
+
+    expect_error(subsetCeldaList(celdaCResList, params = list(K = 11)))
+    expect_error(subsetCeldaList(celdaCResList, params = list(K = 5, M = 10)))
+
+    celdaCResK5 <- subsetCeldaList(celdaCResList, params = list(K = 5))
+    sce2 <- selectBestModel(celdaCResK5)
+    res <- perplexity(sce)
+    res2 <- perplexity(sce, newCounts = counts + 1)
+
+    expect_error(res <- perplexity(sce, newCounts = counts[-1, ]),
+        "'newCounts' should have the same number of rows as 'sce'.")
+})
 
 # logLikelihood
 test_that(desc = "Testing logLikelihood.celda_C", {
-    expect_lt(logLikelihood(model = "celda_C",
-        counts = celdaCSim$counts,
-        z = celdaCSim$z,
-        K = celdaCSim$K,
-        alpha = 1,
-        beta = 1,
-        sampleLabel = celdaCSim$sampleLabel),
-        0)
-
+    expect_lt(logLikelihood(sce), 0)
     fakeZ <- celdaCSim$z
     fakeZ[1] <- celdaCSim$K + 1
     expect_error(logLikelihood(model = "celda_C",
@@ -141,14 +131,14 @@ test_that(desc = "Testing logLikelihood.celda_C", {
         K = celdaCSim$K,
         alpha = 1,
         beta = 1,
-        sampleLabel = celdaCSim$sampleLabel),
+        sampleLabel = sampleLabel(sceceldaCSim)),
         "An entry in z contains a value greater than the provided K.")
 })
 
 # Gibbs sampling
 test_that(desc = "Testing celda_C with Gibbs sampling", {
-    res <- celda_C(counts = celdaCSim$counts,
-        sampleLabel = celdaCSim$sampleLabel,
+    res <- celda_C(sceceldaCSim,
+        sampleLabel = sampleLabel(sceceldaCSim),
         K = celdaCSim$K,
         algorithm = "Gibbs",
         maxIter = 5,
@@ -191,25 +181,25 @@ test_that(desc = "Testing recodeClusterZ with celda_C", {
 })
 
 # compareCountMatrix
-test_that(desc = "Testing CompareCountMatrix with celda_C", {
-    expect_true(compareCountMatrix(counts = celdaCSim$counts,
-        celdaMod = modelC))
-
-    lessCells <- celdaCSim$counts[, seq(100)]
-    expect_error(compareCountMatrix(counts = lessCells, celdaMod = modelC),
-        paste0("The provided celda object was generated from a counts matrix",
-            " with a different number of cells than the one provided."))
-
-    countsMatrixError <- matrix(data = 1,
-        nrow = nrow(celdaCSim$counts),
-        ncol = ncol(celdaCSim$counts))
-    expect_false(compareCountMatrix(counts = countsMatrixError,
-        celdaMod = modelC,
-        errorOnMismatch = FALSE))
-    expect_error(compareCountMatrix(counts = countsMatrixError,
-        celdaMod = modelC,
-        errorOnMismatch = TRUE))
-})
+# test_that(desc = "Testing CompareCountMatrix with celda_C", {
+#     expect_true(compareCountMatrix(counts = celdaCSim$counts,
+#         celdaMod = modelC))
+#
+#     lessCells <- celdaCSim$counts[, seq(100)]
+#     expect_error(compareCountMatrix(counts = lessCells, celdaMod = modelC),
+#         paste0("The provided celda object was generated from a counts matrix",
+#             " with a different number of cells than the one provided."))
+#
+#     countsMatrixError <- matrix(data = 1,
+#         nrow = nrow(celdaCSim$counts),
+#         ncol = ncol(celdaCSim$counts))
+#     expect_false(compareCountMatrix(counts = countsMatrixError,
+#         celdaMod = modelC,
+#         errorOnMismatch = FALSE))
+#     expect_error(compareCountMatrix(counts = countsMatrixError,
+#         celdaMod = modelC,
+#         errorOnMismatch = TRUE))
+# })
 
 # topRank
 test_that(desc = "Checking topRank to see if it runs without errors", {
