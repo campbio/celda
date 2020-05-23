@@ -613,90 +613,6 @@ setMethod("celda_G",
 }
 
 
-.factorizeMatrixCelda_G <- function(sce, useAssay, type) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-    # compareCountMatrix(counts, celdaMod)
-
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    y <- celdaModules(sce)
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-
-    p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
-    nTSByC <- p$nTSByC
-    nByG <- p$nByG
-    nByTS <- p$nByTS
-    nGByTS <- p$nGByTS
-    nM <- p$nM
-    nG <- p$nG
-    rm(p)
-
-    nGByTS[nGByTS == 0] <- 1
-    nGByTS <- matrix(0, nrow = length(y), ncol = L)
-    nGByTS[cbind(seq(nG), y)] <- nByG
-
-    LNames <- paste0("L", seq(L))
-    colnames(nTSByC) <- colnames(sce)
-    rownames(nTSByC) <- LNames
-    colnames(nGByTS) <- LNames
-    rownames(nGByTS) <- rownames(sce)
-    names(nGByTS) <- LNames
-
-    countsList <- c()
-    propList <- c()
-    postList <- c()
-    res <- list()
-
-    if (any("counts" %in% type)) {
-        countsList <- list(
-            cell = nTSByC,
-            module = nGByTS,
-            geneDistribution = nGByTS
-        )
-        res <- c(res, list(counts = countsList))
-    }
-
-    if (any("proportion" %in% type)) {
-        ## Need to avoid normalizing cell/gene states with zero cells/genes
-        uniqueY <- sort(unique(y))
-        tempNGByTS <- nGByTS
-        tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
-            normalize = "proportion"
-        )
-        tempNGByTS <- nGByTS / sum(nGByTS)
-
-        propList <- list(
-            cell = normalizeCounts(nTSByC,
-                normalize = "proportion"
-            ),
-            module = tempNGByTS,
-            geneDistribution = tempNGByTS
-        )
-        res <- c(res, list(proportions = propList))
-    }
-
-    if (any("posterior" %in% type)) {
-        gs <- nGByTS
-        gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
-        gs <- normalizeCounts(gs, normalize = "proportion")
-        tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
-
-        postList <- list(
-            cell = normalizeCounts(nTSByC + beta,
-                normalize = "proportion"
-            ),
-            module = gs,
-            geneDistribution = tempNGByTS
-        )
-        res <- c(res, posterior = list(postList))
-    }
-
-    return(res)
-}
-
-
 # Calculate log-likelihood of celda_CG model
 .cGCalcLL <- function(nTSByC,
                       nByTS,
@@ -736,29 +652,6 @@ setMethod("celda_G",
 
   final <- phiLl + psiLl + etaLl
   return(final)
-}
-
-
-.logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
-    if (sum(y > L) > 0) {
-        stop("Assigned value of feature module greater than the total number",
-            " of feature modules!")
-    }
-    p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
-    final <- .cGCalcLL(
-        nTSByC = p$nTSByC,
-        nByTS = p$nByTS,
-        nByG = p$nByG,
-        nGByTS = p$nGByTS,
-        nM = p$nM,
-        nG = p$nG,
-        L = L,
-        beta = beta,
-        delta = delta,
-        gamma = gamma
-    )
-
-    return(final)
 }
 
 
@@ -806,43 +699,6 @@ setMethod("celda_G",
     nByTS = nByTS,
     nGByTS = nGByTS
   ))
-}
-
-
-.perplexityCelda_G <- function(sce, useAssay, newCounts) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-
-    if (is.null(newCounts)) {
-        newCounts <- counts
-    } else {
-        newCounts <- .processCounts(newCounts)
-    }
-    if (nrow(newCounts) != nrow(counts)) {
-        stop("newCounts should have the same number of rows as counts.")
-    }
-
-    factorized <- factorizeMatrix(
-        sce = sce,
-        useAssay = useAssay,
-        type = c("posterior", "counts"))
-    psi <- factorized$posterior$module
-    phi <- factorized$posterior$cell
-    eta <- factorized$posterior$geneDistribution
-    nGByTS <- factorized$counts$geneDistribution
-
-    etaProb <- log(eta) * nGByTS
-    # gene.by.cell.prob = log(psi %*% phi)
-    # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
-    logPx <- .perplexityGLogPx(
-        newCounts,
-        phi,
-        psi,
-        celdaModules(sce),
-        S4Vectors::metadata(sce)$celda_parameters$L
-    ) # + sum(etaProb)
-    perplexity <- exp(- (logPx / sum(newCounts)))
-    return(perplexity)
 }
 
 

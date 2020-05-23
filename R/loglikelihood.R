@@ -231,3 +231,90 @@ setMethod("bestLogLikelihood",
         return(fll)
     }
 )
+
+
+.logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
+    if (sum(z > K) > 0) {
+        stop("Assigned value of cell cluster greater than the total number of",
+            " cell clusters!")
+    }
+    sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
+    s <- as.integer(sampleLabel)
+    p <- .cCDecomposeCounts(counts, s, z, K)
+    final <- .cCCalcLL(
+        mCPByS = p$mCPByS,
+        nGByCP = p$nGByCP,
+        s = s,
+        z = z,
+        K = K,
+        nS = p$nS,
+        nG = p$nG,
+        alpha = alpha,
+        beta = beta
+    )
+    return(final)
+}
+
+
+.logLikelihoodcelda_CG <- function(counts,
+    sampleLabel,
+    z,
+    y,
+    K,
+    L,
+    alpha,
+    beta,
+    delta,
+    gamma) {
+
+    if (sum(z > K) > 0) {
+        stop("Assigned value of cell cluster greater than the total number of",
+            " cell clusters!")
+    }
+    if (sum(y > L) > 0) {
+        stop("Assigned value of feature module greater than the total number",
+            " of feature modules!")
+    }
+
+    sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
+    s <- as.integer(sampleLabel)
+    p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
+    final <- .cCGCalcLL(
+        K = K,
+        L = L,
+        mCPByS = p$mCPByS,
+        nTSByCP = p$nTSByCP,
+        nByG = p$nByG,
+        nByTS = p$nByTS,
+        nGByTS = p$nGByTS,
+        nS = p$nS,
+        nG = p$nG,
+        alpha = alpha,
+        beta = beta,
+        delta = delta,
+        gamma = gamma)
+    return(final)
+}
+
+
+.logLikelihoodcelda_G <- function(counts, y, L, beta, delta, gamma) {
+    if (sum(y > L) > 0) {
+        stop("Assigned value of feature module greater than the total number",
+            " of feature modules!")
+    }
+    p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
+    final <- .cGCalcLL(
+        nTSByC = p$nTSByC,
+        nByTS = p$nByTS,
+        nByG = p$nByG,
+        nGByTS = p$nGByTS,
+        nM = p$nM,
+        nG = p$nG,
+        L = L,
+        beta = beta,
+        delta = delta,
+        gamma = gamma
+    )
+
+    return(final)
+}

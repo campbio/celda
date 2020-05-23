@@ -781,111 +781,6 @@ setMethod("celda_CG",
 }
 
 
-.factorizeMatrixCelda_CG <- function(sce, useAssay, type) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    z <- celdaClusters(sce)
-    y <- celdaModules(sce)
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-    sampleLabel <- sampleLabel(sce)
-    s <- as.integer(sampleLabel)
-
-    ## Calculate counts one time up front
-    p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
-    nS <- p$nS
-    nG <- p$nG
-    nM <- p$nM
-    mCPByS <- p$mCPByS
-    nTSByC <- p$nTSByC
-    nTSByCP <- p$nTSByCP
-    nByG <- p$nByG
-    nByTS <- p$nByTS
-    nGByTS <- p$nGByTS
-    nGByTS[nGByTS == 0] <- 1
-
-    nGByTS <- matrix(0, nrow = length(y), ncol = L)
-    nGByTS[cbind(seq(nG), y)] <- p$nByG
-
-    LNames <- paste0("L", seq(L))
-    KNames <- paste0("K", seq(K))
-    colnames(nTSByC) <- colnames(sce)
-    rownames(nTSByC) <- LNames
-    colnames(nGByTS) <- LNames
-    rownames(nGByTS) <- rownames(sce)
-    rownames(mCPByS) <- KNames
-    colnames(mCPByS) <- S4Vectors::metadata(sce)$celda_parameters$sampleLevels
-    colnames(nTSByCP) <- KNames
-    rownames(nTSByCP) <- LNames
-
-    countsList <- c()
-    propList <- c()
-    postList <- c()
-    res <- list()
-
-    if (any("counts" %in% type)) {
-        countsList <- list(
-            sample = mCPByS,
-            cellPopulation = nTSByCP,
-            cell = nTSByC,
-            module = nGByTS,
-            geneDistribution = nGByTS
-        )
-        res <- c(res, list(counts = countsList))
-    }
-
-    if (any("proportion" %in% type)) {
-        ## Need to avoid normalizing cell/gene states with zero cells/genes
-        uniqueZ <- sort(unique(z))
-        tempNTSByCP <- nTSByCP
-        tempNTSByCP[, uniqueZ] <- normalizeCounts(tempNTSByCP[, uniqueZ],
-            normalize = "proportion"
-        )
-
-        uniqueY <- sort(unique(y))
-        tempNGByTS <- nGByTS
-        tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
-            normalize = "proportion"
-        )
-        tempNGByTS <- nGByTS / sum(nGByTS)
-
-        propList <- list(
-            sample = normalizeCounts(mCPByS, normalize = "proportion"),
-            cellPopulation = tempNTSByCP,
-            cell = normalizeCounts(nTSByC, normalize = "proportion"),
-            module = tempNGByTS,
-            geneDistribution = tempNGByTS
-        )
-        res <- c(res, list(proportions = propList))
-    }
-
-    if (any("posterior" %in% type)) {
-        gs <- nGByTS
-        gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
-        gs <- normalizeCounts(gs, normalize = "proportion")
-        tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
-
-        postList <- list(
-            sample = normalizeCounts(mCPByS + alpha,
-                normalize = "proportion"
-            ),
-            cellPopulation = normalizeCounts(nTSByCP + beta,
-                normalize = "proportion"
-            ),
-            module = gs,
-            geneDistribution = tempNGByTS
-        )
-        res <- c(res, posterior = list(postList))
-    }
-
-    return(res)
-}
-
-
 # Calculate the loglikelihood for the celda_CG model
 .cCGCalcLL <- function(K,
                        L,
@@ -939,47 +834,6 @@ setMethod("celda_CG",
 }
 
 
-.logLikelihoodcelda_CG <- function(counts,
-    sampleLabel,
-    z,
-    y,
-    K,
-    L,
-    alpha,
-    beta,
-    delta,
-    gamma) {
-
-    if (sum(z > K) > 0) {
-        stop("Assigned value of cell cluster greater than the total number of",
-            " cell clusters!")
-    }
-    if (sum(y > L) > 0) {
-        stop("Assigned value of feature module greater than the total number",
-            " of feature modules!")
-    }
-
-    sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
-    s <- as.integer(sampleLabel)
-    p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
-    final <- .cCGCalcLL(
-        K = K,
-        L = L,
-        mCPByS = p$mCPByS,
-        nTSByCP = p$nTSByCP,
-        nByG = p$nByG,
-        nByTS = p$nByTS,
-        nGByTS = p$nGByTS,
-        nS = p$nS,
-        nG = p$nG,
-        alpha = alpha,
-        beta = beta,
-        delta = delta,
-        gamma = gamma)
-    return(final)
-}
-
-
 # Takes raw counts matrix and converts it to a series of matrices needed for
 # log likelihood calculation
 # @param counts Integer matrix. Rows represent features and columns represent
@@ -1026,42 +880,6 @@ setMethod("celda_CG",
 }
 
 
-.perplexityCelda_CG <- function(sce, useAssay, newCounts) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-
-    if (is.null(newCounts)) {
-        newCounts <- counts
-    } else {
-        newCounts <- .processCounts(newCounts)
-    }
-    if (nrow(newCounts) != nrow(counts)) {
-        stop("newCounts should have the same number of rows as counts.")
-    }
-
-    factorized <- factorizeMatrix(x = sce,
-        useAssay = useAssay,
-        type = c("posterior", "counts"))
-
-    theta <- log(factorized$posterior$sample)
-    phi <- factorized$posterior$cellPopulation
-    psi <- factorized$posterior$module
-    s <- as.integer(sampleLabel(sce))
-    eta <- factorized$posterior$geneDistribution
-    nGByTS <- factorized$counts$geneDistribution
-
-    etaProb <- log(eta) * nGByTS
-    geneByPopProb <- log(psi %*% phi)
-    innerLogProb <- eigenMatMultInt(geneByPopProb, newCounts) + theta[, s]
-    # innerLogProb = (t(geneByPopProb) %*% newCounts) + theta[, s]
-
-    log.px <- sum(apply(innerLogProb, 2, matrixStats::logSumExp))
-    # + sum(etaProb)
-    perplexity <- exp(- (log.px / sum(newCounts)))
-    return(perplexity)
-}
-
-
 .reorderCeldaCG <- function(counts, res) {
     # Reorder K
     if (params(res)$K > 2 & isTRUE(length(unique(res@celdaClusters$z)) > 1)) {
@@ -1086,40 +904,6 @@ setMethod("celda_CG",
         res <- .recodeClusterY(res, from = h$order, to = seq(length(h$order)))
     }
     return(res)
-}
-
-
-.celdaUmapCG <- function(counts,
-    celdaMod,
-    maxCells = NULL,
-    minClusterSize = 100,
-    modules = NULL,
-    nNeighbors = nNeighbors,
-    minDist = minDist,
-    spread = spread,
-    cores = cores,
-    ...) {
-
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(
-        counts,
-        celdaMod,
-        maxCells,
-        minClusterSize,
-        modules
-    )
-    umapRes <- .calculateUmap(preparedCountInfo$norm,
-        nNeighbors = nNeighbors,
-        minDist = minDist,
-        spread = spread,
-        cores = cores,
-        ...
-    )
-
-    final <- matrix(NA, nrow = ncol(counts), ncol = 2)
-    final[preparedCountInfo$cellIx, ] <- umapRes
-    rownames(final) <- colnames(counts)
-    colnames(final) <- c("UMAP_1", "UMAP_2")
-    return(final)
 }
 
 

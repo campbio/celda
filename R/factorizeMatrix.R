@@ -359,3 +359,250 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
         return(res)
     }
 )
+
+
+.factorizeMatrixCelda_C <- function(sce, useAssay, type) {
+
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    z <- celdaClusters(sce)
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    sampleLabel <- sampleLabel(sce)
+    s <- as.integer(sampleLabel)
+
+    p <- .cCDecomposeCounts(counts, s, z, K)
+    mCPByS <- p$mCPByS
+    nGByCP <- p$nGByCP
+
+    KNames <- paste0("K", seq(K))
+    rownames(nGByCP) <- rownames(sce)
+    colnames(nGByCP) <- KNames
+    rownames(mCPByS) <- KNames
+    colnames(mCPByS) <-
+        S4Vectors::metadata(sce)$celda_parameters$sampleLevels
+
+    countsList <- c()
+    propList <- c()
+    postList <- c()
+    res <- list()
+
+    if (any("counts" %in% type)) {
+        countsList <- list(sample = mCPByS, module = nGByCP)
+        res <- c(res, list(counts = countsList))
+    }
+
+    if (any("proportion" %in% type)) {
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueZ <- sort(unique(z))
+        tempNGByCP <- nGByCP
+        tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
+            normalize = "proportion")
+
+        propList <- list(sample = normalizeCounts(mCPByS,
+            normalize = "proportion"),
+            module = tempNGByCP)
+        res <- c(res, list(proportions = propList))
+    }
+
+    if (any("posterior" %in% type)) {
+        postList <- list(sample = normalizeCounts(mCPByS + alpha,
+            normalize = "proportion"),
+            module = normalizeCounts(nGByCP + beta,
+                normalize = "proportion"))
+
+        res <- c(res, posterior = list(postList))
+    }
+
+    return(res)
+}
+
+
+.factorizeMatrixCelda_CG <- function(sce, useAssay, type) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    z <- celdaClusters(sce)
+    y <- celdaModules(sce)
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+    sampleLabel <- sampleLabel(sce)
+    s <- as.integer(sampleLabel)
+
+    ## Calculate counts one time up front
+    p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
+    nS <- p$nS
+    nG <- p$nG
+    nM <- p$nM
+    mCPByS <- p$mCPByS
+    nTSByC <- p$nTSByC
+    nTSByCP <- p$nTSByCP
+    nByG <- p$nByG
+    nByTS <- p$nByTS
+    nGByTS <- p$nGByTS
+    nGByTS[nGByTS == 0] <- 1
+
+    nGByTS <- matrix(0, nrow = length(y), ncol = L)
+    nGByTS[cbind(seq(nG), y)] <- p$nByG
+
+    LNames <- paste0("L", seq(L))
+    KNames <- paste0("K", seq(K))
+    colnames(nTSByC) <- colnames(sce)
+    rownames(nTSByC) <- LNames
+    colnames(nGByTS) <- LNames
+    rownames(nGByTS) <- rownames(sce)
+    rownames(mCPByS) <- KNames
+    colnames(mCPByS) <- S4Vectors::metadata(sce)$celda_parameters$sampleLevels
+    colnames(nTSByCP) <- KNames
+    rownames(nTSByCP) <- LNames
+
+    countsList <- c()
+    propList <- c()
+    postList <- c()
+    res <- list()
+
+    if (any("counts" %in% type)) {
+        countsList <- list(
+            sample = mCPByS,
+            cellPopulation = nTSByCP,
+            cell = nTSByC,
+            module = nGByTS,
+            geneDistribution = nGByTS
+        )
+        res <- c(res, list(counts = countsList))
+    }
+
+    if (any("proportion" %in% type)) {
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueZ <- sort(unique(z))
+        tempNTSByCP <- nTSByCP
+        tempNTSByCP[, uniqueZ] <- normalizeCounts(tempNTSByCP[, uniqueZ],
+            normalize = "proportion"
+        )
+
+        uniqueY <- sort(unique(y))
+        tempNGByTS <- nGByTS
+        tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
+            normalize = "proportion"
+        )
+        tempNGByTS <- nGByTS / sum(nGByTS)
+
+        propList <- list(
+            sample = normalizeCounts(mCPByS, normalize = "proportion"),
+            cellPopulation = tempNTSByCP,
+            cell = normalizeCounts(nTSByC, normalize = "proportion"),
+            module = tempNGByTS,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, list(proportions = propList))
+    }
+
+    if (any("posterior" %in% type)) {
+        gs <- nGByTS
+        gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
+        gs <- normalizeCounts(gs, normalize = "proportion")
+        tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
+
+        postList <- list(
+            sample = normalizeCounts(mCPByS + alpha,
+                normalize = "proportion"
+            ),
+            cellPopulation = normalizeCounts(nTSByCP + beta,
+                normalize = "proportion"
+            ),
+            module = gs,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, posterior = list(postList))
+    }
+
+    return(res)
+}
+
+
+.factorizeMatrixCelda_G <- function(sce, useAssay, type) {
+    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
+    # compareCountMatrix(counts, celdaMod)
+
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    y <- celdaModules(sce)
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+
+    p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
+    nTSByC <- p$nTSByC
+    nByG <- p$nByG
+    nByTS <- p$nByTS
+    nGByTS <- p$nGByTS
+    nM <- p$nM
+    nG <- p$nG
+    rm(p)
+
+    nGByTS[nGByTS == 0] <- 1
+    nGByTS <- matrix(0, nrow = length(y), ncol = L)
+    nGByTS[cbind(seq(nG), y)] <- nByG
+
+    LNames <- paste0("L", seq(L))
+    colnames(nTSByC) <- colnames(sce)
+    rownames(nTSByC) <- LNames
+    colnames(nGByTS) <- LNames
+    rownames(nGByTS) <- rownames(sce)
+    names(nGByTS) <- LNames
+
+    countsList <- c()
+    propList <- c()
+    postList <- c()
+    res <- list()
+
+    if (any("counts" %in% type)) {
+        countsList <- list(
+            cell = nTSByC,
+            module = nGByTS,
+            geneDistribution = nGByTS
+        )
+        res <- c(res, list(counts = countsList))
+    }
+
+    if (any("proportion" %in% type)) {
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueY <- sort(unique(y))
+        tempNGByTS <- nGByTS
+        tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
+            normalize = "proportion"
+        )
+        tempNGByTS <- nGByTS / sum(nGByTS)
+
+        propList <- list(
+            cell = normalizeCounts(nTSByC,
+                normalize = "proportion"
+            ),
+            module = tempNGByTS,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, list(proportions = propList))
+    }
+
+    if (any("posterior" %in% type)) {
+        gs <- nGByTS
+        gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
+        gs <- normalizeCounts(gs, normalize = "proportion")
+        tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
+
+        postList <- list(
+            cell = normalizeCounts(nTSByC + beta,
+                normalize = "proportion"
+            ),
+            module = gs,
+            geneDistribution = tempNGByTS
+        )
+        res <- c(res, posterior = list(postList))
+    }
+
+    return(res)
+}

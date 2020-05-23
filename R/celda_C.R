@@ -708,64 +708,6 @@ setMethod("celda_C",
 }
 
 
-.factorizeMatrixCelda_C <- function(sce, useAssay, type) {
-
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    z <- celdaClusters(sce)
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    sampleLabel <- sampleLabel(sce)
-    s <- as.integer(sampleLabel)
-
-    p <- .cCDecomposeCounts(counts, s, z, K)
-    mCPByS <- p$mCPByS
-    nGByCP <- p$nGByCP
-
-    KNames <- paste0("K", seq(K))
-    rownames(nGByCP) <- rownames(sce)
-    colnames(nGByCP) <- KNames
-    rownames(mCPByS) <- KNames
-    colnames(mCPByS) <-
-        S4Vectors::metadata(sce)$celda_parameters$sampleLevels
-
-    countsList <- c()
-    propList <- c()
-    postList <- c()
-    res <- list()
-
-    if (any("counts" %in% type)) {
-        countsList <- list(sample = mCPByS, module = nGByCP)
-        res <- c(res, list(counts = countsList))
-    }
-
-    if (any("proportion" %in% type)) {
-        ## Need to avoid normalizing cell/gene states with zero cells/genes
-        uniqueZ <- sort(unique(z))
-        tempNGByCP <- nGByCP
-        tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
-            normalize = "proportion")
-
-        propList <- list(sample = normalizeCounts(mCPByS,
-            normalize = "proportion"),
-            module = tempNGByCP)
-        res <- c(res, list(proportions = propList))
-    }
-
-    if (any("posterior" %in% type)) {
-        postList <- list(sample = normalizeCounts(mCPByS + alpha,
-            normalize = "proportion"),
-            module = normalizeCounts(nGByCP + beta,
-                normalize = "proportion"))
-
-        res <- c(res, posterior = list(postList))
-    }
-
-    return(res)
-}
-
-
 # Calculate log-likelihood for celda_C model
 .cCCalcLL <- function(mCPByS,
                       nGByCP,
@@ -795,29 +737,6 @@ setMethod("celda_C",
 
   final <- thetaLl + phiLl
   return(final)
-}
-
-
-.logLikelihoodcelda_C <- function(counts, sampleLabel, z, K, alpha, beta) {
-    if (sum(z > K) > 0) {
-        stop("Assigned value of cell cluster greater than the total number of",
-            " cell clusters!")
-    }
-    sampleLabel <- .processSampleLabels(sampleLabel, ncol(counts))
-    s <- as.integer(sampleLabel)
-    p <- .cCDecomposeCounts(counts, s, z, K)
-    final <- .cCCalcLL(
-        mCPByS = p$mCPByS,
-        nGByCP = p$nGByCP,
-        s = s,
-        z = z,
-        K = K,
-        nS = p$nS,
-        nG = p$nG,
-        alpha = alpha,
-        beta = beta
-    )
-    return(final)
 }
 
 
@@ -867,37 +786,6 @@ setMethod("celda_C",
     nGByCP = nGByCP,
     nCP = nCP
   ))
-}
-
-
-.perplexityCelda_C <- function(sce, useAssay, newCounts) {
-
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-
-    if (is.null(newCounts)) {
-        newCounts <- counts
-    } else {
-        newCounts <- .processCounts(newCounts)
-    }
-
-    if (nrow(newCounts) != nrow(counts)) {
-        stop("'newCounts' should have the same number of rows as 'sce'.")
-    }
-
-    factorized <- factorizeMatrix(x = sce,
-        useAssay = useAssay,
-        type = "posterior")
-    theta <- log(factorized$posterior$sample)
-    phi <- log(factorized$posterior$module)
-    s <- as.integer(sampleLabel(sce))
-
-    # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
-    inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
-    logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
-
-    perplexity <- exp(- (logPx / sum(newCounts)))
-    return(perplexity)
 }
 
 

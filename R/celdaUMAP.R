@@ -282,7 +282,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
 #    even dispersal of points. Default 0.2.
 #    See `?uwot::umap` for more information.
 # @param spread The effective scale of embedded points. In combination with
-#    ‘min_dist’, this determines how clustered/clumped the
+#    'min_dist', this determines how clustered/clumped the
 #    embedded points are. Default 1.
 #    See `?uwot::umap` for more information.
 # @param pca Logical. Whether to perform
