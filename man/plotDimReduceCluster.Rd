@@ -9,9 +9,9 @@
 plotDimReduceCluster(x, ...)
 
 \S4method{plotDimReduceCluster}{SingleCellExperiment}(
-  dim1,
-  dim2,
   x,
+  dim1 = NULL,
+  dim2 = NULL,
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -22,9 +22,9 @@ plotDimReduceCluster(x, ...)
 )
 
 \S4method{plotDimReduceCluster}{vector}(
+  x,
   dim1,
   dim2,
-  x,
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -65,8 +65,6 @@ If NULL, all samples will be plotted together. Default NULL.}
 
 \item{labelSize}{Numeric. Sets size of label if labelClusters is TRUE.
 Default 3.5.}
-
-\item{cluster}{Integer vector. Contains cluster labels for each cell.}
 }
 \value{
 The plot as a ggplot object
@@ -75,25 +73,21 @@ The plot as a ggplot object
 Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a
  data dimensionality reduction tool.
- The cells are colored by its given `cluster` label.
+ The cells are colored by its given \code{cluster} label.
 }
 \examples{
 \donttest{
 data(sceCeldaCG)
-celdaTsne <- celdaTsne(sceCeldaCG)
-plotDimReduceCluster(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
-  x = sceCeldaCG,
-  specificClusters = c(1, 2, 3))
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceCluster(x = sce, specificClusters = c(1, 2, 3))
 }
 \donttest{
 data(sceCeldaCG, celdaCGMod)
-celdaTsne <- celdaTsne(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
 plotDimReduceCluster(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
-  x = celdaClusters(celdaCGMod),
+  dim1 = colData(sce)[["celda_tSNE1"]],
+  dim2 = colData(sce)[["celda_tSNE2"]],
+  x = celdaClusters(celdaCGMod)$z,
   specificClusters = c(1, 2, 3))
 }
 }

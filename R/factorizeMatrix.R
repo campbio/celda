@@ -56,11 +56,11 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
     })
 
 
-#' @return A list with elements for `counts`, `proportions`, or `posterior`
-#'  probabilities. Each element will be a list containing factorized matrices
-#'  for `module`, `cellPopulation`, and `sample`. Additionally, the
-#'  contribution of each module in each individual cell will be included in the
-#'  `cell` element of `counts` and `proportions` elements.
+#' @return For celda_CG model, A list with elements for "counts", "proportions",
+#'  or "posterior" probabilities. Each element will be a list containing
+#'  factorized matrices for "module", "cellPopulation", and "sample".
+#'  Additionally, the contribution of each module in each individual cell will
+#'  be included in the "cell" element of "counts" and "proportions" elements.
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' factorizedMatrices <- factorizeMatrix(
@@ -187,9 +187,9 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
 #'   celdaCSim$counts,
 #'   celdaCMod, "posterior"
 #' )
-#' @return A list with elements for `counts`, `proportions`, or `posterior`
-#'  probabilities. Each element will be a list containing factorized matrices
-#'  for `module` and `sample`.
+#' @return For celda_C model, a list with elements for "counts", "proportions",
+#'  or "posterior" probabilities. Each element will be a list containing
+#'  factorized matrices for "module" and "sample".
 #' @rdname factorizeMatrix
 #' @export
 setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
@@ -262,9 +262,9 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
 )
 
 
-#' @return A list with elements for `counts`, `proportions`, or `posterior`
-#'  probabilities. Each element will be a list containing factorized matrices
-#'  for `module` and `cell`.
+#' @return For celda_G model, a list with elements for "counts", "proportions",
+#'  or "posterior" probabilities. Each element will be a list containing
+#'  factorized matrices for "module" and "cell".
 #' @examples
 #' data(celdaGSim, celdaGMod)
 #' factorizedMatrices <- factorizeMatrix(

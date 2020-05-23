@@ -119,7 +119,7 @@ celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
 \seealso{
 \link{celda_G} for feature clustering, \link{celda_C} for
  clustering of cells, and \link{celda_CG} for simultaneous clustering of
- features and cells. \link{subsetCeldaList} can subset the \link{celdaList}
+ features and cells. \link{subsetCeldaList} can subset the \code{celdaList}
  object. \link{selectBestModel} can get the best model for each combination
  of parameters.
 }

@@ -1,25 +1,3 @@
-setClass(
-    "celdaModel",
-    slots = c(
-        params = "list",
-        # K, L, model priors, checksum
-        names = "list",
-        completeLogLik = "numeric",
-        finalLogLik = "numeric",
-        celdaClusters = "list"
-    )
-) # z and or y
-
-
-setClass("celdaList",
-    slots = c(runParams = "data.frame",
-        resList = "list",
-        countChecksum = "character",
-        perplexity = "matrix",
-        celdaGridSearchParameters = "list")
-)
-
-
 #' @title Get or set the cell cluster labels from a celda
 #'  \linkS4class{SingleCellExperiment}  object or celda model
 #'  object.

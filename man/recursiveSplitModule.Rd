@@ -22,6 +22,7 @@ recursiveSplitModule(x, ...)
   gamma = 1,
   minFeature = 3,
   reorder = TRUE,
+  seed = 12345,
   perplexity = TRUE,
   verbose = TRUE,
   logfile = NULL
@@ -40,6 +41,7 @@ recursiveSplitModule(x, ...)
   gamma = 1,
   minFeature = 3,
   reorder = TRUE,
+  seed = 12345,
   perplexity = TRUE,
   verbose = TRUE,
   logfile = NULL
@@ -93,6 +95,10 @@ many features.}
 clustering after each model has been created. If FALSE, module numbers will
 correspond to the split which created the module (i.e. 'L15' was created at
 split 15, 'L16' was created at split 16, etc.). Default TRUE.}
+
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
 
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with

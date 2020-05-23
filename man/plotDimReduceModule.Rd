@@ -10,9 +10,9 @@
 plotDimReduceModule(x, ...)
 
 \S4method{plotDimReduceModule}{SingleCellExperiment}(
-  dim1,
-  dim2,
   x,
+  dim1 = NULL,
+  dim2 = NULL,
   useAssay = "counts",
   modules = NULL,
   rescale = TRUE,
@@ -26,9 +26,9 @@ plotDimReduceModule(x, ...)
 )
 
 \S4method{plotDimReduceModule}{matrix}(
+  x,
   dim1,
   dim2,
-  x,
   celdaMod,
   modules = NULL,
   rescale = TRUE,
@@ -98,19 +98,15 @@ Create a scatterplot for each row of a normalized
 \examples{
 \donttest{
 data(sceCeldaCG)
-celdaTsne <- celdaTsne(sceCeldaCG)
-plotDimReduceModule(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
-  x = sceCeldaCG,
-  modules = c("1", "2"))
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceModule(x = sce, modules = c("1", "2"))
 }
 \donttest{
 data(sceCeldaCG, celdaCGMod)
-celdaTsne <- celdaTsne(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
 plotDimReduceModule(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
+  dim1 = colData(sce)[["celda_tSNE1"]],
+  dim2 = colData(sce)[["celda_tSNE2"]],
   x = counts(sceCeldaCG),
   celdaMod = celdaCGMod,
   modules = c("1", "2"))

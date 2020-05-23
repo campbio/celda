@@ -74,8 +74,8 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
                     maxIter = maxIter))
         }
 
-        SummarizedExperiment::colData(sce)["celda_tSNE1"] <- res$tSNE1
-        SummarizedExperiment::colData(sce)["celda_tSNE2"] <- res$tSNE2
+        SummarizedExperiment::colData(sce)["celda_tSNE1"] <- res[, "tSNE1"]
+        SummarizedExperiment::colData(sce)["celda_tSNE2"] <- res[, "tSNE2"]
         return(sce)
     })
 
@@ -122,7 +122,6 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
             " one of 'celda_C', 'celda_G', or 'celda_CG'")
     }
     return(res)
-
 }
 
 
@@ -204,4 +203,32 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     rownames(final) <- colnames(sce)
     colnames(final) <- c("tSNE1", "tSNE2")
     return(final)
+}
+
+
+# Run the t-SNE algorithm for dimensionality reduction
+# @param norm Normalized count matrix.
+# @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
+# @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
+# @param doPca Logical. Whether to perform
+# dimensionality reduction with PCA before tSNE.
+# @param initialDims Integer. Number of dimensions from PCA to use as
+# input in tSNE. Default 50.
+#' @importFrom Rtsne Rtsne
+.calculateTsne <- function(norm,
+    perplexity,
+    maxIter,
+    doPca,
+    initialDims) {
+
+    res <- Rtsne::Rtsne(
+        norm,
+        pca = doPca,
+        max_iter = maxIter,
+        perplexity = perplexity,
+        check_duplicates = FALSE,
+        is_distance = FALSE,
+        initial_dims = initialDims)$Y
+
+    return(res)
 }

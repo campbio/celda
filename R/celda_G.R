@@ -613,139 +613,6 @@ setMethod("celda_G",
 }
 
 
-.simulateCellsMaincelda_G <- function(model,
-    C = 100,
-    L = 10,
-    NRange = c(500, 1000),
-    G = 100,
-    beta = 1,
-    delta = 1,
-    gamma = 5,
-    seed = 12345) {
-
-    if (is.null(seed)) {
-        res <- .simulateCellscelda_G(
-            model = model,
-            C = C,
-            L = L,
-            NRange = NRange,
-            G = G,
-            beta = beta,
-            delta = delta,
-            gamma = gamma)
-    } else {
-        with_seed(
-            seed,
-            res <- .simulateCellscelda_G(
-                model = model,
-                C = C,
-                L = L,
-                NRange = NRange,
-                G = G,
-                beta = beta,
-                delta = delta,
-                gamma = gamma)
-        )
-    }
-
-    sce <- .createSCEsimulateCellsCeldaG(res, seed)
-
-    return(res)
-}
-
-
-.simulateCellscelda_G <- function(model,
-    C = 100,
-    L = 10,
-    NRange = c(500, 1000),
-    G = 100,
-    beta = 1,
-    gamma = 5,
-    delta = 1,
-    ...) {
-
-    eta <- .rdirichlet(1, rep(gamma, L))
-
-    y <- sample(seq(L),
-        size = G,
-        prob = eta,
-        replace = TRUE
-    )
-    if (length(table(y)) < L) {
-        stop(
-            "Some states did not receive any features after sampling. Try",
-            " increasing G and/or setting gamma > 1."
-        )
-    }
-
-    psi <- matrix(0, nrow = G, ncol = L)
-    for (i in seq(L)) {
-        ind <- y == i
-        psi[ind, i] <- .rdirichlet(1, rep(delta, sum(ind)))
-    }
-
-    phi <- .rdirichlet(C, rep(beta, L))
-
-    ## Select number of transcripts per cell
-    nN <- sample(seq(NRange[1], NRange[2]), size = C, replace = TRUE)
-
-    ## Select transcript distribution for each cell
-    cellCounts <- matrix(0, nrow = G, ncol = C)
-    for (i in seq(C)) {
-        cellDist <- stats::rmultinom(1, size = nN[i], prob = phi[i, ])
-        for (j in seq(L)) {
-            cellCounts[, i] <- cellCounts[, i] + stats::rmultinom(1,
-                size = cellDist[j], prob = psi[, j]
-            )
-        }
-    }
-
-    ## Ensure that there are no all-0 rows in the counts matrix, which violates
-    ## a celda modeling
-    ## constraint (columns are guarnteed at least one count):
-    zeroRowIdx <- which(rowSums(cellCounts) == 0)
-    if (length(zeroRowIdx > 0)) {
-        cellCounts <- cellCounts[-zeroRowIdx, ]
-        y <- y[-zeroRowIdx]
-    }
-
-    rownames(cellCounts) <- paste0("Gene_", seq(nrow(cellCounts)))
-    colnames(cellCounts) <- paste0("Cell_", seq(ncol(cellCounts)))
-
-    ## Peform reordering on final Z and Y assigments:
-    cellCounts <- .processCounts(cellCounts)
-    names <- list(
-        row = rownames(cellCounts),
-        column = colnames(cellCounts)
-    )
-    countChecksum <- .createCountChecksum(cellCounts)
-    result <- methods::new("celda_G",
-        celdaClusters = list(y = y),
-        params = list(
-            L = as.integer(L),
-            beta = beta,
-            delta = delta,
-            gamma = gamma,
-            countChecksum = countChecksum
-        ),
-        names = names
-    )
-    result <- .reorderCeldaG(counts = cellCounts, res = result)
-
-    return(list(
-        y = result@celdaClusters$y,
-        counts = cellCounts,
-        C = C,
-        G = G,
-        L = L,
-        NRange = NRange,
-        beta = beta,
-        delta = delta,
-        gamma = gamma
-    ))
-}
-
-
 .factorizeMatrixCelda_G <- function(sce, useAssay, type) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -942,49 +809,6 @@ setMethod("celda_G",
 }
 
 
-.clusterProbabilityCeldaG <- function(sce, useAssay, log) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    y <- celdaModules(sce)
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-
-    ## Calculate counts one time up front
-    p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
-    lgbeta <- lgamma(seq(0, max(.colSums(
-        counts,
-        nrow(counts), ncol(counts)
-    ))) + beta)
-    lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
-    lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
-
-    nextY <- .cGCalcGibbsProbY(
-        counts = counts,
-        nTSByC = p$nTSByC,
-        nByTS = p$nByTS,
-        nGByTS = p$nGByTS,
-        nByG = p$nByG,
-        y = y,
-        nG = p$nG,
-        L = L,
-        lgbeta = lgbeta,
-        lgdelta = lgdelta,
-        lggamma = lggamma,
-        delta = delta,
-        doSample = FALSE
-    )
-    yProb <- t(nextY$probs)
-
-    if (!isTRUE(log)) {
-        yProb <- .normalizeLogProbs(yProb)
-    }
-
-    return(list(yProbability = yProb))
-}
-
-
 .perplexityCelda_G <- function(sce, useAssay, newCounts) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -1036,20 +860,6 @@ setMethod("celda_G",
 }
 
 
-.celdaHeatmapCelda_G <- function(sce, useAssay, nfeatures, ...) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    fm <- factorizeMatrix(sce = sce, useAssay = useAssay, type = "proportion")
-    top <- celda::topRank(fm$proportions$module, n = nfeatures)
-    ix <- unlist(top$index)
-    norm <- normalizeCounts(counts,
-        normalize = "proportion",
-        transformationFun = sqrt
-    )
-    plt <- plotHeatmap(norm[ix, ], y = celdaModules(sce)[ix], ...)
-    invisible(plt)
-}
-
-
 .prepareCountsForDimReductionCeldaG <- function(sce,
     useAssay,
     maxCells,
@@ -1065,7 +875,7 @@ setMethod("celda_G",
         cellIx <- sample(seq(ncol(counts)), maxCells)
     }
 
-    fm <- factorizeMatrix(sce = sce, useAssay = useAssay, type = "counts")
+    fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "counts")
 
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {
@@ -1134,28 +944,3 @@ setMethod("celda_G",
     return(sce)
 }
 
-
-.createSCEsimulateCellsCeldaG <- function(simList, seed) {
-    sce <- SingleCellExperiment::SingleCellExperiment(
-        assays = list(counts = simList$counts))
-
-    # add metadata
-    S4Vectors::metadata(sce)[["celda_simulateCellscelda_G"]] <- list(
-        model = "celda_G",
-        featureModuleLevels = sort(unique(simList$y)),
-        NRange = simList$NRange,
-        C = simList$C,
-        G = simList$G,
-        L = simList$L,
-        beta = simList$beta,
-        gamma = simList$gamma,
-        delta = simList$delta,
-        seed = seed)
-
-    SummarizedExperiment::rowData(sce)["rownames"] <- rownames(simList$counts)
-    SummarizedExperiment::colData(sce)["colnames"] <-
-        colnames(simList$counts)
-    SummarizedExperiment::rowData(sce)["celda_feature_module"] <- simList$y
-
-    return(sce)
-}

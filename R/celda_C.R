@@ -708,113 +708,6 @@ setMethod("celda_C",
 }
 
 
-.simulateCellsMaincelda_C <- function(model,
-    S = 5,
-    CRange = c(50, 100),
-    NRange = c(500, 1000),
-    G = 100,
-    K = 5,
-    alpha = 1,
-    beta = 1,
-    seed = 12345) {
-
-    if (is.null(seed)) {
-        res <- .simulateCellscelda_C(model = model,
-            S = S,
-            CRange = CRange,
-            NRange = NRange,
-            G = G,
-            K = K,
-            alpha = alpha,
-            beta = beta)
-    } else {
-        res <- with_seed(seed,
-            .simulateCellscelda_C(model = model,
-                S = S,
-                CRange = CRange,
-                NRange = NRange,
-                G = G,
-                K = K,
-                alpha = alpha,
-                beta = beta))
-    }
-
-    sce <- .createSCEsimulateCellsCeldaC(res, seed)
-
-    return(sce)
-}
-
-
-.simulateCellscelda_C <- function(model,
-    S = 5,
-    CRange = c(50, 100),
-    NRange = c(500, 1000),
-    G = 100,
-    K = 5,
-    alpha = 1,
-    beta = 1) {
-
-    phi <- .rdirichlet(K, rep(beta, G))
-    theta <- .rdirichlet(S, rep(alpha, K))
-
-    ## Select the number of cells per sample
-    nC <- sample(seq(CRange[1], CRange[2]), size = S, replace = TRUE)
-    cellSampleLabel <- rep(seq(S), nC)
-
-    ## Select state of the cells
-    z <- unlist(lapply(seq(S), function(i) {
-        sample(seq(K),
-            size = nC[i],
-            prob = theta[i, ],
-            replace = TRUE)
-    }))
-
-    ## Select number of transcripts per cell
-    nN <- sample(seq(NRange[1], NRange[2]),
-        size = length(cellSampleLabel),
-        replace = TRUE)
-
-    ## Select transcript distribution for each cell
-    cellCounts <- vapply(seq(length(cellSampleLabel)), function(i) {
-        stats::rmultinom(1, size = nN[i], prob = phi[z[i], ])
-    }, integer(G))
-
-    rownames(cellCounts) <- paste0("Gene_", seq(nrow(cellCounts)))
-    colnames(cellCounts) <- paste0("Cell_", seq(ncol(cellCounts)))
-    cellSampleLabel <- paste0("Sample_", seq(S))[cellSampleLabel]
-    cellSampleLabel <- factor(cellSampleLabel,
-        levels = paste0("Sample_", seq(S)))
-
-    ## Peform reordering on final Z and Y assigments:
-    cellCounts <- .processCounts(cellCounts)
-    names <- list(row = rownames(cellCounts),
-        column = colnames(cellCounts),
-        sample = unique(cellSampleLabel))
-    countChecksum <- .createCountChecksum(cellCounts)
-    result <- methods::new("celda_C",
-        celdaClusters = list(z = z),
-        params = list(K = as.integer(K),
-            alpha = alpha,
-            beta = beta,
-            countChecksum = countChecksum),
-        sampleLabel = cellSampleLabel,
-        names = names)
-    class(result) <- "celda_C"
-    result <- .reorderCeldaC(counts = cellCounts, res = result)
-
-    return(list(z = result@celdaClusters$z,
-        counts = cellCounts,
-        sampleLabel = cellSampleLabel,
-        G = G,
-        K = K,
-        alpha = alpha,
-        beta = beta,
-        CRange = CRange,
-        NRange = NRange,
-        S = S))
-}
-
-
 .factorizeMatrixCelda_C <- function(sce, useAssay, type) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
@@ -977,41 +870,6 @@ setMethod("celda_C",
 }
 
 
-.clusterProbabilityCeldaC <- function(sce, useAssay, log) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    z <- celdaClusters(sce)
-    s <- as.integer(sampleLabel(sce))
-
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-
-    p <- .cCDecomposeCounts(counts, s, z, K)
-
-    nextZ <- .cCCalcGibbsProbZ(counts = counts,
-        mCPByS = p$mCPByS,
-        nGByCP = p$nGByCP,
-        nByC = p$nByC,
-        nCP = p$nCP,
-        z = z,
-        s = s,
-        K = K,
-        nG = p$nG,
-        nM = p$nM,
-        alpha = alpha,
-        beta = beta,
-        doSample = FALSE)
-    zProb <- t(nextZ$probs)
-
-    if (!isTRUE(log)) {
-        zProb <- .normalizeLogProbs(zProb)
-    }
-
-    return(list(zProbability = zProb))
-}
-
-
 .perplexityCelda_C <- function(sce, useAssay, newCounts) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
@@ -1027,7 +885,7 @@ setMethod("celda_C",
         stop("'newCounts' should have the same number of rows as 'sce'.")
     }
 
-    factorized <- factorizeMatrix(sce = sce,
+    factorized <- factorizeMatrix(x = sce,
         useAssay = useAssay,
         type = "posterior")
     theta <- log(factorized$posterior$sample)
@@ -1056,24 +914,6 @@ setMethod("celda_C",
     )
   }
   return(res)
-}
-
-
-.celdaHeatmapCelda_C <- function(sce,
-    useAssay, featureIx, ...) {
-
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    norm <- normalizeCounts(counts,
-        normalize = "proportion",
-        transformationFun = sqrt)
-
-    if (is.null(featureIx)) {
-        return(plotHeatmap(norm,
-            z = celdaClusters(sce), ...))
-    }
-
-    return(plotHeatmap(norm[featureIx, ],
-        z = celdaClusters(sce), ...))
 }
 
 
@@ -1142,57 +982,6 @@ setMethod("celda_C",
 }
 
 
-.celdaProbabilityMapC <- function(sce, useAssay, level) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-
-    zInclude <- which(tabulate(celdaClusters(sce),
-        S4Vectors::metadata(sce)$celda_parameters$K) > 0)
-
-    factorized <- factorizeMatrix(sce = sce, useAssay = useAssay)
-
-    samp <- factorized$proportions$sample[zInclude, , drop = FALSE]
-    col <- grDevices::colorRampPalette(c("white",
-        "blue",
-        "#08306B",
-        "#006D2C",
-        "yellowgreen",
-        "yellow",
-        "orange",
-        "red"))(100)
-    breaks <- seq(0, 1, length.out = length(col))
-    g1 <- plotHeatmap(samp,
-        colorScheme = "sequential",
-        scaleRow = NULL,
-        clusterCell = FALSE,
-        clusterFeature = FALSE,
-        showNamesCell = TRUE,
-        showNamesFeature = TRUE,
-        breaks = breaks,
-        col = col,
-        main = "Absolute Probability",
-        silent = TRUE)
-
-    if (ncol(samp) > 1) {
-        sampNorm <- normalizeCounts(samp,
-            normalize = "proportion",
-            transformationFun = sqrt,
-            scaleFun = base::scale)
-        g2 <- plotHeatmap(sampNorm,
-            colorScheme = "divergent",
-            clusterCell = FALSE,
-            clusterFeature = FALSE,
-            showNamesCell = TRUE,
-            showNamesFeature = TRUE,
-            main = "Relative Abundance",
-            silent = TRUE)
-        return(gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2))
-    } else {
-        return(gridExtra::grid.arrange(g1$gtable))
-    }
-}
-
-
 .createSCEceldaC <- function(celdaCMod,
     sce,
     xClass,
@@ -1240,35 +1029,6 @@ setMethod("celda_C",
         celdaCMod@sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
         celdaCMod@celdaClusters$z
-
-    return(sce)
-}
-
-
-.createSCEsimulateCellsCeldaC <- function(simList, seed) {
-    sce <- SingleCellExperiment::SingleCellExperiment(
-        assays = list(counts = simList$counts))
-
-    # add metadata
-    S4Vectors::metadata(sce)[["celda_simulateCellscelda_C"]] <- list(
-        model = "celda_C",
-        sampleLevels = as.character(unique(simList$sampleLabel)),
-        cellClusterLevels = sort(unique(simList$z)),
-        S = simList$S,
-        CRange = simList$CRange,
-        NRange = simList$NRange,
-        G = simList$G,
-        K = simList$K,
-        alpha = simList$alpha,
-        beta = simList$beta,
-        seed = seed)
-
-    SummarizedExperiment::rowData(sce)["rownames"] <- rownames(simList$counts)
-    SummarizedExperiment::colData(sce)["colnames"] <-
-        colnames(simList$counts)
-    SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        simList$sampleLabel
-    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
 
     return(sce)
 }

@@ -51,19 +51,19 @@ concentration parameter (essentially as a pseudocount). Default
 \code{"counts"}.}
 }
 \value{
-A list with elements for `counts`, `proportions`, or `posterior`
- probabilities. Each element will be a list containing factorized matrices
- for `module`, `cellPopulation`, and `sample`. Additionally, the
- contribution of each module in each individual cell will be included in the
- `cell` element of `counts` and `proportions` elements.
+For celda_CG model, A list with elements for "counts", "proportions",
+ or "posterior" probabilities. Each element will be a list containing
+ factorized matrices for "module", "cellPopulation", and "sample".
+ Additionally, the contribution of each module in each individual cell will
+ be included in the "cell" element of "counts" and "proportions" elements.
 
-A list with elements for `counts`, `proportions`, or `posterior`
- probabilities. Each element will be a list containing factorized matrices
- for `module` and `sample`.
+For celda_C model, a list with elements for "counts", "proportions",
+ or "posterior" probabilities. Each element will be a list containing
+ factorized matrices for "module" and "sample".
 
-A list with elements for `counts`, `proportions`, or `posterior`
- probabilities. Each element will be a list containing factorized matrices
- for `module` and `cell`.
+For celda_G model, a list with elements for "counts", "proportions",
+ or "posterior" probabilities. Each element will be a list containing
+ factorized matrices for "module" and "cell".
 }
 \description{
 Generates factorized matrices showing the contribution of each

@@ -9,9 +9,9 @@
 plotDimReduceFeature(x, ...)
 
 \S4method{plotDimReduceFeature}{SingleCellExperiment}(
-  dim1,
-  dim2,
   x,
+  dim1 = NULL,
+  dim2 = NULL,
   useAssay = "counts",
   features,
   headers = NULL,
@@ -30,9 +30,9 @@ plotDimReduceFeature(x, ...)
 )
 
 \S4method{plotDimReduceFeature}{matrix}(
+  x,
   dim1,
   dim2,
-  x,
   features,
   headers = NULL,
   normalize = FALSE,
@@ -117,21 +117,21 @@ Create a scatterplot for each row of a normalized gene
 \examples{
 \donttest{
 data(sceCeldaCG)
-celdaTsne <- celdaTsne(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
-  x = sceCeldaCG,
+  dim1 = colData(sce)[["celda_tSNE1"]],
+  dim2 = colData(sce)[["celda_tSNE2"]],
+  x = sce,
   normalize = TRUE,
   features = c("Gene_99"),
   exactMatch = TRUE)
 }
 \donttest{
 data(sceCeldaCG)
-celdaTsne <- celdaTsne(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
+  dim1 = colData(sce)[["celda_tSNE1"]],
+  dim2 = colData(sce)[["celda_tSNE2"]],
   x = counts(sceCeldaCG),
   normalize = TRUE,
   features = c("Gene_99"),

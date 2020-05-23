@@ -151,7 +151,7 @@ A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
  population clusters. Column \code{celda_feature_module} in
- \link[SummarizedExperiment]{rowData} contain feature modules.
+ \link[SummarizedExperiment]{rowData} contains feature modules.
 }
 \description{
 Clusters the rows and columns of a count matrix containing

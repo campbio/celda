@@ -9,9 +9,9 @@
 plotDimReduceGrid(x, ...)
 
 \S4method{plotDimReduceGrid}{SingleCellExperiment}(
-  dim1,
-  dim2,
   x,
+  dim1 = NULL,
+  dim2 = NULL,
   useAssay = "counts",
   size = 1,
   xlab = "Dimension_1",
@@ -26,9 +26,9 @@ plotDimReduceGrid(x, ...)
 )
 
 \S4method{plotDimReduceGrid}{matrix}(
+  x,
   dim1,
   dim2,
-  x,
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -95,17 +95,15 @@ Creates a scatterplot given two dimensions from a data
 }
 \examples{
 data(sceCeldaCG)
-celdaTsne <- celdaTsne(sceCeldaCG)
-plotDimReduceGrid(celdaTsne[, 1],
-  celdaTsne[, 2],
-  x = sceCeldaCG,
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceGrid(x = sce,
   xlab = "Dimension1",
   ylab = "Dimension2",
   varLabel = "tSNE")
 data(sceCeldaCG)
-celdaTsne <- celdaTsne(sceCeldaCG)
-plotDimReduceGrid(celdaTsne[, 1],
-  celdaTsne[, 2],
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceGrid(dim1 = colData(sce)[["celda_tSNE1"]],
+  dim2 = colData(sce)[["celda_tSNE2"]],
   x = counts(sceCeldaCG),
   xlab = "Dimension1",
   ylab = "Dimension2",

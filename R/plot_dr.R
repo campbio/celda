@@ -1,13 +1,13 @@
 #' @title Mapping the dimensionality reduction plot
 #' @description Creates a scatterplot given two dimensions from a data
 #'  dimensionality reduction tool (e.g tSNE) output.
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Each
+#'  row of the matrix will be plotted as a separate facet.
 #' @param dim1 Numeric vector. First dimension from data dimensionality
 #'  reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality
 #'  reduction output.
-#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
-#'  with the matrix located in the assay slot under \code{useAssay}. Each
-#'  row of the matrix will be plotted as a separate facet.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -40,19 +40,17 @@ setGeneric("plotDimReduceGrid", function(x, ...) {
 #' @rdname plotDimReduceGrid
 #' @examples
 #' data(sceCeldaCG)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
-#' plotDimReduceGrid(celdaTsne[, 1],
-#'   celdaTsne[, 2],
-#'   x = sceCeldaCG,
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceGrid(x = sce,
 #'   xlab = "Dimension1",
 #'   ylab = "Dimension2",
 #'   varLabel = "tSNE")
 #' @export
 setMethod("plotDimReduceGrid",
     signature(x = "SingleCellExperiment"),
-    function(dim1,
-        dim2,
-        x,
+    function(x,
+        dim1 = NULL,
+        dim2 = NULL,
         useAssay = "counts",
         size = 1,
         xlab = "Dimension_1",
@@ -66,6 +64,20 @@ setMethod("plotDimReduceGrid",
         headers = NULL) {
 
         matrix <- SummarizedExperiment::assay(x, i = useAssay)
+
+        if (is.null(dim1)) {
+            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
+            if (is.null(dim1)) {
+                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
+            }
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
+            if (is.null(dim2)) {
+                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
+            }
+        }
 
         g <- .plotDimReduceGrid(dim1 = dim1,
             dim2 = dim2,
@@ -88,9 +100,9 @@ setMethod("plotDimReduceGrid",
 #' @rdname plotDimReduceGrid
 #' @examples
 #' data(sceCeldaCG)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
-#' plotDimReduceGrid(celdaTsne[, 1],
-#'   celdaTsne[, 2],
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceGrid(dim1 = colData(sce)[["celda_tSNE1"]],
+#'   dim2 = colData(sce)[["celda_tSNE2"]],
 #'   x = counts(sceCeldaCG),
 #'   xlab = "Dimension1",
 #'   ylab = "Dimension2",
@@ -98,9 +110,9 @@ setMethod("plotDimReduceGrid",
 #' @export
 setMethod("plotDimReduceGrid",
     signature(x = "matrix"),
-    function(dim1,
+    function(x,
+        dim1,
         dim2,
-        x,
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
@@ -237,13 +249,13 @@ setMethod("plotDimReduceGrid",
 #'  expression matrix where x and y axis are from a data dimensionality
 #'  reduction tool. The cells are colored by expression of
 #'  the specified feature.
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Rows
+#'  represent features and columns represent cells.
 #' @param dim1 Numeric vector. First dimension from data
 #'  dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality
 #'  reduction output.
-#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
-#'  with the matrix located in the assay slot under \code{useAssay}. Rows
-#'  represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -284,11 +296,11 @@ setGeneric("plotDimReduceFeature", function(x, ...) {
 #' @examples
 #' \donttest{
 #' data(sceCeldaCG)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceFeature(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
-#'   x = sceCeldaCG,
+#'   dim1 = colData(sce)[["celda_tSNE1"]],
+#'   dim2 = colData(sce)[["celda_tSNE2"]],
+#'   x = sce,
 #'   normalize = TRUE,
 #'   features = c("Gene_99"),
 #'   exactMatch = TRUE)
@@ -296,9 +308,9 @@ setGeneric("plotDimReduceFeature", function(x, ...) {
 #' @export
 setMethod("plotDimReduceFeature",
     signature(x = "SingleCellExperiment"),
-    function(dim1,
-        dim2,
-        x,
+    function(x,
+        dim1 = NULL,
+        dim2 = NULL,
         useAssay = "counts",
         features,
         headers = NULL,
@@ -316,6 +328,20 @@ setMethod("plotDimReduceFeature",
         ncol = NULL) {
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        if (is.null(dim1)) {
+            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
+            if (is.null(dim1)) {
+                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
+            }
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
+            if (is.null(dim2)) {
+                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
+            }
+        }
 
         g <- .plotDimReduceFeature(dim1 = dim1,
             dim2 = dim2,
@@ -343,10 +369,10 @@ setMethod("plotDimReduceFeature",
 #' @examples
 #' \donttest{
 #' data(sceCeldaCG)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceFeature(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
+#'   dim1 = colData(sce)[["celda_tSNE1"]],
+#'   dim2 = colData(sce)[["celda_tSNE2"]],
 #'   x = counts(sceCeldaCG),
 #'   normalize = TRUE,
 #'   features = c("Gene_99"),
@@ -355,9 +381,9 @@ setMethod("plotDimReduceFeature",
 #' @export
 setMethod("plotDimReduceFeature",
     signature(x = "matrix"),
-    function(dim1,
+    function(x,
+        dim1,
         dim2,
-        x,
         features,
         headers = NULL,
         normalize = FALSE,
@@ -465,7 +491,7 @@ setMethod("plotDimReduceFeature",
     counts[counts > trim[2]] <- trim[2]
   }
 
-  plotDimReduceGrid(
+  .plotDimReduceGrid(
     dim1 = dim1,
     dim2 = dim2,
     matrix = counts,
@@ -489,13 +515,13 @@ setMethod("plotDimReduceFeature",
 #'  gene expression matrix where x and y axis are from a data
 #'  dimensionality reduction tool.
 #'  The cells are colored by the module probability(s).
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Rows
+#'  represent features and columns represent cells.
 #' @param dim1 Numeric vector.
 #'  First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector.
 #'  Second dimension from data dimensionality reduction output.
-#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
-#'  with the matrix located in the assay slot under \code{useAssay}. Rows
-#'  represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -529,19 +555,15 @@ setGeneric("plotDimReduceModule", function(x, ...) {
 #' @examples
 #' \donttest{
 #' data(sceCeldaCG)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
-#' plotDimReduceModule(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
-#'   x = sceCeldaCG,
-#'   modules = c("1", "2"))
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceModule(x = sce, modules = c("1", "2"))
 #' }
 #' @export
 setMethod("plotDimReduceModule",
     signature(x = "SingleCellExperiment"),
-    function(dim1,
-        dim2,
-        x,
+    function(x,
+        dim1 = NULL,
+        dim2 = NULL,
         useAssay = "counts",
         modules = NULL,
         rescale = TRUE,
@@ -552,6 +574,20 @@ setMethod("plotDimReduceModule",
         colorMid = "white",
         colorHigh = "firebrick1",
         ncol = NULL) {
+
+        if (is.null(dim1)) {
+            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
+            if (is.null(dim1)) {
+                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
+            }
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
+            if (is.null(dim2)) {
+                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
+            }
+        }
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
         factorized <- factorizeMatrix(x)
@@ -578,10 +614,10 @@ setMethod("plotDimReduceModule",
 #' @examples
 #' \donttest{
 #' data(sceCeldaCG, celdaCGMod)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceModule(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
+#'   dim1 = colData(sce)[["celda_tSNE1"]],
+#'   dim2 = colData(sce)[["celda_tSNE2"]],
 #'   x = counts(sceCeldaCG),
 #'   celdaMod = celdaCGMod,
 #'   modules = c("1", "2"))
@@ -589,9 +625,9 @@ setMethod("plotDimReduceModule",
 #' @export
 setMethod("plotDimReduceModule",
     signature(x = "matrix"),
-    function(dim1,
+    function(x,
+        dim1,
         dim2,
-        x,
         celdaMod,
         modules = NULL,
         rescale = TRUE,
@@ -662,7 +698,7 @@ setMethod("plotDimReduceModule",
     }
 
     rownames(matrix) <- paste0("L", rownames(matrix))
-    plotDimReduceGrid(
+    .plotDimReduceGrid(
         dim1 = dim1,
         dim2 = dim2,
         matrix = matrix,
@@ -672,8 +708,10 @@ setMethod("plotDimReduceModule",
         colorLow = colorLow,
         colorMid = colorMid,
         colorHigh = colorHigh,
+        midpoint = NULL,
         varLabel = varLabel,
-        ncol = ncol
+        ncol = ncol,
+        headers = NULL
     )
 }
 
@@ -683,16 +721,15 @@ setMethod("plotDimReduceModule",
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a
 #'  data dimensionality reduction tool.
-#'  The cells are colored by its given `cluster` label.
-#' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
-#' @param dim2 Numeric vector. Second dimension from data
-#'  dimensionality reduction output.
+#'  The cells are colored by its given \code{cluster} label.
 #' @param x Integer vector of cell cluster labels or a
 #'  \linkS4class{SingleCellExperiment} object
 #'  containing cluster labels for each cell in \code{"celda_cell_cluster"}
 #'  column in \code{colData(x)}.
-#' @param cluster Integer vector. Contains cluster labels for each cell.
+#' @param dim1 Numeric vector. First dimension from data
+#'  dimensionality reduction output.
+#' @param dim2 Numeric vector. Second dimension from data
+#'  dimensionality reduction output.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -717,19 +754,15 @@ setGeneric("plotDimReduceCluster", function(x, ...) {
 #' @examples
 #' \donttest{
 #' data(sceCeldaCG)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
-#' plotDimReduceCluster(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
-#'   x = sceCeldaCG,
-#'   specificClusters = c(1, 2, 3))
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceCluster(x = sce, specificClusters = c(1, 2, 3))
 #' }
 #' @export
 setMethod("plotDimReduceCluster",
     signature(x = "SingleCellExperiment"),
-    function(dim1,
-        dim2,
-        x,
+    function(x,
+        dim1 = NULL,
+        dim2 = NULL,
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
@@ -743,6 +776,20 @@ setMethod("plotDimReduceCluster",
             stop("Must contain column 'celda_cell_cluster' in colData(x)!")
         }
         cluster <- SummarizedExperiment::colData(x)[["celda_cell_cluster"]]
+
+        if (is.null(dim1)) {
+            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
+            if (is.null(dim1)) {
+                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
+            }
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
+            if (is.null(dim2)) {
+                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
+            }
+        }
 
         g <- .plotDimReduceCluster(dim1 = dim1,
             dim2 = dim2,
@@ -763,19 +810,19 @@ setMethod("plotDimReduceCluster",
 #' @examples
 #' \donttest{
 #' data(sceCeldaCG, celdaCGMod)
-#' celdaTsne <- celdaTsne(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceCluster(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
-#'   x = celdaClusters(celdaCGMod),
+#'   dim1 = colData(sce)[["celda_tSNE1"]],
+#'   dim2 = colData(sce)[["celda_tSNE2"]],
+#'   x = celdaClusters(celdaCGMod)$z,
 #'   specificClusters = c(1, 2, 3))
 #' }
 #' @export
 setMethod("plotDimReduceCluster",
     signature(x = "vector"),
-    function(dim1,
+    function(x,
+        dim1,
         dim2,
-        x,
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
@@ -881,81 +928,6 @@ setMethod("plotDimReduceCluster",
       ggplot2::theme(strip.background = ggplot2::element_blank())
   }
   return(g)
-}
-
-
-# Run the t-SNE algorithm for dimensionality reduction
-# @param norm Normalized count matrix.
-# @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
-# @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
-# @param doPca Logical. Whether to perform
-# dimensionality reduction with PCA before tSNE.
-# @param initialDims Integer. Number of dimensions from PCA to use as
-# input in tSNE. Default 50.
-#' @importFrom Rtsne Rtsne
-.calculateTsne <- function(norm,
-    perplexity,
-    maxIter,
-    doPca,
-    initialDims) {
-
-    res <- Rtsne::Rtsne(
-        norm,
-        pca = doPca,
-        max_iter = maxIter,
-        perplexity = perplexity,
-        check_duplicates = FALSE,
-        is_distance = FALSE,
-        initial_dims = initialDims)$Y
-
-    return(res)
-}
-
-
-# Run the UMAP algorithm for dimensionality reduction
-# @param norm Normalized count matrix.
-# @param nNeighbors The size of local neighborhood used for
-#   manifold approximation. Larger values result in more global
-#   views of the manifold, while smaller values result in more
-#   local data being preserved. Default 30.
-#    See `?uwot::umap` for more information.
-# @param minDist The effective minimum distance between embedded points.
-#    Smaller values will result in a more clustered/clumped
-#    embedding where nearby points on the manifold are drawn
-#    closer together, while larger values will result on a more
-#    even dispersal of points. Default 0.2.
-#    See `?uwot::umap` for more information.
-# @param spread The effective scale of embedded points. In combination with
-#    ‘min_dist’, this determines how clustered/clumped the
-#    embedded points are. Default 1.
-#    See `?uwot::umap` for more information.
-# @param pca Logical. Whether to perform
-# dimensionality reduction with PCA before UMAP.
-# @param initialDims Integer. Number of dimensions from PCA to use as
-# input in UMAP. Default 50.
-# @param cores Number of threads to use. Default 1.
-# @param ... Other parameters to pass to `uwot::umap`.
-#' @import uwot
-.calculateUmap <- function(norm,
-                           nNeighbors = 30,
-                           minDist = 0.75,
-                           spread = 1,
-                           pca = FALSE,
-                           initialDims = 50,
-                           cores = 1,
-                           ...) {
-  if (isTRUE(pca)) {
-    doPCA <- initialDims
-  } else {
-    doPCA <- NULL
-  }
-
-  res <- uwot::umap(norm,
-    n_neighbors = nNeighbors,
-    min_dist = minDist, spread = spread,
-    n_threads = cores, n_sgd_threads = 1, pca = doPCA, ...
-  )
-  return(res)
 }
 
 
