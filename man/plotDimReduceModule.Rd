@@ -107,6 +107,7 @@ sce <- celdaTsne(sceCeldaCG)
 plotDimReduceModule(x = sce,
   reducedDimName = "celda_tSNE",
   modules = c("1", "2"))
+library(SingleCellExperiment)
 data(sceCeldaCG, celdaCGMod)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceModule(x = counts(sce),

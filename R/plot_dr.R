@@ -99,6 +99,7 @@ setMethod("plotDimReduceGrid",
 
 #' @rdname plotDimReduceGrid
 #' @examples
+#' library(SingleCellExperiment)
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceGrid(x = counts(sce),
@@ -362,6 +363,7 @@ setMethod("plotDimReduceFeature",
 
 #' @rdname plotDimReduceFeature
 #' @examples
+#' library(SingleCellExperiment)
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceFeature(x = counts(sce),
@@ -603,6 +605,7 @@ setMethod("plotDimReduceModule",
 
 #' @rdname plotDimReduceModule
 #' @examples
+#' library(SingleCellExperiment)
 #' data(sceCeldaCG, celdaCGMod)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceModule(x = counts(sce),
@@ -795,6 +798,7 @@ setMethod("plotDimReduceCluster",
 
 #' @rdname plotDimReduceCluster
 #' @examples
+#' library(SingleCellExperiment)
 #' data(sceCeldaCG, celdaCGMod)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,

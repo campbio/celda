@@ -107,6 +107,7 @@ plotDimReduceGrid(x = sce,
   xlab = "Dimension1",
   ylab = "Dimension2",
   varLabel = "tSNE")
+library(SingleCellExperiment)
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceGrid(x = counts(sce),

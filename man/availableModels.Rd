@@ -13,8 +13,4 @@ availableModels
 \description{
 available models
 }
-\examples{
-data(availableModels)
-availableModels
-}
 \keyword{datasets}

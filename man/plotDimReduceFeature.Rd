@@ -128,6 +128,7 @@ plotDimReduceFeature(x = sce,
   normalize = TRUE,
   features = c("Gene_99"),
   exactMatch = TRUE)
+library(SingleCellExperiment)
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(x = counts(sce),
