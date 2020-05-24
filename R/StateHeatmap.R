@@ -46,8 +46,8 @@ setGeneric("moduleHeatmap", function(x, ...) {standardGeneric("moduleHeatmap")})
 
 #' @rdname moduleHeatmap
 #' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' moduleHeatmap(celdaCGSim$counts, celdaCGMod)
+#' data(sceCeldaCG)
+#' moduleHeatmap(sceCeldaCG)
 #' @export
 setMethod("moduleHeatmap",
     signature(x = "SingleCellExperiment"),
@@ -192,8 +192,7 @@ setMethod("moduleHeatmap",
         compareCountMatrix(counts, celdaMod)
 
         # factorize counts matrix
-        factorizedMatrix <- factorizeMatrix(celdaMod = celdaMod,
-            counts = counts)
+        factorizedMatrix <- factorizeMatrix(x = counts, celdaMod = celdaMod)
 
         # take topRank
         if (!is.null(topFeatures) && (is.numeric(topFeatures)) |

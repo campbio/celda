@@ -85,8 +85,8 @@ Renders a heatmap for selected featureModules. Cells are
  on the top to the lowest probability on the bottom.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-moduleHeatmap(celdaCGSim$counts, celdaCGMod)
+data(sceCeldaCG)
+moduleHeatmap(sceCeldaCG)
 data(celdaCGSim, celdaCGMod)
 moduleHeatmap(celdaCGSim$counts, celdaCGMod)
 }
