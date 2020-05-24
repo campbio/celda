@@ -33,7 +33,7 @@ setGeneric("geneSetEnrich", function(x, ...) {standardGeneric("geneSetEnrich")})
 #' # subset 500 genes for fast clustering
 #' counts <- counts[seq(1501, 2000), ]
 #' # cluster genes into 10 modules for quick demo
-#' sce <- celda_G(counts = as.matrix(counts), L = 10, verbose = FALSE)
+#' sce <- celda_G(x = as.matrix(counts), L = 10, verbose = FALSE)
 #' gse <- geneSetEnrich(sce,
 #'   databases = c("GO_Biological_Process_2018", "GO_Molecular_Function_2018"))
 #' @export
