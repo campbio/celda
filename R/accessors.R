@@ -47,7 +47,7 @@ setMethod("celdaClusters",
 setMethod("celdaClusters",
     signature(x = "celdaModel"),
     function(x) {
-        return(x@celdaClusters)
+        return(x@clusters)
     }
 )
 

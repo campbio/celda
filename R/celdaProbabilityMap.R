@@ -16,9 +16,6 @@
 #' @param ... Additional parameters.
 #' @seealso \link{celda_C} for clustering cells. \link{celda_CG} for
 #'  clustering features and cells
-#' @examples
-#' data(sceCeldaCG)
-#' celdaProbabilityMap(sceCeldaCG)
 #' @return A grob containing the specified plots
 #' @export
 setGeneric("celdaProbabilityMap",
@@ -31,6 +28,9 @@ setGeneric("celdaProbabilityMap",
 #' @importFrom gridExtra grid.arrange
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices colorRampPalette
+#' @examples
+#' data(sceCeldaCG)
+#' celdaProbabilityMap(sceCeldaCG)
 #' @export
 setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", level = c("cellPopulation", "sample")) {

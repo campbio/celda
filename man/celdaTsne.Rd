@@ -35,7 +35,7 @@ performed. Default \code{NULL}.}
 \item{minClusterSize}{Integer. Do not subsample cell clusters below this
 threshold. Default 100.}
 
-\item{initialDims}{Integer. PCA will be used to reduce the dimentionality
+\item{initialDims}{Integer. PCA will be used to reduce the dimensionality
 of the dataset. The top 'initialDims' principal components will be used
 for tSNE. Default 20.}
 
@@ -54,7 +54,7 @@ a default value of 12345 is used. If NULL, no calls to
 \value{
 \code{sce} with t-SNE coordinates
  (columns "celda_tSNE1" & "celda_tSNE2") added to
- \code{\link[SummarizedExperiment]{colData}(sce)}.
+ \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_tSNE")}.
 }
 \description{
 Embeds cells in two dimensions using \link[Rtsne]{Rtsne} based

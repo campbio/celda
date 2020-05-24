@@ -10,6 +10,7 @@ plotDimReduceCluster(x, ...)
 
 \S4method{plotDimReduceCluster}{SingleCellExperiment}(
   x,
+  reducedDimName,
   dim1 = NULL,
   dim2 = NULL,
   size = 1,
@@ -39,6 +40,11 @@ plotDimReduceCluster(x, ...)
 \linkS4class{SingleCellExperiment} object
 containing cluster labels for each cell in \code{"celda_cell_cluster"}
 column in \code{colData(x)}.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
 
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
@@ -76,18 +82,15 @@ Create a scatterplot for each row of a normalized
  The cells are colored by its given \code{cluster} label.
 }
 \examples{
-\donttest{
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
-plotDimReduceCluster(x = sce, specificClusters = c(1, 2, 3))
-}
-\donttest{
+plotDimReduceCluster(x = sce,
+  reducedDimName = "celda_tSNE",
+  specificClusters = c(1, 2, 3))
 data(sceCeldaCG, celdaCGMod)
 sce <- celdaTsne(sceCeldaCG)
-plotDimReduceCluster(
-  dim1 = colData(sce)[["celda_tSNE1"]],
-  dim2 = colData(sce)[["celda_tSNE2"]],
-  x = celdaClusters(celdaCGMod)$z,
+plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
+  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
   specificClusters = c(1, 2, 3))
-}
 }

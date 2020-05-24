@@ -16,7 +16,7 @@
 #'  performed. Default \code{NULL}.
 #' @param minClusterSize Integer. Do not subsample cell clusters below this
 #'  threshold. Default 100.
-#' @param initialDims Integer. PCA will be used to reduce the dimentionality
+#' @param initialDims Integer. PCA will be used to reduce the dimensionality
 #'  of the dataset. The top 'initialDims' principal components will be used
 #'  for tSNE. Default 20.
 #' @param modules Integer vector. Determines which feature modules to use for
@@ -27,12 +27,9 @@
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @examples
-#' data(sceCeldaCG)
-#' tsneRes <- celdaTsne(sceCeldaCG)
 #' @return \code{sce} with t-SNE coordinates
 #'  (columns "celda_tSNE1" & "celda_tSNE2") added to
-#'  \code{\link[SummarizedExperiment]{colData}(sce)}.
+#'  \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_tSNE")}.
 #' @export
 setGeneric("celdaTsne",
     function(sce, ...) {
@@ -41,6 +38,9 @@ setGeneric("celdaTsne",
 
 
 #' @rdname celdaTsne
+#' @examples
+#' data(sceCeldaCG)
+#' tsneRes <- celdaTsne(sceCeldaCG)
 #' @export
 setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     function(sce,
@@ -74,8 +74,7 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
                     maxIter = maxIter))
         }
 
-        SummarizedExperiment::colData(sce)["celda_tSNE1"] <- res[, "tSNE1"]
-        SummarizedExperiment::colData(sce)["celda_tSNE2"] <- res[, "tSNE2"]
+        SingleCellExperiment::reducedDim(sce, "celda_tSNE") <- res
         return(sce)
     })
 
@@ -147,7 +146,7 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- res
     rownames(final) <- colnames(sce)
-    colnames(final) <- c("tSNE1", "tSNE2")
+    colnames(final) <- c("celda_tSNE1", "celda_tSNE2")
     return(final)
 }
 
@@ -175,7 +174,7 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- res
     rownames(final) <- colnames(sce)
-    colnames(final) <- c("tSNE1", "tSNE2")
+    colnames(final) <- c("celda_tSNE1", "celda_tSNE2")
     return(final)
 }
 
@@ -201,7 +200,7 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- res
     rownames(final) <- colnames(sce)
-    colnames(final) <- c("tSNE1", "tSNE2")
+    colnames(final) <- c("celda_tSNE1", "celda_tSNE2")
     return(final)
 }
 

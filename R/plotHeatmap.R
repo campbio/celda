@@ -75,7 +75,7 @@
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' plotHeatmap(celdaCGSim$counts,
-#'   z = celdaCGMod@celdaClusters$z, y = celdaCGMod@celdaClusters$y
+#'   z = celdaClusters(celdaCGMod)$z, y = celdaClusters(celdaCGMod)$y
 #' )
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @import graphics

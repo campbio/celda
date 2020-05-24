@@ -740,7 +740,7 @@ setMethod("celda_CG",
 
   ## Peform reordering on final Z and Y assigments:
   bestResult <- methods::new("celda_CG",
-    celdaClusters = list(z = zBest, y = yBest),
+    clusters = list(z = zBest, y = yBest),
     params = list(
       K = as.integer(K),
       L = as.integer(L),
@@ -882,10 +882,10 @@ setMethod("celda_CG",
 
 .reorderCeldaCG <- function(counts, res) {
     # Reorder K
-    if (params(res)$K > 2 & isTRUE(length(unique(res@celdaClusters$z)) > 1)) {
-        res@celdaClusters$z <- as.integer(as.factor(res@celdaClusters$z))
+    if (params(res)$K > 2 & isTRUE(length(unique(celdaClusters(res)$z)) > 1)) {
+        res@clusters$z <- as.integer(as.factor(celdaClusters(res)$z))
         fm <- factorizeMatrix(counts, res, type = "posterior")
-        uniqueZ <- sort(unique(res@celdaClusters$z))
+        uniqueZ <- sort(unique(celdaClusters(res)$z))
         d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
         h <- stats::hclust(d, method = "complete")
 
@@ -893,10 +893,10 @@ setMethod("celda_CG",
     }
 
     # Reorder L
-    if (params(res)$L > 2 & isTRUE(length(unique(res@celdaClusters$y)) > 1)) {
-        res@celdaClusters$y <- as.integer(as.factor(res@celdaClusters$y))
+    if (params(res)$L > 2 & isTRUE(length(unique(celdaClusters(res)$y)) > 1)) {
+        res@clusters$y <- as.integer(as.factor(celdaClusters(res)$y))
         fm <- factorizeMatrix(counts, res, type = "posterior")
-        uniqueY <- sort(unique(res@celdaClusters$y))
+        uniqueY <- sort(unique(celdaClusters(res)$y))
         cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -1031,8 +1031,8 @@ setMethod("celda_CG",
         verbose = verbose,
         completeLogLik = celdaCGMod@completeLogLik,
         finalLogLik = celdaCGMod@finalLogLik,
-        cellClusterLevels = sort(unique(celdaCGMod@celdaClusters$z)),
-        featureModuleLevels = sort(unique(celdaCGMod@celdaClusters$y)))
+        cellClusterLevels = sort(unique(celdaClusters(celdaCGMod)$z)),
+        featureModuleLevels = sort(unique(celdaClusters(celdaCGMod)$y)))
 
     SummarizedExperiment::rowData(sce)["rownames"] <- celdaCGMod@names$row
     SummarizedExperiment::colData(sce)["colnames"] <-
@@ -1040,9 +1040,9 @@ setMethod("celda_CG",
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
         celdaCGMod@sampleLabel
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaCGMod@celdaClusters$z
+        celdaClusters(celdaCGMod)$z
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaCGMod@celdaClusters$y
+        celdaClusters(celdaCGMod)$y
 
     return(sce)
 }

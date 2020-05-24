@@ -42,12 +42,9 @@
 #' input in UMAP. Default 50. Only works for celda_C \code{sce} objects.
 #' @param cores Number of threads to use. Default 1.
 #' @param ... Additional parameters to pass to \link[uwot]{umap}.
-#' @examples
-#' data(sceCeldaCG)
-#' umapRes <- celdaUmap(sceCeldaCG)
 #' @return \code{sce} with UMAP coordinates
 #'  (columns "celda_UMAP1" & "celda_UMAP2") added to
-#'  \code{\link[SummarizedExperiment]{colData}(sce)}.
+#'  \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_UMAP")}.
 #' @export
 setGeneric("celdaUmap",
     function(sce, ...) {
@@ -56,6 +53,9 @@ setGeneric("celdaUmap",
 
 
 #' @rdname celdaUmap
+#' @examples
+#' data(sceCeldaCG)
+#' umapRes <- celdaUmap(sceCeldaCG)
 #' @export
 setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     function(sce,
@@ -103,8 +103,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                     ...))
         }
 
-        SummarizedExperiment::colData(sce)["celda_UMAP1"] <- res[, "UMAP1"]
-        SummarizedExperiment::colData(sce)["celda_UMAP2"] <- res[, "UMAP2"]
+        SingleCellExperiment::reducedDim(sce, "celda_UMAP") <- res
         return(sce)
     })
 
@@ -199,7 +198,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
     rownames(final) <- colnames(sce)
-    colnames(final) <- c("UMAP1", "UMAP2")
+    colnames(final) <- c("celda_UMAP1", "celda_UMAP2")
     return(final)
 }
 
@@ -231,7 +230,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
     rownames(final) <- colnames(sce)
-    colnames(final) <- c("UMAP1", "UMAP2")
+    colnames(final) <- c("celda_UMAP1", "celda_UMAP2")
     return(final)
 }
 
@@ -263,7 +262,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- umapRes
     rownames(final) <- colnames(sce)
-    colnames(final) <- c("UMAP1", "UMAP2")
+    colnames(final) <- c("celda_UMAP1", "celda_UMAP2")
     return(final)
 }
 

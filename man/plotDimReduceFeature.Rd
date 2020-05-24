@@ -10,6 +10,7 @@ plotDimReduceFeature(x, ...)
 
 \S4method{plotDimReduceFeature}{SingleCellExperiment}(
   x,
+  reducedDimName,
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
@@ -53,6 +54,11 @@ plotDimReduceFeature(x, ...)
 \item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
 
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
@@ -115,26 +121,19 @@ Create a scatterplot for each row of a normalized gene
  the specified feature.
 }
 \examples{
-\donttest{
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
-plotDimReduceFeature(
-  dim1 = colData(sce)[["celda_tSNE1"]],
-  dim2 = colData(sce)[["celda_tSNE2"]],
-  x = sce,
+plotDimReduceFeature(x = sce,
+  reducedDimName = "celda_tSNE",
   normalize = TRUE,
   features = c("Gene_99"),
   exactMatch = TRUE)
-}
-\donttest{
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
-plotDimReduceFeature(
-  dim1 = colData(sce)[["celda_tSNE1"]],
-  dim2 = colData(sce)[["celda_tSNE2"]],
-  x = counts(sceCeldaCG),
+plotDimReduceFeature(x = counts(sce),
+  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
   normalize = TRUE,
   features = c("Gene_99"),
   exactMatch = TRUE)
-}
 }

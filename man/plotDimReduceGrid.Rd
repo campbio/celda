@@ -10,6 +10,7 @@ plotDimReduceGrid(x, ...)
 
 \S4method{plotDimReduceGrid}{SingleCellExperiment}(
   x,
+  reducedDimName,
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
@@ -45,6 +46,11 @@ plotDimReduceGrid(x, ...)
 \item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}. Each
 row of the matrix will be plotted as a separate facet.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
 
 \item{dim1}{Numeric vector. First dimension from data dimensionality
 reduction output.}
@@ -97,14 +103,15 @@ Creates a scatterplot given two dimensions from a data
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceGrid(x = sce,
+  reducedDimName = "celda_tSNE",
   xlab = "Dimension1",
   ylab = "Dimension2",
   varLabel = "tSNE")
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
-plotDimReduceGrid(dim1 = colData(sce)[["celda_tSNE1"]],
-  dim2 = colData(sce)[["celda_tSNE2"]],
-  x = counts(sceCeldaCG),
+plotDimReduceGrid(x = counts(sce),
+  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
   xlab = "Dimension1",
   ylab = "Dimension2",
   varLabel = "tSNE")

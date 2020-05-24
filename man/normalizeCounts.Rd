@@ -51,6 +51,5 @@ Performs normalization, transformation, and/or scaling of a
 \examples{
 data(celdaCGSim)
 normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
-  pseudocountNormalize = 1
-)
+  pseudocountNormalize = 1)
 }

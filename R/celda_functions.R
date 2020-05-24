@@ -71,8 +71,7 @@
 #' @examples
 #' data(celdaCGSim)
 #' normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
-#'   pseudocountNormalize = 1
-#' )
+#'   pseudocountNormalize = 1)
 #' @export
 normalizeCounts <- function(counts,
                             normalize = c(
@@ -156,10 +155,10 @@ recodeClusterZ <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@celdaClusters$z)) {
+    if (is.null(celdaClusters(celdaMod)$z)) {
         stop("Provided celdaMod argument does not have a z attribute")
     }
-    celdaMod@celdaClusters$z <- plyr::mapvalues(celdaMod@celdaClusters$z,
+    celdaMod@clusters$z <- plyr::mapvalues(celdaClusters(celdaMod)$z,
         from, to)
     return(celdaMod)
 }
@@ -200,10 +199,10 @@ recodeClusterY <- function(sce, from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaMod@celdaClusters$y)) {
+    if (is.null(celdaClusters(celdaMod)$y)) {
         stop("Provided celdaMod argument does not have a y attribute")
     }
-    celdaMod@celdaClusters$y <- plyr::mapvalues(celdaClusters(celdaMod)$y,
+    celdaMod@clusters$y <- plyr::mapvalues(celdaClusters(celdaMod)$y,
         from, to)
     return(celdaMod)
 }
@@ -226,8 +225,8 @@ recodeClusterY <- function(sce, from, to) {
 compareCountMatrix <- function(counts,
                                celdaMod,
                                errorOnMismatch = TRUE) {
-  if ("y" %in% names(celdaMod@celdaClusters)) {
-    if (nrow(counts) != length(celdaMod@celdaClusters$y)) {
+  if ("y" %in% names(celdaClusters(celdaMod))) {
+    if (nrow(counts) != length(celdaClusters(celdaMod)$y)) {
       stop(
         "The provided celda object was generated from a counts",
         " matrix with a different number of features than the one",
@@ -236,8 +235,8 @@ compareCountMatrix <- function(counts,
     }
   }
 
-  if ("z" %in% names(celdaMod@celdaClusters)) {
-    if (ncol(counts) != length(celdaMod@celdaClusters$z)) {
+  if ("z" %in% names(celdaClusters(celdaMod))) {
+    if (ncol(counts) != length(celdaClusters(celdaMod)$z)) {
       stop(
         "The provided celda object was generated from a counts",
         " matrix with a different number of cells than the one",

@@ -75,7 +75,7 @@ simsce <- simulateCells("celda_CG",
     S = 5, K = 5, L = 10, G = 200, CRange = c(30, 50))
 ```
 
-Starting from `r Rpackage("celda")` version 1.5.5. `celda` makes use of the `r Biocpkg("SingleCellExperiment")` package. The `counts` assay slot in `simsce` contains the counts matrix. The dimensions of counts matrix:
+Starting from `r Rpackage("celda")` version 1.5.6. `celda` makes use of the `r Biocpkg("SingleCellExperiment")` package. The `counts` assay slot in `simsce` contains the counts matrix. The dimensions of counts matrix:
 
 ```{r}
 dim(assay(simsce, i = "counts"))
@@ -171,11 +171,12 @@ sce <- celdaTsne(sce)
 ```
 
 ```{r, eval = TRUE, fig.width = 7, fig.height = 7}
-plotDimReduceCluster(x = sce)
+plotDimReduceCluster(x = sce, reducedDimName = "celda_tSNE")
 
-plotDimReduceModule(x = sce, rescale = TRUE)
+plotDimReduceModule(x = sce, reducedDimName = "celda_tSNE", rescale = TRUE)
 
-plotDimReduceFeature(x = sce, normalize = TRUE, features = "Gene_1")
+plotDimReduceFeature(x = sce, reducedDimName = "celda_tSNE",
+    normalize = TRUE, features = "Gene_1")
 ```
 
 ## Displaying relationships between modules and cell populations

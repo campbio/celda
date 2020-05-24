@@ -4,6 +4,10 @@
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Each
 #'  row of the matrix will be plotted as a separate facet.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
 #' @param dim1 Numeric vector. First dimension from data dimensionality
 #'  reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality
@@ -42,6 +46,7 @@ setGeneric("plotDimReduceGrid", function(x, ...) {
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceGrid(x = sce,
+#'   reducedDimName = "celda_tSNE",
 #'   xlab = "Dimension1",
 #'   ylab = "Dimension2",
 #'   varLabel = "tSNE")
@@ -49,6 +54,7 @@ setGeneric("plotDimReduceGrid", function(x, ...) {
 setMethod("plotDimReduceGrid",
     signature(x = "SingleCellExperiment"),
     function(x,
+        reducedDimName,
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
@@ -66,17 +72,11 @@ setMethod("plotDimReduceGrid",
         matrix <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(dim1)) {
-            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
-            if (is.null(dim1)) {
-                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
-            }
+            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
-            if (is.null(dim2)) {
-                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
-            }
+            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
         }
 
         g <- .plotDimReduceGrid(dim1 = dim1,
@@ -101,9 +101,9 @@ setMethod("plotDimReduceGrid",
 #' @examples
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceGrid(dim1 = colData(sce)[["celda_tSNE1"]],
-#'   dim2 = colData(sce)[["celda_tSNE2"]],
-#'   x = counts(sceCeldaCG),
+#' plotDimReduceGrid(x = counts(sce),
+#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
 #'   xlab = "Dimension1",
 #'   ylab = "Dimension2",
 #'   varLabel = "tSNE")
@@ -252,6 +252,10 @@ setMethod("plotDimReduceGrid",
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
 #' @param dim1 Numeric vector. First dimension from data
 #'  dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimensionality
@@ -294,21 +298,18 @@ setGeneric("plotDimReduceFeature", function(x, ...) {
 
 #' @rdname plotDimReduceFeature
 #' @examples
-#' \donttest{
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceFeature(
-#'   dim1 = colData(sce)[["celda_tSNE1"]],
-#'   dim2 = colData(sce)[["celda_tSNE2"]],
-#'   x = sce,
+#' plotDimReduceFeature(x = sce,
+#'   reducedDimName = "celda_tSNE",
 #'   normalize = TRUE,
 #'   features = c("Gene_99"),
 #'   exactMatch = TRUE)
-#' }
 #' @export
 setMethod("plotDimReduceFeature",
     signature(x = "SingleCellExperiment"),
     function(x,
+        reducedDimName,
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
@@ -330,17 +331,11 @@ setMethod("plotDimReduceFeature",
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(dim1)) {
-            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
-            if (is.null(dim1)) {
-                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
-            }
+            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
-            if (is.null(dim2)) {
-                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
-            }
+            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
         }
 
         g <- .plotDimReduceFeature(dim1 = dim1,
@@ -367,17 +362,14 @@ setMethod("plotDimReduceFeature",
 
 #' @rdname plotDimReduceFeature
 #' @examples
-#' \donttest{
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceFeature(
-#'   dim1 = colData(sce)[["celda_tSNE1"]],
-#'   dim2 = colData(sce)[["celda_tSNE2"]],
-#'   x = counts(sceCeldaCG),
+#' plotDimReduceFeature(x = counts(sce),
+#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
 #'   normalize = TRUE,
 #'   features = c("Gene_99"),
 #'   exactMatch = TRUE)
-#' }
 #' @export
 setMethod("plotDimReduceFeature",
     signature(x = "matrix"),
@@ -518,6 +510,10 @@ setMethod("plotDimReduceFeature",
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
 #' @param dim1 Numeric vector.
 #'  First dimension from data dimensionality reduction output.
 #' @param dim2 Numeric vector.
@@ -553,15 +549,16 @@ setGeneric("plotDimReduceModule", function(x, ...) {
 
 #' @rdname plotDimReduceModule
 #' @examples
-#' \donttest{
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceModule(x = sce, modules = c("1", "2"))
-#' }
+#' plotDimReduceModule(x = sce,
+#'   reducedDimName = "celda_tSNE",
+#'   modules = c("1", "2"))
 #' @export
 setMethod("plotDimReduceModule",
     signature(x = "SingleCellExperiment"),
     function(x,
+        reducedDimName,
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
@@ -576,17 +573,11 @@ setMethod("plotDimReduceModule",
         ncol = NULL) {
 
         if (is.null(dim1)) {
-            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
-            if (is.null(dim1)) {
-                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
-            }
+            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
-            if (is.null(dim2)) {
-                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
-            }
+            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
         }
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
@@ -612,16 +603,13 @@ setMethod("plotDimReduceModule",
 
 #' @rdname plotDimReduceModule
 #' @examples
-#' \donttest{
 #' data(sceCeldaCG, celdaCGMod)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceModule(
-#'   dim1 = colData(sce)[["celda_tSNE1"]],
-#'   dim2 = colData(sce)[["celda_tSNE2"]],
-#'   x = counts(sceCeldaCG),
+#' plotDimReduceModule(x = counts(sce),
+#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
 #'   celdaMod = celdaCGMod,
 #'   modules = c("1", "2"))
-#' }
 #' @export
 setMethod("plotDimReduceModule",
     signature(x = "matrix"),
@@ -726,6 +714,10 @@ setMethod("plotDimReduceModule",
 #'  \linkS4class{SingleCellExperiment} object
 #'  containing cluster labels for each cell in \code{"celda_cell_cluster"}
 #'  column in \code{colData(x)}.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
 #' @param dim1 Numeric vector. First dimension from data
 #'  dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data
@@ -752,15 +744,16 @@ setGeneric("plotDimReduceCluster", function(x, ...) {
 
 #' @rdname plotDimReduceCluster
 #' @examples
-#' \donttest{
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceCluster(x = sce, specificClusters = c(1, 2, 3))
-#' }
+#' plotDimReduceCluster(x = sce,
+#'   reducedDimName = "celda_tSNE",
+#'   specificClusters = c(1, 2, 3))
 #' @export
 setMethod("plotDimReduceCluster",
     signature(x = "SingleCellExperiment"),
     function(x,
+        reducedDimName,
         dim1 = NULL,
         dim2 = NULL,
         size = 1,
@@ -773,22 +766,16 @@ setMethod("plotDimReduceCluster",
 
         if (!("celda_cell_cluster" %in%
                 colnames(SummarizedExperiment::colData(x)))) {
-            stop("Must contain column 'celda_cell_cluster' in colData(x)!")
+            stop("Must have column 'celda_cell_cluster' in colData(x)!")
         }
         cluster <- SummarizedExperiment::colData(x)[["celda_cell_cluster"]]
 
         if (is.null(dim1)) {
-            dim1 <- SummarizedExperiment::colData(x)[["celda_tSNE1"]]
-            if (is.null(dim1)) {
-                stop("colData(x)[['celda_tSNE1']] or dim1 is missing!")
-            }
+            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SummarizedExperiment::colData(x)[["celda_tSNE2"]]
-            if (is.null(dim2)) {
-                stop("colData(x)[['celda_tSNE2']] or dim2 is missing!")
-            }
+            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
         }
 
         g <- .plotDimReduceCluster(dim1 = dim1,
@@ -808,15 +795,12 @@ setMethod("plotDimReduceCluster",
 
 #' @rdname plotDimReduceCluster
 #' @examples
-#' \donttest{
 #' data(sceCeldaCG, celdaCGMod)
 #' sce <- celdaTsne(sceCeldaCG)
-#' plotDimReduceCluster(
-#'   dim1 = colData(sce)[["celda_tSNE1"]],
-#'   dim2 = colData(sce)[["celda_tSNE2"]],
-#'   x = celdaClusters(celdaCGMod)$z,
+#' plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
+#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
 #'   specificClusters = c(1, 2, 3))
-#' }
 #' @export
 setMethod("plotDimReduceCluster",
     signature(x = "vector"),
@@ -987,7 +971,8 @@ setMethod("plotCeldaViolin",
 #' @rdname plotCeldaViolin
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
-#' plotCeldaViolin(counts = celdaCGSim$counts, celdaMod = celdaCGMod,
+#' plotCeldaViolin(counts = celdaCGSim$counts,
+#'    celdaMod = celdaCGMod,
 #'    features = "Gene_1")
 #' @export
 setMethod("plotCeldaViolin",

@@ -14,13 +14,10 @@ runParams(x)
 \S4method{runParams}{celdaList}(x)
 }
 \arguments{
-\item{x}{An object of class \code{celdaList}.}
+\item{x}{An object of class \linkS4class{SingleCellExperiment} or class
+\code{celdaList}.}
 }
 \value{
-Data Frame. Contains details on the various K/L parameters, chain
- parameters, seed, and final log-likelihoods derived for each model in the
- provided celdaList.
-
 Data Frame. Contains details on the various K/L parameters, chain
  parameters, seed, and final log-likelihoods derived for each model in the
  provided celdaList.
@@ -28,9 +25,6 @@ Data Frame. Contains details on the various K/L parameters, chain
 \description{
 Returns details on the clustering parameters and model
  priors from the celdaList object when it was created.
-
-Returns details on the clustering parameters, and model priors
- from the celdaList object when it was created.
 }
 \examples{
 data(sceCeldaCGGridSearch)

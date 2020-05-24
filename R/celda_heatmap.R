@@ -14,9 +14,6 @@
 #'  \link{celda_G}.}
 #' @param ... Additional parameters passed to \link{plotHeatmap}.
 #' @seealso `celdaTsne()` for generating 2-dimensional tSNE coordinates
-#' @examples
-#' data(sceCeldaCG)
-#' celdaHeatmap(sceCeldaCG)
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export
 setGeneric("celdaHeatmap",
@@ -26,6 +23,9 @@ setGeneric("celdaHeatmap",
 
 
 #' @rdname celdaHeatmap
+#' @examples
+#' data(sceCeldaCG)
+#' celdaHeatmap(sceCeldaCG)
 #' @export
 setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", featureIx = NULL, nfeatures = 25, ...) {

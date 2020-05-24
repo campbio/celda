@@ -77,7 +77,7 @@ input in UMAP. Default 50. Only works for celda_C \code{sce} objects.}
 \value{
 \code{sce} with UMAP coordinates
  (columns "celda_UMAP1" & "celda_UMAP2") added to
- \code{\link[SummarizedExperiment]{colData}(sce)}.
+ \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_UMAP")}.
 }
 \description{
 Embeds cells in two dimensions using \link[uwot]{umap} based on

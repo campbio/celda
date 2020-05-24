@@ -17,7 +17,6 @@
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters. Column \code{celda_feature_module} in
 #'  \link[SummarizedExperiment]{rowData} contain feature modules.
-
 #' @export
 setGeneric("celdatosce", function(celdaModel, counts) {
     standardGeneric("celdatosce")})

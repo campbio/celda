@@ -61,6 +61,7 @@ Outputs a violin plot for feature expression data.
 data(sceCeldaCG)
 plotCeldaViolin(x = sceCeldaCG, features = "Gene_1")
 data(celdaCGSim, celdaCGMod)
-plotCeldaViolin(counts = celdaCGSim$counts, celdaMod = celdaCGMod,
+plotCeldaViolin(counts = celdaCGSim$counts,
+   celdaMod = celdaCGMod,
    features = "Gene_1")
 }

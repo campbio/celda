@@ -6,15 +6,14 @@
 \title{celdaCMod}
 \format{
 A celda_C object
+#@examples
+data(celdaCSim)
+celdaCMod <- celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
 }
 \usage{
 celdaCMod
 }
 \description{
-celda_C results generated from celdaCSim
-}
-\examples{
-data(celdaCSim)
-celdaCMod <- celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
+Old celda_C results generated from celdaCSim
 }
 \keyword{datasets}

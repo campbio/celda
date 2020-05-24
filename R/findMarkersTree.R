@@ -238,10 +238,10 @@ setMethod("findMarkersTree",
             features <- factorizeMatrix(counts, celda)$proportions$cell
 
             # get class labels
-            class <- celda@celdaClusters$z
+            class <- celdaClusters(celda)$z
 
             # get feature labels
-            featureLabels <- paste0("L", celda@celdaClusters$y)
+            featureLabels <- paste0("L", celdaClusters(celda)$y)
         } else if (methods::hasArg(seurat)) {
             # get counts matrix from seurat object
             counts <- as.matrix(seurat@assays$RNA@data)

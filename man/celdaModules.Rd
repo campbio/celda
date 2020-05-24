@@ -34,6 +34,6 @@ Return or set the feature module cluster labels determined
  by \link{celda_G} or \link{celda_CG} models.
 }
 \examples{
-data(celdaCGMod)
-celdaModules(celdaCGMod)
+data(sceCeldaCG)
+celdaModules(sceCeldaCG)
 }

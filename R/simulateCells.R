@@ -195,7 +195,7 @@ simulateCells <- function(
         sample = unique(cellSampleLabel))
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_C",
-        celdaClusters = list(z = z),
+        clusters = list(z = z),
         params = list(K = as.integer(K),
             alpha = alpha,
             beta = beta,
@@ -205,7 +205,7 @@ simulateCells <- function(
     class(result) <- "celda_C"
     result <- .reorderCeldaC(counts = cellCounts, res = result)
 
-    return(list(z = result@celdaClusters$z,
+    return(list(z = celdaClusters(result)$z,
         counts = cellCounts,
         sampleLabel = cellSampleLabel,
         G = G,
@@ -399,7 +399,7 @@ simulateCells <- function(
     )
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_CG",
-        celdaClusters = list(z = z, y = y),
+        clusters = list(z = z, y = y),
         params = list(
             K = as.integer(K),
             L = as.integer(L),
@@ -416,8 +416,8 @@ simulateCells <- function(
     result <- .reorderCeldaCG(counts = cellCounts, res = result)
 
     return(list(
-        z = result@celdaClusters$z,
-        y = result@celdaClusters$y,
+        z = celdaClusters(result)$z,
+        y = celdaClusters(result)$y,
         counts = cellCounts,
         sampleLabel = cellSampleLabel,
         G = G,
@@ -575,7 +575,7 @@ simulateCells <- function(
     )
     countChecksum <- .createCountChecksum(cellCounts)
     result <- methods::new("celda_G",
-        celdaClusters = list(y = y),
+        clusters = list(y = y),
         params = list(
             L = as.integer(L),
             beta = beta,
@@ -588,7 +588,7 @@ simulateCells <- function(
     result <- .reorderCeldaG(counts = cellCounts, res = result)
 
     return(list(
-        y = result@celdaClusters$y,
+        y = celdaClusters(result)$y,
         counts = cellCounts,
         C = C,
         G = G,

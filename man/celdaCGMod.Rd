@@ -6,19 +6,18 @@
 \title{celdaCGmod}
 \format{
 A celda_CG object
+#@examples
+data(celdaCGSim)
+celdaCGMod <- celda_CG(celdaCGSim$counts,
+  K = celdaCGSim$K,
+  L = celdaCGSim$L,
+  nchains = 1)
 }
 \usage{
 celdaCGMod
 }
 \description{
-celda_CG results generated from celdaCGSim
-}
-\examples{
-data(celdaCGSim)
-celdaCGMod <- celda_CG(celdaCGSim$counts,
-  K = celdaCGSim$K,
-  L = celdaCGSim$L,
-  nchains = 1
-)
+celda_CG model object generated from \code{celdaCGSim} using
+ old \code{celda_CG} function.
 }
 \keyword{datasets}

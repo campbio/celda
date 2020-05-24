@@ -4,7 +4,7 @@ setClass("celdaModel",
         names = "list",
         completeLogLik = "numeric",
         finalLogLik = "numeric",
-        celdaClusters = "list")
+        clusters = "list")
 ) # z and or y
 
 setClass("celda_C",

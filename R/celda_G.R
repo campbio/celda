@@ -497,7 +497,7 @@ setMethod("celda_G",
   }
 
   bestResult <- methods::new("celda_G",
-    celdaClusters = list(y = yBest),
+    clusters = list(y = yBest),
     params = list(
       L = as.integer(L),
       beta = beta,
@@ -703,10 +703,10 @@ setMethod("celda_G",
 
 
 .reorderCeldaG <- function(counts, res) {
-    if (params(res)$L > 2 & isTRUE(length(unique(res@celdaClusters$y)) > 1)) {
-        res@celdaClusters$y <- as.integer(as.factor(res@celdaClusters$y))
+    if (params(res)$L > 2 & isTRUE(length(unique(celdaClusters(res)$y)) > 1)) {
+        res@clusters$y <- as.integer(as.factor(celdaClusters(res)$y))
         fm <- factorizeMatrix(counts, res)
-        uniqueY <- sort(unique(res@celdaClusters$y))
+        uniqueY <- sort(unique(celdaClusters(res)$y))
         cs <- prop.table(t(fm$posterior$cell[uniqueY, ]), 2)
         d <- .cosineDist(cs)
         h <- stats::hclust(d, method = "complete")
@@ -789,13 +789,13 @@ setMethod("celda_G",
         verbose = verbose,
         completeLogLik = celdaGMod@completeLogLik,
         finalLogLik = celdaGMod@finalLogLik,
-        featureModuleLevels = sort(unique(celdaGMod@celdaClusters$y)))
+        featureModuleLevels = sort(unique(celdaClusters(celdaGMod)$y)))
 
     SummarizedExperiment::rowData(sce)["rownames"] <- celdaGMod@names$row
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaGMod@names$column
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaGMod@celdaClusters$y
+        celdaClusters(celdaGMod)$y
 
     return(sce)
 }

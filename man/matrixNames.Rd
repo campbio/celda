@@ -2,9 +2,12 @@
 % Please edit documentation in R/accessors.R
 \name{matrixNames}
 \alias{matrixNames}
+\alias{matrixNames,celdaModel-method}
 \title{Get feature, cell and sample names from a celdaModel}
 \usage{
 matrixNames(celdaMod)
+
+\S4method{matrixNames}{celdaModel}(celdaMod)
 }
 \arguments{
 \item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
