@@ -971,7 +971,7 @@ setMethod("plotCeldaViolin",
 #' @rdname plotCeldaViolin
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
-#' plotCeldaViolin(counts = celdaCGSim$counts,
+#' plotCeldaViolin(x = celdaCGSim$counts,
 #'    celdaMod = celdaCGMod,
 #'    features = "Gene_1")
 #' @export
