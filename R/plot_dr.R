@@ -984,7 +984,7 @@ setMethod("plotCeldaViolin",
         plotDots = TRUE,
         dotSize = 0.1) {
 
-        cluster <- celdaClusters(celdaMod)
+        cluster <- celdaClusters(celdaMod)$z
         g <- .plotCeldaViolin(counts = x,
             cluster = cluster,
             features = features,

@@ -1,8 +1,5 @@
 #' @title available models
 #' @export
-#' @examples
-#' data(availableModels)
-#' availableModels
 availableModels <- c("celda_C", "celda_G", "celda_CG")
 
 
