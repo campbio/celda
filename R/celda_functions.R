@@ -445,7 +445,7 @@ distinctColors <- function(n,
 #' @return Matrix. Contains a list of features per each column (feature module)
 #' @examples
 #' data(sceCeldaCG)
-#' featureModuleTable(csceCeldaCG)
+#' featureModuleTable(sceCeldaCG)
 #' @importFrom stringi stri_list2matrix
 #' @export
 featureModuleTable <- function(sce, useAssay = "counts", outputFile = NULL) {

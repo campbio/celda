@@ -4,7 +4,7 @@ context("Testing celda_C")
 
 sceceldaCSim <- simulateCells("celda_C", K = 10)
 K <- S4Vectors::metadata(sceceldaCSim)$celda_simulateCellscelda_C$K
-counts <- SummarizedExperiment::assay(sce, "counts")
+counts <- SummarizedExperiment::assay(sceceldaCSim, "counts")
 sce <- celda_C(sceceldaCSim,
     sampleLabel = sampleLabel(sceceldaCSim),
     K = K,
