@@ -54,7 +54,8 @@
 #' data(celdaGSim)
 #' sce <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 #' @export
-setGeneric("celda_G", function(x, ...) {standardGeneric("celda_G")})
+setGeneric("celda_G", function(x, ...) {
+    standardGeneric("celda_G")})
 
 
 #' @rdname celda_G
@@ -799,4 +800,3 @@ setMethod("celda_G",
 
     return(sce)
 }
-

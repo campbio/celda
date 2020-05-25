@@ -337,7 +337,8 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 #     expect_true(!is.null(plotObj))
 # })
 #
-# test_that(desc = "Testing celdaTsne with celda_C including a subset of cells", {
+# test_that(desc = paste0("Testing celdaTsne with celda_C including",
+#     " a subset of cells"), {
 #     expect_success(expect_error(tsne <- celdaTsne(counts = celdaCSim$counts,
 #         celdaMod = modelC,
 #         maxCells = 50,
@@ -375,7 +376,8 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 # #     expect_true(!is.null(plotObj))
 # # })
 #
-# test_that(desc = "Testing celdaUmap with celda_C including a subset of cells", {
+# test_that(desc = paste0("Testing celdaUmap with celda_C including",
+#     " a subset of cells"), {
 #     expect_success(expect_error(umap <- celdaUmap(
 #         counts = celdaCSim$counts,
 #         celdaMod = modelC,

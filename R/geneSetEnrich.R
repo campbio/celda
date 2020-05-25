@@ -23,7 +23,8 @@
 #' @importFrom enrichR enrichr
 #' @importFrom enrichR listEnrichrDbs
 #' @export
-setGeneric("geneSetEnrich", function(x, ...) {standardGeneric("geneSetEnrich")})
+setGeneric("geneSetEnrich", function(x, ...) {
+    standardGeneric("geneSetEnrich")})
 
 
 #' @rdname geneSetEnrich

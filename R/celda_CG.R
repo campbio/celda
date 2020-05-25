@@ -82,7 +82,8 @@
 #' @import Rcpp RcppEigen
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
-setGeneric("celda_CG", function(x, ...) {standardGeneric("celda_CG")})
+setGeneric("celda_CG", function(x, ...) {
+    standardGeneric("celda_CG")})
 
 
 #' @rdname celda_CG

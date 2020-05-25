@@ -14,7 +14,8 @@
 #' the provided features.
 #' @export
 setGeneric("featureModuleLookup",
-    function(sce, ...) {standardGeneric("featureModuleLookup")})
+    function(sce, ...) {
+        standardGeneric("featureModuleLookup")})
 
 
 #' @examples

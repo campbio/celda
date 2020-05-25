@@ -360,7 +360,8 @@
 # #         modules = seq(1000, 1005)))
 # # })
 #
-# test_that(desc = "Testing celdaTsne with celda_G including a subset of cells", {
+# test_that(desc = paste0("Testing celdaTsne with celda_G including",
+#     " a subset of cells"), {
 #     tsne <- celdaTsne(counts = celdaGSim$counts,
 #         celdaMod = modelG,
 #         maxCells = 100)
@@ -399,7 +400,8 @@
 #         modules = seq(1000, 1005)))
 # })
 #
-# test_that(desc = "Testing celdaUmap with celda_G including a subset of cells", {
+# test_that(desc = paste0("Testing celdaUmap with celda_G including",
+#     " a subset of cells"), {
 #     umap <- celdaUmap(counts = celdaGSim$counts,
 #         celdaMod = modelG,
 #         maxCells = 100)

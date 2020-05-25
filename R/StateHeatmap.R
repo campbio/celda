@@ -41,7 +41,8 @@
 #'  grob plotting
 #' @importFrom methods .hasSlot
 #' @export
-setGeneric("moduleHeatmap", function(x, ...) {standardGeneric("moduleHeatmap")})
+setGeneric("moduleHeatmap", function(x, ...) {
+    standardGeneric("moduleHeatmap")})
 
 
 #' @rdname moduleHeatmap

@@ -26,7 +26,8 @@
 #'  \code{"counts"}.
 #' @export
 setGeneric("factorizeMatrix",
-    function(x, celdaMod, ...) {standardGeneric("factorizeMatrix")})
+    function(x, celdaMod, ...) {
+        standardGeneric("factorizeMatrix")})
 
 
 #' @examples

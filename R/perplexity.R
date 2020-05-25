@@ -22,7 +22,8 @@
 #'  \code{celdaModel}).
 #' @export
 setGeneric("perplexity",
-    function(x, celdaMod, ...) {standardGeneric("perplexity")})
+    function(x, celdaMod, ...) {
+        standardGeneric("perplexity")})
 
 
 #' @importFrom matrixStats logSumExp

@@ -69,7 +69,8 @@
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @importFrom withr with_seed
 #' @export
-setGeneric("celda_C", function(x, ...) {standardGeneric("celda_C")})
+setGeneric("celda_C", function(x, ...) {
+    standardGeneric("celda_C")})
 
 
 #' @rdname celda_C
