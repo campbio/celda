@@ -630,7 +630,7 @@ setMethod("plotDimReduceModule",
         colorHigh = "firebrick1",
         ncol = NULL) {
 
-        factorized <- factorizeMatrix(x = celdaMod, counts = x)
+        factorized <- factorizeMatrix(x = x, celdaMod = celdaMod)
         g <- .plotDimReduceModule(dim1 = dim1,
             dim2 = dim2,
             counts = x,
