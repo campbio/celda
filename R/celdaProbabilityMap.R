@@ -209,4 +209,3 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         }
     }
 }
-
