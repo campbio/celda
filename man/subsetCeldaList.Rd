@@ -17,7 +17,8 @@ subsetCeldaList(x, ...)
 \item{x}{Can be one of
 \itemize{
  \item A \linkS4class{SingleCellExperiment} object returned from
- \code{celdaGridSearch}. Must contain a list named
+ \code{celdaGridSearch}, \code{recursiveSplitModule},
+ or \code{recursiveSplitCell}. Must contain a list named
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
 
@@ -26,7 +27,7 @@ models in list \code{"celda_grid_search"} in \code{metadata(x)}.}
 
 \item{useAssay}{A string specifying which \code{assay}
 slot to use if \code{x} is a
-\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 }
 \value{
 One of

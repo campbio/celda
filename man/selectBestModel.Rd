@@ -13,9 +13,13 @@ selectBestModel(x, ...)
 \S4method{selectBestModel}{celdaList}(x, asList = FALSE)
 }
 \arguments{
-\item{x}{Object of class \linkS4class{SingleCellExperiment} or
-\code{celdaList}. An object containing celda
-models returned from \link{celdaGridSearch}.}
+\item{x}{Can be one of
+\itemize{
+ \item A \linkS4class{SingleCellExperiment} object returned from
+ \code{celdaGridSearch}, \code{recursiveSplitModule},
+ or \code{recursiveSplitCell}. Must contain a list named
+ \code{"celda_grid_search"} in \code{metadata(x)}.
+ \item celdaList object.}}
 
 \item{asList}{\code{TRUE} or \code{FALSE}. Whether to return the
 best model as a

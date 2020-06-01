@@ -413,14 +413,15 @@ setMethod("celdaGridSearch",
 #' @param x Can be one of
 #' \itemize{
 #'  \item A \linkS4class{SingleCellExperiment} object returned from
-#'  \code{celdaGridSearch}. Must contain a list named
+#'  \code{celdaGridSearch}, \code{recursiveSplitModule},
+#'  or \code{recursiveSplitCell}. Must contain a list named
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
 #' @param params List. List of parameters used to subset the matching celda
 #'  models in list \code{"celda_grid_search"} in \code{metadata(x)}.
 #' @param useAssay A string specifying which \code{assay}
 #'  slot to use if \code{x} is a
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing
@@ -472,19 +473,16 @@ setMethod("subsetCeldaList",
                 subset(newRunParams, newRunParams[, i] %in% params[[i]])
 
             if (nrow(newRunParams) == 0) {
-                stop(
-                    "No runs matched the criteria given in 'params'. Check",
+                stop("No runs matched the criteria given in 'params'. Check",
                     " 'runParams(x)' for complete list of parameters used",
-                    " to generate 'x'."
-                )
+                    " to generate 'x'.")
             }
         }
 
         ## Get index of selected models, subset celdaList, and return
         ix <- match(newRunParams$index, runParams(x)$index)
         if (length(ix) == 1) {
-            x <- celdatosce(resList(x)[[ix]],
-                SummarizedExperiment::assay(x, i = useAssay))
+            x <- .subsetCeldaListSCE(x, ix)
         } else {
             x@metadata$celda_grid_search@runParams <-
                 as.data.frame(newRunParams)
@@ -543,9 +541,13 @@ setMethod("subsetCeldaList",
 #' @description Select the chain with the best log likelihood for each
 #'  combination of tested parameters from a \code{SCE} object gererated by
 #'  \link{celdaGridSearch} or from a \code{celdaList} object.
-#' @param x Object of class \linkS4class{SingleCellExperiment} or
-#'  \code{celdaList}. An object containing celda
-#'  models returned from \link{celdaGridSearch}.
+#' @param x Can be one of
+#' \itemize{
+#'  \item A \linkS4class{SingleCellExperiment} object returned from
+#'  \code{celdaGridSearch}, \code{recursiveSplitModule},
+#'  or \code{recursiveSplitCell}. Must contain a list named
+#'  \code{"celda_grid_search"} in \code{metadata(x)}.
+#'  \item celdaList object.}
 #' @param asList \code{TRUE} or \code{FALSE}. Whether to return the
 #'  best model as a
 #'  \code{celdaList} object or not. If \code{FALSE}, return the best model as a
@@ -595,8 +597,7 @@ setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
 
         ix <- match(newRunParams$index, runParams$index)
         if (nrow(newRunParams) == 1 & !asList) {
-            x <- celdatosce(resList(x)[[ix]],
-                SummarizedExperiment::assay(x, i = useAssay))
+            x <- .subsetCeldaListSCE(x, ix)
         } else {
             x@metadata$celda_grid_search@runParams <-
                 as.data.frame(newRunParams)
@@ -669,4 +670,61 @@ setMethod("selectBestModel", signature(x = "celdaList"),
             verbose = verbose,
             logfilePrefix = logfilePrefix)
     return(sce)
+}
+
+
+.subsetCeldaListSCE <- function (x, ix) {
+    cgsparam <- x@metadata$celda_grid_search@celdaGridSearchParameters
+    if (cgsparam$model == "celda_c") {
+        x <- .createSCEceldaC(celdaCMod = resList(x)[[ix]],
+            sce = x,
+            xClass = cgsparam$xClass,
+            useAssay = cgsparam$useAssay,
+            algorithm = cgsparam$algorithm,
+            stopIter = cgsparam$stopIter,
+            maxIter = cgsparam$maxIter,
+            splitOnIter = cgsparam$splitOnIter,
+            splitOnLast = cgsparam$splitOnLast,
+            nchains = cgsparam$nchains,
+            zInitialize = cgsparamp[["zInitialize"]],
+            zInit = cgsparamp[["zInit"]],
+            logfile = cgsparamp$logfile,
+            verbose = cgsparamp$verbose)
+    } else if (cgsparam$model == "celda_G") {
+        x <- .createSCEceldaG(celdaGMod = resList(x)[[ix]],
+            sce = x,
+            xClass = cgsparam$xClass,
+            useAssay = cgsparam$useAssay,
+            stopIter = cgsparam$stopIter,
+            maxIter = cgsparam$maxIter,
+            splitOnIter = cgsparam$splitOnIter,
+            splitOnLast = cgsparam$splitOnLast,
+            nchains = cgsparam$nchains,
+            yInitialize = cgsparam[["yInitialize"]],
+            yInit = cgsparam[["yInit"]],
+            logfile = cgsparam$logfile,
+            verbose = cgsparam$verbose)
+    } else if (cgsparam$model == "celda_CG") {
+        x <- .createSCEceldaCG(celdaCGMod = resList(x)[[ix]],
+            sce = x,
+            xClass = cgsparam$xClass,
+            useAssay = cgsparam$useAssay,
+            algorithm = cgsparam$algorithm,
+            stopIter = cgsparam$stopIter,
+            maxIter = cgsparam$maxIter,
+            splitOnIter = cgsparam$splitOnIter,
+            splitOnLast = cgsparam$splitOnLast,
+            nchains = cgsparam$nchains,
+            zInitialize = cgsparam[["zInitialize"]],
+            yInitialize = cgsparam[["yInitialize"]],
+            zInit = cgsparam[["zInit"]],
+            yInit = cgsparam[["yInit"]],
+            logfile = cgsparam$logfile,
+            verbose = cgsparam$verbose)
+    } else {
+        stop("S4Vectors::metadata(X)$celda_grid_search@",
+            "celdaGridSearchParameters$model must be",
+            " one of 'celda_C', 'celda_G', or 'celda_CG'")
+    }
+    return(x)
 }
