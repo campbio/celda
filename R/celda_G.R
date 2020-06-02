@@ -724,6 +724,7 @@ setMethod("celda_G",
     modules) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
 
     if (is.null(maxCells) || maxCells > ncol(counts)) {
         maxCells <- ncol(counts)

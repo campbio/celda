@@ -915,6 +915,7 @@ setMethod("celda_CG",
     modules) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
 
     ## Checking if maxCells and minClusterSize will work
     if (!is.null(maxCells)) {
