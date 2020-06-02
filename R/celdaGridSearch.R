@@ -686,10 +686,10 @@ setMethod("selectBestModel", signature(x = "celdaList"),
             splitOnIter = cgsparam$splitOnIter,
             splitOnLast = cgsparam$splitOnLast,
             nchains = cgsparam$nchains,
-            zInitialize = cgsparamp[["zInitialize"]],
-            zInit = cgsparamp[["zInit"]],
-            logfile = cgsparamp$logfile,
-            verbose = cgsparamp$verbose)
+            zInitialize = cgsparam[["zInitialize"]],
+            zInit = cgsparam[["zInit"]],
+            logfile = cgsparam$logfile,
+            verbose = cgsparam$verbose)
     } else if (cgsparam$model == "celda_G") {
         x <- .createSCEceldaG(celdaGMod = resList(x)[[ix]],
             sce = x,
