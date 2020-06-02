@@ -906,7 +906,7 @@ setMethod("plotDimReduceCluster",
     ) +
       ggrepel::geom_text_repel(
         data = centroid,
-        mapping = ggplot2::aes(label = centroid$Cluster),
+        mapping = ggplot2::aes(label = Cluster),
         size = labelSize
       )
   }
