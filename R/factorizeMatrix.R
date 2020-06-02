@@ -363,8 +363,8 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
 
 
 .factorizeMatrixCelda_C <- function(sce, useAssay, type) {
-
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     z <- celdaClusters(sce)
@@ -422,6 +422,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
 
 .factorizeMatrixCelda_CG <- function(sce, useAssay, type) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     L <- S4Vectors::metadata(sce)$celda_parameters$L
