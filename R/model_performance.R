@@ -416,7 +416,7 @@ setMethod("plotGridSearchPerplexityDiff",
         model <- x@metadata$celda_grid_search@celdaGridSearchParameters$model
         celdaList <- S4Vectors::metadata(x)$celda_grid_search
 
-        if (model == "celda_c") {
+        if (model == "celda_C") {
             g <- .plotGridSearchPerplexityDiffC(celdaList, sep)
         } else if (model == "celda_G") {
             g <- .plotGridSearchPerplexityDiffG(celdaList, sep)

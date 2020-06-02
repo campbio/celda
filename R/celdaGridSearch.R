@@ -675,7 +675,7 @@ setMethod("selectBestModel", signature(x = "celdaList"),
 
 .subsetCeldaListSCE <- function (x, ix) {
     cgsparam <- x@metadata$celda_grid_search@celdaGridSearchParameters
-    if (cgsparam$model == "celda_c") {
+    if (cgsparam$model == "celda_C") {
         x <- .createSCEceldaC(celdaCMod = resList(x)[[ix]],
             sce = x,
             xClass = cgsparam$xClass,
