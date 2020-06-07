@@ -194,9 +194,10 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
         minClusterSize = minClusterSize,
         modules = modules)
     res <- .calculateTsne(preparedCountInfo$norm,
-        doPca = FALSE,
         perplexity = perplexity,
-        maxIter = maxIter)
+        maxIter = maxIter,
+        doPca = FALSE,
+        initialDims = initialDims)
     final <- matrix(NA, nrow = ncol(sce), ncol = 2)
     final[preparedCountInfo$cellIx, ] <- res
     rownames(final) <- colnames(sce)
