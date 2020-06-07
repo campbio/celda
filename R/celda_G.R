@@ -1169,7 +1169,8 @@ setMethod(
   res <- .calculateTsne(preparedCountInfo$norm,
     doPca = FALSE,
     perplexity = perplexity,
-    maxIter = maxIter
+    maxIter = maxIter,
+    initialDims = initialDims
   )
   final <- matrix(NA, nrow = ncol(counts), ncol = 2)
   final[preparedCountInfo$cellIx, ] <- res
