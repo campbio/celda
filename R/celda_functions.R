@@ -36,7 +36,7 @@
 }
 
 
-.normalizeLogProbs <- function(llProbs) {
+.LogProbs <- function(llProbs) {
   llProbs <- exp(sweep(llProbs, 1, base::apply(llProbs, 1, max), "-"))
   probs <- sweep(llProbs, 1, rowSums(llProbs), "/")
   return(probs)
@@ -82,6 +82,8 @@ normalizeCounts <- function(counts,
                             scaleFun = NULL,
                             pseudocountNormalize = 0,
                             pseudocountTransform = 0) {
+
+  counts <- .processCounts(counts)
   normalize <- match.arg(normalize)
   if (!is.null(transformationFun) &&
     !is.function(transformationFun)) {

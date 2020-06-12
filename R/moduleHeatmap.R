@@ -62,6 +62,15 @@ setMethod("moduleHeatmap",
         showFeaturenames = TRUE) {
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
+        if (is.null(colnames(counts))) {
+            stop("colnames(x) is NULL! Please assign column names to x and",
+                " try again.")
+        }
+
+        if (is.null(rownames(counts))) {
+            stop("rownames(x) is NULL! Please assign row names to x and",
+                " try again.")
+        }
 
         if (!(S4Vectors::metadata(x)$celda_parameters$model %in% c("celda_G",
             "celda_CG"))) {
