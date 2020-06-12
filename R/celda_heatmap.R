@@ -59,6 +59,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     useAssay, featureIx, ...) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
     norm <- normalizeCounts(counts,
         normalize = "proportion",
         transformationFun = sqrt)
@@ -75,6 +76,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
 
 .celdaHeatmapCelda_CG <- function(sce, useAssay, nfeatures, ...) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
     fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "proportion")
     top <- topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
@@ -92,6 +94,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
 
 .celdaHeatmapCelda_G <- function(sce, useAssay, nfeatures, ...) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    counts <- .processCounts(counts)
     fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "proportion")
     top <- celda::topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
