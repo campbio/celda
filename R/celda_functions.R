@@ -83,7 +83,6 @@ normalizeCounts <- function(counts,
                             pseudocountNormalize = 0,
                             pseudocountTransform = 0) {
 
-  counts <- .processCounts(counts)
   normalize <- match.arg(normalize)
   if (!is.null(transformationFun) &&
     !is.function(transformationFun)) {
