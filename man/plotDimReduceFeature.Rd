@@ -27,7 +27,8 @@ plotDimReduceFeature(x, ...)
   colorMid = "white",
   colorHigh = "firebrick1",
   midpoint = NULL,
-  ncol = NULL
+  ncol = NULL,
+  decreasing = FALSE
 )
 
 \S4method{plotDimReduceFeature}{matrix}(
@@ -47,7 +48,8 @@ plotDimReduceFeature(x, ...)
   colorMid = "white",
   colorHigh = "firebrick1",
   midpoint = NULL,
-  ncol = NULL
+  ncol = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
@@ -110,6 +112,12 @@ with 10 percent of values trimmed. Default \code{NULL}.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with greatest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
 }
 \value{
 The plot as a ggplot object

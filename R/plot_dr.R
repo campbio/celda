@@ -35,6 +35,11 @@
 #'  number of columns for facet wrap.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the genes.
+#' @param decreasing logical. Specifies the order of plotting the points.
+#'  If \code{FALSE}, the points will be plotted in increasing order where
+#'  the points with greatest values will be on top. \code{TRUE} otherwise.
+#'  If \code{NULL}, no sorting is performed. Points will be plotted in their
+#'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceGrid", function(x, ...) {
@@ -67,7 +72,8 @@ setMethod("plotDimReduceGrid",
         midpoint = NULL,
         varLabel = NULL,
         ncol = NULL,
-        headers = NULL) {
+        headers = NULL,
+        decreasing = FALSE) {
 
         matrix <- SummarizedExperiment::assay(x, i = useAssay)
 
@@ -91,7 +97,8 @@ setMethod("plotDimReduceGrid",
             midpoint = midpoint,
             varLabel = varLabel,
             ncol = ncol,
-            headers = headers)
+            headers = headers,
+            decreasing = decreasing)
         return(g)
     }
 )
@@ -123,7 +130,8 @@ setMethod("plotDimReduceGrid",
         midpoint = NULL,
         varLabel = NULL,
         ncol = NULL,
-        headers = NULL) {
+        headers = NULL,
+        decreasing = FALSE) {
 
         g <- .plotDimReduceGrid(dim1 = dim1,
             dim2 = dim2,
@@ -137,7 +145,8 @@ setMethod("plotDimReduceGrid",
             midpoint = midpoint,
             varLabel = varLabel,
             ncol = ncol,
-            headers = headers)
+            headers = headers,
+            decreasing = decreasing)
         return(g)
     }
 )
@@ -156,14 +165,19 @@ setMethod("plotDimReduceGrid",
     midpoint,
     varLabel,
     ncol,
-    headers) {
+    headers,
+    decreasing) {
 
-    df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
+    df <- data.frame(dim1, dim2, t(as.data.frame(matrix)), check.names = FALSE)
     naIx <- is.na(dim1) | is.na(dim2)
     df <- df[!naIx, ]
 
     m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
     colnames(m) <- c(xlab, ylab, "facet", "Expression")
+
+    if (!is.null(decreasing)) {
+        m <- m[order(m$facet, m$Expression, decreasing = decreasing), ]
+    }
 
     if (is.null(midpoint)) {
         midpoint <- mean(m[, 4], trim = 0.1)
@@ -291,6 +305,11 @@ setMethod("plotDimReduceGrid",
 #' with 10 percent of values trimmed. Default \code{NULL}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
+#' @param decreasing logical. Specifies the order of plotting the points.
+#'  If \code{FALSE}, the points will be plotted in increasing order where
+#'  the points with greatest values will be on top. \code{TRUE} otherwise.
+#'  If \code{NULL}, no sorting is performed. Points will be plotted in their
+#'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceFeature", function(x, ...) {
@@ -327,7 +346,8 @@ setMethod("plotDimReduceFeature",
         colorMid = "white",
         colorHigh = "firebrick1",
         midpoint = NULL,
-        ncol = NULL) {
+        ncol = NULL,
+        decreasing = FALSE) {
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
@@ -355,7 +375,8 @@ setMethod("plotDimReduceFeature",
             colorMid = colorMid,
             colorHigh = colorHigh,
             midpoint = midpoint,
-            ncol = ncol)
+            ncol = ncol,
+            decreasing = decreasing)
         return(g)
     }
 )
@@ -391,7 +412,8 @@ setMethod("plotDimReduceFeature",
         colorMid = "white",
         colorHigh = "firebrick1",
         midpoint = NULL,
-        ncol = NULL) {
+        ncol = NULL,
+        decreasing = FALSE) {
 
         g <- .plotDimReduceFeature(dim1 = dim1,
             dim2 = dim2,
@@ -409,7 +431,8 @@ setMethod("plotDimReduceFeature",
             colorMid = colorMid,
             colorHigh = colorHigh,
             midpoint = midpoint,
-            ncol = ncol)
+            ncol = ncol,
+            decreasing = decreasing)
         return(g)
     }
 )
@@ -431,7 +454,8 @@ setMethod("plotDimReduceFeature",
                                  colorMid,
                                  colorHigh,
                                  midpoint,
-                                 ncol) {
+                                 ncol,
+                                 decreasing) {
 
   # Perform checks
   if (is.null(features)) {
@@ -498,7 +522,8 @@ setMethod("plotDimReduceFeature",
     varLabel = varLabel,
     midpoint = midpoint,
     ncol = ncol,
-    headers = headers
+    headers = headers,
+    decreasing = decreasing
   )
 }
 
@@ -543,6 +568,11 @@ setMethod("plotDimReduceFeature",
 #'  Default "firebrick1".
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
+#' @param decreasing logical. Specifies the order of plotting the points.
+#'  If \code{FALSE}, the points will be plotted in increasing order where
+#'  the points with greatest values will be on top. \code{TRUE} otherwise.
+#'  If \code{NULL}, no sorting is performed. Points will be plotted in their
+#'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceModule", function(x, ...) {
@@ -572,7 +602,8 @@ setMethod("plotDimReduceModule",
         colorLow = "blue4",
         colorMid = "white",
         colorHigh = "firebrick1",
-        ncol = NULL) {
+        ncol = NULL,
+        decreasing = FALSE) {
 
         if (is.null(dim1)) {
             dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
@@ -597,7 +628,8 @@ setMethod("plotDimReduceModule",
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
-            ncol = ncol)
+            ncol = ncol,
+            decreasing = decreasing)
         return(g)
     }
 )
@@ -628,7 +660,8 @@ setMethod("plotDimReduceModule",
         colorLow = "blue4",
         colorMid = "white",
         colorHigh = "firebrick1",
-        ncol = NULL) {
+        ncol = NULL,
+        decreasing = FALSE) {
 
         factorized <- factorizeMatrix(x = x, celdaMod = celdaMod)
         g <- .plotDimReduceModule(dim1 = dim1,
@@ -643,7 +676,8 @@ setMethod("plotDimReduceModule",
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
-            ncol = ncol)
+            ncol = ncol,
+            decreasing = decreasing)
         return(g)
     }
 )
@@ -661,7 +695,8 @@ setMethod("plotDimReduceModule",
     colorLow,
     colorMid,
     colorHigh,
-    ncol) {
+    ncol,
+    decreasing) {
 
     matrix <- factorized$proportions$cell
 
@@ -702,7 +737,8 @@ setMethod("plotDimReduceModule",
         midpoint = NULL,
         varLabel = varLabel,
         ncol = ncol,
-        headers = NULL
+        headers = NULL,
+        decreasing = decreasing
     )
 }
 

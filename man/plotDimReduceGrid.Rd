@@ -23,7 +23,8 @@ plotDimReduceGrid(x, ...)
   midpoint = NULL,
   varLabel = NULL,
   ncol = NULL,
-  headers = NULL
+  headers = NULL,
+  decreasing = FALSE
 )
 
 \S4method{plotDimReduceGrid}{matrix}(
@@ -39,7 +40,8 @@ plotDimReduceGrid(x, ...)
   midpoint = NULL,
   varLabel = NULL,
   ncol = NULL,
-  headers = NULL
+  headers = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
@@ -91,6 +93,12 @@ number of columns for facet wrap.}
 
 \item{headers}{Character vector. If `NULL`, the corresponding rownames are
 used as labels. Otherwise, these headers are used to label the genes.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with greatest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
 }
 \value{
 The plot as a ggplot object

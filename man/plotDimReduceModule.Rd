@@ -23,7 +23,8 @@ plotDimReduceModule(x, ...)
   colorLow = "blue4",
   colorMid = "white",
   colorHigh = "firebrick1",
-  ncol = NULL
+  ncol = NULL,
+  decreasing = FALSE
 )
 
 \S4method{plotDimReduceModule}{matrix}(
@@ -39,7 +40,8 @@ plotDimReduceModule(x, ...)
   colorLow = "blue4",
   colorMid = "white",
   colorHigh = "firebrick1",
-  ncol = NULL
+  ncol = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
@@ -88,6 +90,12 @@ Default "firebrick1".}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with greatest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
 
 \item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
 \code{x} is a matrix object.}
