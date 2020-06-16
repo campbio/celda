@@ -919,9 +919,9 @@ setMethod("plotDimReduceCluster",
     # centroidList <- lapply(seq(length(unique(cluster))), function(x) {
     centroidList <- lapply(unique(cluster), function(x) {
       df.sub <- df[df$Cluster == x, ]
-      median.1 <- stats::median(df.sub[, xlab])
-      median.2 <- stats::median(df.sub[, ylab])
-      cbind(median.1, median.2, x)
+      median1 <- stats::median(df.sub[, xlab])
+      median2 <- stats::median(df.sub[, ylab])
+      data.frame(median1 = median1, median2 = median2, x = x)
     })
     centroid <- do.call(rbind, centroidList)
     centroid <- data.frame(
