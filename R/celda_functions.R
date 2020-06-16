@@ -84,6 +84,8 @@ normalizeCounts <- function(counts,
                             pseudocountTransform = 0) {
 
   normalize <- match.arg(normalize)
+  counts <- as.matrix(counts)
+
   if (!is.null(transformationFun) &&
     !is.function(transformationFun)) {
     stop("'transformationFun' needs to be of class 'function'")
