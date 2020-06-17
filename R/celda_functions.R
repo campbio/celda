@@ -36,7 +36,7 @@
 }
 
 
-.LogProbs <- function(llProbs) {
+.normalizeLogProbs <- function(llProbs) {
   llProbs <- exp(sweep(llProbs, 1, base::apply(llProbs, 1, max), "-"))
   probs <- sweep(llProbs, 1, rowSums(llProbs), "/")
   return(probs)
