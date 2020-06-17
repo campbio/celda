@@ -7,7 +7,7 @@
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param L Integer. Number of feature modules.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
 #'  each feature module in each cell. Default 1.
@@ -45,8 +45,10 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @return An object of class `celda_G` with the feature module clusters stored
-#'  in `y`.
+#' @return A \linkS4class{SingleCellExperiment} object. Function
+#'  parameter settings are stored in the \link[S4Vectors]{metadata}
+#'  \code{"celda_parameters"} slot. Column \code{celda_feature_module} in
+#'  \link[SummarizedExperiment]{rowData} contains feature modules.
 #' @seealso \link{celda_C} for cell clustering and \link{celda_CG} for
 #'  simultaneous clustering of features and cells. \link{celdaGridSearch} can
 #'  be used to run multiple values of L and multiple chains in parallel.
