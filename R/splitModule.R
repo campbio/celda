@@ -47,9 +47,9 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
             n = n,
             seed = seed)
 
-        S4Vectors::metadata(x)[["celda_parameters"]]$L <- params(model)$L
+        S4Vectors::metadata(x)[["celda_parameters"]]$L <- params(celdaGMod)$L
         S4Vectors::metadata(x)[["celda_parameters"]]$finalLogLik <-
-            model@finalLogLik
+            celdaGMod@finalLogLik
         S4Vectors::metadata(x)[["celda_parameters"]]$featureModuleLevels <-
             sort(unique(celdaClusters(celdaGMod)$y))
         SummarizedExperiment::rowData(x)["celda_feature_module"] <-
