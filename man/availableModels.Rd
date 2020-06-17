@@ -4,15 +4,13 @@
 \name{availableModels}
 \alias{availableModels}
 \title{available models}
-\format{An object of class \code{character} of length 3.}
+\format{
+An object of class \code{character} of length 3.
+}
 \usage{
 availableModels
 }
 \description{
 available models
-}
-\examples{
-data(availableModels)
-availableModels
 }
 \keyword{datasets}

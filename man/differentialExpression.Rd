@@ -2,10 +2,24 @@
 % Please edit documentation in R/diffExp.R
 \name{differentialExpression}
 \alias{differentialExpression}
+\alias{differentialExpression,SingleCellExperiment-method}
+\alias{differentialExpression,matrix-method}
 \title{Differential expression for cell subpopulations using MAST}
 \usage{
-differentialExpression(
-  counts,
+differentialExpression(x, ...)
+
+\S4method{differentialExpression}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  c1,
+  c2 = NULL,
+  onlyPos = FALSE,
+  log2fcThreshold = NULL,
+  fdrThreshold = 1
+)
+
+\S4method{differentialExpression}{matrix}(
+  x,
   celdaMod,
   c1,
   c2 = NULL,
@@ -15,11 +29,16 @@ differentialExpression(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells. This matrix should be the same as the one used to generate
-`celdaMod`.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells. Must contain cluster
+labels in \code{celdaClusters(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object.}
 
-\item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
 
 \item{c1}{Integer vector. Cell populations to include in group 1 for the
 differential expression analysis.}
@@ -39,6 +58,8 @@ applied. Default NULL.}
 \item{fdrThreshold}{Numeric. A number between 0 and 1 that specifies the
 false discovery rate (FDR) threshold. Only features below this threshold
 will be returned. Default 1.}
+
+\item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
 }
 \value{
 Data frame containing MAST results including statistics such as
@@ -49,7 +70,10 @@ Uses MAST to find differentially expressed features for
  specified cell subpopulations.
 }
 \examples{
+data(sceCeldaCG)
+clusterDiffexpRes <- differentialExpression(sceCeldaCG, c1 = c(1, 2))
 data(celdaCGSim, celdaCGMod)
-clusterDiffexpRes = differentialExpression(celdaCGSim$counts,
-    celdaCGMod, c1 = c(1, 2))
+clusterDiffexpRes <- differentialExpression(celdaCGSim$counts,
+  celdaCGMod,
+  c1 = c(1, 2))
 }

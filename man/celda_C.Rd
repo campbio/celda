@@ -2,10 +2,35 @@
 % Please edit documentation in R/celda_C.R
 \name{celda_C}
 \alias{celda_C}
+\alias{celda_C,SingleCellExperiment-method}
+\alias{celda_C,matrix-method}
 \title{Cell clustering with Celda}
 \usage{
-celda_C(
-  counts,
+celda_C(x, ...)
+
+\S4method{celda_C}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  sampleLabel = NULL,
+  K,
+  alpha = 1,
+  beta = 1,
+  algorithm = c("EM", "Gibbs"),
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  zInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  zInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
+
+\S4method{celda_C}{matrix}(
+  x,
   sampleLabel = NULL,
   K,
   alpha = 1,
@@ -25,8 +50,14 @@ celda_C(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
@@ -74,7 +105,7 @@ cells will be split into sqrt(K) populations and then each popluation will
 be subsequently split into another sqrt(K) populations. With 'predefined',
 values in `zInit` will be used to initialize `z`. Default 'split'.}
 
-\item{countChecksum}{"Character. An MD5 checksum for the `counts` matrix.
+\item{countChecksum}{Character. An MD5 checksum for the `counts` matrix.
 Default NULL.}
 
 \item{zInit}{Integer vector. Sets initial starting values of z. If NULL,
@@ -87,8 +118,12 @@ can only be used when `initialize = 'random'`. Default NULL.}
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class `celda_C` with the cell population clusters
- stored in `z`.
+A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
+ \code{"celda_parameters"} slot.
+ Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
+ \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+ population clusters.
 }
 \description{
 Clusters the columns of a count matrix containing single-cell
@@ -96,12 +131,13 @@ Clusters the columns of a count matrix containing single-cell
 }
 \examples{
 data(celdaCSim)
-celdaCMod <- celda_C(celdaCSim$counts,
+sce <- celda_C(celdaCSim$counts,
     K = celdaCSim$K,
-    sampleLabel = celdaCSim$sampleLabel)
+    sampleLabel = celdaCSim$sampleLabel,
+    nchains = 1)
 }
 \seealso{
-`celda_G()` for feature clustering and `celda_CG()` for simultaneous
- clustering of features and cells. `celdaGridSearch()` can be used to run
- multiple values of K and multiple chains in parallel.
+\link{celda_G} for feature clustering and \link{celda_CG} for
+ simultaneous clustering of features and cells. \link{celdaGridSearch} can
+ be used to run multiple values of K and multiple chains in parallel.
 }

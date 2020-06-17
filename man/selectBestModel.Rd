@@ -2,35 +2,65 @@
 % Please edit documentation in R/celdaGridSearch.R
 \name{selectBestModel}
 \alias{selectBestModel}
+\alias{selectBestModel,SingleCellExperiment-method}
+\alias{selectBestModel,celdaList-method}
 \title{Select best chain within each combination of parameters}
 \usage{
-selectBestModel(celdaList, asList = FALSE)
+selectBestModel(x, ...)
+
+\S4method{selectBestModel}{SingleCellExperiment}(x, asList = FALSE, useAssay = "counts")
+
+\S4method{selectBestModel}{celdaList}(x, asList = FALSE)
 }
 \arguments{
-\item{celdaList}{Object of class `celdaList`. An object containing celda
-models returned from `celdaGridSearch()`.}
+\item{x}{Can be one of
+\itemize{
+ \item A \linkS4class{SingleCellExperiment} object returned from
+ \code{celdaGridSearch}, \code{recursiveSplitModule},
+ or \code{recursiveSplitCell}. Must contain a list named
+ \code{"celda_grid_search"} in \code{metadata(x)}.
+ \item celdaList object.}}
 
-\item{asList}{`TRUE` or `FALSE`. Whether to return the best model as a
-`celdaList` object or not. If `FALSE`, return the best model as a
-corresponding `celda_C`, `celda_G` or `celda_CG` object.}
+\item{asList}{\code{TRUE} or \code{FALSE}. Whether to return the
+best model as a
+\code{celdaList} object or not. If \code{FALSE}, return the best model as a
+corresponding celda model object.}
+
+\item{useAssay}{A string specifying which \code{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 }
 \value{
-A new `celdaList` object containing one model with the best log
- likelihood for each set of parameters. If only one set of parameters is in
- the `celdaList`, the best model will be returned directly instead of a
- `celdaList` object.
+One of
+\itemize{
+ \item A new \linkS4class{SingleCellExperiment} object containing
+ one model with the best log-likelihood for each set of parameters in
+ \code{metadata(x)}. If there is only one set of parameters,
+ a new \linkS4class{SingleCellExperiment} object
+ with the matching model stored in the
+ \link[S4Vectors]{metadata}
+ \code{"celda_parameters"} slot will be returned. Otherwise, a new
+ \linkS4class{SingleCellExperiment} object with the subset models stored
+ in the \link[S4Vectors]{metadata}
+ \code{"celda_grid_search"} slot will be returned.
+ \item A new \code{celdaList} object containing one model with the best
+ log-likelihood for each set of parameters. If only one set of parameters
+ is in the \code{celdaList}, the best model will be returned directly
+ instead of a \code{celdaList} object.}
 }
 \description{
 Select the chain with the best log likelihood for each
- combination of tested parameters from a `celdaList` object gererated by
- `celdaGridSearch()`.
+ combination of tested parameters from a \code{SCE} object gererated by
+ \link{celdaGridSearch} or from a \code{celdaList} object.
 }
 \examples{
+data(sceCeldaCGGridSearch)
+## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
+sce <- selectBestModel(sceCeldaCGGridSearch)
 data(celdaCGGridSearchRes)
 ## Returns same result as running celdaGridSearch with "bestOnly = TRUE"
 cgsBest <- selectBestModel(celdaCGGridSearchRes)
 }
 \seealso{
-`celdaGridSearch()` can run Celda with multiple parameters and
- chains in parallel. `subsetCeldaList()` can subset the `celdaList` object.
+\link{celdaGridSearch} \link{subsetCeldaList}
 }

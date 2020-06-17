@@ -14,7 +14,7 @@ plotMarkerHeatmap(
 )
 }
 \arguments{
-\item{tree}{A decision tree from CELDA's \emph{findMarkersTree} function.}
+\item{tree}{A decision tree returned from \link{findMarkersTree} function.}
 
 \item{counts}{Numeric matrix. Gene-by-cell counts matrix.}
 
@@ -41,23 +41,24 @@ the specified branch point.
 Creates heatmap for a specified branch point in a marker tree.
 }
 \examples{
+\dontrun{
 # Generate simulated single-cell dataset using celda
-sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
 # Celda clustering into 5 clusters & 10 modules
-cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
+cm <- celda_CG(sim_counts, K = 5, L = 10, verbose = FALSE)
 
 # Get features matrix and cluster assignments
-factorized <- factorizeMatrix(sim_counts$counts, cm)
+factorized <- factorizeMatrix(cm)
 features <- factorized$proportions$cell
-class <- clusters(cm)$z
+class <- celdaClusters(cm)
 
 # Generate Decision Tree
 DecTree <- findMarkersTree(features, class, threshold = 1)
 
 # Plot example heatmap
-plotMarkerHeatmap(DecTree, sim_counts$counts,
+plotMarkerHeatmap(DecTree, assay(sim_counts),
   branchPoint = "top_level",
-  featureLabels = paste0("L", clusters(cm)$y)
-)
+  featureLabels = paste0("L", celdaModules(cm)))
+}
 }

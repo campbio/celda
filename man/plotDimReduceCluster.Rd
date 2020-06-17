@@ -2,12 +2,30 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceCluster}
 \alias{plotDimReduceCluster}
+\alias{plotDimReduceCluster,SingleCellExperiment-method}
+\alias{plotDimReduceCluster,vector-method}
 \title{Plotting the cell labels on a dimensionality reduction plot}
 \usage{
-plotDimReduceCluster(
+plotDimReduceCluster(x, ...)
+
+\S4method{plotDimReduceCluster}{SingleCellExperiment}(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  specificClusters = NULL,
+  labelClusters = FALSE,
+  groupBy = NULL,
+  labelSize = 3.5
+)
+
+\S4method{plotDimReduceCluster}{vector}(
+  x,
   dim1,
   dim2,
-  cluster,
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -18,13 +36,21 @@ plotDimReduceCluster(
 )
 }
 \arguments{
+\item{x}{Integer vector of cell cluster labels or a
+\linkS4class{SingleCellExperiment} object
+containing cluster labels for each cell in \code{"celda_cell_cluster"}
+column in \code{colData(x)}.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
+
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data
 dimensionality reduction output.}
-
-\item{cluster}{Integer vector. Contains cluster labels for each cell.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -53,16 +79,19 @@ The plot as a ggplot object
 Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a
  data dimensionality reduction tool.
- The cells are colored by its given `cluster` label.
+ The cells are colored by its given \code{cluster} label.
 }
 \examples{
-\donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
-plotDimReduceCluster(dim1 = celdaTsne[, 1],
-    dim2 = celdaTsne[, 2],
-    cluster = as.factor(clusters(celdaCGMod)$z),
-    specificClusters = c(1, 2, 3))
-}
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceCluster(x = sce,
+  reducedDimName = "celda_tSNE",
+  specificClusters = c(1, 2, 3))
+library(SingleCellExperiment)
+data(sceCeldaCG, celdaCGMod)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
+  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+  specificClusters = c(1, 2, 3))
 }

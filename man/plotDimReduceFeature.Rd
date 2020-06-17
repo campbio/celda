@@ -2,51 +2,94 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceFeature}
 \alias{plotDimReduceFeature}
+\alias{plotDimReduceFeature,SingleCellExperiment-method}
+\alias{plotDimReduceFeature,matrix-method}
 \title{Plotting feature expression on a dimensionality reduction plot}
 \usage{
-plotDimReduceFeature(
-  dim1,
-  dim2,
-  counts,
+plotDimReduceFeature(x, ...)
+
+\S4method{plotDimReduceFeature}{SingleCellExperiment}(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  useAssay = "counts",
   features,
   headers = NULL,
-  normalize = TRUE,
+  normalize = FALSE,
+  zscore = TRUE,
   exactMatch = TRUE,
-  trim = c(-2, 2),
+  trim = c(-1, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "blue",
+  colorLow = "blue4",
   colorMid = "white",
-  colorHigh = "red",
-  ncol = NULL
+  colorHigh = "firebrick1",
+  midpoint = NULL,
+  ncol = NULL,
+  decreasing = FALSE
+)
+
+\S4method{plotDimReduceFeature}{matrix}(
+  x,
+  dim1,
+  dim2,
+  features,
+  headers = NULL,
+  normalize = FALSE,
+  zscore = TRUE,
+  exactMatch = TRUE,
+  trim = c(-1, 1),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorMid = "white",
+  colorHigh = "firebrick1",
+  midpoint = NULL,
+  ncol = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Rows
+represent features and columns represent cells.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
+
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimensionality
 reduction output.}
 
-\item{counts}{Integer matrix. Rows represent features and columns
-represent cells.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{features}{Character vector. Uses these genes for plotting.}
+\item{features}{Character vector. Features in the rownames of counts to plot.}
 
 \item{headers}{Character vector. If `NULL`, the corresponding rownames are
-used as labels. Otherwise, these headers are used to label the genes.}
+used as labels. Otherwise, these headers are used to label the features.}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`.
-Default TRUE.}
+Default \code{FALSE}.}
+
+\item{zscore}{Logical. Whether to scale each feature to have a mean 0
+and standard deviation of 1. Default \code{TRUE}.}
 
 \item{exactMatch}{Logical. Whether an exact match or a partial match using
-`grep()` is used to look up the feature in the rownames of the counts
+\code{grep()} is used to look up the feature in the rownames of the counts
  matrix. Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for the data. This threshold is applied after row scaling.
-Set to NULL to disable. Default c(-2,2).}
+Set to NULL to disable. Default \code{c(-1,1)}.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -63,8 +106,18 @@ will be used to signify the midpoint on the scale. Default 'white'.}
 \item{colorHigh}{Character. A color available from `colors()`. The color
 will be used to signify the highest values on the scale. Default 'red'.}
 
+\item{midpoint}{Numeric. The value indicating the midpoint of the
+diverging color scheme. If \code{NULL}, defaults to the mean
+with 10 percent of values trimmed. Default \code{NULL}.}
+
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with greatest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
 }
 \value{
 The plot as a ggplot object
@@ -76,14 +129,20 @@ Create a scatterplot for each row of a normalized gene
  the specified feature.
 }
 \examples{
-\donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(counts = celdaCGSim$counts,
-    celdaMod = celdaCGMod)
-plotDimReduceFeature(dim1 = celdaTsne[, 1],
-    dim2 = celdaTsne[, 2],
-    counts = celdaCGSim$counts,
-    features = c("Gene_99"),
-    exactMatch = TRUE)
-}
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceFeature(x = sce,
+  reducedDimName = "celda_tSNE",
+  normalize = TRUE,
+  features = c("Gene_99"),
+  exactMatch = TRUE)
+library(SingleCellExperiment)
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceFeature(x = counts(sce),
+  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
+  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+  normalize = TRUE,
+  features = c("Gene_99"),
+  exactMatch = TRUE)
 }

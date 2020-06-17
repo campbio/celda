@@ -2,10 +2,31 @@
 % Please edit documentation in R/findMarkersTree.R
 \name{findMarkersTree}
 \alias{findMarkersTree}
+\alias{findMarkersTree,SingleCellExperiment-method}
+\alias{findMarkersTree,matrix-method}
 \title{Generate marker decision tree from single-cell clustering output}
 \usage{
-findMarkersTree(
-  features,
+findMarkersTree(x, ...)
+
+\S4method{findMarkersTree}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  class,
+  oneoffMetric = c("modified F1", "pairwise AUC"),
+  metaclusters,
+  featureLabels,
+  counts,
+  seurat,
+  threshold = 0.9,
+  reuseFeatures = FALSE,
+  altSplit = TRUE,
+  consecutiveOneoff = FALSE,
+  autoMetaclusters = TRUE,
+  seed = 12345
+)
+
+\S4method{findMarkersTree}{matrix}(
+  x,
   class,
   oneoffMetric = c("modified F1", "pairwise AUC"),
   metaclusters,
@@ -22,7 +43,14 @@ findMarkersTree(
 )
 }
 \arguments{
-\item{features}{features-by-samples numeric matrix, e.g. counts matrix.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
 
 \item{class}{Vector of cell cluster labels.}
 
@@ -35,15 +63,14 @@ cell type) and all the clusters within that metacluster (e.g. subtypes).}
 \item{featureLabels}{Vector of feature assignments, e.g. which cluster
 does each gene belong to? Useful when using clusters of features
 (e.g. gene modules or Seurat PCs) and user wishes to expand tree results
-to individual features (e.g. score individual genes within marker gene modules).}
+to individual features (e.g. score individual genes within marker gene
+modules).}
 
 \item{counts}{Numeric counts matrix. Useful when using clusters
 of features (e.g. gene modules) and user wishes to expand tree results to
 individual features (e.g. score individual genes within marker gene
-modules). Row names should be individual feature names.}
-
-\item{celda}{A \emph{celda_CG} or \emph{celda_C} object.
-Counts matrix has to be provided as well.}
+modules). Row names should be individual feature names. Ignored if
+\code{x} is a \linkS4class{SingleCellExperiment} object.}
 
 \item{seurat}{A seurat object. Note that the seurat functions
 \emph{RunPCA} and \emph{FindClusters} must have been run on the object.}
@@ -67,6 +94,9 @@ cluster that includes several clusters within it. Default is TRUE.}
 
 \item{seed}{Numeric. Seed used to enable reproducible UMAP results
 for identifying metaclusters. Default is 12345.}
+
+\item{celda}{A \emph{celda_CG} or \emph{celda_C} object.
+Counts matrix has to be provided as well.}
 }
 \value{
 A named list with six elements:
@@ -119,20 +149,22 @@ Create a decision tree that identifies gene markers for given
  balanced metric to determine rules for identifying sets of similar clusters.
 }
 \examples{
+\dontrun{
 # Generate simulated single-cell dataset using celda
-sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 
 # Celda clustering into 5 clusters & 10 modules
-cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
+cm <- celda_CG(sim_counts, K = 5, L = 10, verbose = FALSE)
 
 # Get features matrix and cluster assignments
-factorized <- factorizeMatrix(sim_counts$counts, cm)
+factorized <- factorizeMatrix(cm)
 features <- factorized$proportions$cell
-class <- clusters(cm)$z
+class <- celdaClusters(cm)
 
 # Generate Decision Tree
 DecTree <- findMarkersTree(features, class)
 
 # Plot dendrogram
 plotMarkerDendro(DecTree)
+}
 }

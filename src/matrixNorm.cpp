@@ -1,4 +1,4 @@
-// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(Rcpp)]]
 #include <Rcpp.h>
 using namespace Rcpp ;
 
@@ -27,10 +27,6 @@ SEXP fastNormProp(NumericMatrix R_counts, double R_alpha) {
 }
 
 
-// [[Rcpp::depends(RcppEigen)]]
-#include <Rcpp.h>
-using namespace Rcpp ;
-
 //' Fast normalization for numeric matrix
 //' 
 //' @param R_counts An integer matrix
@@ -55,10 +51,6 @@ SEXP fastNormPropLog(NumericMatrix R_counts, double R_alpha) {
   return Rcpp::wrap(res);
 }
 
-
-// [[Rcpp::depends(RcppEigen)]]
-#include <Rcpp.h>
-using namespace Rcpp ;
 
 //' Fast normalization for numeric matrix
 //' 
@@ -85,10 +77,6 @@ SEXP fastNormPropSqrt(NumericMatrix R_counts, double R_alpha) {
 }
 
 
-
-// [[Rcpp::depends(RcppEigen)]]
-#include <Rcpp.h>
-using namespace Rcpp ;
 
 //' get row and column indices of none zero elements in the matrix
 //' 

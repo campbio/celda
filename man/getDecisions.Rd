@@ -10,10 +10,11 @@ getDecisions(rules, features)
 getDecisions(rules, features)
 }
 \arguments{
-\item{rules}{List object. The `rules` element from  `findMarkers`
-output. Returns NA if cluster estimation was ambiguous.}
+\item{rules}{List object. The \code{rules} element from
+\code{findMarkersTree} output. Returns NA if cluster estimation was
+ambiguous.}
 
-\item{features}{A L(features) by N(samples) numeric matrix.}
+\item{features}{A L (features) by N (samples) numeric matrix.}
 }
 \value{
 A character vector of label predicitions.
@@ -32,20 +33,19 @@ Get decisions for a matrix of features. Estimate cell
 library(M3DExampleData)
 counts <- M3DExampleData::Mmus_example_list$data
 # Subset 500 genes for fast clustering
-counts <- as.matrix(counts[1501:2000, ])
-# Cluster genes ans samples each into 10 modules
-cm <- celda_CG(counts = counts, L = 10, K = 5, verbose = FALSE)
+counts <- as.matrix(counts[seq(1501, 2000), ])
+# Cluster genes and samples each into 10 modules
+sce <- celda_CG(counts = counts, L = 10, K = 5, verbose = FALSE)
 # Get features matrix and cluster assignments
-factorized <- factorizeMatrix(counts, cm)
+factorized <- factorizeMatrix(sce)
 features <- factorized$proportions$cell
-class <- clusters(cm)$z
+class <- celdaClusters(sce)
 # Generate Decision Tree
-DecTree <- findMarkers(features,
-    class,
-    oneoffMetric = "modified F1",
-    threshold = 1,
-    consecutiveOneoff = FALSE)
-
+DecTree <- findMarkersTree(features,
+  class,
+  oneoffMetric = "modified F1",
+  threshold = 1,
+  consecutiveOneoff = FALSE)
 # Get sample estimates in training data
 getDecisions(DecTree$rules, features)
 }

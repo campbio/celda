@@ -4,15 +4,16 @@
 \name{celdaGMod}
 \alias{celdaGMod}
 \title{celdaGMod}
-\format{A celda_G object}
+\format{
+A celda_G object
+#@examples
+data(celdaGSim)
+celdaGMod <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
+}
 \usage{
 celdaGMod
 }
 \description{
-celda_G results generated from celdaGsim
-}
-\examples{
-data(celdaGSim)
-celdaGMod = celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
+Old celda_G results generated from celdaGsim
 }
 \keyword{datasets}

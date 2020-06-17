@@ -2,28 +2,31 @@
 % Please edit documentation in R/celda_functions.R
 \name{recodeClusterY}
 \alias{recodeClusterY}
-\title{Recode feature module clusters}
+\title{Recode feature module labels}
 \usage{
-recodeClusterY(celdaMod, from, to)
+recodeClusterY(sce, from, to)
 }
 \arguments{
-\item{celdaMod}{Celda object of class `celda_G` or `celda_CG`.}
+\item{sce}{\linkS4class{SingleCellExperiment} object returned from
+\link{celda_G} or \link{celda_CG}. Must contain column
+\code{celda_feature_module} in \link[SummarizedExperiment]{rowData}.}
 
-\item{from}{Numeric vector. Unique values in the range of seq(L) that
-correspond to the original cluster labels in `celdaMod`.}
+\item{from}{Numeric vector. Unique values in the range of
+\code{seq(celdaModules(sce))} that correspond to the original module labels
+in \code{sce}.}
 
-\item{to}{Numeric vector. Unique values in the range of seq(L) that
-correspond to the new cluster labels.}
+\item{to}{Numeric vector. Unique values in the range of
+\code{seq(celdaModules(sce))} that correspond to the new module labels.}
 }
 \value{
-Celda object with recoded feature module clusters, with class
- corresponding to that of `celdaMod`.
+@return \linkS4class{SingleCellExperiment} object with recoded
+ feature module labels.
 }
 \description{
 Recode feature module clusters using a mapping in the
- `from` and `to` arguments.
+ \code{from} and \code{to} arguments.
 }
 \examples{
-data(celdaCGMod)
-celdaModReorderedY <- recodeClusterY(celdaCGMod, c(1, 3), c(3, 1))
+data(sceCeldaCG)
+sceReorderedY <- recodeClusterY(sceCeldaCG, c(1, 3), c(3, 1))
 }

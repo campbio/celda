@@ -2,10 +2,40 @@
 % Please edit documentation in R/celda_CG.R
 \name{celda_CG}
 \alias{celda_CG}
+\alias{celda_CG,SingleCellExperiment-method}
+\alias{celda_CG,matrix-method}
 \title{Cell and feature clustering with Celda}
 \usage{
-celda_CG(
-  counts,
+celda_CG(x, ...)
+
+\S4method{celda_CG}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  sampleLabel = NULL,
+  K,
+  L,
+  alpha = 1,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  algorithm = c("EM", "Gibbs"),
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  zInitialize = c("split", "random", "predefined"),
+  yInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  zInit = NULL,
+  yInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
+
+\S4method{celda_CG}{matrix}(
+  x,
   sampleLabel = NULL,
   K,
   L,
@@ -30,8 +60,14 @@ celda_CG(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
@@ -109,8 +145,13 @@ starting values for each feature will be randomly sampled from 1:L.
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class `celda_CG` with the cell populations clusters
- stored in `z` and feature module clusters stored in `y`.
+A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
+ \code{"celda_parameters"} slot.
+ Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
+ \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+ population clusters. Column \code{celda_feature_module} in
+ \link[SummarizedExperiment]{rowData} contains feature modules.
 }
 \description{
 Clusters the rows and columns of a count matrix containing
@@ -118,14 +159,14 @@ Clusters the rows and columns of a count matrix containing
 }
 \examples{
 data(celdaCGSim)
-celdaMod <- celda_CG(celdaCGSim$counts,
+sce <- celda_CG(celdaCGSim$counts,
     K = celdaCGSim$K,
     L = celdaCGSim$L,
     sampleLabel = celdaCGSim$sampleLabel,
     nchains = 1)
 }
 \seealso{
-`celda_G()` for feature clustering and `celda_C()` for clustering
- cells. `celdaGridSearch()` can be used to run multiple values of K/L and
- multiple chains in parallel.
+\link{celda_G} for feature clustering and \link{celda_C} for
+ clustering cells. \link{celdaGridSearch} can be used to run multiple
+ values of K/L and multiple chains in parallel.
 }

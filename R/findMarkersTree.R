@@ -5,7 +5,13 @@
 #'  Splits are determined by one of two metrics at each split: a one-off metric
 #'  to determine rules for identifying clusters by a single feature, and a
 #'  balanced metric to determine rules for identifying sets of similar clusters.
-#' @param features features-by-samples numeric matrix, e.g. counts matrix.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
 #' @param class Vector of cell cluster labels.
 #' @param oneoffMetric A character string. What one-off metric to run, either
 #'  `modified F1` or `pairwise AUC`. Default is 'modified F1'.
@@ -14,11 +20,13 @@
 #' @param featureLabels  Vector of feature assignments, e.g. which cluster
 #'  does each gene belong to? Useful when using clusters of features
 #'  (e.g. gene modules or Seurat PCs) and user wishes to expand tree results
-#'  to individual features (e.g. score individual genes within marker gene modules).
+#'  to individual features (e.g. score individual genes within marker gene
+#'  modules).
 #' @param counts Numeric counts matrix. Useful when using clusters
 #'  of features (e.g. gene modules) and user wishes to expand tree results to
 #'  individual features (e.g. score individual genes within marker gene
-#'  modules). Row names should be individual feature names.
+#'  modules). Row names should be individual feature names. Ignored if
+#'  \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @param celda A \emph{celda_CG} or \emph{celda_C} object.
 #'  Counts matrix has to be provided as well.
 #' @param seurat A seurat object. Note that the seurat functions
@@ -78,100 +86,242 @@
 #'  }
 #' }
 #' @examples
+#' \dontrun{
 #' # Generate simulated single-cell dataset using celda
-#' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+#' sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
 #' # Celda clustering into 5 clusters & 10 modules
-#' cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
+#' cm <- celda_CG(sim_counts, K = 5, L = 10, verbose = FALSE)
 #'
 #' # Get features matrix and cluster assignments
-#' factorized <- factorizeMatrix(sim_counts$counts, cm)
+#' factorized <- factorizeMatrix(cm)
 #' features <- factorized$proportions$cell
-#' class <- clusters(cm)$z
+#' class <- celdaClusters(cm)
 #'
 #' # Generate Decision Tree
 #' DecTree <- findMarkersTree(features, class)
 #'
 #' # Plot dendrogram
 #' plotMarkerDendro(DecTree)
+#' }
 #' @export
-findMarkersTree <- function(features,
-                            class,
-                            oneoffMetric = c("modified F1", "pairwise AUC"),
-                            metaclusters,
-                            featureLabels,
-                            counts,
-                            celda,
-                            seurat,
-                            threshold = 0.90,
-                            reuseFeatures = FALSE,
-                            altSplit = TRUE,
-                            consecutiveOneoff = FALSE,
-                            autoMetaclusters = TRUE,
-                            seed = 12345) {
-  if (methods::hasArg(celda)) {
-    # check that counts matrix is provided
-    if (!methods::hasArg(counts)) {
-      stop("Please provide counts matrix in addition to celda object.")
-    }
+setGeneric("findMarkersTree", function(x, ...) {
+    standardGeneric("findMarkersTree")})
 
-    # factorize matrix (proportion of each module in each cell)
-    features <-
-      celda::factorizeMatrix(counts, celda)$proportions$cell
 
-    # get class labels
-    class <- celda@clusters$z
+#' @rdname findMarkersTree
+#' @export
+setMethod("findMarkersTree",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        class,
+        oneoffMetric = c("modified F1", "pairwise AUC"),
+        metaclusters,
+        featureLabels,
+        counts,
+        seurat,
+        threshold = 0.90,
+        reuseFeatures = FALSE,
+        altSplit = TRUE,
+        consecutiveOneoff = FALSE,
+        autoMetaclusters = TRUE,
+        seed = 12345) {
 
-    # get feature labels
-    featureLabels <- paste0("L", celda@clusters$y)
-  }
-  else if (methods::hasArg(seurat)) {
-    # get counts matrix from seurat object
-    counts <- as.matrix(seurat@assays$RNA@data)
+        if ("celda_parameters" %in% names(S4Vectors::metadata(x))) {
+            counts <- SummarizedExperiment::assay(x, i = useAssay)
 
-    # get class labels
-    class <- as.character(Seurat::Idents(seurat))
+            # factorize matrix (proportion of each module in each cell)
+            features <- factorizeMatrix(x)$proportions$cell
 
-    # get feature labels
-    featureLabels <-
-      unlist(apply(
-        seurat@reductions$pca@feature.loadings, 1,
-        function(x) {
-          return(names(x)[which(x == max(x))])
+            # get class labels
+            class <- celdaClusters(x)
+
+            # get feature labels
+            featureLabels <- paste0("L", celdaModules(x))
+        } else if (methods::hasArg(seurat)) {
+            # get counts matrix from seurat object
+            counts <- as.matrix(seurat@assays$RNA@data)
+
+            # get class labels
+            class <- as.character(Seurat::Idents(seurat))
+
+            # get feature labels
+            featureLabels <-
+                unlist(apply(
+                    seurat@reductions$pca@feature.loadings, 1,
+                    function(x) {
+                        return(names(x)[which(x == max(x))])
+                    }
+                ))
+
+            # sum counts for each PC in each cell
+            features <-
+                matrix(
+                    unlist(lapply(unique(featureLabels), function(pc) {
+                        colSums(counts[featureLabels == pc, ])
+                    })),
+                    ncol = length(class),
+                    byrow = TRUE,
+                    dimnames = list(unique(featureLabels), colnames(counts))
+                )
+
+            # normalize column-wise (i.e. convert counts to proportions)
+            features <- apply(features, 2, function(x) {
+                x / sum(x)
+            })
         }
-      ))
 
-    # sum counts for each PC in each cell
-    features <-
-      matrix(
-        unlist(lapply(unique(featureLabels), function(pc) {
-          colSums(counts[featureLabels == pc, ])
-        })),
-        ncol = length(class),
-        byrow = TRUE,
-        dimnames = list(unique(featureLabels), colnames(counts))
-      )
+        if (ncol(features) != length(class)) {
+            stop("Number of columns of features must equal length of class")
+        }
 
-    # normalize column-wise (i.e. convert counts to proportions)
-    features <- apply(features, 2, function(x) {
-      x / sum(x)
-    })
-  }
+        if (any(is.na(class))) {
+            stop("NA class values")
+        }
 
-  if (ncol(features) != length(class)) {
-    stop("Number of columns of features must equal length of class")
-  }
+        if (any(is.na(features))) {
+            stop("NA feature values")
+        }
 
-  if (any(is.na(class))) {
-    stop("NA class values")
-  }
+        # Match the oneoffMetric argument
+        oneoffMetric <- match.arg(oneoffMetric)
 
-  if (any(is.na(features))) {
-    stop("NA feature values")
-  }
+        branchPoints <- .findMarkersTree(features = features,
+            class = class,
+            oneoffMetric = oneoffMetric,
+            metaclusters = metaclusters,
+            featureLabels = featureLabels,
+            counts = counts,
+            seurat = seurat,
+            threshold = threshold,
+            reuseFeatures = reuseFeatures,
+            altSplit = altSplit,
+            consecutiveOneoff = consecutiveOneoff,
+            autoMetaclusters = autoMetaclusters,
+            seed = seed)
 
-  # Match the oneoffMetric argument
-  oneoffMetric <- match.arg(oneoffMetric)
+        return(branchPoints)
+    }
+)
+
+
+#' @rdname findMarkersTree
+#' @export
+setMethod("findMarkersTree",
+    signature(x = "matrix"),
+    function(x,
+        class,
+        oneoffMetric = c("modified F1", "pairwise AUC"),
+        metaclusters,
+        featureLabels,
+        counts,
+        celda,
+        seurat,
+        threshold = 0.90,
+        reuseFeatures = FALSE,
+        altSplit = TRUE,
+        consecutiveOneoff = FALSE,
+        autoMetaclusters = TRUE,
+        seed = 12345) {
+
+        features <- x
+
+        if (methods::hasArg(celda)) {
+            # check that counts matrix is provided
+            if (!methods::hasArg(counts)) {
+                stop("Please provide counts matrix in addition to",
+                    " celda object.")
+            }
+
+            # factorize matrix (proportion of each module in each cell)
+            features <- factorizeMatrix(counts, celda)$proportions$cell
+
+            # get class labels
+            class <- celdaClusters(celda)$z
+
+            # get feature labels
+            featureLabels <- paste0("L", celdaClusters(celda)$y)
+        } else if (methods::hasArg(seurat)) {
+            # get counts matrix from seurat object
+            counts <- as.matrix(seurat@assays$RNA@data)
+
+            # get class labels
+            class <- as.character(Seurat::Idents(seurat))
+
+            # get feature labels
+            featureLabels <-
+                unlist(apply(
+                    seurat@reductions$pca@feature.loadings, 1,
+                    function(x) {
+                        return(names(x)[which(x == max(x))])
+                    }
+                ))
+
+            # sum counts for each PC in each cell
+            features <-
+                matrix(
+                    unlist(lapply(unique(featureLabels), function(pc) {
+                        colSums(counts[featureLabels == pc, ])
+                    })),
+                    ncol = length(class),
+                    byrow = TRUE,
+                    dimnames = list(unique(featureLabels), colnames(counts))
+                )
+
+            # normalize column-wise (i.e. convert counts to proportions)
+            features <- apply(features, 2, function(x) {
+                x / sum(x)
+            })
+        }
+
+        if (ncol(features) != length(class)) {
+            stop("Number of columns of features must equal length of class")
+        }
+
+        if (any(is.na(class))) {
+            stop("NA class values")
+        }
+
+        if (any(is.na(features))) {
+            stop("NA feature values")
+        }
+
+        # Match the oneoffMetric argument
+        oneoffMetric <- match.arg(oneoffMetric)
+
+        branchPoints <- .findMarkersTree(features = features,
+            class = class,
+            oneoffMetric = oneoffMetric,
+            metaclusters = metaclusters,
+            featureLabels = featureLabels,
+            counts = counts,
+            seurat = seurat,
+            threshold = threshold,
+            reuseFeatures = reuseFeatures,
+            altSplit = altSplit,
+            consecutiveOneoff = consecutiveOneoff,
+            autoMetaclusters = autoMetaclusters,
+            seed = seed)
+
+        return(branchPoints)
+    }
+)
+
+
+.findMarkersTree <- function(features,
+    class,
+    oneoffMetric,
+    metaclusters,
+    featureLabels,
+    counts,
+    seurat,
+    threshold,
+    reuseFeatures,
+    altSplit,
+    consecutiveOneoff,
+    autoMetaclusters,
+    seed) {
 
   # Transpose features
   features <- t(features)
@@ -230,8 +380,8 @@ findMarkersTree <- function(features,
     # consecutive one-offs break the code(tricky to find 1st balanced split)
     if (consecutiveOneoff) {
       stop(
-        "Cannot use metaclusters if consecutive one-offs are allowed.
-        Please set the consecutiveOneoff parameter to FALSE."
+        "Cannot use metaclusters if consecutive one-offs are allowed.",
+        " Please set the consecutiveOneoff parameter to FALSE."
       )
     }
 
@@ -244,7 +394,7 @@ findMarkersTree <- function(features,
         suppressMessages(seurat <-
           Seurat::RunUMAP(
             seurat,
-            dims = 1:ncol(seurat@reductions$pca@feature.loadings)
+            dims = seq(ncol(seurat@reductions$pca@feature.loadings))
           ))
         umap <- seurat@reductions$umap@cell.embeddings
       }
@@ -371,10 +521,13 @@ findMarkersTree <- function(features,
       # store clusters with markers at current threshold
       topLevel <- tree[[1]][[1]]
       if (topLevel$statUsed == "One-off") {
-        markerThreshold[[as.character(tmpThreshold)]] <- unlist(lapply(topLevel[1:(length(topLevel) -
-          3)], function(marker) {
-          return(marker$group1Consensus)
-        }))
+        markerThreshold[[as.character(tmpThreshold)]] <-
+          unlist(lapply(
+            topLevel[seq(length(topLevel) - 3)],
+            function(marker) {
+              return(marker$group1Consensus)
+            }
+          ))
       }
 
       # if no more balanced split
@@ -596,7 +749,7 @@ findMarkersTree <- function(features,
       })))
       addDepth <- maxDepth - attributes(dendro)$height
 
-      dendro <- dendrapply(dendro, function(node, addDepth) {
+      dendro <- stats::dendrapply(dendro, function(node, addDepth) {
         if (attributes(node)$height > 1) {
           attributes(node)$height <- attributes(node)$height +
             addDepth + 1
@@ -649,7 +802,7 @@ findMarkersTree <- function(features,
       metaclusterDendro <- newTrees[[metacluster]]$dendro
 
       # Adjust labels, member count, and midpoint of nodes
-      dendro <- dendrapply(dendro, function(node) {
+      dendro <- stats::dendrapply(dendro, function(node) {
         # Check if in right branch
         if (metacluster %in%
           as.character(attributes(node)$classLabels)) {
@@ -699,7 +852,7 @@ findMarkersTree <- function(features,
       )))$height
       metaclusterHeight <-
         attributes(metaclusterDendro)$height
-      metaclusterDendro <- dendrapply(
+      metaclusterDendro <- stats::dendrapply(
         metaclusterDendro,
         function(node,
                  parentHeight,
@@ -806,7 +959,10 @@ findMarkersTree <- function(features,
 
       # simplify top-level in rules tables to only up-regulated markers
       tree$rules <- lapply(tree$rules, function(rule) {
-        return(rule[-intersect(which(rule$level == 1), which(rule$direction == (-1))), ])
+        return(rule[-intersect(
+          which(rule$level == 1),
+          which(rule$direction == (-1))
+        ), ])
       })
 
       ## add gene-level info to rules tables
@@ -821,7 +977,7 @@ findMarkersTree <- function(features,
         toReturn <- data.frame(NULL)
 
         # loop over rows of this class
-        for (i in 1:nrow(class)) {
+        for (i in seq(nrow(class))) {
           # extract relevant genes from branch points tables
           genesAUC <- collapsedBranches[collapsedBranches$feature ==
             class$feature[i] &
@@ -830,7 +986,8 @@ findMarkersTree <- function(features,
 
           # don't forget top-level
           if (class$level[i] == 1) {
-            genesAUC <- collapsedBranches[collapsedBranches$feature == class$feature[i] &
+            genesAUC <- collapsedBranches[collapsedBranches$feature ==
+              class$feature[i] &
               collapsedBranches$level == class$level[i] &
               collapsedBranches$class == class$metacluster[i], ]
           }
@@ -852,9 +1009,10 @@ findMarkersTree <- function(features,
     }
 
     # simplify top-level branch point to save memory
-    branchPoints$top_level <- branchPoints$top_level[branchPoints$top_level$direction ==
-      1, ]
-    branchPoints$top_level <- branchPoints$top_level[!duplicated(branchPoints$top_level), ]
+    branchPoints$top_level <-
+      branchPoints$top_level[branchPoints$top_level$direction == 1, ]
+    branchPoints$top_level <-
+      branchPoints$top_level[!duplicated(branchPoints$top_level), ]
 
     # remove branch points row names
     branchPoints <- lapply(branchPoints, function(br) {
@@ -929,6 +1087,7 @@ findMarkersTree <- function(features,
   }
 }
 
+
 # helper function to create table for each branch point in the tree
 .createBranchPoints <-
   function(rules, largeMetaclusters, metaclusters) {
@@ -947,12 +1106,12 @@ findMarkersTree <- function(features,
 
           # get rules at each level
           levels <-
-            lapply(2:max(subtypeRules$level), function(level) {
+            lapply(seq(2, max(subtypeRules$level)), function(level) {
               return(subtypeRules[subtypeRules$level == level, ])
             })
           names(levels) <- paste0(
             metacluster, "_level_",
-            1:(max(subtypeRules$level) - 1)
+            seq(max(subtypeRules$level) - 1)
           )
 
           return(levels)
@@ -965,11 +1124,11 @@ findMarkersTree <- function(features,
 
       # subset rules at each level
       branchPoints <-
-        lapply(1:max(collapsed$level), function(level) {
+        lapply(seq(max(collapsed$level)), function(level) {
           return(collapsed[collapsed$level == level, ])
         })
       names(branchPoints) <-
-        paste0("level_", 1:max(collapsed$level))
+        paste0("level_", seq(max(collapsed$level)))
     }
 
     # split each level into its branch points
@@ -1038,13 +1197,13 @@ findMarkersTree <- function(features,
       if (is.list(bSplits)) {
         names(bSplits) <- paste0(
           "split_",
-          LETTERS[length(bSplits):1]
+          LETTERS[seq(length(bSplits), 1)]
         )
       }
       if (is.list(oSplits)) {
         names(oSplits) <- paste0(
           "one-off_",
-          LETTERS[length(oSplits):1]
+          LETTERS[seq(length(oSplits), 1)]
         )
       }
 
@@ -1272,7 +1431,8 @@ findMarkersTree <- function(features,
             group1Samples]
 
           # Check that there is still more than one class
-          group2Classes <- levels(droplevels(class[rownames(features) %in% group2Samples]))
+          group2Classes <- levels(droplevels(class[rownames(features) %in%
+            group2Samples]))
           if (length(group2Classes) > 1) {
             # Create branch from this split
             branch2 <- .wrapBranchHybrid(
@@ -1324,7 +1484,7 @@ findMarkersTree <- function(features,
       }, features, class)
 
     # Unlist outList so is one list per 'treeLevel'
-    treeLevel <- unlist(outList, recursive = F)
+    treeLevel <- unlist(outList, recursive = FALSE)
 
     # Increase tree depth
     mDepth <- mDepth + 1
@@ -1418,7 +1578,7 @@ findMarkersTree <- function(features,
   if (length(splitList) > 1) {
     group1Vec <- unlist(lapply(splitList, function(X) {
       X$group1Consensus
-    }), recursive = F)
+    }), recursive = FALSE)
 
     splitList <- lapply(
       unique(group1Vec),
@@ -1596,7 +1756,7 @@ findMarkersTree <- function(features,
     )
 
     # Create data.matrix
-    X <- model.matrix(~ 0 + classSort)
+    X <- stats::model.matrix(~ 0 + classSort)
 
     # Get cumulative sums
     sRCounts <- apply(X, 2, cumsum)
@@ -1671,7 +1831,10 @@ findMarkersTree <- function(features,
       # Get value at this point
       ValueCeiling <- featValuesKeep[ModF1Index]
       ValueWhich <- which(featValuesSort == ValueCeiling)
-      ModF1Value <- mean(c(featValuesSort[ValueWhich], featValuesSort[ValueWhich + 1]))
+      ModF1Value <- mean(c(
+        featValuesSort[ValueWhich],
+        featValuesSort[ValueWhich + 1]
+      ))
     } else {
       ModF1Max <- 0
       ModF1Value <- NA
@@ -1685,8 +1848,7 @@ findMarkersTree <- function(features,
   }
 
 # Run Information Gain (probability + density) on a single feature
-.splitMetricIGpIGd <-
-  function(feat, class, features, rPerf = FALSE) {
+.splitMetricIGpIGd <- function(feat, class, features, rPerf = FALSE) {
     # Get number of samples
     len <- length(class)
 
@@ -1708,7 +1870,7 @@ findMarkersTree <- function(features,
     )
 
     # Create data.matrix
-    X <- model.matrix(~ 0 + classSort)
+    X <- stats::model.matrix(~ 0 + classSort)
 
     # Get cumulative sums
     sRCounts <- apply(X, 2, cumsum)
@@ -1854,8 +2016,12 @@ findMarkersTree <- function(features,
 # Function to calculate density information gain
 .infoGainDensity <- function(splitVector, X, features, DET) {
   # Get Subsets of the feature matrix
-  sRFeat <- features[as.logical(rowSums(X[, splitVector, drop = F])), , drop = F]
-  sLFeat <- features[as.logical(rowSums(X[, !splitVector, drop = F])), , drop = F]
+  sRFeat <- features[as.logical(rowSums(X[, splitVector, drop = FALSE])), ,
+    drop = FALSE
+  ]
+  sLFeat <- features[as.logical(rowSums(X[, !splitVector, drop = FALSE])), ,
+    drop = FALSE
+  ]
 
   # Get pseudo-determinant of covariance matrices
   DETR <- .psdet(stats::cov(sRFeat))
@@ -1923,7 +2089,7 @@ findMarkersTree <- function(features,
 # Function to annotate alternate split of a soley downregulated terminal nodes
 .addAlternativeSplit <- function(tree, features, class) {
   # Unlist decsision tree
-  DecTree <- unlist(tree, recursive = F)
+  DecTree <- unlist(tree, recursive = FALSE)
 
   # Get leaves
   groupList <- lapply(DecTree, function(split) {
@@ -1991,7 +2157,7 @@ findMarkersTree <- function(features,
 
     # Subset class and features
     cSub <- droplevels(class[sampKeep])
-    fSub <- features[sampKeep, featKeep, drop = F]
+    fSub <- features[sampKeep, featKeep, drop = FALSE]
 
     # Get best alternative split
     altStats <- do.call(
@@ -2003,7 +2169,7 @@ findMarkersTree <- function(features,
                  features,
                  class,
                  cInt) {
-          Val <- splitMetric(feat, cSub, fSub, rPerf = F)
+          Val <- splitMetric(feat, cSub, fSub, rPerf = FALSE)
 
           # Get node1 classes
           node1Class <- class[features[, feat] > Val]
@@ -2038,7 +2204,7 @@ findMarkersTree <- function(features,
             feat = feat,
             val = Val,
             stat = HM,
-            stringsAsFactors = F
+            stringsAsFactors = FALSE
           ))
         }, .splitMetricModF1, fSub, cSub, group2only
       )
@@ -2142,7 +2308,7 @@ getDecisions <- function(rules, features) {
         # For multiple direction == 1, use one with the top stat
         if (sum(ruleClass$direction == 1) > 1) {
           ruleClass <- ruleClass[order(ruleClass$direction,
-            decreasing = T
+            decreasing = TRUE
           ), ]
           ruleClass <- ruleClass[c(
             which.max(ruleClass$stat[ruleClass$direction == 1]),
@@ -2203,7 +2369,7 @@ getDecisions <- function(rules, features) {
 # Function to reformat raw tree ouput to a dendrogram
 .convertToDendrogram <- function(tree, class, splitNames = NULL) {
   # Unlist decision tree (one element for each split)
-  DecTree <- unlist(tree, recursive = F)
+  DecTree <- unlist(tree, recursive = FALSE)
 
   if (is.null(splitNames)) {
     # Name split by gene and threshold
@@ -2231,7 +2397,7 @@ getDecisions <- function(rules, features) {
     names(splitNames) <- sub("1_", "", names(splitNames))
   }
   else {
-    names(splitNames) <- 1:(length(DecTree[[1]]) - 3)
+    names(splitNames) <- seq(length(DecTree[[1]]) - 3)
   }
 
   # Get Stat Used
@@ -2342,7 +2508,10 @@ getDecisions <- function(rules, features) {
     ))
 
     # Add attributes
-    classLabels <- names(matCollapse[subUnderscore(matCollapse, ncharX(i)) == i])
+    classLabels <- names(matCollapse[subUnderscore(
+      matCollapse,
+      ncharX(i)
+    ) == i])
     members <- length(classLabels)
 
     # Add height, set to one if leaf
@@ -2497,7 +2666,7 @@ subUnderscore <- function(x, n) {
                   direction = rep(sdir, length(feat)),
                   value = rep(val, each = length(groups)),
                   stat = rep(stat, each = length(groups)),
-                  stringsAsFactors = F
+                  stringsAsFactors = FALSE
                 )
               }))
 
@@ -2515,8 +2684,9 @@ subUnderscore <- function(x, n) {
 
     # Generate list of rules for each class
     if (topLevelMeta) {
-      orderedClass <- unique(class2featuresIndices[class2featuresIndices$direction ==
-        1, "class"])
+      orderedClass <- unique(class2featuresIndices[
+        class2featuresIndices$direction == 1, "class"
+      ])
     }
     else {
       orderedClass <- levels(class)
@@ -2548,6 +2718,7 @@ subUnderscore <- function(x, n) {
 #' @param boxSize Numeric value. Size of rule labels. Default is 7.
 #' @param boxColor Character value. Color of rule labels. Default is black.
 #' @examples
+#' \dontrun{
 #' # Generate simulated single-cell dataset using celda
 #' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
@@ -2557,13 +2728,14 @@ subUnderscore <- function(x, n) {
 #' # Get features matrix and cluster assignments
 #' factorized <- factorizeMatrix(sim_counts$counts, cm)
 #' features <- factorized$proportions$cell
-#' class <- clusters(cm)$z
+#' class <- celdaClusters(cm)
 #'
 #' # Generate Decision Tree
 #' DecTree <- findMarkersTree(features, class, threshold = 1)
 #'
 #' # Plot dendrogram
 #' plotMarkerDendro(DecTree)
+#' }
 #' @return A ggplot2 object
 #' @export
 plotMarkerDendro <- function(tree,
@@ -2650,7 +2822,7 @@ plotMarkerDendro <- function(tree,
 
   # Remove duplicated labels
   dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$y,
-    decreasing = T
+    decreasing = TRUE
   ), ]
   dendSegsLabelled <- dendSegsLabelled[!duplicated(dendSegsLabelled[
     ,
@@ -2779,9 +2951,9 @@ plotMarkerDendro <- function(tree,
 
     # Add metacluster labels to top of plot
     dendroP <- dendroP +
-      geom_text(
+      ggplot2::geom_text(
         data = metaclusterText,
-        aes(
+        ggplot2::aes(
           x = metaclusterText$xend,
           y = metaclusterText$y,
           label = metaclusterText$label,
@@ -2794,7 +2966,7 @@ plotMarkerDendro <- function(tree,
       )
 
     # adjust coordinates of plot to show labels
-    dendroP <- dendroP + coord_cartesian(
+    dendroP <- dendroP + ggplot2::coord_cartesian(
       ylim =
         c(
           0,
@@ -2863,7 +3035,7 @@ plotMarkerDendro <- function(tree,
 
 #' @title Generate heatmap for a marker decision tree
 #' @description Creates heatmap for a specified branch point in a marker tree.
-#' @param tree A decision tree from CELDA's \emph{findMarkersTree} function.
+#' @param tree A decision tree returned from \link{findMarkersTree} function.
 #' @param counts Numeric matrix. Gene-by-cell counts matrix.
 #' @param branchPoint Character. Name of branch point to plot heatmap for.
 #' Name should match those in \emph{tree$branchPoints}.
@@ -2879,28 +3051,28 @@ plotMarkerDendro <- function(tree,
 #' @return A heatmap visualizing the counts matrix for the cells and genes at
 #' the specified branch point.
 #' @examples
+#' \dontrun{
 #' # Generate simulated single-cell dataset using celda
-#' sim_counts <- celda::simulateCells("celda_CG", K = 4, L = 10, G = 100)
+#' sim_counts <- simulateCells("celda_CG", K = 4, L = 10, G = 100)
 #'
 #' # Celda clustering into 5 clusters & 10 modules
-#' cm <- celda_CG(sim_counts$counts, K = 5, L = 10, verbose = FALSE)
+#' cm <- celda_CG(sim_counts, K = 5, L = 10, verbose = FALSE)
 #'
 #' # Get features matrix and cluster assignments
-#' factorized <- factorizeMatrix(sim_counts$counts, cm)
+#' factorized <- factorizeMatrix(cm)
 #' features <- factorized$proportions$cell
-#' class <- clusters(cm)$z
+#' class <- celdaClusters(cm)
 #'
 #' # Generate Decision Tree
 #' DecTree <- findMarkersTree(features, class, threshold = 1)
 #'
 #' # Plot example heatmap
-#' plotMarkerHeatmap(DecTree, sim_counts$counts,
+#' plotMarkerHeatmap(DecTree, assay(sim_counts),
 #'   branchPoint = "top_level",
-#'   featureLabels = paste0("L", clusters(cm)$y)
-#' )
+#'   featureLabels = paste0("L", celdaModules(cm)))
+#' }
 #' @export
-plotMarkerHeatmap <-
-  function(tree,
+plotMarkerHeatmap <- function(tree,
            counts,
            branchPoint,
            featureLabels,
@@ -2912,8 +3084,8 @@ plotMarkerHeatmap <-
     # check that user entered valid branch point name
     if (is.null(branch)) {
       stop(
-        "Invalid branch point.
-        Branch point name should match one of those in tree$branchPoints."
+        "Invalid branch point.",
+        " Branch point name should match one of those in tree$branchPoints."
       )
     }
 
@@ -2945,8 +3117,8 @@ plotMarkerHeatmap <-
     # make sure feature labels match the table
     if (!all(branch$feature %in% featureLabels)) {
       stop(
-        "Provided feature labels don't match those in the tree.
-        Please check the feature names in the tree's rules' table."
+        "Provided feature labels don't match those in the tree.",
+        " Please check the feature names in the tree's rules' table."
       )
     }
 
@@ -3017,14 +3189,14 @@ plotMarkerHeatmap <-
       colOrder <- data.frame(
         groupName = names(sort(
           table(tree$metaclusterLabels),
-          decreasing = T
+          decreasing = TRUE
         )),
         groupIndex = seq_along(unique(tree$metaclusterLabels))
       )
 
       # order the markers for metaclusters
-      allMarkers <-
-        setNames(as.list(colOrder$groupName), colOrder$groupName)
+      allMarkers <- stats::setNames(as.list(colOrder$groupName),
+          colOrder$groupName)
       allMarkers <- lapply(allMarkers, function(x) {
         unique(branch[branch$metacluster == x, "feature"])
       })
@@ -3210,13 +3382,16 @@ plotMarkerHeatmap <-
 
       # order the clusters such that up-regulated come first
       colOrder <- data.frame(
-        groupName = unique(branch[order(branch$direction, decreasing = T), "class"]),
+        groupName = unique(branch[
+          order(branch$direction, decreasing = TRUE),
+          "class"
+        ]),
         groupIndex = seq_along(unique(branch$class))
       )
 
       # order the markers for clusters
-      allMarkers <-
-        setNames(as.list(colOrder$groupName), colOrder$groupName)
+      allMarkers <- stats::setNames(as.list(colOrder$groupName),
+          colOrder$groupName)
       allMarkers <- lapply(allMarkers, function(x) {
         unique(branch[branch$class == x & branch$direction == 1, "feature"])
       })
@@ -3267,7 +3442,7 @@ plotMarkerHeatmap <-
   counts <- t(scale(t(counts)))
 
   # get indices of genes which have NA
-  zeroVarianceGenes <- which(!complete.cases(counts))
+  zeroVarianceGenes <- which(!stats::complete.cases(counts))
 
   # find overlap between zero-variance genes and marker genes
   zeroVarianceMarkers <- intersect(zeroVarianceGenes, markers)

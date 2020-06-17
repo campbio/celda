@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.3.4
+Version: 1.5.6
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre")),
     person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
@@ -8,66 +8,31 @@ Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
     person("Eric", "Reed", email="reeder@bu.edu", role = c("aut")),
     person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")))
-Description: celda is a Bayesian hierarchical model that can co-cluster features and cells in single cell sequencing data.
-Depends:
-    R (>= 3.6)
+Description: Utilizing Bayesian hierarchical models to analyze single-cell genomic data.
+Depends: R (>= 3.6)
 VignetteBuilder: knitr
-Imports:
-    plyr,
-    foreach,
-    ggplot2,
-    RColorBrewer,
-    grid,
-    scales,
-    gtable,
-    grDevices,
-    graphics,
-    matrixStats,
-    doParallel,
-    digest,
-    gridExtra,
-    methods,
-    reshape2,
-    MAST,
-    S4Vectors,
-    data.table,
-    Rcpp,
-    RcppArmadillo,
-    RcppEigen,
-    uwot,
-    enrichR,
-    stringi,
-    SummarizedExperiment,
-    MCMCprecision,
-    ggrepel,
-    Rtsne,
-    withr,
-    dendextend,
-    ggdendro,
-    pROC,
-    scater (>= 1.14.4),
-    scran,
-    SingleCellExperiment,
-    dbscan,
-    DelayedArray,
-    Seurat,
-    stringr,
-    Matrix
-Suggests:
-    testthat,
-    knitr,
-    roxygen2,
-    rmarkdown,
-    biomaRt,
-    covr,
-    BiocManager,
-    BiocStyle,
-    M3DExampleData,
-    TENxPBMCData
-LinkingTo: RcppArmadillo, Rcpp, RcppEigen
+Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
+        grDevices, graphics, matrixStats, doParallel, digest,
+        gridExtra, methods, reshape2, MAST, S4Vectors, data.table,
+        Rcpp, RcppEigen, uwot, enrichR, stringi, SummarizedExperiment,
+        MCMCprecision, ggrepel, Rtsne, withr, dendextend, ggdendro,
+        pROC, scater (>= 1.14.4), scran, SingleCellExperiment, dbscan,
+        DelayedArray, Seurat, stringr, Matrix
+Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
+        BiocManager, BiocStyle, M3DExampleData, TENxPBMCData
+LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: false
-RoxygenNote: 7.0.2
+LazyData: true
+RoxygenNote: 7.1.0
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian
+NeedsCompilation: yes
+Packaged: 2020-04-02 18:47:49 UTC; josh
+Author: Joshua Campbell [aut, cre],
+  Sean Corbett [aut],
+  Yusuke Koga [aut],
+  Shiyi Yang [aut],
+  Eric Reed [aut],
+  Zhe Wang [aut]
+Maintainer: Joshua Campbell <camp@bu.edu>
