@@ -36,8 +36,8 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
         n = 2,
         seed = 12345) {
 
-        if (!module %in% celdaClusters(x)) {
-            stop("Module ", module, " is not found in celdaClusters(x).",
+        if (!module %in% celdaModules(x)) {
+            stop("Module ", module, " is not found in celdaModules(x).",
                 " Please specify a valid module.")
         }
 
