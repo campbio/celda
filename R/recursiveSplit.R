@@ -418,6 +418,8 @@ setMethod("recursiveSplitCell",
     verbose = verbose
   )
 
+  .validateCounts(counts)
+
   startTime <- Sys.time()
   counts <- .processCounts(counts)
   countChecksum <- .createCountChecksum(counts)
@@ -1150,6 +1152,8 @@ setMethod("recursiveSplitModule",
     verbose = verbose
   )
   startTime <- Sys.time()
+
+  .validateCounts(counts)
 
   counts <- .processCounts(counts)
   countChecksum <- .createCountChecksum(counts)
