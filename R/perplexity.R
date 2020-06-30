@@ -720,11 +720,11 @@ setMethod("plotGridSearchPerplexityDiff",
         celdaList <- S4Vectors::metadata(x)$celda_grid_search
 
         if (model == "celda_C") {
-            g <- .plotGridSearchPerplexityDiffC(celdaList, sep, k = k)
+            g <- .plotGridSearchPerplexityDiffC(celdaList, sep, n = n)
         } else if (model == "celda_G") {
-            g <- .plotGridSearchPerplexityDiffG(celdaList, sep, k = k)
+            g <- .plotGridSearchPerplexityDiffG(celdaList, sep, n = n)
         } else if (model == "celda_CG") {
-            g <- .plotGridSearchPerplexityDiffCG(celdaList, sep, k = k)
+            g <- .plotGridSearchPerplexityDiffCG(celdaList, sep, n = n)
         } else {
             stop("S4Vectors::metadata(X)$celda_grid_search@",
                 "celdaGridSearchParameters$model must be",
