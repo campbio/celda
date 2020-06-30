@@ -809,7 +809,10 @@ setMethod("celda_C",
 .prepareCountsForDimReductionCeldaC <- function(sce,
     useAssay,
     maxCells,
-    minClusterSize) {
+    minClusterSize,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -864,9 +867,9 @@ setMethod("celda_C",
 
     cellIx <- which(zInclude)
     norm <- t(normalizeCounts(counts[, cellIx],
-        normalize = "proportion",
-        transformationFun = sqrt
-    ))
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun))
     return(list(norm = norm, cellIx = cellIx))
 }
 

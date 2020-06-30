@@ -56,6 +56,10 @@
 #'  size of each cell by the median library size across all cells. 'mean'
 #'  divides the library size of each cell by the mean library size across all
 #'  cells.
+#' @param scaleFactor Numeric. Sets the scale factor for cell-level
+#'  normalization. This scale factor is multiplied to each cell after the
+#'  library size of each cell had been adjusted in \code{normalize}. Default
+#'  \code{NULL} which means no scale factor is applied.
 #' @param transformationFun Function. Applys a transformation such as `sqrt`,
 #'  `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be
 #'  applied. Occurs after normalization. Default NULL.
@@ -74,10 +78,9 @@
 #'   pseudocountNormalize = 1)
 #' @export
 normalizeCounts <- function(counts,
-                            normalize = c(
-                              "proportion", "cpm",
-                              "median", "mean"
-                            ),
+                            normalize = c("proportion", "cpm",
+                              "median", "mean"),
+                            scaleFactor = NULL,
                             transformationFun = NULL,
                             scaleFun = NULL,
                             pseudocountNormalize = 0,
@@ -107,6 +110,11 @@ normalizeCounts <- function(counts,
       "mean" = sweep(counts, 2, cs / mean(cs), "/")
     )
   }
+
+  if (!is.null(scaleFactor)) {
+      norm <- norm * scaleFactor
+  }
+
   if (!is.null(transformationFun)) {
     norm <- do.call(
       transformationFun,

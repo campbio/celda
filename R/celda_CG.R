@@ -912,7 +912,10 @@ setMethod("celda_CG",
     useAssay,
     maxCells,
     minClusterSize,
-    modules) {
+    modules,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -981,9 +984,9 @@ setMethod("celda_CG",
     cellIx <- which(zInclude)
 
     norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
-        normalize = "proportion",
-        transformationFun = sqrt
-    ))
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun))
     return(list(norm = norm, cellIx = cellIx))
 }
 

@@ -22,24 +22,40 @@
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @param nNeighbors The size of local neighborhood used for
-#'   manifold approximation. Larger values result in more global
-#'   views of the manifold, while smaller values result in more
-#'   local data being preserved. Default 30.
-#'   See \link[uwot]{umap} for more information.
+#'  manifold approximation. Larger values result in more global
+#'  views of the manifold, while smaller values result in more
+#'  local data being preserved. Default 30.
+#'  See \link[uwot]{umap} for more information.
 #' @param minDist The effective minimum distance between embedded points.
-#'   Smaller values will result in a more clustered/clumped
-#'   embedding where nearby points on the manifold are drawn
-#'   closer together, while larger values will result on a more
-#'   even dispersal of points. Default 0.75.
-#'   See \link[uwot]{umap} for more information.
+#'  Smaller values will result in a more clustered/clumped
+#'  embedding where nearby points on the manifold are drawn
+#'  closer together, while larger values will result on a more
+#'  even dispersal of points. Default 0.75.
+#'  See \link[uwot]{umap} for more information.
 #' @param spread The effective scale of embedded points. In combination with
 #'  \code{min_dist}, this determines how clustered/clumped the
 #'   embedded points are. Default 1. See \link[uwot]{umap} for more information.
 #' @param pca Logical. Whether to perform
-#' dimensionality reduction with PCA before UMAP. Only works for celda_C
+#'  dimensionality reduction with PCA before UMAP. Only works for celda_C
 #'  \code{sce} objects.
 #' @param initialDims Integer. Number of dimensions from PCA to use as
-#' input in UMAP. Default 50. Only works for celda_C \code{sce} objects.
+#'  input in UMAP. Default 50. Only works for celda_C \code{sce} objects.
+#' @param normalize Character. Passed to \link{normalizeCounts} in
+#'  normalization step. Divides counts by the library sizes for each
+#'  cell. One of 'proportion', 'cpm', 'median', or 'mean'. 'proportion' uses
+#'  the total counts for each cell as the library size. 'cpm' divides the
+#'  library size of each cell by one million to produce counts per million.
+#'  'median' divides the library size of each cell by the median library size
+#'  across all cells. 'mean' divides the library size of each cell by the mean
+#'  library size across all cells.
+#' @param scaleFactor Numeric. Sets the scale factor for cell-level
+#'  normalization. This scale factor is multiplied to each cell after the
+#'  library size of each cell had been adjusted in \code{normalize}. Default
+#'  \code{NULL} which means no scale factor is applied.
+#' @param transformationFun Function. Applys a transformation such as 'sqrt',
+#'  'log', 'log2', 'log10', or 'log1p'. If \code{NULL}, no transformation will
+#'  be applied. Occurs after applying normalization and scale factor. Default
+#'  \code{NULL}.
 #' @param cores Number of threads to use. Default 1.
 #' @param ... Additional parameters to pass to \link[uwot]{umap}.
 #' @return \code{sce} with UMAP coordinates
@@ -69,6 +85,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
         spread = 1,
         pca = TRUE,
         initialDims = 50,
+        normalize = "proportion",
+        scaleFactor = NULL,
+        transformationFun = sqrt,
         cores = 1,
         ...) {
 
@@ -84,6 +103,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                 spread = spread,
                 pca = pca,
                 initialDims = initialDims,
+                normalize = normalize,
+                scaleFactor = scaleFactor,
+                transformationFun = transformationFun,
                 cores = cores,
                 ...)
         } else {
@@ -99,6 +121,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
                     spread = spread,
                     pca = pca,
                     initialDims = initialDims,
+                    normalize = normalize,
+                    scaleFactor = scaleFactor,
+                    transformationFun = transformationFun,
                     cores = cores,
                     ...))
         }
@@ -120,6 +145,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     pca,
     initialDims,
     cores,
+    normalize,
+    scaleFactor,
+    transformationFun,
     ...) {
 
     celdaMod <- celdaModel(sce)
@@ -134,6 +162,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
             spread = spread,
             pca = pca,
             initialDims = initialDims,
+            normalize = normalize,
+            scaleFactor = scaleFactor,
+            transformationFun = transformationFun,
             cores = cores,
             ...)
     } else if (celdaMod == "celda_CG") {
@@ -146,6 +177,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
             nNeighbors = nNeighbors,
             minDist = minDist,
             spread = spread,
+            normalize = normalize,
+            scaleFactor = scaleFactor,
+            transformationFun = transformationFun,
             cores = cores,
             ...)
     } else if (celdaMod == "celda_G") {
@@ -158,6 +192,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
             nNeighbors = nNeighbors,
             minDist = minDist,
             spread = spread,
+            normalize = normalize,
+            scaleFactor = scaleFactor,
+            transformationFun = transformationFun,
             cores = cores,
             ...)
     } else {
@@ -178,13 +215,19 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     spread,
     pca,
     initialDims,
+    normalize,
+    scaleFactor,
+    transformationFun,
     cores,
     ...) {
 
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce,
-        useAssay,
-        maxCells,
-        minClusterSize)
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce = sce,
+        useAssay = useAssay,
+        maxCells = maxCells,
+        minClusterSize = minClusterSize,
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun)
     umapRes <- .calculateUmap(preparedCountInfo$norm,
         nNeighbors = nNeighbors,
         minDist = minDist,
@@ -212,14 +255,20 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     nNeighbors,
     minDist,
     spread,
+    normalize,
+    scaleFactor,
+    transformationFun,
     cores,
     ...) {
 
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce,
-        useAssay,
-        maxCells,
-        minClusterSize,
-        modules)
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce = sce,
+        useAssay = useAssay,
+        maxCells = maxCells,
+        minClusterSize = minClusterSize,
+        modules = modules,
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun)
     umapRes <- .calculateUmap(preparedCountInfo$norm,
         nNeighbors = nNeighbors,
         minDist = minDist,
@@ -235,23 +284,29 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
 }
 
 
-.celdaUmapG <- function(sce = sce,
-    useAssay = useAssay,
-    maxCells = maxCells,
-    minClusterSize = minClusterSize,
-    modules = modules,
-    seed = seed,
-    nNeighbors = nNeighbors,
-    minDist = minDist,
-    spread = spread,
-    cores = cores,
+.celdaUmapG <- function(sce,
+    useAssay,
+    maxCells,
+    minClusterSize,
+    modules,
+    seed,
+    nNeighbors,
+    minDist,
+    spread,
+    normalize,
+    scaleFactor,
+    transformationFun,
+    cores,
     ...) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaG(sce = sce,
         useAssay = useAssay,
         maxCells = maxCells,
         minClusterSize = minClusterSize,
-        modules = modules)
+        modules = modules,
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun)
     umapRes <- .calculateUmap(preparedCountInfo$norm,
         nNeighbors = nNeighbors,
         minDist = minDist,

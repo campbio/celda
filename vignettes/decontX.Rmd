@@ -30,8 +30,9 @@ Droplet-based microfluidic devices have become widely used to perform single-cel
 celda can be installed from Bioconductor:
 
 ```{r install, eval= FALSE}
-if (!requireNamespace("BiocManager", quietly=TRUE)) {
-    install.packages("BiocManager")}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
 BiocManager::install("celda")
 ```
 
@@ -58,9 +59,9 @@ if (!requireNamespace("TENxPBMCData", quietly = TRUE)) {
 }
 
 # Load PBMC data
-library(TENxPBMCData)  
+library(TENxPBMCData)
 pbmc4k <- TENxPBMCData("pbmc4k")
-colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep="_")
+colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep = "_")
 rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
 ```
 
@@ -70,7 +71,7 @@ rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
 To run decontX with a SingleCellExperiment object, simply use the following command. 
 
 ```{r decontX, eval=TRUE, message=FALSE}
-pbmc4k <- decontX(x = pbmc4k) 
+pbmc4k <- decontX(x = pbmc4k)
 ```
 
 The contamination can be found in the `colData(pbmc4k)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(pbmc4k)`. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. 
@@ -170,7 +171,7 @@ Some helfpul hints when using `plotDecontXMarkerExpression`:
 ```{r plot_norm_counts, eval = FALSE}
 pbmc4k <- scater::logNormCounts(pbmc4k,
     exprs_values = "decontXcounts",
-    name="dlogcounts")
+    name = "dlogcounts")
 
 plotDecontXMarkerExpression(pbmc4k,
     markers = markers[["Monocyte_Markers"]],
@@ -200,7 +201,7 @@ pbmc4k.delta <- decontX(pbmc4k, delta = c(9, 20), estimateDelta = FALSE)
 plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination,
      xlab = "DecontX estimated priors",
      ylab = "Setting priors to estimate higher contamination")
-abline(0, 1, col="red", lwd=2)
+abline(0, 1, col = "red", lwd = 2)
 ```
 
 
