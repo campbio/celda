@@ -689,7 +689,8 @@ setMethod("plotGridSearchPerplexity",
 
 #' @title Visualize perplexity differences of a list of celda models
 #' @description Visualize perplexity differences of every model in a celdaList,
-#'  by unique K/L combinations.
+#'  by unique K/L combinations. Line represents centered moving average with
+#'  windows of length \code{n}.
 #' @param x Can be one of
 #' \itemize{
 #'  \item A \linkS4class{SingleCellExperiment} object returned from
@@ -698,6 +699,7 @@ setMethod("plotGridSearchPerplexity",
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
+#' @param n Integer. Width of the rolling window. Default 10.
 #' @return A ggplot plot object showing perplexity diferences as a function of
 #'  clustering parameters.
 #' @export
@@ -713,16 +715,16 @@ setGeneric("plotGridSearchPerplexityDiff", function(x, ...) {
 #' @export
 setMethod("plotGridSearchPerplexityDiff",
     signature(x = "SingleCellExperiment"),
-    function(x, sep = 1) {
+    function(x, sep = 1, n = 10) {
         model <- x@metadata$celda_grid_search@celdaGridSearchParameters$model
         celdaList <- S4Vectors::metadata(x)$celda_grid_search
 
         if (model == "celda_C") {
-            g <- .plotGridSearchPerplexityDiffC(celdaList, sep)
+            g <- .plotGridSearchPerplexityDiffC(celdaList, sep, k = k)
         } else if (model == "celda_G") {
-            g <- .plotGridSearchPerplexityDiffG(celdaList, sep)
+            g <- .plotGridSearchPerplexityDiffG(celdaList, sep, k = k)
         } else if (model == "celda_CG") {
-            g <- .plotGridSearchPerplexityDiffCG(celdaList, sep)
+            g <- .plotGridSearchPerplexityDiffCG(celdaList, sep, k = k)
         } else {
             stop("S4Vectors::metadata(X)$celda_grid_search@",
                 "celdaGridSearchParameters$model must be",
@@ -744,16 +746,16 @@ setMethod("plotGridSearchPerplexityDiff",
 #' @export
 setMethod("plotGridSearchPerplexityDiff",
     signature(x = "celdaList"),
-    function(x, sep = 1) {
+    function(x, sep = 1, n = 10) {
         g <- do.call(paste0(".plotGridSearchPerplexityDiff",
             unlist(strsplit(as.character(class(resList(x)[[1]])), "_"))[[2]]),
-            args = list(x, sep))
+            args = list(x, sep, n))
         return(g)
     }
 )
 
 
-.plotGridSearchPerplexityDiffCG <- function(celdaList, sep) {
+.plotGridSearchPerplexityDiffCG <- function(celdaList, sep, n) {
     if (!all(c("K", "L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs K and L columns.")
     }
@@ -789,6 +791,8 @@ setMethod("plotGridSearchPerplexityDiff",
         colnames(diffMeansByK) <- c("K", "L", "meanperpdiffK")
         diffMeansByK$K <- as.factor(diffMeansByK$K)
         diffMeansByK$L <- as.factor(diffMeansByK$L)
+        diffMeansByK$rollmean <- data.table::frollmean(
+            diffMeansByK$meanperpdiffK, n = n, align = "center")
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
@@ -797,9 +801,8 @@ setMethod("plotGridSearchPerplexityDiff",
                 ggplot2::aes_string(color = "L")) +
             ggplot2::scale_color_discrete(name = "L") +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
-                ggplot2::aes_string(
-                    x = "K",
-                    y = "meanperpdiffK", group = "L", color = "L")) +
+                ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                    color = "L"), size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
             ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$K))[2],
@@ -822,7 +825,9 @@ setMethod("plotGridSearchPerplexityDiff",
             FUN = mean))
         colnames(diffMeansByL) <- c("K", "L", "meanperpdiffL")
         diffMeansByL$K <- as.factor(diffMeansByL$K)
-        diffMeansByK$L <- as.factor(diffMeansByL$L)
+        diffMeansByL$L <- as.factor(diffMeansByL$L)
+        diffMeansByL$rollmean <- data.table::frollmean(
+            diffMeansByL$meanperpdiffL, n = n, align = "center")
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
@@ -832,7 +837,8 @@ setMethod("plotGridSearchPerplexityDiff",
             ggplot2::geom_path(
                 data = diffMeansByL[!is.na(meanperpdiffL), ],
                 ggplot2::aes_string(
-                    x = "L", y = "meanperpdiffL", group = "K", color = "K")) +
+                    x = "L", y = "rollmean", group = "K", color = "K"),
+                size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
             ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$L))[2],
@@ -847,7 +853,7 @@ setMethod("plotGridSearchPerplexityDiff",
 }
 
 
-.plotGridSearchPerplexityDiffC <- function(celdaList, sep) {
+.plotGridSearchPerplexityDiffC <- function(celdaList, sep, n) {
     if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
     }
@@ -878,13 +884,16 @@ setMethod("plotGridSearchPerplexityDiff",
             FUN = mean))
         colnames(diffMeansByK) <- c("K", "meanperpdiffK")
         diffMeansByK$K <- as.factor(diffMeansByK$K)
+        diffMeansByK$rollmean <- data.table::frollmean(
+            diffMeansByK$meanperpdiffK, n = n, align = "center")
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
             ggplot2::geom_jitter(height = 0, width = 0.1) +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
-                ggplot2::aes_string(x = "K", y = "meanperpdiffK", group = 1)) +
+                ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
+                size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
             ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$K))[2],
@@ -898,7 +907,7 @@ setMethod("plotGridSearchPerplexityDiff",
 }
 
 
-.plotGridSearchPerplexityDiffG <- function(celdaList, sep) {
+.plotGridSearchPerplexityDiffG <- function(celdaList, sep, n) {
     if (!all(c("L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column L.")
     }
@@ -929,13 +938,16 @@ setMethod("plotGridSearchPerplexityDiff",
             FUN = mean))
         colnames(diffMeansByL) <- c("L", "meanperpdiffL")
         diffMeansByL$L <- as.factor(diffMeansByL$L)
+        diffMeansByL$rollmean <- data.table::frollmean(
+            diffMeansByL$meanperpdiffL, n = n, align = "center")
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1) +
             ggplot2::geom_path(data = diffMeansByL[!is.na(meanperpdiffL), ],
-                ggplot2::aes_string(x = "L", y = "meanperpdiffL", group = 1)) +
+                ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
+                size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
             ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$L))[2],

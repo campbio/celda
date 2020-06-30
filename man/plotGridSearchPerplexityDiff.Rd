@@ -8,9 +8,9 @@
 \usage{
 plotGridSearchPerplexityDiff(x, ...)
 
-\S4method{plotGridSearchPerplexityDiff}{SingleCellExperiment}(x, sep = 1)
+\S4method{plotGridSearchPerplexityDiff}{SingleCellExperiment}(x, sep = 1, n = 10)
 
-\S4method{plotGridSearchPerplexityDiff}{celdaList}(x, sep = 1)
+\S4method{plotGridSearchPerplexityDiff}{celdaList}(x, sep = 1, n = 10)
 }
 \arguments{
 \item{x}{Can be one of
@@ -22,6 +22,8 @@ plotGridSearchPerplexityDiff(x, ...)
  \item celdaList object.}}
 
 \item{sep}{Numeric. Breaks in the x axis of the resulting plot.}
+
+\item{n}{Integer. Width of the rolling window. Default 10.}
 }
 \value{
 A ggplot plot object showing perplexity diferences as a function of
@@ -29,7 +31,8 @@ A ggplot plot object showing perplexity diferences as a function of
 }
 \description{
 Visualize perplexity differences of every model in a celdaList,
- by unique K/L combinations.
+ by unique K/L combinations. Line represents centered moving average with
+ windows of length \code{n}.
 }
 \examples{
 data(sceCeldaCGGridSearch)
