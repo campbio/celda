@@ -47,6 +47,7 @@ The package can be loaded using the `library` command.
 
 ```{r, eval = TRUE, message = FALSE}
 library(celda)
+library(SingleCellExperiment)
 ```
 
 Complete list of help files are accessible using the help command with a `package` option.
@@ -108,7 +109,7 @@ simsce <- selectFeatures(simsce)
 There are currently three models within *celda* package: `celda_C` will cluster cells, `celda_G` will cluster features, and `celda_CG` will simultaneously cluster cells and features. Within the functions the `K` parameter will be the number of cell populations to be estimated, while the `L` parameter will be the number of feature modules to be estimated in the output model.
 
 ```{r, warning = FALSE, message = FALSE}
-sce <- celda_CG(x = simsce, K = 5, L = 10, verbose = FALSE)
+sce <- celda_CG(x = simsce, K = 5, L = 10, verbose = FALSE, nchains = 1)
 ```
 
 Here is a comparison between the true cluster labels and the estimated cluster labels.
