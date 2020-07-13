@@ -246,7 +246,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
         SingleCellExperiment::altExp(x, altExpName) <- altExp
-        return(sce)
+        return(x)
     }
 )
 
@@ -1005,7 +1005,7 @@ setMethod("recursiveSplitModule",
             verbose = verbose,
             logfile = logfile)
         SingleCellExperiment::altExp(x, altExpName) <- altExp
-        return(sce)
+        return(x)
     }
 )
 

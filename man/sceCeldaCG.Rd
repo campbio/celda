@@ -17,9 +17,11 @@ A \linkS4class{SingleCellExperiment} object containing the
 }
 \examples{
 data(celdaCGSim)
-sceCeldaCG = celda_CG(celdaCGSim$counts,
+sceCeldaCG <- selectFeatures(celdaCGSim$counts)
+sceCeldaCG <- celda_CG(sceCeldaCG,
     K = celdaCGSim$K,
     L = celdaCGSim$L,
-    sampleLabel = celdaCGSim$sampleLabel)
+    sampleLabel = celdaCGSim$sampleLabel,
+    nchains = 1)
 }
 \keyword{datasets}

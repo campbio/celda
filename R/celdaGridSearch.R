@@ -134,7 +134,7 @@ setMethod("celdaGridSearch",
             verbose = verbose,
             logfilePrefix = logfilePrefix)
         SingleCellExperiment::altExp(x, altExpName) <- altExp
-        return(sce)
+        return(x)
     })
 
 
