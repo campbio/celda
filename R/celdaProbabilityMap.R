@@ -38,7 +38,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", altExpName = "featureSubset",
         level = c("cellPopulation", "sample")) {
 
-        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
         level <- match.arg(level)
         if (celdaModel(sce) == "celda_C") {
             if (level == "cellPopulation") {

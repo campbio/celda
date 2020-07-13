@@ -163,7 +163,8 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
             "celda_parameters$model must be",
             " one of 'celda_C', 'celda_G', or 'celda_CG'")
     }
-    SingleCellExperiment::reducedDim(sce, "celda_tSNE") <- res
+    SingleCellExperiment::reducedDim(altExp, "celda_tSNE") <- res
+    SingleCellExperiment::altExp(sce, altExpName) <- altExp
     return(sce)
 }
 

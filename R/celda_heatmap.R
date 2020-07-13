@@ -35,21 +35,21 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
 
         aleExp <- SingleCellExperiment::altExp(sce, altExpName)
 
-        if (celdaModel(aleExp) == "celda_C") {
+        if (celdaModel(sce) == "celda_C") {
             g <- .celdaHeatmapCelda_C(sce = sce,
                 useAssay = useAssay,
                 altExpName = altExpName,
                 featureIx = featureIx,
                 ...)
             return(g)
-        } else if (celdaModel(aleExp) == "celda_CG") {
+        } else if (celdaModel(sce) == "celda_CG") {
             g <- .celdaHeatmapCelda_CG(sce = sce,
                 useAssay = useAssay,
                 altExpName = altExpName,
                 nfeatures = nfeatures,
                 ...)
             return(g)
-        } else if (celdaModel(aleExp) == "celda_G") {
+        } else if (celdaModel(sce) == "celda_G") {
             g <- .celdaHeatmapCelda_G(sce = sce,
                 useAssay = useAssay,
                 altExpName = altExpName,

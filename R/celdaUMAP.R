@@ -206,9 +206,9 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
             "celda_parameters$model must be",
             " one of 'celda_C', 'celda_G', or 'celda_CG'")
     }
-    SingleCellExperiment::reducedDim(sce, "celda_UMAP") <- res
+    SingleCellExperiment::reducedDim(altExp, "celda_UMAP") <- res
+    SingleCellExperiment::altExp(sce, altExpName) <- altExp
     return(sce)
-
 }
 
 

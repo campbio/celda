@@ -364,12 +364,12 @@ setMethod("celdaModel",
     signature(sce = "SingleCellExperiment"),
     function(sce, altExpName = "featureSubset") {
 
-        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
-            stop(altExpName, " not in 'altExpNames(x)'. Run ",
-                "selectFeatures(x) first!")
+        if (!altExpName %in% SingleCellExperiment::altExpNames(sce)) {
+            stop(altExpName, " not in 'altExpNames(sce)'. Run ",
+                "selectFeatures(sce) first!")
         }
 
-        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
 
         tryCatch(
             if (S4Vectors::metadata(altExp)$celda_parameters$model %in%
