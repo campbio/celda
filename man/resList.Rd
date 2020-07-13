@@ -7,15 +7,18 @@
 \title{Get final celdaModels from a celda model \code{SCE} or celdaList
  object}
 \usage{
-resList(x)
+resList(x, ...)
 
-\S4method{resList}{SingleCellExperiment}(x)
+\S4method{resList}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
 \S4method{resList}{celdaList}(x)
 }
 \arguments{
 \item{x}{An object of class \linkS4class{SingleCellExperiment} or
 \code{celdaList}.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 List. Contains one celdaModel object for each of the parameters

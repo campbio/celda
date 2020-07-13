@@ -15,6 +15,7 @@ plotDimReduceModule(x, ...)
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
+  altExpName = "featureSubset",
   modules = NULL,
   rescale = TRUE,
   size = 1,
@@ -63,6 +64,9 @@ Second dimension from data dimensionality reduction output.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{modules}{Character vector. Module(s) from celda model to be plotted.
 e.g. c("1", "2").}

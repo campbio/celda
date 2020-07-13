@@ -8,7 +8,7 @@
 \usage{
 plotGridSearchPerplexity(x, ...)
 
-\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, sep = 1)
+\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 1)
 
 \S4method{plotGridSearchPerplexity}{celdaList}(x, sep = 1)
 }
@@ -20,6 +20,9 @@ plotGridSearchPerplexity(x, ...)
  or \code{recursiveSplitCell}. Must contain a list named
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{sep}{Numeric. Breaks in the x axis of the resulting plot.}
 }

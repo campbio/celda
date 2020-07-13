@@ -15,6 +15,8 @@
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'.
 #' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'.
@@ -63,6 +65,7 @@ setMethod("plotDimReduceGrid",
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
+        altExpName = "featureSubset",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
@@ -75,14 +78,17 @@ setMethod("plotDimReduceGrid",
         headers = NULL,
         decreasing = FALSE) {
 
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
         matrix <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
         }
 
         g <- .plotDimReduceGrid(dim1 = dim1,
@@ -278,6 +284,8 @@ setMethod("plotDimReduceGrid",
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param features Character vector. Features in the rownames of counts to plot.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the features.
@@ -333,6 +341,7 @@ setMethod("plotDimReduceFeature",
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
+        altExpName = "featureSubset",
         features,
         headers = NULL,
         normalize = FALSE,
@@ -349,14 +358,17 @@ setMethod("plotDimReduceFeature",
         ncol = NULL,
         decreasing = FALSE) {
 
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
         }
 
         g <- .plotDimReduceFeature(dim1 = dim1,
@@ -548,6 +560,8 @@ setMethod("plotDimReduceFeature",
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG". Used only if
 #'  \code{x} is a matrix object.
 #' @param modules Character vector. Module(s) from celda model to be plotted.
@@ -594,6 +608,7 @@ setMethod("plotDimReduceModule",
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
+        altExpName = "featureSubset",
         modules = NULL,
         rescale = TRUE,
         size = 1,
@@ -605,16 +620,23 @@ setMethod("plotDimReduceModule",
         ncol = NULL,
         decreasing = FALSE) {
 
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
         if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
         }
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
-        factorized <- factorizeMatrix(x)
+        factorized <- factorizeMatrix(x,
+            useAssay = useAssay,
+            altExpName = altExpName,
+            type = "proportion")
 
         g <- .plotDimReduceModule(dim1 = dim1,
             dim2 = dim2,
@@ -757,6 +779,8 @@ setMethod("plotDimReduceModule",
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param dim1 Numeric vector. First dimension from data
 #'  dimensionality reduction output.
 #' @param dim2 Numeric vector. Second dimension from data
@@ -793,6 +817,7 @@ setMethod("plotDimReduceCluster",
     signature(x = "SingleCellExperiment"),
     function(x,
         reducedDimName,
+        altExpName = "featureSubset",
         dim1 = NULL,
         dim2 = NULL,
         size = 1,
@@ -803,18 +828,23 @@ setMethod("plotDimReduceCluster",
         groupBy = NULL,
         labelSize = 3.5) {
 
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
         if (!("celda_cell_cluster" %in%
-                colnames(SummarizedExperiment::colData(x)))) {
-            stop("Must have column 'celda_cell_cluster' in colData(x)!")
+                colnames(SummarizedExperiment::colData(altExp)))) {
+            stop("Must have column 'celda_cell_cluster' in",
+                " colData(altExp(x, altExpName))!")
         }
-        cluster <- SummarizedExperiment::colData(x)[["celda_cell_cluster"]]
+        cluster <- SummarizedExperiment::colData(altExp)[["celda_cell_cluster"]]
 
         if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 1]
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
         }
 
         if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(x, reducedDimName)[, 2]
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
         }
 
         g <- .plotDimReduceCluster(dim1 = dim1,
@@ -960,12 +990,14 @@ setMethod("plotDimReduceCluster",
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
+#' @param features Character vector. Uses these genes for plotting.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG". Used only if
 #'  \code{x} is a matrix object.
-#' @param features Character vector. Uses these genes for plotting.
 #' @param exactMatch Logical. Whether an exact match or a partial match using
 #'  \code{grep()} is used to look up the feature in the rownames of the counts
 #'   matrix. Default \code{TRUE}.
@@ -988,14 +1020,15 @@ setGeneric("plotCeldaViolin", function(x, ...) {
 setMethod("plotCeldaViolin",
     signature(x = "SingleCellExperiment"),
     function(x,
-        useAssay = "counts",
         features,
+        useAssay = "counts",
+        altExpName = "featureSubset",
         exactMatch = TRUE,
         plotDots = TRUE,
         dotSize = 0.1) {
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
-        cluster <- celdaClusters(x)
+        cluster <- celdaClusters(x, altExpName = altExpName)
 
         g <- .plotCeldaViolin(counts = counts,
             cluster = cluster,

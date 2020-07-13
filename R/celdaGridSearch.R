@@ -6,14 +6,15 @@
 #'  Fixed parameters to be used in all models, such as \code{sampleLabel}, can
 #'  be passed as a list to the argument \code{paramsFixed}. When
 #'  \code{verbose = TRUE}, output from each chain will be sent to a log file
-#'  but not be displayed in stdout.
+#'  but not be displayed in \code{stdout}.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
-#'  slot to use if \code{x} is a
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param useAssay A string specifying the name of the
+#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param model Celda model. Options available in \link{availableModels}.
 #' @param paramsTest List. A list denoting the combinations of parameters to
 #'  run in a celda model. For example,
@@ -76,6 +77,7 @@ setMethod("celdaGridSearch",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         model,
         paramsTest,
         paramsFixed = NULL,
@@ -89,7 +91,19 @@ setMethod("celdaGridSearch",
         logfilePrefix = "Celda") {
 
         xClass <- "SingleCellExperiment"
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
 
         celdaList <- .celdaGridSearch(counts = counts,
             model = paste0(".", model),
@@ -104,8 +118,8 @@ setMethod("celdaGridSearch",
             verbose = verbose,
             logfilePrefix = logfilePrefix)
 
-        sce <- .createSCEceldaGridSearch(celdaList = celdaList,
-            sce = x,
+        altExp <- .createSCEceldaGridSearch(celdaList = celdaList,
+            sce = altExp,
             xClass = xClass,
             useAssay = useAssay,
             model = model,
@@ -119,6 +133,7 @@ setMethod("celdaGridSearch",
             perplexity = perplexity,
             verbose = verbose,
             logfilePrefix = logfilePrefix)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(sce)
     })
 
@@ -128,6 +143,8 @@ setMethod("celdaGridSearch",
 setMethod("celdaGridSearch",
     signature(x = "matrix"),
     function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
         model,
         paramsTest,
         paramsFixed = NULL,
@@ -140,10 +157,12 @@ setMethod("celdaGridSearch",
         verbose = TRUE,
         logfilePrefix = "Celda") {
 
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = x))
+
         celdaList <- .celdaGridSearch(counts = x,
             model = paste0(".", model),
             paramsTest = paramsTest,
@@ -157,8 +176,8 @@ setMethod("celdaGridSearch",
             verbose = verbose,
             logfilePrefix = logfilePrefix)
 
-        sce <- .createSCEceldaGridSearch(celdaList = celdaList,
-            sce = sce,
+        altExp <- .createSCEceldaGridSearch(celdaList = celdaList,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
             model = model,
@@ -172,6 +191,7 @@ setMethod("celdaGridSearch",
             perplexity = perplexity,
             verbose = verbose,
             logfilePrefix = logfilePrefix)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     })
 
@@ -422,6 +442,8 @@ setMethod("celdaGridSearch",
 #' @param useAssay A string specifying which \code{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing
@@ -455,13 +477,13 @@ setGeneric("subsetCeldaList", function(x, ...) {
 #' @export
 setMethod("subsetCeldaList",
     signature(x = "SingleCellExperiment"),
-    function(x, params, useAssay = "counts") {
+    function(x, params, useAssay = "counts", altExpName = "featureSubset") {
 
         ## Check for bad parameter names
         if (!all(names(params) %in% colnames(runParams(x)))) {
             badParams <- setdiff(names(params), colnames(runParams(x)))
             stop("The following elements in 'params' are not columns in",
-                " runParams (x) ",
+                " runParams(x) ",
                 paste(badParams, collapse = ",")
             )
         }
@@ -481,13 +503,17 @@ setMethod("subsetCeldaList",
 
         ## Get index of selected models, subset celdaList, and return
         ix <- match(newRunParams$index, runParams(x)$index)
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
         if (length(ix) == 1) {
-            x <- .subsetCeldaListSCE(x, ix)
+            altExp <- .subsetCeldaListSCE(altExp, ix)
         } else {
-            x@metadata$celda_grid_search@runParams <-
+            altExp@metadata$celda_grid_search@runParams <-
                 as.data.frame(newRunParams)
-            x@metadata$celda_grid_search@resList <- resList(x)[ix]
+            altExp@metadata$celda_grid_search@resList <-
+                altExp@metadata$celda_grid_search@resList[ix]
         }
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
 )
@@ -555,6 +581,8 @@ setMethod("subsetCeldaList",
 #' @param useAssay A string specifying which \code{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing
@@ -585,11 +613,14 @@ setGeneric("selectBestModel", function(x, ...) {
 #' @importFrom data.table as.data.table
 #' @export
 setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
-    function(x, asList = FALSE, useAssay = "counts") {
+    function(x, asList = FALSE, useAssay = "counts",
+        altExpName = "featureSubset") {
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
         logLikelihood <- NULL
         group <- setdiff(colnames(runParams(x)),
             c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
-        runParams <- S4Vectors::metadata(x)$celda_grid_search@runParams
+        runParams <- S4Vectors::metadata(altExp)$celda_grid_search@runParams
         dt <- data.table::as.data.table(runParams)
         newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
             by = group])
@@ -597,12 +628,14 @@ setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
 
         ix <- match(newRunParams$index, runParams$index)
         if (nrow(newRunParams) == 1 & !asList) {
-            x <- .subsetCeldaListSCE(x, ix)
+            altExp <- .subsetCeldaListSCE(altExp, ix)
         } else {
-            x@metadata$celda_grid_search@runParams <-
+            altExp@metadata$celda_grid_search@runParams <-
                 as.data.frame(newRunParams)
-            x@metadata$celda_grid_search@resList <- resList(x)[ix]
+            altExp@metadata$celda_grid_search@resList <-
+                altExp@metadata$celda_grid_search@resList[ix]
         }
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
 )
@@ -676,7 +709,8 @@ setMethod("selectBestModel", signature(x = "celdaList"),
 .subsetCeldaListSCE <- function(x, ix) {
     cgsparam <- x@metadata$celda_grid_search@celdaGridSearchParameters
     if (cgsparam$model == "celda_C") {
-        x <- .createSCEceldaC(celdaCMod = resList(x)[[ix]],
+        x <- .createSCEceldaC(celdaCMod =
+                x@metadata$celda_grid_search@resList[[ix]],
             sce = x,
             xClass = cgsparam$xClass,
             useAssay = cgsparam$useAssay,
@@ -691,7 +725,8 @@ setMethod("selectBestModel", signature(x = "celdaList"),
             logfile = cgsparam$logfile,
             verbose = cgsparam$verbose)
     } else if (cgsparam$model == "celda_G") {
-        x <- .createSCEceldaG(celdaGMod = resList(x)[[ix]],
+        x <- .createSCEceldaG(celdaGMod =
+                x@metadata$celda_grid_search@resList[[ix]],
             sce = x,
             xClass = cgsparam$xClass,
             useAssay = cgsparam$useAssay,
@@ -705,7 +740,8 @@ setMethod("selectBestModel", signature(x = "celdaList"),
             logfile = cgsparam$logfile,
             verbose = cgsparam$verbose)
     } else if (cgsparam$model == "celda_CG") {
-        x <- .createSCEceldaCG(celdaCGMod = resList(x)[[ix]],
+        x <- .createSCEceldaCG(celdaCGMod =
+                x@metadata$celda_grid_search@resList[[ix]],
             sce = x,
             xClass = cgsparam$xClass,
             useAssay = cgsparam$useAssay,
@@ -722,7 +758,7 @@ setMethod("selectBestModel", signature(x = "celdaList"),
             logfile = cgsparam$logfile,
             verbose = cgsparam$verbose)
     } else {
-        stop("S4Vectors::metadata(X)$celda_grid_search@",
+        stop("S4Vectors::metadata(altExp(x, altExpName))$celda_grid_search@",
             "celdaGridSearchParameters$model must be",
             " one of 'celda_C', 'celda_G', or 'celda_CG'")
     }

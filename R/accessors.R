@@ -1,5 +1,5 @@
 #' @title Get or set the cell cluster labels from a celda
-#'  \linkS4class{SingleCellExperiment}  object or celda model
+#'  \linkS4class{SingleCellExperiment} object or celda model
 #'  object.
 #' @description Return or set the cell cluster labels determined
 #'  by \link{celda_C} or \link{celda_CG} models.
@@ -7,9 +7,12 @@
 #'  \itemize{
 #'  \item A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_C}, or \link{celda_CG}, with the matrix
-#'  located in the \code{useAssay} assay slot.
-#'  Rows represent features and columns represent cells.
+#'  located in the \code{useAssay} assay slot. The
+#'  a \link[SingleCellExperiment]{altExp} slot with name \code{altExpName} will
+#'  be used. Rows represent features and columns represent cells.
 #'  \item Celda model object.}
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param value Character vector of cell cluster labels for replacements. Works
 #'  only if \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @return One of
@@ -22,7 +25,7 @@
 #'  Models) and/or feature module labels (for celda_G and celdaCG Models).}
 #' @export
 setGeneric("celdaClusters",
-    function(x) {
+    function(x, ...) {
         standardGeneric("celdaClusters")
     })
 
@@ -34,8 +37,9 @@ setGeneric("celdaClusters",
 #' @export
 setMethod("celdaClusters",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        return(SummarizedExperiment::colData(x)$celda_cell_cluster)
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        return(SummarizedExperiment::colData(altExp)$celda_cell_cluster)
     })
 
 
@@ -55,34 +59,38 @@ setMethod("celdaClusters",
 #' @rdname celdaClusters
 #' @export
 setGeneric("celdaClusters<-",
-    function(x, value) standardGeneric("celdaClusters<-")
+    function(x, ...) standardGeneric("celdaClusters<-")
 )
 
 
 #' @rdname celdaClusters
 #' @export
 setReplaceMethod("celdaClusters", signature(x = "SingleCellExperiment"),
-    function(x, value) {
-        SummarizedExperiment::colData(x)$celda_cell_cluster <- value
+    function(x, altExpName = "featureSubset", value) {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        SummarizedExperiment::colData(altExp)$celda_cell_cluster <- value
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     })
 
 
 #' @title Get or set the feature module labels from a celda
-#'  \linkS4class{SingleCellExperiment}  object.
+#'  \linkS4class{SingleCellExperiment} object.
 #' @description Return or set the feature module cluster labels determined
 #'  by \link{celda_G} or \link{celda_CG} models.
 #' @param sce A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param value Character vector of feature module labels for replacements.
 #'  Works only if \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @return Character vector. Contains feature module labels for each
 #'  feature in x.
 #' @export
 setGeneric("celdaModules",
-    function(sce) {
+    function(sce, ...) {
         standardGeneric("celdaModules")
     })
 
@@ -94,23 +102,26 @@ setGeneric("celdaModules",
 #' @export
 setMethod("celdaModules",
     signature(sce = "SingleCellExperiment"),
-    function(sce) {
-        return(SummarizedExperiment::rowData(sce)$celda_feature_module)
+    function(sce, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        return(SummarizedExperiment::rowData(altExp)$celda_feature_module)
     })
 
 
 #' @rdname celdaModules
 #' @export
 setGeneric("celdaModules<-",
-    function(sce, value) standardGeneric("celdaModules<-")
+    function(sce, ...) standardGeneric("celdaModules<-")
 )
 
 
 #' @rdname celdaModules
 #' @export
 setReplaceMethod("celdaModules", signature(sce = "SingleCellExperiment"),
-    function(sce, value) {
+    function(sce, altExpName = "featureSubset", value) {
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
         SummarizedExperiment::rowData(sce)$celda_feature_module <- value
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     })
 
@@ -125,13 +136,15 @@ setReplaceMethod("celdaModules", signature(sce = "SingleCellExperiment"),
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
 #'  \item A celda model object.}
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param value Character vector of sample labels for replacements. Works
 #'  only is \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @return Character vector. Contains the sample labels provided at model
 #'  creation, or those automatically generated by celda.
 #' @export
 setGeneric("sampleLabel",
-    function(x) {
+    function(x, ...) {
         standardGeneric("sampleLabel")
     })
 
@@ -143,21 +156,24 @@ setGeneric("sampleLabel",
 #' @export
 setMethod("sampleLabel",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        return(SummarizedExperiment::colData(x)$celda_sample_label)
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        return(SummarizedExperiment::colData(altExp)$celda_sample_label)
     })
 
 
 #' @rdname sampleLabel
 #' @export
 setGeneric("sampleLabel<-",
-    function(x, value) standardGeneric("sampleLabel<-")
+    function(x, ...) standardGeneric("sampleLabel<-")
 )
 #' @rdname sampleLabel
 #' @export
 setReplaceMethod("sampleLabel", signature(x = "SingleCellExperiment"),
-    function(x, value) {
-        SummarizedExperiment::colData(x)$celda_sample_label <- value
+    function(x, altExpName = "featureSubset", value) {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        SummarizedExperiment::colData(altExp)$celda_sample_label <- value
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     })
 
@@ -238,13 +254,14 @@ setMethod("matrixNames",
 #'  priors from the celdaList object when it was created.
 #' @param x An object of class \linkS4class{SingleCellExperiment} or class
 #'  \code{celdaList}.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return Data Frame. Contains details on the various K/L parameters, chain
 #'  parameters, seed, and final log-likelihoods derived for each model in the
 #'  provided celdaList.
 #' @export
-setGeneric(
-    "runParams",
-    function(x) {
+setGeneric("runParams",
+    function(x, ...) {
         standardGeneric("runParams")
     }
 )
@@ -257,8 +274,9 @@ setGeneric(
 #' @export
 setMethod("runParams",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        return(x@metadata$celda_grid_search@runParams)
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        return(altExp@metadata$celda_grid_search@runParams)
     }
 )
 
@@ -282,12 +300,14 @@ setMethod("runParams",
 #'  \link{celdaGridSearch} run.
 #' @param x An object of class \linkS4class{SingleCellExperiment} or
 #'  \code{celdaList}.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return List. Contains one celdaModel object for each of the parameters
 #'  specified in \code{runParams(x)}.
 #' @export
 setGeneric(
     "resList",
-    function(x) {
+    function(x, ...) {
         standardGeneric("resList")
     }
 )
@@ -300,8 +320,9 @@ setGeneric(
 #' @export
 setMethod("resList",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        return(x@metadata$celda_grid_search@resList)
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        return(altExp@metadata$celda_grid_search@resList)
     }
 )
 
@@ -315,5 +336,123 @@ setMethod("resList",
     signature(x = "celdaList"),
     function(x) {
         return(x@resList)
+    }
+)
+
+
+#' @title Get celda model from a celda
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object
+#' @description Return the celda model for \code{sce} returned by
+#'  \link{celda_C}, \link{celda_G} or \link{celda_CG}.
+#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
+#'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
+#' @return Character. The celda model. Can be one of "celda_C", "celda_G", or
+#'  "celda_CG".
+#' @examples
+#' data(sceCeldaCG)
+#' celdaModel(sceCeldaCG)
+#' @export
+setGeneric("celdaModel",
+    function(sce, ...) {
+        standardGeneric("celdaModel")
+    })
+#' @rdname celdaModel
+#' @export
+setMethod("celdaModel",
+    signature(sce = "SingleCellExperiment"),
+    function(sce, altExpName = "featureSubset") {
+
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        tryCatch(
+            if (S4Vectors::metadata(altExp)$celda_parameters$model %in%
+                    c("celda_C", "celda_G", "celda_CG")) {
+                return(S4Vectors::metadata(altExp)$celda_parameters$model)
+            } else {
+                stop("S4Vectors::metadata(altExp(sce,",
+                    " altExpName))$celda_parameters$model must be",
+                    " one of 'celda_C', 'celda_G', or 'celda_CG'")
+            },
+            error = function(e) {
+                message("S4Vectors::metadata(altExp(sce,",
+                    " altExpName))$celda_parameters$model must",
+                    " exist! Try running celda model (celda_C, celda_CG, or",
+                    " celda_G) first.")
+                stop(e)
+            })
+    })
+
+
+#' @title Get perplexity for every model in a celdaList
+#' @description Returns perplexity for each model in a celdaList as calculated
+#'  by `perplexity().`
+#' @param celdaList An object of class celdaList.
+#' @return List. Contains one celdaModel object for each of the parameters
+#'  specified in the `runParams()` of the provided celda list.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
+#' @export
+setGeneric(
+    "celdaPerplexity",
+    function(celdaList) {
+        standardGeneric("celdaPerplexity")
+    }
+)
+#' @title Get perplexity for every model in a celdaList
+#' @description Returns perplexity for each model in a celdaList as calculated
+#'  by `perplexity().`
+#' @param celdaList An object of class celdaList.
+#' @return List. Contains one celdaModel object for each of the parameters
+#'  specified in the `runParams()` of the provided celda list.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' celdaCGGridModelPerplexities <- celdaPerplexity(celdaCGGridSearchRes)
+#' @export
+setMethod("celdaPerplexity",
+    signature = c(celdaList = "celdaList"),
+    function(celdaList) {
+        celdaList@perplexity
+    }
+)
+
+
+#' @title Get the MD5 hash of the count matrix from the celdaList
+#' @description Returns the MD5 hash of the count matrix used to generate the
+#'  celdaList.
+#' @param celdaList An object of class celdaList.
+#' @return A character string of length 32 containing the MD5 digest of
+#'  the count matrix.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' countChecksum <- countChecksum(celdaCGGridSearchRes)
+#' @export
+setGeneric(
+    "countChecksum",
+    function(celdaList) {
+        standardGeneric("countChecksum")
+    }
+)
+#' @title Get the MD5 hash of the count matrix from the celdaList
+#' @description Returns the MD5 hash of the count matrix used to generate the
+#'  celdaList.
+#' @param celdaList An object of class celdaList.
+#' @return A character string of length 32 containing the MD5 digest of
+#'  the count matrix.
+#' @examples
+#' data(celdaCGGridSearchRes)
+#' countChecksum <- countChecksum(celdaCGGridSearchRes)
+#' @export
+setMethod("countChecksum",
+    signature = c(celdaList = "celdaList"),
+    function(celdaList) {
+        celdaList@countChecksum
     }
 )

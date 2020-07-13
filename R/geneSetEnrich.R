@@ -12,6 +12,8 @@
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaModel Celda object of class \code{celda_G} or \code{celda_CG}.
 #' @param databases Character vector. Name of reference database. Available
 #'  databases can be viewed by \link[enrichR]{listEnrichrDbs}.
@@ -40,17 +42,23 @@ setGeneric("geneSetEnrich", function(x, ...) {
 #' @export
 setMethod("geneSetEnrich",
     signature(x = "SingleCellExperiment"),
-    function(x, useAssay = "counts", databases, fdr = 0.05) {
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        databases,
+        fdr = 0.05) {
+
+        altExp <- SingleCellExperiment::altExp(x, e = altExpName)
 
         # initialize list with one entry for each gene module
         modules <- vector("list",
-            length = S4Vectors::metadata(x)$celda_parameters$L)
+            length = S4Vectors::metadata(altExp)$celda_parameters$L)
 
         # create dataframe with gene-module associations
-        genes <- data.frame(gene = rownames(x), module = celdaModules(x))
+        genes <- data.frame(gene = rownames(altExp), module = celdaModules(x))
 
         # iterate over each module, get genes in that module, add to list
-        for (i in seq_len(S4Vectors::metadata(x)$celda_parameters$L)) {
+        for (i in seq_len(S4Vectors::metadata(altExp)$celda_parameters$L)) {
             modules[[i]] <- as.character(genes[genes$module == i, "gene"])
         }
 

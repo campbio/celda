@@ -10,6 +10,8 @@
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if \code{ncol(counts) > maxCells}. Larger numbers of
 #'  cells requires more memory. If \code{NULL}, no subsampling will be
@@ -61,6 +63,7 @@ setGeneric("celdaTsne",
 setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     function(sce,
         useAssay = "counts",
+        altExpName = "featureSubset",
         maxCells = NULL,
         minClusterSize = 100,
         initialDims = 20,
@@ -73,8 +76,9 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
         seed = 12345) {
 
         if (is.null(seed)) {
-            res <- .celdaTsne(sce = sce,
+            sce <- .celdaTsne(sce = sce,
                 useAssay = useAssay,
+                altExpName = altExpName,
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
                 initialDims = initialDims,
@@ -86,8 +90,9 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
                 transformationFun = transformationFun)
         } else {
             with_seed(seed,
-                res <- .celdaTsne(sce = sce,
+                sce <- .celdaTsne(sce = sce,
                     useAssay = useAssay,
+                    altExpName = altExpName,
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
                     initialDims = initialDims,
@@ -98,14 +103,13 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
                     scaleFactor = scaleFactor,
                     transformationFun = transformationFun))
         }
-
-        SingleCellExperiment::reducedDim(sce, "celda_tSNE") <- res
         return(sce)
     })
 
 
 .celdaTsne <- function(sce,
     useAssay,
+    altExpName,
     maxCells,
     minClusterSize,
     initialDims,
@@ -117,9 +121,10 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     transformationFun) {
 
     celdaMod <- celdaModel(sce)
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
 
     if (celdaMod == "celda_C") {
-        res <- .celdaTsneC(sce = sce,
+        res <- .celdaTsneC(sce = altExp,
             useAssay = useAssay,
             maxCells = maxCells,
             minClusterSize = minClusterSize,
@@ -130,7 +135,7 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
             scaleFactor = scaleFactor,
             transformationFun = transformationFun)
     } else if (celdaMod == "celda_CG") {
-        res <- .celdaTsneCG(sce = sce,
+        res <- .celdaTsneCG(sce = altExp,
             useAssay = useAssay,
             maxCells = maxCells,
             minClusterSize = minClusterSize,
@@ -142,7 +147,7 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
             scaleFactor = scaleFactor,
             transformationFun = transformationFun)
     } else if (celdaMod == "celda_G") {
-        res <- .celdaTsneG(sce = sce,
+        res <- .celdaTsneG(sce = altExp,
             useAssay = useAssay,
             maxCells = maxCells,
             minClusterSize = minClusterSize,
@@ -154,10 +159,12 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
             scaleFactor = scaleFactor,
             transformationFun = transformationFun)
     } else {
-        stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+        stop("S4Vectors::metadata(altExp(sce, altExpName))$",
+            "celda_parameters$model must be",
             " one of 'celda_C', 'celda_G', or 'celda_CG'")
     }
-    return(res)
+    SingleCellExperiment::reducedDim(sce, "celda_tSNE") <- res
+    return(sce)
 }
 
 

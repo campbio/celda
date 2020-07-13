@@ -13,6 +13,8 @@
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 #'  Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod Celda model object. Only works if \code{x} is an integer
 #'  counts matrix.
 #' @param newCounts A new counts matrix used to calculate perplexity. If NULL,
@@ -33,22 +35,32 @@ setGeneric("perplexity",
 #' @rdname perplexity
 #' @export
 setMethod("perplexity", signature(x = "SingleCellExperiment"),
-    function(x, useAssay = "counts", newCounts = NULL) {
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        newCounts = NULL) {
 
         if (celdaModel(x) == "celda_C") {
-            p <- .perplexityCelda_C(sce = x, useAssay = useAssay,
+            p <- .perplexityCelda_C(sce = x,
+                useAssay = useAssay,
+                altExpName = altExpName,
                 newCounts = newCounts)
             return(p)
         } else if (celdaModel(x) == "celda_CG") {
-            p <- .perplexityCelda_CG(sce = x, useAssay = useAssay,
+            p <- .perplexityCelda_CG(sce = x,
+                useAssay = useAssay,
+                altExpName = altExpName,
                 newCounts = newCounts)
             return(p)
         } else if (celdaModel(x) == "celda_G") {
-            p <- .perplexityCelda_G(sce = x, useAssay = useAssay,
+            p <- .perplexityCelda_G(sce = x,
+                useAssay = useAssay,
+                altExpName = altExpName,
                 newCounts = newCounts)
             return(p)
         } else {
-            stop("S4Vectors::metadata(x)$celda_parameters$model must be",
+            stop("S4Vectors::metadata(altExp(x, altExpName))$",
+                "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
     })
@@ -195,9 +207,14 @@ setMethod(
 )
 
 
-.perplexityCelda_C <- function(sce, useAssay, newCounts) {
+.perplexityCelda_C <- function(sce,
+    useAssay,
+    altExpName,
+    newCounts) {
 
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
+
+    counts <- SummarizedExperiment::assay(altExp, i = useAssay)
     counts <- .processCounts(counts)
 
     if (is.null(newCounts)) {
@@ -207,11 +224,13 @@ setMethod(
     }
 
     if (nrow(newCounts) != nrow(counts)) {
-        stop("'newCounts' should have the same number of rows as 'sce'.")
+        stop("'newCounts' should have the same number of rows as",
+            " 'assay(altExp(sce, altExpName), i = useAssay)'.")
     }
 
     factorized <- factorizeMatrix(x = sce,
         useAssay = useAssay,
+        altExpName = altExpName,
         type = "posterior")
     theta <- log(factorized$posterior$sample)
     phi <- log(factorized$posterior$module)
@@ -226,8 +245,14 @@ setMethod(
 }
 
 
-.perplexityCelda_CG <- function(sce, useAssay, newCounts) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+.perplexityCelda_CG <- function(sce,
+    useAssay,
+    altExpName,
+    newCounts) {
+
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
+
+    counts <- SummarizedExperiment::assay(altExp, i = useAssay)
     counts <- .processCounts(counts)
 
     if (is.null(newCounts)) {
@@ -236,11 +261,13 @@ setMethod(
         newCounts <- .processCounts(newCounts)
     }
     if (nrow(newCounts) != nrow(counts)) {
-        stop("newCounts should have the same number of rows as counts.")
+        stop("newCounts should have the same number of rows as",
+            " 'assay(altExp(sce, altExpName), i = useAssay)'.")
     }
 
     factorized <- factorizeMatrix(x = sce,
         useAssay = useAssay,
+        altExpName = altExpName,
         type = c("posterior", "counts"))
 
     theta <- log(factorized$posterior$sample)
@@ -262,8 +289,14 @@ setMethod(
 }
 
 
-.perplexityCelda_G <- function(sce, useAssay, newCounts) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
+.perplexityCelda_G <- function(sce,
+    useAssay,
+    altExpName,
+    newCounts) {
+
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
+
+    counts <- SummarizedExperiment::assay(altExp, i = useAssay)
     counts <- .processCounts(counts)
 
     if (is.null(newCounts)) {
@@ -272,12 +305,14 @@ setMethod(
         newCounts <- .processCounts(newCounts)
     }
     if (nrow(newCounts) != nrow(counts)) {
-        stop("newCounts should have the same number of rows as counts.")
+        stop("newCounts should have the same number of rows as",
+            " 'assay(altExp(sce, altExpName), i = useAssay)'.")
     }
 
     factorized <- factorizeMatrix(
         sce = sce,
         useAssay = useAssay,
+        altExpName = altExpName,
         type = c("posterior", "counts"))
     psi <- factorized$posterior$module
     phi <- factorized$posterior$cell
@@ -292,7 +327,7 @@ setMethod(
         phi,
         psi,
         celdaModules(sce),
-        S4Vectors::metadata(sce)$celda_parameters$L
+        S4Vectors::metadata(altExp)$celda_parameters$L
     ) # + sum(etaProb)
     perplexity <- exp(- (logPx / sum(newCounts)))
     return(perplexity)
@@ -314,6 +349,8 @@ setMethod(
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaList Object of class 'celdaList'. Used only if \code{x} is a
 #'  matrix object.
 #' @param resample Integer. The number of times to resample the counts matrix
@@ -340,12 +377,14 @@ setMethod("resamplePerplexity",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
-        celdaList,
+        altExpName = "featureSubset",
         resample = 5,
         seed = 12345) {
 
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
-        celdaList <- S4Vectors::metadata(x)$celda_grid_search
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+        celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
         if (is.null(seed)) {
             res <- .resamplePerplexity(
                 counts = counts,
@@ -360,7 +399,8 @@ setMethod("resamplePerplexity",
             )
         }
 
-        S4Vectors::metadata(x)$celda_grid_search <- res
+        S4Vectors::metadata(altExp)$celda_grid_search <- res
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
 )
@@ -403,6 +443,7 @@ setMethod("resamplePerplexity",
 .resamplePerplexity <- function(counts,
     celdaList,
     resample = 5) {
+
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
     }
@@ -440,6 +481,8 @@ setMethod("resamplePerplexity",
 #'  or \code{recursiveSplitCell}. Must contain a list named
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
@@ -456,8 +499,9 @@ setGeneric("plotGridSearchPerplexity", function(x, ...) {
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "SingleCellExperiment"),
-    function(x, sep = 1) {
-        celdaList <- S4Vectors::metadata(x)$celda_grid_search
+    function(x, altExpName = "featureSubset", sep = 1) {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
         g <- do.call(paste0(".plotGridSearchPerplexity",
             as.character(class(resList(x)[[1]]))),
             args = list(celdaList, sep))
@@ -491,10 +535,8 @@ setMethod("plotGridSearchPerplexity",
         stop("runParams(celdaList) needs K and L columns.")
     }
     if (is.null(celdaPerplexity(celdaList))) {
-        stop(
-            "No perplexity measurements available. First run",
-            " 'resamplePerplexity' with celdaList object."
-        )
+        stop("No perplexity measurements available. First run",
+            " 'resamplePerplexity' with celdaList object.")
     }
 
     ix1 <- rep(seq(nrow(celdaPerplexity(celdaList))),
@@ -698,6 +740,8 @@ setMethod("plotGridSearchPerplexity",
 #'  or \code{recursiveSplitCell}. Must contain a list named
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
 #' @param n Integer. Width of the rolling window. Default 10.
 #' @return A ggplot plot object showing perplexity diferences as a function of
@@ -715,9 +759,11 @@ setGeneric("plotGridSearchPerplexityDiff", function(x, ...) {
 #' @export
 setMethod("plotGridSearchPerplexityDiff",
     signature(x = "SingleCellExperiment"),
-    function(x, sep = 1, n = 10) {
-        model <- x@metadata$celda_grid_search@celdaGridSearchParameters$model
-        celdaList <- S4Vectors::metadata(x)$celda_grid_search
+    function(x, altExpName = "featureSubset", sep = 1, n = 10) {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        model <- altExp@metadata$celda_grid_search@celdaGridSearchParameters$
+            model
+        celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
 
         if (model == "celda_C") {
             g <- .plotGridSearchPerplexityDiffC(celdaList, sep, n = n)
@@ -726,7 +772,8 @@ setMethod("plotGridSearchPerplexityDiff",
         } else if (model == "celda_CG") {
             g <- .plotGridSearchPerplexityDiffCG(celdaList, sep, n = n)
         } else {
-            stop("S4Vectors::metadata(X)$celda_grid_search@",
+            stop("S4Vectors::metadata(altExp(x, altExpName))$",
+                "celda_grid_search@",
                 "celdaGridSearchParameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }

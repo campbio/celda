@@ -4,7 +4,12 @@
 \alias{featureModuleTable}
 \title{Output a feature module table}
 \usage{
-featureModuleTable(sce, useAssay = "counts", outputFile = NULL)
+featureModuleTable(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  outputFile = NULL
+)
 }
 \arguments{
 \item{sce}{A \linkS4class{SingleCellExperiment} object returned by
@@ -14,6 +19,9 @@ Rows represent features and columns represent cells.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{outputFile}{File name for feature module table. If NULL, file will
 not be created. Default NULL.}

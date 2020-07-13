@@ -7,7 +7,14 @@
 \usage{
 splitModule(x, ...)
 
-\S4method{splitModule}{SingleCellExperiment}(x, useAssay = "counts", module, n = 2, seed = 12345)
+\S4method{splitModule}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  module,
+  n = 2,
+  seed = 12345
+)
 }
 \arguments{
 \item{x}{A \linkS4class{SingleCellExperiment} object
@@ -16,6 +23,9 @@ Rows represent features and columns represent cells.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use for \code{x}. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{module}{Integer. The module to be split.}
 

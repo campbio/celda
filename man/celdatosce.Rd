@@ -7,13 +7,28 @@
 \alias{celdatosce,celda_CG-method}
 \title{Convert old celda model object to \code{SCE} object}
 \usage{
-celdatosce(celdaModel, counts)
+celdatosce(celdaModel, counts, ...)
 
-\S4method{celdatosce}{celda_C}(celdaModel, counts)
+\S4method{celdatosce}{celda_C}(
+  celdaModel,
+  counts,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 
-\S4method{celdatosce}{celda_G}(celdaModel, counts)
+\S4method{celdatosce}{celda_G}(
+  celdaModel,
+  counts,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 
-\S4method{celdatosce}{celda_CG}(celdaModel, counts)
+\S4method{celdatosce}{celda_CG}(
+  celdaModel,
+  counts,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 }
 \arguments{
 \item{celdaModel}{A celda model object generated using older versions of
@@ -22,6 +37,12 @@ celdatosce(celdaModel, counts)
 \item{counts}{A numeric \link{matrix} of counts used to generate
 \code{celdaModel}. Dimensions and MD5 checksum will be checked by
 \link{compareCountMatrix}.}
+
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 A \linkS4class{SingleCellExperiment} object. Function

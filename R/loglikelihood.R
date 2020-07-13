@@ -7,6 +7,8 @@
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod celda model object. Ignored if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
 #' @return The log-likelihood of the cluster assignment for the
@@ -25,18 +27,19 @@ setGeneric("logLikelihood", function(x, celdaMod, ...) {
 #' loglikCG <- logLikelihood(sceCeldaCG)
 #' @export
 setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
-    function(x, useAssay = "counts") {
+    function(x, useAssay = "counts", altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
 
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
         sampleLabel <- sampleLabel(x)
         z <- celdaClusters(x)
         y <- celdaModules(x)
-        K <- S4Vectors::metadata(x)$celda_parameters$K
-        L <- S4Vectors::metadata(x)$celda_parameters$L
-        alpha <- S4Vectors::metadata(x)$celda_parameters$alpha
-        beta <- S4Vectors::metadata(x)$celda_parameters$beta
-        delta <- S4Vectors::metadata(x)$celda_parameters$delta
-        gamma <- S4Vectors::metadata(x)$celda_parameters$gamma
+        K <- S4Vectors::metadata(altExp)$celda_parameters$K
+        L <- S4Vectors::metadata(altExp)$celda_parameters$L
+        alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
+        beta <- S4Vectors::metadata(altExp)$celda_parameters$beta
+        delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
+        gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
 
         if (celdaModel(x) == "celda_C") {
             ll <- .logLikelihoodcelda_C(counts = counts,
@@ -64,7 +67,8 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
                 delta = delta,
                 gamma = gamma)
         } else {
-            stop("S4Vectors::metadata(x)$celda_parameters$model must be",
+            stop("S4Vectors::metadata(altExp(x, altExpName))$",
+                "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'!")
         }
         return(ll)

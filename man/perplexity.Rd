@@ -10,7 +10,12 @@
 \usage{
 perplexity(x, celdaMod, ...)
 
-\S4method{perplexity}{SingleCellExperiment,ANY}(x, useAssay = "counts", newCounts = NULL)
+\S4method{perplexity}{SingleCellExperiment,ANY}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  newCounts = NULL
+)
 
 \S4method{perplexity}{matrix,celda_CG}(x, celdaMod, newCounts = NULL)
 
@@ -35,6 +40,9 @@ counts matrix.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{newCounts}{A new counts matrix used to calculate perplexity. If NULL,
 perplexity will be calculated for the matrix in \code{useAssay} slot in

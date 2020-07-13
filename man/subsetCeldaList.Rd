@@ -9,7 +9,7 @@
 \usage{
 subsetCeldaList(x, ...)
 
-\S4method{subsetCeldaList}{SingleCellExperiment}(x, params, useAssay = "counts")
+\S4method{subsetCeldaList}{SingleCellExperiment}(x, params, useAssay = "counts", altExpName = "featureSubset")
 
 \S4method{subsetCeldaList}{celdaList}(x, params)
 }
@@ -28,6 +28,9 @@ models in list \code{"celda_grid_search"} in \code{metadata(x)}.}
 \item{useAssay}{A string specifying which \code{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 One of

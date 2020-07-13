@@ -11,6 +11,7 @@ celda_G(x, ...)
 \S4method{celda_G}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   L,
   beta = 1,
   delta = 1,
@@ -30,6 +31,8 @@ celda_G(x, ...)
 
 \S4method{celda_G}{matrix}(
   x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   L,
   beta = 1,
   delta = 1,
@@ -53,9 +56,11 @@ celda_G(x, ...)
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
-slot to use if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Default "counts".}
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{L}{Integer. Number of feature modules.}
 
@@ -117,7 +122,12 @@ A \linkS4class{SingleCellExperiment} object. Function
 }
 \description{
 Clusters the rows of a count matrix containing single-cell data
- into L modules.
+ into L modules. The
+ \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+ \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+ it exists. Otherwise, the \code{useAssay}
+ \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+ \code{x} is a \linkS4class{SingleCellExperiment} object.
 }
 \examples{
 data(celdaGSim)

@@ -10,6 +10,10 @@
 #' @param counts A numeric \link{matrix} of counts used to generate
 #'  \code{celdaModel}. Dimensions and MD5 checksum will be checked by
 #'  \link{compareCountMatrix}.
+#' @param useAssay A string specifying the name of the
+#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
@@ -18,7 +22,7 @@
 #'  population clusters. Column \code{celda_feature_module} in
 #'  \link[SummarizedExperiment]{rowData} contain feature modules.
 #' @export
-setGeneric("celdatosce", function(celdaModel, counts) {
+setGeneric("celdatosce", function(celdaModel, counts, ...) {
     standardGeneric("celdatosce")})
 
 
@@ -29,16 +33,21 @@ setGeneric("celdatosce", function(celdaModel, counts) {
 #' @export
 setMethod("celdatosce",
     signature(celdaModel = "celda_C"),
-    function(celdaModel, counts) {
+    function(celdaModel,
+        counts,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
+
         compareCountMatrix(counts, celdaModel, errorOnMismatch = FALSE)
 
+        ls <- list()
+        ls[[useAssay]] <- counts
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = counts))
 
-        sce <- .createSCEceldaC(celdaCMod = celdaModel,
-            sce = sce,
+        altExp <- .createSCEceldaC(celdaCMod = celdaModel,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
             algorithm = NULL,
@@ -51,6 +60,7 @@ setMethod("celdatosce",
             zInit = NULL,
             logfile = NULL,
             verbose = NULL)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )
@@ -63,16 +73,21 @@ setMethod("celdatosce",
 #' @export
 setMethod("celdatosce",
     signature(celdaModel = "celda_G"),
-    function(celdaModel, counts) {
+    function(celdaModel,
+        counts,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
+
         compareCountMatrix(counts, celdaModel, errorOnMismatch = FALSE)
 
+        ls <- list()
+        ls[[useAssay]] <- counts
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = counts))
 
-        sce <- .createSCEceldaG(celdaGMod = celdaModel,
-            sce = sce,
+        altExp <- .createSCEceldaG(celdaGMod = celdaModel,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
             stopIter = NULL,
@@ -84,6 +99,7 @@ setMethod("celdatosce",
             yInit = NULL,
             logfile = NULL,
             verbose = NULL)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )
@@ -96,16 +112,21 @@ setMethod("celdatosce",
 #' @export
 setMethod("celdatosce",
     signature(celdaModel = "celda_CG"),
-    function(celdaModel, counts) {
+    function(celdaModel,
+        counts,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
+
         compareCountMatrix(counts, celdaModel, errorOnMismatch = FALSE)
 
+        ls <- list()
+        ls[[useAssay]] <- counts
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = counts))
 
-        sce <- .createSCEceldaCG(celdaCGMod = celdaModel,
-            sce = sce,
+        altExp <- .createSCEceldaCG(celdaCGMod = celdaModel,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
             algorithm = NULL,
@@ -120,6 +141,7 @@ setMethod("celdatosce",
             yInit = NULL,
             logfile = NULL,
             verbose = NULL)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )

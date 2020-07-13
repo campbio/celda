@@ -11,6 +11,7 @@ moduleHeatmap(x, ...)
 \S4method{moduleHeatmap}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   featureModule = 1,
   topCells = 100,
   topFeatures = NULL,
@@ -39,6 +40,9 @@ Rows represent features and columns represent cells.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{featureModule}{Integer Vector. The featureModule(s) to display.
 Multiple modules can be included in a vector.}

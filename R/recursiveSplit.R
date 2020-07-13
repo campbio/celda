@@ -89,9 +89,11 @@
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
-#'  slot to use if \code{x} is a
-#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param useAssay A string specifying the name of the
+#'  \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
 #' @param initialK Integer. Minimum number of cell populations to try.
@@ -168,6 +170,7 @@ setMethod("recursiveSplitCell",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         sampleLabel = NULL,
         initialK = 5,
         maxK = 25,
@@ -185,7 +188,19 @@ setMethod("recursiveSplitCell",
         verbose = TRUE) {
 
         xClass <- "SingleCellExperiment"
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
 
         if (!is.null(yInit)) {
             model <- "celda_CG"
@@ -210,8 +225,8 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-        sce <- .createSCERecursiveSplitCell(celdaList = celdaList,
-            sce = x,
+        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList,
+            sce = altExp,
             xClass = xClass,
             useAssay = useAssay,
             model = model,
@@ -230,6 +245,7 @@ setMethod("recursiveSplitCell",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(sce)
     }
 )
@@ -259,6 +275,8 @@ setMethod("recursiveSplitCell",
 setMethod("recursiveSplitCell",
     signature(x = "matrix"),
     function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
         sampleLabel = NULL,
         initialK = 5,
         maxK = 25,
@@ -275,10 +293,11 @@ setMethod("recursiveSplitCell",
         logfile = NULL,
         verbose = TRUE) {
 
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = x))
 
         if (!is.null(yInit)) {
             model <- "celda_CG"
@@ -303,8 +322,8 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-        sce <- .createSCERecursiveSplitCell(celdaList = celdaList,
-            sce = sce,
+        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
             model = model,
@@ -323,6 +342,7 @@ setMethod("recursiveSplitCell",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )
@@ -841,6 +861,8 @@ setMethod("recursiveSplitCell",
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param initialL Integer. Minimum number of modules to try.
 #' @param maxL Integer. Maximum number of modules to try.
 #' @param tempK Integer. Number of temporary cell populations to identify and
@@ -907,6 +929,7 @@ setMethod("recursiveSplitModule",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         initialL = 10,
         maxL = 100,
         tempK = 100,
@@ -924,7 +947,19 @@ setMethod("recursiveSplitModule",
         logfile = NULL) {
 
         xClass <- "SingleCellExperiment"
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
 
         if (!is.null(zInit)) {
             model <- "celda_CG"
@@ -949,8 +984,8 @@ setMethod("recursiveSplitModule",
             verbose = verbose,
             logfile = logfile)
 
-        sce <- .createSCERecursiveSplitModule(celdaList = celdaList,
-            sce = x,
+        altExp <- .createSCERecursiveSplitModule(celdaList = celdaList,
+            sce = altExp,
             xClass = xClass,
             useAssay = useAssay,
             model = model,
@@ -969,6 +1004,7 @@ setMethod("recursiveSplitModule",
             perplexity = perplexity,
             verbose = verbose,
             logfile = logfile)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(sce)
     }
 )
@@ -991,6 +1027,8 @@ setMethod("recursiveSplitModule",
 setMethod("recursiveSplitModule",
     signature(x = "matrix"),
     function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
         initialL = 10,
         maxL = 100,
         tempK = 100,
@@ -1007,11 +1045,11 @@ setMethod("recursiveSplitModule",
         verbose = TRUE,
         logfile = NULL) {
 
-
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = x))
 
         if (!is.null(zInit)) {
             model <- "celda_CG"
@@ -1036,8 +1074,8 @@ setMethod("recursiveSplitModule",
             verbose = verbose,
             logfile = logfile)
 
-        sce <- .createSCERecursiveSplitModule(celdaList = celdaList,
-            sce = sce,
+        altExp <- .createSCERecursiveSplitModule(celdaList = celdaList,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
             model = model,
@@ -1056,6 +1094,7 @@ setMethod("recursiveSplitModule",
             perplexity = perplexity,
             verbose = verbose,
             logfile = logfile)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )

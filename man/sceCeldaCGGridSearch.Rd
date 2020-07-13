@@ -12,7 +12,8 @@ sceCeldaCGGridSearch
 }
 \description{
 A \linkS4class{SingleCellExperiment} object containing the
- results of running \link{celdaGridSearch} on \link{celdaCGSim}.
+ results of running \link{selectFeatures} and \link{celdaGridSearch} on
+ \link{celdaCGSim}.
 }
 \examples{
 data(celdaCGSim)

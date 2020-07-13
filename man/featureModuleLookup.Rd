@@ -7,7 +7,12 @@
 \usage{
 featureModuleLookup(sce, ...)
 
-\S4method{featureModuleLookup}{SingleCellExperiment}(sce, feature, exactMatch = TRUE)
+\S4method{featureModuleLookup}{SingleCellExperiment}(
+  sce,
+  feature,
+  altExpName = "featureSubset",
+  exactMatch = TRUE
+)
 }
 \arguments{
 \item{sce}{A \linkS4class{SingleCellExperiment} object returned by
@@ -18,6 +23,9 @@ Rows represent features and columns represent cells.}
 \item{feature}{Character vector. Identify feature modules for the specified
 feature names. \code{feature} must match the rownames of \code{sce}.}
 
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
+
 \item{exactMatch}{Logical. Whether to look for exactMatch of the gene name
 within counts matrix. Default \code{TRUE}.}
 }
@@ -27,7 +35,7 @@ the provided features.
 }
 \description{
 This function will output the corresponding feature module for
- a specified vector of genes from a celda_CG or celda_G celdaModel.
+ a specified vector of genes from a celda_CG or celda_G \code{celdaModel}.
  \code{feature} must match the rownames of \code{sce}.
 }
 \examples{

@@ -1,13 +1,19 @@
 #' @title Feature clustering with Celda
 #' @description Clusters the rows of a count matrix containing single-cell data
-#'  into L modules.
+#'  into L modules. The
+#'  \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+#'  \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+#'  it exists. Otherwise, the \code{useAssay}
+#'  \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+#'  \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
-#'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param useAssay A string specifying the name of the
+#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param L Integer. Number of feature modules.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
 #'  each feature module in each cell. Default 1.
@@ -66,6 +72,7 @@ setMethod("celda_G",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         L,
         beta = 1,
         delta = 1,
@@ -83,12 +90,24 @@ setMethod("celda_G",
         verbose = TRUE) {
 
         xClass <- "SingleCellExperiment"
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
 
-        sce <- .celdaGWithSeed(counts = counts,
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+
+        altExp <- .celdaGWithSeed(counts = counts,
             xClass = xClass,
             useAssay = useAssay,
-            sce = x,
+            sce = altExp,
             L = L,
             beta = beta,
             delta = delta,
@@ -104,7 +123,8 @@ setMethod("celda_G",
             yInit = yInit,
             logfile = logfile,
             verbose = verbose)
-        return(sce)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
+        return(x)
     }
 )
 
@@ -114,6 +134,8 @@ setMethod("celda_G",
 setMethod("celda_G",
     signature(x = "matrix"),
     function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
         L,
         beta = 1,
         delta = 1,
@@ -130,14 +152,16 @@ setMethod("celda_G",
         logfile = NULL,
         verbose = TRUE) {
 
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = x))
-        sce <- .celdaGWithSeed(counts = x,
+
+        altExp <- .celdaGWithSeed(counts = x,
             xClass = xClass,
             useAssay = useAssay,
-            sce = sce,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             L = L,
             beta = beta,
             delta = delta,
@@ -153,6 +177,7 @@ setMethod("celda_G",
             yInit = yInit,
             logfile = logfile,
             verbose = verbose)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )
@@ -738,7 +763,7 @@ setMethod("celda_G",
         cellIx <- sample(seq(ncol(counts)), maxCells)
     }
 
-    fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "counts")
+    fm <- .factorizeMatrixCelda_G(x = sce, useAssay = useAssay, type = "counts")
 
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {

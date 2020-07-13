@@ -9,13 +9,13 @@
 \title{Get or set sample labels from a celda
  \linkS4class{SingleCellExperiment}  object}
 \usage{
-sampleLabel(x)
+sampleLabel(x, ...)
 
-\S4method{sampleLabel}{SingleCellExperiment}(x)
+\S4method{sampleLabel}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
-sampleLabel(x) <- value
+sampleLabel(x, ...) <- value
 
-\S4method{sampleLabel}{SingleCellExperiment}(x) <- value
+\S4method{sampleLabel}{SingleCellExperiment}(x, altExpName = "featureSubset") <- value
 
 \S4method{sampleLabel}{celdaModel}(x)
 }
@@ -27,6 +27,9 @@ sampleLabel(x) <- value
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.
 \item A celda model object.}}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{value}{Character vector of sample labels for replacements. Works
 only is \code{x} is a \linkS4class{SingleCellExperiment} object.}

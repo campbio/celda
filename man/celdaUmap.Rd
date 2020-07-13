@@ -11,6 +11,7 @@ celdaUmap(sce, ...)
 \S4method{celdaUmap}{SingleCellExperiment}(
   sce,
   useAssay = "counts",
+  altExpName = "featureSubset",
   maxCells = NULL,
   minClusterSize = 100,
   modules = NULL,
@@ -35,6 +36,9 @@ returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
 randomly subsampled if \code{ncol(sce) > maxCells}. Larger numbers of cells

@@ -4,12 +4,16 @@
 \alias{recodeClusterY}
 \title{Recode feature module labels}
 \usage{
-recodeClusterY(sce, from, to)
+recodeClusterY(sce, altExpName = "featureSubset", from, to)
 }
 \arguments{
 \item{sce}{\linkS4class{SingleCellExperiment} object returned from
 \link{celda_G} or \link{celda_CG}. Must contain column
-\code{celda_feature_module} in \link[SummarizedExperiment]{rowData}.}
+\code{celda_feature_module} in
+\code{\link[SummarizedExperiment]{rowData}(altExp(sce, altExpName))}.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{from}{Numeric vector. Unique values in the range of
 \code{seq(celdaModules(sce))} that correspond to the original module labels

@@ -10,8 +10,9 @@ plotCeldaViolin(x, ...)
 
 \S4method{plotCeldaViolin}{SingleCellExperiment}(
   x,
-  useAssay = "counts",
   features,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   exactMatch = TRUE,
   plotDots = TRUE,
   dotSize = 0.1
@@ -31,11 +32,14 @@ plotCeldaViolin(x, ...)
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
 
+\item{features}{Character vector. Uses these genes for plotting.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{features}{Character vector. Uses these genes for plotting.}
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{exactMatch}{Logical. Whether an exact match or a partial match using
 \code{grep()} is used to look up the feature in the rownames of the counts

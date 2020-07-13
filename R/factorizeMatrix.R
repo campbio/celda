@@ -6,7 +6,7 @@
 #'  \itemize{
 #'  \item A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G} or \link{celda_CG}, with the matrix
-#'  located in the \code{useAssay} assay slot.
+#'  located in the \code{useAssay} assay slot in \code{altExp(x, altExpName)}.
 #'  Rows represent features and columns represent cells.
 #'  \item Integer counts matrix. Rows represent features and columns represent
 #'  cells. This matrix should be the same as the one used to generate
@@ -14,6 +14,8 @@
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 #'  Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod Celda model object. Only works if \code{x} is an integer
 #'  counts matrix.
 #' @param type Character vector. A vector containing one or more of "counts",
@@ -38,19 +40,23 @@ setGeneric("factorizeMatrix",
 setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         type = c("counts", "proportion", "posterior")) {
 
-        if (celdaModel(x) == "celda_C") {
-            res <- .factorizeMatrixCelda_C(sce = x, useAssay = useAssay,
+        altExp <- SingleCellExperiment::altExp(x, e = altExpName)
+
+        if (celdaModel(altExp) == "celda_C") {
+            res <- .factorizeMatrixCelda_C(sce = altExp, useAssay = useAssay,
                 type = type)
-        } else if (celdaModel(x) == "celda_CG") {
-            res <- .factorizeMatrixCelda_CG(sce = x, useAssay = useAssay,
+        } else if (celdaModel(altExp) == "celda_CG") {
+            res <- .factorizeMatrixCelda_CG(sce = altExp, useAssay = useAssay,
                 type = type)
-        } else if (celdaModel(x) == "celda_G") {
-            res <- .factorizeMatrixCelda_G(sce = x, useAssay = useAssay,
+        } else if (celdaModel(altExp) == "celda_G") {
+            res <- .factorizeMatrixCelda_G(sce = altExp, useAssay = useAssay,
                 type = type)
         } else {
-            stop("S4Vectors::metadata(x)$celda_parameters$model must be",
+            stop("S4Vectors::metadata(altExp(x, altExpName))$",
+                "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
         return(res)
@@ -367,10 +373,10 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
     counts <- .processCounts(counts)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
-    z <- celdaClusters(sce)
+    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    sampleLabel <- sampleLabel(sce)
+    sampleLabel <- SummarizedExperiment::colData(sce)$celda_sample_label
     s <- as.integer(sampleLabel)
 
     p <- .cCDecomposeCounts(counts, s, z, K)
@@ -426,13 +432,13 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     L <- S4Vectors::metadata(sce)$celda_parameters$L
-    z <- celdaClusters(sce)
-    y <- celdaModules(sce)
+    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
+    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-    sampleLabel <- sampleLabel(sce)
+    sampleLabel <- SummarizedExperiment::colData(sce)$celda_sample_label
     s <- as.integer(sampleLabel)
 
     ## Calculate counts one time up front
@@ -532,7 +538,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
     # compareCountMatrix(counts, celdaMod)
 
     L <- S4Vectors::metadata(sce)$celda_parameters$L
-    y <- celdaModules(sce)
+    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma

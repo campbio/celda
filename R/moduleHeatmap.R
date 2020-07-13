@@ -12,6 +12,8 @@
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod Celda object of class \link{celda_G} or \link{celda_CG}. Used
 #'  only if \code{x} is a matrix object.
 #' @param featureModule Integer Vector. The featureModule(s) to display.
@@ -54,6 +56,7 @@ setMethod("moduleHeatmap",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         featureModule = 1,
         topCells = 100,
         topFeatures = NULL,
@@ -61,38 +64,44 @@ setMethod("moduleHeatmap",
         scaleRow = scale,
         showFeaturenames = TRUE) {
 
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
         if (is.null(colnames(counts))) {
-            stop("colnames(x) is NULL! Please assign column names to x and",
+            stop("colnames(altExp(x, altExpName)) is NULL!",
+                " Please assign column names to x and",
                 " try again.")
         }
 
         if (is.null(rownames(counts))) {
-            stop("rownames(x) is NULL! Please assign row names to x and",
+            stop("rownames(altExp(x, altExpName)) is NULL!",
+                " Please assign row names to x and",
                 " try again.")
         }
 
-        if (!(S4Vectors::metadata(x)$celda_parameters$model %in% c("celda_G",
-            "celda_CG"))) {
-            stop("metadata(x)$celda_parameters$model must be 'celda_G' or",
+        if (!(S4Vectors::metadata(altExp)$celda_parameters$model %in%
+                c("celda_G", "celda_CG"))) {
+            stop("metadata(altExp(x, altExpName))$",
+                "celda_parameters$model must be 'celda_G' or",
                 " 'celda_CG'")
         }
 
         # factorize counts matrix
-        factorizedMatrix <- factorizeMatrix(x, useAssay = useAssay)
+        factorizedMatrix <- factorizeMatrix(x,
+            useAssay = useAssay,
+            altExpName = altExpName,
+            type = "proportion")
 
         # take topRank
         if (!is.null(topFeatures) && (is.numeric(topFeatures)) |
                 is.integer(topFeatures)) {
             topRanked <- topRank(
                 matrix = factorizedMatrix$proportions$module,
-                n = topFeatures
-            )
+                n = topFeatures)
         } else {
             topRanked <- topRank(
                 matrix = factorizedMatrix$proportions$module,
-                n = nrow(factorizedMatrix$proportions$module)
-            )
+                n = nrow(factorizedMatrix$proportions$module))
         }
 
         # filter topRank using featureModule into featureIndices
@@ -128,8 +137,7 @@ setMethod("moduleHeatmap",
         if (is.na(normalizedCounts)) {
             normCounts <- normalizeCounts(counts,
                 normalize = "proportion",
-                transformationFun = sqrt
-            )
+                transformationFun = sqrt)
         } else {
             normCounts <- normalizedCounts
         }
@@ -142,19 +150,23 @@ setMethod("moduleHeatmap",
             filteredNormCounts[rowSums(filteredNormCounts > 0) > 0, ,
                 drop = FALSE]
 
-        geneIx <- match(rownames(filteredNormCounts), rownames(x))
-        cellIx <- match(colnames(filteredNormCounts), colnames(x))
+        geneIx <- match(rownames(filteredNormCounts), rownames(altExp))
+        cellIx <- match(colnames(filteredNormCounts), colnames(altExp))
         zToPlot <- c()
         anno_cell_colors <- NULL
-        if (S4Vectors::metadata(x)$celda_parameters$model == "celda_CG") {
+        if (S4Vectors::metadata(altExp)$celda_parameters$model == "celda_CG") {
             if ("celda_cell_cluster" %in%
-                    colnames(SummarizedExperiment::colData(x))) {
+                    colnames(SummarizedExperiment::colData(altExp))) {
                 cell <-
-                    distinctColors(length(unique(celdaClusters(x))))[
-                        sort(unique(celdaClusters(x)[cellIx]))]
-                names(cell) <- sort(unique(celdaClusters(x)[cellIx]))
+                    distinctColors(length(unique(celdaClusters(x,
+                        altExpName = altExpName))))[
+                        sort(unique(celdaClusters(x,
+                            altExpName = altExpName)[cellIx]))]
+                names(cell) <- sort(unique(celdaClusters(x,
+                    altExpName = altExpName)[cellIx]))
                 anno_cell_colors <- list(cell = cell)
-                zToPlot <- celdaClusters(x)[cellIndices]
+                zToPlot <- celdaClusters(x,
+                    altExpName = altExpName)[cellIndices]
             }
         }
 

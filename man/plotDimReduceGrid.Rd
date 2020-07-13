@@ -14,6 +14,7 @@ plotDimReduceGrid(x, ...)
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
+  altExpName = "featureSubset",
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -63,6 +64,9 @@ reduction output.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 

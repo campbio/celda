@@ -12,7 +12,7 @@ resamplePerplexity(x, ...)
 \S4method{resamplePerplexity}{SingleCellExperiment}(
   x,
   useAssay = "counts",
-  celdaList,
+  altExpName = "featureSubset",
   resample = 5,
   seed = 12345
 )
@@ -31,8 +31,8 @@ Rows represent features and columns represent cells. Must contain
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{celdaList}{Object of class 'celdaList'. Used only if \code{x} is a
-matrix object.}
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{resample}{Integer. The number of times to resample the counts matrix
 for evaluating perplexity. Default 5.}
@@ -40,6 +40,9 @@ for evaluating perplexity. Default 5.}
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
+
+\item{celdaList}{Object of class 'celdaList'. Used only if \code{x} is a
+matrix object.}
 }
 \value{
 A \linkS4class{SingleCellExperiment} object or

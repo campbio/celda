@@ -12,7 +12,8 @@ sceCeldaG
 }
 \description{
 A \linkS4class{SingleCellExperiment} object containing the
- results of running \link{celda_G} on \link{celdaGSim}.
+ results of running \link{selectFeatures} and \link{celda_G} on
+ \link{celdaGSim}.
 }
 \examples{
 data(celdaGSim)
