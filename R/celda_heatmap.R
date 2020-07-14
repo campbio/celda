@@ -33,8 +33,6 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", altExpName = "featureSubset",
         featureIx = NULL, nfeatures = 25, ...) {
 
-        aleExp <- SingleCellExperiment::altExp(sce, altExpName)
-
         if (celdaModel(sce) == "celda_C") {
             g <- .celdaHeatmapCelda_C(sce = sce,
                 useAssay = useAssay,
@@ -97,7 +95,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         transformationFun = sqrt)
     plt <- plotHeatmap(norm[rn, ],
         z = celdaClusters(sce, altExpName = altExpName),
-        y = celdaModules(sce)[ix],
+        y = celdaModules(sce, altExpName = altExpName)[ix],
         ...)
     invisible(plt)
 }
@@ -114,6 +112,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     norm <- normalizeCounts(counts,
         normalize = "proportion",
         transformationFun = sqrt)
-    plt <- plotHeatmap(norm[rn, ], y = celdaModules(sce)[ix], ...)
+    plt <- plotHeatmap(norm[rn, ], y = celdaModules(sce,
+        altExpName = altExpName)[ix], ...)
     invisible(plt)
 }

@@ -13,7 +13,7 @@ sampleLabel(x, ...)
 
 \S4method{sampleLabel}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
-sampleLabel(x, altExpName) <- value
+sampleLabel(x, altExpName = "featureSubset") <- value
 
 \S4method{sampleLabel}{SingleCellExperiment}(x, altExpName = "featureSubset") <- value
 
