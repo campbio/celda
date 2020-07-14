@@ -1,5 +1,6 @@
 # celda_C
 library(celda)
+library(SingleCellExperiment)
 context("Testing celda_C")
 
 sceceldaCSim <- simulateCells("celda_C", K = 10)
@@ -10,7 +11,8 @@ sce <- celda_C(scesf,
     sampleLabel = sampleLabel(scesf),
     K = K,
     algorithm = "EM",
-    verbose = FALSE)
+    verbose = FALSE,
+    nchains = 1)
 factorized <- factorizeMatrix(sce)
 
 # celda_C
@@ -89,13 +91,14 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
             " of 'celda_C': xxx"))
 
     expect_true(class(S4Vectors::metadata(
-        celdaCResList)$celda_grid_search)[1] == "celdaList")
+        altExp(celdaCResList))$celda_grid_search)[1] == "celdaList")
     expect_equal(names(runParams(celdaCResList)),
         c("index", "chain", "K", "seed", "logLikelihood"))
     expect_error(plotGridSearchPerplexity(celdaCResList))
 
     celdaCResList <- resamplePerplexity(celdaCResList, resample = 2)
-    expect_equal(is.null(celdaCResList@metadata$celda_grid_search@perplexity),
+    expect_equal(is.null(altExp(
+        celdaCResList)@metadata$celda_grid_search@perplexity),
         FALSE)
     expect_true(is(celdaCResList, "SingleCellExperiment"))
     expect_error(resamplePerplexity(celdaCResList, resample = "2"),
@@ -106,8 +109,9 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 
     celdaCResIndex1 <- subsetCeldaList(celdaCResList, params = list(index = 1))
 
-    expect_true(all("celda_grid_search" %in% names(celdaCResList@metadata) &&
-            "celda_parameters" %in% names(celdaCResIndex1@metadata)))
+    expect_true(all("celda_grid_search" %in%
+            names(altExp(celdaCResList)@metadata) &&
+            "celda_parameters" %in% names(altExp(celdaCResIndex1)@metadata)))
 
     expect_error(subsetCeldaList(celdaCResList, params = list(K = 11)))
     expect_error(subsetCeldaList(celdaCResList, params = list(K = 5, M = 10)))
@@ -117,8 +121,7 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
     res <- perplexity(sce)
     res2 <- perplexity(sce, newCounts = counts + 1)
 
-    expect_error(res <- perplexity(sce, newCounts = counts[-1, ]),
-        "'newCounts' should have the same number of rows as 'sce'.")
+    expect_error(res <- perplexity(sce, newCounts = counts[-1, ]))
 })
 
 # # logLikelihood

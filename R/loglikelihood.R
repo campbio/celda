@@ -153,12 +153,14 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to
 #'  generate the model.
 #' @export
 setGeneric(
     "logLikelihoodHistory",
-    function(x) {
+    function(x, ...) {
         standardGeneric("logLikelihoodHistory")
     }
 )
@@ -171,8 +173,9 @@ setGeneric(
 #' @export
 setMethod("logLikelihoodHistory",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        cll <- S4Vectors::metadata(x)$celda_parameters$completeLogLik
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        cll <- S4Vectors::metadata(altExp)$celda_parameters$completeLogLik
         return(cll)
     }
 )
@@ -197,13 +200,15 @@ setMethod("logLikelihoodHistory",
 #'  sampling used to generate a celdaModel.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used
 #'  to generate the model.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
 #' @export
 setGeneric(
     "bestLogLikelihood",
-    function(x) {
+    function(x, ...) {
         standardGeneric("bestLogLikelihood")
     }
 )
@@ -216,8 +221,9 @@ setGeneric(
 #' @export
 setMethod("bestLogLikelihood",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        fll <- S4Vectors::metadata(x)$celda_parameters$finalLogLik
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        fll <- S4Vectors::metadata(altExp)$celda_parameters$finalLogLik
         return(fll)
     }
 )

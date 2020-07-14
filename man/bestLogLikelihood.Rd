@@ -6,9 +6,9 @@
 \alias{bestLogLikelihood,celdaModel-method}
 \title{Get the log-likelihood}
 \usage{
-bestLogLikelihood(x)
+bestLogLikelihood(x, ...)
 
-\S4method{bestLogLikelihood}{SingleCellExperiment}(x)
+\S4method{bestLogLikelihood}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
 \S4method{bestLogLikelihood}{celdaModel}(x)
 }
@@ -16,6 +16,9 @@ bestLogLikelihood(x)
 \item{x}{A \linkS4class{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 model object.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 Numeric. The log-likelihood at the final step of Gibbs sampling used
