@@ -116,8 +116,8 @@ setMethod("plotDimReduceGrid",
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceGrid(x = counts(sce),
-#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
 #'   xlab = "Dimension1",
 #'   ylab = "Dimension2",
 #'   varLabel = "tSNE")
@@ -400,8 +400,8 @@ setMethod("plotDimReduceFeature",
 #' data(sceCeldaCG)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceFeature(x = counts(sce),
-#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
 #'   normalize = TRUE,
 #'   features = c("Gene_99"),
 #'   exactMatch = TRUE)
@@ -663,8 +663,8 @@ setMethod("plotDimReduceModule",
 #' data(sceCeldaCG, celdaCGMod)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceModule(x = counts(sce),
-#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
 #'   celdaMod = celdaCGMod,
 #'   modules = c("1", "2"))
 #' @export
@@ -868,8 +868,8 @@ setMethod("plotDimReduceCluster",
 #' data(sceCeldaCG, celdaCGMod)
 #' sce <- celdaTsne(sceCeldaCG)
 #' plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
-#'   dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-#'   dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
 #'   specificClusters = c(1, 2, 3))
 #' @export
 setMethod("plotDimReduceCluster",

@@ -95,7 +95,7 @@ library(SingleCellExperiment)
 data(sceCeldaCG, celdaCGMod)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
-  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
   specificClusters = c(1, 2, 3))
 }

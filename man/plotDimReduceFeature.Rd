@@ -144,8 +144,8 @@ library(SingleCellExperiment)
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(x = counts(sce),
-  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
   normalize = TRUE,
   features = c("Gene_99"),
   exactMatch = TRUE)
