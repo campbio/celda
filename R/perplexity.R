@@ -40,19 +40,19 @@ setMethod("perplexity", signature(x = "SingleCellExperiment"),
         altExpName = "featureSubset",
         newCounts = NULL) {
 
-        if (celdaModel(x) == "celda_C") {
+        if (celdaModel(x, altExpName = altExpName) == "celda_C") {
             p <- .perplexityCelda_C(sce = x,
                 useAssay = useAssay,
                 altExpName = altExpName,
                 newCounts = newCounts)
             return(p)
-        } else if (celdaModel(x) == "celda_CG") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
             p <- .perplexityCelda_CG(sce = x,
                 useAssay = useAssay,
                 altExpName = altExpName,
                 newCounts = newCounts)
             return(p)
-        } else if (celdaModel(x) == "celda_G") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
             p <- .perplexityCelda_G(sce = x,
                 useAssay = useAssay,
                 altExpName = altExpName,

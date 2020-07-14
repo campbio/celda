@@ -40,15 +40,15 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
         log = FALSE) {
 
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
-        if (celdaModel(sce) == "celda_C") {
+        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
             cp <- .clusterProbabilityCeldaC(sce = altExp,
                 useAssay = useAssay,
                 log = log)
-        } else if (celdaModel(sce) == "celda_CG") {
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
             cp <- .clusterProbabilityCeldaCG(sce = altExp,
                 useAssay = useAssay,
                 log = log)
-        } else if (celdaModel(sce) == "celda_G") {
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_G") {
             cp <- .clusterProbabilityCeldaG(sce = altExp,
                 useAssay = useAssay,
                 log = log)

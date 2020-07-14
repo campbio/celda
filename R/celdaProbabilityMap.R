@@ -40,13 +40,13 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
 
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
         level <- match.arg(level)
-        if (celdaModel(sce) == "celda_C") {
+        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
             if (level == "cellPopulation") {
                 warning("'level' has been set to 'sample'")
             }
             pm <- .celdaProbabilityMapC(sce = altExp, useAssay = useAssay,
                 level = "sample")
-        } else if (celdaModel(sce) == "celda_CG") {
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
             pm <- .celdaProbabilityMapCG(sce = altExp, useAssay = useAssay,
                 level = level)
         } else {

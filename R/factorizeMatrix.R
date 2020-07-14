@@ -45,13 +45,13 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
 
         altExp <- SingleCellExperiment::altExp(x, e = altExpName)
 
-        if (celdaModel(x) == "celda_C") {
+        if (celdaModel(x, altExpName = altExpName) == "celda_C") {
             res <- .factorizeMatrixCelda_C(sce = altExp, useAssay = useAssay,
                 type = type)
-        } else if (celdaModel(x) == "celda_CG") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
             res <- .factorizeMatrixCelda_CG(sce = altExp, useAssay = useAssay,
                 type = type)
-        } else if (celdaModel(x) == "celda_G") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
             res <- .factorizeMatrixCelda_G(sce = altExp, useAssay = useAssay,
                 type = type)
         } else {

@@ -33,21 +33,21 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", altExpName = "featureSubset",
         featureIx = NULL, nfeatures = 25, ...) {
 
-        if (celdaModel(sce) == "celda_C") {
+        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
             g <- .celdaHeatmapCelda_C(sce = sce,
                 useAssay = useAssay,
                 altExpName = altExpName,
                 featureIx = featureIx,
                 ...)
             return(g)
-        } else if (celdaModel(sce) == "celda_CG") {
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
             g <- .celdaHeatmapCelda_CG(sce = sce,
                 useAssay = useAssay,
                 altExpName = altExpName,
                 nfeatures = nfeatures,
                 ...)
             return(g)
-        } else if (celdaModel(sce) == "celda_G") {
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_G") {
             g <- .celdaHeatmapCelda_G(sce = sce,
                 useAssay = useAssay,
                 altExpName = altExpName,

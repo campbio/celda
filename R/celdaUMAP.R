@@ -154,7 +154,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
     transformationFun,
     ...) {
 
-    celdaMod <- celdaModel(sce)
+    celdaMod <- celdaModel(sce, altExpName = altExpName)
     altExp <- SingleCellExperiment::altExp(sce, altExpName)
 
     if (celdaMod == "celda_C") {

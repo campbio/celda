@@ -41,14 +41,14 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
         delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
         gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
 
-        if (celdaModel(x) == "celda_C") {
+        if (celdaModel(x, altExpName = altExpName) == "celda_C") {
             ll <- .logLikelihoodcelda_C(counts = counts,
                 sampleLabel = sampleLabel,
                 z = z,
                 K = K,
                 alpha = alpha,
                 beta = beta)
-        } else if (celdaModel(x) == "celda_CG") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
             ll <- .logLikelihoodcelda_CG(counts = counts,
                 sampleLabel = sampleLabel,
                 z = z,
@@ -59,7 +59,7 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
                 beta = beta,
                 delta = delta,
                 gamma = gamma)
-        } else if (celdaModel(x) == "celda_G") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
             ll <- .logLikelihoodcelda_G(counts = counts,
                 y = y,
                 L = L,

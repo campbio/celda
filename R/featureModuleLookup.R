@@ -33,7 +33,7 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
         exactMatch = TRUE) {
 
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
-        if (celdaModel(sce) %in% c("celda_CG", "celda_G")) {
+        if (celdaModel(sce, altExpName = altExpName) %in% c("celda_CG", "celda_G")) {
             featureList <- .featureModuleLookup(sce = altExp,
                 feature = feature,
                 exactMatch = exactMatch)
