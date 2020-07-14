@@ -188,20 +188,20 @@ recodeClusterZ <- function(sce, altExpName = "featureSubset", from, to) {
 #'  \link{celda_G} or \link{celda_CG}. Must contain column
 #'  \code{celda_feature_module} in
 #'  \code{\link[SummarizedExperiment]{rowData}(altExp(sce, altExpName))}.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
-#'  to use. Default "featureSubset".
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the original module labels
 #'  in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the new module labels.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return @return \linkS4class{SingleCellExperiment} object with recoded
 #'  feature module labels.
 #' @examples
 #' data(sceCeldaCG)
 #' sceReorderedY <- recodeClusterY(sceCeldaCG, c(1, 3), c(3, 1))
 #' @export
-recodeClusterY <- function(sce, altExpName = "featureSubset", from, to) {
+recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
