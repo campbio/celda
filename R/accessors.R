@@ -122,7 +122,7 @@ setGeneric("celdaModules<-",
 setReplaceMethod("celdaModules", signature(sce = "SingleCellExperiment"),
     function(sce, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
-        SummarizedExperiment::rowData(sce)$celda_feature_module <- value
+        SummarizedExperiment::rowData(altExp)$celda_feature_module <- value
         SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     })
