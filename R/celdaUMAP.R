@@ -138,6 +138,7 @@ setMethod("celdaUmap", signature(sce = "SingleCellExperiment"),
 
 .celdaUmap <- function(sce,
     useAssay,
+    altExpName,
     maxCells,
     minClusterSize,
     modules,

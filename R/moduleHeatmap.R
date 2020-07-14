@@ -64,7 +64,7 @@ setMethod("moduleHeatmap",
         scaleRow = scale,
         showFeaturenames = TRUE) {
 
-        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
         if (is.null(colnames(counts))) {

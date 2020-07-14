@@ -131,7 +131,7 @@ setMethod("findMarkersTree",
         autoMetaclusters = TRUE,
         seed = 12345) {
 
-        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         if ("celda_parameters" %in% names(S4Vectors::metadata(altExp))) {
             counts <- SummarizedExperiment::assay(altExp, i = useAssay)

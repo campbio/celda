@@ -175,7 +175,7 @@ setMethod("celda_C",
         SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
 
-        sce <- .celdaCWithSeed(counts = x,
+        altExp <- .celdaCWithSeed(counts = x,
             xClass = xClass,
             useAssay = useAssay,
             sce = SingleCellExperiment::altExp(sce, altExpName),

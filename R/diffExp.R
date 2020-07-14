@@ -72,7 +72,7 @@ setMethod("differentialExpression",
             }
         }
 
-        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(c2)) {

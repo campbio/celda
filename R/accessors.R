@@ -59,7 +59,7 @@ setMethod("celdaClusters",
 #' @rdname celdaClusters
 #' @export
 setGeneric("celdaClusters<-",
-    function(x, ...) standardGeneric("celdaClusters<-")
+    function(x, altExpName, value) standardGeneric("celdaClusters<-")
 )
 
 
@@ -90,7 +90,7 @@ setReplaceMethod("celdaClusters", signature(x = "SingleCellExperiment"),
 #'  feature in x.
 #' @export
 setGeneric("celdaModules",
-    function(sce, ...) {
+    function(sce, altExpName) {
         standardGeneric("celdaModules")
     })
 
@@ -111,7 +111,7 @@ setMethod("celdaModules",
 #' @rdname celdaModules
 #' @export
 setGeneric("celdaModules<-",
-    function(sce, ...) standardGeneric("celdaModules<-")
+    function(sce, altExpName, value) standardGeneric("celdaModules<-")
 )
 
 
@@ -165,7 +165,7 @@ setMethod("sampleLabel",
 #' @rdname sampleLabel
 #' @export
 setGeneric("sampleLabel<-",
-    function(x, ...) standardGeneric("sampleLabel<-")
+    function(x, altExpName, value) standardGeneric("sampleLabel<-")
 )
 #' @rdname sampleLabel
 #' @export

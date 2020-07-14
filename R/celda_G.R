@@ -763,7 +763,7 @@ setMethod("celda_G",
         cellIx <- sample(seq(ncol(counts)), maxCells)
     }
 
-    fm <- .factorizeMatrixCelda_G(x = sce, useAssay = useAssay, type = "counts")
+    fm <- .factorizeMatrixCelda_G(sce, useAssay = useAssay, type = "counts")
 
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {

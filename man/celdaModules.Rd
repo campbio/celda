@@ -8,11 +8,11 @@
 \title{Get or set the feature module labels from a celda
  \linkS4class{SingleCellExperiment} object.}
 \usage{
-celdaModules(sce, ...)
+celdaModules(sce, altExpName)
 
 \S4method{celdaModules}{SingleCellExperiment}(sce, altExpName = "featureSubset")
 
-celdaModules(sce, ...) <- value
+celdaModules(sce, altExpName) <- value
 
 \S4method{celdaModules}{SingleCellExperiment}(sce, altExpName = "featureSubset") <- value
 }

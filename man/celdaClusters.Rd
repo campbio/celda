@@ -16,7 +16,7 @@ celdaClusters(x, ...)
 
 \S4method{celdaClusters}{celdaModel}(x)
 
-celdaClusters(x, ...) <- value
+celdaClusters(x, altExpName) <- value
 
 \S4method{celdaClusters}{SingleCellExperiment}(x, altExpName = "featureSubset") <- value
 }

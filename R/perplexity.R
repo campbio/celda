@@ -381,7 +381,7 @@ setMethod("resamplePerplexity",
         resample = 5,
         seed = 12345) {
 
-        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search

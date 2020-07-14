@@ -67,7 +67,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         sce)$celda_cell_cluster,
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
 
-    factorized <- .factorizeMatrixCelda_C(x = sce, useAssay = useAssay,
+    factorized <- .factorizeMatrixCelda_C(sce, useAssay = useAssay,
         type = "proportion")
 
     samp <- factorized$proportions$sample[zInclude, , drop = FALSE]
