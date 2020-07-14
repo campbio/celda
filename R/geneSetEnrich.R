@@ -55,7 +55,8 @@ setMethod("geneSetEnrich",
             length = S4Vectors::metadata(altExp)$celda_parameters$L)
 
         # create dataframe with gene-module associations
-        genes <- data.frame(gene = rownames(altExp), module = celdaModules(x))
+        genes <- data.frame(gene = rownames(altExp),
+            module = celdaModules(x, altExpName = altExpName))
 
         # iterate over each module, get genes in that module, add to list
         for (i in seq_len(S4Vectors::metadata(altExp)$celda_parameters$L)) {

@@ -205,7 +205,7 @@ recodeClusterY <- function(sce, altExpName = "featureSubset", from, to) {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaModules(sce))) {
+    if (is.null(celdaModules(sce, altExpName = altExpName))) {
         stop("Provided 'sce' argument does not have a 'celda_feature_module'",
             " column in 'rowData(altExp(sce, altExpName))'")
     }

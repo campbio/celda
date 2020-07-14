@@ -480,29 +480,32 @@ setMethod("subsetCeldaList",
     function(x, params, useAssay = "counts", altExpName = "featureSubset") {
 
         ## Check for bad parameter names
-        if (!all(names(params) %in% colnames(runParams(x)))) {
-            badParams <- setdiff(names(params), colnames(runParams(x)))
+        if (!all(names(params) %in% colnames(runParams(x,
+            altExpName = altExpName)))) {
+            badParams <- setdiff(names(params),
+                colnames(runParams(x, altExpName = altExpName)))
             stop("The following elements in 'params' are not columns in",
-                " runParams(x) ",
+                " runParams(x, altExpName = altExpName) ",
                 paste(badParams, collapse = ",")
             )
         }
 
         ## Subset 'runParams' based on items in 'params'
-        newRunParams <- runParams(x)
+        newRunParams <- runParams(x, altExpName = altExpName)
         for (i in names(params)) {
             newRunParams <-
                 subset(newRunParams, newRunParams[, i] %in% params[[i]])
 
             if (nrow(newRunParams) == 0) {
                 stop("No runs matched the criteria given in 'params'. Check",
-                    " 'runParams(x)' for complete list of parameters used",
+                    " 'runParams(x, altExpName = altExpName)' for complete",
+                    " list of parameters used",
                     " to generate 'x'.")
             }
         }
 
         ## Get index of selected models, subset celdaList, and return
-        ix <- match(newRunParams$index, runParams(x)$index)
+        ix <- match(newRunParams$index, runParams(x, altExpName = altExpName)$index)
         altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         if (length(ix) == 1) {
@@ -618,7 +621,7 @@ setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         logLikelihood <- NULL
-        group <- setdiff(colnames(runParams(x)),
+        group <- setdiff(colnames(runParams(x, altExpName = altExpName)),
             c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
         runParams <- S4Vectors::metadata(altExp)$celda_grid_search@runParams
         dt <- data.table::as.data.table(runParams)

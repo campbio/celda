@@ -145,7 +145,8 @@ setMethod("findMarkersTree",
             class <- celdaClusters(x, altExpName = altExpName)
 
             # get feature labels
-            featureLabels <- paste0("L", celdaModules(x))
+            featureLabels <- paste0("L",
+                celdaModules(x, altExpName = altExpName))
         } else if (methods::hasArg(seurat)) {
             # get counts matrix from seurat object
             counts <- as.matrix(seurat@assays$RNA@data)

@@ -41,8 +41,9 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
 
-        if (!module %in% celdaModules(x)) {
-            stop("Module ", module, " is not found in celdaModules(x).",
+        if (!module %in% celdaModules(x, altExpName = altExpName)) {
+            stop("Module ", module, " is not found in celdaModules(x,",
+                " altExpName = altExpName).",
                 " Please specify a valid module.")
         }
 

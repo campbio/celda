@@ -234,7 +234,7 @@ setMethod(
         type = "posterior")
     theta <- log(factorized$posterior$sample)
     phi <- log(factorized$posterior$module)
-    s <- as.integer(sampleLabel(sce))
+    s <- as.integer(sampleLabel(sce, altExpName = altExpName))
 
     # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
     inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
@@ -273,7 +273,7 @@ setMethod(
     theta <- log(factorized$posterior$sample)
     phi <- factorized$posterior$cellPopulation
     psi <- factorized$posterior$module
-    s <- as.integer(sampleLabel(sce))
+    s <- as.integer(sampleLabel(sce, altExpName = altExpName))
     eta <- factorized$posterior$geneDistribution
     nGByTS <- factorized$counts$geneDistribution
 
@@ -326,7 +326,7 @@ setMethod(
         newCounts,
         phi,
         psi,
-        celdaModules(sce),
+        celdaModules(sce, altExpName = altExpName),
         S4Vectors::metadata(altExp)$celda_parameters$L
     ) # + sum(etaProb)
     perplexity <- exp(- (logPx / sum(newCounts)))

@@ -173,7 +173,7 @@ setMethod("moduleHeatmap",
         plt <- plotHeatmap(
             filteredNormCounts,
             z = zToPlot,
-            y = celdaModules(x)[geneIx],
+            y = celdaModules(x, altExpName = altExpName)[geneIx],
             scaleRow = scaleRow,
             colorScheme = "divergent",
             showNamesFeature = showFeaturenames,

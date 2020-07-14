@@ -66,7 +66,7 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
     z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
-    s <- as.integer(sampleLabel(sce))
+    s <- as.integer(SummarizedExperiment::colData(sce)$celda_sample_label)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
@@ -100,7 +100,7 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
 .clusterProbabilityCeldaCG <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    s <- as.integer(sampleLabel(sce))
+    s <- as.integer(SummarizedExperiment::colData(sce)$celda_sample_label)
     z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     y <- SummarizedExperiment::rowData(sce)$celda_feature_module
