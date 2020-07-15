@@ -137,8 +137,6 @@ normalizeCounts <- function(counts,
 #'  \link{celda_C} or \link{celda_CG}. Must contain column
 #'  \code{celda_cell_cluster} in
 #'  \code{\link[SummarizedExperiment]{colData}(altExp(sce, altExpName))}.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
-#'  to use. Default "featureSubset".
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
 #'  the original cluster
@@ -146,6 +144,8 @@ normalizeCounts <- function(counts,
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
 #'  the new cluster labels.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell
 #'  cluster labels.
 #' @examples
@@ -153,7 +153,7 @@ normalizeCounts <- function(counts,
 #' sceReorderedZ <- recodeClusterZ(sceCeldaCG, c(1, 3), c(3, 1))
 #' @importFrom plyr mapvalues
 #' @export
-recodeClusterZ <- function(sce, altExpName = "featureSubset", from, to) {
+recodeClusterZ <- function(sce, from, to, altExpName = "featureSubset") {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
