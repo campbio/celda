@@ -60,7 +60,8 @@ setMethod("celdaClusters",
 #' @export
 setGeneric("celdaClusters<-",
     function(x, altExpName = "featureSubset", value) {
-        standardGeneric("celdaClusters<-")}
+        standardGeneric("celdaClusters<-")
+    }
 )
 
 
@@ -113,7 +114,8 @@ setMethod("celdaModules",
 #' @export
 setGeneric("celdaModules<-",
     function(sce, altExpName = "featureSubset", value) {
-        standardGeneric("celdaModules<-")}
+        standardGeneric("celdaModules<-")
+    }
 )
 
 
@@ -168,7 +170,8 @@ setMethod("sampleLabel",
 #' @export
 setGeneric("sampleLabel<-",
     function(x, altExpName = "featureSubset", value) {
-        standardGeneric("sampleLabel<-")}
+        standardGeneric("sampleLabel<-")
+    }
 )
 #' @rdname sampleLabel
 #' @export

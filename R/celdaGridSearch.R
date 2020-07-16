@@ -505,7 +505,8 @@ setMethod("subsetCeldaList",
         }
 
         ## Get index of selected models, subset celdaList, and return
-        ix <- match(newRunParams$index, runParams(x, altExpName = altExpName)$index)
+        ix <- match(newRunParams$index, runParams(x,
+            altExpName = altExpName)$index)
         altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         if (length(ix) == 1) {

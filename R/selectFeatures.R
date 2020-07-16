@@ -80,5 +80,3 @@ setMethod("selectFeatures",
         return(sce)
     }
 )
-
-
