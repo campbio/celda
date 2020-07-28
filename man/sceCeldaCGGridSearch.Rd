@@ -12,16 +12,19 @@ sceCeldaCGGridSearch
 }
 \description{
 A \linkS4class{SingleCellExperiment} object containing the
- results of running \link{celdaGridSearch} on \link{celdaCGSim}.
+ results of running \link{selectFeatures} and \link{celdaGridSearch} on
+ \link{celdaCGSim}.
 }
 \examples{
 data(celdaCGSim)
-sceCeldaCGGridSearch <- celdaGridSearch(celdaCGSim$counts,
+sce <- selectFeatures(celdaCGSim$counts)
+sceCeldaCGGridSearch <- celdaGridSearch(sce,
     model = "celda_CG",
     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
     bestOnly = TRUE,
     nchains = 1,
-    cores = 1)
+    cores = 1,
+    verbose = FALSE)
 }
 \keyword{datasets}

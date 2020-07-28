@@ -6,9 +6,9 @@
 \alias{logLikelihoodHistory,celdaModel-method}
 \title{Get log-likelihood history}
 \usage{
-logLikelihoodHistory(x)
+logLikelihoodHistory(x, ...)
 
-\S4method{logLikelihoodHistory}{SingleCellExperiment}(x)
+\S4method{logLikelihoodHistory}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
 \S4method{logLikelihoodHistory}{celdaModel}(x)
 }
@@ -16,6 +16,9 @@ logLikelihoodHistory(x)
 \item{x}{A \linkS4class{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 model object.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 Numeric. The log-likelihood at each step of Gibbs sampling used to

@@ -1,15 +1,18 @@
 # celda_C
 library(celda)
+library(SingleCellExperiment)
 context("Testing celda_C")
 
 sceceldaCSim <- simulateCells("celda_C", K = 10)
+scesf <- selectFeatures(sceceldaCSim)
 K <- S4Vectors::metadata(sceceldaCSim)$celda_simulateCellscelda_C$K
-counts <- SummarizedExperiment::assay(sceceldaCSim, "counts")
-sce <- celda_C(sceceldaCSim,
-    sampleLabel = sampleLabel(sceceldaCSim),
+counts <- SummarizedExperiment::assay(scesf, "counts")
+sce <- celda_C(scesf,
+    sampleLabel = sampleLabel(scesf),
     K = K,
     algorithm = "EM",
-    verbose = FALSE)
+    verbose = FALSE,
+    nchains = 1)
 factorized <- factorizeMatrix(sce)
 
 # celda_C
@@ -27,7 +30,7 @@ test_that(desc = "Testing simulation and celda_C model", {
     numericCounts <- counts
     storage.mode(numericCounts) <- "numeric"
     expect_true(is(celda_C(counts,
-        sampleLabel = sampleLabel(sceceldaCSim),
+        sampleLabel = sampleLabel(scesf),
         K = K,
         algorithm = "EM",
         verbose = FALSE,
@@ -42,59 +45,60 @@ test_that(desc = "Testing clusterProbability with celda_C", {
 
 # celdaGridSearch and perplexity calculations
 test_that(desc = "Testing celdaGridSearch with celda_C", {
-    celdaCResList <- celdaGridSearch(sceceldaCSim,
+    celdaCResList <- celdaGridSearch(scesf,
         model = "celda_C",
         nchains = 2,
         paramsTest = list(K = c(5, 6)),
-        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim)),
+        paramsFixed = list(sampleLabel = sampleLabel(scesf)),
         maxIter = 2,
         verbose = FALSE,
         bestOnly = FALSE,
         perplexity = FALSE)
-    expect_error(celdaGridSearch(sceceldaCSim,
+    expect_error(celdaGridSearch(scesf,
         model = "celda_C",
         paramsTest = list(K = c(4, 5), M = c(3, 4)),
-        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim)),
+        paramsFixed = list(sampleLabel = sampleLabel(scesf)),
         bestOnly = FALSE),
         paste0("The following elements in 'paramsTest' are not arguments of",
             " 'celda_C': M"))
 
-    expect_error(celdaGridSearch(sceceldaCSim,
+    expect_error(celdaGridSearch(scesf,
         model = "celda_C",
         nchains = 1,
         maxIter = 1,
         paramsTest = list(K = c(4, 5), sampleLabel = "Sample"),
-        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim))),
+        paramsFixed = list(sampleLabel = sampleLabel(scesf))),
         paste0("Setting parameters such as 'z.init', 'y.init', and",
             " 'sampleLabel' in 'paramsTest' is not currently supported."))
 
-    expect_error(celdaGridSearch(sceceldaCSim,
+    expect_error(celdaGridSearch(scesf,
         model = "celda_C",
         nchains = 1,
         maxIter = 1,
         paramsTest = list(),
-        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim))),
+        paramsFixed = list(sampleLabel = sampleLabel(scesf))),
         paste0("The following arguments are not in 'paramsTest' or",
             " 'paramsFixed' but are required for 'celda_C': K"))
 
-    expect_error(celdaGridSearch(sceceldaCSim,
+    expect_error(celdaGridSearch(scesf,
         model = "celda_C",
         nchains = 1,
         maxIter = 1,
         paramsTest = list(K = c(9, 10)),
-        paramsFixed = list(sampleLabel = sampleLabel(sceceldaCSim),
+        paramsFixed = list(sampleLabel = sampleLabel(scesf),
             xxx = "xxx")),
         paste0("The following elements in 'paramsFixed' are not arguments",
             " of 'celda_C': xxx"))
 
     expect_true(class(S4Vectors::metadata(
-        celdaCResList)$celda_grid_search)[1] == "celdaList")
+        altExp(celdaCResList))$celda_grid_search)[1] == "celdaList")
     expect_equal(names(runParams(celdaCResList)),
         c("index", "chain", "K", "seed", "logLikelihood"))
     expect_error(plotGridSearchPerplexity(celdaCResList))
 
     celdaCResList <- resamplePerplexity(celdaCResList, resample = 2)
-    expect_equal(is.null(celdaCResList@metadata$celda_grid_search@perplexity),
+    expect_equal(is.null(altExp(
+        celdaCResList)@metadata$celda_grid_search@perplexity),
         FALSE)
     expect_true(is(celdaCResList, "SingleCellExperiment"))
     expect_error(resamplePerplexity(celdaCResList, resample = "2"),
@@ -105,8 +109,9 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 
     celdaCResIndex1 <- subsetCeldaList(celdaCResList, params = list(index = 1))
 
-    expect_true(all("celda_grid_search" %in% names(celdaCResList@metadata) &&
-            "celda_parameters" %in% names(celdaCResIndex1@metadata)))
+    expect_true(all("celda_grid_search" %in%
+            names(altExp(celdaCResList)@metadata) &&
+            "celda_parameters" %in% names(altExp(celdaCResIndex1)@metadata)))
 
     expect_error(subsetCeldaList(celdaCResList, params = list(K = 11)))
     expect_error(subsetCeldaList(celdaCResList, params = list(K = 5, M = 10)))
@@ -116,8 +121,7 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
     res <- perplexity(sce)
     res2 <- perplexity(sce, newCounts = counts + 1)
 
-    expect_error(res <- perplexity(sce, newCounts = counts[-1, ]),
-        "'newCounts' should have the same number of rows as 'sce'.")
+    expect_error(res <- perplexity(sce, newCounts = counts[-1, ]))
 })
 
 # # logLikelihood

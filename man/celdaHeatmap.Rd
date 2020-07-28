@@ -7,7 +7,14 @@
 \usage{
 celdaHeatmap(sce, ...)
 
-\S4method{celdaHeatmap}{SingleCellExperiment}(sce, useAssay = "counts", featureIx = NULL, nfeatures = 25, ...)
+\S4method{celdaHeatmap}{SingleCellExperiment}(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  featureIx = NULL,
+  nfeatures = 25,
+  ...
+)
 }
 \arguments{
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
@@ -17,6 +24,9 @@ returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{featureIx}{Integer vector. Select features for display in heatmap. If
 NULL, no subsetting will be performed. Default NULL. \strong{Only used for

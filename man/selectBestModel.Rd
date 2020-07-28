@@ -8,7 +8,12 @@
 \usage{
 selectBestModel(x, ...)
 
-\S4method{selectBestModel}{SingleCellExperiment}(x, asList = FALSE, useAssay = "counts")
+\S4method{selectBestModel}{SingleCellExperiment}(
+  x,
+  asList = FALSE,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 
 \S4method{selectBestModel}{celdaList}(x, asList = FALSE)
 }
@@ -29,6 +34,9 @@ corresponding celda model object.}
 \item{useAssay}{A string specifying which \code{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 One of

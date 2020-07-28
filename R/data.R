@@ -93,50 +93,61 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 
 #' @title sceCeldaC
 #' @description A \linkS4class{SingleCellExperiment} object containing the
-#'  results of running \link{celda_C} on \link{celdaCSim}.
+#'  results of running \link{selectFeatures} and \link{celda_C} on
+#'  \link{celdaCSim}.
 #' @format A \linkS4class{SingleCellExperiment} object
 #' @examples
 #' data(celdaCSim)
-#' sceCeldaC = celda_C(celdaCSim$counts,
+#' sceCeldaC <- selectFeatures(celdaCSim$counts)
+#' sceCeldaC <- celda_C(sceCeldaC,
 #'     K = celdaCSim$K,
-#'     sampleLabel = celdaCSim$sampleLabel)
+#'     sampleLabel = celdaCSim$sampleLabel,
+#'     nchains = 1)
 "sceCeldaC"
 
 
 #' @title sceCeldaG
 #' @description A \linkS4class{SingleCellExperiment} object containing the
-#'  results of running \link{celda_G} on \link{celdaGSim}.
+#'  results of running \link{selectFeatures} and \link{celda_G} on
+#'  \link{celdaGSim}.
 #' @format A \linkS4class{SingleCellExperiment} object
 #' @examples
 #' data(celdaGSim)
-#' sceCeldaG = celda_G(celdaGSim$counts, L = celdaGSim$L)
+#' sceCeldaG <- selectFeatures(celdaGSim$counts)
+#' sceCeldaG <- celda_G(sceCeldaG, L = celdaGSim$L, nchains = 1)
 "sceCeldaG"
 
 
 #' @title sceCeldaCG
 #' @description A \linkS4class{SingleCellExperiment} object containing the
-#'  results of running \link{celda_CG} on \link{celdaCGSim}.
+#'  results of running \link{selectFeatures} and \link{celda_CG} on
+#'  \link{celdaCGSim}.
 #' @format A \linkS4class{SingleCellExperiment} object
 #' @examples
 #' data(celdaCGSim)
-#' sceCeldaCG = celda_CG(celdaCGSim$counts,
+#' sceCeldaCG <- selectFeatures(celdaCGSim$counts)
+#' sceCeldaCG <- celda_CG(sceCeldaCG,
 #'     K = celdaCGSim$K,
 #'     L = celdaCGSim$L,
-#'     sampleLabel = celdaCGSim$sampleLabel)
+#'     sampleLabel = celdaCGSim$sampleLabel,
+#'     nchains = 1)
 "sceCeldaCG"
 
 
 #' @title sceCeldaCGGridSearch
 #' @description A \linkS4class{SingleCellExperiment} object containing the
-#'  results of running \link{celdaGridSearch} on \link{celdaCGSim}.
+#'  results of running \link{selectFeatures} and \link{celdaGridSearch} on
+#'  \link{celdaCGSim}.
 #' @format A \linkS4class{SingleCellExperiment} object
 #' @examples
 #' data(celdaCGSim)
-#' sceCeldaCGGridSearch <- celdaGridSearch(celdaCGSim$counts,
+#' sce <- selectFeatures(celdaCGSim$counts)
+#' sceCeldaCGGridSearch <- celdaGridSearch(sce,
 #'     model = "celda_CG",
 #'     paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
 #'     paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
 #'     bestOnly = TRUE,
 #'     nchains = 1,
-#'     cores = 1)
+#'     cores = 1,
+#'     verbose = FALSE)
 "sceCeldaCGGridSearch"

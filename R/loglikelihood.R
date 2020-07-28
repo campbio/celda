@@ -7,6 +7,8 @@
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod celda model object. Ignored if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
 #' @return The log-likelihood of the cluster assignment for the
@@ -25,27 +27,28 @@ setGeneric("logLikelihood", function(x, celdaMod, ...) {
 #' loglikCG <- logLikelihood(sceCeldaCG)
 #' @export
 setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
-    function(x, useAssay = "counts") {
+    function(x, useAssay = "counts", altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
 
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
-        sampleLabel <- sampleLabel(x)
-        z <- celdaClusters(x)
-        y <- celdaModules(x)
-        K <- S4Vectors::metadata(x)$celda_parameters$K
-        L <- S4Vectors::metadata(x)$celda_parameters$L
-        alpha <- S4Vectors::metadata(x)$celda_parameters$alpha
-        beta <- S4Vectors::metadata(x)$celda_parameters$beta
-        delta <- S4Vectors::metadata(x)$celda_parameters$delta
-        gamma <- S4Vectors::metadata(x)$celda_parameters$gamma
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+        sampleLabel <- sampleLabel(x, altExpName = altExpName)
+        z <- celdaClusters(x, altExpName = altExpName)
+        y <- celdaModules(x, altExpName = altExpName)
+        K <- S4Vectors::metadata(altExp)$celda_parameters$K
+        L <- S4Vectors::metadata(altExp)$celda_parameters$L
+        alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
+        beta <- S4Vectors::metadata(altExp)$celda_parameters$beta
+        delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
+        gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
 
-        if (celdaModel(x) == "celda_C") {
+        if (celdaModel(x, altExpName = altExpName) == "celda_C") {
             ll <- .logLikelihoodcelda_C(counts = counts,
                 sampleLabel = sampleLabel,
                 z = z,
                 K = K,
                 alpha = alpha,
                 beta = beta)
-        } else if (celdaModel(x) == "celda_CG") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
             ll <- .logLikelihoodcelda_CG(counts = counts,
                 sampleLabel = sampleLabel,
                 z = z,
@@ -56,7 +59,7 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
                 beta = beta,
                 delta = delta,
                 gamma = gamma)
-        } else if (celdaModel(x) == "celda_G") {
+        } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
             ll <- .logLikelihoodcelda_G(counts = counts,
                 y = y,
                 L = L,
@@ -64,7 +67,8 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
                 delta = delta,
                 gamma = gamma)
         } else {
-            stop("S4Vectors::metadata(x)$celda_parameters$model must be",
+            stop("S4Vectors::metadata(altExp(x, altExpName))$",
+                "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'!")
         }
         return(ll)
@@ -149,12 +153,14 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to
 #'  generate the model.
 #' @export
 setGeneric(
     "logLikelihoodHistory",
-    function(x) {
+    function(x, ...) {
         standardGeneric("logLikelihoodHistory")
     }
 )
@@ -167,8 +173,9 @@ setGeneric(
 #' @export
 setMethod("logLikelihoodHistory",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        cll <- S4Vectors::metadata(x)$celda_parameters$completeLogLik
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        cll <- S4Vectors::metadata(altExp)$celda_parameters$completeLogLik
         return(cll)
     }
 )
@@ -193,13 +200,15 @@ setMethod("logLikelihoodHistory",
 #'  sampling used to generate a celdaModel.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used
 #'  to generate the model.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
 #' @export
 setGeneric(
     "bestLogLikelihood",
-    function(x) {
+    function(x, ...) {
         standardGeneric("bestLogLikelihood")
     }
 )
@@ -212,8 +221,9 @@ setGeneric(
 #' @export
 setMethod("bestLogLikelihood",
     signature(x = "SingleCellExperiment"),
-    function(x) {
-        fll <- S4Vectors::metadata(x)$celda_parameters$finalLogLik
+    function(x, altExpName = "featureSubset") {
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        fll <- S4Vectors::metadata(altExp)$celda_parameters$finalLogLik
         return(fll)
     }
 )

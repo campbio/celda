@@ -8,7 +8,13 @@
 \usage{
 geneSetEnrich(x, ...)
 
-\S4method{geneSetEnrich}{SingleCellExperiment}(x, useAssay = "counts", databases, fdr = 0.05)
+\S4method{geneSetEnrich}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  databases,
+  fdr = 0.05
+)
 
 \S4method{geneSetEnrich}{matrix}(x, celdaModel, databases, fdr = 0.05)
 }
@@ -22,6 +28,9 @@ matrix or \linkS4class{SingleCellExperiment} object should be gene names.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{databases}{Character vector. Name of reference database. Available
 databases can be viewed by \link[enrichR]{listEnrichrDbs}.}

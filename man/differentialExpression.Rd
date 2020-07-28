@@ -11,6 +11,7 @@ differentialExpression(x, ...)
 \S4method{differentialExpression}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   c1,
   c2 = NULL,
   onlyPos = FALSE,
@@ -33,12 +34,15 @@ differentialExpression(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Must contain cluster
-labels in \code{celdaClusters(x)} if \code{x} is a
+labels in \code{celdaClusters(x, altExpName = altExpName)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{c1}{Integer vector. Cell populations to include in group 1 for the
 differential expression analysis.}

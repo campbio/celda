@@ -12,6 +12,8 @@
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param class Vector of cell cluster labels.
 #' @param oneoffMetric A character string. What one-off metric to run, either
 #'  `modified F1` or `pairwise AUC`. Default is 'modified F1'.
@@ -115,6 +117,7 @@ setMethod("findMarkersTree",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         class,
         oneoffMetric = c("modified F1", "pairwise AUC"),
         metaclusters,
@@ -128,17 +131,22 @@ setMethod("findMarkersTree",
         autoMetaclusters = TRUE,
         seed = 12345) {
 
-        if ("celda_parameters" %in% names(S4Vectors::metadata(x))) {
-            counts <- SummarizedExperiment::assay(x, i = useAssay)
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if ("celda_parameters" %in% names(S4Vectors::metadata(altExp))) {
+            counts <- SummarizedExperiment::assay(altExp, i = useAssay)
 
             # factorize matrix (proportion of each module in each cell)
-            features <- factorizeMatrix(x)$proportions$cell
+            features <- factorizeMatrix(x,
+                useAssay = useAssay,
+                altExpName = altExpName)$proportions$cell
 
             # get class labels
-            class <- celdaClusters(x)
+            class <- celdaClusters(x, altExpName = altExpName)
 
             # get feature labels
-            featureLabels <- paste0("L", celdaModules(x))
+            featureLabels <- paste0("L",
+                celdaModules(x, altExpName = altExpName))
         } else if (methods::hasArg(seurat)) {
             # get counts matrix from seurat object
             counts <- as.matrix(seurat@assays$RNA@data)

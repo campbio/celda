@@ -6,6 +6,8 @@
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param level Character. One of "cellPopulation" or "Sample".
 #'  "cellPopulation" will display the absolute probabilities and relative
 #'  normalized expression of each module in each cell population.
@@ -33,19 +35,23 @@ setGeneric("celdaProbabilityMap",
 #' celdaProbabilityMap(sceCeldaCG)
 #' @export
 setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
-    function(sce, useAssay = "counts", level = c("cellPopulation", "sample")) {
+    function(sce, useAssay = "counts", altExpName = "featureSubset",
+        level = c("cellPopulation", "sample")) {
+
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
         level <- match.arg(level)
-        if (celdaModel(sce) == "celda_C") {
+        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
             if (level == "cellPopulation") {
                 warning("'level' has been set to 'sample'")
             }
-            pm <- .celdaProbabilityMapC(sce = sce, useAssay = useAssay,
+            pm <- .celdaProbabilityMapC(sce = altExp, useAssay = useAssay,
                 level = "sample")
-        } else if (celdaModel(sce) == "celda_CG") {
-            pm <- .celdaProbabilityMapCG(sce = sce, useAssay = useAssay,
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
+            pm <- .celdaProbabilityMapCG(sce = altExp, useAssay = useAssay,
                 level = level)
         } else {
-            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+            stop("S4Vectors::metadata(altExp(sce,",
+                " altExpName))$celda_parameters$model must be",
                 " one of 'celda_C', or 'celda_CG'!")
         }
         return(pm)
@@ -57,10 +63,12 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
-    zInclude <- which(tabulate(celdaClusters(sce),
+    zInclude <- which(tabulate(SummarizedExperiment::colData(
+        sce)$celda_cell_cluster,
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
 
-    factorized <- factorizeMatrix(x = sce, useAssay = useAssay)
+    factorized <- .factorizeMatrixCelda_C(sce, useAssay = useAssay,
+        type = "proportion")
 
     samp <- factorized$proportions$sample[zInclude, , drop = FALSE]
     col <- grDevices::colorRampPalette(c("white",
@@ -108,22 +116,23 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
-    factorized <- factorizeMatrix(sce, useAssay)
-    zInclude <- which(tabulate(celdaClusters(sce),
+    factorized <- .factorizeMatrixCelda_CG(sce, useAssay,
+        type = c("counts", "proportion"))
+    zInclude <- which(tabulate(SummarizedExperiment::colData(
+        sce)$celda_cell_cluster,
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
-    yInclude <- which(tabulate(celdaModules(sce),
+    yInclude <- which(tabulate(SummarizedExperiment::rowData(
+        sce)$celda_feature_module,
         S4Vectors::metadata(sce)$celda_parameters$L) > 0)
 
     if (level == "cellPopulation") {
         pop <- factorized$proportions$cellPopulation[yInclude,
             zInclude,
-            drop = FALSE
-            ]
+            drop = FALSE]
         popNorm <- normalizeCounts(pop,
             normalize = "proportion",
             transformationFun = sqrt,
-            scaleFun = base::scale
-        )
+            scaleFun = base::scale)
 
         percentile9 <- round(stats::quantile(pop, .9), digits = 2) * 100
         col1 <- grDevices::colorRampPalette(c(

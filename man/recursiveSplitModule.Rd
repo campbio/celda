@@ -11,6 +11,7 @@ recursiveSplitModule(x, ...)
 \S4method{recursiveSplitModule}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   initialL = 10,
   maxL = 100,
   tempK = 100,
@@ -30,6 +31,8 @@ recursiveSplitModule(x, ...)
 
 \S4method{recursiveSplitModule}{matrix}(
   x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   initialL = 10,
   maxL = 100,
   tempK = 100,
@@ -56,6 +59,9 @@ Rows represent features and columns represent cells.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{initialL}{Integer. Minimum number of modules to try.}
 

@@ -14,6 +14,7 @@ plotDimReduceFeature(x, ...)
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
+  altExpName = "featureSubset",
   features,
   headers = NULL,
   normalize = FALSE,
@@ -71,6 +72,9 @@ reduction output.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{features}{Character vector. Features in the rownames of counts to plot.}
 
@@ -140,8 +144,8 @@ library(SingleCellExperiment)
 data(sceCeldaCG)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(x = counts(sce),
-  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
   normalize = TRUE,
   features = c("Gene_99"),
   exactMatch = TRUE)

@@ -7,15 +7,18 @@
 \title{Get run parameters from a celda model
  \code{SingleCellExperiment} or \code{celdaList} object}
 \usage{
-runParams(x)
+runParams(x, ...)
 
-\S4method{runParams}{SingleCellExperiment}(x)
+\S4method{runParams}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
 \S4method{runParams}{celdaList}(x)
 }
 \arguments{
 \item{x}{An object of class \linkS4class{SingleCellExperiment} or class
 \code{celdaList}.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 Data Frame. Contains details on the various K/L parameters, chain

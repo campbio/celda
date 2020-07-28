@@ -56,6 +56,10 @@
 #'  size of each cell by the median library size across all cells. 'mean'
 #'  divides the library size of each cell by the mean library size across all
 #'  cells.
+#' @param scaleFactor Numeric. Sets the scale factor for cell-level
+#'  normalization. This scale factor is multiplied to each cell after the
+#'  library size of each cell had been adjusted in \code{normalize}. Default
+#'  \code{NULL} which means no scale factor is applied.
 #' @param transformationFun Function. Applys a transformation such as `sqrt`,
 #'  `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be
 #'  applied. Occurs after normalization. Default NULL.
@@ -74,10 +78,9 @@
 #'   pseudocountNormalize = 1)
 #' @export
 normalizeCounts <- function(counts,
-                            normalize = c(
-                              "proportion", "cpm",
-                              "median", "mean"
-                            ),
+                            normalize = c("proportion", "cpm",
+                              "median", "mean"),
+                            scaleFactor = NULL,
                             transformationFun = NULL,
                             scaleFun = NULL,
                             pseudocountNormalize = 0,
@@ -107,6 +110,11 @@ normalizeCounts <- function(counts,
       "mean" = sweep(counts, 2, cs / mean(cs), "/")
     )
   }
+
+  if (!is.null(scaleFactor)) {
+      norm <- norm * scaleFactor
+  }
+
   if (!is.null(transformationFun)) {
     norm <- do.call(
       transformationFun,
@@ -127,12 +135,17 @@ normalizeCounts <- function(counts,
 #'  \code{from} and \code{to} arguments.
 #' @param sce \linkS4class{SingleCellExperiment} object returned from
 #'  \link{celda_C} or \link{celda_CG}. Must contain column
-#'  \code{celda_cell_cluster} in \link[SummarizedExperiment]{colData}.
+#'  \code{celda_cell_cluster} in
+#'  \code{\link[SummarizedExperiment]{colData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce))} that correspond to the original cluster
+#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
+#'  the original cluster
 #'  labels in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce))} that correspond to the new cluster labels.
+#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
+#'  the new cluster labels.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell
 #'  cluster labels.
 #' @examples
@@ -140,15 +153,16 @@ normalizeCounts <- function(counts,
 #' sceReorderedZ <- recodeClusterZ(sceCeldaCG, c(1, 3), c(3, 1))
 #' @importFrom plyr mapvalues
 #' @export
-recodeClusterZ <- function(sce, from, to) {
+recodeClusterZ <- function(sce, from, to, altExpName = "featureSubset") {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaClusters(sce))) {
+    if (is.null(celdaClusters(sce, altExpName = altExpName))) {
         stop("Provided 'sce' argument does not have a 'celda_cell_cluster'",
-            " column in 'colData(sce)'")
+            " column in 'colData(altExp(sce, altExpName))'")
     }
-    celdaClusters(sce) <- plyr::mapvalues(celdaClusters(sce), from, to)
+    celdaClusters(sce, altExpName = altExpName) <- plyr::mapvalues(
+        celdaClusters(sce, altExpName = altExpName), from, to)
     return(sce)
 }
 
@@ -172,27 +186,31 @@ recodeClusterZ <- function(sce, from, to) {
 #'  \code{from} and \code{to} arguments.
 #' @param sce \linkS4class{SingleCellExperiment} object returned from
 #'  \link{celda_G} or \link{celda_CG}. Must contain column
-#'  \code{celda_feature_module} in \link[SummarizedExperiment]{rowData}.
+#'  \code{celda_feature_module} in
+#'  \code{\link[SummarizedExperiment]{rowData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the original module labels
 #'  in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the new module labels.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @return @return \linkS4class{SingleCellExperiment} object with recoded
 #'  feature module labels.
 #' @examples
 #' data(sceCeldaCG)
 #' sceReorderedY <- recodeClusterY(sceCeldaCG, c(1, 3), c(3, 1))
 #' @export
-recodeClusterY <- function(sce, from, to) {
+recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
     if (length(setdiff(from, to)) != 0) {
         stop("All values in 'from' must have a mapping in 'to'")
     }
-    if (is.null(celdaModules(sce))) {
+    if (is.null(celdaModules(sce, altExpName = altExpName))) {
         stop("Provided 'sce' argument does not have a 'celda_feature_module'",
-            " column in 'rowData(sce)'")
+            " column in 'rowData(altExp(sce, altExpName))'")
     }
-    celdaModules(sce) <- plyr::mapvalues(celdaModules(sce), from, to)
+    celdaModules(sce, altExpName = altExpName) <- plyr::mapvalues(
+        celdaModules(sce, altExpName = altExpName), from, to)
     return(sce)
 }
 
@@ -444,6 +462,8 @@ distinctColors <- function(n,
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param outputFile File name for feature module table. If NULL, file will
 #'  not be created. Default NULL.
 #' @return Matrix. Contains a list of features per each column (feature module)
@@ -452,9 +472,11 @@ distinctColors <- function(n,
 #' featureModuleTable(sceCeldaCG)
 #' @importFrom stringi stri_list2matrix
 #' @export
-featureModuleTable <- function(sce, useAssay = "counts", outputFile = NULL) {
-  factorize.matrix <- factorizeMatrix(sce, useAssay)
-  allGenes <- topRank(factorize.matrix$proportions$module, n = nrow(sce))
+featureModuleTable <- function(sce, useAssay = "counts",
+    altExpName = "featureSubset", outputFile = NULL) {
+
+  factorizeMatrix <- factorizeMatrix(sce, useAssay, altExpName = altExpName)
+  allGenes <- topRank(factorizeMatrix$proportions$module, n = nrow(sce))
   res <- as.data.frame(stringi::stri_list2matrix(allGenes$names))
   res <- apply(res, c(1, 2), function(x) {
     if (is.na(x)) {
@@ -515,7 +537,8 @@ featureModuleTable <- function(sce, useAssay = "counts", outputFile = NULL) {
 #' retrieveFeatureIndex(c("Gene_1", "Gene_5"), celdaCGSim$counts,
 #'                                             exactMatch = FALSE)
 #' @export
-retrieveFeatureIndex <- function(features, x,
+retrieveFeatureIndex <- function(features,
+                                 x,
                                  by = "rownames",
                                  exactMatch = TRUE,
                                  removeNA = FALSE) {

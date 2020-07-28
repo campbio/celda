@@ -37,8 +37,9 @@ In this vignette we will demonstrate how to use celda to perform cell and featur
 celda can be installed from Bioconductor:
 
 ```{r, eval= FALSE}
-if (!requireNamespace("BiocManager", quietly=TRUE)){
-    install.packages("BiocManager")}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
 BiocManager::install("celda")
 ```
 
@@ -46,6 +47,7 @@ The package can be loaded using the `library` command.
 
 ```{r, eval = TRUE, message = FALSE}
 library(celda)
+library(SingleCellExperiment)
 ```
 
 Complete list of help files are accessible using the help command with a `package` option.
@@ -94,12 +96,20 @@ Column `celda_feature_module` in `rowData(simsce)` contains feature module label
 table(rowData(simsce)$celda_feature_module)
 ```
 
+# Feature selection
+
+A simple heuristic feature selection is performed to reduce the size of features used for clustering. To speed up the process, only features with at least 3 counts in at least 3 cells are included in downstream clustering for this data. A subset `SingleCellExperiment` object with filtered features is stored in `altExp(simsce, "featureSubset")` slot by default.
+
+```{r, warning = FALSE, message = FALSE}
+simsce <- selectFeatures(simsce)
+```
+
 # Performing bi-clustering with celda
 
 There are currently three models within *celda* package: `celda_C` will cluster cells, `celda_G` will cluster features, and `celda_CG` will simultaneously cluster cells and features. Within the functions the `K` parameter will be the number of cell populations to be estimated, while the `L` parameter will be the number of feature modules to be estimated in the output model.
 
 ```{r, warning = FALSE, message = FALSE}
-sce <- celda_CG(x = simsce, K = 5, L = 10, verbose = FALSE)
+sce <- celda_CG(x = simsce, K = 5, L = 10, verbose = FALSE, nchains = 1)
 ```
 
 Here is a comparison between the true cluster labels and the estimated cluster labels.
@@ -199,8 +209,8 @@ While `celdaHeatmap` will plot a heatmap directly with a celda *SCE* object, the
 
 ```{r}
 genes <- c(topGenes$names$L1, topGenes$names$L10)
-geneIx <- which(rownames(sce) %in% genes)
-normCounts <- normalizeCounts(counts = counts(sce), scaleFun = scale)
+geneIx <- which(rownames(altExp(sce)) %in% genes)
+normCounts <- normalizeCounts(counts = counts(altExp(sce)), scaleFun = scale)
 ```
 
 ```{r, fig.width = 8, fig.height = 8}
@@ -236,9 +246,8 @@ head(diffexpClust1vs2, 5)
 The differentially expressed genes can be visualized further with a heatmap:
 
 ```{r}
-diffexpGeneIx <- which(rownames(sce) %in% diffexpClust1vs2$Gene)
-
-normCounts <- normalizeCounts(counts = counts(sce), scaleFun = scale)
+diffexpGeneIx <- which(rownames(altExp(sce)) %in% diffexpClust1vs2$Gene)
+normCounts <- normalizeCounts(counts = counts(altExp(sce)), scaleFun = scale)
 ```
 
 ```{r}

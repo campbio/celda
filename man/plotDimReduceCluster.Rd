@@ -11,6 +11,7 @@ plotDimReduceCluster(x, ...)
 \S4method{plotDimReduceCluster}{SingleCellExperiment}(
   x,
   reducedDimName,
+  altExpName = "featureSubset",
   dim1 = NULL,
   dim2 = NULL,
   size = 1,
@@ -45,6 +46,9 @@ column in \code{colData(x)}.}
 \code{reducedDimNames(x)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{dim1}{Numeric vector. First dimension from data
 dimensionality reduction output.}
@@ -91,7 +95,7 @@ library(SingleCellExperiment)
 data(sceCeldaCG, celdaCGMod)
 sce <- celdaTsne(sceCeldaCG)
 plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
-  dim1 = reducedDim(sce, "celda_tSNE")[, 1],
-  dim2 = reducedDim(sce, "celda_tSNE")[, 2],
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
   specificClusters = c(1, 2, 3))
 }

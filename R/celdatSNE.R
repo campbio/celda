@@ -10,6 +10,8 @@
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if \code{ncol(counts) > maxCells}. Larger numbers of
 #'  cells requires more memory. If \code{NULL}, no subsampling will be
@@ -24,6 +26,22 @@
 #' @param perplexity Numeric. Perplexity parameter for tSNE. Default 20.
 #' @param maxIter Integer. Maximum number of iterations in tSNE generation.
 #'  Default 2500.
+#' @param normalize Character. Passed to \link{normalizeCounts} in
+#'  normalization step. Divides counts by the library sizes for each
+#'  cell. One of 'proportion', 'cpm', 'median', or 'mean'. 'proportion' uses
+#'  the total counts for each cell as the library size. 'cpm' divides the
+#'  library size of each cell by one million to produce counts per million.
+#'  'median' divides the library size of each cell by the median library size
+#'  across all cells. 'mean' divides the library size of each cell by the mean
+#'  library size across all cells.
+#' @param scaleFactor Numeric. Sets the scale factor for cell-level
+#'  normalization. This scale factor is multiplied to each cell after the
+#'  library size of each cell had been adjusted in \code{normalize}. Default
+#'  \code{NULL} which means no scale factor is applied.
+#' @param transformationFun Function. Applys a transformation such as 'sqrt',
+#'  'log', 'log2', 'log10', or 'log1p'. If \code{NULL}, no transformation will
+#'  be applied. Occurs after applying normalization and scale factor. Default
+#'  \code{NULL}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -45,82 +63,109 @@ setGeneric("celdaTsne",
 setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     function(sce,
         useAssay = "counts",
+        altExpName = "featureSubset",
         maxCells = NULL,
         minClusterSize = 100,
         initialDims = 20,
         modules = NULL,
         perplexity = 20,
         maxIter = 2500,
+        normalize = "proportion",
+        scaleFactor = NULL,
+        transformationFun = sqrt,
         seed = 12345) {
 
         if (is.null(seed)) {
-            res <- .celdaTsne(sce = sce,
+            sce <- .celdaTsne(sce = sce,
                 useAssay = useAssay,
+                altExpName = altExpName,
                 maxCells = maxCells,
                 minClusterSize = minClusterSize,
                 initialDims = initialDims,
                 modules = modules,
                 perplexity = perplexity,
-                maxIter = maxIter)
+                maxIter = maxIter,
+                normalize = normalize,
+                scaleFactor = scaleFactor,
+                transformationFun = transformationFun)
         } else {
             with_seed(seed,
-                res <- .celdaTsne(sce = sce,
+                sce <- .celdaTsne(sce = sce,
                     useAssay = useAssay,
+                    altExpName = altExpName,
                     maxCells = maxCells,
                     minClusterSize = minClusterSize,
                     initialDims = initialDims,
                     modules = modules,
                     perplexity = perplexity,
-                    maxIter = maxIter))
+                    maxIter = maxIter,
+                    normalize = normalize,
+                    scaleFactor = scaleFactor,
+                    transformationFun = transformationFun))
         }
-
-        SingleCellExperiment::reducedDim(sce, "celda_tSNE") <- res
         return(sce)
     })
 
 
 .celdaTsne <- function(sce,
     useAssay,
+    altExpName,
     maxCells,
     minClusterSize,
     initialDims,
     modules,
     perplexity,
-    maxIter) {
+    maxIter,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
-    celdaMod <- celdaModel(sce)
+    celdaMod <- celdaModel(sce, altExpName = altExpName)
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
 
     if (celdaMod == "celda_C") {
-        res <- .celdaTsneC(sce = sce,
+        res <- .celdaTsneC(sce = altExp,
             useAssay = useAssay,
             maxCells = maxCells,
             minClusterSize = minClusterSize,
             initialDims = initialDims,
             perplexity = perplexity,
-            maxIter = maxIter)
+            maxIter = maxIter,
+            normalize = normalize,
+            scaleFactor = scaleFactor,
+            transformationFun = transformationFun)
     } else if (celdaMod == "celda_CG") {
-        res <- .celdaTsneCG(sce = sce,
+        res <- .celdaTsneCG(sce = altExp,
             useAssay = useAssay,
             maxCells = maxCells,
             minClusterSize = minClusterSize,
             initialDims = initialDims,
             modules = modules,
             perplexity = perplexity,
-            maxIter = maxIter)
+            maxIter = maxIter,
+            normalize = normalize,
+            scaleFactor = scaleFactor,
+            transformationFun = transformationFun)
     } else if (celdaMod == "celda_G") {
-        res <- .celdaTsneG(sce = sce,
+        res <- .celdaTsneG(sce = altExp,
             useAssay = useAssay,
             maxCells = maxCells,
             minClusterSize = minClusterSize,
             initialDims = initialDims,
             modules = modules,
             perplexity = perplexity,
-            maxIter = maxIter)
+            maxIter = maxIter,
+            normalize = normalize,
+            scaleFactor = scaleFactor,
+            transformationFun = transformationFun)
     } else {
-        stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+        stop("S4Vectors::metadata(altExp(sce, altExpName))$",
+            "celda_parameters$model must be",
             " one of 'celda_C', 'celda_G', or 'celda_CG'")
     }
-    return(res)
+    SingleCellExperiment::reducedDim(altExp, "celda_tSNE") <- res
+    SingleCellExperiment::altExp(sce, altExpName) <- altExp
+    return(sce)
 }
 
 
@@ -130,12 +175,18 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     minClusterSize,
     initialDims,
     perplexity,
-    maxIter) {
+    maxIter,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
-    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce,
-        useAssay,
-        maxCells,
-        minClusterSize)
+    preparedCountInfo <- .prepareCountsForDimReductionCeldaC(sce = sce,
+        useAssay = useAssay,
+        maxCells = maxCells,
+        minClusterSize = minClusterSize,
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun)
 
     res <- .calculateTsne(preparedCountInfo$norm,
         perplexity = perplexity,
@@ -158,13 +209,19 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     initialDims,
     modules,
     perplexity,
-    maxIter) {
+    maxIter,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaCG(sce = sce,
         useAssay = useAssay,
         maxCells = maxCells,
         minClusterSize = minClusterSize,
-        modules = modules)
+        modules = modules,
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun)
     norm <- preparedCountInfo$norm
     res <- .calculateTsne(norm,
         doPca = FALSE,
@@ -186,13 +243,19 @@ setMethod("celdaTsne", signature(sce = "SingleCellExperiment"),
     initialDims,
     modules,
     perplexity,
-    maxIter) {
+    maxIter,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
     preparedCountInfo <- .prepareCountsForDimReductionCeldaG(sce = sce,
         useAssay = useAssay,
         maxCells = maxCells,
         minClusterSize = minClusterSize,
-        modules = modules)
+        modules = modules,
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun)
     res <- .calculateTsne(preparedCountInfo$norm,
         perplexity = perplexity,
         maxIter = maxIter,

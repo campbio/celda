@@ -14,6 +14,7 @@ factorizeMatrix(x, celdaMod, ...)
 \S4method{factorizeMatrix}{SingleCellExperiment,ANY}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   type = c("counts", "proportion", "posterior")
 )
 
@@ -28,7 +29,7 @@ factorizeMatrix(x, celdaMod, ...)
 \itemize{
 \item A \linkS4class{SingleCellExperiment} object returned by
 \link{celda_C}, \link{celda_G} or \link{celda_CG}, with the matrix
-located in the \code{useAssay} assay slot.
+located in the \code{useAssay} assay slot in \code{altExp(x, altExpName)}.
 Rows represent features and columns represent cells.
 \item Integer counts matrix. Rows represent features and columns represent
 cells. This matrix should be the same as the one used to generate
@@ -40,6 +41,9 @@ counts matrix.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{type}{Character vector. A vector containing one or more of "counts",
 "proportion", or "posterior". "counts" returns the raw number of counts for

@@ -5,11 +5,13 @@
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells. Must contain cluster
-#'  labels in \code{celdaClusters(x)} if \code{x} is a
+#'  labels in \code{celdaClusters(x, altExpName = altExpName)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param celdaMod Celda object of class `celda_C` or `celda_CG`.
 #' @param c1 Integer vector. Cell populations to include in group 1 for the
 #'  differential expression analysis.
@@ -48,6 +50,7 @@ setMethod("differentialExpression",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         c1,
         c2 = NULL,
         onlyPos = FALSE,
@@ -58,36 +61,38 @@ setMethod("differentialExpression",
             stop("'c1' should be a numeric vector of cell cluster(s)")
         }
 
-        cdiff <- setdiff(c1, celdaClusters(x))
+        cdiff <- setdiff(c1, celdaClusters(x, altExpName = altExpName))
 
         if (length(cdiff) > 0) {
             warning("cluster ", cdiff, "in 'c1' does not exist in",
-                " 'celdaClusters(x)'!")
+                " 'celdaClusters(x, altExpName = altExpName)'!")
             if (length(cdiff) == length(c1)) {
                 stop("All clusters in 'c1' does not exist in",
-                    " 'celdaClusters(x)'!")
+                    " 'celdaClusters(x, altExpName = altExpName)'!")
             }
         }
 
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
         if (is.null(c2)) {
-            c2 <- sort(setdiff(unique(celdaClusters(x)), c1))
+            c2 <- sort(setdiff(unique(celdaClusters(x,
+                altExpName = altExpName)), c1))
         }
         if (length(c1) > 1) {
-            cells1 <- SummarizedExperiment::colData(x)$colnames[
-                which(celdaClusters(x) %in% c1)]
+            cells1 <- SummarizedExperiment::colData(altExp)$colnames[
+                which(celdaClusters(x, altExpName = altExpName) %in% c1)]
         } else {
-            cells1 <- SummarizedExperiment::colData(x)$colnames[
-                which(celdaClusters(x) == c1)]
+            cells1 <- SummarizedExperiment::colData(altExp)$colnames[
+                which(celdaClusters(x, altExpName = altExpName) == c1)]
         }
 
         if (length(c2) > 1) {
-            cells2 <- SummarizedExperiment::colData(x)$colnames[
-                which(celdaClusters(x) %in% c2)]
+            cells2 <- SummarizedExperiment::colData(altExp)$colnames[
+                which(celdaClusters(x, altExpName = altExpName) %in% c2)]
         } else {
-            cells2 <- SummarizedExperiment::colData(x)$colnames[
-                which(celdaClusters(x) == c2)]
+            cells2 <- SummarizedExperiment::colData(altExp)$colnames[
+                which(celdaClusters(x, altExpName = altExpName) == c2)]
         }
 
         mat <- counts[, c(cells1, cells2)]

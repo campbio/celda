@@ -10,6 +10,7 @@ celdaProbabilityMap(sce, ...)
 \S4method{celdaProbabilityMap}{SingleCellExperiment}(
   sce,
   useAssay = "counts",
+  altExpName = "featureSubset",
   level = c("cellPopulation", "sample")
 )
 }
@@ -21,6 +22,9 @@ returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{level}{Character. One of "cellPopulation" or "Sample".
 "cellPopulation" will display the absolute probabilities and relative

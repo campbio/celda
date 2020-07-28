@@ -8,7 +8,12 @@
 \usage{
 clusterProbability(sce, ...)
 
-\S4method{clusterProbability}{SingleCellExperiment}(sce, useAssay = "counts", log = FALSE)
+\S4method{clusterProbability}{SingleCellExperiment}(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  log = FALSE
+)
 }
 \arguments{
 \item{sce}{A \linkS4class{SingleCellExperiment} object returned by
@@ -18,6 +23,9 @@ Rows represent features and columns represent cells.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{log}{Logical. If \code{FALSE}, then the normalized conditional
 probabilities will be returned. If \code{TRUE}, then the unnormalized log

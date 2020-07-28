@@ -11,6 +11,7 @@ celdaUmap(sce, ...)
 \S4method{celdaUmap}{SingleCellExperiment}(
   sce,
   useAssay = "counts",
+  altExpName = "featureSubset",
   maxCells = NULL,
   minClusterSize = 100,
   modules = NULL,
@@ -20,6 +21,9 @@ celdaUmap(sce, ...)
   spread = 1,
   pca = TRUE,
   initialDims = 50,
+  normalize = "proportion",
+  scaleFactor = NULL,
+  transformationFun = sqrt,
   cores = 1,
   ...
 )
@@ -32,6 +36,9 @@ returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
 randomly subsampled if \code{ncol(sce) > maxCells}. Larger numbers of cells
@@ -67,10 +74,29 @@ See \link[uwot]{umap} for more information.}
 
 \item{pca}{Logical. Whether to perform
 dimensionality reduction with PCA before UMAP. Only works for celda_C
- \code{sce} objects.}
+\code{sce} objects.}
 
 \item{initialDims}{Integer. Number of dimensions from PCA to use as
 input in UMAP. Default 50. Only works for celda_C \code{sce} objects.}
+
+\item{normalize}{Character. Passed to \link{normalizeCounts} in
+normalization step. Divides counts by the library sizes for each
+cell. One of 'proportion', 'cpm', 'median', or 'mean'. 'proportion' uses
+the total counts for each cell as the library size. 'cpm' divides the
+library size of each cell by one million to produce counts per million.
+'median' divides the library size of each cell by the median library size
+across all cells. 'mean' divides the library size of each cell by the mean
+library size across all cells.}
+
+\item{scaleFactor}{Numeric. Sets the scale factor for cell-level
+normalization. This scale factor is multiplied to each cell after the
+library size of each cell had been adjusted in \code{normalize}. Default
+\code{NULL} which means no scale factor is applied.}
+
+\item{transformationFun}{Function. Applys a transformation such as 'sqrt',
+'log', 'log2', 'log10', or 'log1p'. If \code{NULL}, no transformation will
+be applied. Occurs after applying normalization and scale factor. Default
+\code{NULL}.}
 
 \item{cores}{Number of threads to use. Default 1.}
 }

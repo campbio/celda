@@ -1,13 +1,20 @@
 #' @title Cell and feature clustering with Celda
 #' @description Clusters the rows and columns of a count matrix containing
-#'  single-cell data into L modules and K subpopulations, respectively.
+#'  single-cell data into L modules and K subpopulations, respectively. The
+#'  \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+#'  \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+#'  it exists. Otherwise, the \code{useAssay}
+#'  \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+#'  \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
-#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  with the matrix located in the \link[SummarizedExperiment]{assay}
+#'  slot under \code{useAssay} in \code{altExp(x, altExpName)}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
-#'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param useAssay A string specifying the name of the
+#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
 #' @param K Integer. Number of cell populations.
@@ -62,23 +69,17 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
-#'  parameter settings are stored in the \link[S4Vectors]{metadata}
-#'  \code{"celda_parameters"} slot.
-#'  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
+#' @return A \linkS4class{SingleCellExperiment} object. Function
+#'  parameter settings are stored in \link[S4Vectors]{metadata}
+#'  \code{"celda_parameters"} in \link[SingleCellExperiment]{altExp} slot.
+#'  In \link[SingleCellExperiment]{altExp} slot,
+#'  columns \code{celda_sample_label} and \code{celda_cell_cluster} in
 #'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters. Column \code{celda_feature_module} in
 #'  \link[SummarizedExperiment]{rowData} contains feature modules.
 #' @seealso \link{celda_G} for feature clustering and \link{celda_C} for
 #'  clustering cells. \link{celdaGridSearch} can be used to run multiple
 #'  values of K/L and multiple chains in parallel.
-#' @examples
-#' data(celdaCGSim)
-#' sce <- celda_CG(celdaCGSim$counts,
-#'     K = celdaCGSim$K,
-#'     L = celdaCGSim$L,
-#'     sampleLabel = celdaCGSim$sampleLabel,
-#'     nchains = 1)
 #' @import Rcpp RcppEigen
 #' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
@@ -92,6 +93,7 @@ setMethod("celda_CG",
     signature(x = "SingleCellExperiment"),
     function(x,
         useAssay = "counts",
+        altExpName = "featureSubset",
         sampleLabel = NULL,
         K,
         L,
@@ -115,12 +117,24 @@ setMethod("celda_CG",
         verbose = TRUE) {
 
         xClass <- "SingleCellExperiment"
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
 
-        sce <- .celdaCGWithSeed(counts = counts,
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+
+        altExp <- .celdaCGWithSeed(counts = counts,
             xClass = xClass,
             useAssay = useAssay,
-            sce = x,
+            sce = altExp,
             sampleLabel = sampleLabel,
             K = K,
             L = L,
@@ -142,16 +156,26 @@ setMethod("celda_CG",
             yInit = yInit,
             logfile = logfile,
             verbose = verbose)
-        return(sce)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
+        return(x)
     }
 )
 
 
 #' @rdname celda_CG
+#' @examples
+#' data(celdaCGSim)
+#' sce <- celda_CG(celdaCGSim$counts,
+#'     K = celdaCGSim$K,
+#'     L = celdaCGSim$L,
+#'     sampleLabel = celdaCGSim$sampleLabel,
+#'     nchains = 1)
 #' @export
 setMethod("celda_CG",
     signature(x = "matrix"),
     function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
         sampleLabel = NULL,
         K,
         L,
@@ -174,14 +198,16 @@ setMethod("celda_CG",
         logfile = NULL,
         verbose = TRUE) {
 
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
-        useAssay <- NULL
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            assays = list(counts = x))
-        sce <- .celdaCGWithSeed(counts = x,
+
+        altExp <- .celdaCGWithSeed(counts = x,
             xClass = xClass,
             useAssay = useAssay,
-            sce = sce,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
             sampleLabel = sampleLabel,
             K = K,
             L = L,
@@ -203,6 +229,7 @@ setMethod("celda_CG",
             yInit = yInit,
             logfile = logfile,
             verbose = verbose)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
 )
@@ -912,7 +939,10 @@ setMethod("celda_CG",
     useAssay,
     maxCells,
     minClusterSize,
-    modules) {
+    modules,
+    normalize,
+    scaleFactor,
+    transformationFun) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -935,9 +965,7 @@ setMethod("celda_CG",
         maxCells <- ncol(counts)
     }
 
-    fm <- factorizeMatrix(sce,
-        useAssay,
-        type = "counts")
+    fm <- .factorizeMatrixCelda_CG(sce, useAssay, type = "counts")
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {
         if (!all(modules %in% modulesToUse)) {
@@ -953,7 +981,7 @@ setMethod("celda_CG",
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(celdaClusters(sce),
+        zTa <- tabulate(SummarizedExperiment::colData(sce)$celda_cell_cluster,
             S4Vectors::metadata(sce)$celda_parameters$K)
 
         ## Number of cells that can be sampled from each cluster without
@@ -973,7 +1001,8 @@ setMethod("celda_CG",
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
             zInclude[sample(
-                which(celdaClusters(sce) == i),
+                which(SummarizedExperiment::colData(sce)$celda_cell_cluster ==
+                        i),
                 clusterNToSample[i]
             )] <- FALSE
         }
@@ -981,9 +1010,9 @@ setMethod("celda_CG",
     cellIx <- which(zInclude)
 
     norm <- t(normalizeCounts(fm$counts$cell[modulesToUse, cellIx],
-        normalize = "proportion",
-        transformationFun = sqrt
-    ))
+        normalize = normalize,
+        scaleFactor = scaleFactor,
+        transformationFun = transformationFun))
     return(list(norm = norm, cellIx = cellIx))
 }
 

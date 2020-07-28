@@ -6,21 +6,24 @@
 \alias{celdaModules<-}
 \alias{celdaModules<-,SingleCellExperiment-method}
 \title{Get or set the feature module labels from a celda
- \linkS4class{SingleCellExperiment}  object.}
+ \linkS4class{SingleCellExperiment} object.}
 \usage{
-celdaModules(sce)
+celdaModules(sce, altExpName = "featureSubset")
 
-\S4method{celdaModules}{SingleCellExperiment}(sce)
+\S4method{celdaModules}{SingleCellExperiment}(sce, altExpName = "featureSubset")
 
-celdaModules(sce) <- value
+celdaModules(sce, altExpName = "featureSubset") <- value
 
-\S4method{celdaModules}{SingleCellExperiment}(sce) <- value
+\S4method{celdaModules}{SingleCellExperiment}(sce, altExpName = "featureSubset") <- value
 }
 \arguments{
 \item{sce}{A \linkS4class{SingleCellExperiment} object returned by
 \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{value}{Character vector of feature module labels for replacements.
 Works only if \code{x} is a \linkS4class{SingleCellExperiment} object.}

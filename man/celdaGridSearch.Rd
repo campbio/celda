@@ -11,6 +11,7 @@ celdaGridSearch(x, ...)
 \S4method{celdaGridSearch}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   model,
   paramsTest,
   paramsFixed = NULL,
@@ -26,6 +27,8 @@ celdaGridSearch(x, ...)
 
 \S4method{celdaGridSearch}{matrix}(
   x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   model,
   paramsTest,
   paramsFixed = NULL,
@@ -45,9 +48,11 @@ celdaGridSearch(x, ...)
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
-slot to use if \code{x} is a
-\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{model}{Celda model. Options available in \link{availableModels}.}
 
@@ -101,7 +106,7 @@ Run Celda with different combinations of parameters and
  Fixed parameters to be used in all models, such as \code{sampleLabel}, can
  be passed as a list to the argument \code{paramsFixed}. When
  \code{verbose = TRUE}, output from each chain will be sent to a log file
- but not be displayed in stdout.
+ but not be displayed in \code{stdout}.
 }
 \examples{
 \dontrun{

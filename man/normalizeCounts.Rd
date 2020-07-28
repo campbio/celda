@@ -7,6 +7,7 @@
 normalizeCounts(
   counts,
   normalize = c("proportion", "cpm", "median", "mean"),
+  scaleFactor = NULL,
   transformationFun = NULL,
   scaleFun = NULL,
   pseudocountNormalize = 0,
@@ -25,6 +26,11 @@ one million to produce counts per million. 'median' divides the library
 size of each cell by the median library size across all cells. 'mean'
 divides the library size of each cell by the mean library size across all
 cells.}
+
+\item{scaleFactor}{Numeric. Sets the scale factor for cell-level
+normalization. This scale factor is multiplied to each cell after the
+library size of each cell had been adjusted in \code{normalize}. Default
+\code{NULL} which means no scale factor is applied.}
 
 \item{transformationFun}{Function. Applys a transformation such as `sqrt`,
 `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be

@@ -10,6 +10,8 @@
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param log Logical. If \code{FALSE}, then the normalized conditional
 #'  probabilities will be returned. If \code{TRUE}, then the unnormalized log
 #'  probabilities will be returned. Default \code{FALSE}.
@@ -32,27 +34,30 @@ setGeneric("clusterProbability",
 #' @rdname clusterProbability
 #' @export
 setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
-    function(sce, useAssay = "counts", log = FALSE) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        log = FALSE) {
 
-        if (celdaModel(sce) == "celda_C") {
-            cp <- .clusterProbabilityCeldaC(sce = sce,
+        altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
+            cp <- .clusterProbabilityCeldaC(sce = altExp,
                 useAssay = useAssay,
                 log = log)
-            return(cp)
-        } else if (celdaModel(sce) == "celda_CG") {
-            cp <- .clusterProbabilityCeldaCG(sce = sce,
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
+            cp <- .clusterProbabilityCeldaCG(sce = altExp,
                 useAssay = useAssay,
                 log = log)
-            return(cp)
-        } else if (celdaModel(sce) == "celda_G") {
-            cp <- .clusterProbabilityCeldaG(sce = sce,
+        } else if (celdaModel(sce, altExpName = altExpName) == "celda_G") {
+            cp <- .clusterProbabilityCeldaG(sce = altExp,
                 useAssay = useAssay,
                 log = log)
-            return(cp)
         } else {
-            stop("S4Vectors::metadata(sce)$celda_parameters$model must be",
+            stop("S4Vectors::metadata(altExp(sce, altExpName))$",
+                "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'!")
         }
+        return(cp)
     }
 )
 
@@ -60,8 +65,8 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
 .clusterProbabilityCeldaC <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    z <- celdaClusters(sce)
-    s <- as.integer(sampleLabel(sce))
+    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
+    s <- as.integer(SummarizedExperiment::colData(sce)$celda_sample_label)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
@@ -95,10 +100,10 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
 .clusterProbabilityCeldaCG <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    s <- as.integer(sampleLabel(sce))
-    z <- celdaClusters(sce)
+    s <- as.integer(SummarizedExperiment::colData(sce)$celda_sample_label)
+    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
     K <- S4Vectors::metadata(sce)$celda_parameters$K
-    y <- celdaModules(sce)
+    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
@@ -158,7 +163,7 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
 .clusterProbabilityCeldaG <- function(sce, useAssay, log) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
 
-    y <- celdaModules(sce)
+    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta

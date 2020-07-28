@@ -10,7 +10,7 @@
 \usage{
 logLikelihood(x, celdaMod, ...)
 
-\S4method{logLikelihood}{SingleCellExperiment,ANY}(x, useAssay = "counts")
+\S4method{logLikelihood}{SingleCellExperiment,ANY}(x, useAssay = "counts", altExpName = "featureSubset")
 
 \S4method{logLikelihood}{matrix,celda_C}(x, celdaMod)
 
@@ -29,6 +29,9 @@ Rows represent features and columns represent cells.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
 The log-likelihood of the cluster assignment for the

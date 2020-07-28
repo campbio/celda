@@ -11,6 +11,7 @@ findMarkersTree(x, ...)
 \S4method{findMarkersTree}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   class,
   oneoffMetric = c("modified F1", "pairwise AUC"),
   metaclusters,
@@ -51,6 +52,9 @@ Rows represent features and columns represent cells.}
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{class}{Vector of cell cluster labels.}
 

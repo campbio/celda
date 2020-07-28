@@ -11,6 +11,7 @@ celda_G(x, ...)
 \S4method{celda_G}{SingleCellExperiment}(
   x,
   useAssay = "counts",
+  altExpName = "featureSubset",
   L,
   beta = 1,
   delta = 1,
@@ -30,6 +31,8 @@ celda_G(x, ...)
 
 \S4method{celda_G}{matrix}(
   x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   L,
   beta = 1,
   delta = 1,
@@ -53,9 +56,11 @@ celda_G(x, ...)
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
-slot to use if \code{x} is a
-\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{L}{Integer. Number of feature modules.}
 
@@ -110,12 +115,19 @@ starting values for each feature will be randomly sampled from `1:L`.
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class `celda_G` with the feature module clusters stored
- in `y`.
+A \linkS4class{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
+ \code{"celda_parameters"} slot. Column \code{celda_feature_module} in
+ \link[SummarizedExperiment]{rowData} contains feature modules.
 }
 \description{
 Clusters the rows of a count matrix containing single-cell data
- into L modules.
+ into L modules. The
+ \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+ \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+ it exists. Otherwise, the \code{useAssay}
+ \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+ \code{x} is a \linkS4class{SingleCellExperiment} object.
 }
 \examples{
 data(celdaGSim)
