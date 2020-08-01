@@ -10,8 +10,8 @@
 #' Cells in each batch will be subsetted and converted to a sparse matrix
 #' of class \code{dgCMatrix} from package \link{Matrix} before analysis. This
 #' object should only contain filtered cells after cell calling. Empty
-#' cell barcodes (low expression cells before cell calling) are not needed to
-#' run DecontX.
+#' cell barcodes (low expression droplets before cell calling) are not needed
+#' to run DecontX.
 #' @param assayName Character. Name of the assay to use if \code{x} is a
 #' \linkS4class{SingleCellExperiment}.
 #' @param z Numeric or character vector. Cell cluster labels. If NULL,
