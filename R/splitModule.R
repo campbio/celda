@@ -84,7 +84,7 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
 
 .splitModule <- function(x, useAssay, module, n) {
     counts <- SummarizedExperiment::assay(x, i = useAssay)
-    counts <- as.matrix(counts)
+    counts <- .processCounts(counts)
     .validateCounts(counts)
     ix <- SummarizedExperiment::rowData(x)$celda_feature_module == module
 

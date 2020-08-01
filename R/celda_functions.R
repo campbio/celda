@@ -475,7 +475,10 @@ distinctColors <- function(n,
 featureModuleTable <- function(sce, useAssay = "counts",
     altExpName = "featureSubset", outputFile = NULL) {
 
-  factorizeMatrix <- factorizeMatrix(sce, useAssay, altExpName = altExpName)
+  factorizeMatrix <- factorizeMatrix(sce,
+      useAssay = useAssay,
+      altExpName = altExpName,
+      type = "proportion")
   allGenes <- topRank(factorizeMatrix$proportions$module, n = nrow(sce))
   res <- as.data.frame(stringi::stri_list2matrix(allGenes$names))
   res <- apply(res, c(1, 2), function(x) {
