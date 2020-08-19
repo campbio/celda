@@ -23,15 +23,16 @@ knitr::opts_chunk$set(echo = TRUE, dev = "png")
 ```
 
 # Introduction
-Droplet-based microfluidic devices have become widely used to perform single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in the cell suspension can be aberrantly counted along with a cell’s native mRNA and result in cross-contamination of transcripts between different cell populations. DecontX is a Bayesian method to estimate and remove contamination in individual cells. DecontX assumes the observed expression of a cell is a mixture of counts from two multinomial distributions: (1) a distribution of native transcript counts from the cell’s actual population and (2) a distribution of contaminating transcript counts from all other cell populations captured in the assay. Overall, computational decontamination of single cell counts can aid in downstream clustering and visualization.
+Droplet-based microfluidic devices have become widely used to perform single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in the cell suspension can be aberrantly counted along with a cell’s native mRNA and result in cross-contamination of transcripts between different cell populations. DecontX is a Bayesian method to estimate and remove contamination in individual cells. DecontX assumes the observed expression of a cell is a mixture of counts from two multinomial distributions: (1) a distribution of native transcript counts from the cell’s actual population and (2) a distribution of contaminating transcript counts from all other cell populations captured in the assay. Overall, computational decontamination of single cell counts can aid in downstream clustering and visualization. **Only the expression profile of *"real"* cells after cell calling are required to run DecontX. Empty cell droplet information (low expression cell barcodes before cell calling) are not needed.**
 
 # Installation
 
 celda can be installed from Bioconductor:
 
 ```{r install, eval= FALSE}
-if (!requireNamespace("BiocManager", quietly=TRUE)) {
-    install.packages("BiocManager")}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
 BiocManager::install("celda")
 ```
 
@@ -58,9 +59,9 @@ if (!requireNamespace("TENxPBMCData", quietly = TRUE)) {
 }
 
 # Load PBMC data
-library(TENxPBMCData)  
+library(TENxPBMCData)
 pbmc4k <- TENxPBMCData("pbmc4k")
-colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep="_")
+colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep = "_")
 rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
 ```
 
@@ -70,7 +71,7 @@ rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
 To run decontX with a SingleCellExperiment object, simply use the following command. 
 
 ```{r decontX, eval=TRUE, message=FALSE}
-pbmc4k <- decontX(x = pbmc4k) 
+pbmc4k <- decontX(x = pbmc4k)
 ```
 
 The contamination can be found in the `colData(pbmc4k)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(pbmc4k)`. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. 
@@ -82,7 +83,7 @@ DecontX creates a UMAP which we can use to plot the cluster labels automatically
 
 ```{r UMAP_Clusters}
 umap <- reducedDim(pbmc4k, "decontX_UMAP")
-plotDimReduceCluster(umap[,1], umap[,2], cluster = pbmc4k$decontX_clusters)
+plotDimReduceCluster(umap[, 1], umap[, 2], cluster = pbmc4k$decontX_clusters)
 ```
 
 ## Contamination on UMAP
@@ -98,7 +99,7 @@ Known marker genes can also be plotted on the UMAP to identify the cell types fo
 ```{r, message=FALSE}
 library(scater)
 pbmc4k <- logNormCounts(pbmc4k)
-plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k),
+plotDimReduceFeature(umap[, 1], umap[, 2], logcounts(pbmc4k),
                      features = c("CD3D", "CD3E", "GNLY",
                                   "LYZ", "S100A8", "S100A9",
                                   "CD79A", "CD79B", "MS4A1"),
@@ -109,11 +110,11 @@ plotDimReduceFeature(umap[,1], umap[,2], logcounts(pbmc4k),
 The percetage of cells within a cluster that have detectable expression of marker genes can be displayed in a barplot. Markers for cell types need to be supplied in a named list. First, the detection of marker genes in the original `counts` assay is shown:
 
 ```{r barplotCounts}
-markers <- list(Tcell_Markers=c("CD3E", "CD3D"),
-                    Bcell_Markers=c("CD79A", "CD79B", "MS4A1"), 
-                    Monocyte_Markers=c("S100A8", "S100A9", "LYZ"),
-                    NKcell_Markers="GNLY")
-cellTypeMappings <- list(Tcells=2, Bcells=5, Monocytes=1, NKcells=6)
+markers <- list(Tcell_Markers = c("CD3E", "CD3D"),
+                    Bcell_Markers = c("CD79A", "CD79B", "MS4A1"),
+                    Monocyte_Markers = c("S100A8", "S100A9", "LYZ"),
+                    NKcell_Markers = "GNLY")
+cellTypeMappings <- list(Tcells = 2, Bcells = 5, Monocytes = 1, NKcells = 6)
 plotDecontXMarkerPercentage(pbmc4k, markers = markers,
                             groupClusters = cellTypeMappings,
                             assayName = "counts")
@@ -162,7 +163,7 @@ Some helfpul hints when using `plotDecontXMarkerExpression`:
 ```{r plot_norm_counts, eval = FALSE}
 pbmc4k <- scater::logNormCounts(pbmc4k,
                                 exprs_values = "decontXcounts",
-                                name="dlogcounts")
+                                name = "dlogcounts")
 
 plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
                             groupClusters = cellTypeMappings,
@@ -186,12 +187,12 @@ metadata(pbmc4k)$decontX$estimates$all_cells$delta
 Setting a higher value in the second element of delta and `estimateDelta = FALSE` will force `decontX` to estimate higher levels of contamination per cell:
 
 ```{r newDecontX, eval=TRUE, message=FALSE}
-pbmc4k.delta <- decontX(pbmc4k, delta=c(9, 20), estimateDelta = FALSE)
+pbmc4k.delta <- decontX(pbmc4k, delta = c(9, 20), estimateDelta = FALSE)
 
 plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination,
-     xlab="DecontX estimated priors",
-     ylab="Setting priors to estimate higher contamination")
-abline(0, 1, col="red", lwd=2)
+     xlab = "DecontX estimated priors",
+     ylab = "Setting priors to estimate higher contamination")
+abline(0, 1, col = "red", lwd = 2)
 ```
 
 

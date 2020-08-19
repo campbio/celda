@@ -37,8 +37,9 @@ In this vignette we will demonstrate how to use celda to perform cell and featur
 celda can be installed from Bioconductor:
 
 ```{r, eval= FALSE}
-if (!requireNamespace("BiocManager", quietly=TRUE)){
-    install.packages("BiocManager")}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
 BiocManager::install("celda")
 ```
 
