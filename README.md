@@ -31,6 +31,10 @@ Also, if you receive installation errors when Rcpp is being installed and compil
 
 https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/
 
+If you are running R 4.0.0 or later version on MacOS Catalina and you see error `'wchar.h' file not found`, you can try the method in this link:
+
+https://discourse.mc-stan.org/t/dealing-with-catalina-iii/12731/5
+
 **NOTE** If you are trying to install **celda** using Rstudio and get this error: `could not find tools necessary to compile a package`, you can try this:
 ```
 options(buildtools.check = function(action) TRUE)
