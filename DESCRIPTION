@@ -17,14 +17,14 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         Rcpp, RcppEigen, uwot, enrichR, stringi, SummarizedExperiment,
         MCMCprecision, ggrepel, Rtsne, withr, dendextend, ggdendro,
         pROC, scater (>= 1.14.4), scran, SingleCellExperiment, dbscan,
-        DelayedArray, Seurat, stringr, Matrix
+        DelayedArray, Seurat, stringr, Matrix, ComplexHeatmap
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, M3DExampleData, TENxPBMCData
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian
 NeedsCompilation: yes

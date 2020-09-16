@@ -316,11 +316,5 @@ plotHeatmap <- function(counts,
         silent = TRUE,
         ...
     )
-
-    if (!isTRUE(silent)) {
-        grid::grid.newpage()
-        grid::grid.draw(sp$gtable)
-    }
-
-    invisible(sp)
+    return(sp)
 }
