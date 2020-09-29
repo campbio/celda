@@ -1,6 +1,5 @@
 language: r
 cache: packages
-dist: trusty
 sudo: false
 warnings_are_errors: false
 bioc_required: true
