@@ -101,7 +101,6 @@ setGeneric("moduleHeatmap", function(x, ...) {
 #' @examples
 #' data(sceCeldaCG)
 #' moduleHeatmap(sceCeldaCG)
-#' @import patchwork
 #' @export
 setMethod("moduleHeatmap",
     signature(x = "SingleCellExperiment"),
