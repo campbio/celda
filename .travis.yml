@@ -16,3 +16,10 @@ after_success:
   - R CMD INSTALL $PKG_TARBALL
   - Rscript -e 'covr::coveralls()'
   - Rscript -e 'library(lintr); lint_package(linters = with_defaults(object_length_linter(length = 40L), object_name_linter = NULL, commented_code_linter = NULL, object_usage_linter = NULL, cyclocomp_linter(complexity_limit = 100)), exclusions = list("R/RcppExports.R"))'
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:opencpu/imagemagick'
+    packages:
+    - libmagick++-dev

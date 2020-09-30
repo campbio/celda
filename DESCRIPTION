@@ -36,10 +36,3 @@ Author: Joshua Campbell [aut, cre],
   Eric Reed [aut],
   Zhe Wang [aut]
 Maintainer: Joshua Campbell <camp@bu.edu>
-
-addons:
-  apt:
-    sources:
-    - sourceline: 'ppa:opencpu/imagemagick'
-    packages:
-    - libmagick++-dev
