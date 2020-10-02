@@ -12,6 +12,7 @@ moduleHeatmap(x, ...)
   useAssay = "counts",
   altExpName = "featureSubset",
   featureModule = NULL,
+  col = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
   topCells = 100,
   topFeatures = NULL,
   normalizedCounts = NA,
@@ -32,7 +33,8 @@ moduleHeatmap(x, ...)
   height = "auto",
   unit = "mm",
   ModuleLabel = "auto",
-  labelJust = c("right", "bottom")
+  labelJust = c("right", "bottom"),
+  ...
 )
 }
 \arguments{
@@ -40,6 +42,8 @@ moduleHeatmap(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
+
+\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
@@ -51,6 +55,9 @@ to use. Default "featureSubset".}
 \item{featureModule}{Integer Vector. The featureModule(s) to display.
 Multiple modules can be included in a vector. Default \code{NULL} which
 plots all module heatmaps.}
+
+\item{col}{Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
+and colors.}
 
 \item{topCells}{Integer. Number of cells with the highest and lowest
 probabilities for each module to include in the heatmap. For example, if
@@ -139,7 +146,7 @@ character object defining the unit of all dimensions defined.}
 
 \item{ModuleLabel}{Must be
 vector of the same length as \code{length(unique(celdaModules(x)))} or
-\code{length(unique(celdaClusters(x)$y))}. Set to \code{''} to disable.}
+\code{length(unique(celdaClusters(x)$y))}. Set to \code{""} to disable.}
 
 \item{labelJust}{Passed to \link[multipanelfigure]{fill_panel}.
 Justification for the label within the interpanel spacing grob to the
@@ -160,5 +167,5 @@ Renders a heatmap for selected featureModules. Cells are
 }
 \examples{
 data(sceCeldaCG)
-moduleHeatmap(sceCeldaCG)
+moduleHeatmap(sceCeldaCG, width = 250, height = 250)
 }

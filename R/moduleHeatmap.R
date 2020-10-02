@@ -18,6 +18,8 @@
 #' @param featureModule Integer Vector. The featureModule(s) to display.
 #'  Multiple modules can be included in a vector. Default \code{NULL} which
 #'  plots all module heatmaps.
+#' @param col Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
+#'  and colors.
 #' @param topCells Integer. Number of cells with the highest and lowest
 #'  probabilities for each module to include in the heatmap. For example, if
 #'  \code{topCells = 50}, the 50 cells with the lowest probabilities and
@@ -86,10 +88,11 @@
 #'  character object defining the unit of all dimensions defined.
 #' @param ModuleLabel Must be
 #'  vector of the same length as \code{length(unique(celdaModules(x)))} or
-#'  \code{length(unique(celdaClusters(x)$y))}. Set to \code{''} to disable.
+#'  \code{length(unique(celdaClusters(x)$y))}. Set to \code{""} to disable.
 #' @param labelJust Passed to \link[multipanelfigure]{fill_panel}.
 #'  Justification for the label within the interpanel spacing grob to the
 #'  top-left of the panel content grob.
+#' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object.
 #' @importFrom methods .hasSlot
 #' @export
@@ -100,7 +103,7 @@ setGeneric("moduleHeatmap", function(x, ...) {
 #' @rdname moduleHeatmap
 #' @examples
 #' data(sceCeldaCG)
-#' moduleHeatmap(sceCeldaCG)
+#' moduleHeatmap(sceCeldaCG, width = 250, height = 250)
 #' @export
 setMethod("moduleHeatmap",
     signature(x = "SingleCellExperiment"),
@@ -108,6 +111,8 @@ setMethod("moduleHeatmap",
         useAssay = "counts",
         altExpName = "featureSubset",
         featureModule = NULL,
+        col = circlize::colorRamp2(c(-2, 0, 2),
+            c("#1E90FF", "#FFFFFF", "#CD2626")),
         topCells = 100,
         topFeatures = NULL,
         normalizedCounts = NA,
@@ -128,7 +133,8 @@ setMethod("moduleHeatmap",
         height = "auto",
         unit = "mm",
         ModuleLabel = "auto",
-        labelJust = c("right", "bottom")) {
+        labelJust = c("right", "bottom"),
+        ...) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
 
@@ -153,16 +159,15 @@ setMethod("moduleHeatmap",
         }
 
         if (is.null(featureModule)) {
-            featureModule <- sort(unique(celdaModules(sceCeldaCG)))
+            featureModule <- sort(unique(celdaModules(x)))
         }
 
         if (is.null(ModuleLabel)) {
             ModuleLabel <- NULL
         } else if (ModuleLabel == "auto") {
-            ModuleLabel <- as.character(sort(unique(celdaModules(x,
-                altExpName = altExpName))))
-        } else if (ModuleLabel == '') {
-            ModuleLabel <- rep('', length = length(unique(celdaModules(x,
+            ModuleLabel <- as.character(featureModule)
+        } else if (ModuleLabel == "") {
+            ModuleLabel <- rep("", length = length(unique(celdaModules(x,
                 altExpName = altExpName))))
         } else if (length(ModuleLabel) != length(unique(celdaModules(x,
             altExpName = altExpName)))) {
@@ -211,6 +216,7 @@ setMethod("moduleHeatmap",
 
         for (i in seq(length(featureModule))) {
             plts[[i]] <- .plotModuleHeatmap(normCounts = normCounts,
+                col = col,
                 allCellStates = allCellStates,
                 featureIndices = featureIndices[[i]],
                 featureModule = featureModule[i],
@@ -229,7 +235,8 @@ setMethod("moduleHeatmap",
                 showLeftAnnotationLegend = showLeftAnnotationLegend,
                 showLeftAnnotationName = showLeftAnnotationName,
                 annotationWidth = annotationWidth,
-                unit = unit)
+                unit = unit,
+                ... = ...)
         }
 
 
@@ -262,6 +269,7 @@ setMethod("moduleHeatmap",
 
 
 .plotModuleHeatmap <- function(normCounts,
+    col,
     allCellStates,
     featureIndices,
     featureModule,
@@ -280,7 +288,8 @@ setMethod("moduleHeatmap",
     showLeftAnnotationLegend,
     showLeftAnnotationName,
     annotationWidth,
-    unit) {
+    unit,
+    ...) {
 
     # Determine cell order from factorizedMatrix$proportions$cell
     cellStates <- allCellStates[featureModule, , drop = TRUE]
@@ -314,15 +323,15 @@ setMethod("moduleHeatmap",
 
     zToPlot <- z[cellIx]
 
-    K <- stringr::str_sort(unique(zToPlot), numeric = TRUE)
-    ccols <- distinctColors(length(K))
-    names(ccols) <- K
+    uniquezToPlot <- sort(unique(zToPlot))
+    ccols <- distinctColors(length(unique(z)))[uniquezToPlot]
+    names(ccols) <- uniquezToPlot
 
     yToPlot <- y[geneIx]
 
-    L <- stringr::str_sort(unique(yToPlot), numeric = TRUE)
-    rcols <- distinctColors(length(L))
-    names(rcols) <- L
+    uniqueyToPlot <- sort(unique(yToPlot))
+    rcols <- distinctColors(length(y))[uniqueyToPlot]
+    names(rcols) <- uniqueyToPlot
 
     # scale indivisual rows by scaleRow
     if (!is.null(scaleRow)) {
@@ -348,7 +357,8 @@ setMethod("moduleHeatmap",
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
     }
 
-    plt <- ComplexHeatmap::Heatmap(filteredNormCounts,
+    plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
+        col = col,
         show_column_names = FALSE,
         show_row_names = showFeaturenames,
         row_names_gp = grid::gpar(fontsize = rowFontSize),
@@ -371,6 +381,7 @@ setMethod("moduleHeatmap",
             show_legend = showLeftAnnotationLegend,
             show_annotation_name = showLeftAnnotationName,
             col = list(module = rcols),
-            simple_anno_size = grid::unit(annotationWidth, unit)))
+            simple_anno_size = grid::unit(annotationWidth, unit)),
+        ...)
     return(plt)
 }
