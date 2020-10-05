@@ -22,8 +22,9 @@ plotDimReduceModule(x, ...)
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
+  midpoint = NULL,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -39,8 +40,9 @@ plotDimReduceModule(x, ...)
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
+  midpoint = NULL,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -91,6 +93,10 @@ The color will be used to signify the midpoint on the scale. Default
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
 Default "firebrick1".}
+
+\item{midpoint}{Numeric. The value indicating the midpoint of the
+diverging color scheme. If \code{NULL}, defaults to the mean
+with 10 percent of values trimmed. Default \code{NULL}.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}

@@ -18,10 +18,11 @@ plotDimReduceGrid(x, ...)
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
+  limits = c(-2, 2),
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
+  midpoint = 0,
   varLabel = NULL,
   ncol = NULL,
   headers = NULL,
@@ -35,8 +36,9 @@ plotDimReduceGrid(x, ...)
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
+  limits = c(-2, 2),
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
   midpoint = NULL,
   varLabel = NULL,
@@ -74,6 +76,9 @@ to use. Default "featureSubset".}
 
 \item{ylab}{Character vector. Label for the y-axis. Default 'Dimension_2'.}
 
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
+range of color.}
+
 \item{colorLow}{Character. A color available from `colors()`.
 The color will be used to signify the lowest values on the scale.
 Default "blue4".}
@@ -88,7 +93,7 @@ Default "firebrick1".}
 
 \item{midpoint}{Numeric. The value indicating the midpoint of the
 diverging color scheme. If \code{NULL}, defaults to the mean
-with 10 percent of values trimmed. Default \code{NULL}.}
+with 10 percent of values trimmed. Default \code{0}.}
 
 \item{varLabel}{Character vector. Title for the color legend.}
 

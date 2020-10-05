@@ -20,6 +20,8 @@
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'.
 #' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
+#'  range of color.
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
 #'  Default "blue4".
@@ -31,7 +33,7 @@
 #'  Default "firebrick1".
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
+#' with 10 percent of values trimmed. Default \code{0}.
 #' @param varLabel Character vector. Title for the color legend.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
@@ -69,10 +71,11 @@ setMethod("plotDimReduceGrid",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
+        limits = c(-2, 2),
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         varLabel = NULL,
         ncol = NULL,
         headers = NULL,
@@ -97,6 +100,7 @@ setMethod("plotDimReduceGrid",
             size = size,
             xlab = xlab,
             ylab = ylab,
+            limits = limits,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
@@ -130,8 +134,9 @@ setMethod("plotDimReduceGrid",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
+        limits = c(-2, 2),
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
         midpoint = NULL,
         varLabel = NULL,
@@ -145,6 +150,7 @@ setMethod("plotDimReduceGrid",
             size = size,
             xlab = xlab,
             ylab = ylab,
+            limits = limits,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
@@ -165,6 +171,7 @@ setMethod("plotDimReduceGrid",
     size,
     xlab,
     ylab,
+    limits,
     colorLow,
     colorMid,
     colorHigh,
@@ -206,6 +213,7 @@ setMethod("plotDimReduceGrid",
             ) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(
+                limits = limits,
                 low = colorLow,
                 high = colorHigh,
                 mid = colorMid,
@@ -241,6 +249,7 @@ setMethod("plotDimReduceGrid",
             ggplot2::facet_wrap(~facet) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(
+                limits = limits,
                 low = colorLow,
                 high = colorHigh,
                 mid = colorMid,
@@ -299,6 +308,8 @@ setMethod("plotDimReduceGrid",
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for the data. This threshold is applied after row scaling.
 #'  Set to NULL to disable. Default \code{c(-1,1)}.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
+#'  range of color.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -310,7 +321,7 @@ setMethod("plotDimReduceGrid",
 #'  will be used to signify the highest values on the scale. Default 'red'.
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
+#' with 10 percent of values trimmed. Default \code{0}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @param decreasing logical. Specifies the order of plotting the points.
@@ -347,14 +358,15 @@ setMethod("plotDimReduceFeature",
         normalize = FALSE,
         zscore = TRUE,
         exactMatch = TRUE,
-        trim = c(-1, 1),
+        trim = c(-2, 2),
+        limits = c(-2, 2),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -380,6 +392,7 @@ setMethod("plotDimReduceFeature",
             zscore = zscore,
             exactMatch = exactMatch,
             trim = trim,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
@@ -416,14 +429,15 @@ setMethod("plotDimReduceFeature",
         normalize = FALSE,
         zscore = TRUE,
         exactMatch = TRUE,
-        trim = c(-1, 1),
+        trim = c(-2, 2),
+        limits = c(-2, 2),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -436,6 +450,7 @@ setMethod("plotDimReduceFeature",
             zscore = zscore,
             exactMatch = exactMatch,
             trim = trim,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
@@ -459,6 +474,7 @@ setMethod("plotDimReduceFeature",
                                  zscore,
                                  exactMatch,
                                  trim,
+                                 limits,
                                  size,
                                  xlab,
                                  ylab,
@@ -528,6 +544,7 @@ setMethod("plotDimReduceFeature",
     size = size,
     xlab = xlab,
     ylab = ylab,
+    limits = limits,
     colorLow = colorLow,
     colorMid = colorMid,
     colorHigh = colorHigh,
@@ -580,6 +597,9 @@ setMethod("plotDimReduceFeature",
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #'  Default "firebrick1".
+#' @param midpoint Numeric. The value indicating the midpoint of the
+#' diverging color scheme. If \code{NULL}, defaults to the mean
+#' with 10 percent of values trimmed. Default \code{NULL}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @param decreasing logical. Specifies the order of plotting the points.
@@ -615,8 +635,9 @@ setMethod("plotDimReduceModule",
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
+        midpoint = NULL,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -650,6 +671,7 @@ setMethod("plotDimReduceModule",
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
+            midpoint = midpoint,
             ncol = ncol,
             decreasing = decreasing)
         return(g)
@@ -680,8 +702,9 @@ setMethod("plotDimReduceModule",
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
+        midpoint = NULL,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -698,6 +721,7 @@ setMethod("plotDimReduceModule",
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
+            midpoint = midpoint,
             ncol = ncol,
             decreasing = decreasing)
         return(g)
@@ -717,6 +741,7 @@ setMethod("plotDimReduceModule",
     colorLow,
     colorMid,
     colorHigh,
+    midpoint,
     ncol,
     decreasing) {
 
@@ -756,7 +781,7 @@ setMethod("plotDimReduceModule",
         colorLow = colorLow,
         colorMid = colorMid,
         colorHigh = colorHigh,
-        midpoint = NULL,
+        midpoint = midpoint,
         varLabel = varLabel,
         ncol = ncol,
         headers = NULL,
