@@ -76,8 +76,8 @@ to use. Default "featureSubset".}
 
 \item{ylab}{Character vector. Label for the y-axis. Default 'Dimension_2'.}
 
-\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
-range of color.}
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
 
 \item{colorLow}{Character. A color available from `colors()`.
 The color will be used to signify the lowest values on the scale.

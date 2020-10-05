@@ -20,8 +20,8 @@
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'.
 #' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'.
-#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
-#'  range of color.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
 #'  Default "blue4".
@@ -308,8 +308,8 @@ setMethod("plotDimReduceGrid",
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for the data. This threshold is applied after row scaling.
 #'  Set to NULL to disable. Default \code{c(-1,1)}.
-#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
-#'  range of color.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -585,6 +585,8 @@ setMethod("plotDimReduceFeature",
 #'  e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -631,6 +633,7 @@ setMethod("plotDimReduceModule",
         altExpName = "featureSubset",
         modules = NULL,
         rescale = TRUE,
+        limits = c(0, 1),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
@@ -665,6 +668,7 @@ setMethod("plotDimReduceModule",
             factorized = factorized,
             modules = modules,
             rescale = rescale,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
@@ -698,6 +702,7 @@ setMethod("plotDimReduceModule",
         celdaMod,
         modules = NULL,
         rescale = TRUE,
+        limits = c(0, 1),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
@@ -715,6 +720,7 @@ setMethod("plotDimReduceModule",
             factorized = factorized,
             modules = modules,
             rescale = rescale,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
@@ -735,6 +741,7 @@ setMethod("plotDimReduceModule",
     factorized,
     modules,
     rescale,
+    limits,
     size,
     xlab,
     ylab,
@@ -778,6 +785,7 @@ setMethod("plotDimReduceModule",
         size = size,
         xlab = xlab,
         ylab = ylab,
+        limits = limits,
         colorLow = colorLow,
         colorMid = colorMid,
         colorHigh = colorHigh,

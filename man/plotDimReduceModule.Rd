@@ -18,6 +18,7 @@ plotDimReduceModule(x, ...)
   altExpName = "featureSubset",
   modules = NULL,
   rescale = TRUE,
+  limits = c(0, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -36,6 +37,7 @@ plotDimReduceModule(x, ...)
   celdaMod,
   modules = NULL,
   rescale = TRUE,
+  limits = c(0, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
@@ -75,6 +77,9 @@ e.g. c("1", "2").}
 
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
+
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 

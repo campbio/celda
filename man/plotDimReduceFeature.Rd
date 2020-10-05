@@ -97,8 +97,8 @@ and standard deviation of 1. Default \code{TRUE}.}
 and upper bounds for the data. This threshold is applied after row scaling.
 Set to NULL to disable. Default \code{c(-1,1)}.}
 
-\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The scale
-range of color.}
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
