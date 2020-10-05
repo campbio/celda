@@ -1,6 +1,6 @@
-#' @title Mapping the dimensionality reduction plot
+#' @title Mapping the dimension reduction plot
 #' @description Creates a scatterplot given two dimensions from a data
-#'  dimensionality reduction tool (e.g tSNE) output.
+#'  dimension reduction tool (e.g tSNE) output.
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Each
 #'  row of the matrix will be plotted as a separate facet.
@@ -8,9 +8,9 @@
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
-#' @param dim1 Numeric vector. First dimension from data dimensionality
+#' @param dim1 Numeric vector. First dimension from data dimension
 #'  reduction output.
-#' @param dim2 Numeric vector. Second dimension from data dimensionality
+#' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
@@ -274,9 +274,9 @@ setMethod("plotDimReduceGrid",
 }
 
 
-#' @title Plotting feature expression on a dimensionality reduction plot
+#' @title Plotting feature expression on a dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized gene
-#'  expression matrix where x and y axis are from a data dimensionality
+#'  expression matrix where x and y axis are from a data dimension
 #'  reduction tool. The cells are colored by expression of
 #'  the specified feature.
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
@@ -287,8 +287,8 @@ setMethod("plotDimReduceGrid",
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
-#' @param dim2 Numeric vector. Second dimension from data dimensionality
+#'  dimension reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
@@ -557,12 +557,12 @@ setMethod("plotDimReduceFeature",
 }
 
 
-#' @title Plotting the Celda module probability on a
-#'  dimensionality reduction plot
+#' @title Plotting Celda module probability on a
+#'  dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a data
-#'  dimensionality reduction tool.
-#'  The cells are colored by the module probability(s).
+#'  dimension reduction tool.
+#'  The cells are colored by the module probability.
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
@@ -571,9 +571,9 @@ setMethod("plotDimReduceFeature",
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
 #' @param dim1 Numeric vector.
-#'  First dimension from data dimensionality reduction output.
+#'  First dimension from data dimension reduction output.
 #' @param dim2 Numeric vector.
-#'  Second dimension from data dimensionality reduction output.
+#'  Second dimension from data dimension reduction output.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -799,10 +799,10 @@ setMethod("plotDimReduceModule",
 
 
 # Labeling code adapted from Seurat (https://github.com/satijalab/seurat)
-#' @title Plotting the cell labels on a dimensionality reduction plot
+#' @title Plotting the cell labels on a dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a
-#'  data dimensionality reduction tool.
+#'  data dimension reduction tool.
 #'  The cells are colored by its given \code{cluster} label.
 #' @param x Integer vector of cell cluster labels or a
 #'  \linkS4class{SingleCellExperiment} object
@@ -815,9 +815,9 @@ setMethod("plotDimReduceModule",
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
+#'  dimension reduction output.
 #' @param dim2 Numeric vector. Second dimension from data
-#'  dimensionality reduction output.
+#'  dimension reduction output.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".

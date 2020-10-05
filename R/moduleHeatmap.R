@@ -1,9 +1,11 @@
 #' @title Heatmap for featureModules
-#' @description Renders a heatmap for selected featureModules. Cells are
+#' @description Renders a heatmap for selected \code{featureModule}. Cells are
 #'  ordered from those with the lowest probability of the module on the left to
 #'  the highest probability on the right. Features are ordered from those
 #'  with the highest probability in the module
-#'  on the top to the lowest probability on the bottom.
+#'  on the top to the lowest probability on the bottom. Use of
+#'  \link[multipanelfigure]{save_multi_panel_figure} is recommended for
+#'  outputting figures in various formats.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
@@ -73,12 +75,15 @@
 #' @param showTopAnnotationName Passed to
 #'  \link[ComplexHeatmap]{HeatmapAnnotation}. Show heatmap top annotation name.
 #' @param showLeftAnnotationLegend Passed to
-#' @param annotationHeight Passed to
+#'  \link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for feature module
+#'  annotation.
+#' @param topAnnotationHeight Passed to
 #'  \link[ComplexHeatmap]{HeatmapAnnotation}. Column annotation height.
 #'  \link[ComplexHeatmap]{rowAnnotation}. Show legend for module annotation.
+#' @param showLeftAnnotation Show left annotation. Default \code{FALSE}.
 #' @param showLeftAnnotationName Passed to
-#'  \link[ComplexHeatmap]{rowAnnotation}. Show lheatmap left annotation name.
-#' @param annotationWidth Passed to
+#'  \link[ComplexHeatmap]{rowAnnotation}. Show heatmap left annotation name.
+#' @param leftAnnotationWidth Passed to
 #'  \link[ComplexHeatmap]{rowAnnotation}. Row annotation width.
 #' @param width Passed to \link[multipanelfigure]{multi_panel_figure}. The
 #'  width of the output figure.
@@ -125,10 +130,11 @@ setMethod("moduleHeatmap",
         showHeatmapLegend = FALSE,
         showTopAnnotationLegend = FALSE,
         showTopAnnotationName = FALSE,
-        annotationHeight = 1.5,
+        topAnnotationHeight = 1.5,
+        showLeftAnnotation = FALSE,
         showLeftAnnotationLegend = FALSE,
         showLeftAnnotationName = FALSE,
-        annotationWidth = 1.5,
+        leftAnnotationWidth = 1.5,
         width = "auto",
         height = "auto",
         unit = "mm",
@@ -231,10 +237,11 @@ setMethod("moduleHeatmap",
                 showHeatmapLegend = showHeatmapLegend,
                 showTopAnnotationLegend = showTopAnnotationLegend,
                 showTopAnnotationName = showTopAnnotationName,
-                annotationHeight = annotationHeight,
+                topAnnotationHeight = topAnnotationHeight,
+                showLeftAnnotation = showLeftAnnotation,
                 showLeftAnnotationLegend = showLeftAnnotationLegend,
                 showLeftAnnotationName = showLeftAnnotationName,
-                annotationWidth = annotationWidth,
+                leftAnnotationWidth = leftAnnotationWidth,
                 unit = unit,
                 ... = ...)
         }
@@ -284,10 +291,11 @@ setMethod("moduleHeatmap",
     showHeatmapLegend,
     showTopAnnotationLegend,
     showTopAnnotationName,
-    annotationHeight,
+    topAnnotationHeight,
+    showLeftAnnotation,
     showLeftAnnotationLegend,
     showLeftAnnotationName,
-    annotationWidth,
+    leftAnnotationWidth,
     unit,
     ...) {
 
@@ -357,31 +365,52 @@ setMethod("moduleHeatmap",
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
     }
 
-    plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
-        col = col,
-        show_column_names = FALSE,
-        show_row_names = showFeaturenames,
-        row_names_gp = grid::gpar(fontsize = rowFontSize),
-        cluster_rows = FALSE,
-        cluster_columns = FALSE,
-        heatmap_legend_param = list(title = "Expression"),
-        show_heatmap_legend = showHeatmapLegend,
-        top_annotation = ComplexHeatmap::HeatmapAnnotation(
-            cell = factor(zToPlot,
-                levels = stringr::str_sort(unique(zToPlot),
-                    numeric = TRUE)),
-            show_legend = showTopAnnotationLegend,
-            show_annotation_name = showTopAnnotationName,
-            col = list(cell = ccols),
-            simple_anno_size = grid::unit(annotationHeight, unit)),
-        left_annotation = ComplexHeatmap::rowAnnotation(
-            module = factor(yToPlot,
-                levels = stringr::str_sort(unique(yToPlot),
-                    numeric = TRUE)),
-            show_legend = showLeftAnnotationLegend,
-            show_annotation_name = showLeftAnnotationName,
-            col = list(module = rcols),
-            simple_anno_size = grid::unit(annotationWidth, unit)),
-        ...)
+    if (isTRUE(showLeftAnnotation)) {
+        plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
+            col = col,
+            show_column_names = FALSE,
+            show_row_names = showFeaturenames,
+            row_names_gp = grid::gpar(fontsize = rowFontSize),
+            cluster_rows = FALSE,
+            cluster_columns = FALSE,
+            heatmap_legend_param = list(title = "Expression"),
+            show_heatmap_legend = showHeatmapLegend,
+            top_annotation = ComplexHeatmap::HeatmapAnnotation(
+                cell = factor(zToPlot,
+                    levels = stringr::str_sort(unique(zToPlot),
+                        numeric = TRUE)),
+                show_legend = showTopAnnotationLegend,
+                show_annotation_name = showTopAnnotationName,
+                col = list(cell = ccols),
+                simple_anno_size = grid::unit(topAnnotationHeight, unit)),
+            left_annotation = ComplexHeatmap::rowAnnotation(
+                module = factor(yToPlot,
+                    levels = stringr::str_sort(unique(yToPlot),
+                        numeric = TRUE)),
+                show_legend = showLeftAnnotationLegend,
+                show_annotation_name = showLeftAnnotationName,
+                col = list(module = rcols),
+                simple_anno_size = grid::unit(leftAnnotationWidth, unit)),
+            ...)
+    } else {
+        plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
+            col = col,
+            show_column_names = FALSE,
+            show_row_names = showFeaturenames,
+            row_names_gp = grid::gpar(fontsize = rowFontSize),
+            cluster_rows = FALSE,
+            cluster_columns = FALSE,
+            heatmap_legend_param = list(title = "Expression"),
+            show_heatmap_legend = showHeatmapLegend,
+            top_annotation = ComplexHeatmap::HeatmapAnnotation(
+                cell = factor(zToPlot,
+                    levels = stringr::str_sort(unique(zToPlot),
+                        numeric = TRUE)),
+                show_legend = showTopAnnotationLegend,
+                show_annotation_name = showTopAnnotationName,
+                col = list(cell = ccols),
+                simple_anno_size = grid::unit(topAnnotationHeight, unit)),
+            ...)
+    }
     return(plt)
 }

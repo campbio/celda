@@ -25,10 +25,11 @@ moduleHeatmap(x, ...)
   showHeatmapLegend = FALSE,
   showTopAnnotationLegend = FALSE,
   showTopAnnotationName = FALSE,
-  annotationHeight = 1.5,
+  topAnnotationHeight = 1.5,
+  showLeftAnnotation = FALSE,
   showLeftAnnotationLegend = FALSE,
   showLeftAnnotationName = FALSE,
-  annotationWidth = 1.5,
+  leftAnnotationWidth = 1.5,
   width = "auto",
   height = "auto",
   unit = "mm",
@@ -123,16 +124,20 @@ legend for expression levels.}
 \item{showTopAnnotationName}{Passed to
 \link[ComplexHeatmap]{HeatmapAnnotation}. Show heatmap top annotation name.}
 
-\item{annotationHeight}{Passed to
+\item{topAnnotationHeight}{Passed to
 \link[ComplexHeatmap]{HeatmapAnnotation}. Column annotation height.
 \link[ComplexHeatmap]{rowAnnotation}. Show legend for module annotation.}
 
-\item{showLeftAnnotationLegend}{Passed to}
+\item{showLeftAnnotation}{Show left annotation. Default \code{FALSE}.}
+
+\item{showLeftAnnotationLegend}{Passed to
+\link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for feature module
+annotation.}
 
 \item{showLeftAnnotationName}{Passed to
-\link[ComplexHeatmap]{rowAnnotation}. Show lheatmap left annotation name.}
+\link[ComplexHeatmap]{rowAnnotation}. Show heatmap left annotation name.}
 
-\item{annotationWidth}{Passed to
+\item{leftAnnotationWidth}{Passed to
 \link[ComplexHeatmap]{rowAnnotation}. Row annotation width.}
 
 \item{width}{Passed to \link[multipanelfigure]{multi_panel_figure}. The
@@ -159,11 +164,13 @@ only if \code{x} is a matrix object.}
 A \link[multipanelfigure]{multi_panel_figure} object.
 }
 \description{
-Renders a heatmap for selected featureModules. Cells are
+Renders a heatmap for selected \code{featureModule}. Cells are
  ordered from those with the lowest probability of the module on the left to
  the highest probability on the right. Features are ordered from those
  with the highest probability in the module
- on the top to the lowest probability on the bottom.
+ on the top to the lowest probability on the bottom. Use of
+ \link[multipanelfigure]{save_multi_panel_figure} is recommended for
+ outputting figures in various formats.
 }
 \examples{
 data(sceCeldaCG)
