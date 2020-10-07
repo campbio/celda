@@ -735,7 +735,7 @@ setMethod(
         cell = normalizeCounts(nTSByC,
           normalize = "proportion"
         ),
-        module = tempNGByTS,
+        module = tempGByTS,
         geneDistribution = tempNGByTS
       )
       res <- c(res, list(proportions = propList))
