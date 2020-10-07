@@ -908,15 +908,15 @@ setMethod(
     nGByTS <- p$nGByTS
     nGByTS[nGByTS == 0] <- 1
 
-    nGByTS <- matrix(0, nrow = length(y), ncol = L)
-    nGByTS[cbind(seq(nG), y)] <- p$nByG
+    GByTS <- matrix(0, nrow = length(y), ncol = L)
+    GByTS[cbind(seq(nG), y)] <- p$nByG
 
     LNames <- paste0("L", seq(L))
     KNames <- paste0("K", seq(K))
     colnames(nTSByC) <- matrixNames(celdaMod)$column
     rownames(nTSByC) <- LNames
-    colnames(nGByTS) <- LNames
-    rownames(nGByTS) <- matrixNames(celdaMod)$row
+    colnames(GByTS) <- LNames
+    rownames(GByTS) <- matrixNames(celdaMod)$row
     rownames(mCPByS) <- KNames
     colnames(mCPByS) <- matrixNames(celdaMod)$sample
     colnames(nTSByCP) <- KNames
@@ -932,7 +932,7 @@ setMethod(
         sample = mCPByS,
         cellPopulation = nTSByCP,
         cell = nTSByC,
-        module = nGByTS,
+        module = GByTS,
         geneDistribution = nGByTS
       )
       res <- c(res, list(counts = countsList))
@@ -947,8 +947,8 @@ setMethod(
       )
 
       uniqueY <- sort(unique(y))
-      tempNGByTS <- nGByTS
-      tempNGByTS[, uniqueY] <- normalizeCounts(tempNGByTS[, uniqueY],
+      tempGByTS <- GByTS
+      tempGByTS[, uniqueY] <- normalizeCounts(tempGByTS[, uniqueY],
         normalize = "proportion"
       )
       tempNGByTS <- nGByTS / sum(nGByTS)
@@ -959,14 +959,14 @@ setMethod(
         ),
         cellPopulation = tempNTSByCP,
         cell = normalizeCounts(nTSByC, normalize = "proportion"),
-        module = tempNGByTS,
+        module = tempGByTS,
         geneDistribution = tempNGByTS
       )
       res <- c(res, list(proportions = propList))
     }
 
     if (any("posterior" %in% type)) {
-      gs <- nGByTS
+      gs <- GByTS
       gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
       gs <- normalizeCounts(gs, normalize = "proportion")
       tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
