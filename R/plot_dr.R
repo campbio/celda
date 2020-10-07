@@ -27,7 +27,7 @@
 #'  Default "blue4".
 #' @param colorMid Character. A color available from `colors()`.
 #'  The color will be used to signify the midpoint on the scale. Default
-#'  "white".
+#'  "grey90".
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #'  Default "firebrick1".
@@ -41,7 +41,7 @@
 #'  used as labels. Otherwise, these headers are used to label the genes.
 #' @param decreasing logical. Specifies the order of plotting the points.
 #'  If \code{FALSE}, the points will be plotted in increasing order where
-#'  the points with greatest values will be on top. \code{TRUE} otherwise.
+#'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
@@ -314,11 +314,11 @@ setMethod("plotDimReduceGrid",
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`. The color
-#'  will be used to signify the lowest values on the scale. Default 'blue'.
+#'  will be used to signify the lowest values on the scale.
 #' @param colorMid Character. A color available from `colors()`. The color
-#'  will be used to signify the midpoint on the scale. Default 'white'.
+#'  will be used to signify the midpoint on the scale.
 #' @param colorHigh Character. A color available from `colors()`. The color
-#'  will be used to signify the highest values on the scale. Default 'red'.
+#'  will be used to signify the highest values on the scale.
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
 #' with 10 percent of values trimmed. Default \code{0}.
@@ -326,7 +326,7 @@ setMethod("plotDimReduceGrid",
 #'  number of columns for facet wrap.
 #' @param decreasing logical. Specifies the order of plotting the points.
 #'  If \code{FALSE}, the points will be plotted in increasing order where
-#'  the points with greatest values will be on top. \code{TRUE} otherwise.
+#'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
@@ -585,28 +585,20 @@ setMethod("plotDimReduceFeature",
 #'  e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
-#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient}. The range
 #'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
-#'  Default "blue4".
-#' @param colorMid Character. A color available from `colors()`.
-#'  The color will be used to signify the midpoint on the scale. Default
-#'  "white".
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
-#'  Default "firebrick1".
-#' @param midpoint Numeric. The value indicating the midpoint of the
-#' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @param decreasing logical. Specifies the order of plotting the points.
 #'  If \code{FALSE}, the points will be plotted in increasing order where
-#'  the points with greatest values will be on top. \code{TRUE} otherwise.
+#'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
@@ -637,10 +629,8 @@ setMethod("plotDimReduceModule",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
-        colorLow = "blue4",
-        colorMid = "grey90",
+        colorLow = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -673,9 +663,7 @@ setMethod("plotDimReduceModule",
             xlab = xlab,
             ylab = ylab,
             colorLow = colorLow,
-            colorMid = colorMid,
             colorHigh = colorHigh,
-            midpoint = midpoint,
             ncol = ncol,
             decreasing = decreasing)
         return(g)
@@ -707,9 +695,7 @@ setMethod("plotDimReduceModule",
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -725,9 +711,7 @@ setMethod("plotDimReduceModule",
             xlab = xlab,
             ylab = ylab,
             colorLow = colorLow,
-            colorMid = colorMid,
             colorHigh = colorHigh,
-            midpoint = midpoint,
             ncol = ncol,
             decreasing = decreasing)
         return(g)
@@ -746,9 +730,7 @@ setMethod("plotDimReduceModule",
     xlab,
     ylab,
     colorLow,
-    colorMid,
     colorHigh,
-    midpoint,
     ncol,
     decreasing) {
 
@@ -758,7 +740,7 @@ setMethod("plotDimReduceModule",
         for (x in seq(nrow(matrix))) {
             matrix[x, ] <- matrix[x, ] - min(matrix[x, ])
             matrix[x, ] <- matrix[x, ] / max(matrix[x, ])
-            varLabel <- "Scaled_Probability"
+            varLabel <- "Scaled Probability"
         }
     } else {
         varLabel <- "Probability"
@@ -769,32 +751,46 @@ setMethod("plotDimReduceModule",
         if (length(rownames(matrix)[rownames(matrix) %in% modules]) < 1) {
             stop("All modules selected do not exist in the model.")
         }
-        matrix <- matrix[which(rownames(matrix) %in% modules), ,
-            drop = FALSE
-            ]
-        matrix <- matrix[match(rownames(matrix), modules), ,
-            drop = FALSE
-            ]
+        matrix <- matrix[which(rownames(matrix) %in% modules), , drop = FALSE]
+        matrix <- matrix[match(rownames(matrix), modules), , drop = FALSE]
     }
 
     rownames(matrix) <- paste0("L", rownames(matrix))
-    .plotDimReduceGrid(
-        dim1 = dim1,
-        dim2 = dim2,
-        matrix = matrix,
-        size = size,
-        xlab = xlab,
-        ylab = ylab,
-        limits = limits,
-        colorLow = colorLow,
-        colorMid = colorMid,
-        colorHigh = colorHigh,
-        midpoint = midpoint,
-        varLabel = varLabel,
-        ncol = ncol,
-        headers = NULL,
-        decreasing = decreasing
-    )
+
+    df <- data.frame(dim1, dim2, t(as.data.frame(matrix)), check.names = FALSE)
+    naIx <- is.na(dim1) | is.na(dim2)
+    df <- df[!naIx, ]
+
+    m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
+    colnames(m) <- c(xlab, ylab, "facet", "Expression")
+
+    if (!is.null(decreasing)) {
+        m <- m[order(m$facet, m$Expression, decreasing = decreasing), ]
+    }
+
+    g <- ggplot2::ggplot(m, ggplot2::aes_string(x = xlab, y = ylab)) +
+        ggplot2::geom_point(stat = "identity",
+            size = size,
+            ggplot2::aes_string(color = m$Expression)) +
+        ggplot2::facet_wrap(~facet) +
+        ggplot2::theme_bw() +
+        ggplot2::scale_colour_gradient(limits = limits,
+            low = colorLow,
+            high = colorHigh,
+            name = varLabel) +
+        ggplot2::theme(strip.background = ggplot2::element_blank(),
+            panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank(),
+            panel.spacing = unit(0, "lines"),
+            panel.background = ggplot2::element_blank(),
+            axis.line = ggplot2::element_line(colour = "black"))
+    if (isFALSE(is.null(ncol))) {
+        g <- g + ggplot2::facet_wrap(~facet, ncol = ncol)
+    } else {
+        g <- g + ggplot2::facet_wrap(~facet)
+    }
+
+    return(g)
 }
 
 
@@ -824,7 +820,7 @@ setMethod("plotDimReduceModule",
 #' @param specificClusters Numeric vector.
 #'  Only color cells in the specified clusters.
 #'  All other cells will be grey.
-#'  If NULL, all clusters will be colored. Default NULL.
+#'  If NULL, all clusters will be colored. Default \code{NULL}.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
 #' @param groupBy Character vector. Contains sample labels for each cell.

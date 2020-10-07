@@ -4,8 +4,8 @@
 \alias{plotDimReduceModule}
 \alias{plotDimReduceModule,SingleCellExperiment-method}
 \alias{plotDimReduceModule,matrix-method}
-\title{Plotting the Celda module probability on a
- dimensionality reduction plot}
+\title{Plotting Celda module probability on a
+ dimension reduction plot}
 \usage{
 plotDimReduceModule(x, ...)
 
@@ -22,10 +22,8 @@ plotDimReduceModule(x, ...)
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "blue4",
-  colorMid = "grey90",
+  colorLow = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -42,9 +40,7 @@ plotDimReduceModule(x, ...)
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -60,10 +56,10 @@ represent features and columns represent cells.}
 \code{dim2} are set.}
 
 \item{dim1}{Numeric vector.
-First dimension from data dimensionality reduction output.}
+First dimension from data dimension reduction output.}
 
 \item{dim2}{Numeric vector.
-Second dimension from data dimensionality reduction output.}
+Second dimension from data dimension reduction output.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
@@ -78,7 +74,7 @@ e.g. c("1", "2").}
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
 
-\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient}. The range
 of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
@@ -88,27 +84,17 @@ of color scale.}
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`.
-The color will be used to signify the lowest values on the scale.
-Default "blue4".}
-
-\item{colorMid}{Character. A color available from `colors()`.
-The color will be used to signify the midpoint on the scale. Default
-"white".}
+The color will be used to signify the lowest values on the scale.}
 
 \item{colorHigh}{Character. A color available from `colors()`.
-The color will be used to signify the highest values on the scale.
-Default "firebrick1".}
-
-\item{midpoint}{Numeric. The value indicating the midpoint of the
-diverging color scheme. If \code{NULL}, defaults to the mean
-with 10 percent of values trimmed. Default \code{NULL}.}
+The color will be used to signify the highest values on the scale.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
 
 \item{decreasing}{logical. Specifies the order of plotting the points.
 If \code{FALSE}, the points will be plotted in increasing order where
-the points with greatest values will be on top. \code{TRUE} otherwise.
+the points with largest values will be on top. \code{TRUE} otherwise.
 If \code{NULL}, no sorting is performed. Points will be plotted in their
 current order in \code{x}. Default \code{FALSE}.}
 
@@ -121,8 +107,8 @@ The plot as a ggplot object
 \description{
 Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a data
- dimensionality reduction tool.
- The cells are colored by the module probability(s).
+ dimension reduction tool.
+ The cells are colored by the module probability.
 }
 \examples{
 data(sceCeldaCG)

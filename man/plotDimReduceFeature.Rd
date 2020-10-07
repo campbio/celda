@@ -4,7 +4,7 @@
 \alias{plotDimReduceFeature}
 \alias{plotDimReduceFeature,SingleCellExperiment-method}
 \alias{plotDimReduceFeature,matrix-method}
-\title{Plotting feature expression on a dimensionality reduction plot}
+\title{Plotting feature expression on a dimension reduction plot}
 \usage{
 plotDimReduceFeature(x, ...)
 
@@ -66,9 +66,9 @@ represent features and columns represent cells.}
 \code{dim2} are set.}
 
 \item{dim1}{Numeric vector. First dimension from data
-dimensionality reduction output.}
+dimension reduction output.}
 
-\item{dim2}{Numeric vector. Second dimension from data dimensionality
+\item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
@@ -107,13 +107,13 @@ of color scale.}
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`. The color
-will be used to signify the lowest values on the scale. Default 'blue'.}
+will be used to signify the lowest values on the scale.}
 
 \item{colorMid}{Character. A color available from `colors()`. The color
-will be used to signify the midpoint on the scale. Default 'white'.}
+will be used to signify the midpoint on the scale.}
 
 \item{colorHigh}{Character. A color available from `colors()`. The color
-will be used to signify the highest values on the scale. Default 'red'.}
+will be used to signify the highest values on the scale.}
 
 \item{midpoint}{Numeric. The value indicating the midpoint of the
 diverging color scheme. If \code{NULL}, defaults to the mean
@@ -124,7 +124,7 @@ number of columns for facet wrap.}
 
 \item{decreasing}{logical. Specifies the order of plotting the points.
 If \code{FALSE}, the points will be plotted in increasing order where
-the points with greatest values will be on top. \code{TRUE} otherwise.
+the points with largest values will be on top. \code{TRUE} otherwise.
 If \code{NULL}, no sorting is performed. Points will be plotted in their
 current order in \code{x}. Default \code{FALSE}.}
 }
@@ -133,7 +133,7 @@ The plot as a ggplot object
 }
 \description{
 Create a scatterplot for each row of a normalized gene
- expression matrix where x and y axis are from a data dimensionality
+ expression matrix where x and y axis are from a data dimension
  reduction tool. The cells are colored by expression of
  the specified feature.
 }
