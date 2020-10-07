@@ -820,7 +820,7 @@ setMethod("plotDimReduceModule",
 #' @param specificClusters Numeric vector.
 #'  Only color cells in the specified clusters.
 #'  All other cells will be grey.
-#'  If NULL, all clusters will be colored. Default \coce{NULL}.
+#'  If NULL, all clusters will be colored. Default \code{NULL}.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
 #' @param groupBy Character vector. Contains sample labels for each cell.
