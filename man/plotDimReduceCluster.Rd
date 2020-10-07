@@ -4,7 +4,7 @@
 \alias{plotDimReduceCluster}
 \alias{plotDimReduceCluster,SingleCellExperiment-method}
 \alias{plotDimReduceCluster,vector-method}
-\title{Plotting the cell labels on a dimensionality reduction plot}
+\title{Plotting the cell labels on a dimension reduction plot}
 \usage{
 plotDimReduceCluster(x, ...)
 
@@ -51,10 +51,10 @@ column in \code{colData(x)}.}
 to use. Default "featureSubset".}
 
 \item{dim1}{Numeric vector. First dimension from data
-dimensionality reduction output.}
+dimension reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data
-dimensionality reduction output.}
+dimension reduction output.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -65,7 +65,7 @@ dimensionality reduction output.}
 \item{specificClusters}{Numeric vector.
 Only color cells in the specified clusters.
 All other cells will be grey.
-If NULL, all clusters will be colored. Default NULL.}
+If NULL, all clusters will be colored. Default \coce{NULL}.}
 
 \item{labelClusters}{Logical. Whether the cluster labels are plotted.
 Default FALSE.}
@@ -82,7 +82,7 @@ The plot as a ggplot object
 \description{
 Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a
- data dimensionality reduction tool.
+ data dimension reduction tool.
  The cells are colored by its given \code{cluster} label.
 }
 \examples{

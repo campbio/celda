@@ -4,7 +4,7 @@
 \alias{plotDimReduceGrid}
 \alias{plotDimReduceGrid,SingleCellExperiment-method}
 \alias{plotDimReduceGrid,matrix-method}
-\title{Mapping the dimensionality reduction plot}
+\title{Mapping the dimension reduction plot}
 \usage{
 plotDimReduceGrid(x, ...)
 
@@ -57,10 +57,10 @@ row of the matrix will be plotted as a separate facet.}
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
-\item{dim1}{Numeric vector. First dimension from data dimensionality
+\item{dim1}{Numeric vector. First dimension from data dimension
 reduction output.}
 
-\item{dim2}{Numeric vector. Second dimension from data dimensionality
+\item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
@@ -85,7 +85,7 @@ Default "blue4".}
 
 \item{colorMid}{Character. A color available from `colors()`.
 The color will be used to signify the midpoint on the scale. Default
-"white".}
+"grey90".}
 
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
@@ -105,7 +105,7 @@ used as labels. Otherwise, these headers are used to label the genes.}
 
 \item{decreasing}{logical. Specifies the order of plotting the points.
 If \code{FALSE}, the points will be plotted in increasing order where
-the points with greatest values will be on top. \code{TRUE} otherwise.
+the points with largest values will be on top. \code{TRUE} otherwise.
 If \code{NULL}, no sorting is performed. Points will be plotted in their
 current order in \code{x}. Default \code{FALSE}.}
 }
@@ -114,7 +114,7 @@ The plot as a ggplot object
 }
 \description{
 Creates a scatterplot given two dimensions from a data
- dimensionality reduction tool (e.g tSNE) output.
+ dimension reduction tool (e.g tSNE) output.
 }
 \examples{
 data(sceCeldaCG)
