@@ -97,7 +97,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         z = celdaClusters(sce, altExpName = altExpName),
         y = celdaModules(sce, altExpName = altExpName)[ix],
         ...)
-    invisible(plt)
+    return(plt)
 }
 
 
@@ -114,5 +114,5 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         transformationFun = sqrt)
     plt <- plotHeatmap(norm[rn, ], y = celdaModules(sce,
         altExpName = altExpName)[ix], ...)
-    invisible(plt)
+    return(plt)
 }

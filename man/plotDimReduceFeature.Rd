@@ -20,14 +20,15 @@ plotDimReduceFeature(x, ...)
   normalize = FALSE,
   zscore = TRUE,
   exactMatch = TRUE,
-  trim = c(-1, 1),
+  trim = c(-2, 2),
+  limits = c(-2, 2),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
+  midpoint = 0,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -41,14 +42,15 @@ plotDimReduceFeature(x, ...)
   normalize = FALSE,
   zscore = TRUE,
   exactMatch = TRUE,
-  trim = c(-1, 1),
+  trim = c(-2, 2),
+  limits = c(-2, 2),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
+  midpoint = 0,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -95,6 +97,9 @@ and standard deviation of 1. Default \code{TRUE}.}
 and upper bounds for the data. This threshold is applied after row scaling.
 Set to NULL to disable. Default \code{c(-1,1)}.}
 
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
+
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
 \item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
@@ -112,7 +117,7 @@ will be used to signify the highest values on the scale. Default 'red'.}
 
 \item{midpoint}{Numeric. The value indicating the midpoint of the
 diverging color scheme. If \code{NULL}, defaults to the mean
-with 10 percent of values trimmed. Default \code{NULL}.}
+with 10 percent of values trimmed. Default \code{0}.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}

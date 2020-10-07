@@ -60,9 +60,10 @@
 #'  normalization. This scale factor is multiplied to each cell after the
 #'  library size of each cell had been adjusted in \code{normalize}. Default
 #'  \code{NULL} which means no scale factor is applied.
-#' @param transformationFun Function. Applys a transformation such as `sqrt`,
-#'  `log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be
-#'  applied. Occurs after normalization. Default NULL.
+#' @param transformationFun Function. Applys a transformation such as
+#'  \link{sqrt}, \link{log}, \link{log2}, \link{log10}, or \link{log1p}.
+#'  If NULL, no transformation will be applied. Occurs after normalization.
+#'  Default NULL.
 #' @param scaleFun Function. Scales the rows of the normalized and transformed
 #'  count matrix. For example, 'scale' can be used to z-score normalize the
 #'  rows. Default NULL.

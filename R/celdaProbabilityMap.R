@@ -89,8 +89,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         showNamesFeature = TRUE,
         breaks = breaks,
         col = col,
-        main = "Absolute Probability",
-        silent = TRUE)
+        main = "Absolute Probability")
 
     if (ncol(samp) > 1) {
         sampNorm <- normalizeCounts(samp,
@@ -103,11 +102,10 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             clusterFeature = FALSE,
             showNamesCell = TRUE,
             showNamesFeature = TRUE,
-            main = "Relative Abundance",
-            silent = TRUE)
-        return(gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2))
+            main = "Relative Abundance")
+        return(gridExtra::grid.arrange(g1, g2, ncol = 2))
     } else {
-        return(gridExtra::grid.arrange(g1$gtable))
+        return(gridExtra::grid.arrange(g1))
     }
 }
 
@@ -158,19 +156,15 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             showNamesFeature = TRUE,
             breaks = breaks,
             col = col,
-            main = "Absolute Probability",
-            silent = TRUE
-        )
+            main = "Absolute Probability")
         g2 <- plotHeatmap(popNorm,
             colorScheme = "divergent",
             clusterCell = FALSE,
             clusterFeature = FALSE,
             showNamesCell = TRUE,
             showNamesFeature = TRUE,
-            main = "Relative Expression",
-            silent = TRUE
-        )
-        gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2)
+            main = "Relative Expression")
+        gridExtra::grid.arrange(g1, g2, ncol = 2)
     } else {
         samp <- factorized$proportions$sample
         col <- grDevices::colorRampPalette(c(
@@ -193,9 +187,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             showNamesFeature = TRUE,
             breaks = breaks,
             col = col,
-            main = "Absolute Probability",
-            silent = TRUE
-        )
+            main = "Absolute Probability")
 
         if (ncol(samp) > 1) {
             sampNorm <- normalizeCounts(factorized$counts$sample,
@@ -209,12 +201,10 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
                 clusterFeature = FALSE,
                 showNamesCell = TRUE,
                 showNamesFeature = TRUE,
-                main = "Relative Abundance",
-                silent = TRUE
-            )
-            gridExtra::grid.arrange(g1$gtable, g2$gtable, ncol = 2)
+                main = "Relative Abundance")
+            gridExtra::grid.arrange(g1, g2, ncol = 2)
         } else {
-            gridExtra::grid.arrange(g1$gtable)
+            gridExtra::grid.arrange(g1)
         }
     }
 }

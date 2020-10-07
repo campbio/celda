@@ -3,7 +3,6 @@
 \name{moduleHeatmap}
 \alias{moduleHeatmap}
 \alias{moduleHeatmap,SingleCellExperiment-method}
-\alias{moduleHeatmap,matrix-method}
 \title{Heatmap for featureModules}
 \usage{
 moduleHeatmap(x, ...)
@@ -12,23 +11,31 @@ moduleHeatmap(x, ...)
   x,
   useAssay = "counts",
   altExpName = "featureSubset",
-  featureModule = 1,
+  featureModule = NULL,
+  col = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
   topCells = 100,
   topFeatures = NULL,
   normalizedCounts = NA,
+  normalize = "proportion",
+  transformationFun = sqrt,
   scaleRow = scale,
-  showFeaturenames = TRUE
-)
-
-\S4method{moduleHeatmap}{matrix}(
-  x,
-  celdaMod,
-  featureModule = 1,
-  topCells = 100,
-  topFeatures = NULL,
-  normalizedCounts = NA,
-  scaleRow = scale,
-  showFeaturenames = TRUE
+  showFeaturenames = TRUE,
+  trim = c(-2, 2),
+  rowFontSize = 6,
+  showHeatmapLegend = FALSE,
+  showTopAnnotationLegend = FALSE,
+  showTopAnnotationName = FALSE,
+  topAnnotationHeight = 1.5,
+  showLeftAnnotation = FALSE,
+  showLeftAnnotationLegend = FALSE,
+  showLeftAnnotationName = FALSE,
+  leftAnnotationWidth = 1.5,
+  width = "auto",
+  height = "auto",
+  unit = "mm",
+  ModuleLabel = "auto",
+  labelJust = c("right", "bottom"),
+  ...
 )
 }
 \arguments{
@@ -36,6 +43,8 @@ moduleHeatmap(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
+
+\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
@@ -45,52 +54,125 @@ slot to use if \code{x} is a
 to use. Default "featureSubset".}
 
 \item{featureModule}{Integer Vector. The featureModule(s) to display.
-Multiple modules can be included in a vector.}
+Multiple modules can be included in a vector. Default \code{NULL} which
+plots all module heatmaps.}
+
+\item{col}{Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
+and colors.}
 
 \item{topCells}{Integer. Number of cells with the highest and lowest
-probabilities for this module to include in the heatmap. For example, if
-`topCells` = 50, the 50 cells with the lowest probability and the 50 cells
-with the highest probability for that featureModule will be included. If
+probabilities for each module to include in the heatmap. For example, if
+\code{topCells = 50}, the 50 cells with the lowest probabilities and
+the 50 cells
+with the highest probabilities for each featureModule will be included. If
 NULL, all cells will be plotted. Default 100.}
 
-\item{topFeatures}{Integer. Plot `topFeatures` with the highest probability
-in the featureModule. If NULL, plot all features in the module. Default
-NULL.}
+\item{topFeatures}{Integer. Plot `topFeatures` features with the highest
+probabilities in the module heatmap for each featureModule. If \code{NULL},
+plot all features in the module. Default \code{NULL}.}
 
 \item{normalizedCounts}{Integer matrix. Rows represent features and columns
-represent cells. This matrix should correspond to the one provided for
-`counts`, but should be passed through. If NA, normalize `counts`.
-Default NA.
-`normalizeCounts(counts, "proportion", transformationFun=sqrt)`. Use of this
-parameter is particularly useful for plotting many moduleHeatmaps, where
-normalizing the counts matrix repeatedly would be too time consuming.}
+represent cells. If you have a normalized matrix result from
+\link{normalizeCounts}, you can pass through the result here to
+skip the normalization step in this function. Make sure the colnames and
+rownames match the object in x. This matrix should
+correspond to one generated from this count matrix
+\code{assay(altExp(x, altExpName), i = useAssay)}. If \code{NA},
+normalization will be carried out in the following form
+\code{normalizeCounts(assay(altExp(x, altExpName), i = useAssay),
+normalize = "proportion", transformationFun = sqrt)}.
+Use of this parameter is particularly useful for plotting many
+module heatmaps, where normalizing the counts matrix repeatedly would
+be too time consuming. Default NA.}
 
-\item{scaleRow}{Character. Which function to use to scale each individual
+\item{normalize}{Character. Passed to \link{normalizeCounts} if
+\code{normalizedCounts} is \code{NA}.
+Divides counts by the library sizes for each cell. One of 'proportion',
+'cpm', 'median', or 'mean'. 'proportion' uses the total counts for each
+cell as the library size. 'cpm' divides the library size of each cell by
+one million to produce counts per million. 'median' divides the library
+size of each cell by the median library size across all cells. 'mean'
+divides the library size of each cell by the mean library size across all
+cells. Default "proportion".}
+
+\item{transformationFun}{Function. Passed to \link{normalizeCounts} if
+\code{normalizedCounts} is \code{NA}. Applys a transformation such as
+\link{sqrt}, \link{log}, \link{log2}, \link{log10}, or \link{log1p}.
+If NULL, no transformation will be applied. Occurs after normalization.
+Default \link{sqrt}.}
+
+\item{scaleRow}{Function. Which function to use to scale each individual
 row. Set to NULL to disable. Occurs after normalization and log
-transformation. For example, `scale` will Z-score transform each row.
-Default `scale`.}
+transformation. For example, \link{scale} will Z-score transform each row.
+Default \link{scale}.}
 
 \item{showFeaturenames}{Logical. Wheter feature names should be displayed.
 Default TRUE.}
+
+\item{trim}{Numeric vector. Vector of length two that specifies the lower
+and upper bounds for plotting the data. This threshold is applied
+after row scaling. Set to NULL to disable. Default c(-2,2).}
+
+\item{rowFontSize}{Integer. Font size for genes.}
+
+\item{showHeatmapLegend}{Passed to \link[ComplexHeatmap]{Heatmap}. Show
+legend for expression levels.}
+
+\item{showTopAnnotationLegend}{Passed to
+\link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for cell annotation.}
+
+\item{showTopAnnotationName}{Passed to
+\link[ComplexHeatmap]{HeatmapAnnotation}. Show heatmap top annotation name.}
+
+\item{topAnnotationHeight}{Passed to
+\link[ComplexHeatmap]{HeatmapAnnotation}. Column annotation height.
+\link[ComplexHeatmap]{rowAnnotation}. Show legend for module annotation.}
+
+\item{showLeftAnnotation}{Show left annotation. Default \code{FALSE}.}
+
+\item{showLeftAnnotationLegend}{Passed to
+\link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for feature module
+annotation.}
+
+\item{showLeftAnnotationName}{Passed to
+\link[ComplexHeatmap]{rowAnnotation}. Show heatmap left annotation name.}
+
+\item{leftAnnotationWidth}{Passed to
+\link[ComplexHeatmap]{rowAnnotation}. Row annotation width.}
+
+\item{width}{Passed to \link[multipanelfigure]{multi_panel_figure}. The
+width of the output figure.}
+
+\item{height}{Passed to \link[multipanelfigure]{multi_panel_figure}. The
+height of the output figure.}
+
+\item{unit}{Passed to \link[multipanelfigure]{multi_panel_figure}. Single
+character object defining the unit of all dimensions defined.}
+
+\item{ModuleLabel}{Must be
+vector of the same length as \code{length(unique(celdaModules(x)))} or
+\code{length(unique(celdaClusters(x)$y))}. Set to \code{""} to disable.}
+
+\item{labelJust}{Passed to \link[multipanelfigure]{fill_panel}.
+Justification for the label within the interpanel spacing grob to the
+top-left of the panel content grob.}
 
 \item{celdaMod}{Celda object of class \link{celda_G} or \link{celda_CG}. Used
 only if \code{x} is a matrix object.}
 }
 \value{
-A list containing row and column dendrograms as well as a gtable for
- grob plotting
+A \link[multipanelfigure]{multi_panel_figure} object.
 }
 \description{
-Renders a heatmap for selected featureModules. Cells are
+Renders a heatmap for selected \code{featureModule}. Cells are
  ordered from those with the lowest probability of the module on the left to
- the highest probability on the right. If more than one module is used, then
- cells will be ordered by the probabilities of the first module only.
- Features are ordered from those with the highest probability in the module
- on the top to the lowest probability on the bottom.
+ the highest probability on the right. Features are ordered from those
+ with the highest probability in the module
+ on the top to the lowest probability on the bottom. Use of
+ \link[multipanelfigure]{save_multi_panel_figure} is recommended for
+ outputting figures in various formats.
 }
 \examples{
 data(sceCeldaCG)
-moduleHeatmap(sceCeldaCG)
-data(celdaCGSim, celdaCGMod)
-moduleHeatmap(celdaCGSim$counts, celdaCGMod)
+moduleHeatmap(sceCeldaCG, width = 250, height = 250)
 }

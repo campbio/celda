@@ -1,6 +1,6 @@
-#' @title Mapping the dimensionality reduction plot
+#' @title Mapping the dimension reduction plot
 #' @description Creates a scatterplot given two dimensions from a data
-#'  dimensionality reduction tool (e.g tSNE) output.
+#'  dimension reduction tool (e.g tSNE) output.
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Each
 #'  row of the matrix will be plotted as a separate facet.
@@ -8,9 +8,9 @@
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
-#' @param dim1 Numeric vector. First dimension from data dimensionality
+#' @param dim1 Numeric vector. First dimension from data dimension
 #'  reduction output.
-#' @param dim2 Numeric vector. Second dimension from data dimensionality
+#' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
@@ -20,6 +20,8 @@
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'.
 #' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
 #'  Default "blue4".
@@ -31,7 +33,7 @@
 #'  Default "firebrick1".
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
+#' with 10 percent of values trimmed. Default \code{0}.
 #' @param varLabel Character vector. Title for the color legend.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
@@ -69,10 +71,11 @@ setMethod("plotDimReduceGrid",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
+        limits = c(-2, 2),
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         varLabel = NULL,
         ncol = NULL,
         headers = NULL,
@@ -97,6 +100,7 @@ setMethod("plotDimReduceGrid",
             size = size,
             xlab = xlab,
             ylab = ylab,
+            limits = limits,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
@@ -130,8 +134,9 @@ setMethod("plotDimReduceGrid",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
+        limits = c(-2, 2),
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
         midpoint = NULL,
         varLabel = NULL,
@@ -145,6 +150,7 @@ setMethod("plotDimReduceGrid",
             size = size,
             xlab = xlab,
             ylab = ylab,
+            limits = limits,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
@@ -165,6 +171,7 @@ setMethod("plotDimReduceGrid",
     size,
     xlab,
     ylab,
+    limits,
     colorLow,
     colorMid,
     colorHigh,
@@ -206,6 +213,7 @@ setMethod("plotDimReduceGrid",
             ) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(
+                limits = limits,
                 low = colorLow,
                 high = colorHigh,
                 mid = colorMid,
@@ -241,6 +249,7 @@ setMethod("plotDimReduceGrid",
             ggplot2::facet_wrap(~facet) +
             ggplot2::theme_bw() +
             ggplot2::scale_colour_gradient2(
+                limits = limits,
                 low = colorLow,
                 high = colorHigh,
                 mid = colorMid,
@@ -265,9 +274,9 @@ setMethod("plotDimReduceGrid",
 }
 
 
-#' @title Plotting feature expression on a dimensionality reduction plot
+#' @title Plotting feature expression on a dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized gene
-#'  expression matrix where x and y axis are from a data dimensionality
+#'  expression matrix where x and y axis are from a data dimension
 #'  reduction tool. The cells are colored by expression of
 #'  the specified feature.
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
@@ -278,8 +287,8 @@ setMethod("plotDimReduceGrid",
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
-#' @param dim2 Numeric vector. Second dimension from data dimensionality
+#'  dimension reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
@@ -299,6 +308,8 @@ setMethod("plotDimReduceGrid",
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for the data. This threshold is applied after row scaling.
 #'  Set to NULL to disable. Default \code{c(-1,1)}.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -310,7 +321,7 @@ setMethod("plotDimReduceGrid",
 #'  will be used to signify the highest values on the scale. Default 'red'.
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
+#' with 10 percent of values trimmed. Default \code{0}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @param decreasing logical. Specifies the order of plotting the points.
@@ -347,14 +358,15 @@ setMethod("plotDimReduceFeature",
         normalize = FALSE,
         zscore = TRUE,
         exactMatch = TRUE,
-        trim = c(-1, 1),
+        trim = c(-2, 2),
+        limits = c(-2, 2),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -380,6 +392,7 @@ setMethod("plotDimReduceFeature",
             zscore = zscore,
             exactMatch = exactMatch,
             trim = trim,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
@@ -416,14 +429,15 @@ setMethod("plotDimReduceFeature",
         normalize = FALSE,
         zscore = TRUE,
         exactMatch = TRUE,
-        trim = c(-1, 1),
+        trim = c(-2, 2),
+        limits = c(-2, 2),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -436,6 +450,7 @@ setMethod("plotDimReduceFeature",
             zscore = zscore,
             exactMatch = exactMatch,
             trim = trim,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
@@ -459,6 +474,7 @@ setMethod("plotDimReduceFeature",
                                  zscore,
                                  exactMatch,
                                  trim,
+                                 limits,
                                  size,
                                  xlab,
                                  ylab,
@@ -528,6 +544,7 @@ setMethod("plotDimReduceFeature",
     size = size,
     xlab = xlab,
     ylab = ylab,
+    limits = limits,
     colorLow = colorLow,
     colorMid = colorMid,
     colorHigh = colorHigh,
@@ -540,12 +557,12 @@ setMethod("plotDimReduceFeature",
 }
 
 
-#' @title Plotting the Celda module probability on a
-#'  dimensionality reduction plot
+#' @title Plotting Celda module probability on a
+#'  dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a data
-#'  dimensionality reduction tool.
-#'  The cells are colored by the module probability(s).
+#'  dimension reduction tool.
+#'  The cells are colored by the module probability.
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
@@ -554,9 +571,9 @@ setMethod("plotDimReduceFeature",
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
 #' @param dim1 Numeric vector.
-#'  First dimension from data dimensionality reduction output.
+#'  First dimension from data dimension reduction output.
 #' @param dim2 Numeric vector.
-#'  Second dimension from data dimensionality reduction output.
+#'  Second dimension from data dimension reduction output.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -568,6 +585,8 @@ setMethod("plotDimReduceFeature",
 #'  e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
@@ -580,6 +599,9 @@ setMethod("plotDimReduceFeature",
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #'  Default "firebrick1".
+#' @param midpoint Numeric. The value indicating the midpoint of the
+#' diverging color scheme. If \code{NULL}, defaults to the mean
+#' with 10 percent of values trimmed. Default \code{NULL}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @param decreasing logical. Specifies the order of plotting the points.
@@ -611,12 +633,14 @@ setMethod("plotDimReduceModule",
         altExpName = "featureSubset",
         modules = NULL,
         rescale = TRUE,
+        limits = c(0, 1),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
+        midpoint = NULL,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -644,12 +668,14 @@ setMethod("plotDimReduceModule",
             factorized = factorized,
             modules = modules,
             rescale = rescale,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
+            midpoint = midpoint,
             ncol = ncol,
             decreasing = decreasing)
         return(g)
@@ -676,12 +702,14 @@ setMethod("plotDimReduceModule",
         celdaMod,
         modules = NULL,
         rescale = TRUE,
+        limits = c(0, 1),
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
-        colorMid = "white",
+        colorMid = "grey90",
         colorHigh = "firebrick1",
+        midpoint = NULL,
         ncol = NULL,
         decreasing = FALSE) {
 
@@ -692,12 +720,14 @@ setMethod("plotDimReduceModule",
             factorized = factorized,
             modules = modules,
             rescale = rescale,
+            limits = limits,
             size = size,
             xlab = xlab,
             ylab = ylab,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
+            midpoint = midpoint,
             ncol = ncol,
             decreasing = decreasing)
         return(g)
@@ -711,12 +741,14 @@ setMethod("plotDimReduceModule",
     factorized,
     modules,
     rescale,
+    limits,
     size,
     xlab,
     ylab,
     colorLow,
     colorMid,
     colorHigh,
+    midpoint,
     ncol,
     decreasing) {
 
@@ -753,10 +785,11 @@ setMethod("plotDimReduceModule",
         size = size,
         xlab = xlab,
         ylab = ylab,
+        limits = limits,
         colorLow = colorLow,
         colorMid = colorMid,
         colorHigh = colorHigh,
-        midpoint = NULL,
+        midpoint = midpoint,
         varLabel = varLabel,
         ncol = ncol,
         headers = NULL,
@@ -766,10 +799,10 @@ setMethod("plotDimReduceModule",
 
 
 # Labeling code adapted from Seurat (https://github.com/satijalab/seurat)
-#' @title Plotting the cell labels on a dimensionality reduction plot
+#' @title Plotting the cell labels on a dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a
-#'  data dimensionality reduction tool.
+#'  data dimension reduction tool.
 #'  The cells are colored by its given \code{cluster} label.
 #' @param x Integer vector of cell cluster labels or a
 #'  \linkS4class{SingleCellExperiment} object
@@ -782,9 +815,9 @@ setMethod("plotDimReduceModule",
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
+#'  dimension reduction output.
 #' @param dim2 Numeric vector. Second dimension from data
-#'  dimensionality reduction output.
+#'  dimension reduction output.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".

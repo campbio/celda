@@ -202,7 +202,7 @@ celdaProbabilityMap(sce)
 `moduleHeatmap` creates a heatmap using only the features from a specific feature module. Cells are ordered from those with the lowest probability of the module to the highest. If more than one module is used, then cells will be ordered by the probabilities of the first module.
 
 ```{r, eval = TRUE, fig.width = 7, fig.height = 7}
-moduleHeatmap(sce, featureModule = 1, topCells = 100)
+moduleHeatmap(sce, featureModule = seq(10), topCells = 100)
 ```
 
 While `celdaHeatmap` will plot a heatmap directly with a celda *SCE* object, the `plotHeatmap` function is a more general heatmap function which takes a normalized expression matrix as the input. Simple normalization of the counts matrix can be performed with the `normalizeCounts` function. For instance, if users want to display specific modules and cell populations, the `featureIx`  and `cellIx` parameters can be used to select rows and columns out of the matrix. 

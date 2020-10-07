@@ -18,12 +18,14 @@ plotDimReduceModule(x, ...)
   altExpName = "featureSubset",
   modules = NULL,
   rescale = TRUE,
+  limits = c(0, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
+  midpoint = NULL,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -35,12 +37,14 @@ plotDimReduceModule(x, ...)
   celdaMod,
   modules = NULL,
   rescale = TRUE,
+  limits = c(0, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
+  midpoint = NULL,
   ncol = NULL,
   decreasing = FALSE
 )
@@ -74,6 +78,9 @@ e.g. c("1", "2").}
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
 
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
+
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
 \item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
@@ -91,6 +98,10 @@ The color will be used to signify the midpoint on the scale. Default
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
 Default "firebrick1".}
+
+\item{midpoint}{Numeric. The value indicating the midpoint of the
+diverging color scheme. If \code{NULL}, defaults to the mean
+with 10 percent of values trimmed. Default \code{NULL}.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
