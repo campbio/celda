@@ -2,33 +2,73 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceGrid}
 \alias{plotDimReduceGrid}
-\title{Mapping the dimensionality reduction plot}
+\alias{plotDimReduceGrid,SingleCellExperiment-method}
+\alias{plotDimReduceGrid,matrix-method}
+\title{Mapping the dimension reduction plot}
 \usage{
-plotDimReduceGrid(
-  dim1,
-  dim2,
-  matrix,
+plotDimReduceGrid(x, ...)
+
+\S4method{plotDimReduceGrid}{SingleCellExperiment}(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "grey",
-  colorMid = NULL,
-  colorHigh = "blue",
+  limits = c(-2, 2),
+  colorLow = "blue4",
+  colorMid = "grey90",
+  colorHigh = "firebrick1",
+  midpoint = 0,
+  varLabel = NULL,
+  ncol = NULL,
+  headers = NULL,
+  decreasing = FALSE
+)
+
+\S4method{plotDimReduceGrid}{matrix}(
+  x,
+  dim1,
+  dim2,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  limits = c(-2, 2),
+  colorLow = "blue4",
+  colorMid = "grey90",
+  colorHigh = "firebrick1",
   midpoint = NULL,
   varLabel = NULL,
   ncol = NULL,
-  headers = NULL
+  headers = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
-\item{dim1}{Numeric vector. First dimension from data dimensionality
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Each
+row of the matrix will be plotted as a separate facet.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
+
+\item{dim1}{Numeric vector. First dimension from data dimension
 reduction output.}
 
-\item{dim2}{Numeric vector. Second dimension from data dimensionality
+\item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
-\item{matrix}{Numeric matrix. Each row of the matrix will be plotted as
-a separate facet.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -36,20 +76,24 @@ a separate facet.}
 
 \item{ylab}{Character vector. Label for the y-axis. Default 'Dimension_2'.}
 
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
+
 \item{colorLow}{Character. A color available from `colors()`.
 The color will be used to signify the lowest values on the scale.
-Default 'grey'.}
+Default "blue4".}
 
 \item{colorMid}{Character. A color available from `colors()`.
-The color will be used to signify the midpoint on the scale.}
+The color will be used to signify the midpoint on the scale. Default
+"grey90".}
 
 \item{colorHigh}{Character. A color available from `colors()`.
 The color will be used to signify the highest values on the scale.
-Default 'blue'.}
+Default "firebrick1".}
 
 \item{midpoint}{Numeric. The value indicating the midpoint of the
 diverging color scheme. If \code{NULL}, defaults to the mean
-with 10 percent of values trimmed. Default \code{NULL}.}
+with 10 percent of values trimmed. Default \code{0}.}
 
 \item{varLabel}{Character vector. Title for the color legend.}
 
@@ -58,29 +102,35 @@ number of columns for facet wrap.}
 
 \item{headers}{Character vector. If `NULL`, the corresponding rownames are
 used as labels. Otherwise, these headers are used to label the genes.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with largest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
 }
 \value{
 The plot as a ggplot object
 }
 \description{
 Creates a scatterplot given two dimensions from a data
- dimensionality reduction tool (e.g tSNE) output.
+ dimension reduction tool (e.g tSNE) output.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
-plotDimReduceGrid(celdaTsne[, 1],
-  celdaTsne[, 2],
-  matrix = celdaCGSim$counts,
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceGrid(x = sce,
+  reducedDimName = "celda_tSNE",
   xlab = "Dimension1",
   ylab = "Dimension2",
-  varLabel = "tsne",
-  size = 1,
-  colorLow = "grey",
-  colorMid = NULL,
-  colorHigh = "blue"
-)
+  varLabel = "tSNE")
+library(SingleCellExperiment)
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceGrid(x = counts(sce),
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+  xlab = "Dimension1",
+  ylab = "Dimension2",
+  varLabel = "tSNE")
 }

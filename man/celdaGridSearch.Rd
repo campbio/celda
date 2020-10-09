@@ -2,10 +2,33 @@
 % Please edit documentation in R/celdaGridSearch.R
 \name{celdaGridSearch}
 \alias{celdaGridSearch}
+\alias{celdaGridSearch,SingleCellExperiment-method}
+\alias{celdaGridSearch,matrix-method}
 \title{Run Celda in parallel with multiple parameters}
 \usage{
-celdaGridSearch(
-  counts,
+celdaGridSearch(x, ...)
+
+\S4method{celdaGridSearch}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  model,
+  paramsTest,
+  paramsFixed = NULL,
+  maxIter = 200,
+  nchains = 3,
+  cores = 1,
+  bestOnly = TRUE,
+  seed = 12345,
+  perplexity = TRUE,
+  verbose = TRUE,
+  logfilePrefix = "Celda"
+)
+
+\S4method{celdaGridSearch}{matrix}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   model,
   paramsTest,
   paramsFixed = NULL,
@@ -20,15 +43,24 @@ celdaGridSearch(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
 
-\item{model}{Celda model. Options available in `celda::availableModels`.}
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
+
+\item{model}{Celda model. Options available in \link{availableModels}.}
 
 \item{paramsTest}{List. A list denoting the combinations of parameters to
-run in a celda model. For example, `list(K = seq(5, 10), L = seq(15, 20))`
+run in a celda model. For example,
+\code{list(K = seq(5, 10), L = seq(15, 20))}
 will run all combinations of K from 5 to 10 and L from 15 to 20 in model
-`celda_CG()`.}
+\link{celda_CG}.}
 
 \item{paramsFixed}{List. A list denoting additional parameters to use in
 each celda model. Default NULL.}
@@ -48,12 +80,12 @@ TRUE.}
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. Seed values
 \code{seq(seed, (seed + nchains - 1))} will be supplied to each chain in
-\code{nchains} If NULL, no calls to
+\code{nchains}. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
-`resamplePerplexity()`. Default TRUE.}
+\link{resamplePerplexity}. Default TRUE.}
 
 \item{verbose}{Logical. Whether to print log messages during celda chain
 execution. Default TRUE.}
@@ -62,17 +94,19 @@ execution. Default TRUE.}
 and main process. Default "Celda".}
 }
 \value{
-Object of class `celdaList`, which contains results for all model
- parameter combinations and summaries of the run parameters
+A \linkS4class{SingleCellExperiment} object. Function
+ parameter settings and celda model results are stored in the
+ \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
 }
 \description{
 Run Celda with different combinations of parameters and
- multiple chains in parallel. The variable `availableModels` contains the
- potential models that can be utilized. Different parameters to be tested
- should be stored in a list and passed to the argument `paramsTest`. Fixed
- parameters to be used in all models, such as `sampleLabel`, can be passed
- as a list to the argument `paramsFixed`. When `verbose = TRUE`, output
- from each chain will be sent to a log file but not be displayed in stdout.
+ multiple chains in parallel. The variable \link{availableModels} contains
+ the potential models that can be utilized. Different parameters to be tested
+ should be stored in a list and passed to the argument \code{paramsTest}.
+ Fixed parameters to be used in all models, such as \code{sampleLabel}, can
+ be passed as a list to the argument \code{paramsFixed}. When
+ \code{verbose = TRUE}, output from each chain will be sent to a log file
+ but not be displayed in \code{stdout}.
 }
 \examples{
 \dontrun{
@@ -84,13 +118,13 @@ celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
   bestOnly = TRUE,
   nchains = 1,
-  cores = 1
-)
+  cores = 1)
 }
 }
 \seealso{
-`celda_G()` for feature clustering, `celda_C()` for clustering of
- cells, and `celda_CG()` for simultaneous clustering of features and cells.
- `subsetCeldaList()` can subset the `celdaList` object. `selectBestModel()`
- can get the best model for each combination of parameters.
+\link{celda_G} for feature clustering, \link{celda_C} for
+ clustering of cells, and \link{celda_CG} for simultaneous clustering of
+ features and cells. \link{subsetCeldaList} can subset the \code{celdaList}
+ object. \link{selectBestModel} can get the best model for each combination
+ of parameters.
 }

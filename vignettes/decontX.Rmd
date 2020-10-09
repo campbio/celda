@@ -83,7 +83,8 @@ DecontX creates a UMAP which we can use to plot the cluster labels automatically
 
 ```{r UMAP_Clusters}
 umap <- reducedDim(pbmc4k, "decontX_UMAP")
-plotDimReduceCluster(umap[, 1], umap[, 2], cluster = pbmc4k$decontX_clusters)
+plotDimReduceCluster(x = pbmc4k$decontX_clusters,
+    dim1 = umap[, 1], dim2 = umap[, 2])
 ```
 
 ## Contamination on UMAP
@@ -99,11 +100,14 @@ Known marker genes can also be plotted on the UMAP to identify the cell types fo
 ```{r, message=FALSE}
 library(scater)
 pbmc4k <- logNormCounts(pbmc4k)
-plotDimReduceFeature(umap[, 1], umap[, 2], logcounts(pbmc4k),
-                     features = c("CD3D", "CD3E", "GNLY",
-                                  "LYZ", "S100A8", "S100A9",
-                                  "CD79A", "CD79B", "MS4A1"),
-                     exactMatch = TRUE)
+plotDimReduceFeature(x = pbmc4k,
+    useAssay = "logcounts",
+    dim1 = umap[, 1],
+    dim2 = umap[, 2],
+    features = c("CD3D", "CD3E", "GNLY",
+        "LYZ", "S100A8", "S100A9",
+        "CD79A", "CD79B", "MS4A1"),
+    exactMatch = TRUE)
 ```
 
 ## Barplot of markers detected in cell clusters
@@ -111,45 +115,49 @@ The percetage of cells within a cluster that have detectable expression of marke
 
 ```{r barplotCounts}
 markers <- list(Tcell_Markers = c("CD3E", "CD3D"),
-                    Bcell_Markers = c("CD79A", "CD79B", "MS4A1"),
-                    Monocyte_Markers = c("S100A8", "S100A9", "LYZ"),
-                    NKcell_Markers = "GNLY")
+    Bcell_Markers = c("CD79A", "CD79B", "MS4A1"),
+    Monocyte_Markers = c("S100A8", "S100A9", "LYZ"),
+    NKcell_Markers = "GNLY")
 cellTypeMappings <- list(Tcells = 2, Bcells = 5, Monocytes = 1, NKcells = 6)
-plotDecontXMarkerPercentage(pbmc4k, markers = markers,
-                            groupClusters = cellTypeMappings,
-                            assayName = "counts")
+plotDecontXMarkerPercentage(pbmc4k,
+    markers = markers,
+    groupClusters = cellTypeMappings,
+    assayName = "counts")
 ```
 
 We can then look to see how much DecontX removed aberrant expression of marker genes in each cell type by changing the `assayName` to `decontXcounts`:
 
 ```{r barplotDecontCounts}
-plotDecontXMarkerPercentage(pbmc4k, markers = markers,
-                            groupClusters = cellTypeMappings,
-                            assayName = "decontXcounts")
+plotDecontXMarkerPercentage(pbmc4k,
+    markers = markers,
+    groupClusters = cellTypeMappings,
+    assayName = "decontXcounts")
 ```
 
 Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells.
-The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the `assayName` parameter. This ooption only available if the data is stored in `SingleCellExperiment` object.
+The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the `assayName` parameter. This option is only available if the data is stored in `SingleCellExperiment` object.
 
 ```{r barplotBoth}
-plotDecontXMarkerPercentage(pbmc4k, markers = markers,
-                            groupClusters = cellTypeMappings,
-                            assayName = c("counts", "decontXcounts"))
+plotDecontXMarkerPercentage(pbmc4k,
+    markers = markers,
+    groupClusters = cellTypeMappings,
+    assayName = c("counts", "decontXcounts"))
 ```
 
 Some helpful hints when using `plotDecontXMarkerPercentage`:
 
-1. Cell clusters can be renamed and re-grouped using the `groupCluster` parameter, which also needs to be a named list. If `groupCluster` is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set `cellTypeMappings <- list(NK_Tcells=c(2,6), Bcells=5, Monocytes=1)`
+1. Cell clusters can be renamed and re-grouped using the `groupCluster` parameter, which also needs to be a named list. If `groupCluster` is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set `cellTypeMappings <- list(NK_Tcells = c(2,6), Bcells = 5, Monocytes = 1)`
 2. The level a gene needs to be expressed to be considered detected in a cell can be adjusted using the `threshold` parameter.
 3. If you are not using a `SingleCellExperiment`, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots. 
 
 ## Violin plot to compare the distributions of original and decontaminated counts
-Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `DecontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
+Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after `decontX` across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.
 
 ```{r plotDecontXMarkerExpression}
-plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
-                            groupClusters = cellTypeMappings,
-                            ncol = 3)
+plotDecontXMarkerExpression(pbmc4k,
+    markers = markers[["Monocyte_Markers"]],
+    groupClusters = cellTypeMappings,
+    ncol = 3)
 ```
 
 Some helfpul hints when using `plotDecontXMarkerExpression`:
@@ -162,13 +170,14 @@ Some helfpul hints when using `plotDecontXMarkerExpression`:
 
 ```{r plot_norm_counts, eval = FALSE}
 pbmc4k <- scater::logNormCounts(pbmc4k,
-                                exprs_values = "decontXcounts",
-                                name = "dlogcounts")
+    exprs_values = "decontXcounts",
+    name = "dlogcounts")
 
-plotDecontXMarkerExpression(pbmc4k, markers = markers[["Monocyte_Markers"]],
-                            groupClusters = cellTypeMappings,
-                            ncol = 3,
-                            assayName = c("logcounts", "dlogcounts"))
+plotDecontXMarkerExpression(pbmc4k,
+    markers = markers[["Monocyte_Markers"]],
+    groupClusters = cellTypeMappings,
+    ncol = 3,
+    assayName = c("logcounts", "dlogcounts"))
 ```
 
 

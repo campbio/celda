@@ -1,162 +1,300 @@
-#' @title Mapping the dimensionality reduction plot
+#' @title Mapping the dimension reduction plot
 #' @description Creates a scatterplot given two dimensions from a data
-#'  dimensionality reduction tool (e.g tSNE) output.
-#' @param dim1 Numeric vector. First dimension from data dimensionality
+#'  dimension reduction tool (e.g tSNE) output.
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Each
+#'  row of the matrix will be plotted as a separate facet.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
+#' @param dim1 Numeric vector. First dimension from data dimension
 #'  reduction output.
-#' @param dim2 Numeric vector. Second dimension from data dimensionality
+#' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
-#' @param matrix Numeric matrix. Each row of the matrix will be plotted as
-#'  a separate facet.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'.
 #' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
-#'  Default 'grey'.
+#'  Default "blue4".
 #' @param colorMid Character. A color available from `colors()`.
-#'  The color will be used to signify the midpoint on the scale.
+#'  The color will be used to signify the midpoint on the scale. Default
+#'  "grey90".
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
-#'  Default 'blue'.
+#'  Default "firebrick1".
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
+#' with 10 percent of values trimmed. Default \code{0}.
 #' @param varLabel Character vector. Title for the color legend.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the genes.
+#' @param decreasing logical. Specifies the order of plotting the points.
+#'  If \code{FALSE}, the points will be plotted in increasing order where
+#'  the points with largest values will be on top. \code{TRUE} otherwise.
+#'  If \code{NULL}, no sorting is performed. Points will be plotted in their
+#'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
+#' @export
+setGeneric("plotDimReduceGrid", function(x, ...) {
+    standardGeneric("plotDimReduceGrid")})
+
+
+#' @rdname plotDimReduceGrid
 #' @examples
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(
-#'   counts = celdaCGSim$counts,
-#'   celdaMod = celdaCGMod
-#' )
-#' plotDimReduceGrid(celdaTsne[, 1],
-#'   celdaTsne[, 2],
-#'   matrix = celdaCGSim$counts,
+#' data(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceGrid(x = sce,
+#'   reducedDimName = "celda_tSNE",
 #'   xlab = "Dimension1",
 #'   ylab = "Dimension2",
-#'   varLabel = "tsne",
-#'   size = 1,
-#'   colorLow = "grey",
-#'   colorMid = NULL,
-#'   colorHigh = "blue"
-#' )
-#' @importFrom reshape2 melt
+#'   varLabel = "tSNE")
 #' @export
-plotDimReduceGrid <- function(dim1,
-                              dim2,
-                              matrix,
-                              size = 1,
-                              xlab = "Dimension_1",
-                              ylab = "Dimension_2",
-                              colorLow = "grey",
-                              colorMid = NULL,
-                              colorHigh = "blue",
-                              midpoint = NULL,
-                              varLabel = NULL,
-                              ncol = NULL,
-                              headers = NULL) {
-  df <- data.frame(dim1, dim2, t(as.data.frame(matrix)))
-  naIx <- is.na(dim1) | is.na(dim2)
-  df <- df[!naIx, ]
+setMethod("plotDimReduceGrid",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        reducedDimName,
+        dim1 = NULL,
+        dim2 = NULL,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        limits = c(-2, 2),
+        colorLow = "blue4",
+        colorMid = "grey90",
+        colorHigh = "firebrick1",
+        midpoint = 0,
+        varLabel = NULL,
+        ncol = NULL,
+        headers = NULL,
+        decreasing = FALSE) {
 
-  m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
-  colnames(m) <- c(xlab, ylab, "facet", "Expression")
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        matrix <- SummarizedExperiment::assay(x, i = useAssay)
 
-  if (is.null(midpoint)) {
-    midpoint <- mean(m[, 4], trim = 0.1)
-  }
+        if (is.null(dim1)) {
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
+        }
 
-  varLabel <- gsub("_", " ", varLabel)
+        if (is.null(dim2)) {
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
+        }
 
-  if (isFALSE(is.null(headers))) {
-    names(headers) <- levels(m$facet)
-    headers <- ggplot2::as_labeller(headers)
-
-    g <- ggplot2::ggplot(
-      m,
-      ggplot2::aes_string(x = xlab, y = ylab)
-    ) +
-      ggplot2::geom_point(
-        stat = "identity",
-        size = size,
-        ggplot2::aes_string(color = m$Expression)
-      ) +
-      ggplot2::theme_bw() +
-      ggplot2::scale_colour_gradient2(
-        low = colorLow,
-        high = colorHigh,
-        mid = colorMid,
-        midpoint = midpoint,
-        name = varLabel
-      ) +
-      ggplot2::theme(
-        strip.background = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_blank(),
-        panel.grid.minor = ggplot2::element_blank(),
-        panel.spacing = unit(0, "lines"),
-        panel.background = ggplot2::element_blank(),
-        axis.line = ggplot2::element_line(colour = "black")
-      )
-    if (isFALSE(is.null(ncol))) {
-      g <- g + ggplot2::facet_wrap(~facet,
-        labeller = headers,
-        ncol = ncol
-      )
-    } else {
-      g <- g + ggplot2::facet_wrap(~facet, labeller = headers)
+        g <- .plotDimReduceGrid(dim1 = dim1,
+            dim2 = dim2,
+            matrix = matrix,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            limits = limits,
+            colorLow = colorLow,
+            colorMid = colorMid,
+            colorHigh = colorHigh,
+            midpoint = midpoint,
+            varLabel = varLabel,
+            ncol = ncol,
+            headers = headers,
+            decreasing = decreasing)
+        return(g)
     }
-  } else {
-    g <- ggplot2::ggplot(
-      m,
-      ggplot2::aes_string(x = xlab, y = ylab)
-    ) +
-      ggplot2::geom_point(
-        stat = "identity",
-        size = size,
-        ggplot2::aes_string(color = m$Expression)
-      ) +
-      ggplot2::facet_wrap(~facet) +
-      ggplot2::theme_bw() +
-      ggplot2::scale_colour_gradient2(
-        low = colorLow,
-        high = colorHigh,
-        mid = colorMid,
-        midpoint = midpoint,
-        name = varLabel
-      ) +
-      ggplot2::theme(
-        strip.background = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_blank(),
-        panel.grid.minor = ggplot2::element_blank(),
-        panel.spacing = unit(0, "lines"),
-        panel.background = ggplot2::element_blank(),
-        axis.line = ggplot2::element_line(colour = "black")
-      )
-    if (isFALSE(is.null(ncol))) {
-      g <- g + ggplot2::facet_wrap(~facet, ncol = ncol)
-    } else {
-      g <- g + ggplot2::facet_wrap(~facet)
+)
+
+
+#' @rdname plotDimReduceGrid
+#' @examples
+#' library(SingleCellExperiment)
+#' data(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceGrid(x = counts(sce),
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+#'   xlab = "Dimension1",
+#'   ylab = "Dimension2",
+#'   varLabel = "tSNE")
+#' @export
+setMethod("plotDimReduceGrid",
+    signature(x = "matrix"),
+    function(x,
+        dim1,
+        dim2,
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        limits = c(-2, 2),
+        colorLow = "blue4",
+        colorMid = "grey90",
+        colorHigh = "firebrick1",
+        midpoint = NULL,
+        varLabel = NULL,
+        ncol = NULL,
+        headers = NULL,
+        decreasing = FALSE) {
+
+        g <- .plotDimReduceGrid(dim1 = dim1,
+            dim2 = dim2,
+            matrix = x,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            limits = limits,
+            colorLow = colorLow,
+            colorMid = colorMid,
+            colorHigh = colorHigh,
+            midpoint = midpoint,
+            varLabel = varLabel,
+            ncol = ncol,
+            headers = headers,
+            decreasing = decreasing)
+        return(g)
     }
-  }
-  return(g)
+)
+
+
+#' @importFrom reshape2 melt
+.plotDimReduceGrid <- function(dim1,
+    dim2,
+    matrix,
+    size,
+    xlab,
+    ylab,
+    limits,
+    colorLow,
+    colorMid,
+    colorHigh,
+    midpoint,
+    varLabel,
+    ncol,
+    headers,
+    decreasing) {
+
+    df <- data.frame(dim1, dim2, t(as.data.frame(matrix)), check.names = FALSE)
+    naIx <- is.na(dim1) | is.na(dim2)
+    df <- df[!naIx, ]
+
+    m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
+    colnames(m) <- c(xlab, ylab, "facet", "Expression")
+
+    if (!is.null(decreasing)) {
+        m <- m[order(m$facet, m$Expression, decreasing = decreasing), ]
+    }
+
+    if (is.null(midpoint)) {
+        midpoint <- mean(m[, 4], trim = 0.1)
+    }
+
+    varLabel <- gsub("_", " ", varLabel)
+
+    if (isFALSE(is.null(headers))) {
+        names(headers) <- levels(m$facet)
+        headers <- ggplot2::as_labeller(headers)
+
+        g <- ggplot2::ggplot(
+            m,
+            ggplot2::aes_string(x = xlab, y = ylab)
+        ) +
+            ggplot2::geom_point(
+                stat = "identity",
+                size = size,
+                ggplot2::aes_string(color = m$Expression)
+            ) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_colour_gradient2(
+                limits = limits,
+                low = colorLow,
+                high = colorHigh,
+                mid = colorMid,
+                midpoint = midpoint,
+                name = varLabel
+            ) +
+            ggplot2::theme(
+                strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black")
+            )
+        if (isFALSE(is.null(ncol))) {
+            g <- g + ggplot2::facet_wrap(~facet,
+                labeller = headers,
+                ncol = ncol
+            )
+        } else {
+            g <- g + ggplot2::facet_wrap(~facet, labeller = headers)
+        }
+    } else {
+        g <- ggplot2::ggplot(
+            m,
+            ggplot2::aes_string(x = xlab, y = ylab)
+        ) +
+            ggplot2::geom_point(
+                stat = "identity",
+                size = size,
+                ggplot2::aes_string(color = m$Expression)
+            ) +
+            ggplot2::facet_wrap(~facet) +
+            ggplot2::theme_bw() +
+            ggplot2::scale_colour_gradient2(
+                limits = limits,
+                low = colorLow,
+                high = colorHigh,
+                mid = colorMid,
+                midpoint = midpoint,
+                name = varLabel
+            ) +
+            ggplot2::theme(
+                strip.background = ggplot2::element_blank(),
+                panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank(),
+                panel.spacing = unit(0, "lines"),
+                panel.background = ggplot2::element_blank(),
+                axis.line = ggplot2::element_line(colour = "black")
+            )
+        if (isFALSE(is.null(ncol))) {
+            g <- g + ggplot2::facet_wrap(~facet, ncol = ncol)
+        } else {
+            g <- g + ggplot2::facet_wrap(~facet)
+        }
+    }
+    return(g)
 }
 
 
-#' @title Plotting feature expression on a dimensionality reduction plot
+#' @title Plotting feature expression on a dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized gene
-#'  expression matrix where x and y axis are from a data dimensionality
+#'  expression matrix where x and y axis are from a data dimension
 #'  reduction tool. The cells are colored by expression of
 #'  the specified feature.
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Rows
+#'  represent features and columns represent cells.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
-#' @param dim2 Numeric vector. Second dimension from data dimensionality
+#'  dimension reduction output.
+#' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
-#' @param counts Integer matrix. Rows represent features and columns
-#'  represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param features Character vector. Features in the rownames of counts to plot.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the features.
@@ -170,55 +308,182 @@ plotDimReduceGrid <- function(dim1,
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for the data. This threshold is applied after row scaling.
 #'  Set to NULL to disable. Default \code{c(-1,1)}.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`. The color
-#'  will be used to signify the lowest values on the scale. Default 'blue'.
+#'  will be used to signify the lowest values on the scale.
 #' @param colorMid Character. A color available from `colors()`. The color
-#'  will be used to signify the midpoint on the scale. Default 'white'.
+#'  will be used to signify the midpoint on the scale.
 #' @param colorHigh Character. A color available from `colors()`. The color
-#'  will be used to signify the highest values on the scale. Default 'red'.
+#'  will be used to signify the highest values on the scale.
 #' @param midpoint Numeric. The value indicating the midpoint of the
 #' diverging color scheme. If \code{NULL}, defaults to the mean
-#' with 10 percent of values trimmed. Default \code{NULL}.
+#' with 10 percent of values trimmed. Default \code{0}.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
+#' @param decreasing logical. Specifies the order of plotting the points.
+#'  If \code{FALSE}, the points will be plotted in increasing order where
+#'  the points with largest values will be on top. \code{TRUE} otherwise.
+#'  If \code{NULL}, no sorting is performed. Points will be plotted in their
+#'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
+#' @export
+setGeneric("plotDimReduceFeature", function(x, ...) {
+    standardGeneric("plotDimReduceFeature")})
+
+
+#' @rdname plotDimReduceFeature
 #' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(
-#'   counts = celdaCGSim$counts,
-#'   celdaMod = celdaCGMod
-#' )
-#' plotDimReduceFeature(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
-#'   counts = celdaCGSim$counts,
+#' data(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceFeature(x = sce,
+#'   reducedDimName = "celda_tSNE",
 #'   normalize = TRUE,
 #'   features = c("Gene_99"),
-#'   exactMatch = TRUE
-#' )
-#' }
+#'   exactMatch = TRUE)
 #' @export
-plotDimReduceFeature <- function(dim1,
+setMethod("plotDimReduceFeature",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        reducedDimName,
+        dim1 = NULL,
+        dim2 = NULL,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        features,
+        headers = NULL,
+        normalize = FALSE,
+        zscore = TRUE,
+        exactMatch = TRUE,
+        trim = c(-2, 2),
+        limits = c(-2, 2),
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        colorLow = "blue4",
+        colorMid = "grey90",
+        colorHigh = "firebrick1",
+        midpoint = 0,
+        ncol = NULL,
+        decreasing = FALSE) {
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+
+        if (is.null(dim1)) {
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
+        }
+
+        g <- .plotDimReduceFeature(dim1 = dim1,
+            dim2 = dim2,
+            counts = counts,
+            features = features,
+            headers = headers,
+            normalize = normalize,
+            zscore = zscore,
+            exactMatch = exactMatch,
+            trim = trim,
+            limits = limits,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            colorLow = colorLow,
+            colorMid = colorMid,
+            colorHigh = colorHigh,
+            midpoint = midpoint,
+            ncol = ncol,
+            decreasing = decreasing)
+        return(g)
+    }
+)
+
+
+#' @rdname plotDimReduceFeature
+#' @examples
+#' library(SingleCellExperiment)
+#' data(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceFeature(x = counts(sce),
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+#'   normalize = TRUE,
+#'   features = c("Gene_99"),
+#'   exactMatch = TRUE)
+#' @export
+setMethod("plotDimReduceFeature",
+    signature(x = "matrix"),
+    function(x,
+        dim1,
+        dim2,
+        features,
+        headers = NULL,
+        normalize = FALSE,
+        zscore = TRUE,
+        exactMatch = TRUE,
+        trim = c(-2, 2),
+        limits = c(-2, 2),
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        colorLow = "blue4",
+        colorMid = "grey90",
+        colorHigh = "firebrick1",
+        midpoint = 0,
+        ncol = NULL,
+        decreasing = FALSE) {
+
+        g <- .plotDimReduceFeature(dim1 = dim1,
+            dim2 = dim2,
+            counts = x,
+            features = features,
+            headers = headers,
+            normalize = normalize,
+            zscore = zscore,
+            exactMatch = exactMatch,
+            trim = trim,
+            limits = limits,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            colorLow = colorLow,
+            colorMid = colorMid,
+            colorHigh = colorHigh,
+            midpoint = midpoint,
+            ncol = ncol,
+            decreasing = decreasing)
+        return(g)
+    }
+)
+
+
+.plotDimReduceFeature <- function(dim1,
                                  dim2,
                                  counts,
                                  features,
-                                 headers = NULL,
-                                 normalize = FALSE,
-                                 zscore = TRUE,
-                                 exactMatch = TRUE,
-                                 trim = c(-1, 1),
-                                 size = 1,
-                                 xlab = "Dimension_1",
-                                 ylab = "Dimension_2",
-                                 colorLow = "blue4",
-                                 colorMid = "white",
-                                 colorHigh = "firebrick1",
-                                 midpoint = NULL,
-                                 ncol = NULL) {
+                                 headers,
+                                 normalize,
+                                 zscore,
+                                 exactMatch,
+                                 trim,
+                                 limits,
+                                 size,
+                                 xlab,
+                                 ylab,
+                                 colorLow,
+                                 colorMid,
+                                 colorHigh,
+                                 midpoint,
+                                 ncol,
+                                 decreasing) {
 
   # Perform checks
   if (is.null(features)) {
@@ -250,8 +515,7 @@ plotDimReduceFeature <- function(dim1,
   featuresIx <- retrieveFeatureIndex(features,
     counts,
     by = "rownames",
-    exactMatch = exactMatch
-  )
+    exactMatch = exactMatch)
   counts <- as.matrix(counts[featuresIx, , drop = FALSE])
 
   # Scale/zscore data if needed
@@ -273,149 +537,290 @@ plotDimReduceFeature <- function(dim1,
     counts[counts > trim[2]] <- trim[2]
   }
 
-
-  plotDimReduceGrid(
+  .plotDimReduceGrid(
     dim1 = dim1,
     dim2 = dim2,
     matrix = counts,
     size = size,
     xlab = xlab,
     ylab = ylab,
+    limits = limits,
     colorLow = colorLow,
     colorMid = colorMid,
     colorHigh = colorHigh,
     varLabel = varLabel,
     midpoint = midpoint,
     ncol = ncol,
-    headers = headers
+    headers = headers,
+    decreasing = decreasing
   )
 }
 
 
-#' @title Plotting the Celda module probability on a
-#'  dimensionality reduction plot
+#' @title Plotting Celda module probability on a
+#'  dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a data
-#'  dimensionality reduction tool.
-#'  The cells are colored by the module probability(s).
+#'  dimension reduction tool.
+#'  The cells are colored by the module probability.
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Rows
+#'  represent features and columns represent cells.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
 #' @param dim1 Numeric vector.
-#'  First dimension from data dimensionality reduction output.
+#'  First dimension from data dimension reduction output.
 #' @param dim2 Numeric vector.
-#'  Second dimension from data dimensionality reduction output.
-#' @param counts Integer matrix.
-#'  Rows represent features and columns represent cells.
-#'  This matrix should be the same as the one used to generate `celdaMod`.
-#' @param celdaMod Celda object of class "celda_G" or "celda_CG".
+#'  Second dimension from data dimension reduction output.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
+#' @param celdaMod Celda object of class "celda_G" or "celda_CG". Used only if
+#'  \code{x} is a matrix object.
 #' @param modules Character vector. Module(s) from celda model to be plotted.
-#' e.g. c("1", "2").
+#'  e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
+#' @param limits Passed to \link[ggplot2]{scale_colour_gradient}. The range
+#'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
-#'  Default 'grey'.
-#' @param colorMid Character. A color available from `colors()`.
-#'  The color will be used to signify the midpoint on the scale.
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
-#'  Default 'blue'.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 #'  number of columns for facet wrap.
+#' @param decreasing logical. Specifies the order of plotting the points.
+#'  If \code{FALSE}, the points will be plotted in increasing order where
+#'  the points with largest values will be on top. \code{TRUE} otherwise.
+#'  If \code{NULL}, no sorting is performed. Points will be plotted in their
+#'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
-#' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(
-#'   counts = celdaCGSim$counts,
-#'   celdaMod = celdaCGMod
-#' )
-#' plotDimReduceModule(
-#'   dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-#'   counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-#'   modules = c("1", "2")
-#' )
-#' }
 #' @export
-plotDimReduceModule <-
-  function(dim1,
-           dim2,
-           counts,
-           celdaMod,
-           modules = NULL,
-           rescale = TRUE,
-           size = 1,
-           xlab = "Dimension_1",
-           ylab = "Dimension_2",
-           colorLow = "grey",
-           colorMid = NULL,
-           colorHigh = "blue",
-           ncol = NULL) {
-    factorized <- factorizeMatrix(
-      celdaMod = celdaMod,
-      counts = counts
-    )
+setGeneric("plotDimReduceModule", function(x, ...) {
+    standardGeneric("plotDimReduceModule")})
+
+
+#' @rdname plotDimReduceModule
+#' @examples
+#' data(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceModule(x = sce,
+#'   reducedDimName = "celda_tSNE",
+#'   modules = c("1", "2"))
+#' @export
+setMethod("plotDimReduceModule",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        reducedDimName,
+        dim1 = NULL,
+        dim2 = NULL,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        modules = NULL,
+        rescale = TRUE,
+        limits = c(0, 1),
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        colorLow = "grey90",
+        colorHigh = "firebrick1",
+        ncol = NULL,
+        decreasing = FALSE) {
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (is.null(dim1)) {
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
+        }
+
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+        factorized <- factorizeMatrix(x,
+            useAssay = useAssay,
+            altExpName = altExpName,
+            type = "proportion")
+
+        g <- .plotDimReduceModule(dim1 = dim1,
+            dim2 = dim2,
+            counts = counts,
+            factorized = factorized,
+            modules = modules,
+            rescale = rescale,
+            limits = limits,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            colorLow = colorLow,
+            colorHigh = colorHigh,
+            ncol = ncol,
+            decreasing = decreasing)
+        return(g)
+    }
+)
+
+
+#' @rdname plotDimReduceModule
+#' @examples
+#' library(SingleCellExperiment)
+#' data(sceCeldaCG, celdaCGMod)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceModule(x = counts(sce),
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+#'   celdaMod = celdaCGMod,
+#'   modules = c("1", "2"))
+#' @export
+setMethod("plotDimReduceModule",
+    signature(x = "matrix"),
+    function(x,
+        dim1,
+        dim2,
+        celdaMod,
+        modules = NULL,
+        rescale = TRUE,
+        limits = c(0, 1),
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        colorLow = "blue4",
+        colorHigh = "firebrick1",
+        ncol = NULL,
+        decreasing = FALSE) {
+
+        factorized <- factorizeMatrix(x = x, celdaMod = celdaMod)
+        g <- .plotDimReduceModule(dim1 = dim1,
+            dim2 = dim2,
+            counts = x,
+            factorized = factorized,
+            modules = modules,
+            rescale = rescale,
+            limits = limits,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            colorLow = colorLow,
+            colorHigh = colorHigh,
+            ncol = ncol,
+            decreasing = decreasing)
+        return(g)
+    }
+)
+
+
+.plotDimReduceModule <- function(dim1,
+    dim2,
+    counts,
+    factorized,
+    modules,
+    rescale,
+    limits,
+    size,
+    xlab,
+    ylab,
+    colorLow,
+    colorHigh,
+    ncol,
+    decreasing) {
+
     matrix <- factorized$proportions$cell
 
     if (rescale == TRUE) {
-      for (x in seq(nrow(matrix))) {
-        matrix[x, ] <- matrix[x, ] - min(matrix[x, ])
-        matrix[x, ] <- matrix[x, ] / max(matrix[x, ])
-        varLabel <- "Scaled_Probability"
-      }
+        for (x in seq(nrow(matrix))) {
+            matrix[x, ] <- matrix[x, ] - min(matrix[x, ])
+            matrix[x, ] <- matrix[x, ] / max(matrix[x, ])
+            varLabel <- "Scaled Probability"
+        }
     } else {
-      varLabel <- "Probability"
+        varLabel <- "Probability"
     }
 
     rownames(matrix) <- gsub("L", "", rownames(matrix))
     if (!is.null(modules)) {
-      if (length(rownames(matrix)[rownames(matrix) %in% modules]) < 1) {
-        stop("All modules selected do not exist in the model.")
-      }
-      matrix <- matrix[which(rownames(matrix) %in% modules), ,
-        drop = FALSE
-      ]
-      matrix <- matrix[match(rownames(matrix), modules), ,
-        drop = FALSE
-      ]
+        if (length(rownames(matrix)[rownames(matrix) %in% modules]) < 1) {
+            stop("All modules selected do not exist in the model.")
+        }
+        matrix <- matrix[which(rownames(matrix) %in% modules), , drop = FALSE]
+        matrix <- matrix[match(rownames(matrix), modules), , drop = FALSE]
     }
 
     rownames(matrix) <- paste0("L", rownames(matrix))
-    plotDimReduceGrid(
-      dim1 = dim1,
-      dim2 = dim2,
-      matrix = matrix,
-      size = size,
-      xlab = xlab,
-      ylab = ylab,
-      colorLow = colorLow,
-      colorMid = colorMid,
-      colorHigh = colorHigh,
-      varLabel = varLabel,
-      ncol = ncol
-    )
-  }
+
+    df <- data.frame(dim1, dim2, t(as.data.frame(matrix)), check.names = FALSE)
+    naIx <- is.na(dim1) | is.na(dim2)
+    df <- df[!naIx, ]
+
+    m <- reshape2::melt(df, id.vars = c("dim1", "dim2"))
+    colnames(m) <- c(xlab, ylab, "facet", "Expression")
+
+    if (!is.null(decreasing)) {
+        m <- m[order(m$facet, m$Expression, decreasing = decreasing), ]
+    }
+
+    g <- ggplot2::ggplot(m, ggplot2::aes_string(x = xlab, y = ylab)) +
+        ggplot2::geom_point(stat = "identity",
+            size = size,
+            ggplot2::aes_string(color = m$Expression)) +
+        ggplot2::facet_wrap(~facet) +
+        ggplot2::theme_bw() +
+        ggplot2::scale_colour_gradient(limits = limits,
+            low = colorLow,
+            high = colorHigh,
+            name = varLabel) +
+        ggplot2::theme(strip.background = ggplot2::element_blank(),
+            panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank(),
+            panel.spacing = unit(0, "lines"),
+            panel.background = ggplot2::element_blank(),
+            axis.line = ggplot2::element_line(colour = "black"))
+    if (isFALSE(is.null(ncol))) {
+        g <- g + ggplot2::facet_wrap(~facet, ncol = ncol)
+    } else {
+        g <- g + ggplot2::facet_wrap(~facet)
+    }
+
+    return(g)
+}
 
 
 # Labeling code adapted from Seurat (https://github.com/satijalab/seurat)
-#' @title Plotting the cell labels on a dimensionality reduction plot
+#' @title Plotting the cell labels on a dimension reduction plot
 #' @description Create a scatterplot for each row of a normalized
 #'  gene expression matrix where x and y axis are from a
-#'  data dimensionality reduction tool.
-#'  The cells are colored by its given `cluster` label.
+#'  data dimension reduction tool.
+#'  The cells are colored by its given \code{cluster} label.
+#' @param x Integer vector of cell cluster labels or a
+#'  \linkS4class{SingleCellExperiment} object
+#'  containing cluster labels for each cell in \code{"celda_cell_cluster"}
+#'  column in \code{colData(x)}.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+#'  \code{dim2} are set.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimensionality reduction output.
+#'  dimension reduction output.
 #' @param dim2 Numeric vector. Second dimension from data
-#'  dimensionality reduction output.
-#' @param cluster Integer vector. Contains cluster labels for each cell.
+#'  dimension reduction output.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param specificClusters Numeric vector.
 #'  Only color cells in the specified clusters.
 #'  All other cells will be grey.
-#'  If NULL, all clusters will be colored. Default NULL.
+#'  If NULL, all clusters will be colored. Default \code{NULL}.
 #' @param labelClusters Logical. Whether the cluster labels are plotted.
 #'  Default FALSE.
 #' @param groupBy Character vector. Contains sample labels for each cell.
@@ -424,31 +829,116 @@ plotDimReduceModule <-
 #'  Default 3.5.
 #' @return The plot as a ggplot object
 #' @importFrom ggrepel geom_text_repel
-#' @examples
-#' \donttest{
-#' data(celdaCGSim, celdaCGMod)
-#' celdaTsne <- celdaTsne(
-#'   counts = celdaCGSim$counts,
-#'   celdaMod = celdaCGMod
-#' )
-#' plotDimReduceCluster(
-#'   dim1 = celdaTsne[, 1],
-#'   dim2 = celdaTsne[, 2],
-#'   cluster = as.factor(clusters(celdaCGMod)$z),
-#'   specificClusters = c(1, 2, 3)
-#' )
-#' }
 #' @export
-plotDimReduceCluster <- function(dim1,
+setGeneric("plotDimReduceCluster", function(x, ...) {
+    standardGeneric("plotDimReduceCluster")})
+
+
+#' @rdname plotDimReduceCluster
+#' @examples
+#' data(sceCeldaCG)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceCluster(x = sce,
+#'   reducedDimName = "celda_tSNE",
+#'   specificClusters = c(1, 2, 3))
+#' @export
+setMethod("plotDimReduceCluster",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        reducedDimName,
+        altExpName = "featureSubset",
+        dim1 = NULL,
+        dim2 = NULL,
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        specificClusters = NULL,
+        labelClusters = FALSE,
+        groupBy = NULL,
+        labelSize = 3.5) {
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!("celda_cell_cluster" %in%
+                colnames(SummarizedExperiment::colData(altExp)))) {
+            stop("Must have column 'celda_cell_cluster' in",
+                " colData(altExp(x, altExpName))!")
+        }
+        cluster <- SummarizedExperiment::colData(altExp)[["celda_cell_cluster"]]
+
+        if (is.null(dim1)) {
+            dim1 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 1]
+        }
+
+        if (is.null(dim2)) {
+            dim2 <- SingleCellExperiment::reducedDim(altExp,
+                reducedDimName)[, 2]
+        }
+
+        g <- .plotDimReduceCluster(dim1 = dim1,
+            dim2 = dim2,
+            cluster = cluster,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            specificClusters = specificClusters,
+            labelClusters = labelClusters,
+            groupBy = groupBy,
+            labelSize = labelSize)
+        return(g)
+    }
+)
+
+
+#' @rdname plotDimReduceCluster
+#' @examples
+#' library(SingleCellExperiment)
+#' data(sceCeldaCG, celdaCGMod)
+#' sce <- celdaTsne(sceCeldaCG)
+#' plotDimReduceCluster(x = celdaClusters(celdaCGMod)$z,
+#'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+#'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+#'   specificClusters = c(1, 2, 3))
+#' @export
+setMethod("plotDimReduceCluster",
+    signature(x = "vector"),
+    function(x,
+        dim1,
+        dim2,
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        specificClusters = NULL,
+        labelClusters = FALSE,
+        groupBy = NULL,
+        labelSize = 3.5) {
+
+        g <- .plotDimReduceCluster(dim1 = dim1,
+            dim2 = dim2,
+            cluster = x,
+            size = size,
+            xlab = xlab,
+            ylab = ylab,
+            specificClusters = specificClusters,
+            labelClusters = labelClusters,
+            groupBy = groupBy,
+            labelSize = labelSize)
+        return(g)
+    }
+)
+
+
+.plotDimReduceCluster <- function(dim1,
                                  dim2,
                                  cluster,
-                                 size = 1,
-                                 xlab = "Dimension_1",
-                                 ylab = "Dimension_2",
-                                 specificClusters = NULL,
-                                 labelClusters = FALSE,
-                                 groupBy = NULL,
-                                 labelSize = 3.5) {
+                                 size,
+                                 xlab,
+                                 ylab,
+                                 specificClusters,
+                                 labelClusters,
+                                 groupBy,
+                                 labelSize) {
   if (!is.null(groupBy)) {
     df <- data.frame(dim1, dim2, cluster, groupBy)
     colnames(df) <- c(xlab, ylab, "Cluster", "Sample")
@@ -488,9 +978,9 @@ plotDimReduceCluster <- function(dim1,
     # centroidList <- lapply(seq(length(unique(cluster))), function(x) {
     centroidList <- lapply(unique(cluster), function(x) {
       df.sub <- df[df$Cluster == x, ]
-      median.1 <- stats::median(df.sub[, xlab])
-      median.2 <- stats::median(df.sub[, ylab])
-      cbind(median.1, median.2, x)
+      median1 <- stats::median(df.sub[, xlab])
+      median2 <- stats::median(df.sub[, ylab])
+      data.frame(median1 = median1, median2 = median2, x = x)
     })
     centroid <- do.call(rbind, centroidList)
     centroid <- data.frame(
@@ -511,7 +1001,7 @@ plotDimReduceCluster <- function(dim1,
     ) +
       ggrepel::geom_text_repel(
         data = centroid,
-        mapping = ggplot2::aes(label = centroid$Cluster),
+        mapping = ggplot2::aes(label = Cluster),
         size = labelSize
       )
   }
@@ -524,88 +1014,19 @@ plotDimReduceCluster <- function(dim1,
 }
 
 
-# Run the t-SNE algorithm for dimensionality reduction
-# @param norm Normalized count matrix.
-# @param perplexity Numeric vector. Determines perplexity for tsne. Default 20.
-# @param maxIter Numeric vector. Determines iterations for tsne. Default 1000.
-# @param doPca Logical. Whether to perform
-# dimensionality reduction with PCA before tSNE.
-# @param initialDims Integer. Number of dimensions from PCA to use as
-# input in tSNE. Default 50.
-#' @importFrom Rtsne Rtsne
-.calculateTsne <- function(norm,
-                           perplexity = 20,
-                           maxIter = 2500,
-                           doPca = FALSE,
-                           initialDims = 50) {
-  res <- Rtsne::Rtsne(
-    norm,
-    pca = doPca,
-    max_iter = maxIter,
-    perplexity = perplexity,
-    check_duplicates = FALSE,
-    is_distance = FALSE,
-    initial_dims = initialDims
-  )$Y
-
-  return(res)
-}
-
-
-# Run the UMAP algorithm for dimensionality reduction
-# @param norm Normalized count matrix.
-# @param nNeighbors The size of local neighborhood used for
-#   manifold approximation. Larger values result in more global
-#   views of the manifold, while smaller values result in more
-#   local data being preserved. Default 30.
-#    See `?uwot::umap` for more information.
-# @param minDist The effective minimum distance between embedded points.
-#    Smaller values will result in a more clustered/clumped
-#    embedding where nearby points on the manifold are drawn
-#    closer together, while larger values will result on a more
-#    even dispersal of points. Default 0.2.
-#    See `?uwot::umap` for more information.
-# @param spread The effective scale of embedded points. In combination with
-#    ‘min_dist’, this determines how clustered/clumped the
-#    embedded points are. Default 1.
-#    See `?uwot::umap` for more information.
-# @param pca Logical. Whether to perform
-# dimensionality reduction with PCA before UMAP.
-# @param initialDims Integer. Number of dimensions from PCA to use as
-# input in UMAP. Default 50.
-# @param cores Number of threads to use. Default 1.
-# @param ... Other parameters to pass to `uwot::umap`.
-#' @import uwot
-.calculateUmap <- function(norm,
-                           nNeighbors = 30,
-                           minDist = 0.75,
-                           spread = 1,
-                           pca = FALSE,
-                           initialDims = 50,
-                           cores = 1,
-                           ...) {
-  if (isTRUE(pca)) {
-    doPCA <- initialDims
-  } else {
-    doPCA <- NULL
-  }
-
-  res <- uwot::umap(norm,
-    n_neighbors = nNeighbors,
-    min_dist = minDist, spread = spread,
-    n_threads = cores, n_sgd_threads = 1, pca = doPCA, ...
-  )
-  return(res)
-}
-
-
-
 #' @title Feature Expression Violin Plot
 #' @description Outputs a violin plot for feature expression data.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
-#' @param celdaMod Celda object of class "celda_G" or "celda_CG".
+#' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
+#'  with the matrix located in the assay slot under \code{useAssay}. Rows
+#'  represent features and columns represent cells.
 #' @param features Character vector. Uses these genes for plotting.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
+#' @param celdaMod Celda object of class "celda_G" or "celda_CG". Used only if
+#'  \code{x} is a matrix object.
 #' @param exactMatch Logical. Whether an exact match or a partial match using
 #'  \code{grep()} is used to look up the feature in the rownames of the counts
 #'   matrix. Default \code{TRUE}.
@@ -615,57 +1036,110 @@ plotDimReduceCluster <- function(dim1,
 #' @param dotSize Numeric. Size of points if \code{plotDots = TRUE}.
 #' Default \code{0.1}.
 #' @return Violin plot for each feature, grouped by celda cluster
+#' @export
+setGeneric("plotCeldaViolin", function(x, ...) {
+    standardGeneric("plotCeldaViolin")})
+
+
+#' @rdname plotCeldaViolin
+#' @examples
+#' data(sceCeldaCG)
+#' plotCeldaViolin(x = sceCeldaCG, features = "Gene_1")
+#' @export
+setMethod("plotCeldaViolin",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        features,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        exactMatch = TRUE,
+        plotDots = TRUE,
+        dotSize = 0.1) {
+
+        counts <- SummarizedExperiment::assay(x, i = useAssay)
+        cluster <- celdaClusters(x, altExpName = altExpName)
+
+        g <- .plotCeldaViolin(counts = counts,
+            cluster = cluster,
+            features = features,
+            exactMatch = exactMatch,
+            plotDots = plotDots,
+            dotSize = dotSize)
+        return(g)
+    }
+)
+
+
+#' @rdname plotCeldaViolin
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
-#' plotCeldaViolin(
-#'   counts = celdaCGSim$counts,
-#'   celdaMod = celdaCGMod, features = "Gene_1"
-#' )
+#' plotCeldaViolin(x = celdaCGSim$counts,
+#'    celdaMod = celdaCGMod,
+#'    features = "Gene_1")
 #' @export
-plotCeldaViolin <- function(counts,
-                            celdaMod,
-                            features,
-                            exactMatch = TRUE,
-                            plotDots = TRUE,
-                            dotSize = 0.1) {
-  cluster <- clusters(celdaMod)$z
+setMethod("plotCeldaViolin",
+    signature(x = "matrix"),
+    function(x,
+        celdaMod,
+        features,
+        exactMatch = TRUE,
+        plotDots = TRUE,
+        dotSize = 0.1) {
 
-  featuresIx <- retrieveFeatureIndex(features,
-    counts,
-    by = "rownames",
-    exactMatch = exactMatch
-  )
-  dataFeature <- as.matrix(counts[featuresIx, , drop = FALSE])
-  dataFeature <- as.data.frame(t(dataFeature))
-  df <- cbind(cluster, dataFeature)
-  df$cluster <- as.factor(df$cluster)
-  m <- reshape2::melt(df, id.vars = c("cluster"))
-  colnames(m) <- c("Cluster", "Feature", "Expression")
-  colorPal <- distinctColors(length(unique(cluster)))
+        cluster <- celdaClusters(celdaMod)$z
+        g <- .plotCeldaViolin(counts = x,
+            cluster = cluster,
+            features = features,
+            exactMatch = exactMatch,
+            plotDots = plotDots,
+            dotSize = dotSize)
+        return(g)
+    }
+)
 
-  p <- ggplot2::ggplot(
-    m,
-    ggplot2::aes_string(
-      x = "Cluster",
-      y = "Expression",
-      fill = "Cluster"
-    )
-  ) +
-    ggplot2::facet_wrap(~Feature) +
-    ggplot2::geom_violin(trim = TRUE, scale = "width") +
-    ggplot2::scale_fill_manual(values = colorPal) +
-    ggplot2::theme(
-      strip.background = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_blank(),
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.spacing = grid::unit(0, "lines"),
-      panel.background = ggplot2::element_blank(),
-      axis.line = ggplot2::element_line(colour = "black")
-    )
 
-  if (isTRUE(plotDots)) {
-    p <- p + ggplot2::geom_jitter(height = 0, size = dotSize)
-  }
+.plotCeldaViolin <- function(counts,
+    cluster,
+    features,
+    exactMatch = TRUE,
+    plotDots = TRUE,
+    dotSize = 0.1) {
 
-  return(p)
+    featuresIx <- retrieveFeatureIndex(features,
+        counts,
+        by = "rownames",
+        exactMatch = exactMatch)
+    dataFeature <- as.matrix(counts[featuresIx, , drop = FALSE])
+    dataFeature <- as.data.frame(t(dataFeature))
+    df <- cbind(cluster, dataFeature)
+    df$cluster <- as.factor(df$cluster)
+    m <- reshape2::melt(df, id.vars = c("cluster"))
+    colnames(m) <- c("Cluster", "Feature", "Expression")
+    colorPal <- distinctColors(length(unique(cluster)))
+
+    p <- ggplot2::ggplot(
+        m,
+        ggplot2::aes_string(
+            x = "Cluster",
+            y = "Expression",
+            fill = "Cluster"
+        )
+    ) +
+        ggplot2::facet_wrap(~Feature) +
+        ggplot2::geom_violin(trim = TRUE, scale = "width") +
+        ggplot2::scale_fill_manual(values = colorPal) +
+        ggplot2::theme(
+            strip.background = ggplot2::element_blank(),
+            panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank(),
+            panel.spacing = grid::unit(0, "lines"),
+            panel.background = ggplot2::element_blank(),
+            axis.line = ggplot2::element_line(colour = "black")
+        )
+
+    if (isTRUE(plotDots)) {
+        p <- p + ggplot2::geom_jitter(height = 0, size = dotSize)
+    }
+
+    return(p)
 }

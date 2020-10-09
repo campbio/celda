@@ -5,15 +5,8 @@
 \alias{celdaCGGridSearchRes}
 \title{celdaCGGridSearchRes}
 \format{
-An object as returned from celdaGridSearch()
-}
-\usage{
-celdaCGGridSearchRes
-}
-\description{
-Example results of celdaGridSearch on celdaCGSim
-}
-\examples{
+An object as returned from old celdaGridSearch()
+#@examples
 data(celdaCGSim)
 celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
   model = "celda_CG",
@@ -23,5 +16,11 @@ celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
   nchains = 1,
   cores = 2
 )
+}
+\usage{
+celdaCGGridSearchRes
+}
+\description{
+Example results of old celdaGridSearch on celdaCGSim
 }
 \keyword{datasets}

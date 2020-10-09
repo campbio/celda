@@ -7,6 +7,7 @@
 normalizeCounts(
   counts,
   normalize = c("proportion", "cpm", "median", "mean"),
+  scaleFactor = NULL,
   transformationFun = NULL,
   scaleFun = NULL,
   pseudocountNormalize = 0,
@@ -26,9 +27,15 @@ size of each cell by the median library size across all cells. 'mean'
 divides the library size of each cell by the mean library size across all
 cells.}
 
-\item{transformationFun}{Function. Applys a transformation such as `sqrt`,
-`log`, `log2`, `log10`, or `log1p`. If NULL, no transformation will be
-applied. Occurs after normalization. Default NULL.}
+\item{scaleFactor}{Numeric. Sets the scale factor for cell-level
+normalization. This scale factor is multiplied to each cell after the
+library size of each cell had been adjusted in \code{normalize}. Default
+\code{NULL} which means no scale factor is applied.}
+
+\item{transformationFun}{Function. Applys a transformation such as
+\link{sqrt}, \link{log}, \link{log2}, \link{log10}, or \link{log1p}.
+If NULL, no transformation will be applied. Occurs after normalization.
+Default NULL.}
 
 \item{scaleFun}{Function. Scales the rows of the normalized and transformed
 count matrix. For example, 'scale' can be used to z-score normalize the
@@ -51,6 +58,5 @@ Performs normalization, transformation, and/or scaling of a
 \examples{
 data(celdaCGSim)
 normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
-  pseudocountNormalize = 1
-)
+  pseudocountNormalize = 1)
 }

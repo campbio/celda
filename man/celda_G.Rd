@@ -2,10 +2,37 @@
 % Please edit documentation in R/celda_G.R
 \name{celda_G}
 \alias{celda_G}
+\alias{celda_G,SingleCellExperiment-method}
+\alias{celda_G,matrix-method}
 \title{Feature clustering with Celda}
 \usage{
-celda_G(
-  counts,
+celda_G(x, ...)
+
+\S4method{celda_G}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  L,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  yInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  yInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
+
+\S4method{celda_G}{matrix}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   L,
   beta = 1,
   delta = 1,
@@ -24,8 +51,16 @@ celda_G(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{L}{Integer. Number of feature modules.}
 
@@ -80,19 +115,26 @@ starting values for each feature will be randomly sampled from `1:L`.
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-An object of class `celda_G` with the feature module clusters stored
- in `y`.
+A \linkS4class{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
+ \code{"celda_parameters"} slot. Column \code{celda_feature_module} in
+ \link[SummarizedExperiment]{rowData} contains feature modules.
 }
 \description{
 Clusters the rows of a count matrix containing single-cell data
- into L modules.
+ into L modules. The
+ \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+ \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+ it exists. Otherwise, the \code{useAssay}
+ \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+ \code{x} is a \linkS4class{SingleCellExperiment} object.
 }
 \examples{
 data(celdaGSim)
-celdaMod <- celda_G(celdaGSim$counts, L = celdaGSim$L)
+sce <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 }
 \seealso{
-`celda_C()` for cell clustering and `celda_CG()` for simultaneous
- clustering of features and cells. `celdaGridSearch()` can be used to run
- multiple values of L and multiple chains in parallel.
+\link{celda_C} for cell clustering and \link{celda_CG} for
+ simultaneous clustering of features and cells. \link{celdaGridSearch} can
+ be used to run multiple values of L and multiple chains in parallel.
 }

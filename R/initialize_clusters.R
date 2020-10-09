@@ -81,7 +81,7 @@
     verbose = FALSE,
     reorder = FALSE
   )
-  overallZ <- as.integer(as.factor(clusters(res)$z))
+  overallZ <- as.integer(as.factor(celdaClusters(res)$z))
   currentK <- max(overallZ)
 
   counter <- 0
@@ -111,9 +111,8 @@
         maxIter = 20,
         splitOnIter = -1,
         splitOnLast = FALSE,
-        verbose = FALSE
-      )
-      tempZ <- as.integer(as.factor(clusters(clustLabel)$z))
+        verbose = FALSE)
+      tempZ <- as.integer(as.factor(celdaClusters(clustLabel)$z))
 
       # Reassign clusters with label > 1
       splitIx <- tempZ > 1
@@ -157,8 +156,7 @@
       nM = nM,
       alpha = alpha,
       beta = beta,
-      doSample = FALSE
-    )
+      doSample = FALSE)
     zProb <- t(probs$probs)
     zProb[cbind(seq(nrow(zProb)), overallZ)] <- NA
     zSecond <- apply(zProb, 1, which.max)
@@ -180,8 +178,7 @@
         newZ,
         previousZ,
         nGByCP,
-        currentK
-      )
+        currentK)
       nGByCP <- p$nGByCP
       mCPByS <- p$mCPByS
       llShuffle[i] <- .cCCalcLL(
@@ -193,8 +190,7 @@
         nS,
         nG,
         alpha,
-        beta
-      )
+        beta)
       previousZ <- newZ
     }
 
@@ -204,14 +200,12 @@
     ix <- overallZ == zToRemove
     overallZ[ix] <- zSecond[ix]
 
-    p <- .cCReDecomposeCounts(
-      counts,
+    p <- .cCReDecomposeCounts(counts,
       s,
       overallZ,
       previousZ,
       nGByCP,
-      currentK
-    )
+      currentK)
     nGByCP <- p$nGByCP[, -zToRemove, drop = FALSE]
     mCPByS <- p$mCPByS[-zToRemove, , drop = FALSE]
     overallZ <- as.integer(as.factor(overallZ))
@@ -250,9 +244,8 @@
     splitOnIter = -1,
     splitOnLast = FALSE,
     verbose = FALSE,
-    reorder = FALSE
-  )
-  overallY <- as.integer(as.factor(clusters(res)$y))
+    reorder = FALSE)
+  overallY <- as.integer(as.factor(celdaClusters(res)$y))
   currentL <- max(overallY)
 
   counter <- 0
@@ -288,7 +281,7 @@
         splitOnLast = FALSE,
         verbose = FALSE
       )
-      tempY <- as.integer(as.factor(clusters(clustLabel)$y))
+      tempY <- as.integer(as.factor(celdaClusters(clustLabel)$y))
 
       # Reassign clusters with label > 1
       splitIx <- tempY > 1
@@ -343,8 +336,7 @@
       lgbeta = lgbeta,
       lggamma = lggamma,
       lgdelta = lgdelta,
-      doSample = FALSE
-    )
+      doSample = FALSE)
     yProb <- t(probs$probs)
     yProb[cbind(seq(nrow(yProb)), overallY)] <- NA
     ySecond <- apply(yProb, 1, which.max)
@@ -367,8 +359,7 @@
         previousY,
         nTSByC,
         nByG,
-        currentL
-      )
+        currentL)
       nTSByC <- p$nTSByC
       nGByTS <- p$nGByTS
       nByTS <- p$nByTS
@@ -382,8 +373,7 @@
         currentL,
         beta,
         delta,
-        gamma
-      )
+        gamma)
       previousY <- newY
     }
 
@@ -400,8 +390,7 @@
       previousY,
       nTSByC,
       nByG,
-      currentL
-    )
+      currentL)
     nTSByC <- p$nTSByC[-yToRemove, , drop = FALSE]
     nGByTS <- p$nGByTS[-yToRemove]
     nByTS <- p$nByTS[-yToRemove]
