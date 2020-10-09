@@ -2,10 +2,16 @@
 % Please edit documentation in R/recursiveSplit.R
 \name{recursiveSplitCell}
 \alias{recursiveSplitCell}
+\alias{recursiveSplitCell,SingleCellExperiment-method}
+\alias{recursiveSplitCell,matrix-method}
 \title{Recursive cell splitting}
 \usage{
-recursiveSplitCell(
-  counts,
+recursiveSplitCell(x, ...)
+
+\S4method{recursiveSplitCell}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   sampleLabel = NULL,
   initialK = 5,
   maxK = 25,
@@ -17,14 +23,45 @@ recursiveSplitCell(
   gamma = 1,
   minCell = 3,
   reorder = TRUE,
+  seed = 12345,
+  perplexity = TRUE,
+  logfile = NULL,
+  verbose = TRUE
+)
+
+\S4method{recursiveSplitCell}{matrix}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  sampleLabel = NULL,
+  initialK = 5,
+  maxK = 25,
+  tempL = NULL,
+  yInit = NULL,
+  alpha = 1,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  minCell = 3,
+  reorder = TRUE,
+  seed = 12345,
   perplexity = TRUE,
   logfile = NULL,
   verbose = TRUE
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying the name of the
+\link[SummarizedExperiment]{assay}
+slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
@@ -68,6 +105,10 @@ populations numbers will correspond to the split which created the cell
 populations (i.e. 'K15' was created at split 15, 'K16' was created at split
 16, etc.). Default TRUE.}
 
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
+
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
 `resamplePerplexity()`. Default TRUE.}
@@ -78,10 +119,11 @@ If FALSE, then perplexity can be calculated later with
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-Object of class `celda_list`, which contains results for all model
- parameter combinations and summaries of the run parameters. The models in
- the list will be of class `celda_C` if `yInit = NULL` or `celda_CG` if
- `zInit` is set.
+A \linkS4class{SingleCellExperiment} object. Function
+ parameter settings and celda model results are stored in the
+ \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+ the list will be of class \code{celda_C} if \code{yInit = NULL} or
+ \code{celda_CG} if \code{zInit} is set.
 }
 \description{
 Uses the `celda_C` model to cluster cells into population for
@@ -96,28 +138,43 @@ Uses the `celda_C` model to cluster cells into population for
  slightly different than `yInit`.
 }
 \examples{
-data(celdaCGSim, celdaCSim)
+data(sceCeldaCG)
 ## Create models that range from K = 3 to K = 7 by recursively splitting
-## cell populations into two to produce `celda_C` cell clustering models
-testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
+## cell populations into two to produce \link{celda_C} cell clustering models
+sce <- recursiveSplitCell(sceCeldaCG, initialK = 3, maxK = 7)
 
 ## Alternatively, first identify features modules using
-## `recursiveSplitModule()`
-moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-  initialL = 3, maxL = 15
-)
+## \link{recursiveSplitModule}
+moduleSplit <- recursiveSplitModule(sceCeldaCG, initialL = 3, maxL = 15)
 plotGridSearchPerplexity(moduleSplit)
 moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
 
-## Then use module labels for initialization in `recursiveSplitCell()` to
-## produce `celda_CG` bi-clustering models
-cellSplit <- recursiveSplitCell(celdaCGSim$counts,
-  initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y
-)
+## Then use module labels for initialization in \link{recursiveSplitCell} to
+## produce \link{celda_CG} bi-clustering models
+cellSplit <- recursiveSplitCell(sceCeldaCG,
+  initialK = 3, maxK = 7, yInit = celdaModules(moduleSplitSelect))
 plotGridSearchPerplexity(cellSplit)
-celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
+sce <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
+data(celdaCGSim, celdaCSim)
+## Create models that range from K = 3 to K = 7 by recursively splitting
+## cell populations into two to produce \link{celda_C} cell clustering models
+sce <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
+
+## Alternatively, first identify features modules using
+## \link{recursiveSplitModule}
+moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
+  initialL = 3, maxL = 15)
+plotGridSearchPerplexity(moduleSplit)
+moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
+
+## Then use module labels for initialization in \link{recursiveSplitCell} to
+## produce \link{celda_CG} bi-clustering models
+cellSplit <- recursiveSplitCell(celdaCGSim$counts,
+  initialK = 3, maxK = 7, yInit = celdaModules(moduleSplitSelect))
+plotGridSearchPerplexity(cellSplit)
+sce <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
 }
 \seealso{
-`recursiveSplitModule()` for recursive splitting of cell
- populations.
+\link{recursiveSplitModule} for recursive splitting of feature
+ modules.
 }

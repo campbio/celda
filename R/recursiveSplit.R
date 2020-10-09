@@ -19,11 +19,11 @@
       verbose = FALSE
     )
 
-    if (length(unique(clusters(clustLabel)$z)) == 2) {
+    if (length(unique(celdaClusters(clustLabel)$z)) == 2) {
       ix <- z == i
       newZ <- z
-      newZ[ix] <- ifelse(clusters(clustLabel)$z == 2, i, K)
-      ll <- logLikelihoodcelda_C(counts, s, newZ, K, alpha, beta)
+      newZ[ix] <- ifelse(celdaClusters(clustLabel)$z == 2, i, K)
+      ll <- .logLikelihoodcelda_C(counts, s, newZ, K, alpha, beta)
 
       if (ll > bestLl) {
         bestZ <- newZ
@@ -33,6 +33,7 @@
   }
   return(list(ll = bestLl, z = bestZ))
 }
+
 
 .singleSplitY <- function(counts,
                           y,
@@ -57,11 +58,11 @@
       verbose = FALSE
     )
 
-    if (length(unique(clusters(clustLabel)$y)) == 2) {
+    if (length(unique(celdaClusters(clustLabel)$y)) == 2) {
       ix <- y == i
       newY <- y
-      newY[ix] <- ifelse(clusters(clustLabel)$y == 2, i, L)
-      ll <- logLikelihoodcelda_G(counts, newY, L, beta, delta, gamma)
+      newY[ix] <- ifelse(celdaClusters(clustLabel)$y == 2, i, L)
+      ll <- .logLikelihoodcelda_G(counts, newY, L, beta, delta, gamma)
 
       if (ll > bestLl) {
         bestY <- newY
@@ -84,8 +85,15 @@
 #'  cell populations based on those modules instead of individual features.
 #'  Module labels will also be updated during sampling and thus may end up
 #'  slightly different than `yInit`.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying the name of the
+#'  \link[SummarizedExperiment]{assay}
+#'  slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
 #' @param initialK Integer. Minimum number of cell populations to try.
@@ -117,55 +125,303 @@
 #'  populations numbers will correspond to the split which created the cell
 #'  populations (i.e. 'K15' was created at split 15, 'K16' was created at split
 #'  16, etc.). Default TRUE.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
-#' @return Object of class `celda_list`, which contains results for all model
-#'  parameter combinations and summaries of the run parameters. The models in
-#'  the list will be of class `celda_C` if `yInit = NULL` or `celda_CG` if
-#'  `zInit` is set.
-#' @seealso `recursiveSplitModule()` for recursive splitting of cell
-#'  populations.
+#' @return A \linkS4class{SingleCellExperiment} object. Function
+#'  parameter settings and celda model results are stored in the
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+#'  the list will be of class \code{celda_C} if \code{yInit = NULL} or
+#'  \code{celda_CG} if \code{zInit} is set.
+#' @seealso \link{recursiveSplitModule} for recursive splitting of feature
+#'  modules.
+#' @export
+setGeneric("recursiveSplitCell", function(x, ...) {
+    standardGeneric("recursiveSplitCell")})
+
+
+#' @rdname recursiveSplitCell
 #' @examples
-#' data(celdaCGSim, celdaCSim)
+#' data(sceCeldaCG)
 #' ## Create models that range from K = 3 to K = 7 by recursively splitting
-#' ## cell populations into two to produce `celda_C` cell clustering models
-#' testZ <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
+#' ## cell populations into two to produce \link{celda_C} cell clustering models
+#' sce <- recursiveSplitCell(sceCeldaCG, initialK = 3, maxK = 7)
 #'
 #' ## Alternatively, first identify features modules using
-#' ## `recursiveSplitModule()`
-#' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-#'   initialL = 3, maxL = 15
-#' )
+#' ## \link{recursiveSplitModule}
+#' moduleSplit <- recursiveSplitModule(sceCeldaCG, initialL = 3, maxL = 15)
 #' plotGridSearchPerplexity(moduleSplit)
 #' moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
 #'
-#' ## Then use module labels for initialization in `recursiveSplitCell()` to
-#' ## produce `celda_CG` bi-clustering models
-#' cellSplit <- recursiveSplitCell(celdaCGSim$counts,
-#'   initialK = 3, maxK = 7, yInit = clusters(moduleSplitSelect)$y
-#' )
+#' ## Then use module labels for initialization in \link{recursiveSplitCell} to
+#' ## produce \link{celda_CG} bi-clustering models
+#' cellSplit <- recursiveSplitCell(sceCeldaCG,
+#'   initialK = 3, maxK = 7, yInit = celdaModules(moduleSplitSelect))
 #' plotGridSearchPerplexity(cellSplit)
-#' celdaMod <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
+#' sce <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
 #' @export
-recursiveSplitCell <- function(counts,
-                               sampleLabel = NULL,
-                               initialK = 5,
-                               maxK = 25,
-                               tempL = NULL,
-                               yInit = NULL,
-                               alpha = 1,
-                               beta = 1,
-                               delta = 1,
-                               gamma = 1,
-                               minCell = 3,
-                               reorder = TRUE,
-                               perplexity = TRUE,
-                               logfile = NULL,
-                               verbose = TRUE) {
+setMethod("recursiveSplitCell",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        sampleLabel = NULL,
+        initialK = 5,
+        maxK = 25,
+        tempL = NULL,
+        yInit = NULL,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        minCell = 3,
+        reorder = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        logfile = NULL,
+        verbose = TRUE) {
+
+        xClass <- "SingleCellExperiment"
+
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+
+        if (!is.null(yInit)) {
+            model <- "celda_CG"
+        } else {
+            model <- "celda_C"
+        }
+
+        celdaList <- .recursiveSplitCellWithSeed(counts = counts,
+            sampleLabel = sampleLabel,
+            initialK = initialK,
+            maxK = maxK,
+            tempL = tempL,
+            yInit = yInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minCell = minCell,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+
+        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList,
+            sce = altExp,
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            sampleLabel = sampleLabel,
+            initialK = initialK,
+            maxK = maxK,
+            tempL = tempL,
+            yInit = yInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minCell = minCell,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
+        return(x)
+    }
+)
+
+
+#' @rdname recursiveSplitCell
+#' @examples
+#' data(celdaCGSim, celdaCSim)
+#' ## Create models that range from K = 3 to K = 7 by recursively splitting
+#' ## cell populations into two to produce \link{celda_C} cell clustering models
+#' sce <- recursiveSplitCell(celdaCSim$counts, initialK = 3, maxK = 7)
+#'
+#' ## Alternatively, first identify features modules using
+#' ## \link{recursiveSplitModule}
+#' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
+#'   initialL = 3, maxL = 15)
+#' plotGridSearchPerplexity(moduleSplit)
+#' moduleSplitSelect <- subsetCeldaList(moduleSplit, list(L = 10))
+#'
+#' ## Then use module labels for initialization in \link{recursiveSplitCell} to
+#' ## produce \link{celda_CG} bi-clustering models
+#' cellSplit <- recursiveSplitCell(celdaCGSim$counts,
+#'   initialK = 3, maxK = 7, yInit = celdaModules(moduleSplitSelect))
+#' plotGridSearchPerplexity(cellSplit)
+#' sce <- subsetCeldaList(cellSplit, list(K = 5, L = 10))
+#' @export
+setMethod("recursiveSplitCell",
+    signature(x = "matrix"),
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        sampleLabel = NULL,
+        initialK = 5,
+        maxK = 25,
+        tempL = NULL,
+        yInit = NULL,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        minCell = 3,
+        reorder = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        logfile = NULL,
+        verbose = TRUE) {
+
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
+        xClass <- "matrix"
+
+        if (!is.null(yInit)) {
+            model <- "celda_CG"
+        } else {
+            model <- "celda_C"
+        }
+
+        celdaList <- .recursiveSplitCellWithSeed(counts = x,
+            sampleLabel = sampleLabel,
+            initialK = initialK,
+            maxK = maxK,
+            tempL = tempL,
+            yInit = yInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minCell = minCell,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+
+        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            sampleLabel = sampleLabel,
+            initialK = initialK,
+            maxK = maxK,
+            tempL = tempL,
+            yInit = yInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minCell = minCell,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
+        return(sce)
+    }
+)
+
+
+.recursiveSplitCellWithSeed <- function(counts,
+    sampleLabel,
+    initialK,
+    maxK,
+    tempL,
+    yInit,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    minCell,
+    reorder,
+    seed,
+    perplexity,
+    logfile,
+    verbose) {
+
+    if (is.null(seed)) {
+        celdaList <- .recursiveSplitCell(counts = counts,
+            sampleLabel = sampleLabel,
+            initialK = initialK,
+            maxK = maxK,
+            tempL = tempL,
+            yInit = yInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minCell = minCell,
+            reorder = reorder,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+    } else {
+        with_seed(
+            seed,
+            celdaList <- .recursiveSplitCell(counts = counts,
+                sampleLabel = sampleLabel,
+                initialK = initialK,
+                maxK = maxK,
+                tempL = tempL,
+                yInit = yInit,
+                alpha = alpha,
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                minCell = minCell,
+                reorder = reorder,
+                perplexity = perplexity,
+                logfile = logfile,
+                verbose = verbose)
+        )
+    }
+
+    return(celdaList)
+}
+
+
+.recursiveSplitCell <- function(counts,
+                               sampleLabel,
+                               initialK,
+                               maxK,
+                               tempL,
+                               yInit,
+                               alpha,
+                               beta,
+                               delta,
+                               gamma,
+                               minCell,
+                               reorder,
+                               perplexity,
+                               logfile,
+                               verbose) {
+
   .logMessages(paste(rep("=", 50), collapse = ""),
     logfile = logfile,
     append = FALSE,
@@ -181,6 +437,8 @@ recursiveSplitCell <- function(counts,
     append = TRUE,
     verbose = verbose
   )
+
+  .validateCounts(counts)
 
   startTime <- Sys.time()
   counts <- .processCounts(counts)
@@ -215,8 +473,7 @@ recursiveSplitCell <- function(counts,
       "populations",
       append = TRUE,
       verbose = verbose,
-      logfile = logfile
-    )
+      logfile = logfile)
     modelInitial <- .celda_CG(counts,
       sampleLabel = s,
       K = as.integer(initialK),
@@ -230,10 +487,9 @@ recursiveSplitCell <- function(counts,
       gamma = gamma,
       delta = delta,
       verbose = FALSE,
-      reorder = reorder
-    )
-    currentK <- length(unique(clusters(modelInitial)$z)) + 1
-    overallZ <- clusters(modelInitial)$z
+      reorder = reorder)
+    currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
+    overallZ <- celdaClusters(modelInitial)$z
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       # previousY <- overallY
@@ -272,15 +528,15 @@ recursiveSplitCell <- function(counts,
 
       # If the number of clusters is still "currentK", then keep the
       # reordering, otherwise keep the previous configuration
-      if (length(unique(clusters(tempModel)$z)) == currentK) {
-        overallZ <- clusters(tempModel)$z
+      if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
+        overallZ <- celdaClusters(tempModel)$z
       } else {
         overallZ <- tempSplit$z
-        ll <- logLikelihoodcelda_CG(
+        ll <- .logLikelihoodcelda_CG(
           counts,
           s,
           overallZ,
-          clusters(tempModel)$y,
+          celdaClusters(tempModel)$y,
           currentK,
           L,
           alpha,
@@ -289,7 +545,7 @@ recursiveSplitCell <- function(counts,
           gamma
         )
         tempModel <- methods::new("celda_CG",
-          clusters = list(z = overallZ, y = clusters(tempModel)$y),
+          clusters = list(z = overallZ, y = celdaClusters(tempModel)$y),
           params = list(
             K = as.integer(currentK),
             L = as.integer(L),
@@ -368,9 +624,9 @@ recursiveSplitCell <- function(counts,
       verbose = FALSE,
       reorder = reorder
     )
-    currentK <- length(unique(clusters(modelInitial)$z)) + 1
-    overallZ <- clusters(modelInitial)$z
-    ll <- logLikelihoodcelda_C(
+    currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
+    overallZ <- celdaClusters(modelInitial)$z
+    ll <- .logLikelihoodcelda_C(
       counts, s, overallZ, currentK,
       alpha, beta
     )
@@ -405,14 +661,14 @@ recursiveSplitCell <- function(counts,
 
       # Handle rare cases where a population has no cells after running
       # the model
-      if (length(unique(clusters(tempModel)$z)) == currentK) {
-        overallZ <- clusters(tempModel)$z
+      if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
+        overallZ <- celdaClusters(tempModel)$z
       } else {
         overallZ <- tempSplit$z
       }
 
       # Need to change below line to use decompose counts to save time
-      ll <- logLikelihoodcelda_C(
+      ll <- .logLikelihoodcelda_C(
         counts, s, overallZ, currentK,
         alpha, beta
       )
@@ -470,8 +726,8 @@ recursiveSplitCell <- function(counts,
       verbose = FALSE,
       reorder = reorder
     )
-    currentK <- length(unique(clusters(modelInitial)$z)) + 1
-    overallZ <- clusters(modelInitial)$z
+    currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
+    overallZ <- celdaClusters(modelInitial)$z
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       tempSplit <- .singleSplitZ(counts,
@@ -496,12 +752,12 @@ recursiveSplitCell <- function(counts,
         reorder = reorder
       )
 
-      if (length(unique(clusters(tempModel)$z)) == currentK) {
-        overallZ <- clusters(tempModel)$z
+      if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
+        overallZ <- celdaClusters(tempModel)$z
       } else {
         overallZ <- tempSplit$z
         ll <-
-          logLikelihoodcelda_C(
+          .logLikelihoodcelda_C(
             counts, s, overallZ,
             currentK, alpha, beta
           )
@@ -592,23 +848,29 @@ recursiveSplitCell <- function(counts,
 
 
 #' @title Recursive module splitting
-#'
-#' @description Uses the `celda_G` model to cluster features into modules for
-#'  a range of possible L's. The module labels of the previous "L-1" model are
-#'  used as the initial values in the current model with L modules. The best
+#' @description Uses the \link{celda_G} model to cluster features into modules
+#'  for a range of possible L's. The module labels of the previous "L-1" model
+#'  are used as the initial values in the current model with L modules. The best
 #'  split of an existing module is found to create the L-th module. This
 #'  procedure is much faster than randomly initializing each model with a
 #'  different L.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param x A numeric \link{matrix} of counts or a
+#'  \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a
+#'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
 #' @param initialL Integer. Minimum number of modules to try.
 #' @param maxL Integer. Maximum number of modules to try.
 #' @param tempK Integer. Number of temporary cell populations to identify and
-#'  use in module splitting. Only used if `zInit=NULL` Collapsing cells to a
-#'  relatively smaller number of cell popluations will increase the speed of
-#'  module clustering and tend to produce better modules. This number should be
-#'  larger than the number of true cell populations expected in the dataset.
-#'  Default 100.
+#'  use in module splitting. Only used if \code{zInit = NULL} Collapsing cells
+#'  to a relatively smaller number of cell popluations will increase the
+#'  speed of module clustering and tend to produce better modules. This number
+#'  should be larger than the number of true cell populations expected in the
+#'  dataset. Default 100.
 #' @param zInit Integer vector. Collapse cells to cell populations based on
 #'  labels in `zInit` and then perform module splitting. If NULL, no
 #'  collapasing will be performed unless `tempK` is specified. Default NULL.
@@ -629,24 +891,33 @@ recursiveSplitCell <- function(counts,
 #'  clustering after each model has been created. If FALSE, module numbers will
 #'  correspond to the split which created the module (i.e. 'L15' was created at
 #'  split 15, 'L16' was created at split 16, etc.). Default TRUE.
+#' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+#'  a default value of 12345 is used. If NULL, no calls to
+#'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  `resamplePerplexity()`. Default TRUE.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
-#' @return Object of class `celda_list`, which contains results for all model
-#'  parameter combinations and summaries of the run parameters. The models in
-#'  the list will be of class `celda_G` if `zInit=NULL` or `celda_CG` if
-#'  `zInit` is set.
-#' @seealso `recursiveSplitCell()` for recursive splitting of cell populations.
+#' @return A \linkS4class{SingleCellExperiment} object. Function
+#'  parameter settings and celda model results are stored in the
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+#'  the list will be of class \link{celda_G} if \code{zInit = NULL} or
+#'  \link{celda_CG} if \code{zInit} is set.
+#' @seealso \code{recursiveSplitCell} for recursive splitting of cell
+#'  populations.
+#' @export
+setGeneric("recursiveSplitModule", function(x, ...) {
+    standardGeneric("recursiveSplitModule")})
+
+
+#' @rdname recursiveSplitModule
 #' @examples
-#' data(celdaCGSim)
+#' data(sceCeldaCG)
 #' ## Create models that range from L=3 to L=20 by recursively splitting modules
 #' ## into two
-#' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-#'   initialL = 3, maxL = 20
-#' )
+#' moduleSplit <- recursiveSplitModule(sceCeldaCG, initialL = 3, maxL = 20)
 #'
 #' ## Example results with perplexity
 #' plotGridSearchPerplexity(moduleSplit)
@@ -654,7 +925,241 @@ recursiveSplitCell <- function(counts,
 #' ## Select model for downstream analysis
 #' celdaMod <- subsetCeldaList(moduleSplit, list(L = 10))
 #' @export
-recursiveSplitModule <- function(counts,
+setMethod("recursiveSplitModule",
+    signature(x = "SingleCellExperiment"),
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        initialL = 10,
+        maxL = 100,
+        tempK = 100,
+        zInit = NULL,
+        sampleLabel = NULL,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        minFeature = 3,
+        reorder = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        verbose = TRUE,
+        logfile = NULL) {
+
+        xClass <- "SingleCellExperiment"
+
+        if (!altExpName %in% SingleCellExperiment::altExpNames(x)) {
+            stop(altExpName, " not in 'altExpNames(x)'. Run ",
+                "selectFeatures(x) first!")
+        }
+
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        if (!useAssay %in% SummarizedExperiment::assayNames(altExp)) {
+            stop(useAssay, " not in assayNames(altExp(x, altExpName))")
+        }
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+
+        if (!is.null(zInit)) {
+            model <- "celda_CG"
+        } else {
+            model <- "celda_G"
+        }
+
+        celdaList <- .recursiveSplitModuleWithSeed(counts = counts,
+            initialL = initialL,
+            maxL = maxL,
+            tempK = tempK,
+            zInit = zInit,
+            sampleLabel = sampleLabel,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minFeature = minFeature,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfile = logfile)
+
+        altExp <- .createSCERecursiveSplitModule(celdaList = celdaList,
+            sce = altExp,
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            initialL = initialL,
+            maxL = maxL,
+            tempK = tempK,
+            zInit = zInit,
+            sampleLabel = sampleLabel,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minFeature = minFeature,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfile = logfile)
+        SingleCellExperiment::altExp(x, altExpName) <- altExp
+        return(x)
+    }
+)
+
+
+#' @rdname recursiveSplitModule
+#' @examples
+#' data(celdaCGSim)
+#' ## Create models that range from L=3 to L=20 by recursively splitting modules
+#' ## into two
+#' moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
+#'   initialL = 3, maxL = 20)
+#'
+#' ## Example results with perplexity
+#' plotGridSearchPerplexity(moduleSplit)
+#'
+#' ## Select model for downstream analysis
+#' celdaMod <- subsetCeldaList(moduleSplit, list(L = 10))
+#' @export
+setMethod("recursiveSplitModule",
+    signature(x = "matrix"),
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        initialL = 10,
+        maxL = 100,
+        tempK = 100,
+        zInit = NULL,
+        sampleLabel = NULL,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        minFeature = 3,
+        reorder = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        verbose = TRUE,
+        logfile = NULL) {
+
+        ls <- list()
+        ls[[useAssay]] <- x
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
+        xClass <- "matrix"
+
+        if (!is.null(zInit)) {
+            model <- "celda_CG"
+        } else {
+            model <- "celda_G"
+        }
+
+        celdaList <- .recursiveSplitModuleWithSeed(counts = x,
+            initialL = initialL,
+            maxL = maxL,
+            tempK = tempK,
+            zInit = zInit,
+            sampleLabel = sampleLabel,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minFeature = minFeature,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfile = logfile)
+
+        altExp <- .createSCERecursiveSplitModule(celdaList = celdaList,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            initialL = initialL,
+            maxL = maxL,
+            tempK = tempK,
+            zInit = zInit,
+            sampleLabel = sampleLabel,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minFeature = minFeature,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfile = logfile)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
+        return(sce)
+    }
+)
+
+
+.recursiveSplitModuleWithSeed <- function(counts,
+    initialL,
+    maxL,
+    tempK,
+    zInit,
+    sampleLabel,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    minFeature,
+    reorder,
+    seed,
+    perplexity,
+    verbose,
+    logfile) {
+
+    if (is.null(seed)) {
+        celdaList <- .recursiveSplitModule(
+            counts = counts,
+            initialL = initialL,
+            maxL = maxL,
+            tempK = tempK,
+            zInit = zInit,
+            sampleLabel = sampleLabel,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minFeature = minFeature,
+            reorder = reorder,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfile = logfile)
+    } else {
+        with_seed(seed,
+            celdaList <- .recursiveSplitModule(
+                counts = counts,
+                initialL = initialL,
+                maxL = maxL,
+                tempK = tempK,
+                zInit = zInit,
+                sampleLabel = sampleLabel,
+                alpha = alpha,
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                minFeature = minFeature,
+                reorder = reorder,
+                perplexity = perplexity,
+                verbose = verbose,
+                logfile = logfile)
+        )
+    }
+
+    return(celdaList)
+}
+
+
+.recursiveSplitModule <- function(counts,
                                  initialL = 10,
                                  maxL = 100,
                                  tempK = 100,
@@ -669,6 +1174,7 @@ recursiveSplitModule <- function(counts,
                                  perplexity = TRUE,
                                  verbose = TRUE,
                                  logfile = NULL) {
+
   .logMessages(paste(rep("=", 50), collapse = ""),
     logfile = logfile,
     append = FALSE,
@@ -685,6 +1191,8 @@ recursiveSplitModule <- function(counts,
     verbose = verbose
   )
   startTime <- Sys.time()
+
+  .validateCounts(counts)
 
   counts <- .processCounts(counts)
   countChecksum <- .createCountChecksum(counts)
@@ -736,10 +1244,9 @@ recursiveSplitModule <- function(counts,
       gamma = gamma,
       delta = delta,
       verbose = FALSE,
-      reorder = reorder
-    )
-    currentL <- length(unique(clusters(modelInitial)$y)) + 1
-    overallY <- clusters(modelInitial)$y
+      reorder = reorder)
+    currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
+    overallY <- celdaClusters(modelInitial)$y
 
     resList <- list(modelInitial)
     while (currentL <= maxL) {
@@ -768,7 +1275,7 @@ recursiveSplitModule <- function(counts,
         zInit = overallZ,
         reorder = reorder
       )
-      overallY <- clusters(tempModel)$y
+      overallY <- celdaClusters(tempModel)$y
 
       ## Add new model to results list and increment L
       .logMessages(
@@ -830,8 +1337,8 @@ recursiveSplitModule <- function(counts,
       verbose = FALSE
     )
 
-    currentL <- length(unique(clusters(modelInitial)$y)) + 1
-    overallY <- clusters(modelInitial)$y
+    currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
+    overallY <- celdaClusters(modelInitial)$y
 
     ## Decomposed counts for full count matrix
     p <- .cGDecomposeCounts(counts, overallY, currentL)
@@ -867,7 +1374,7 @@ recursiveSplitModule <- function(counts,
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- clusters(tempModel)$y
+      overallY <- celdaClusters(tempModel)$y
 
       # Adjust decomposed count matrices
       p <- .cGReDecomposeCounts(counts,
@@ -945,7 +1452,7 @@ recursiveSplitModule <- function(counts,
       nchains = 1,
       verbose = FALSE
     )
-    overallY <- clusters(modelInitial)$y
+    overallY <- celdaClusters(modelInitial)$y
     currentL <- length(unique(overallY)) + 1
 
     ## Perform splitting for y labels
@@ -974,7 +1481,7 @@ recursiveSplitModule <- function(counts,
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- clusters(tempModel)$y
+      overallY <- celdaClusters(tempModel)$y
 
       ## Add new model to results list and increment L
       .logMessages(
@@ -1047,4 +1554,97 @@ recursiveSplitModule <- function(counts,
   )
 
   return(celdaRes)
+}
+
+
+.createSCERecursiveSplitCell <- function(celdaList,
+    sce,
+    xClass,
+    useAssay,
+    model,
+    sampleLabel,
+    initialK,
+    maxK,
+    tempL,
+    yInit,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    minCell,
+    reorder,
+    seed,
+    perplexity,
+    logfile,
+    verbose) {
+
+    S4Vectors::metadata(sce)[["celda_grid_search"]] <- celdaList
+
+    S4Vectors::metadata(sce)$celda_grid_search@celdaGridSearchParameters <-
+        list(xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            sampleLabel = sampleLabel,
+            initialK = initialK,
+            maxK = maxK,
+            tempL = tempL,
+            yInit = yInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minCell = minCell,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+    return(sce)
+
+}
+
+
+.createSCERecursiveSplitModule <- function(celdaList,
+    sce,
+    xClass,
+    useAssay,
+    model,
+    initialL,
+    maxL,
+    tempK,
+    zInit,
+    sampleLabel,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    minFeature,
+    reorder,
+    seed,
+    perplexity,
+    verbose,
+    logfile) {
+
+    S4Vectors::metadata(sce)[["celda_grid_search"]] <- celdaList
+
+    S4Vectors::metadata(sce)$celda_grid_search@celdaGridSearchParameters <-
+        list(xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            sampleLabel = sampleLabel,
+            initialL = initialL,
+            maxL = maxL,
+            tempK = tempK,
+            zInit = zInit,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            minFeature = minFeature,
+            reorder = reorder,
+            seed = seed,
+            perplexity = perplexity,
+            logfile = logfile,
+            verbose = verbose)
+    return(sce)
 }

@@ -4,26 +4,35 @@
 \alias{recodeClusterZ}
 \title{Recode cell cluster labels}
 \usage{
-recodeClusterZ(celdaMod, from, to)
+recodeClusterZ(sce, from, to, altExpName = "featureSubset")
 }
 \arguments{
-\item{celdaMod}{Celda object of class `celda_C` or `celda_CG`.}
+\item{sce}{\linkS4class{SingleCellExperiment} object returned from
+\link{celda_C} or \link{celda_CG}. Must contain column
+\code{celda_cell_cluster} in
+\code{\link[SummarizedExperiment]{colData}(altExp(sce, altExpName))}.}
 
-\item{from}{Numeric vector. Unique values in the range of seq(K) that
-correspond to the original cluster labels in `celdaMod`.}
+\item{from}{Numeric vector. Unique values in the range of
+\code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
+the original cluster
+labels in \code{sce}.}
 
-\item{to}{Numeric vector. Unique values in the range of seq(K) that
-correspond to the new cluster labels.}
+\item{to}{Numeric vector. Unique values in the range of
+\code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
+the new cluster labels.}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 }
 \value{
-Celda object with cell subpopulation clusters, with class
- corresponding to that of `celdaMod`.
+\linkS4class{SingleCellExperiment} object with recoded cell
+ cluster labels.
 }
 \description{
-Recode cell subpopulaton clusters using a mapping in the `from`
- and `to` arguments.
+Recode cell subpopulaton clusters using a mapping in the
+ \code{from} and \code{to} arguments.
 }
 \examples{
-data(celdaCGMod)
-celdaModReorderedZ <- recodeClusterZ(celdaCGMod, c(1, 3), c(3, 1))
+data(sceCeldaCG)
+sceReorderedZ <- recodeClusterZ(sceCeldaCG, c(1, 3), c(3, 1))
 }

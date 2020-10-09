@@ -2,10 +2,16 @@
 % Please edit documentation in R/recursiveSplit.R
 \name{recursiveSplitModule}
 \alias{recursiveSplitModule}
+\alias{recursiveSplitModule,SingleCellExperiment-method}
+\alias{recursiveSplitModule,matrix-method}
 \title{Recursive module splitting}
 \usage{
-recursiveSplitModule(
-  counts,
+recursiveSplitModule(x, ...)
+
+\S4method{recursiveSplitModule}{SingleCellExperiment}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   initialL = 10,
   maxL = 100,
   tempK = 100,
@@ -17,25 +23,56 @@ recursiveSplitModule(
   gamma = 1,
   minFeature = 3,
   reorder = TRUE,
+  seed = 12345,
+  perplexity = TRUE,
+  verbose = TRUE,
+  logfile = NULL
+)
+
+\S4method{recursiveSplitModule}{matrix}(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  initialL = 10,
+  maxL = 100,
+  tempK = 100,
+  zInit = NULL,
+  sampleLabel = NULL,
+  alpha = 1,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  minFeature = 3,
+  reorder = TRUE,
+  seed = 12345,
   perplexity = TRUE,
   verbose = TRUE,
   logfile = NULL
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{x}{A numeric \link{matrix} of counts or a
+\linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells.}
+
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{initialL}{Integer. Minimum number of modules to try.}
 
 \item{maxL}{Integer. Maximum number of modules to try.}
 
 \item{tempK}{Integer. Number of temporary cell populations to identify and
-use in module splitting. Only used if `zInit=NULL` Collapsing cells to a
-relatively smaller number of cell popluations will increase the speed of
-module clustering and tend to produce better modules. This number should be
-larger than the number of true cell populations expected in the dataset.
-Default 100.}
+use in module splitting. Only used if \code{zInit = NULL} Collapsing cells
+to a relatively smaller number of cell popluations will increase the
+speed of module clustering and tend to produce better modules. This number
+should be larger than the number of true cell populations expected in the
+dataset. Default 100.}
 
 \item{zInit}{Integer vector. Collapse cells to cell populations based on
 labels in `zInit` and then perform module splitting. If NULL, no
@@ -65,6 +102,10 @@ clustering after each model has been created. If FALSE, module numbers will
 correspond to the split which created the module (i.e. 'L15' was created at
 split 15, 'L16' was created at split 16, etc.). Default TRUE.}
 
+\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
+a default value of 12345 is used. If NULL, no calls to
+\link[withr]{with_seed} are made.}
+
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
 `resamplePerplexity()`. Default TRUE.}
@@ -75,26 +116,36 @@ If FALSE, then perplexity can be calculated later with
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
 }
 \value{
-Object of class `celda_list`, which contains results for all model
- parameter combinations and summaries of the run parameters. The models in
- the list will be of class `celda_G` if `zInit=NULL` or `celda_CG` if
- `zInit` is set.
+A \linkS4class{SingleCellExperiment} object. Function
+ parameter settings and celda model results are stored in the
+ \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+ the list will be of class \link{celda_G} if \code{zInit = NULL} or
+ \link{celda_CG} if \code{zInit} is set.
 }
 \description{
-Uses the `celda_G` model to cluster features into modules for
- a range of possible L's. The module labels of the previous "L-1" model are
- used as the initial values in the current model with L modules. The best
+Uses the \link{celda_G} model to cluster features into modules
+ for a range of possible L's. The module labels of the previous "L-1" model
+ are used as the initial values in the current model with L modules. The best
  split of an existing module is found to create the L-th module. This
  procedure is much faster than randomly initializing each model with a
  different L.
 }
 \examples{
+data(sceCeldaCG)
+## Create models that range from L=3 to L=20 by recursively splitting modules
+## into two
+moduleSplit <- recursiveSplitModule(sceCeldaCG, initialL = 3, maxL = 20)
+
+## Example results with perplexity
+plotGridSearchPerplexity(moduleSplit)
+
+## Select model for downstream analysis
+celdaMod <- subsetCeldaList(moduleSplit, list(L = 10))
 data(celdaCGSim)
 ## Create models that range from L=3 to L=20 by recursively splitting modules
 ## into two
 moduleSplit <- recursiveSplitModule(celdaCGSim$counts,
-  initialL = 3, maxL = 20
-)
+  initialL = 3, maxL = 20)
 
 ## Example results with perplexity
 plotGridSearchPerplexity(moduleSplit)
@@ -103,5 +154,6 @@ plotGridSearchPerplexity(moduleSplit)
 celdaMod <- subsetCeldaList(moduleSplit, list(L = 10))
 }
 \seealso{
-`recursiveSplitCell()` for recursive splitting of cell populations.
+\code{recursiveSplitCell} for recursive splitting of cell
+ populations.
 }

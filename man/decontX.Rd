@@ -154,7 +154,8 @@ plotDecontXContamination(sce)
 
 # Plot decontX cluster labels
 umap <- reducedDim(sce)
-plotDimReduceCluster(umap[, 1], umap[, 2], sce$decontX_clusters)
+plotDimReduceCluster(x = sce$decontX_clusters,
+    dim1 = umap[, 1], dim2 = umap[, 2], )
 
 # Plot percentage of marker genes detected
 # in each cell cluster before decontamination

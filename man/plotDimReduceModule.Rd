@@ -2,43 +2,80 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceModule}
 \alias{plotDimReduceModule}
-\title{Plotting the Celda module probability on a
- dimensionality reduction plot}
+\alias{plotDimReduceModule,SingleCellExperiment-method}
+\alias{plotDimReduceModule,matrix-method}
+\title{Plotting Celda module probability on a
+ dimension reduction plot}
 \usage{
-plotDimReduceModule(
-  dim1,
-  dim2,
-  counts,
-  celdaMod,
+plotDimReduceModule(x, ...)
+
+\S4method{plotDimReduceModule}{SingleCellExperiment}(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   modules = NULL,
   rescale = TRUE,
+  limits = c(0, 1),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "grey",
-  colorMid = NULL,
-  colorHigh = "blue",
-  ncol = NULL
+  colorLow = "grey90",
+  colorHigh = "firebrick1",
+  ncol = NULL,
+  decreasing = FALSE
+)
+
+\S4method{plotDimReduceModule}{matrix}(
+  x,
+  dim1,
+  dim2,
+  celdaMod,
+  modules = NULL,
+  rescale = TRUE,
+  limits = c(0, 1),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorHigh = "firebrick1",
+  ncol = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Rows
+represent features and columns represent cells.}
+
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
+
 \item{dim1}{Numeric vector.
-First dimension from data dimensionality reduction output.}
+First dimension from data dimension reduction output.}
 
 \item{dim2}{Numeric vector.
-Second dimension from data dimensionality reduction output.}
+Second dimension from data dimension reduction output.}
 
-\item{counts}{Integer matrix.
-Rows represent features and columns represent cells.
-This matrix should be the same as the one used to generate `celdaMod`.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{modules}{Character vector. Module(s) from celda model to be plotted.
 e.g. c("1", "2").}
 
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
+
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient}. The range
+of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
@@ -47,18 +84,22 @@ Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`.
-The color will be used to signify the lowest values on the scale.
-Default 'grey'.}
-
-\item{colorMid}{Character. A color available from `colors()`.
-The color will be used to signify the midpoint on the scale.}
+The color will be used to signify the lowest values on the scale.}
 
 \item{colorHigh}{Character. A color available from `colors()`.
-The color will be used to signify the highest values on the scale.
-Default 'blue'.}
+The color will be used to signify the highest values on the scale.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with largest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
+
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
+\code{x} is a matrix object.}
 }
 \value{
 The plot as a ggplot object
@@ -66,20 +107,21 @@ The plot as a ggplot object
 \description{
 Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a data
- dimensionality reduction tool.
- The cells are colored by the module probability(s).
+ dimension reduction tool.
+ The cells are colored by the module probability.
 }
 \examples{
-\donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
-plotDimReduceModule(
-  dim1 = celdaTsne[, 1], dim2 = celdaTsne[, 2],
-  counts = celdaCGSim$counts, celdaMod = celdaCGMod,
-  modules = c("1", "2")
-)
-}
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceModule(x = sce,
+  reducedDimName = "celda_tSNE",
+  modules = c("1", "2"))
+library(SingleCellExperiment)
+data(sceCeldaCG, celdaCGMod)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceModule(x = counts(sce),
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+  celdaMod = celdaCGMod,
+  modules = c("1", "2"))
 }

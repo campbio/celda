@@ -2,15 +2,26 @@
 % Please edit documentation in R/celda_functions.R
 \name{featureModuleTable}
 \alias{featureModuleTable}
-\title{Outputting a feature module table}
+\title{Output a feature module table}
 \usage{
-featureModuleTable(counts, celdaMod, outputFile = NULL)
+featureModuleTable(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  outputFile = NULL
+)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{sce}{A \linkS4class{SingleCellExperiment} object returned by
+\link{celda_G}, or \link{celda_CG}, with the matrix
+located in the \code{useAssay} assay slot.
+Rows represent features and columns represent cells.}
 
-\item{celdaMod}{Celda object of class "celda_G" or "celda_CG".}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{outputFile}{File name for feature module table. If NULL, file will
 not be created. Default NULL.}
@@ -23,6 +34,6 @@ Creates a table that contains the list of features in
  each feature module.
 }
 \examples{
-data(celdaCGSim, celdaCGMod)
-featureModuleTable(celdaCGSim$counts, celdaCGMod, outputFile = NULL)
+data(sceCeldaCG)
+featureModuleTable(sceCeldaCG)
 }

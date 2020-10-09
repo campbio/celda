@@ -1973,16 +1973,7 @@ semiPheatmap <- function(mat,
     ...
   )
 
-  if (is.na(fileName) & !silent) {
-    grid.newpage()
-    grid.draw(gt)
-  }
-
-  return(list(
-    treeRow = treeRow,
-    treeCol = treeCol,
-    gtable = gt
-  ))
+  return(gt)
 }
 
 

@@ -2,37 +2,81 @@
 % Please edit documentation in R/plot_dr.R
 \name{plotDimReduceFeature}
 \alias{plotDimReduceFeature}
-\title{Plotting feature expression on a dimensionality reduction plot}
+\alias{plotDimReduceFeature,SingleCellExperiment-method}
+\alias{plotDimReduceFeature,matrix-method}
+\title{Plotting feature expression on a dimension reduction plot}
 \usage{
-plotDimReduceFeature(
-  dim1,
-  dim2,
-  counts,
+plotDimReduceFeature(x, ...)
+
+\S4method{plotDimReduceFeature}{SingleCellExperiment}(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  useAssay = "counts",
+  altExpName = "featureSubset",
   features,
   headers = NULL,
   normalize = FALSE,
   zscore = TRUE,
   exactMatch = TRUE,
-  trim = c(-1, 1),
+  trim = c(-2, 2),
+  limits = c(-2, 2),
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
-  colorMid = "white",
+  colorMid = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
-  ncol = NULL
+  midpoint = 0,
+  ncol = NULL,
+  decreasing = FALSE
+)
+
+\S4method{plotDimReduceFeature}{matrix}(
+  x,
+  dim1,
+  dim2,
+  features,
+  headers = NULL,
+  normalize = FALSE,
+  zscore = TRUE,
+  exactMatch = TRUE,
+  trim = c(-2, 2),
+  limits = c(-2, 2),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorMid = "grey90",
+  colorHigh = "firebrick1",
+  midpoint = 0,
+  ncol = NULL,
+  decreasing = FALSE
 )
 }
 \arguments{
-\item{dim1}{Numeric vector. First dimension from data
-dimensionality reduction output.}
+\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+with the matrix located in the assay slot under \code{useAssay}. Rows
+represent features and columns represent cells.}
 
-\item{dim2}{Numeric vector. Second dimension from data dimensionality
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\code{dim2} are set.}
+
+\item{dim1}{Numeric vector. First dimension from data
+dimension reduction output.}
+
+\item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
-\item{counts}{Integer matrix. Rows represent features and columns
-represent cells.}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a
+\linkS4class{SingleCellExperiment} object. Default "counts".}
+
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+to use. Default "featureSubset".}
 
 \item{features}{Character vector. Features in the rownames of counts to plot.}
 
@@ -53,6 +97,9 @@ and standard deviation of 1. Default \code{TRUE}.}
 and upper bounds for the data. This threshold is applied after row scaling.
 Set to NULL to disable. Default \code{c(-1,1)}.}
 
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+of color scale.}
+
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
 \item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
@@ -60,44 +107,51 @@ Set to NULL to disable. Default \code{c(-1,1)}.}
 \item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`. The color
-will be used to signify the lowest values on the scale. Default 'blue'.}
+will be used to signify the lowest values on the scale.}
 
 \item{colorMid}{Character. A color available from `colors()`. The color
-will be used to signify the midpoint on the scale. Default 'white'.}
+will be used to signify the midpoint on the scale.}
 
 \item{colorHigh}{Character. A color available from `colors()`. The color
-will be used to signify the highest values on the scale. Default 'red'.}
+will be used to signify the highest values on the scale.}
 
 \item{midpoint}{Numeric. The value indicating the midpoint of the
 diverging color scheme. If \code{NULL}, defaults to the mean
-with 10 percent of values trimmed. Default \code{NULL}.}
+with 10 percent of values trimmed. Default \code{0}.}
 
 \item{ncol}{Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
 number of columns for facet wrap.}
+
+\item{decreasing}{logical. Specifies the order of plotting the points.
+If \code{FALSE}, the points will be plotted in increasing order where
+the points with largest values will be on top. \code{TRUE} otherwise.
+If \code{NULL}, no sorting is performed. Points will be plotted in their
+current order in \code{x}. Default \code{FALSE}.}
 }
 \value{
 The plot as a ggplot object
 }
 \description{
 Create a scatterplot for each row of a normalized gene
- expression matrix where x and y axis are from a data dimensionality
+ expression matrix where x and y axis are from a data dimension
  reduction tool. The cells are colored by expression of
  the specified feature.
 }
 \examples{
-\donttest{
-data(celdaCGSim, celdaCGMod)
-celdaTsne <- celdaTsne(
-  counts = celdaCGSim$counts,
-  celdaMod = celdaCGMod
-)
-plotDimReduceFeature(
-  dim1 = celdaTsne[, 1],
-  dim2 = celdaTsne[, 2],
-  counts = celdaCGSim$counts,
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceFeature(x = sce,
+  reducedDimName = "celda_tSNE",
   normalize = TRUE,
   features = c("Gene_99"),
-  exactMatch = TRUE
-)
-}
+  exactMatch = TRUE)
+library(SingleCellExperiment)
+data(sceCeldaCG)
+sce <- celdaTsne(sceCeldaCG)
+plotDimReduceFeature(x = counts(sce),
+  dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
+  dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
+  normalize = TRUE,
+  features = c("Gene_99"),
+  exactMatch = TRUE)
 }

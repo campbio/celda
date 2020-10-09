@@ -5,15 +5,14 @@
 \alias{celdaCSim}
 \title{celdaCSim}
 \format{
-A list of counts and properties as returned from simulateCells().
+A list of counts and properties as returned from old simulateCells().
+#@examples
+celdaCSim <- simulateCells("celda_C")
 }
 \usage{
 celdaCSim
 }
 \description{
-An example simulated count matrix from the celda_C model.
-}
-\examples{
-celdaCSim <- simulateCells("celda_C")
+An old example simulated count matrix from the celda_C model.
 }
 \keyword{datasets}
