@@ -100,8 +100,7 @@ Known marker genes can also be plotted on the UMAP to identify the cell types fo
 ```{r, message=FALSE}
 library(scater)
 pbmc4k <- logNormCounts(pbmc4k)
-plotDimReduceFeature(x = pbmc4k,
-    useAssay = "logcounts",
+plotDimReduceFeature(as.matrix(logcounts(pbmc4k)),
     dim1 = umap[, 1],
     dim2 = umap[, 2],
     features = c("CD3D", "CD3E", "GNLY",

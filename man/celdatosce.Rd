@@ -5,6 +5,7 @@
 \alias{celdatosce,celda_C-method}
 \alias{celdatosce,celda_G-method}
 \alias{celdatosce,celda_CG-method}
+\alias{celdatosce,celdaList-method}
 \title{Convert old celda model object to \code{SCE} object}
 \usage{
 celdatosce(celdaModel, counts, ...)
@@ -29,10 +30,17 @@ celdatosce(celdaModel, counts, ...)
   useAssay = "counts",
   altExpName = "featureSubset"
 )
+
+\S4method{celdatosce}{celdaList}(
+  celdaModel,
+  counts,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 }
 \arguments{
-\item{celdaModel}{A celda model object generated using older versions of
-\code{celda}.}
+\item{celdaModel}{A \code{celdaModel} or \code{celdaList} object generated
+using older versions of \code{celda}.}
 
 \item{counts}{A numeric \link{matrix} of counts used to generate
 \code{celdaModel}. Dimensions and MD5 checksum will be checked by
@@ -67,4 +75,6 @@ data(celdaGMod, celdaGSim)
 sce <- celdatosce(celdaGMod, celdaGSim$counts)
 data(celdaCGMod, celdaCGSim)
 sce <- celdatosce(celdaCGMod, celdaCGSim$counts)
+data(celdaCGGridSearchRes, celdaCGSim)
+sce <- celdatosce(celdaCGGridSearchRes, celdaCGSim$counts)
 }

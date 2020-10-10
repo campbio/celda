@@ -39,7 +39,7 @@ setMethod("selectFeatures",
         altExpName = "featureSubset") {
 
         assay <- SummarizedExperiment::assay(x, i = useAssay)
-        sceSubset <- x[rowSums(assay >= minCount) >= minCell, ]
+        sceSubset <- x[Matrix::rowSums(assay >= minCount) >= minCell, ]
         SingleCellExperiment::altExp(x, altExpName) <- sceSubset
 
         S4Vectors::metadata(x)[["select_features"]] <- list(

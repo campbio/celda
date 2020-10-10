@@ -5,8 +5,8 @@
 #'  \linkS4class{SingleCellExperiment} object containing celda model
 #'  information in \code{metadata} slot. Counts matrix is stored in the
 #'  \code{"counts"} assay slot in \code{assays}.
-#' @param celdaModel A celda model object generated using older versions of
-#'  \code{celda}.
+#' @param celdaModel A \code{celdaModel} or \code{celdaList} object generated
+#'  using older versions of \code{celda}.
 #' @param counts A numeric \link{matrix} of counts used to generate
 #'  \code{celdaModel}. Dimensions and MD5 checksum will be checked by
 #'  \link{compareCountMatrix}.
@@ -141,6 +141,59 @@ setMethod("celdatosce",
             yInit = NULL,
             logfile = NULL,
             verbose = NULL)
+        SingleCellExperiment::altExp(sce, altExpName) <- altExp
+        return(sce)
+    }
+)
+
+
+#' @rdname celdatosce
+#' @examples
+#' data(celdaCGGridSearchRes, celdaCGSim)
+#' sce <- celdatosce(celdaCGGridSearchRes, celdaCGSim$counts)
+#' @export
+setMethod("celdatosce",
+    signature(celdaModel = "celdaList"),
+    function(celdaModel,
+        counts,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
+
+        compareCountMatrix(counts, celdaModel, errorOnMismatch = FALSE)
+
+        ls <- list()
+        ls[[useAssay]] <- counts
+        sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)
+        SingleCellExperiment::altExp(sce, altExpName) <- sce
+        xClass <- "matrix"
+        model <- celdaModel@celdaGridSearchParameters$model
+        paramsTest <- celdaCGGridSearchRes@celdaGridSearchParameters$paramsTest
+        paramsFixed <-
+            celdaCGGridSearchRes@celdaGridSearchParameters$paramsFixed
+        maxIter <- celdaCGGridSearchRes@celdaGridSearchParameters$maxIter
+        nchains <- celdaCGGridSearchRes@celdaGridSearchParameters$nchains
+        cores <- celdaCGGridSearchRes@celdaGridSearchParameters$cores
+        bestOnly <- celdaCGGridSearchRes@celdaGridSearchParameters$bestOnly
+        perplexity <- celdaCGGridSearchRes@celdaGridSearchParameters$perplexity
+        verbose <- celdaCGGridSearchRes@celdaGridSearchParameters$verbose
+        logfilePrefix <-
+            celdaCGGridSearchRes@celdaGridSearchParameters$logfilePrefix
+
+        altExp <- .createSCEceldaGridSearch(celdaList = celdaModel,
+            sce = SingleCellExperiment::altExp(sce, altExpName),
+            xClass = xClass,
+            useAssay = useAssay,
+            model = model,
+            paramsTest = paramsTest,
+            paramsFixed = paramsFixed,
+            maxIter = maxIter,
+            seed = NULL,
+            nchains = nchains,
+            cores = cores,
+            bestOnly = bestOnly,
+            perplexity = perplexity,
+            verbose = verbose,
+            logfilePrefix = logfilePrefix)
         SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }

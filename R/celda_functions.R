@@ -235,56 +235,119 @@ recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
 #'  the celda model object by comparing dimensions and MD5 checksum.
 #' @param counts Integer matrix. Rows represent features and columns represent
 #'  cells.
-#' @param celdaMod Celda model object.
+#' @param celdaMod A \code{celdaModel} or \code{celdaList} object.
 #' @param errorOnMismatch Logical. Whether to throw an error in the event of
 #'  a mismatch. Default TRUE.
 #' @return Returns TRUE if provided count matrix matches the one used in the
-#'  celda object and/or `errorOnMismatch = FALSE`, FALSE otherwise.
+#'  celda object and/or \code{errorOnMismatch = FALSE}, FALSE otherwise.
+#' @export
+setGeneric("compareCountMatrix", function(counts, celdaMod, ...) {
+    standardGeneric("compareCountMatrix")})
+
+
+#' @rdname compareCountMatrix
 #' @examples
 #' data(celdaCGSim, celdaCGMod)
 #' compareCountMatrix(celdaCGSim$counts, celdaCGMod, errorOnMismatch = FALSE)
 #' @export
-compareCountMatrix <- function(counts,
-                               celdaMod,
-                               errorOnMismatch = TRUE) {
-  if ("y" %in% names(celdaClusters(celdaMod))) {
-    if (nrow(counts) != length(celdaClusters(celdaMod)$y)) {
-      stop(
-        "The provided celda object was generated from a counts",
-        " matrix with a different number of features than the one",
-        " provided."
-      )
-    }
-  }
+setMethod("compareCountMatrix",
+    signature(celdaMod = "celdaModel"),
+    function(counts, celdaMod, errorOnMismatch = TRUE) {
 
-  if ("z" %in% names(celdaClusters(celdaMod))) {
-    if (ncol(counts) != length(celdaClusters(celdaMod)$z)) {
-      stop(
-        "The provided celda object was generated from a counts",
-        " matrix with a different number of cells than the one",
-        " provided."
-      )
+        if ("y" %in% names(celdaClusters(celdaMod))) {
+            if (nrow(counts) != length(celdaClusters(celdaMod)$y)) {
+                stop(
+                    "The provided celda object was generated from a counts",
+                    " matrix with a different number of features than the one",
+                    " provided."
+                )
+            }
+        }
+
+        if ("z" %in% names(celdaClusters(celdaMod))) {
+            if (ncol(counts) != length(celdaClusters(celdaMod)$z)) {
+                stop(
+                    "The provided celda object was generated from a counts",
+                    " matrix with a different number of cells than the one",
+                    " provided."
+                )
+            }
+        }
+        celdaChecksum <- params(celdaMod)$countChecksum
+
+        counts <- .processCounts(counts)
+        # Checksums are generated in celdaGridSearch and model after processing
+        count.md5 <- .createCountChecksum(counts)
+        res <- isTRUE(count.md5 == celdaChecksum)
+        if (res) {
+            return(TRUE)
+        }
+        if (!res && errorOnMismatch) {
+            stop(
+                "There was a mismatch between the provided count matrix and",
+                " the count matrix used to generate the provided celda result."
+            )
+        } else if (!res && !errorOnMismatch) {
+            warning("There was a mismatch between the provided count matrix",
+                " and the count matrix used to generate the provided celda",
+                " result.")
+            return(FALSE)
+        }
     }
-  }
-  celdaChecksum <- params(celdaMod)$countChecksum
-  counts <- .processCounts(counts)
-  # Checksums are generated in celdaGridSearch and model after processing
-  count.md5 <- .createCountChecksum(counts)
-  res <- isTRUE(count.md5 == celdaChecksum)
-  if (res) {
-    return(TRUE)
-  }
-  if (!res && errorOnMismatch) {
-    stop(
-      "There was a mismatch between the provided count matrix and",
-      " the count matrix used to generate the provided celda result."
-    )
-  } else if (!res && !errorOnMismatch) {
-    warning("There was a mismatch between the provided count matrix and",
-        " the count matrix used to generate the provided celda result.")
-    return(FALSE)
-  }
-}
+)
+
+
+#' @rdname compareCountMatrix
+#' @examples
+#' data(celdaCGSim, celdaCGGridSearchRes)
+#' compareCountMatrix(celdaCGSim$counts, celdaCGGridSearchRes,
+#'     errorOnMismatch = FALSE)
+#' @export
+setMethod("compareCountMatrix",
+    signature(celdaMod = "celdaList"),
+    function(counts, celdaMod, errorOnMismatch = TRUE) {
+
+        if ("y" %in% names(celdaMod@resList[[1]]@clusters)) {
+            if (nrow(counts) != length(celdaMod@resList[[1]]@clusters$y)) {
+                stop(
+                    "The provided celda object was generated from a counts",
+                    " matrix with a different number of features than the one",
+                    " provided."
+                )
+            }
+        }
+
+        if ("z" %in% names(celdaMod@resList[[1]]@clusters)) {
+            if (ncol(counts) != length(celdaMod@resList[[1]]@clusters$z)) {
+                stop(
+                    "The provided celda object was generated from a counts",
+                    " matrix with a different number of cells than the one",
+                    " provided."
+                )
+            }
+        }
+        celdaChecksum <- celdaMod@countChecksum
+
+        counts <- .processCounts(counts)
+        # Checksums are generated in celdaGridSearch and model after processing
+        count.md5 <- .createCountChecksum(counts)
+        res <- isTRUE(count.md5 == celdaChecksum)
+        if (res) {
+            return(TRUE)
+        }
+        if (!res && errorOnMismatch) {
+            stop(
+                "There was a mismatch between the provided count matrix and",
+                " the count matrix used to generate the provided celda result."
+            )
+        } else if (!res && !errorOnMismatch) {
+            warning("There was a mismatch between the provided count matrix",
+                " and the count matrix used to generate the provided celda",
+                " result.")
+            return(FALSE)
+        }
+    }
+)
 
 
 .logMessages <- function(...,
