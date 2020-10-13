@@ -17,8 +17,9 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         Rcpp, RcppEigen, uwot, enrichR, stringi, SummarizedExperiment,
         MCMCprecision, ggrepel, Rtsne, withr, dendextend, ggdendro,
         pROC, scater (>= 1.14.4), scran, SingleCellExperiment, dbscan,
-        DelayedArray, Seurat, stringr, Matrix, ComplexHeatmap, multipanelfigure
-Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr, circlize
+        DelayedArray, Seurat, stringr, Matrix, ComplexHeatmap, multipanelfigure,
+        circlize
+Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, M3DExampleData, TENxPBMCData
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
