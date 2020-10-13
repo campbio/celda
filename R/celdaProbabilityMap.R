@@ -78,7 +78,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         clusterColumns = FALSE,
         showHeatmapLegend = TRUE,
         heatmapLegendParam = list(title = NULL,
-            legend_height = unit(6, "cm"))) {
+            legend_height = grid::unit(6, "cm"))) {
 
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
         level <- match.arg(level)
