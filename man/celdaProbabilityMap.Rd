@@ -46,7 +46,7 @@ objects}. "sample" will display the absolute probabilities and relative
 normalized abundance of each cell population in each sample. Default
 "cellPopulation".}
 
-\item{ncols}{The number of colors (\ge 1) to be in the color palette of
+\item{ncols}{The number of colors (>1) to be in the color palette of
 the absolute probability heatmap.}
 
 \item{col2}{Passed to \code{col} argument of \link[ComplexHeatmap]{Heatmap}.
