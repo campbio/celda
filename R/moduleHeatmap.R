@@ -100,6 +100,7 @@
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object.
 #' @importFrom methods .hasSlot
+#' @importFrom multipanelfigure multi_panel_figure
 #' @export
 setGeneric("moduleHeatmap", function(x, ...) {
     standardGeneric("moduleHeatmap")})

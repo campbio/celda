@@ -81,7 +81,6 @@
 #'  clustering cells. \link{celdaGridSearch} can be used to run multiple
 #'  values of K/L and multiple chains in parallel.
 #' @import Rcpp RcppEigen
-#' @rawNamespace import(gridExtra, except = c(combine))
 #' @export
 setGeneric("celda_CG", function(x, ...) {
     standardGeneric("celda_CG")})
