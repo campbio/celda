@@ -11,14 +11,26 @@ celdaProbabilityMap(sce, ...)
   sce,
   useAssay = "counts",
   altExpName = "featureSubset",
-  level = c("cellPopulation", "sample")
+  level = c("cellPopulation", "sample"),
+  ncols = 100,
+  col2 = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
+  title1 = "Absolute probability",
+  title2 = "Relative expression",
+  showColumnNames = TRUE,
+  showRowNames = TRUE,
+  rowNamesgp = grid::gpar(fontsize = 8),
+  colNamesgp = grid::gpar(fontsize = 12),
+  clusterRows = FALSE,
+  clusterColumns = FALSE,
+  showHeatmapLegend = TRUE,
+  heatmapLegendParam = list(title = NULL, legend_height = unit(6, "cm"))
 )
 }
 \arguments{
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
-\item{...}{Additional parameters.}
+\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
@@ -33,9 +45,48 @@ normalized expression of each module in each cell population.
 objects}. "sample" will display the absolute probabilities and relative
 normalized abundance of each cell population in each sample. Default
 "cellPopulation".}
+
+\item{ncols}{The number of colors (>1) to be in the color palette of
+the absolute probability heatmap.}
+
+\item{col2}{Passed to \code{col} argument of \link[ComplexHeatmap]{Heatmap}.
+Set color boundaries and colors for the relative expression heatmap.}
+
+\item{title1}{Passed to \code{column_title} argument of
+\link[ComplexHeatmap]{Heatmap}. Figure title for the absolute probability
+heatmap.}
+
+\item{title2}{Passed to \code{column_title} argument of
+\link[ComplexHeatmap]{Heatmap}. Figure title for the relative expression
+heatmap.}
+
+\item{showColumnNames}{Passed to \code{show_column_names} argument of
+\link[ComplexHeatmap]{Heatmap}. Show column names.}
+
+\item{showRowNames}{Passed to \code{show_row_names} argument of
+\link[ComplexHeatmap]{Heatmap}. Show row names.}
+
+\item{rowNamesgp}{Passed to \code{row_names_gp} argument of
+\link[ComplexHeatmap]{Heatmap}. Set row name font.}
+
+\item{colNamesgp}{Passed to \code{column_names_gp} argument of
+\link[ComplexHeatmap]{Heatmap}. Set column name font.}
+
+\item{clusterRows}{Passed to \code{cluster_rows} argument of
+\link[ComplexHeatmap]{Heatmap}. Cluster rows.}
+
+\item{clusterColumns}{Passed to \code{cluster_columns} argument of
+\link[ComplexHeatmap]{Heatmap}. Cluster columns.}
+
+\item{showHeatmapLegend}{Passed to \code{show_heatmap_legend} argument of
+\link[ComplexHeatmap]{Heatmap}. Show heatmap legend.}
+
+\item{heatmapLegendParam}{Passed to \code{heatmap_legend_param} argument of
+\link[ComplexHeatmap]{Heatmap}. Heatmap legend parameters.}
 }
 \value{
-A grob containing the specified plots
+A \link[ComplexHeatmap]{HeatmapList} object containing 2
+ \link[ComplexHeatmap]{Heatmap-class} objects
 }
 \description{
 Renders probability and relative expression heatmaps to

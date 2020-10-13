@@ -73,7 +73,6 @@
 #'     sampleLabel = celdaCSim$sampleLabel,
 #'     nchains = 1)
 #' @import Rcpp RcppEigen
-#' @rawNamespace import(gridExtra, except = c(combine))
 #' @importFrom withr with_seed
 #' @export
 setGeneric("celda_C", function(x, ...) {
