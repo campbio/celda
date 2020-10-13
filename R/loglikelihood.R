@@ -11,6 +11,7 @@
 #'  to use. Default "featureSubset".
 #' @param celdaMod celda model object. Ignored if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The log-likelihood of the cluster assignment for the
 #'  provided \linkS4class{SingleCellExperiment}.
 #' @seealso `celda_C()` for clustering cells
@@ -155,6 +156,7 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
 #'  model object.
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to
 #'  generate the model.
 #' @export
@@ -200,11 +202,12 @@ setMethod("logLikelihoodHistory",
 #'  sampling used to generate a celdaModel.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used
 #'  to generate the model.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
-#'  to use. Default "featureSubset".
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  to use. Default "featureSubset".
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @export
 setGeneric(
     "bestLogLikelihood",

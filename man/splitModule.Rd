@@ -21,6 +21,8 @@ splitModule(x, ...)
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use for \code{x}. Default "counts".}
 

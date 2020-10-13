@@ -42,6 +42,8 @@ plotDimReduceCluster(x, ...)
 containing cluster labels for each cell in \code{"celda_cell_cluster"}
 column in \code{colData(x)}.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and

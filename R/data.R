@@ -25,62 +25,61 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 #' @description celda_CG model object generated from \code{celdaCGSim} using
 #'  old \code{celda_CG} function.
 #' @format A celda_CG object
-#' #@examples
-#' data(celdaCGSim)
-#' celdaCGMod <- celda_CG(celdaCGSim$counts,
-#'   K = celdaCGSim$K,
-#'   L = celdaCGSim$L,
-#'   nchains = 1)
+# @examples
+# data(celdaCGSim)
+# celdaCGMod <- celda_CG(celdaCGSim$counts,
+#   K = celdaCGSim$K,
+#   L = celdaCGSim$L,
+#   nchains = 1)
 "celdaCGMod"
 
 
 #' @title celdaCGGridSearchRes
 #' @description Example results of old celdaGridSearch on celdaCGSim
 #' @format An object as returned from old celdaGridSearch()
-#' #@examples
-#' data(celdaCGSim)
-#' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
-#'   model = "celda_CG",
-#'   paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-#'   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-#'   bestOnly = TRUE,
-#'   nchains = 1,
-#'   cores = 2
-#' )
+# @examples
+# data(celdaCGSim)
+# celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
+#   model = "celda_CG",
+#   paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
+#   paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
+#   bestOnly = TRUE,
+#   nchains = 1,
+#   cores = 2)
 "celdaCGGridSearchRes"
 
 
 #' @title celdaCSim
 #' @description An old example simulated count matrix from the celda_C model.
 #' @format A list of counts and properties as returned from old simulateCells().
-#' #@examples
-#' celdaCSim <- simulateCells("celda_C")
+# @examples
+# celdaCSim <- simulateCells("celda_C")
 "celdaCSim"
 
 
 #' @title celdaCMod
 #' @description Old celda_C results generated from celdaCSim
 #' @format A celda_C object
-#' #@examples
-#' data(celdaCSim)
-#' celdaCMod <- celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
+# @examples
+# data(celdaCSim)
+# celdaCMod <- celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
 "celdaCMod"
 
 
 #' @title celdaGSim
 #' @description An old example simulated count matrix from the celda_G model.
 #' @format A list of counts and properties as returned from old simulateCells()
-#' #@examples
-#' celdaGSim <- simulateCells("celda_G")
+# @examples
+# celdaGSim <- simulateCells("celda_G")
 "celdaGSim"
 
 
 #' @title celdaGMod
 #' @description Old celda_G results generated from celdaGsim
 #' @format A celda_G object
-#' #@examples
-#' data(celdaGSim)
-#' celdaGMod <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
+# @examples
+# data(celdaGSim)
+# celdaGMod <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 "celdaGMod"
 
 

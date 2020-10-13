@@ -26,6 +26,8 @@ selectBestModel(x, ...)
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{asList}{\code{TRUE} or \code{FALSE}. Whether to return the
 best model as a
 \code{celdaList} object or not. If \code{FALSE}, return the best model as a

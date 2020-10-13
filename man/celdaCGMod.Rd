@@ -6,12 +6,6 @@
 \title{celdaCGmod}
 \format{
 A celda_CG object
-#@examples
-data(celdaCGSim)
-celdaCGMod <- celda_CG(celdaCGSim$counts,
-  K = celdaCGSim$K,
-  L = celdaCGSim$L,
-  nchains = 1)
 }
 \usage{
 celdaCGMod

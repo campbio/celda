@@ -6,16 +6,6 @@
 \title{celdaCGGridSearchRes}
 \format{
 An object as returned from old celdaGridSearch()
-#@examples
-data(celdaCGSim)
-celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
-  model = "celda_CG",
-  paramsTest = list(K = seq(4, 6), L = seq(9, 11)),
-  paramsFixed = list(sampleLabel = celdaCGSim$sampleLabel),
-  bestOnly = TRUE,
-  nchains = 1,
-  cores = 2
-)
 }
 \usage{
 celdaCGGridSearchRes

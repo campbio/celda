@@ -37,6 +37,8 @@ Rows represent features and columns represent cells. Must contain cluster
 labels in \code{celdaClusters(x, altExpName = altExpName)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}

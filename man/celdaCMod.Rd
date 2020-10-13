@@ -6,9 +6,6 @@
 \title{celdaCMod}
 \format{
 A celda_C object
-#@examples
-data(celdaCSim)
-celdaCMod <- celda_C(celdaCSim$counts, K = celdaCSim$K, nchains = 1)
 }
 \usage{
 celdaCMod

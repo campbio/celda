@@ -25,6 +25,8 @@ with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Rownames of the
 matrix or \linkS4class{SingleCellExperiment} object should be gene names.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}

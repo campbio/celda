@@ -14,6 +14,7 @@
 #'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.

@@ -75,16 +75,16 @@
 
 
 #' @title Recursive cell splitting
-#' @description Uses the `celda_C` model to cluster cells into population for
-#'  range of possible K's. The cell population labels of the previous "K-1"
-#'  model are used as the initial values in the current model with K cell
-#'  populations. The best split of an existing cell population is found to
-#'  create the K-th cluster. This procedure is much faster than randomly
-#'  initializing each model with a different K. If module labels for each
-#'  feature are given in 'yInit', the `celda_CG` model will be used to split
-#'  cell populations based on those modules instead of individual features.
-#'  Module labels will also be updated during sampling and thus may end up
-#'  slightly different than `yInit`.
+#' @description Uses the \link{celda_C} model to cluster cells into
+#'  population for range of possible K's. The cell population labels of the
+#'  previous "K-1" model are used as the initial values in the current model
+#'  with K cell populations. The best split of an existing cell population is
+#'  found to create the K-th cluster. This procedure is much faster than
+#'  randomly initializing each model with a different K. If module labels for
+#'  each feature are given in 'yInit', the \link{celda_CG} model will be used to
+#'  split cell populations based on those modules instead of individual
+#'  features. Module labels will also be updated during sampling and thus
+#'  may end up slightly different than \code{yInit}.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
@@ -99,24 +99,24 @@
 #' @param initialK Integer. Minimum number of cell populations to try.
 #' @param maxK Integer. Maximum number of cell populations to try.
 #' @param tempL Integer. Number of temporary modules to identify and use in cell
-#'  splitting. Only used if `yInit = NULL`. Collapsing features to a relatively
-#'  smaller number of modules will increase the speed of clustering and tend to
-#'  produce better cell populations. This number should be larger than the
-#'  number of true modules expected in the dataset. Default NULL.
+#'  splitting. Only used if \code{yInit = NULL}. Collapsing features to a
+#'  relatively smaller number of modules will increase the speed of clustering
+#'  and tend to produce better cell populations. This number should be larger
+#'  than the number of true modules expected in the dataset. Default NULL.
 #' @param yInit Integer vector. Module labels for features. Cells will be
-#'  clustered using the `celda_CG` model based on the modules specified in
-#'  `yInit` rather than the counts of individual features. While the features
-#'  will be initialized to the module labels in `yInit`, the labels will be
-#'  allowed to move within each new model with a different K.
+#'  clustered using the \link{celda_CG} model based on the modules specified in
+#'  \code{yInit} rather than the counts of individual features. While the
+#'  features will be initialized to the module labels in \code{yInit}, the
+#'  labels will be allowed to move within each new model with a different K.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
 #'  to each cell population in each sample. Default 1.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
-#'  each feature in each cell (if `yInit` is NULL) or to each module in each
-#'  cell population (if `yInit` is set). Default 1.
+#'  each feature in each cell (if \code{yInit} is NULL) or to each module in
+#'  each cell population (if \code{yInit} is set). Default 1.
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount
-#'  to each feature in each module. Only used if `yInit` is set. Default 1.
+#'  to each feature in each module. Only used if \code{yInit} is set. Default 1.
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount
-#'  to the number of features in each module. Only used if `yInit` is set.
+#'  to the number of features in each module. Only used if \code{yInit} is set.
 #'  Default 1.
 #' @param minCell Integer. Only attempt to split cell populations with at
 #'  least this many cells.
@@ -130,10 +130,11 @@
 #'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
-#'  `resamplePerplexity()`. Default TRUE.
+#'  \link{resamplePerplexity}. Default TRUE.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
-#'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
 #'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
@@ -872,12 +873,13 @@ setMethod("recursiveSplitCell",
 #'  should be larger than the number of true cell populations expected in the
 #'  dataset. Default 100.
 #' @param zInit Integer vector. Collapse cells to cell populations based on
-#'  labels in `zInit` and then perform module splitting. If NULL, no
-#'  collapasing will be performed unless `tempK` is specified. Default NULL.
+#'  labels in \code{zInit} and then perform module splitting. If NULL, no
+#'  collapasing will be performed unless \code{tempK} is specified.
+#'  Default NULL.
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
-#'  (column) in the count matrix. Only used if `zInit` is set.
+#'  (column) in the count matrix. Only used if \code{zInit} is set.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
-#'  to each cell population in each sample. Only used if `zInit` is set.
+#'  to each cell population in each sample. Only used if \code{zInit} is set.
 #'  Default 1.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount
 #'  to each feature module in each cell. Default 1.
@@ -896,10 +898,11 @@ setMethod("recursiveSplitCell",
 #'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
-#'  `resamplePerplexity()`. Default TRUE.
+#'  \link{resamplePerplexity}. Default TRUE.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
-#'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
 #'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in

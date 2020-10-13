@@ -28,6 +28,8 @@ located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.
 \item A celda model object.}}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 

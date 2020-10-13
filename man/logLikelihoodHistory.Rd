@@ -17,6 +17,8 @@ logLikelihoodHistory(x, ...)
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 model object.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }

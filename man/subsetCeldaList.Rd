@@ -22,6 +22,8 @@ subsetCeldaList(x, ...)
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{params}{List. List of parameters used to subset the matching celda
 models in list \code{"celda_grid_search"} in \code{metadata(x)}.}
 

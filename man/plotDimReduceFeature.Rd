@@ -60,6 +60,8 @@ plotDimReduceFeature(x, ...)
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and

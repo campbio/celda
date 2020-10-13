@@ -18,6 +18,8 @@ cells.}
 
 \item{celdaMod}{A \code{celdaModel} or \code{celdaList} object.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{errorOnMismatch}{Logical. Whether to throw an error in the event of
 a mismatch. Default TRUE.}
 }

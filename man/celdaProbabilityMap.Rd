@@ -23,7 +23,7 @@ celdaProbabilityMap(sce, ...)
   clusterRows = FALSE,
   clusterColumns = FALSE,
   showHeatmapLegend = TRUE,
-  heatmapLegendParam = list(title = NULL, legend_height = unit(6, "cm"))
+  heatmapLegendParam = list(title = NULL, legend_height = grid::unit(6, "cm"))
 )
 }
 \arguments{

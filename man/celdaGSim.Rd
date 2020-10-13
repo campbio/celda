@@ -6,8 +6,6 @@
 \title{celdaGSim}
 \format{
 A list of counts and properties as returned from old simulateCells()
-#@examples
-celdaGSim <- simulateCells("celda_G")
 }
 \usage{
 celdaGSim

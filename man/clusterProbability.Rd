@@ -21,6 +21,8 @@ clusterProbability(sce, ...)
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
 

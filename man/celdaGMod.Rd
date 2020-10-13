@@ -6,9 +6,6 @@
 \title{celdaGMod}
 \format{
 A celda_G object
-#@examples
-data(celdaGSim)
-celdaGMod <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 }
 \usage{
 celdaGMod

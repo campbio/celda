@@ -69,6 +69,8 @@ with the matrix located in the \link[SummarizedExperiment]{assay}
 slot under \code{useAssay} in \code{altExp(x, altExpName)}.
 Rows represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying the name of the
 \link[SummarizedExperiment]{assay} slot to use. Default "counts".}
 

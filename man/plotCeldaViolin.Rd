@@ -32,6 +32,8 @@ plotCeldaViolin(x, ...)
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{features}{Character vector. Uses these genes for plotting.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
