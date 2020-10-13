@@ -830,6 +830,7 @@ setMethod("plotDimReduceModule",
 #'  If NULL, all samples will be plotted together. Default NULL.
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @importFrom ggrepel geom_text_repel
 #' @export
