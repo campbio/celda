@@ -156,9 +156,6 @@ vector of the same length as \code{length(unique(celdaModules(x)))} or
 \item{labelJust}{Passed to \link[multipanelfigure]{fill_panel}.
 Justification for the label within the interpanel spacing grob to the
 top-left of the panel content grob.}
-
-\item{celdaMod}{Celda object of class \link{celda_G} or \link{celda_CG}. Used
-only if \code{x} is a matrix object.}
 }
 \value{
 A \link[multipanelfigure]{multi_panel_figure} object.

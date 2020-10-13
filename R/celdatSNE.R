@@ -45,6 +45,7 @@
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return \code{sce} with t-SNE coordinates
 #'  (columns "celda_tSNE1" & "celda_tSNE2") added to
 #'  \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_tSNE")}.

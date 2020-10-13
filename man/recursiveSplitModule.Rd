@@ -56,6 +56,8 @@ recursiveSplitModule(x, ...)
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
 \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
@@ -75,14 +77,15 @@ should be larger than the number of true cell populations expected in the
 dataset. Default 100.}
 
 \item{zInit}{Integer vector. Collapse cells to cell populations based on
-labels in `zInit` and then perform module splitting. If NULL, no
-collapasing will be performed unless `tempK` is specified. Default NULL.}
+labels in \code{zInit} and then perform module splitting. If NULL, no
+collapasing will be performed unless \code{tempK} is specified.
+Default NULL.}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
-(column) in the count matrix. Only used if `zInit` is set.}
+(column) in the count matrix. Only used if \code{zInit} is set.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount
-to each cell population in each sample. Only used if `zInit` is set.
+to each cell population in each sample. Only used if \code{zInit} is set.
 Default 1.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount
@@ -108,12 +111,12 @@ a default value of 12345 is used. If NULL, no calls to
 
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
-`resamplePerplexity()`. Default TRUE.}
+\link{resamplePerplexity}. Default TRUE.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
-`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+"logfile". If NULL, messages will be printed to stdout.  Default NULL.}
 }
 \value{
 A \linkS4class{SingleCellExperiment} object. Function

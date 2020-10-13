@@ -27,6 +27,7 @@
 #' @param fdrThreshold Numeric. A number between 0 and 1 that specifies the
 #'  false discovery rate (FDR) threshold. Only features below this threshold
 #'  will be returned. Default 1.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Data frame containing MAST results including statistics such as
 #'  p-value, log2 fold change, and FDR.
 #' @export

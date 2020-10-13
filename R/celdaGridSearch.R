@@ -46,6 +46,7 @@
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
 #'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @seealso \link{celda_G} for feature clustering, \link{celda_C} for
 #'  clustering of cells, and \link{celda_CG} for simultaneous clustering of
 #'  features and cells. \link{subsetCeldaList} can subset the \code{celdaList}
@@ -444,6 +445,7 @@ setMethod("celdaGridSearch",
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing
@@ -587,6 +589,7 @@ setMethod("subsetCeldaList",
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing

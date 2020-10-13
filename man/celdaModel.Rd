@@ -14,6 +14,8 @@ celdaModel(sce, ...)
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }

@@ -46,6 +46,8 @@ using older versions of \code{celda}.}
 \code{celdaModel}. Dimensions and MD5 checksum will be checked by
 \link{compareCountMatrix}.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying the name of the
 \link[SummarizedExperiment]{assay} slot to use. Default "counts".}
 

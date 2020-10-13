@@ -20,6 +20,7 @@
 #' @param fdr False discovery rate (FDR). Numeric. Cutoff value for adjusted
 #'  p-value, terms with FDR below this value are considered significantly
 #'  enriched.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return List of length 'L' where each member contains the significantly
 #'  enriched terms for the corresponding module.
 #' @importFrom enrichR enrichr

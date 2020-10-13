@@ -39,6 +39,7 @@
 #'  number of columns for facet wrap.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the genes.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @param decreasing logical. Specifies the order of plotting the points.
 #'  If \code{FALSE}, the points will be plotted in increasing order where
 #'  the points with largest values will be on top. \code{TRUE} otherwise.
@@ -329,6 +330,7 @@ setMethod("plotDimReduceGrid",
 #'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceFeature", function(x, ...) {
@@ -601,6 +603,7 @@ setMethod("plotDimReduceFeature",
 #'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceModule", function(x, ...) {
@@ -1035,6 +1038,7 @@ setMethod("plotDimReduceCluster",
 #'  curve. Default \code{TRUE}.
 #' @param dotSize Numeric. Size of points if \code{plotDots = TRUE}.
 #' Default \code{0.1}.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Violin plot for each feature, grouped by celda cluster
 #' @export
 setGeneric("plotCeldaViolin", function(x, ...) {

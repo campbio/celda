@@ -10,7 +10,8 @@ params(celdaMod)
 \S4method{params}{celdaModel}(celdaMod)
 }
 \arguments{
-\item{celdaMod}{celdaModel. Options available in `celda::availableModels`.}
+\item{celdaMod}{celdaModel. Options available in
+\code{celda::availableModels}.}
 }
 \value{
 List. Contains the model-specific parameters for the provided celda

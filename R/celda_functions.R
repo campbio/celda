@@ -238,6 +238,7 @@ recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
 #' @param celdaMod A \code{celdaModel} or \code{celdaList} object.
 #' @param errorOnMismatch Logical. Whether to throw an error in the event of
 #'  a mismatch. Default TRUE.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Returns TRUE if provided count matrix matches the one used in the
 #'  celda object and/or \code{errorOnMismatch = FALSE}, FALSE otherwise.
 #' @export

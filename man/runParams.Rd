@@ -17,6 +17,8 @@ runParams(x, ...)
 \item{x}{An object of class \linkS4class{SingleCellExperiment} or class
 \code{celdaList}.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }

@@ -38,6 +38,8 @@ cells. This matrix should be the same as the one used to generate
 \item{celdaMod}{Celda model object. Only works if \code{x} is an integer
 counts matrix.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 Default "counts".}

@@ -172,7 +172,7 @@ topGenes$names$L1
 The clustering results can be viewed with a heatmap of the normalized counts using the function `celdaHeatmap`. The top `nfeatures` in each module will be selected according to the factorized module probability matrix. 
 
 ```{r, eval = TRUE, fig.width = 7, fig.height = 7}
-celdaHeatmap(sce = sce, nfeatures = 10)
+plot(celdaHeatmap(sce = sce, nfeatures = 10))
 ```
 
 ## Plotting cell populations with tSNE
@@ -217,11 +217,11 @@ normCounts <- normalizeCounts(counts = counts(altExp(sce)), scaleFun = scale)
 ```
 
 ```{r, fig.width = 8, fig.height = 8}
-plotHeatmap(counts = normCounts,
+plot(plotHeatmap(counts = normCounts,
     z = celdaClusters(sce),
     y = celdaModules(sce),
     featureIx = geneIx,
-    showNamesFeature = TRUE)
+    showNamesFeature = TRUE))
 ```
 
 # Differential Expression Analysis
@@ -254,12 +254,12 @@ normCounts <- normalizeCounts(counts = counts(altExp(sce)), scaleFun = scale)
 ```
 
 ```{r}
-plotHeatmap(counts = normCounts[, celdaClusters(sce) %in% c(1, 2)],
+plot(plotHeatmap(counts = normCounts[, celdaClusters(sce) %in% c(1, 2)],
     clusterCell = TRUE,
     z = celdaClusters(sce)[celdaClusters(sce) %in% c(1, 2)],
     y = celdaModules(sce),
     featureIx = diffexpGeneIx,
-    showNamesFeature = TRUE)
+    showNamesFeature = TRUE))
 ```
 
 # Identifying the optimal number of cell subpopulations and feature modules

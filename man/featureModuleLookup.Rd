@@ -20,6 +20,8 @@ featureModuleLookup(sce, ...)
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{feature}{Character vector. Identify feature modules for the specified
 feature names. \code{feature} must match the rownames of \code{sce}.}
 

@@ -20,6 +20,7 @@
 #' @param newCounts A new counts matrix used to calculate perplexity. If NULL,
 #'  perplexity will be calculated for the matrix in \code{useAssay} slot in
 #'  \code{x}. Default NULL.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Numeric. The perplexity for the provided \code{x} (and
 #'  \code{celdaModel}).
 #' @export
@@ -358,6 +359,7 @@ setMethod(
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object or
 #'  \code{celdaList} object with a \code{perplexity}
 #'  property, detailing the perplexity of all K/L combinations that appeared in
@@ -484,6 +486,7 @@ setMethod("resamplePerplexity",
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
 #' @export
@@ -744,6 +747,7 @@ setMethod("plotGridSearchPerplexity",
 #'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
 #' @param n Integer. Width of the rolling window. Default 10.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A ggplot plot object showing perplexity diferences as a function of
 #'  clustering parameters.
 #' @export

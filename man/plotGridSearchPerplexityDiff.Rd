@@ -21,6 +21,8 @@ plotGridSearchPerplexityDiff(x, ...)
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 

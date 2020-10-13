@@ -57,6 +57,7 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.

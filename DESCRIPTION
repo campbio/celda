@@ -24,7 +24,7 @@ Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: false
+LazyData: true
 RoxygenNote: 7.1.1
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian

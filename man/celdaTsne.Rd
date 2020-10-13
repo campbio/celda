@@ -28,6 +28,8 @@ celdaTsne(sce, ...)
 \item{sce}{A \linkS4class{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
 

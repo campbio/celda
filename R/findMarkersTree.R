@@ -47,6 +47,7 @@
 #'  cluster that includes several clusters within it. Default is TRUE.
 #' @param seed Numeric. Seed used to enable reproducible UMAP results
 #'  for identifying metaclusters. Default is 12345.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A named list with six elements:
 #' \itemize{
 #'   \item rules - A named list with one data frame for every label. Each

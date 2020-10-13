@@ -27,6 +27,8 @@ Rows represent features and columns represent cells.}
 \item{celdaMod}{celda model object. Ignored if \code{x} is a
 \linkS4class{SingleCellExperiment} object.}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
 

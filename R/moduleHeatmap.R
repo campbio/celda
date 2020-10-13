@@ -15,8 +15,6 @@
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param celdaMod Celda object of class \link{celda_G} or \link{celda_CG}. Used
-#'  only if \code{x} is a matrix object.
 #' @param featureModule Integer Vector. The featureModule(s) to display.
 #'  Multiple modules can be included in a vector. Default \code{NULL} which
 #'  plots all module heatmaps.

@@ -30,6 +30,8 @@ a \link[SingleCellExperiment]{altExp} slot with name \code{altExpName} will
 be used. Rows represent features and columns represent cells.
 \item Celda model object.}}
 
+\item{...}{Ignored. Placeholder to prevent check warning.}
+
 \item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 

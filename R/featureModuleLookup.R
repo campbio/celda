@@ -12,6 +12,7 @@
 #'  to use. Default "featureSubset".
 #' @param exactMatch Logical. Whether to look for exactMatch of the gene name
 #'  within counts matrix. Default \code{TRUE}.
+#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return List. Each entry corresponds to the feature module determined for
 #' the provided features.
 #' @export
