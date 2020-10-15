@@ -440,9 +440,6 @@ setMethod("celdaGridSearch",
 #'  \item celdaList object.}
 #' @param params List. List of parameters used to subset the matching celda
 #'  models in list \code{"celda_grid_search"} in \code{metadata(x)}.
-#' @param useAssay A string specifying which \code{assay}
-#'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
@@ -479,7 +476,7 @@ setGeneric("subsetCeldaList", function(x, ...) {
 #' @export
 setMethod("subsetCeldaList",
     signature(x = "SingleCellExperiment"),
-    function(x, params, useAssay = "counts", altExpName = "featureSubset") {
+    function(x, params, altExpName = "featureSubset") {
 
         ## Check for bad parameter names
         if (!all(names(params) %in% colnames(runParams(x,
@@ -584,9 +581,6 @@ setMethod("subsetCeldaList",
 #'  best model as a
 #'  \code{celdaList} object or not. If \code{FALSE}, return the best model as a
 #'  corresponding celda model object.
-#' @param useAssay A string specifying which \code{assay}
-#'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
@@ -620,8 +614,7 @@ setGeneric("selectBestModel", function(x, ...) {
 #' @importFrom data.table as.data.table
 #' @export
 setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
-    function(x, asList = FALSE, useAssay = "counts",
-        altExpName = "featureSubset") {
+    function(x, asList = FALSE, altExpName = "featureSubset") {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         logLikelihood <- NULL
