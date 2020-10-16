@@ -51,9 +51,9 @@ Rows represent features and columns represent cells.}
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
-\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+\link{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{model}{Celda model. Options available in \link{availableModels}.}
@@ -98,7 +98,7 @@ and main process. Default "Celda".}
 \value{
 A \linkS4class{SingleCellExperiment} object. Function
  parameter settings and celda model results are stored in the
- \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
+ \link{metadata} \code{"celda_grid_search"} slot.
 }
 \description{
 Run Celda with different combinations of parameters and

@@ -8,9 +8,9 @@
 #'  Module probabilities are square-root transformed before applying tSNE.
 #' @param sce A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if \code{ncol(counts) > maxCells}. Larger numbers of
@@ -48,7 +48,7 @@
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return \code{sce} with t-SNE coordinates
 #'  (columns "celda_tSNE1" & "celda_tSNE2") added to
-#'  \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_tSNE")}.
+#'  \code{\link{reducedDim}(sce, "celda_tSNE")}.
 #' @export
 setGeneric("celdaTsne",
     function(sce, ...) {

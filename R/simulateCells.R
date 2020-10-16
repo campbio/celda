@@ -41,13 +41,13 @@
 #'  \link[withr]{with_seed} are made.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object with
 #'  simulated count matrix stored in the "counts" assay slot. Function
-#'  parameter settings are stored in the \link[S4Vectors]{metadata} slot. For
+#'  parameter settings are stored in the \link{metadata} slot. For
 #'  \code{"celda_CG"} and \code{"celda_C"} models,
 #'  columns \code{celda_sample_label} and \code{celda_cell_cluster} in
-#'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
+#'  \link{colData} contain simulated sample labels and
 #'  cell population clusters. For \code{"celda_CG"} and \code{"celda_G"}
 #'  models, column \code{celda_feature_module} in
-#'  \link[SummarizedExperiment]{rowData} contains simulated gene modules.
+#'  \link{rowData} contains simulated gene modules.
 #' @examples
 #' sce <- simulateCells()
 #' @export

@@ -5,9 +5,9 @@
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use for \code{x}. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param module Integer. The module to be split.
 #' @param n Integer. How many modules should \code{module} be split into.
@@ -18,7 +18,7 @@
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A updated \linkS4class{SingleCellExperiment} object with new
 #'  feature modules stored in column \code{celda_feature_module} in
-#'  \code{\link[SummarizedExperiment]{rowData}(x)}.
+#'  \code{\link{rowData}(x)}.
 #' @export
 setGeneric("splitModule",
     function(x, ...) {

@@ -22,10 +22,10 @@ returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
 \item{...}{Additional parameters passed to \link{plotHeatmap}.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{featureIx}{Integer vector. Select features for display in heatmap. If

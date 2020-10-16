@@ -5,9 +5,9 @@
 #'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod celda model object. Ignored if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
@@ -154,7 +154,7 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to
@@ -205,7 +205,7 @@ setMethod("logLikelihoodHistory",
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @export

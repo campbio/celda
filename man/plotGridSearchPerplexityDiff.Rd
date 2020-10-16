@@ -23,7 +23,7 @@ plotGridSearchPerplexityDiff(x, ...)
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{sep}{Numeric. Breaks in the x axis of the resulting plot.}

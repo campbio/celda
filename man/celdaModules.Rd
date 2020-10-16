@@ -22,7 +22,7 @@ celdaModules(sce, altExpName = "featureSubset") <- value
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{value}{Character vector of feature module labels for replacements.

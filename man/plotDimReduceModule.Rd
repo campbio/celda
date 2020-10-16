@@ -63,11 +63,11 @@ First dimension from data dimension reduction output.}
 \item{dim2}{Numeric vector.
 Second dimension from data dimension reduction output.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{modules}{Character vector. Module(s) from celda model to be plotted.
@@ -76,7 +76,7 @@ e.g. c("1", "2").}
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
 
-\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient}. The range
+\item{limits}{Passed to \link{scale_colour_gradient}. The range
 of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}

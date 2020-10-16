@@ -30,10 +30,10 @@ returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
@@ -82,7 +82,7 @@ a default value of 12345 is used. If NULL, no calls to
 \value{
 \code{sce} with t-SNE coordinates
  (columns "celda_tSNE1" & "celda_tSNE2") added to
- \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_tSNE")}.
+ \code{\link{reducedDim}(sce, "celda_tSNE")}.
 }
 \description{
 Embeds cells in two dimensions using \link[Rtsne]{Rtsne} based

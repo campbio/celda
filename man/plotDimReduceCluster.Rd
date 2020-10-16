@@ -49,7 +49,7 @@ column in \code{colData(x)}.}
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{dim1}{Numeric vector. First dimension from data
@@ -85,7 +85,10 @@ The plot as a ggplot object
 Create a scatterplot for each row of a normalized
  gene expression matrix where x and y axis are from a
  data dimension reduction tool.
- The cells are colored by its given \code{cluster} label.
+ The cells are colored by "celda_cell_cluster" column in
+  \code{colData(altExp(x, altExpName))} if \code{x} is a
+  \linkS4class{SingleCellExperiment} object, or \code{x} if \code{x} is
+  a integer vector of cell cluster labels.
 }
 \examples{
 data(sceCeldaCG)

@@ -8,9 +8,9 @@
 #'  transformed before applying UMAP.
 #' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param maxCells Integer. Maximum number of cells to plot. Cells will be
 #'  randomly subsampled if \code{ncol(sce) > maxCells}. Larger numbers of cells
@@ -62,7 +62,7 @@
 #' @param ... Additional parameters to pass to \link[uwot]{umap}.
 #' @return \code{sce} with UMAP coordinates
 #'  (columns "celda_UMAP1" & "celda_UMAP2") added to
-#'  \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_UMAP")}.
+#'  \code{\link{reducedDim}(sce, "celda_UMAP")}.
 #' @export
 setGeneric("celdaUmap",
     function(sce, ...) {
