@@ -28,7 +28,7 @@ best model as a
 \code{celdaList} object or not. If \code{FALSE}, return the best model as a
 corresponding celda model object.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
@@ -39,10 +39,10 @@ One of
  \code{metadata(x)}. If there is only one set of parameters,
  a new \linkS4class{SingleCellExperiment} object
  with the matching model stored in the
- \link[S4Vectors]{metadata}
+ \link{metadata}
  \code{"celda_parameters"} slot will be returned. Otherwise, a new
  \linkS4class{SingleCellExperiment} object with the subset models stored
- in the \link[S4Vectors]{metadata}
+ in the \link{metadata}
  \code{"celda_grid_search"} slot will be returned.
  \item A new \code{celdaList} object containing one model with the best
  log-likelihood for each set of parameters. If only one set of parameters

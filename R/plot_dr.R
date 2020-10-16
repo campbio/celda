@@ -12,15 +12,15 @@
 #'  reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default 'Dimension_1'.
 #' @param ylab Character vector. Label for the y-axis. Default 'Dimension_2'.
-#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#' @param limits Passed to \link{scale_colour_gradient2}. The range
 #'  of color scale.
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
@@ -291,10 +291,10 @@ setMethod("plotDimReduceGrid",
 #'  dimension reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param features Character vector. Features in the rownames of counts to plot.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
@@ -309,7 +309,7 @@ setMethod("plotDimReduceGrid",
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for the data. This threshold is applied after row scaling.
 #'  Set to NULL to disable. Default \code{c(-1,1)}.
-#' @param limits Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+#' @param limits Passed to \link{scale_colour_gradient2}. The range
 #'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
@@ -576,10 +576,10 @@ setMethod("plotDimReduceFeature",
 #'  First dimension from data dimension reduction output.
 #' @param dim2 Numeric vector.
 #'  Second dimension from data dimension reduction output.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG". Used only if
 #'  \code{x} is a matrix object.
@@ -587,7 +587,7 @@ setMethod("plotDimReduceFeature",
 #'  e.g. c("1", "2").
 #' @param rescale Logical.
 #'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
-#' @param limits Passed to \link[ggplot2]{scale_colour_gradient}. The range
+#' @param limits Passed to \link{scale_colour_gradient}. The range
 #'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
@@ -814,7 +814,7 @@ setMethod("plotDimReduceModule",
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param dim1 Numeric vector. First dimension from data
 #'  dimension reduction output.
@@ -1027,10 +1027,10 @@ setMethod("plotDimReduceCluster",
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
 #' @param features Character vector. Uses these genes for plotting.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod Celda object of class "celda_G" or "celda_CG". Used only if
 #'  \code{x} is a matrix object.

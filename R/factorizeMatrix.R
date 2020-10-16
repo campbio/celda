@@ -11,10 +11,10 @@
 #'  \item Integer counts matrix. Rows represent features and columns represent
 #'  cells. This matrix should be the same as the one used to generate
 #'  \code{celdaMod}.}
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 #'  Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod Celda model object. Only works if \code{x} is an integer
 #'  counts matrix.

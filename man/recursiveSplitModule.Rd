@@ -58,11 +58,11 @@ Rows represent features and columns represent cells.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
 \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{initialL}{Integer. Minimum number of modules to try.}
@@ -121,7 +121,7 @@ If FALSE, then perplexity can be calculated later with
 \value{
 A \linkS4class{SingleCellExperiment} object. Function
  parameter settings and celda model results are stored in the
- \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+ \link{metadata} \code{"celda_grid_search"} slot. The models in
  the list will be of class \link{celda_G} if \code{zInit = NULL} or
  \link{celda_CG} if \code{zInit} is set.
 }

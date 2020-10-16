@@ -46,11 +46,11 @@ Rows represent features and columns represent cells.}
 
 \item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{featureModule}{Integer Vector. The featureModule(s) to display.

@@ -49,7 +49,7 @@ column in \code{colData(x)}.}
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{dim1}{Numeric vector. First dimension from data

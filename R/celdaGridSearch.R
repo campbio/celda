@@ -12,8 +12,8 @@
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying the name of the
-#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  \link{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param model Celda model. Options available in \link{availableModels}.
 #' @param paramsTest List. A list denoting the combinations of parameters to
@@ -45,7 +45,7 @@
 #'  and main process. Default "Celda".
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
-#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
+#'  \link{metadata} \code{"celda_grid_search"} slot.
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @seealso \link{celda_G} for feature clustering, \link{celda_C} for
 #'  clustering of cells, and \link{celda_CG} for simultaneous clustering of
@@ -440,7 +440,7 @@ setMethod("celdaGridSearch",
 #'  \item celdaList object.}
 #' @param params List. List of parameters used to subset the matching celda
 #'  models in list \code{"celda_grid_search"} in \code{metadata(x)}.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return One of
@@ -451,10 +451,10 @@ setMethod("celdaGridSearch",
 #'  \code{"celda_grid_search"} slot in \code{metadata(x)} matches
 #'  the given criteria, a new \linkS4class{SingleCellExperiment} object
 #'  with the matching model stored in the
-#'  \link[S4Vectors]{metadata}
+#'  \link{metadata}
 #'  \code{"celda_parameters"} slot will be returned. Otherwise, a new
 #'  \linkS4class{SingleCellExperiment} object with the subset models stored
-#'  in the \link[S4Vectors]{metadata}
+#'  in the \link{metadata}
 #'  \code{"celda_grid_search"} slot will be returned.
 #'  \item A new \code{celdaList} object containing all models matching the
 #'  provided criteria in \code{params}. If only one item in the
@@ -581,7 +581,7 @@ setMethod("subsetCeldaList",
 #'  best model as a
 #'  \code{celdaList} object or not. If \code{FALSE}, return the best model as a
 #'  corresponding celda model object.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return One of
@@ -591,10 +591,10 @@ setMethod("subsetCeldaList",
 #'  \code{metadata(x)}. If there is only one set of parameters,
 #'  a new \linkS4class{SingleCellExperiment} object
 #'  with the matching model stored in the
-#'  \link[S4Vectors]{metadata}
+#'  \link{metadata}
 #'  \code{"celda_parameters"} slot will be returned. Otherwise, a new
 #'  \linkS4class{SingleCellExperiment} object with the subset models stored
-#'  in the \link[S4Vectors]{metadata}
+#'  in the \link{metadata}
 #'  \code{"celda_grid_search"} slot will be returned.
 #'  \item A new \code{celdaList} object containing one model with the best
 #'  log-likelihood for each set of parameters. If only one set of parameters

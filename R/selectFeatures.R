@@ -3,8 +3,8 @@
 #'  Select features with at least \code{minCount} counts
 #'  in at least \code{minCell} cells. A \linkS4class{SingleCellExperiment}
 #'  object with subset features will be stored in the
-#'  \link[SingleCellExperiment]{altExp} slot with name \code{altExpName}.
-#'  The name of the \code{assay} slot in \link[SingleCellExperiment]{altExp}
+#'  \link{altExp} slot with name \code{altExpName}.
+#'  The name of the \code{assay} slot in \link{altExp}
 #'  will be the same as \code{useAssay}.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
@@ -13,13 +13,13 @@
 #' @param minCount Minimum number of counts required for feature selection.
 #' @param minCell Minimum number of cells required for feature selection.
 #' @param useAssay A string specifying the name of the
-#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#'  \link{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object with a
-#'  \code{altExpName} \link[SingleCellExperiment]{altExp} slot. Function
-#'  parameter settings are stored in the \link[S4Vectors]{metadata}
+#'  \code{altExpName} \link{altExp} slot. Function
+#'  parameter settings are stored in the \link{metadata}
 #'  \code{"select_features"} slot.
 #' @export
 setGeneric("selectFeatures", function(x, ...) {

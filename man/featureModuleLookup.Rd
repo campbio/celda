@@ -25,7 +25,7 @@ Rows represent features and columns represent cells.}
 \item{feature}{Character vector. Identify feature modules for the specified
 feature names. \code{feature} must match the rownames of \code{sce}.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{exactMatch}{Logical. Whether to look for exactMatch of the gene name

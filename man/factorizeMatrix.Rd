@@ -40,11 +40,11 @@ counts matrix.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
 Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{type}{Character vector. A vector containing one or more of "counts",

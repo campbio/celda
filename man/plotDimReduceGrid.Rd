@@ -65,11 +65,11 @@ reduction output.}
 \item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
@@ -78,7 +78,7 @@ to use. Default "featureSubset".}
 
 \item{ylab}{Character vector. Label for the y-axis. Default 'Dimension_2'.}
 
-\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
+\item{limits}{Passed to \link{scale_colour_gradient2}. The range
 of color scale.}
 
 \item{colorLow}{Character. A color available from `colors()`.

@@ -27,11 +27,11 @@ matrix or \linkS4class{SingleCellExperiment} object should be gene names.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{databases}{Character vector. Name of reference database. Available

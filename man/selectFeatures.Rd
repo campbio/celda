@@ -37,15 +37,15 @@ Rows represent features and columns represent cells.}
 \item{minCell}{Minimum number of cells required for feature selection.}
 
 \item{useAssay}{A string specifying the name of the
-\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+\link{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
 A \linkS4class{SingleCellExperiment} object with a
- \code{altExpName} \link[SingleCellExperiment]{altExp} slot. Function
- parameter settings are stored in the \link[S4Vectors]{metadata}
+ \code{altExpName} \link{altExp} slot. Function
+ parameter settings are stored in the \link{metadata}
  \code{"select_features"} slot.
 }
 \description{
@@ -53,8 +53,8 @@ A simple heuristic feature selection procedure.
  Select features with at least \code{minCount} counts
  in at least \code{minCell} cells. A \linkS4class{SingleCellExperiment}
  object with subset features will be stored in the
- \link[SingleCellExperiment]{altExp} slot with name \code{altExpName}.
- The name of the \code{assay} slot in \link[SingleCellExperiment]{altExp}
+ \link{altExp} slot with name \code{altExpName}.
+ The name of the \code{assay} slot in \link{altExp}
  will be the same as \code{useAssay}.
 }
 \examples{

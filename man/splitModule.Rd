@@ -23,10 +23,10 @@ Rows represent features and columns represent cells.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+\item{useAssay}{A string specifying which \link{assay}
 slot to use for \code{x}. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{module}{Integer. The module to be split.}
@@ -41,7 +41,7 @@ a default value of 12345 is used. If NULL, no calls to
 \value{
 A updated \linkS4class{SingleCellExperiment} object with new
  feature modules stored in column \code{celda_feature_module} in
- \code{\link[SummarizedExperiment]{rowData}(x)}.
+ \code{\link{rowData}(x)}.
 }
 \description{
 Manually select a celda feature module to split into 2 or

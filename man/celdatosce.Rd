@@ -49,19 +49,19 @@ using older versions of \code{celda}.}
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
-\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+\link{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
 A \linkS4class{SingleCellExperiment} object. Function
- parameter settings are stored in the \link[S4Vectors]{metadata}
+ parameter settings are stored in the \link{metadata}
  \code{"celda_parameters"} slot.
  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
- \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+ \link{colData} contain sample labels and celda cell
  population clusters. Column \code{celda_feature_module} in
- \link[SummarizedExperiment]{rowData} contain feature modules.
+ \link{rowData} contain feature modules.
 }
 \description{
 Convert a old celda model object (\code{celda_C},

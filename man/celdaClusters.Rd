@@ -26,13 +26,13 @@ celdaClusters(x, altExpName = "featureSubset") <- value
 \item A \linkS4class{SingleCellExperiment} object returned by
 \link{celda_C}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot. The
-a \link[SingleCellExperiment]{altExp} slot with name \code{altExpName} will
+a \link{altExp} slot with name \code{altExpName} will
 be used. Rows represent features and columns represent cells.
 \item Celda model object.}}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{value}{Character vector of cell cluster labels for replacements. Works

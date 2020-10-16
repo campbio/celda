@@ -3,9 +3,9 @@
 #'  clustering results.
 #' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param featureIx Integer vector. Select features for display in heatmap. If
 #'  NULL, no subsetting will be performed. Default NULL. \strong{Only used for

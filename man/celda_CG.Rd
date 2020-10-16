@@ -65,16 +65,16 @@ celda_CG(x, ...)
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
 \linkS4class{SingleCellExperiment}
-with the matrix located in the \link[SummarizedExperiment]{assay}
+with the matrix located in the \link{assay}
 slot under \code{useAssay} in \code{altExp(x, altExpName)}.
 Rows represent features and columns represent cells.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
-\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+\link{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
@@ -107,12 +107,13 @@ likelihood to stop inference. Default 10.}
 \item{maxIter}{Integer. Maximum number of iterations of Gibbs sampling to
 perform. Default 200.}
 
-\item{splitOnIter}{Integer. On every `splitOnIter` iteration, a heuristic
+\item{splitOnIter}{Integer. On every \code{splitOnIter} iteration,
+a heuristic
 will be applied to determine if a cell population or feature module should
 be reassigned and another cell population or feature module should be split
 into two clusters. To disable splitting, set to -1. Default 10.}
 
-\item{splitOnLast}{Integer. After `stopIter` iterations have been
+\item{splitOnLast}{Integer. After \code{stopIter} iterations have been
 performed without improvement, a heuristic will be applied to determine if
 a cell population or feature module should be reassigned and another cell
 population or feature module should be split into two clusters. If a split
@@ -128,24 +129,24 @@ a default value of 12345 is used. If NULL, no calls to
 With 'random', cells are randomly assigned to a populations. With 'split',
 cells will be split into sqrt(K) populations and then each popluation will
 be subsequently split into another sqrt(K) populations. With 'predefined',
-values in `zInit` will be used to initialize `z`. Default 'split'.}
+values in \code{zInit} will be used to initialize \code{z}. Default 'split'.}
 
 \item{yInitialize}{Chararacter. One of 'random', 'split', or 'predefined'.
 With 'random', features are randomly assigned to a modules. With 'split',
 features will be split into sqrt(L) modules and then each module will be
 subsequently split into another sqrt(L) modules. With 'predefined', values
-in `yInit` will be used to initialize `y`. Default 'split'.}
+in \code{yInit} will be used to initialize \code{y}. Default 'split'.}
 
-\item{countChecksum}{Character. An MD5 checksum for the `counts` matrix.
+\item{countChecksum}{Character. An MD5 checksum for the counts matrix.
 Default NULL.}
 
 \item{zInit}{Integer vector. Sets initial starting values of z. If NULL,
 starting values for each cell will be randomly sampled from 1:K. 'zInit'
-can only be used when `initialize' = 'random'`. Default NULL.}
+can only be used when \code{initialize = "random"}. Default NULL.}
 
 \item{yInit}{Integer vector. Sets initial starting values of y. If NULL,
 starting values for each feature will be randomly sampled from 1:L.
-'yInit' can only be used when `initialize = 'random'`. Default NULL.}
+'yInit' can only be used when \code{initialize = "random"}. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
@@ -154,21 +155,21 @@ starting values for each feature will be randomly sampled from 1:L.
 }
 \value{
 A \linkS4class{SingleCellExperiment} object. Function
- parameter settings are stored in \link[S4Vectors]{metadata}
- \code{"celda_parameters"} in \link[SingleCellExperiment]{altExp} slot.
- In \link[SingleCellExperiment]{altExp} slot,
+ parameter settings are stored in \link{metadata}
+ \code{"celda_parameters"} in \link{altExp} slot.
+ In \link{altExp} slot,
  columns \code{celda_sample_label} and \code{celda_cell_cluster} in
- \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+ \link{colData} contain sample labels and celda cell
  population clusters. Column \code{celda_feature_module} in
- \link[SummarizedExperiment]{rowData} contains feature modules.
+ \link{rowData} contains feature modules.
 }
 \description{
 Clusters the rows and columns of a count matrix containing
  single-cell data into L modules and K subpopulations, respectively. The
- \code{useAssay} \link[SummarizedExperiment]{assay} slot in
- \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+ \code{useAssay} \link{assay} slot in
+ \code{altExpName} \link{altExp} slot will be used if
  it exists. Otherwise, the \code{useAssay}
- \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+ \link{assay} slot in \code{x} will be used if
  \code{x} is a \linkS4class{SingleCellExperiment} object.
 }
 \examples{

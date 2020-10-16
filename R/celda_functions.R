@@ -137,7 +137,7 @@ normalizeCounts <- function(counts,
 #' @param sce \linkS4class{SingleCellExperiment} object returned from
 #'  \link{celda_C} or \link{celda_CG}. Must contain column
 #'  \code{celda_cell_cluster} in
-#'  \code{\link[SummarizedExperiment]{colData}(altExp(sce, altExpName))}.
+#'  \code{\link{colData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
 #'  the original cluster
@@ -145,7 +145,7 @@ normalizeCounts <- function(counts,
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
 #'  the new cluster labels.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell
 #'  cluster labels.
@@ -188,13 +188,13 @@ recodeClusterZ <- function(sce, from, to, altExpName = "featureSubset") {
 #' @param sce \linkS4class{SingleCellExperiment} object returned from
 #'  \link{celda_G} or \link{celda_CG}. Must contain column
 #'  \code{celda_feature_module} in
-#'  \code{\link[SummarizedExperiment]{rowData}(altExp(sce, altExpName))}.
+#'  \code{\link{rowData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the original module labels
 #'  in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the new module labels.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @return @return \linkS4class{SingleCellExperiment} object with recoded
 #'  feature module labels.
@@ -525,9 +525,9 @@ distinctColors <- function(n,
 #'  \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param outputFile File name for feature module table. If NULL, file will
 #'  not be created. Default NULL.

@@ -62,9 +62,9 @@ Rows represent features and columns represent cells.}
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
-\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
+\link{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
+\item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
@@ -127,19 +127,19 @@ can only be used when `initialize = 'random'`. Default NULL.}
 }
 \value{
 A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
- parameter settings are stored in the \link[S4Vectors]{metadata}
+ parameter settings are stored in the \link{metadata}
  \code{"celda_parameters"} slot.
  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
- \link[SummarizedExperiment]{colData} contain sample labels and celda cell
+ \link{colData} contain sample labels and celda cell
  population clusters.
 }
 \description{
 Clusters the columns of a count matrix containing single-cell
  data into K subpopulations. The
- \code{useAssay} \link[SummarizedExperiment]{assay} slot in
- \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
+ \code{useAssay} \link{assay} slot in
+ \code{altExpName} \link{altExp} slot will be used if
  it exists. Otherwise, the \code{useAssay}
- \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+ \link{assay} slot in \code{x} will be used if
  \code{x} is a \linkS4class{SingleCellExperiment} object.
 }
 \examples{

@@ -8,10 +8,10 @@
 #'  \item A \linkS4class{SingleCellExperiment} object returned by
 #'  \link{celda_C}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot. The
-#'  a \link[SingleCellExperiment]{altExp} slot with name \code{altExpName} will
+#'  a \link{altExp} slot with name \code{altExpName} will
 #'  be used. Rows represent features and columns represent cells.
 #'  \item Celda model object.}
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param value Character vector of cell cluster labels for replacements. Works
 #'  only if \code{x} is a \linkS4class{SingleCellExperiment} object.
@@ -85,7 +85,7 @@ setReplaceMethod("celdaClusters", signature(x = "SingleCellExperiment"),
 #'  \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param value Character vector of feature module labels for replacements.
 #'  Works only if \code{x} is a \linkS4class{SingleCellExperiment} object.
@@ -141,7 +141,7 @@ setReplaceMethod("celdaModules", signature(sce = "SingleCellExperiment"),
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
 #'  \item A celda model object.}
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param value Character vector of sample labels for replacements. Works
 #'  only is \code{x} is a \linkS4class{SingleCellExperiment} object.
@@ -263,7 +263,7 @@ setMethod("matrixNames",
 #'  priors from the celdaList object when it was created.
 #' @param x An object of class \linkS4class{SingleCellExperiment} or class
 #'  \code{celdaList}.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Data Frame. Contains details on the various K/L parameters, chain
@@ -310,7 +310,7 @@ setMethod("runParams",
 #'  \link{celdaGridSearch} run.
 #' @param x An object of class \linkS4class{SingleCellExperiment} or
 #'  \code{celdaList}.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return List. Contains one celdaModel object for each of the parameters
@@ -357,7 +357,7 @@ setMethod("resList",
 #'  \link{celda_C}, \link{celda_G} or \link{celda_CG}.
 #' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Character. The celda model. Can be one of "celda_C", "celda_G", or

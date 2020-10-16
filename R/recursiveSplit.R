@@ -90,9 +90,9 @@
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying the name of the
-#'  \link[SummarizedExperiment]{assay}
+#'  \link{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
@@ -137,7 +137,7 @@
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
-#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+#'  \link{metadata} \code{"celda_grid_search"} slot. The models in
 #'  the list will be of class \code{celda_C} if \code{yInit = NULL} or
 #'  \code{celda_CG} if \code{zInit} is set.
 #' @seealso \link{recursiveSplitModule} for recursive splitting of feature
@@ -859,10 +859,10 @@ setMethod("recursiveSplitCell",
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
+#' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param initialL Integer. Minimum number of modules to try.
 #' @param maxL Integer. Maximum number of modules to try.
@@ -905,7 +905,7 @@ setMethod("recursiveSplitCell",
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
-#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
+#'  \link{metadata} \code{"celda_grid_search"} slot. The models in
 #'  the list will be of class \link{celda_G} if \code{zInit = NULL} or
 #'  \link{celda_CG} if \code{zInit} is set.
 #' @seealso \code{recursiveSplitCell} for recursive splitting of cell
