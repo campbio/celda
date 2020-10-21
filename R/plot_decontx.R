@@ -160,6 +160,8 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
                                         exactMatch = TRUE, by = "rownames",
                                         ncol = round(sqrt(length(markers))),
                                         labelBars = TRUE, labelSize = 3) {
+  cellTypeLabels <- percent <- NULL # fix check note
+
   legend <- "none"
   # Check that list arguments are named
   if (!is(markers, "list") || is.null(names(markers))) {
