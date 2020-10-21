@@ -807,6 +807,9 @@ setMethod("plotGridSearchPerplexityDiff",
 
 
 .plotGridSearchPerplexityDiffCG <- function(celdaList, sep, n) {
+    # fix check note
+    K <- L <- perpdiffK <- meanperpdiffK <- perpdiffL <- meanperpdiffL <- NULL
+
     if (!all(c("K", "L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs K and L columns.")
     }
@@ -905,6 +908,7 @@ setMethod("plotGridSearchPerplexityDiff",
 
 
 .plotGridSearchPerplexityDiffC <- function(celdaList, sep, n) {
+    K <- perpdiffK <- meanperpdiffK <- NULL # fix check note
     if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
     }
@@ -959,6 +963,7 @@ setMethod("plotGridSearchPerplexityDiff",
 
 
 .plotGridSearchPerplexityDiffG <- function(celdaList, sep, n) {
+    L <- perpdiffL <- meanperpdiffL <- NULL # fix check note
     if (!all(c("L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column L.")
     }

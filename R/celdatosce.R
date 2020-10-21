@@ -168,17 +168,17 @@ setMethod("celdatosce",
         SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
         model <- celdaModel@celdaGridSearchParameters$model
-        paramsTest <- celdaCGGridSearchRes@celdaGridSearchParameters$paramsTest
+        paramsTest <- celdaModel@celdaGridSearchParameters$paramsTest
         paramsFixed <-
-            celdaCGGridSearchRes@celdaGridSearchParameters$paramsFixed
-        maxIter <- celdaCGGridSearchRes@celdaGridSearchParameters$maxIter
-        nchains <- celdaCGGridSearchRes@celdaGridSearchParameters$nchains
-        cores <- celdaCGGridSearchRes@celdaGridSearchParameters$cores
-        bestOnly <- celdaCGGridSearchRes@celdaGridSearchParameters$bestOnly
-        perplexity <- celdaCGGridSearchRes@celdaGridSearchParameters$perplexity
-        verbose <- celdaCGGridSearchRes@celdaGridSearchParameters$verbose
+            celdaModel@celdaGridSearchParameters$paramsFixed
+        maxIter <- celdaModel@celdaGridSearchParameters$maxIter
+        nchains <- celdaModel@celdaGridSearchParameters$nchains
+        cores <- celdaModel@celdaGridSearchParameters$cores
+        bestOnly <- celdaModel@celdaGridSearchParameters$bestOnly
+        perplexity <- celdaModel@celdaGridSearchParameters$perplexity
+        verbose <- celdaModel@celdaGridSearchParameters$verbose
         logfilePrefix <-
-            celdaCGGridSearchRes@celdaGridSearchParameters$logfilePrefix
+            celdaModel@celdaGridSearchParameters$logfilePrefix
 
         altExp <- .createSCEceldaGridSearch(celdaList = celdaModel,
             sce = SingleCellExperiment::altExp(sce, altExpName),
