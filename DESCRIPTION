@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.5.12
+Version: 1.7.1
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre")),
     person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
@@ -29,11 +29,3 @@ RoxygenNote: 7.1.1
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian
 NeedsCompilation: yes
-Packaged: 2020-04-02 18:47:49 UTC; josh
-Author: Joshua Campbell [aut, cre],
-  Sean Corbett [aut],
-  Yusuke Koga [aut],
-  Shiyi Yang [aut],
-  Eric Reed [aut],
-  Zhe Wang [aut]
-Maintainer: Joshua Campbell <camp@bu.edu>
