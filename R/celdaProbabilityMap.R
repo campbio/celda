@@ -78,7 +78,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         clusterColumns = FALSE,
         showHeatmapLegend = TRUE,
         heatmapLegendParam = list(title = NULL,
-            legend_height = grid::unit(6, "cm"))) {
+            legend_height = grid::unit(6, "cm")),
+        ...) {
 
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
         level <- match.arg(level)
@@ -100,7 +101,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
                 clusterRows = clusterRows,
                 clusterColumns = clusterColumns,
                 showHeatmapLegend = showHeatmapLegend,
-                heatmapLegendParam = heatmapLegendParam)
+                heatmapLegendParam = heatmapLegendParam,
+                ...)
         } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
             pm <- .celdaProbabilityMapCG(sce = altExp,
                 useAssay = useAssay,
@@ -116,7 +118,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
                 clusterRows = clusterRows,
                 clusterColumns = clusterColumns,
                 showHeatmapLegend = showHeatmapLegend,
-                heatmapLegendParam = heatmapLegendParam)
+                heatmapLegendParam = heatmapLegendParam,
+                ...)
         } else {
             stop("S4Vectors::metadata(altExp(sce,",
                 " altExpName))$celda_parameters$model must be",
@@ -141,7 +144,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     clusterRows,
     clusterColumns,
     showHeatmapLegend,
-    heatmapLegendParam) {
+    heatmapLegendParam,
+    ...) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -174,7 +178,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         cluster_rows = clusterRows,
         cluster_columns = clusterColumns,
         show_heatmap_legend = showHeatmapLegend,
-        heatmap_legend_param = heatmapLegendParam)
+        heatmap_legend_param = heatmapLegendParam,
+        ...)
 
     if (ncol(samp) > 1) {
         sampNorm <- normalizeCounts(samp,
@@ -192,7 +197,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             cluster_rows = clusterRows,
             cluster_columns = clusterColumns,
             show_heatmap_legend = showHeatmapLegend,
-            heatmap_legend_param = heatmapLegendParam)
+            heatmap_legend_param = heatmapLegendParam,
+            ...)
         return(g1 + g2)
     } else {
         return(g1)
@@ -214,7 +220,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     clusterRows,
     clusterColumns,
     showHeatmapLegend,
-    heatmapLegendParam) {
+    heatmapLegendParam,
+    ...) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
@@ -256,7 +263,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             cluster_rows = clusterRows,
             cluster_columns = clusterColumns,
             show_heatmap_legend = showHeatmapLegend,
-            heatmap_legend_param = heatmapLegendParam)
+            heatmap_legend_param = heatmapLegendParam,
+            ...)
         g2 <- ComplexHeatmap::Heatmap(matrix = popNorm,
             col = col2,
             column_title = title2,
@@ -267,7 +275,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             cluster_rows = clusterRows,
             cluster_columns = clusterColumns,
             show_heatmap_legend = showHeatmapLegend,
-            heatmap_legend_param = heatmapLegendParam)
+            heatmap_legend_param = heatmapLegendParam,
+            ...)
         return(g1 + g2)
     } else {
         samp <- factorized$proportions$sample
@@ -293,7 +302,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             cluster_rows = clusterRows,
             cluster_columns = clusterColumns,
             show_heatmap_legend = showHeatmapLegend,
-            heatmap_legend_param = heatmapLegendParam)
+            heatmap_legend_param = heatmapLegendParam,
+            ...)
 
         if (ncol(samp) > 1) {
             sampNorm <- normalizeCounts(factorized$counts$sample,
@@ -310,7 +320,8 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
                 cluster_rows = clusterRows,
                 cluster_columns = clusterColumns,
                 show_heatmap_legend = showHeatmapLegend,
-                heatmap_legend_param = heatmapLegendParam)
+                heatmap_legend_param = heatmapLegendParam,
+                ...)
             return(g1 + g2)
         } else {
             return(g1 + g2)
