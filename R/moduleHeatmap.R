@@ -72,29 +72,20 @@
 #'  \link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for cell annotation.
 #' @param showTopAnnotationName Passed to
 #'  \link[ComplexHeatmap]{HeatmapAnnotation}. Show heatmap top annotation name.
-#' @param showLeftAnnotationLegend Passed to
-#'  \link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for feature module
-#'  annotation.
 #' @param topAnnotationHeight Passed to
 #'  \link[ComplexHeatmap]{HeatmapAnnotation}. Column annotation height.
 #'  \link[ComplexHeatmap]{rowAnnotation}. Show legend for module annotation.
-#' @param showLeftAnnotation Show left annotation. Default \code{FALSE}.
-#' @param showLeftAnnotationName Passed to
-#'  \link[ComplexHeatmap]{rowAnnotation}. Show heatmap left annotation name.
-#' @param leftAnnotationWidth Passed to
-#'  \link[ComplexHeatmap]{rowAnnotation}. Row annotation width.
+#' @param showModuleLabel Show left side module labels.
+#' @param moduleLabel The left side row titles for module heatmap. Must be
+#'  vector of the same length as \code{featureModule}. Default "auto", which
+#'  automatically pulls module labels from \code{x}.
+#' @param moduleLabelSize Passed to \link{gpar}. The size of text (in points).
 #' @param width Passed to \link[multipanelfigure]{multi_panel_figure}. The
 #'  width of the output figure.
 #' @param height Passed to \link[multipanelfigure]{multi_panel_figure}. The
 #'  height of the output figure.
 #' @param unit Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 #'  character object defining the unit of all dimensions defined.
-#' @param ModuleLabel Must be
-#'  vector of the same length as \code{length(unique(celdaModules(x)))} or
-#'  \code{length(unique(celdaClusters(x)$y))}. Set to \code{""} to disable.
-#' @param labelJust Passed to \link[multipanelfigure]{fill_panel}.
-#'  Justification for the label within the interpanel spacing grob to the
-#'  top-left of the panel content grob.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object.
 #' @importFrom methods .hasSlot
@@ -130,15 +121,12 @@ setMethod("moduleHeatmap",
         showTopAnnotationLegend = FALSE,
         showTopAnnotationName = FALSE,
         topAnnotationHeight = 1.5,
-        showLeftAnnotation = FALSE,
-        showLeftAnnotationLegend = FALSE,
-        showLeftAnnotationName = FALSE,
-        leftAnnotationWidth = 1.5,
+        showModuleLabel = TRUE,
+        moduleLabel = "auto",
+        moduleLabelSize = 13,
         width = "auto",
         height = "auto",
         unit = "mm",
-        ModuleLabel = "auto",
-        labelJust = c("right", "bottom"),
         ...) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
@@ -167,16 +155,11 @@ setMethod("moduleHeatmap",
             featureModule <- sort(unique(celdaModules(x)))
         }
 
-        if (is.null(ModuleLabel)) {
-            ModuleLabel <- NULL
-        } else if (ModuleLabel == "auto") {
-            ModuleLabel <- as.character(featureModule)
-        } else if (ModuleLabel == "") {
-            ModuleLabel <- rep("", length = length(unique(celdaModules(x,
-                altExpName = altExpName))))
-        } else if (length(ModuleLabel) != length(unique(celdaModules(x,
+        if (moduleLabel == "auto") {
+            moduleLabel <- paste0("Module ", as.character(featureModule))
+        } else if (length(moduleLabel) != length(unique(celdaModules(x,
             altExpName = altExpName)))) {
-            stop("Invalid 'ModuleLabel' length!")
+            stop("Invalid 'moduleLabel' length!")
         }
 
         # factorize counts matrix
@@ -237,14 +220,12 @@ setMethod("moduleHeatmap",
                 showTopAnnotationLegend = showTopAnnotationLegend,
                 showTopAnnotationName = showTopAnnotationName,
                 topAnnotationHeight = topAnnotationHeight,
-                showLeftAnnotation = showLeftAnnotation,
-                showLeftAnnotationLegend = showLeftAnnotationLegend,
-                showLeftAnnotationName = showLeftAnnotationName,
-                leftAnnotationWidth = leftAnnotationWidth,
+                showModuleLabel = showModuleLabel,
+                moduleLabel = moduleLabel[i],
+                moduleLabelSize = moduleLabelSize,
                 unit = unit,
                 ... = ...)
         }
-
 
         ncol <- floor(sqrt(length(plts)))
         nrow <- ceiling(length(plts) / ncol)
@@ -261,13 +242,8 @@ setMethod("moduleHeatmap",
             unit = unit)
 
         for (i in seq(length(plts))) {
-            if (!is.null(ModuleLabel)) {
-                figure <- suppressMessages(multipanelfigure::fill_panel(figure,
-                    plts[[i]], label = ModuleLabel[i], label_just = labelJust))
-            } else {
-                figure <- suppressMessages(multipanelfigure::fill_panel(figure,
-                    plts[[i]], label_just = labelJust))
-            }
+            figure <- suppressMessages(multipanelfigure::fill_panel(figure,
+                plts[[i]], label = ""))
         }
         suppressWarnings(return(figure))
     }
@@ -291,10 +267,9 @@ setMethod("moduleHeatmap",
     showTopAnnotationLegend,
     showTopAnnotationName,
     topAnnotationHeight,
-    showLeftAnnotation,
-    showLeftAnnotationLegend,
-    showLeftAnnotationName,
-    leftAnnotationWidth,
+    showModuleLabel,
+    moduleLabel,
+    moduleLabelSize,
     unit,
     ...) {
 
@@ -364,9 +339,11 @@ setMethod("moduleHeatmap",
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
     }
 
-    if (isTRUE(showLeftAnnotation)) {
+    if (isTRUE(showModuleLabel)) {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,
+            row_title = moduleLabel,
+            row_title_gp = gpar(fontsize = moduleLabelSize),
             show_column_names = FALSE,
             show_row_names = showFeaturenames,
             row_names_gp = grid::gpar(fontsize = rowFontSize),
@@ -382,14 +359,6 @@ setMethod("moduleHeatmap",
                 show_annotation_name = showTopAnnotationName,
                 col = list(cell = ccols),
                 simple_anno_size = grid::unit(topAnnotationHeight, unit)),
-            left_annotation = ComplexHeatmap::rowAnnotation(
-                module = factor(yToPlot,
-                    levels = stringr::str_sort(unique(yToPlot),
-                        numeric = TRUE)),
-                show_legend = showLeftAnnotationLegend,
-                show_annotation_name = showLeftAnnotationName,
-                col = list(module = rcols),
-                simple_anno_size = grid::unit(leftAnnotationWidth, unit)),
             ...)
     } else {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,

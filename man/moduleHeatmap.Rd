@@ -26,15 +26,12 @@ moduleHeatmap(x, ...)
   showTopAnnotationLegend = FALSE,
   showTopAnnotationName = FALSE,
   topAnnotationHeight = 1.5,
-  showLeftAnnotation = FALSE,
-  showLeftAnnotationLegend = FALSE,
-  showLeftAnnotationName = FALSE,
-  leftAnnotationWidth = 1.5,
+  showModuleLabel = TRUE,
+  moduleLabel = "auto",
+  moduleLabelSize = 13,
   width = "auto",
   height = "auto",
   unit = "mm",
-  ModuleLabel = "auto",
-  labelJust = c("right", "bottom"),
   ...
 )
 }
@@ -128,17 +125,13 @@ legend for expression levels.}
 \link[ComplexHeatmap]{HeatmapAnnotation}. Column annotation height.
 \link[ComplexHeatmap]{rowAnnotation}. Show legend for module annotation.}
 
-\item{showLeftAnnotation}{Show left annotation. Default \code{FALSE}.}
+\item{showModuleLabel}{Show left side module labels.}
 
-\item{showLeftAnnotationLegend}{Passed to
-\link[ComplexHeatmap]{HeatmapAnnotation}. Show legend for feature module
-annotation.}
+\item{moduleLabel}{The left side row titles for module heatmap. Must be
+vector of the same length as \code{featureModule}. Default "auto", which
+automatically pulls module labels from \code{x}.}
 
-\item{showLeftAnnotationName}{Passed to
-\link[ComplexHeatmap]{rowAnnotation}. Show heatmap left annotation name.}
-
-\item{leftAnnotationWidth}{Passed to
-\link[ComplexHeatmap]{rowAnnotation}. Row annotation width.}
+\item{moduleLabelSize}{Passed to \link{gpar}. The size of text (in points).}
 
 \item{width}{Passed to \link[multipanelfigure]{multi_panel_figure}. The
 width of the output figure.}
@@ -148,14 +141,6 @@ height of the output figure.}
 
 \item{unit}{Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 character object defining the unit of all dimensions defined.}
-
-\item{ModuleLabel}{Must be
-vector of the same length as \code{length(unique(celdaModules(x)))} or
-\code{length(unique(celdaClusters(x)$y))}. Set to \code{""} to disable.}
-
-\item{labelJust}{Passed to \link[multipanelfigure]{fill_panel}.
-Justification for the label within the interpanel spacing grob to the
-top-left of the panel content grob.}
 }
 \value{
 A \link[multipanelfigure]{multi_panel_figure} object.
