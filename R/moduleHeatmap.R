@@ -87,7 +87,9 @@
 #' @param unit Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 #'  character object defining the unit of all dimensions defined.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
-#' @return A \link[multipanelfigure]{multi_panel_figure} object.
+#' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
+#'  more than one module heatmaps. Otherwise a
+#'  \link[ComplexHeatmap]{HeatmapList} object is returned.
 #' @importFrom methods .hasSlot
 #' @importFrom multipanelfigure multi_panel_figure
 #' @export
@@ -153,6 +155,12 @@ setMethod("moduleHeatmap",
 
         if (is.null(featureModule)) {
             featureModule <- sort(unique(celdaModules(x)))
+        }
+
+        if (length(featureModule) == 1) {
+            returnHeatmap <- TRUE
+        } else {
+            returnHeatmap <- FALSE
         }
 
         if (moduleLabel == "auto") {
@@ -227,25 +235,30 @@ setMethod("moduleHeatmap",
                 ... = ...)
         }
 
-        ncol <- floor(sqrt(length(plts)))
-        nrow <- ceiling(length(plts) / ncol)
+        if (isTRUE(returnHeatmap)) {
+            return(plts[[1]])
+        } else {
+            ncol <- floor(sqrt(length(plts)))
+            nrow <- ceiling(length(plts) / ncol)
 
-        for (i in seq(length(plts))) {
-            plts[[i]] <- grid::grid.grabExpr(ComplexHeatmap::draw(plts[[i]]),
-                wrap.grobs = TRUE)
+            for (i in seq(length(plts))) {
+                plts[[i]] <- grid::grid.grabExpr(
+                    ComplexHeatmap::draw(plts[[i]]),
+                    wrap.grobs = TRUE)
+            }
+
+            figure <- multipanelfigure::multi_panel_figure(columns = ncol,
+                rows = nrow,
+                width = width,
+                height = height,
+                unit = unit)
+
+            for (i in seq(length(plts))) {
+                figure <- suppressMessages(multipanelfigure::fill_panel(figure,
+                    plts[[i]], label = ""))
+            }
+            suppressWarnings(return(figure))
         }
-
-        figure <- multipanelfigure::multi_panel_figure(columns = ncol,
-            rows = nrow,
-            width = width,
-            height = height,
-            unit = unit)
-
-        for (i in seq(length(plts))) {
-            figure <- suppressMessages(multipanelfigure::fill_panel(figure,
-                plts[[i]], label = ""))
-        }
-        suppressWarnings(return(figure))
     }
 )
 
