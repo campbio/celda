@@ -143,7 +143,9 @@ height of the output figure.}
 character object defining the unit of all dimensions defined.}
 }
 \value{
-A \link[multipanelfigure]{multi_panel_figure} object.
+A \link[multipanelfigure]{multi_panel_figure} object if plotting
+ more than one module heatmaps. Otherwise a
+ \link[ComplexHeatmap]{HeatmapList} object is returned.
 }
 \description{
 Renders a heatmap for selected \code{featureModule}. Cells are
