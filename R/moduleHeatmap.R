@@ -242,7 +242,8 @@ setMethod("moduleHeatmap",
             nrow <- ceiling(length(plts) / ncol)
 
             for (i in seq(length(plts))) {
-                plts[[i]] <- grid::grid.grabExpr(ComplexHeatmap::draw(plts[[i]]),
+                plts[[i]] <- grid::grid.grabExpr(
+                    ComplexHeatmap::draw(plts[[i]]),
                     wrap.grobs = TRUE)
             }
 
