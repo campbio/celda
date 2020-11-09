@@ -8,8 +8,14 @@ Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
     person("Eric", "Reed", email="reeder@bu.edu", role = c("aut")),
     person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")))
-Description: Utilizing Bayesian hierarchical models to analyze single-cell genomic data.
-Depends: R (>= 3.6)
+Description: Celda is a suite of Bayesian hierarchical models for
+    clustering single-cell RNA-sequencing (scRNA-seq) data. It is able to
+    perform "bi-clustering" and simultaneously cluster genes into gene modules
+    and cells into cell subpopulations. It also contains DecontX, a novel
+    Bayesian method to computationally estimate and remove RNA contamination in
+    individual cells without empty droplet information. A variety of scRNA-seq
+    data visualization functions is also included.
+Depends: R (>= 4.0)
 VignetteBuilder: knitr
 Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         grDevices, graphics, matrixStats, doParallel, digest, methods,
