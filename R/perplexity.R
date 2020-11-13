@@ -851,7 +851,7 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1,
+            ggplot2::geom_jitter(height = 0, width = 0.1, alpha = 0.5,
                 ggplot2::aes_string(color = "L")) +
             ggplot2::scale_color_discrete(name = "L") +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
