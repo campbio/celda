@@ -886,7 +886,7 @@ setMethod("plotGridSearchPerplexityDiff",
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1,
+            ggplot2::geom_jitter(height = 0, width = 0.1, alpha = 0.5,
                 ggplot2::aes_string(color = "K")) +
             ggplot2::scale_color_discrete(name = "K") +
             ggplot2::geom_path(
@@ -947,7 +947,7 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1) +
+            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
                 ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
                 size = 1) +
@@ -1003,7 +1003,7 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1) +
+            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
             ggplot2::geom_path(data = diffMeansByL[!is.na(meanperpdiffL), ],
                 ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
                 size = 1) +
