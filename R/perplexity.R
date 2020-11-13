@@ -859,7 +859,8 @@ setMethod("plotGridSearchPerplexityDiff",
                     color = "L"), size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$K))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$K))),
                 max(as.integer(levels(dt$K))), sep)) +
             ggplot2::theme_bw()
     } else if (nlevels(dt$L) > 1) {
@@ -895,7 +896,8 @@ setMethod("plotGridSearchPerplexityDiff",
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$L))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$L))),
                 max(as.integer(levels(dt$L))), sep)) +
             ggplot2::theme_bw()
     } else {
@@ -951,7 +953,8 @@ setMethod("plotGridSearchPerplexityDiff",
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$K))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$K))),
                 max(as.integer(levels(dt$K))), sep)) +
             ggplot2::theme_bw()
     } else {
@@ -1006,7 +1009,8 @@ setMethod("plotGridSearchPerplexityDiff",
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$L))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$L))),
                 max(as.integer(levels(dt$L))), sep)) +
             ggplot2::theme_bw()
     } else {
