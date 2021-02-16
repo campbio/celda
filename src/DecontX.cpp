@@ -296,5 +296,8 @@ Eigen::SparseMatrix<double> calculateNativeMatrix(const Eigen::MappedSparseMatri
 
 
 
+int test(){
+  return 1;
+}
 
 
