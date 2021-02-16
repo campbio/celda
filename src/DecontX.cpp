@@ -296,8 +296,108 @@ Eigen::SparseMatrix<double> calculateNativeMatrix(const Eigen::MappedSparseMatri
 
 
 
-int test(){
-  return 1;
-}
+// [[Rcpp::export]]
+Rcpp::List decontXEM_fixEta(const Eigen::MappedSparseMatrix<double>& counts,
+                     const NumericVector& counts_colsums,
+                     const NumericVector& theta,
+                     const NumericVector& eta,
+                     const NumericMatrix& phi,
+                     const IntegerVector& z,
+                     const bool& estimate_delta,
+                     const NumericVector& delta,
+                     const double& pseudocount) {
 
+  // Perform error checking
+  if(counts.cols() != theta.size()) {
+    stop("Length of 'theta' must be equal to the number of columns in 'counts'.");
+  }
+  if(counts.cols() != z.size()) {
+    stop("Length of 'z' must be equal to the number of columns in 'counts'.");
+  }  
+  if(counts.cols() != counts_colsums.size()) {
+    stop("Length of 'counts_colsums' must be equal to the number of columns in 'counts'.");
+  }    
+  if(counts.rows() != phi.nrow()) {
+    stop("The number of rows in 'phi' must be equal to the number of rows in 'counts'.");
+  }
+  if(counts.rows() != eta.size()) {
+    stop("The size of vector 'eta' must be equal to the number of rows in 'counts'.");
+  }
+  if(min(z) < 1 || max(z) > phi.ncol()) {
+    stop("The entries in 'z' need to be between 1 and the number of columns in eta and phi.");
+  }
+  if(delta.size() != 2 || sum(delta < 0) > 0) {
+    stop("'delta' must be a numeric vector of length 2 with positive integers.");
+  }
+  
+  // Declare variables and functions
+  NumericVector new_theta(theta.size());
+  NumericVector native_total(theta.size());
+  NumericMatrix new_phi(phi.nrow(), phi.ncol());
+  
+    
+  // Obtaining 'fit_dirichlet' function from MCMCprecision package
+  Environment pkg = Environment::namespace_env("MCMCprecision");
+  Function f = pkg["fit_dirichlet"];
+
+  int i;
+  int j;
+  int k;
+  int nr = phi.nrow();
+  double x; 
+  double pcontamin;
+  double pnative;
+  double normp;
+  double px;
+  for(int j = 0; j < counts.cols(); ++j) {
+    for (Eigen::MappedSparseMatrix<double>::InnerIterator i_(counts, j); i_; ++i_) {
+      i = i_.index();
+      x = i_.value();
+      k = z[j] - 1;
+      
+      // Calculate variational probabilities
+      // Removing the log/exp speeds it up and produces the same result since
+      // there are only 2 probabilities being multiplied
+      
+      //pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
+      //pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
+      pnative = (phi[nr * k + i] + pseudocount) * (theta[j] + pseudocount);
+      pcontamin = (eta[i] + pseudocount) * (1 - theta[j] + pseudocount);
+      
+      // Normalize probabilities and add to proper components
+      //normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
+      normp = pnative / (pcontamin + pnative);
+      px = normp * x;
+      new_phi(i,k) += px;
+      native_total(j) += px;
+    }  
+  }
+  
+  
+  // Normalize Phi
+  NumericVector phi_colsum = colSums(new_phi);
+  for(i = 0; i < new_phi.ncol(); i++) {
+    new_phi(_,i) = new_phi(_,i) / phi_colsum[i];
+  }
+  
+  // Update Theta
+  NumericVector contamination_prop = (counts_colsums - native_total) / counts_colsums;
+  NumericVector native_prop = 1 - contamination_prop;
+  NumericMatrix theta_raw = cbind(native_prop, contamination_prop);
+  
+  NumericVector new_delta = delta;
+  if(estimate_delta == TRUE) {
+    Rcpp::List result = f(Named("x", theta_raw)); 
+    new_delta = result["alpha"];
+  }
+  
+  // Estimate new theta
+  new_theta = (native_total + new_delta[0]) / (counts_colsums + sum(new_delta));
+  
+  return Rcpp::List::create(Rcpp::Named("phi") = new_phi,
+                            Rcpp::Named("eta") = eta,
+                            Rcpp::Named("theta") = new_theta,
+                            Rcpp::Named("delta") = new_delta,
+                            Rcpp::Named("contamination") = contamination_prop);
+}
 
