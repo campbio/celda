@@ -296,6 +296,7 @@ setReplaceMethod(
 .decontX <- function(counts,
                      z = NULL,
                      batch = NULL,
+                     background_idx = NULL,
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
@@ -326,6 +327,7 @@ setReplaceMethod(
   runParams <- list(
     z = z,
     batch = batch,
+    background_idx = background_idx,
     maxIter = maxIter,
     delta = delta,
     estimateDelta = estimateDelta,
@@ -335,6 +337,13 @@ setReplaceMethod(
     logfile = logfile,
     verbose = verbose
   )
+
+  # matrix containing ambient transcript counts are default to NULL
+  counts_background <- NULL
+  if (!is.null(background_idx)) {
+     counts <- counts[,background_idx]
+     counts_background <- counts[,-background_idx]
+  }
 
   totalGenes <- nrow(counts)
   totalCells <- ncol(counts)
@@ -409,6 +418,7 @@ setReplaceMethod(
         counts = countsBat,
         z = zBat,
         batch = bat,
+        counts_background = counts_background,
         maxIter = maxIter,
         delta = delta,
         estimateDelta = estimateDelta,
@@ -427,6 +437,7 @@ setReplaceMethod(
           counts = countsBat,
           z = zBat,
           batch = bat,
+          counts_background = counts_background,
           maxIter = maxIter,
           delta = delta,
           estimateDelta = estimateDelta,
@@ -546,6 +557,7 @@ setReplaceMethod(
 .decontXoneBatch <- function(counts,
                              z = NULL,
                              batch = NULL,
+                             counts_background = NULL,
                              maxIter = 200,
                              delta = c(10, 10),
                              estimateDelta = TRUE,
@@ -632,6 +644,12 @@ setReplaceMethod(
     phi <- nextDecon$phi
     eta <- nextDecon$eta
 
+    # if counts_background is not NULL, use empirical dist. to replace eta
+    if (!is.null(counts_backround)) {
+       eta_tilda <- rowSums(counts_background) + 1
+       eta <- eta_tilda/sum(eta_tilda)
+    }
+
     ll <- c()
     llRound <- decontXLogLik(
       counts = counts,
@@ -648,17 +666,32 @@ setReplaceMethod(
     counts.colsums <- Matrix::colSums(counts)
     while (iter <= maxIter & !isTRUE(converged) &
       numIterWithoutImprovement <= stopIter) {
-      nextDecon <- decontXEM(
-        counts = counts,
-        counts_colsums = counts.colsums,
-        phi = phi,
-        eta = eta,
-        theta = theta,
-        z = z,
-        estimate_delta = isTRUE(estimateDelta),
-        delta = delta,
-        pseudocount = 1e-20
-      )
+        if (is.null(background_idx)) {
+          nextDecon <- decontXEM(
+            counts = counts,
+            counts_colsums = counts.colsums,
+            phi = phi,
+            eta = eta,
+            theta = theta,
+            z = z,
+            estimate_delta = isTRUE(estimateDelta),
+            delta = delta,
+            pseudocount = 1e-20
+          )
+        } else {
+           nextDecon <- decontXEM_fixEta(
+            counts = counts,
+            counts_colsums = counts.colsums,
+            phi = phi,
+            eta = eta,
+            theta = theta,
+            z = z,
+            estimate_delta = isTRUE(estimateDelta),
+            delta = delta,
+            pseudocount = 1e-20
+          )
+        }
+      
 
       theta <- nextDecon$theta
       phi <- nextDecon$phi
