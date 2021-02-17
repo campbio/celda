@@ -346,11 +346,11 @@ setReplaceMethod(
     verbose = verbose
   )
 
-  # matrix containing ambient transcript counts are default to NULL
+  # counts_background is the count matrix of ambient transcript counts
   counts_background <- NULL
   if (!is.null(background_idx)) {
-     counts <- counts[,background_idx]
-     counts_background <- counts[,-background_idx]
+     counts <- counts[, background_idx]
+     counts_background <- counts[, -background_idx]
   }
 
   totalGenes <- nrow(counts)
@@ -654,6 +654,7 @@ setReplaceMethod(
 
     # if counts_background is not NULL, use empirical dist. to replace eta
     if (!is.null(counts_backround)) {
+      # Add pseudocount to each gene in eta
        eta_tilda <- rowSums(counts_background) + 1
        eta <- eta_tilda/sum(eta_tilda)
     }
