@@ -349,8 +349,8 @@ setReplaceMethod(
   # counts_background is the count matrix of ambient transcript counts
   counts_background <- NULL
   if (!is.null(background_idx)) {
-     counts <- counts[, background_idx]
-     counts_background <- counts[, -background_idx]
+     counts_background <- counts[, background_idx]
+     counts <- counts[, -background_idx]
   }
 
   totalGenes <- nrow(counts)
