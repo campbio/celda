@@ -300,7 +300,7 @@ Eigen::SparseMatrix<double> calculateNativeMatrix(const Eigen::MappedSparseMatri
 Rcpp::List decontXEM_fixEta(const Eigen::MappedSparseMatrix<double>& counts,
                      const NumericVector& counts_colsums,
                      const NumericVector& theta,
-                     const NumericVector& eta,
+                     const NumericMatrix& eta,
                      const NumericMatrix& phi,
                      const IntegerVector& z,
                      const bool& estimate_delta,
@@ -320,10 +320,13 @@ Rcpp::List decontXEM_fixEta(const Eigen::MappedSparseMatrix<double>& counts,
   if(counts.rows() != phi.nrow()) {
     stop("The number of rows in 'phi' must be equal to the number of rows in 'counts'.");
   }
-  if(counts.rows() != eta.size()) {
-    stop("The size of vector 'eta' must be equal to the number of rows in 'counts'.");
+  if(counts.rows() != eta.nrow()) {
+    stop("The number of rows in 'eta' must be equal to the number of rows in 'counts'.");
   }
-  if(min(z) < 1 || max(z) > phi.ncol()) {
+  if(phi.ncol() != eta.ncol()) {
+    stop("The number of columns in 'eta' must be equal to the number of columns in 'phi'.");
+  }
+  if(min(z) < 1 || max(z) > eta.ncol()) {
     stop("The entries in 'z' need to be between 1 and the number of columns in eta and phi.");
   }
   if(delta.size() != 2 || sum(delta < 0) > 0) {

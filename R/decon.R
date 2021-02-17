@@ -652,12 +652,16 @@ setReplaceMethod(
     phi <- nextDecon$phi
     eta <- nextDecon$eta
 
-    # if counts_background is not NULL, use empirical dist. to replace eta
-    if (!is.null(counts_backround)) {
+    # if background_idx is provided by user, use empirical dist. to replace eta
+    if (!is.null(background_idx)) {
       # Add pseudocount to each gene in eta
-       eta_tilda <- rowSums(counts_background) + 1
+       eta_tilda <- rowSums(counts_background) + 1e-20
        eta <- eta_tilda/sum(eta_tilda)
+       
+       # Make eta same dimension as phi
+       eta <- matrix(eta, length(eta), dim(phi)[2])
     }
+    
 
     ll <- c()
     llRound <- decontXLogLik(
