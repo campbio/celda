@@ -8,10 +8,12 @@
 #' @param x A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
 #' with the matrix located in the assay slot under \code{assayName}.
 #' Cells in each batch will be subsetted and converted to a sparse matrix
-#' of class \code{dgCMatrix} from package \link{Matrix} before analysis. This
-#' object should only contain filtered cells after cell calling. Empty
-#' cell barcodes (low expression droplets before cell calling) are not needed
-#' to run DecontX.
+#' of class \code{dgCMatrix} from package \link{Matrix} before analysis. 
+#' If background_idx is not provided, this object should only contain filtered
+#' cells after cell calling. Empty cell barcodes 
+#' (low expression droplets before cell calling) are not needed. If background_idx
+#' is provided, this objet should contain all barcodes, including both cell and
+#' empty cell barcodes.
 #' @param assayName Character. Name of the assay to use if \code{x} is a
 #' \linkS4class{SingleCellExperiment}.
 #' @param z Numeric or character vector. Cell cluster labels. If NULL,
@@ -24,6 +26,8 @@
 #' If batch labels are supplied, DecontX is run on cells from each
 #' batch separately. Cells run in different channels or assays
 #' should be considered different batches. Default NULL.
+#' @param background_idx Numeric or caracter vector. Index of barcodes 
+#' (i.e. column id of counts matrix) that are empty droplets. 
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -137,6 +141,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       assayName = "counts",
                                                       z = NULL,
                                                       batch = NULL,
+                                                      background_idx = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -152,6 +157,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     counts = mat,
     z = z,
     batch = batch,
+    background_idx = background_idx,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -203,6 +209,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
 setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
+                                     background_idx = NULL,
                                      maxIter = 500,
                                      delta = c(10, 10),
                                      estimateDelta = TRUE,
@@ -217,6 +224,7 @@ setMethod("decontX", "ANY", function(x,
     counts = x,
     z = z,
     batch = batch,
+    background_idx = background_idx,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
