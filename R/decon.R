@@ -658,7 +658,7 @@ setReplaceMethod(
        eta_tilda <- rowSums(counts_background) + 1e-20
        eta <- eta_tilda/sum(eta_tilda)
        
-       # Make eta same dimension as phi
+       # Make eta a matrix same dimension as phi
        eta <- matrix(eta, length(eta), dim(phi)[2])
     }
     

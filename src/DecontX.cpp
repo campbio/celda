@@ -365,7 +365,7 @@ Rcpp::List decontXEM_fixEta(const Eigen::MappedSparseMatrix<double>& counts,
       //pnative = log(phi(i,k) + pseudocount) + log(theta(j) + pseudocount);
       //pcontamin = log(eta(i,k) + pseudocount) + log(1 - theta(j) + pseudocount);
       pnative = (phi[nr * k + i] + pseudocount) * (theta[j] + pseudocount);
-      pcontamin = (eta[i] + pseudocount) * (1 - theta[j] + pseudocount);
+      pcontamin = (eta[nr * k + i] + pseudocount) * (1 - theta[j] + pseudocount);
       
       // Normalize probabilities and add to proper components
       //normp = exp(pnative) / (exp(pcontamin) + exp(pnative));
