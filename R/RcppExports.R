@@ -17,6 +17,10 @@ calculateNativeMatrix <- function(counts, theta, eta, phi, z, pseudocount) {
     .Call('_celda_calculateNativeMatrix', PACKAGE = 'celda', counts, theta, eta, phi, z, pseudocount)
 }
 
+decontXEM_fixEta <- function(counts, counts_colsums, theta, eta, phi, z, estimate_delta, delta, pseudocount) {
+    .Call('_celda_decontXEM_fixEta', PACKAGE = 'celda', counts, counts_colsums, theta, eta, phi, z, estimate_delta, delta, pseudocount)
+}
+
 cG_calcGibbsProbY_Simple <- function(counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta) {
     .Call('_celda_cG_calcGibbsProbY_Simple', PACKAGE = 'celda', counts, nGbyTS, nTSbyC, nbyTS, nbyG, y, L, index, gamma, beta, delta)
 }
