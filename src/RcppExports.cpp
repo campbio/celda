@@ -72,7 +72,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // decontXEM_fixEta
-Rcpp::List decontXEM_fixEta(const Eigen::MappedSparseMatrix<double>& counts, const NumericVector& counts_colsums, const NumericVector& theta, const NumericVector& eta, const NumericMatrix& phi, const IntegerVector& z, const bool& estimate_delta, const NumericVector& delta, const double& pseudocount);
+Rcpp::List decontXEM_fixEta(const Eigen::MappedSparseMatrix<double>& counts, const NumericVector& counts_colsums, const NumericVector& theta, const NumericMatrix& eta, const NumericMatrix& phi, const IntegerVector& z, const bool& estimate_delta, const NumericVector& delta, const double& pseudocount);
 RcppExport SEXP _celda_decontXEM_fixEta(SEXP countsSEXP, SEXP counts_colsumsSEXP, SEXP thetaSEXP, SEXP etaSEXP, SEXP phiSEXP, SEXP zSEXP, SEXP estimate_deltaSEXP, SEXP deltaSEXP, SEXP pseudocountSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -80,7 +80,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type counts_colsums(counts_colsumsSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< const NumericMatrix& >::type phi(phiSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type z(zSEXP);
     Rcpp::traits::input_parameter< const bool& >::type estimate_delta(estimate_deltaSEXP);
