@@ -652,8 +652,8 @@ setReplaceMethod(
     phi <- nextDecon$phi
     eta <- nextDecon$eta
 
-    # if background_idx is provided by user, use empirical dist. to replace eta
-    if (!is.null(background_idx)) {
+    # if counts_background is not null, use empirical dist. to replace eta
+    if (!is.null(counts_background)) {
       # Add pseudocount to each gene in eta
        eta_tilda <- rowSums(counts_background) + 1e-20
        eta <- eta_tilda/sum(eta_tilda)
