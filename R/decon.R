@@ -655,7 +655,7 @@ setReplaceMethod(
     # if counts_background is not null, use empirical dist. to replace eta
     if (!is.null(counts_background)) {
       # Add pseudocount to each gene in eta
-       eta_tilda <- rowSums(counts_background) + 1e-20
+       eta_tilda <- Matrix::rowSums(counts_background) + 1e-20
        eta <- eta_tilda/sum(eta_tilda)
        
        # Make eta a matrix same dimension as phi
@@ -679,7 +679,7 @@ setReplaceMethod(
     counts.colsums <- Matrix::colSums(counts)
     while (iter <= maxIter & !isTRUE(converged) &
       numIterWithoutImprovement <= stopIter) {
-        if (is.null(background_idx)) {
+        if (is.null(counts_background)) {
           nextDecon <- decontXEM(
             counts = counts,
             counts_colsums = counts.colsums,
