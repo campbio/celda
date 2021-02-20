@@ -160,6 +160,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   }
 
   mat <- SummarizedExperiment::assay(x, i = assayName)
+  counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
+  
   result <- .decontX(
     counts = mat,
     z = z,
