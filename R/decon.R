@@ -152,12 +152,19 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       seed = 12345,
                                                       logfile = NULL,
                                                       verbose = TRUE) {
+  
+  counts_background <- NULL
+  if (!is.null(background_idx)) {
+     counts_background <- x[, background_idx]
+     x <- x[, -background_idx]
+  }
+
   mat <- SummarizedExperiment::assay(x, i = assayName)
   result <- .decontX(
     counts = mat,
     z = z,
     batch = batch,
-    background_idx = background_idx,
+    counts_background = counts_background,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -220,11 +227,18 @@ setMethod("decontX", "ANY", function(x,
                                      seed = 12345,
                                      logfile = NULL,
                                      verbose = TRUE) {
+
+  counts_background <- NULL
+  if (!is.null(background_idx)) {
+     counts_background <- x[, background_idx]
+     x <- x[, -background_idx]
+  }
+
   .decontX(
     counts = x,
     z = z,
     batch = batch,
-    background_idx = background_idx,
+    counts_background = counts_background,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -304,7 +318,7 @@ setReplaceMethod(
 .decontX <- function(counts,
                      z = NULL,
                      batch = NULL,
-                     background_idx = NULL,
+                     counts_background = NULL,
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
@@ -335,7 +349,6 @@ setReplaceMethod(
   runParams <- list(
     z = z,
     batch = batch,
-    background_idx = background_idx,
     maxIter = maxIter,
     delta = delta,
     estimateDelta = estimateDelta,
@@ -346,12 +359,6 @@ setReplaceMethod(
     verbose = verbose
   )
 
-  # counts_background is the count matrix of ambient transcript counts
-  counts_background <- NULL
-  if (!is.null(background_idx)) {
-     counts_background <- counts[, background_idx]
-     counts <- counts[, -background_idx]
-  }
 
   totalGenes <- nrow(counts)
   totalCells <- ncol(counts)
