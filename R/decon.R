@@ -578,7 +578,7 @@ setReplaceMethod(
                              maxIter = 200,
                              delta = c(10, 10),
                              estimateDelta = TRUE,
-                             convergence = 0.1,
+                             convergence = 0.01,
                              iterLogLik = 10,
                              logfile = NULL,
                              verbose = TRUE,
