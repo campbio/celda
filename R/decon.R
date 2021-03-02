@@ -156,11 +156,11 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   counts_background <- NULL
   if (!is.null(background_idx)) {
      counts_background <- x[, background_idx]
+     counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
      x <- x[, -background_idx]
   }
 
   mat <- SummarizedExperiment::assay(x, i = assayName)
-  counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
   
   result <- .decontX(
     counts = mat,
@@ -233,6 +233,7 @@ setMethod("decontX", "ANY", function(x,
   counts_background <- NULL
   if (!is.null(background_idx)) {
      counts_background <- x[, background_idx]
+     counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
      x <- x[, -background_idx]
   }
 
