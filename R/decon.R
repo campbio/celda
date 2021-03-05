@@ -694,6 +694,7 @@ setReplaceMethod(
             counts = counts,
             counts_colsums = counts.colsums,
             phi = phi,
+            estimate_eta = TRUE,
             eta = eta,
             theta = theta,
             z = z,
@@ -702,10 +703,11 @@ setReplaceMethod(
             pseudocount = 1e-20
           )
         } else {
-           nextDecon <- decontXEM_fixEta(
+           nextDecon <- decontXEM(
             counts = counts,
             counts_colsums = counts.colsums,
             phi = phi,
+            estimate_eta = FALSE,
             eta = eta,
             theta = theta,
             z = z,
