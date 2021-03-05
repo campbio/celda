@@ -9,9 +9,9 @@
 #' with the matrix located in the assay slot under \code{assayName}.
 #' Cells in each batch will be subsetted and converted to a sparse matrix
 #' of class \code{dgCMatrix} from package \link{Matrix} before analysis. 
-#' If background_idx is not provided, this object should only contain filtered
+#' If \code{backgroundId} is not provided, this object should only contain filtered
 #' cells after cell calling. Empty cell barcodes 
-#' (low expression droplets before cell calling) are not needed. If background_idx
+#' (low expression droplets before cell calling) are not needed. If \code{backgroundId}
 #' is provided, this objet should contain all barcodes, including both cell and
 #' empty cell barcodes.
 #' @param assayName Character. Name of the assay to use if \code{x} is a
@@ -26,8 +26,10 @@
 #' If batch labels are supplied, DecontX is run on cells from each
 #' batch separately. Cells run in different channels or assays
 #' should be considered different batches. Default NULL.
-#' @param background_idx Numeric or caracter vector. Index of barcodes 
-#' (i.e. column id of counts matrix) that are empty droplets. 
+#' @param backgroundId Numeric vector. ID of barcodes that are empty droplets.
+#' Only needed when \code{x} supplied contains both cell and empty cell barcodes.
+#' If supplied, empirical distribution of transcripts from these empty droplets
+#' will be used as the contamination distribution.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -141,7 +143,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       assayName = "counts",
                                                       z = NULL,
                                                       batch = NULL,
-                                                      background_idx = NULL,
+                                                      backgroundId = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -154,10 +156,10 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       verbose = TRUE) {
   
   counts_background <- NULL
-  if (!is.null(background_idx)) {
-     counts_background <- x[, background_idx]
+  if (!is.null(backgroundId)) {
+     counts_background <- x[, backgroundId]
      counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
-     x <- x[, -background_idx]
+     x <- x[, -backgroundId]
   }
 
   mat <- SummarizedExperiment::assay(x, i = assayName)
@@ -218,7 +220,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
 setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
-                                     background_idx = NULL,
+                                     backgroundId = NULL,
                                      maxIter = 500,
                                      delta = c(10, 10),
                                      estimateDelta = TRUE,
@@ -231,10 +233,10 @@ setMethod("decontX", "ANY", function(x,
                                      verbose = TRUE) {
 
   counts_background <- NULL
-  if (!is.null(background_idx)) {
-     counts_background <- x[, background_idx]
+  if (!is.null(backgroundId)) {
+     counts_background <- x[, backgroundId]
      counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
-     x <- x[, -background_idx]
+     x <- x[, -backgroundId]
   }
 
   .decontX(

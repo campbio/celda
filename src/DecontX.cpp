@@ -54,11 +54,9 @@ Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double> &counts,
   NumericVector new_theta(theta.size());
   NumericVector native_total(theta.size());
   NumericMatrix new_phi(phi.nrow(), phi.ncol());
-  // Only update eta when estimate_eta is TRUE, otherwise eta is fixed
-  if (estimate_eta == TRUE)
-  {
-    NumericMatrix new_eta(eta.nrow(), eta.ncol());
-  }
+  // Instantiate new_eta but only update it when estimate_eta is TRUE
+  NumericMatrix new_eta(eta.nrow(), eta.ncol());
+
 
   // Obtaining 'fit_dirichlet' function from MCMCprecision package
   Environment pkg = Environment::namespace_env("MCMCprecision");
@@ -100,7 +98,7 @@ Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double> &counts,
   }
 
   // Calculate Eta using Weights from Phi
-  if (estiamte_eta == TRUE)
+  if (estimate_eta == TRUE)
   {
     NumericVector phi_rowsum = rowSums(new_phi);
     for (i = 0; i < new_eta.ncol(); i++)
@@ -144,7 +142,7 @@ Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double> &counts,
   // Estimate new theta
   new_theta = (native_total + new_delta[0]) / (counts_colsums + sum(new_delta));
 
-  // New_eta not initialized when etimate_eta==FALSE. Therefore just return input eta
+  // If not to estimate new_eta, just return input eta
   if (estimate_eta == FALSE)
   {
     new_eta = eta;

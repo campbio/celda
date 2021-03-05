@@ -13,6 +13,7 @@ decontX(x, ...)
   assayName = "counts",
   z = NULL,
   batch = NULL,
+  backgroundId = NULL,
   maxIter = 500,
   delta = c(10, 10),
   estimateDelta = TRUE,
@@ -29,6 +30,7 @@ decontX(x, ...)
   x,
   z = NULL,
   batch = NULL,
+  backgroundId = NULL,
   maxIter = 500,
   delta = c(10, 10),
   estimateDelta = TRUE,
@@ -45,10 +47,12 @@ decontX(x, ...)
 \item{x}{A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{assayName}.
 Cells in each batch will be subsetted and converted to a sparse matrix
-of class \code{dgCMatrix} from package \link{Matrix} before analysis. This
-object should only contain filtered cells after cell calling. Empty
-cell barcodes (low expression droplets before cell calling) are not needed
-to run DecontX.}
+of class \code{dgCMatrix} from package \link{Matrix} before analysis. 
+If \code{backgroundId} is not provided, this object should only contain filtered
+cells after cell calling. Empty cell barcodes 
+(low expression droplets before cell calling) are not needed. If \code{backgroundId}
+is provided, this objet should contain all barcodes, including both cell and
+empty cell barcodes.}
 
 \item{...}{For the generic, further arguments to pass to each method.}
 
@@ -66,6 +70,11 @@ will be used to identify clusters of broad cell types. Default NULL.}
 If batch labels are supplied, DecontX is run on cells from each
 batch separately. Cells run in different channels or assays
 should be considered different batches. Default NULL.}
+
+\item{backgroundId}{Numeric vector. ID of barcodes that are empty droplets.
+Only needed when \code{x} supplied contains both cell and empty cell barcodes.
+If supplied, empirical distribution of transcripts from these empty droplets
+will be used as the contamination distribution.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
 
