@@ -8,12 +8,10 @@
 #' @param x A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
 #' with the matrix located in the assay slot under \code{assayName}.
 #' Cells in each batch will be subsetted and converted to a sparse matrix
-#' of class \code{dgCMatrix} from package \link{Matrix} before analysis. 
-#' If \code{backgroundId} is not provided, this object should only contain filtered
-#' cells after cell calling. Empty cell barcodes 
-#' (low expression droplets before cell calling) are not needed. If \code{backgroundId}
-#' is provided, this objet should contain all barcodes, including both cell and
-#' empty cell barcodes.
+#' of class \code{dgCMatrix} from package \link{Matrix} before analysis. This
+#' object should only contain filtered cells after cell calling. Empty
+#' cell barcodes (low expression droplets before cell calling) are not needed
+#' to run DecontX.
 #' @param assayName Character. Name of the assay to use if \code{x} is a
 #' \linkS4class{SingleCellExperiment}.
 #' @param z Numeric or character vector. Cell cluster labels. If NULL,
@@ -26,10 +24,11 @@
 #' If batch labels are supplied, DecontX is run on cells from each
 #' batch separately. Cells run in different channels or assays
 #' should be considered different batches. Default NULL.
-#' @param backgroundId Numeric vector. ID of barcodes that are empty droplets.
-#' Only needed when \code{x} supplied contains both cell and empty cell barcodes.
-#' If supplied, empirical distribution of transcripts from these empty droplets
-#' will be used as the contamination distribution.
+#' @param background A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
+#' with the matrix located in the assay slot under \code{assayName}. It should
+#' have the same structure as \code{x} except it contains the empty droplets after
+#' cell calling. When supplied, empirical distribution of transcripts from these 
+#' empty droplets will be used as the contamination distribution. Default NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -143,7 +142,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       assayName = "counts",
                                                       z = NULL,
                                                       batch = NULL,
-                                                      backgroundId = NULL,
+                                                      background = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -155,11 +154,11 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       logfile = NULL,
                                                       verbose = TRUE) {
   
-  counts_background <- NULL
-  if (!is.null(backgroundId)) {
-     counts_background <- x[, backgroundId]
-     counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
-     x <- x[, -backgroundId]
+  countsBackground <- NULL
+  if (!is.null(background)) {
+    # Remove background barcodes that have already appeared in x
+    background <- background[, !(background$Barcode %in% x$Barcode)]
+    countsBackground <- SummarizedExperiment::assay(background, i = assayName)
   }
 
   mat <- SummarizedExperiment::assay(x, i = assayName)
@@ -168,7 +167,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     counts = mat,
     z = z,
     batch = batch,
-    counts_background = counts_background,
+    countsBackground = countsBackground,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -220,7 +219,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
 setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
-                                     backgroundId = NULL,
+                                     background = NULL,
                                      maxIter = 500,
                                      delta = c(10, 10),
                                      estimateDelta = TRUE,
@@ -232,18 +231,18 @@ setMethod("decontX", "ANY", function(x,
                                      logfile = NULL,
                                      verbose = TRUE) {
 
-  counts_background <- NULL
-  if (!is.null(backgroundId)) {
-     counts_background <- x[, backgroundId]
-     counts_background <- SummarizedExperiment::assay(counts_background, i = assayName)
-     x <- x[, -backgroundId]
+  countsBackground <- NULL
+  if (!is.null(background)) {
+    # Remove background barcodes that have already appeared in x
+    background <- background[, !(colnames(background) %in% colnames(x))]
+    countsBackground <- SummarizedExperiment::assay(background, i = assayName)
   }
 
   .decontX(
     counts = x,
     z = z,
     batch = batch,
-    counts_background = counts_background,
+    countsBackground = countsBackground,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -323,7 +322,7 @@ setReplaceMethod(
 .decontX <- function(counts,
                      z = NULL,
                      batch = NULL,
-                     counts_background = NULL,
+                     countsBackground = NULL,
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
@@ -438,7 +437,7 @@ setReplaceMethod(
         counts = countsBat,
         z = zBat,
         batch = bat,
-        counts_background = counts_background,
+        countsBackground = countsBackground,
         maxIter = maxIter,
         delta = delta,
         estimateDelta = estimateDelta,
@@ -457,7 +456,7 @@ setReplaceMethod(
           counts = countsBat,
           z = zBat,
           batch = bat,
-          counts_background = counts_background,
+          countsBackground = countsBackground,
           maxIter = maxIter,
           delta = delta,
           estimateDelta = estimateDelta,
@@ -577,7 +576,7 @@ setReplaceMethod(
 .decontXoneBatch <- function(counts,
                              z = NULL,
                              batch = NULL,
-                             counts_background = NULL,
+                             countsBackground = NULL,
                              maxIter = 200,
                              delta = c(10, 10),
                              estimateDelta = TRUE,
@@ -664,10 +663,10 @@ setReplaceMethod(
     phi <- nextDecon$phi
     eta <- nextDecon$eta
 
-    # if counts_background is not null, use empirical dist. to replace eta
-    if (!is.null(counts_background)) {
+    # if countsBackground is not null, use empirical dist. to replace eta
+    if (!is.null(countsBackground)) {
       # Add pseudocount to each gene in eta
-       eta_tilda <- Matrix::rowSums(counts_background) + 1e-20
+       eta_tilda <- Matrix::rowSums(countsBackground) + 1e-20
        eta <- eta_tilda/sum(eta_tilda)
        
        # Make eta a matrix same dimension as phi
@@ -691,7 +690,7 @@ setReplaceMethod(
     counts.colsums <- Matrix::colSums(counts)
     while (iter <= maxIter & !isTRUE(converged) &
       numIterWithoutImprovement <= stopIter) {
-        if (is.null(counts_background)) {
+        if (is.null(countsBackground)) {
           nextDecon <- decontXEM(
             counts = counts,
             counts_colsums = counts.colsums,
@@ -1186,7 +1185,7 @@ addLogLikelihood <- function(llA, llB) {
 #' @return A list containing the \code{nativeMatirx} (real expression),
 #' \code{observedMatrix} (real expression + contamination), as well as other
 #' parameters used in the simulation.
-#' @author Shiyi Yang, Joshua Campbell
+#' @author Shiyi Yang, Joshua Campbell, Yuan Yin
 #' @examples
 #' contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 #' @export
