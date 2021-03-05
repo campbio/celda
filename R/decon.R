@@ -26,8 +26,8 @@
 #' should be considered different batches. Default NULL.
 #' @param background A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
 #' with the matrix located in the assay slot under \code{assayName}. It should
-#' have the same structure as \code{x} except it contains the empty droplets after
-#' cell calling. When supplied, empirical distribution of transcripts from these 
+#' have the same structure as \code{x} except it contains the matrix of empty droplets
+#' instead of cells. When supplied, empirical distribution of transcripts from these 
 #' empty droplets will be used as the contamination distribution. Default NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
@@ -90,6 +90,8 @@
 #' cell cluster labels will be stored in
 #' \code{reducedDims} slot in \code{x}.
 #'
+#' @author Shiyi Yang, Joshua Campbell, Yuan Yin
+#' 
 #' @examples
 #' # Generate matrix with contamination
 #' s <- simulateContamination(seed = 12345)
@@ -234,8 +236,7 @@ setMethod("decontX", "ANY", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove background barcodes that have already appeared in x
-    background <- background[, !(colnames(background) %in% colnames(x))]
-    countsBackground <- SummarizedExperiment::assay(background, i = assayName)
+    countsBackground <- background[, !(colnames(background) %in% colnames(x))]
   }
 
   .decontX(

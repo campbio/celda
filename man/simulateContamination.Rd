@@ -57,5 +57,5 @@ This function generates a list containing two count matrices --
 contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 }
 \author{
-Shiyi Yang, Joshua Campbell
+Shiyi Yang, Joshua Campbell, Yuan Yin
 }
