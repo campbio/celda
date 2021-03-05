@@ -85,6 +85,7 @@ test_that(desc = "Testing DecontX on SCE with Background SCE", {
     list(counts = s$observedCounts))
   
   b <- simulateContamination()
+  colnames(b$observedCounts) = paste(colnames(b$observedCounts), "_", sep="")
   bg <- SingleCellExperiment::SingleCellExperiment(
                               list(counts = b$observedCounts))
   
