@@ -429,6 +429,9 @@ setReplaceMethod(
       )
       countsBat <- methods::as(countsBat, "dgCMatrix")
     }
+    if (!inherits(countsBackground, "dgCMatrix")) {
+      countsBackground <- methods::as(countsBackground, "dgCMatrix")
+    }
 
     if (!is.null(z)) {
       zBat <- z[batch == bat]
