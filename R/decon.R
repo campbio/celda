@@ -1192,7 +1192,7 @@ addLogLikelihood <- function(llA, llB) {
 #' @return A list containing the \code{nativeMatirx} (real expression),
 #' \code{observedMatrix} (real expression + contamination), as well as other
 #' parameters used in the simulation.
-#' @author Shiyi Yang, Joshua Campbell, Yuan Yin
+#' @author Shiyi Yang, Yuan Yin, Joshua Campbell
 #' @examples
 #' contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 #' @export
