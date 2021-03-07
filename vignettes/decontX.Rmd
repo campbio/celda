@@ -5,6 +5,8 @@ author:
   affiliation: &id Boston University School of Medicine
 - name: Zhe Wang
   affiliation: *id
+- name: Yuan Yin
+  affiliation: *id
 - name: Joshua Campbell
   affiliation: *id
   email: camp@bu.edu
@@ -203,6 +205,28 @@ plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination,
 abline(0, 1, col = "red", lwd = 2)
 ```
 
+## Using known contamination distribution
+If a dataset of empty droplets are available, and the empirical distribution from the dataset is believed to give an accurate estimate of the contamination distribution, then this dataset can be put into `decontX` as `background`. The empirical distribution from the empty droplets dataset will be constructed and fixed as the contamination distribution during the inference.
+
+To demonstrate, we reload the pbmc4k dataset. Suppose that after running some independent tests, we now believe column 1 through 1000 are actually empty droplets, and the rest columns are cell-containing droplets. We can divide the dataset.
+
+```{r reload_10X, eval=TRUE, message=FALSE}
+# Reload PBMC data
+pbmc4k <- TENxPBMCData("pbmc4k")
+colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep = "_")
+rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
+
+# Divide dataset based on cell-containing and empty droplets
+pbmc4k.empty <- pbmc4k[, 1:1000]
+pbmc4k.cell <- pbmc4k[, -c(1:1000)]
+```
+
+Rerun `decontX`, now with input of empty droplets dataset.
+
+```{r knownContamination, eval=TRUE, message=FALSE}
+pbmc4k <- decontX(x = pbmc4k.cell,
+                  background = pbmc4k.empty)
+```
 
 # Session Information
 
