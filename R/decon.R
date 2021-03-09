@@ -677,7 +677,7 @@ setReplaceMethod(
        # Make eta a matrix same dimension as phi
        eta <- matrix(eta, length(eta), dim(phi)[2])
     }
-  
+
     ll <- c()
     llRound <- decontXLogLik(
       counts = counts,
