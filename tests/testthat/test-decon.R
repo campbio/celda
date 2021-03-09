@@ -42,11 +42,13 @@ test_that(desc = "Testing DecontX on counts matrix", {
 test_that(desc = "Testing DecontX on counts matrix with Background matrix", {
   s <- simulateContamination()
   b <- simulateContamination()
-  colnames(b$observedCounts) = paste(colnames(b$observedCounts), "_", sep="")
-  
+  colnames(b$observedCounts) <- paste(colnames(b$observedCounts),
+                                      "_",
+                                      sep = "")
+
   res <- decontX(s$observedCounts,
                  background = b$observedCounts)
-  
+
   p <- plotDecontXMarkerPercentage(s$observedCounts,
                                    z = res$z,
                                    markers = s$markers)
@@ -83,12 +85,12 @@ test_that(desc = "Testing DecontX on SCE with Background SCE", {
   s <- simulateContamination()
   sce <- SingleCellExperiment::SingleCellExperiment(
     list(counts = s$observedCounts))
-  
+
   b <- simulateContamination()
-  colnames(b$observedCounts) = paste(colnames(b$observedCounts), "_", sep="")
+  colnames(b$observedCounts) <- paste(colnames(b$observedCounts), "_", sep = "")
   bg <- SingleCellExperiment::SingleCellExperiment(
                               list(counts = b$observedCounts))
-  
+
   sce <- decontX(sce, background = bg)
   p <- plotDecontXContamination(sce)
   p <- plotDecontXMarkerPercentage(sce,
@@ -96,7 +98,7 @@ test_that(desc = "Testing DecontX on SCE with Background SCE", {
                                    markers = s$markers,
                                    assayName = "decontXcounts")
   p <- plotDecontXMarkerExpression(sce, s$markers[[1]])
-  
+
 })
 
 

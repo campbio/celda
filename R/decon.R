@@ -24,11 +24,12 @@
 #' If batch labels are supplied, DecontX is run on cells from each
 #' batch separately. Cells run in different channels or assays
 #' should be considered different batches. Default NULL.
-#' @param background A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
-#' with the matrix located in the assay slot under \code{assayName}. It should
-#' have the same structure as \code{x} except it contains the matrix of empty droplets
-#' instead of cells. When supplied, empirical distribution of transcripts from these 
-#' empty droplets will be used as the contamination distribution. Default NULL.
+#' @param background A numeric matrix of counts or a
+#' \linkS4class{SingleCellExperiment} with the matrix located in the assay
+#' slot under \code{assayName}. It should have the same structure as \code{x}
+#' except it contains the matrix of empty droplets instead of cells. When
+#' supplied, empirical distribution of transcripts from these empty droplets
+#' will be used as the contamination distribution. Default NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -90,8 +91,8 @@
 #' cell cluster labels will be stored in
 #' \code{reducedDims} slot in \code{x}.
 #'
-#' @author Shiyi Yang, Joshua Campbell, Yuan Yin
-#' 
+#' @author Shiyi Yang, Yuan Yin, Joshua Campbell
+#'
 #' @examples
 #' # Generate matrix with contamination
 #' s <- simulateContamination(seed = 12345)
@@ -155,7 +156,6 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       seed = 12345,
                                                       logfile = NULL,
                                                       verbose = TRUE) {
-  
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove background barcodes that have already appeared in x
@@ -164,7 +164,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   }
 
   mat <- SummarizedExperiment::assay(x, i = assayName)
-  
+
   result <- .decontX(
     counts = mat,
     z = z,
@@ -434,7 +434,6 @@ setReplaceMethod(
         countsBackground <- methods::as(countsBackground, "dgCMatrix")
       }
     }
-    
 
     if (!is.null(z)) {
       zBat <- z[batch == bat]
@@ -674,13 +673,11 @@ setReplaceMethod(
     if (!is.null(countsBackground)) {
       # Add pseudocount to each gene in eta
        eta_tilda <- Matrix::rowSums(countsBackground) + 1e-20
-       eta <- eta_tilda/sum(eta_tilda)
-       
+       eta <- eta_tilda / sum(eta_tilda)
        # Make eta a matrix same dimension as phi
        eta <- matrix(eta, length(eta), dim(phi)[2])
     }
-    
-
+  
     ll <- c()
     llRound <- decontXLogLik(
       counts = counts,
@@ -724,7 +721,7 @@ setReplaceMethod(
             pseudocount = 1e-20
           )
         }
-      
+
 
       theta <- nextDecon$theta
       phi <- nextDecon$phi
