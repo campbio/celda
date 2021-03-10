@@ -160,7 +160,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   if (!is.null(background)) {
     # Remove background barcodes that have already appeared in x
     dupBarcode <- background$Barcode %in% x$Barcode
-    
+
     if (any(dupBarcode)) {
       .logMessages(
         sum(dupBarcode),
@@ -170,7 +170,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
         verbose = verbose
       )
     }
-    
+
     background <- background[, !(dupBarcode)]
     countsBackground <- SummarizedExperiment::assay(background, i = assayName)
   }
@@ -249,7 +249,7 @@ setMethod("decontX", "ANY", function(x,
   if (!is.null(background)) {
     # Remove background barcodes that have already appeared in x
     dupBarcode <- colnames(background) %in% colnames(x)
-    
+
     if (any(dupBarcode)) {
       .logMessages(
         sum(dupBarcode),
@@ -259,7 +259,7 @@ setMethod("decontX", "ANY", function(x,
         verbose = verbose
       )
     }
-    
+
     countsBackground <- background[, !(dupBarcode)]
   }
   
