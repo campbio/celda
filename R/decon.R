@@ -30,6 +30,9 @@
 #' except it contains the matrix of empty droplets instead of cells. When
 #' supplied, empirical distribution of transcripts from these empty droplets
 #' will be used as the contamination distribution. Default NULL.
+#' @param bgAssayName Character. Name of the assay to use if \code{background}
+#' is a \linkS4class{SingleCellExperiment}. Default to same as
+#' \code{assayName}.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -146,6 +149,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       z = NULL,
                                                       batch = NULL,
                                                       background = NULL,
+                                                      bgAssayName = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -172,7 +176,12 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     }
 
     background <- background[, !(dupBarcode)]
-    countsBackground <- SummarizedExperiment::assay(background, i = assayName)
+
+
+    if (is.null(bgAssayName)) {
+      bgAssayName <- assayName
+    }
+    countsBackground <- SummarizedExperiment::assay(background, i = bgAssayName)
   }
 
   mat <- SummarizedExperiment::assay(x, i = assayName)
