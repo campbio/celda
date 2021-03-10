@@ -168,7 +168,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     if (any(dupBarcode)) {
       .logMessages(
         sum(dupBarcode),
-        " columns in background removed because they are found in filtered matrix",
+        " columns in background removed as they are found in filtered matrix",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -262,7 +262,7 @@ setMethod("decontX", "ANY", function(x,
     if (any(dupBarcode)) {
       .logMessages(
         sum(dupBarcode),
-        " columns in background removed because they are found in filtered matrix",
+        " columns in background removed as they are found in filtered matrix",
         logfile = logfile,
         append = TRUE,
         verbose = verbose
@@ -271,7 +271,7 @@ setMethod("decontX", "ANY", function(x,
 
     countsBackground <- background[, !(dupBarcode)]
   }
-  
+
   .decontX(
     counts = x,
     z = z,
