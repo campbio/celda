@@ -70,11 +70,19 @@ rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
 
 # Running decontX
 
-To run decontX with a SingleCellExperiment object, simply use the following command. 
+A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the `x` parameter. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets. The raw/droplet matrix can be used to empirically estimate the distribution of ambient RNA, which is especially useful when cells that contributed to the ambient RNA are not accurately represented in the filtered count matrix containing the cells. For example, cells that were removed via flow cytometry or that were more sensitive to lysis during dissociation may have contributed to the ambient RNA but were not measured in the filtered/cell matrix. The raw/droplet matrix can be input as a sparse matrix or SCE object using the `background` parameter:
+
+```{r decontX_background, eval=FALSE, message=FALSE}
+pbmc4k <- decontX(x = pbmc4k, background = raw)
+```
+
+Note that if cell/column names in the raw/droplet matrix are also found in the filtered counts matrix, then they will be excluded from the raw/droplet matrix before calculation of the ambient RNA distribution. If the raw matrix is not available, then `decontX` will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:
 
 ```{r decontX, eval=TRUE, message=FALSE}
 pbmc4k <- decontX(x = pbmc4k)
 ```
+
+Note that in this case `decontX` will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the `z` parameter. If you supply a raw matrix via the `background` parameter, then the `z` parameter will not have an effect as clustering will not be performed.
 
 The contamination can be found in the `colData(pbmc4k)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(pbmc4k)`. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. 
 
@@ -203,29 +211,6 @@ plot(pbmc4k$decontX_contamination, pbmc4k.delta$decontX_contamination,
      xlab = "DecontX estimated priors",
      ylab = "Setting priors to estimate higher contamination")
 abline(0, 1, col = "red", lwd = 2)
-```
-
-## Using known contamination distribution
-If a dataset of empty droplets are available, and the empirical distribution from the dataset is believed to give an accurate estimate of the contamination distribution, then this dataset can be put into `decontX` as `background`. The empirical distribution from the empty droplets dataset will be constructed and fixed as the contamination distribution during the inference.
-
-To demonstrate, we reload the pbmc4k dataset. Suppose that after running some independent tests, we now believe column 1 through 1000 are actually empty droplets, and the rest columns are cell-containing droplets. We can divide the dataset.
-
-```{r reload_10X, eval=TRUE, message=FALSE}
-# Reload PBMC data
-pbmc4k <- TENxPBMCData("pbmc4k")
-colnames(pbmc4k) <- paste(pbmc4k$Sample, pbmc4k$Barcode, sep = "_")
-rownames(pbmc4k) <- rowData(pbmc4k)$Symbol_TENx
-
-# Divide dataset based on cell-containing and empty droplets
-pbmc4k.empty <- pbmc4k[, 1:1000]
-pbmc4k.cell <- pbmc4k[, -c(1:1000)]
-```
-
-Rerun `decontX`, now with input of empty droplets dataset.
-
-```{r knownContamination, eval=TRUE, message=FALSE}
-pbmc4k <- decontX(x = pbmc4k.cell,
-                  background = pbmc4k.empty)
 ```
 
 # Session Information
