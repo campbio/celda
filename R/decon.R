@@ -159,7 +159,19 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove background barcodes that have already appeared in x
-    background <- background[, !(background$Barcode %in% x$Barcode)]
+    dupBarcode <- background$Barcode %in% x$Barcode
+    
+    if (any(dupBarcode)) {
+      .logMessages(
+        sum(dupBarcode),
+        " columns in background removed because they are found in filtered matrix",
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+      )
+    }
+    
+    background <- background[, !(dupBarcode)]
     countsBackground <- SummarizedExperiment::assay(background, i = assayName)
   }
 
@@ -236,9 +248,21 @@ setMethod("decontX", "ANY", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove background barcodes that have already appeared in x
-    countsBackground <- background[, !(colnames(background) %in% colnames(x))]
+    dupBarcode <- colnames(background) %in% colnames(x)
+    
+    if (any(dupBarcode)) {
+      .logMessages(
+        sum(dupBarcode),
+        " columns in background removed because they are found in filtered matrix",
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+      )
+    }
+    
+    countsBackground <- background[, !(dupBarcode)]
   }
-
+  
   .decontX(
     counts = x,
     z = z,
