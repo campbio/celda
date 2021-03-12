@@ -37,6 +37,12 @@ test_that(desc = "Testing DecontX on counts matrix", {
                                    s$markers[[1]],
                                    z = s$z)
   p <- plotDecontXContamination(res)
+
+  # test with background input
+  b <- s$observedCounts[, 1:5]
+  colnames(b) <- paste(colnames(b), "_", sep = "")
+  res <- decontX(s$observedCounts,
+                 background = b)
 })
 
 test_that(desc = "Testing DecontX on SCE", {
@@ -57,7 +63,13 @@ test_that(desc = "Testing DecontX on SCE", {
                                    markers = s$markers,
                                    assayName = "decontXcounts")
   sce <- decontX(sce, estimateDelta = FALSE)
+
+  # test with background input
+  bg <- sce[, 1:5]
+  colnames(bg) <- paste(colnames(bg), "_", sep = "")
+  sce <- decontX(sce, background = bg)
 })
+
 
 ## .decontXoneBatch
 test_that(desc = "Testing .decontXoneBatch", {

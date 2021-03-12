@@ -35,3 +35,6 @@ Celda_chain.*log.txt
 inst/doc
 doc
 Meta
+.Rprofile
+renv/
+
