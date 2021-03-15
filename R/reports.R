@@ -8,7 +8,7 @@
 #'   displayed on a reduced dimensional plot defined by \code{reducedDimName}. If \code{NULL}, then no plotting of features
 #'   on a reduced dimensinoal plot will be performed. Default \code{NULL}.
 #' @param displayName Character. The name to use for display in scatter plots
-#'   and heatmaps. This can be \code{"rownames"} or the name of a column in the row
+#'   and heatmaps. If \code{NULL}, then the rownames of the \code{sce} object will be used. This can also be set to the name of a column in the row data of the \code{sce}. Default \code{NULL}.
 #'   data. Default \code{"rownames"}.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
@@ -26,14 +26,15 @@
 #' @examples
 #' data(sceCeldaCG)
 #' \dontrun{
-#' reportCeldaCG_PlotResults(sce = sceCeldaCG, features = c("Gene_1", "Gene_100"))
+#' sceCeldaCG <- celdaUmap(sceCeldaCG)
+#' reportCeldaCG_PlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP", features = c("Gene_1", "Gene_100"))
 #' }
 #' @export
 reportCeldaCG_PlotResults <-
   function(sce,
            reducedDimName,
            features = NULL,
-           displayName = "rownames",
+           displayName = NULL,
            altExpName = "featureSubset",
            useAssay = "counts",
            cellAnnot = NULL,
@@ -44,7 +45,7 @@ reportCeldaCG_PlotResults <-
            showSetup = TRUE,
            showSession = TRUE) {
     rmarkdown::render(
-      system.file("rmarkdown/CeldaCG_PlotResults.rmd", package = "celda"),
+      system.file("rmarkdown/CeldaCG_PlotResults.Rmd", package = "celda"),
       params = list(
         sce = sce,
         altExpName = altExpName,

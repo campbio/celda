@@ -51,9 +51,6 @@ if(!is.null(cellAnnot)) {
   }
 }
 
-if(!is.null(features)) {
-  plotMarkers <- TRUE
-}
 L <- max(celdaModules(sce))
 K <- max(celdaClusters(sce))
 
@@ -121,10 +118,18 @@ Celda performs bi-clustering of features into modules and cells into subpopulati
 Celda estimates the probability of each feature in each cell. For these plots, the probability is scaled to go between 0 and 1.
 
 ```{r celda_module_tabs, results = "asis", fig.height = 9, fig.width = 10}
-grids <- seq(1, L, by = 9)
-for (i in seq.int(2, length(grids))) {
-  modules <- seq(grids[i-1], grids[i]-1)
-  label <- paste0("L", modules[1], "-", "L", modules[length(modules)])
+#grids <- seq(1, L, by = 9)
+
+grids <- seq(0, L, by = 9)
+if(tail(grids, 1) != L) { grids <- c(grids, L)}
+
+for (i in seq.int(1, length(grids)-1)) {
+  modules <- seq(grids[i]+1, grids[i+1])
+  if(length(modules) > 1) {
+    label <- paste0("L", modules[1], "-", "L", modules[length(modules)])
+  } else {
+    label <- paste0("L", modules[1])
+  }
   cat(sprintf(tab4, label))
   print(plotDimReduceModule(sce, reducedDimName = reducedDimName,
                     useAssay = useAssay,  altExpName = altExpName, 
@@ -150,7 +155,7 @@ This section displays a table of features in each module and can be used as a qu
 
 ```{r celda_modules_table}
 table <- featureModuleTable(sce)
-kable(table, style = 'html', row.names = F) %>%
+kable(table, style = 'html', row.names = FALSE) %>%
   kable_styling(bootstrap_options = "striped") %>%
   scroll_box(width = "100%", height = "800px")
 ```
@@ -160,18 +165,23 @@ kable(table, style = 'html', row.names = F) %>%
 ## Expression of pre-selected markers {.tabset .tabset-fade}
 Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional featuers that contain the name of any marker may also be shown.
 
-```{r plot_markers, eval=plotMarkers}
+```{r plot_markers}
 
-ix <- retrieveSCEIndex(inSCE = sce, IDs = features, axis = "row",
+if(!is.null(features)) {
+
+  ix <- retrieveSCEIndex(inSCE = sce, IDs = features, axis = "row",
                        by = displayName,
                        exactMatch = exactMatch)
-if(length(ix) > 0) {
-  print(plotDimReduceFeature(sce, reducedDimName = "celda_UMAP",
+  if(length(ix) > 0) {
+    print(plotDimReduceFeature(sce, reducedDimName = "celda_UMAP",
                            features = rownames(sce)[ix],
                            colorHigh = "red", colorMid = "grey",
                            colorLow = "blue", ncol = 3))
+  } else {
+    message("No matching markers were found.")
+  }
 } else {
-  message("No matching markers were found.")
+  message("No features were supplied.")
 }
 ```
 
