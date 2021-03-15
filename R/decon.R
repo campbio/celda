@@ -24,6 +24,15 @@
 #' If batch labels are supplied, DecontX is run on cells from each
 #' batch separately. Cells run in different channels or assays
 #' should be considered different batches. Default NULL.
+#' @param background A numeric matrix of counts or a
+#' \linkS4class{SingleCellExperiment} with the matrix located in the assay
+#' slot under \code{assayName}. It should have the same structure as \code{x}
+#' except it contains the matrix of empty droplets instead of cells. When
+#' supplied, empirical distribution of transcripts from these empty droplets
+#' will be used as the contamination distribution. Default NULL.
+#' @param bgAssayName Character. Name of the assay to use if \code{background}
+#' is a \linkS4class{SingleCellExperiment}. Default to same as
+#' \code{assayName}.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -85,6 +94,8 @@
 #' cell cluster labels will be stored in
 #' \code{reducedDims} slot in \code{x}.
 #'
+#' @author Shiyi Yang, Yuan Yin, Joshua Campbell
+#'
 #' @examples
 #' # Generate matrix with contamination
 #' s <- simulateContamination(seed = 12345)
@@ -137,6 +148,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       assayName = "counts",
                                                       z = NULL,
                                                       batch = NULL,
+                                                      background = NULL,
+                                                      bgAssayName = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -147,11 +160,37 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       seed = 12345,
                                                       logfile = NULL,
                                                       verbose = TRUE) {
+  countsBackground <- NULL
+  if (!is.null(background)) {
+    # Remove background barcodes that have already appeared in x
+    dupBarcode <- background$Barcode %in% x$Barcode
+
+    if (any(dupBarcode)) {
+      .logMessages(
+        sum(dupBarcode),
+        " columns in background removed as they are found in filtered matrix",
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+      )
+    }
+
+    background <- background[, !(dupBarcode)]
+
+
+    if (is.null(bgAssayName)) {
+      bgAssayName <- assayName
+    }
+    countsBackground <- SummarizedExperiment::assay(background, i = bgAssayName)
+  }
+
   mat <- SummarizedExperiment::assay(x, i = assayName)
+
   result <- .decontX(
     counts = mat,
     z = z,
     batch = batch,
+    countsBackground = countsBackground,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -203,6 +242,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
 setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
+                                     background = NULL,
                                      maxIter = 500,
                                      delta = c(10, 10),
                                      estimateDelta = TRUE,
@@ -213,10 +253,30 @@ setMethod("decontX", "ANY", function(x,
                                      seed = 12345,
                                      logfile = NULL,
                                      verbose = TRUE) {
+
+  countsBackground <- NULL
+  if (!is.null(background)) {
+    # Remove background barcodes that have already appeared in x
+    dupBarcode <- colnames(background) %in% colnames(x)
+
+    if (any(dupBarcode)) {
+      .logMessages(
+        sum(dupBarcode),
+        " columns in background removed as they are found in filtered matrix",
+        logfile = logfile,
+        append = TRUE,
+        verbose = verbose
+      )
+    }
+
+    countsBackground <- background[, !(dupBarcode)]
+  }
+
   .decontX(
     counts = x,
     z = z,
     batch = batch,
+    countsBackground = countsBackground,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -296,6 +356,7 @@ setReplaceMethod(
 .decontX <- function(counts,
                      z = NULL,
                      batch = NULL,
+                     countsBackground = NULL,
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
@@ -335,6 +396,7 @@ setReplaceMethod(
     logfile = logfile,
     verbose = verbose
   )
+
 
   totalGenes <- nrow(counts)
   totalCells <- ncol(counts)
@@ -400,6 +462,11 @@ setReplaceMethod(
       )
       countsBat <- methods::as(countsBat, "dgCMatrix")
     }
+    if (!is.null(countsBackground)) {
+      if (!inherits(countsBackground, "dgCMatrix")) {
+        countsBackground <- methods::as(countsBackground, "dgCMatrix")
+      }
+    }
 
     if (!is.null(z)) {
       zBat <- z[batch == bat]
@@ -409,6 +476,7 @@ setReplaceMethod(
         counts = countsBat,
         z = zBat,
         batch = bat,
+        countsBackground = countsBackground,
         maxIter = maxIter,
         delta = delta,
         estimateDelta = estimateDelta,
@@ -427,6 +495,7 @@ setReplaceMethod(
           counts = countsBat,
           z = zBat,
           batch = bat,
+          countsBackground = countsBackground,
           maxIter = maxIter,
           delta = delta,
           estimateDelta = estimateDelta,
@@ -546,6 +615,7 @@ setReplaceMethod(
 .decontXoneBatch <- function(counts,
                              z = NULL,
                              batch = NULL,
+                             countsBackground = NULL,
                              maxIter = 200,
                              delta = c(10, 10),
                              estimateDelta = TRUE,
@@ -632,6 +702,15 @@ setReplaceMethod(
     phi <- nextDecon$phi
     eta <- nextDecon$eta
 
+    # if countsBackground is not null, use empirical dist. to replace eta
+    if (!is.null(countsBackground)) {
+      # Add pseudocount to each gene in eta
+       eta_tilda <- Matrix::rowSums(countsBackground) + 1e-20
+       eta <- eta_tilda / sum(eta_tilda)
+       # Make eta a matrix same dimension as phi
+       eta <- matrix(eta, length(eta), dim(phi)[2])
+    }
+
     ll <- c()
     llRound <- decontXLogLik(
       counts = counts,
@@ -648,17 +727,34 @@ setReplaceMethod(
     counts.colsums <- Matrix::colSums(counts)
     while (iter <= maxIter & !isTRUE(converged) &
       numIterWithoutImprovement <= stopIter) {
-      nextDecon <- decontXEM(
-        counts = counts,
-        counts_colsums = counts.colsums,
-        phi = phi,
-        eta = eta,
-        theta = theta,
-        z = z,
-        estimate_delta = isTRUE(estimateDelta),
-        delta = delta,
-        pseudocount = 1e-20
-      )
+        if (is.null(countsBackground)) {
+          nextDecon <- decontXEM(
+            counts = counts,
+            counts_colsums = counts.colsums,
+            phi = phi,
+            estimate_eta = TRUE,
+            eta = eta,
+            theta = theta,
+            z = z,
+            estimate_delta = isTRUE(estimateDelta),
+            delta = delta,
+            pseudocount = 1e-20
+          )
+        } else {
+           nextDecon <- decontXEM(
+            counts = counts,
+            counts_colsums = counts.colsums,
+            phi = phi,
+            estimate_eta = FALSE,
+            eta = eta,
+            theta = theta,
+            z = z,
+            estimate_delta = isTRUE(estimateDelta),
+            delta = delta,
+            pseudocount = 1e-20
+          )
+        }
+
 
       theta <- nextDecon$theta
       phi <- nextDecon$phi
@@ -1126,7 +1222,7 @@ addLogLikelihood <- function(llA, llB) {
 #' @return A list containing the \code{nativeMatirx} (real expression),
 #' \code{observedMatrix} (real expression + contamination), as well as other
 #' parameters used in the simulation.
-#' @author Shiyi Yang, Joshua Campbell
+#' @author Shiyi Yang, Yuan Yin, Joshua Campbell
 #' @examples
 #' contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 #' @export

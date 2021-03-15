@@ -13,6 +13,8 @@ decontX(x, ...)
   assayName = "counts",
   z = NULL,
   batch = NULL,
+  background = NULL,
+  bgAssayName = NULL,
   maxIter = 500,
   delta = c(10, 10),
   estimateDelta = TRUE,
@@ -29,6 +31,7 @@ decontX(x, ...)
   x,
   z = NULL,
   batch = NULL,
+  background = NULL,
   maxIter = 500,
   delta = c(10, 10),
   estimateDelta = TRUE,
@@ -66,6 +69,17 @@ will be used to identify clusters of broad cell types. Default NULL.}
 If batch labels are supplied, DecontX is run on cells from each
 batch separately. Cells run in different channels or assays
 should be considered different batches. Default NULL.}
+
+\item{background}{A numeric matrix of counts or a
+\linkS4class{SingleCellExperiment} with the matrix located in the assay
+slot under \code{assayName}. It should have the same structure as \code{x}
+except it contains the matrix of empty droplets instead of cells. When
+supplied, empirical distribution of transcripts from these empty droplets
+will be used as the contamination distribution. Default NULL.}
+
+\item{bgAssayName}{Character. Name of the assay to use if \code{background}
+is a \linkS4class{SingleCellExperiment}. Default to same as
+\code{assayName}.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
 
@@ -175,4 +189,7 @@ plotDecontXMarkerPercentage(sce, markers = s$markers,
 # Plot raw counts of indiviual markers genes before
 # and after decontamination
 plotDecontXMarkerExpression(sce, unlist(s$markers))
+}
+\author{
+Shiyi Yang, Yuan Yin, Joshua Campbell
 }

@@ -851,7 +851,7 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1,
+            ggplot2::geom_jitter(height = 0, width = 0.1, alpha = 0.5,
                 ggplot2::aes_string(color = "L")) +
             ggplot2::scale_color_discrete(name = "L") +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
@@ -859,7 +859,8 @@ setMethod("plotGridSearchPerplexityDiff",
                     color = "L"), size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$K))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$K))),
                 max(as.integer(levels(dt$K))), sep)) +
             ggplot2::theme_bw()
     } else if (nlevels(dt$L) > 1) {
@@ -885,7 +886,7 @@ setMethod("plotGridSearchPerplexityDiff",
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1,
+            ggplot2::geom_jitter(height = 0, width = 0.1, alpha = 0.5,
                 ggplot2::aes_string(color = "K")) +
             ggplot2::scale_color_discrete(name = "K") +
             ggplot2::geom_path(
@@ -895,7 +896,8 @@ setMethod("plotGridSearchPerplexityDiff",
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$L))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$L))),
                 max(as.integer(levels(dt$L))), sep)) +
             ggplot2::theme_bw()
     } else {
@@ -945,13 +947,14 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1) +
+            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
                 ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$K))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$K))),
                 max(as.integer(levels(dt$K))), sep)) +
             ggplot2::theme_bw()
     } else {
@@ -1000,13 +1003,14 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1) +
+            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
             ggplot2::geom_path(data = diffMeansByL[!is.na(meanperpdiffL), ],
                 ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
-            ggplot2::scale_x_discrete(breaks = seq(as.integer(levels(dt$L))[2],
+            ggplot2::scale_x_discrete(
+                breaks = seq(min(as.integer(levels(dt$L))),
                 max(as.integer(levels(dt$L))), sep)) +
             ggplot2::theme_bw()
     } else {
