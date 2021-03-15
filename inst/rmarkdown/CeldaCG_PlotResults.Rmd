@@ -1,0 +1,203 @@
+---
+title: "Celda_CG Results"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+params:
+  sce: sce
+  altExpName: altExpName
+  useAssay: useAssay
+  reducedDimName: reducedDimName
+  features: features
+  displayName: displayName
+  cellAnnot: cellAnnot
+  exactMatch: exactMatch
+  pdf: pdf
+  showSetup: showSetup
+  showSession: showSession
+output: 
+ html_document:
+     toc: true
+     toc_float: true
+     number_sections: true
+     theme: cosmo
+     code_folding: hide
+---
+
+
+# Celda_CG Results
+
+## Setup
+The following code loads required librarys, reads in parameters, checks input variables, and sets up display options for the celda_CG results report.
+```{r setup, eval = TRUE, echo = showSetup}
+require(singleCellTK)
+require(celda)
+require(kableExtra)
+require(grid)
+require(knitr)
+
+sce <- params$sce
+features <- params$features
+altExpName <- params$altExpName
+useAssay <- params$useAssay
+reducedDimName <- params$reducedDimName
+displayName <- params$displayName
+cellAnnot <- params$cellAnnot
+pdf <- params$pdf
+
+if(!is.null(cellAnnot)) {
+  if(!all(cellAnnot %in% colnames(colData(altExp(sce, e = altExpName))))) {
+    s <- setdiff(cellAnnot, colnames(colData(altExp(sce, e = altExpName))))
+    stop("The following items in 'cellAnnotations' were not found in the ",
+         "column data of the object: ", paste0(s, ","))
+  }
+}
+
+if(!is.null(features)) {
+  plotMarkers <- TRUE
+}
+L <- max(celdaModules(sce))
+K <- max(celdaClusters(sce))
+
+# Define tab levels
+tab3 <- "### %s {-}
+"
+tab4 <- "#### %s {-}
+"
+space <- " 
+
+"
+dev <- ifelse(isTRUE(pdf), c("png"), c("png", "pdf"))
+opts_chunk$set(
+  echo=TRUE,
+  cache=FALSE,
+  cache.lazy=FALSE,       
+  cache.comments=FALSE,
+  fig.align = "center",
+  fig.keep = "all",
+  dev = dev
+)
+```
+
+
+
+
+## Visualization of cells in 2-D embeddings {.tabset .tabset-fade}
+Reduced dimensional 2-D plots created by algorithms such as tSNE and UMAP are useful for visualizing the relationship between cells. Each point on the plot represents a single cell. Cells closer together on the plot have more similar expression profiles across all genes. The tabs below show the `r reducedDimName` dimensions colored by different variables. The *Cluster* tab colors cells by the `r K` subpopulation labels identified by celda_CG, The *Sample Labels* tab colors cells by the sample label supplied to celda_CG. If no sample label was supplied to celda_CG, then all cells will be the same color. The *Cell Annotations* tab contains colors points by other pre-specified cell-level annotations.
+
+### Clusters
+```{r celda_clusters, fig.height = 9, fig.width = 9}
+plotDimReduceCluster(sce, reducedDimName = reducedDimName, labelClusters = TRUE)
+```
+
+### Sample Labels
+```{r celda_samples, fig.height = 9, fig.width = 9}
+plotSCEDimReduceColData(altExp(sce), reducedDimName = reducedDimName, colorBy = "celda_sample_label", labelClusters = FALSE)
+```
+
+
+### Cell Annotations {.tabset .tabset-fade}
+
+```{r celda_cellAnnot, results = "asis", fig.height = 9, fig.width = 10}
+if(!is.null(cellAnnot)) {
+  for (i in cellAnnot) {
+    cat(sprintf(tab4, i))
+    print(plotSCEDimReduceColData(altExp(sce), sample=sce$sample,
+                                  colorBy = i, reducedDim = reducedDimName,
+                                  labelClusters = FALSE))
+    cat(space)
+  }  
+} else {
+  message("No cell annotations are displayed. To plot cell annotations in this section, you can pass the desired variables from the `colData` in the SingleCellExperiment object via the 'cellAnnot' parameter.")
+} 
+
+```
+
+<br><br>
+
+## Modules {.tabset .tabset-fade}
+Celda performs bi-clustering of features into modules and cells into subpopulations.  Modules are groups of genes that are co-expressed across cells. The *Module Probabilities* tabcolors cells by the probability of each module on a 2-D embedding plot. The *Module Heatmaps* tab contain a heatmap for each module with the cells that express the lowest and highest levels of that module. The *Module Table* tab contains a complete table of all features in each module. 
+
+### Module Probabilities {.tabset .tabset-fade}
+
+Celda estimates the probability of each feature in each cell. For these plots, the probability is scaled to go between 0 and 1.
+
+```{r celda_module_tabs, results = "asis", fig.height = 9, fig.width = 10}
+grids <- seq(1, L, by = 9)
+for (i in seq.int(2, length(grids))) {
+  modules <- seq(grids[i-1], grids[i]-1)
+  label <- paste0("L", modules[1], "-", "L", modules[length(modules)])
+  cat(sprintf(tab4, label))
+  print(plotDimReduceModule(sce, reducedDimName = reducedDimName,
+                    useAssay = useAssay,  altExpName = altExpName, 
+                    ncol = 3, modules = modules))
+  cat(space)
+}
+```
+
+### Module Heatmaps {.tabset .tabset-fade}
+
+Module heatmaps are below show for each module. Use the dropdown box to select modules ranging from 1 to `r L`. Each column on the heatmap represents a cell and each row represents a feature. Expression values for each feature are z-scored normalized across all cells after normalization. Red represents higher relative expression and blue represents lower relative expression. Only the top 100 cells with the lowest module probability and the 100 cells with the highest module probability are shown for each module. The column color bar displays the population assignment for each cell. 
+
+```{r celda_module_heatmaps, results = "asis", fig.height = 9, fig.width = 10}
+for (i in seq_len(L)) {
+  cat(sprintf(tab4, paste0("L", i)))
+  print(moduleHeatmap(sce, featureModule = i))
+  cat(space)
+}
+```
+
+### Module Table
+This section displays a table of features in each module and can be used as a quick way to lookup featuers of interest. The features within each module are ordered from those with highest expression at the top to those with lower expression at the bottom.
+
+```{r celda_modules_table}
+table <- featureModuleTable(sce)
+kable(table, style = 'html', row.names = F) %>%
+  kable_styling(bootstrap_options = "striped") %>%
+  scroll_box(width = "100%", height = "800px")
+```
+
+<br><br>
+
+## Expression of pre-selected markers {.tabset .tabset-fade}
+Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional featuers that contain the name of any marker may also be shown.
+
+```{r plot_markers, eval=plotMarkers}
+
+ix <- retrieveSCEIndex(inSCE = sce, IDs = features, axis = "row",
+                       by = displayName,
+                       exactMatch = exactMatch)
+if(length(ix) > 0) {
+  print(plotDimReduceFeature(sce, reducedDimName = "celda_UMAP",
+                           features = rownames(sce)[ix],
+                           colorHigh = "red", colorMid = "grey",
+                           colorLow = "blue", ncol = 3))
+} else {
+  message("No matching markers were found.")
+}
+```
+
+
+## Overview Heatmaps {.tabset}
+Overview heatmaps can be used to visualize the relationship between modules and cell populations at high level.
+
+<br><br>
+
+### Probability Map
+The probability matrix on the left contains the probability of each module within each cell subpopulation. This matrix can be used to gain insights into the absolute abundance of each module within a cell subpopulation. Modules with higher probability have a higher overall expression level compared to other modules within the same cell population. The relative probability heatmap on the right is produced by taking the z-score of the module probabilities across cell subpopulations. Examining the relative abundance can be useful for finding modules that exhibit specific patterns across cell populations even if they have an overall lower absolute probability compared to other modules.
+```{r celda_probability_map, echo = TRUE, eval = TRUE, fig.height = 20, fig.width = 10}
+print(celdaProbabilityMap(sce))
+```
+
+### Overview Heatmap
+This general heatmap shows the actual relative expression of the
+top 10 features in each module (rows) for each cell (columns). Rows are z-score
+normalized. The columns of the heatmap are semi-supervised by cell population and the rows are semi-supervised by module. 
+```{r celda_heatmap,fig.height = 15, fig.width = 9}
+grid.draw(celdaHeatmap(sce, nfeatures = 10))
+```
+
+## Session Information
+```{r session, eval = sessionInfo, echo = sessionInfo}
+sessionInfo()
+```
+
+<br><br>
