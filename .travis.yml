@@ -12,7 +12,7 @@ notifications:
 r_github_packages:
   - r-lib/covr
   - jimhester/lintr
-  - spatstat/spatstat@66c4540
+  - spatstat/spatstat@v1.64-1
 after_success:
   - R CMD INSTALL $PKG_TARBALL
   - Rscript -e 'covr::coveralls()'
