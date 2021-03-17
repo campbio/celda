@@ -816,22 +816,6 @@ setMethod("celda_C",
 }
 
 
-.reorderCeldaC <- function(counts, res) {
-  if (params(res)$K > 2 & isTRUE(length(unique(celdaClusters(res)$z)) > 1)) {
-    res@clusters$z <- as.integer(as.factor(celdaClusters(res)$z))
-    fm <- factorizeMatrix(counts, res)
-    uniqueZ <- sort(unique(celdaClusters(res)$z))
-    d <- .cosineDist(fm$posterior$module[, uniqueZ])
-    h <- stats::hclust(d, method = "complete")
-    res <- .recodeClusterZ(res,
-      from = h$order,
-      to = seq(length(h$order))
-    )
-  }
-  return(res)
-}
-
-
 .prepareCountsForDimReductionCeldaC <- function(sce,
     useAssay,
     maxCells,
