@@ -126,7 +126,8 @@ setMethod("reorderCelda", signature(x = "matrix", celdaMod = "celda_G"),
 
 
 .reorderCeldaCsce <- function(sce, useAssay, altExpName, method = "complete") {
-    if (S4Vectors::metadata(altExp(sce, altExpName))$celda_parameters$K > 2 &
+    if (S4Vectors::metadata(SingleCellExperiment::altExp(sce,
+        altExpName))$celda_parameters$K > 2 &
             isTRUE(length(unique(celdaClusters(sce, altExpName))) > 1)) {
         celdaClusters(sce, altExpName) <-
             as.integer(as.factor(celdaClusters(sce, altExpName)))
@@ -161,7 +162,8 @@ setMethod("reorderCelda", signature(x = "matrix", celdaMod = "celda_G"),
 
 
 .reorderCeldaGsce <- function(sce, useAssay, altExpName, method = "complete") {
-    if (S4Vectors::metadata(altExp(sce, altExpName))$celda_parameters$L > 2 &
+    if (S4Vectors::metadata(SingleCellExperiment::altExp(sce,
+        altExpName))$celda_parameters$L > 2 &
             isTRUE(length(unique(celdaModules(sce, altExpName))) > 1)) {
         celdaModules(sce, altExpName) <-
             as.integer(as.factor(celdaModules(sce, altExpName)))
@@ -211,7 +213,8 @@ setMethod("reorderCelda", signature(x = "matrix", celdaMod = "celda_G"),
 
 .reorderCeldaCGsce <- function(sce, useAssay, altExpName, method = "complete") {
     # Reorder K
-    if (S4Vectors::metadata(altExp(sce, altExpName))$celda_parameters$K > 2 &
+    if (S4Vectors::metadata(SingleCellExperiment::altExp(sce,
+        altExpName))$celda_parameters$K > 2 &
             isTRUE(length(unique(celdaClusters(sce, altExpName))) > 1)) {
         celdaClusters(sce, altExpName) <-
             as.integer(as.factor(celdaClusters(sce, altExpName)))
@@ -229,7 +232,8 @@ setMethod("reorderCelda", signature(x = "matrix", celdaMod = "celda_G"),
     }
 
     # Reorder L
-    if (S4Vectors::metadata(altExp(sce, altExpName))$celda_parameters$L > 2 &
+    if (S4Vectors::metadata(SingleCellExperiment::altExp(sce,
+        altExpName))$celda_parameters$L > 2 &
             isTRUE(length(unique(celdaModules(sce, altExpName))) > 1)) {
         celdaModules(sce, altExpName) <-
             as.integer(as.factor(celdaModules(sce, altExpName)))
