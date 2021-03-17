@@ -909,33 +909,6 @@ setMethod("celda_CG",
 }
 
 
-.reorderCeldaCG <- function(counts, res) {
-    # Reorder K
-    if (params(res)$K > 2 & isTRUE(length(unique(celdaClusters(res)$z)) > 1)) {
-        res@clusters$z <- as.integer(as.factor(celdaClusters(res)$z))
-        fm <- factorizeMatrix(counts, res, type = "posterior")
-        uniqueZ <- sort(unique(celdaClusters(res)$z))
-        d <- .cosineDist(fm$posterior$cellPopulation[, uniqueZ])
-        h <- stats::hclust(d, method = "complete")
-
-        res <- .recodeClusterZ(res, from = h$order, to = seq(length(h$order)))
-    }
-
-    # Reorder L
-    if (params(res)$L > 2 & isTRUE(length(unique(celdaClusters(res)$y)) > 1)) {
-        res@clusters$y <- as.integer(as.factor(celdaClusters(res)$y))
-        fm <- factorizeMatrix(counts, res, type = "posterior")
-        uniqueY <- sort(unique(celdaClusters(res)$y))
-        cs <- prop.table(t(fm$posterior$cellPopulation[uniqueY, ]), 2)
-        d <- .cosineDist(cs)
-        h <- stats::hclust(d, method = "complete")
-
-        res <- .recodeClusterY(res, from = h$order, to = seq(length(h$order)))
-    }
-    return(res)
-}
-
-
 .prepareCountsForDimReductionCeldaCG <- function(sce,
     useAssay,
     maxCells,
