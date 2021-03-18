@@ -286,7 +286,7 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
 #' or list of character vectors
 #' with the names of the marker genes of interest.
 #' @param groupClusters List. A named list that allows
-#' cell clusterslabels coded in
+#' cell clusters labels coded in
 #' \code{z} to be regrouped and renamed on the fly. For example,
 #' \code{list(Tcells=c(1, 2), Bcells=7)} would recode clusters
 #' 1 and 2 to "Tcells"
@@ -301,7 +301,7 @@ plotDecontXMarkerPercentage <- function(x, markers, groupClusters = NULL,
 #' @param z Character, Integer, or Vector.
 #' Indicates the cluster labels for each cell.
 #' If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL},
-#' then the cluster labels from \code{\link{decontX}} will be retived from the
+#' then the cluster labels from \code{\link{decontX}} will be retreived from the
 #' \code{colData} of \code{x} (i.e. \code{colData(x)$decontX_clusters}).
 #' If \code{z} is a single character or integer, then that column will be
 #' retrived from \code{colData} of \code{x}. (i.e. \code{colData(x)[,z]}).
