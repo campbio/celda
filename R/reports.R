@@ -1,33 +1,44 @@
 #' @title Generate a report for celda_CG results
 #' @description After a celda_CG model has been fitted, this function will
-#' create an html report which can be used to visualize and explore the results. 
+#'   create an html report which can be used to visualize and explore the
+#'   results.
 #' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
 #'   returned by \link{celda_CG}.
-#' @param reducedDimName Character. Name of the reduced dimensional object to be used in 2-D scatter plots throughout the report.
+#' @param reducedDimName Character. Name of the reduced dimensional object to be
+#'   used in 2-D scatter plots throughout the report.
 #' @param features Character vector.  Expression of these features will be
-#'   displayed on a reduced dimensional plot defined by \code{reducedDimName}. If \code{NULL}, then no plotting of features
-#'   on a reduced dimensinoal plot will be performed. Default \code{NULL}.
+#'   displayed on a reduced dimensional plot defined by \code{reducedDimName}.
+#'   If \code{NULL}, then no plotting of features on a reduced dimensinoal plot
+#'   will be performed. Default \code{NULL}.
 #' @param displayName Character. The name to use for display in scatter plots
-#'   and heatmaps. If \code{NULL}, then the rownames of the \code{sce} object will be used. This can also be set to the name of a column in the row data of the \code{sce}. Default \code{NULL}.
-#'   data. Default \code{"rownames"}.
-#' @param altExpName The name for the \link{altExp} slot
-#'  to use. Default "featureSubset".
-#' @param useAssay A string specifying which \link{assay}
-#'  slot to use. Default \code{"counts"}.
-#' @param cellAnnot Character vector. The cell-level annotations to display on the reduced dimensional plot. These variables should be present in the column data of the \code{sce} object.
-#' @param exactMatch Boolean. Whether to only identify exact matches
-#' or to identify partial matches using \code{\link{grep}}. Default \code{FALSE}.
-#' @param output_file Character. Prefix of the html file. Default \code{"CeldaCG_ResultReport"}.
+#'   and heatmaps. If \code{NULL}, then the rownames of the \code{sce} object
+#'   will be used. This can also be set to the name of a column in the row data
+#'   of the \code{sce}. Default \code{NULL}. data. Default \code{"rownames"}.
+#' @param altExpName The name for the \link{altExp} slot to use. Default
+#'   "featureSubset".
+#' @param useAssay A string specifying which \link{assay} slot to use. Default
+#'   \code{"counts"}.
+#' @param cellAnnot Character vector. The cell-level annotations to display on
+#'   the reduced dimensional plot. These variables should be present in the
+#'   column data of the \code{sce} object.
+#' @param exactMatch Boolean. Whether to only identify exact matches or to
+#'   identify partial matches using \code{\link{grep}}. Default \code{FALSE}.
+#' @param output_file Character. Prefix of the html file. Default
+#'   \code{"CeldaCG_ResultReport"}.
 #' @param output_dir Character. Path to save the html file. Default \code{.}.
-#' @param pdf Boolean. Whether to create PDF versions of each plot in addition to PNGs. Default \code{FALSE}.
-#' @param showSetup Boolean. Whether to show the setup code at the beginning. Default \code{TRUE}.
-#' @param showSession Boolean. Whether to show the session information at the end. Default \code{TRUE}.
+#' @param pdf Boolean. Whether to create PDF versions of each plot in addition
+#'   to PNGs. Default \code{FALSE}.
+#' @param showSetup Boolean. Whether to show the setup code at the beginning.
+#'   Default \code{TRUE}.
+#' @param showSession Boolean. Whether to show the session information at the
+#'   end. Default \code{TRUE}.
 #' @return .html file
 #' @examples
 #' data(sceCeldaCG)
 #' \dontrun{
 #' sceCeldaCG <- celdaUmap(sceCeldaCG)
-#' reportCeldaCG_PlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP", features = c("Gene_1", "Gene_100"))
+#' reportCeldaCG_PlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
+#'                          features = c("Gene_1", "Gene_100"))
 #' }
 #' @export
 reportCeldaCG_PlotResults <-
