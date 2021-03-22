@@ -1,11 +1,32 @@
-#' @title Generate a report for celda_CG results
-#' @description After a celda_CG model has been fitted, this function will
-#'   create an html report which can be used to visualize and explore the
-#'   results.
-#' @param sce A \link[SingleCellExperiment]{SingleCellExperiment} object
-#'   returned by \link{celda_CG}.
+#' @title Generate an HTML report for celda_CG
+#' @name report
+#' @description \code{reportCeldaCGRun} will run \link{recursiveSplitModule} and
+#'   \link{recursiveSplitCell} to find the number of modules \code{L} and the
+#'   number of cell populations \code{K} and fit a model with \link{celda_CG}.
+#'   After a \link{celda_CG} model has been fit, \code{reportCeldaCGPlotResults}
+#'   can be used to create an HTML report for to visualization and exploration
+#'   of the \link{celda_CG} model results.
+#' @param sce A \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells.
+#' @param L Integer. Final number of feature modules. See \code{celda_CG} for more information.
+#' @param K Integer. Final number of cell populations. See \code{celda_CG} for more information.
+#' @param sampleLabel Vector or factor. Denotes the sample label for each cell
+#'  (column) in the count matrix. 
+#' @param altExpName The name for the \link{altExp} slot to use. Default
+#'   \code{"featureSubset"}.
+#' @param useAssay A string specifying which \link{assay} slot to use. Default
+#'   \code{"counts"}.
+#' @param initialL Integer. Minimum number of modules to try. See \link{recursiveSplitModule} for more information. Defailt \code{10}.
+#' @param maxL Integer. Maximum number of modules to try. See \link{recursiveSplitModule} for more information. Default \code{150}.
+#' @param initialK Integer. Initial number of cell populations to try.
+#' @param maxK Integer. Maximum number of cell populations to try.
+#' @param minCell Integer. Minimum number of cells required for feature selection. See \link{selectFeatures} for more information. Default \code{3}.
+#' @param minCount Integer. Minimum number of counts required for feature selection. See \link{selectFeatures} for more information. Default \code{3}.
+#' @param maxFeatures Integer. Maximum number of features to include. If the number of features after filtering for \code{minCell} and \code{minCount} are greater than \code{maxFeature}, then Seurat's VST function is used to select the top variable features. Default \code{5000}.
+#' @param sceFile Character. Name of the RDS file to store the SCE object with the final \code{celda_CG} model.
 #' @param reducedDimName Character. Name of the reduced dimensional object to be
-#'   used in 2-D scatter plots throughout the report.
+#'   used in 2-D scatter plots throughout the report. Default \code{celda_UMAP}.
 #' @param features Character vector.  Expression of these features will be
 #'   displayed on a reduced dimensional plot defined by \code{reducedDimName}.
 #'   If \code{NULL}, then no plotting of features on a reduced dimensinoal plot
@@ -14,10 +35,6 @@
 #'   and heatmaps. If \code{NULL}, then the rownames of the \code{sce} object
 #'   will be used. This can also be set to the name of a column in the row data
 #'   of the \code{sce}. Default \code{NULL}. data. Default \code{"rownames"}.
-#' @param altExpName The name for the \link{altExp} slot to use. Default
-#'   "featureSubset".
-#' @param useAssay A string specifying which \link{assay} slot to use. Default
-#'   \code{"counts"}.
 #' @param cellAnnot Character vector. The cell-level annotations to display on
 #'   the reduced dimensional plot. These variables should be present in the
 #'   column data of the \code{sce} object.
@@ -40,8 +57,79 @@
 #' reportCeldaCG_PlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
 #'                          features = c("Gene_1", "Gene_100"))
 #' }
+NULL
+
+#' @rdname report
+#' export
+reportCeldaCGRun <-
+  function(sce,
+           L,
+           K,
+           sampleLabel = NULL,
+           altExpName = "featureSubset",
+           useAssay = "counts",
+           initialL = 10,
+           maxL = 150,
+           initialK = 5,
+           maxK = 50,
+           minCell = 3,
+           minCount = 3,
+           maxFeatures = 5000,
+           output_file = "CeldaCG_RunReport",
+           output_sce_prefix = "celda_cg",
+           output_dir = ".",
+           pdf = FALSE,
+           showSession = TRUE) {
+    sceFile <-
+      file.path(normalizePath(output_dir),
+                paste0(output_sce_prefix, ".rds"))
+    
+    rmarkdown::render(
+      system.file("rmarkdown/CeldaCG_Run.Rmd", package = "celda"),
+      params = list(
+        sce = sce,
+        L = L,
+        K = K,
+        sampleLabel = sampleLabel,
+        altExpName = altExpName,
+        useAssay = useAssay,
+        initialL = initialL,
+        maxL = maxL,
+        initialK = initialK,
+        maxK = maxK,
+        minCell = minCell,
+        minCount = minCount,
+        maxFeatures = maxFeatures,
+        sceFile = sceFile,
+        pdf = isTRUE(pdf),
+        showSession = isTRUE(showSession)
+      ),
+      output_file = output_file,
+      output_dir = output_dir,
+      intermediates_dir = output_dir,
+      knit_root_dir = output_dir
+    )
+    
+    if (!is.null(output_sce_prefix)) {
+      if (file.exists(sceFile)) {
+        sce <- readRDS(sceFile)
+        invisible(sce)
+      } else {
+        warning(
+          "The file '",
+          sceFile,
+          "' could not be found. The SCE with celda_CG results was not reloaded."
+        )
+      }
+    }
+  }
+
+
+
+
+
 #' @export
-reportCeldaCG_PlotResults <-
+reportCeldaCGPlotResults <-
   function(sce,
            reducedDimName,
            features = NULL,

@@ -96,23 +96,26 @@
 #'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
-#' @param initialK Integer. Minimum number of cell populations to try.
+#' @param initialK Integer. Initial number of cell populations to try.
+#' Default \code{5}.
 #' @param maxK Integer. Maximum number of cell populations to try.
+#' Default \code{25}.
 #' @param tempL Integer. Number of temporary modules to identify and use in cell
 #'  splitting. Only used if \code{yInit = NULL}. Collapsing features to a
 #'  relatively smaller number of modules will increase the speed of clustering
 #'  and tend to produce better cell populations. This number should be larger
-#'  than the number of true modules expected in the dataset. Default NULL.
+#'  than the number of true modules expected in the dataset. Default
+#'  \code{NULL.}
 #' @param yInit Integer vector. Module labels for features. Cells will be
 #'  clustered using the \link{celda_CG} model based on the modules specified in
 #'  \code{yInit} rather than the counts of individual features. While the
 #'  features will be initialized to the module labels in \code{yInit}, the
 #'  labels will be allowed to move within each new model with a different K.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
-#'  to each cell population in each sample. Default 1.
+#'  to each cell population in each sample. Default \code{1}.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount to
 #'  each feature in each cell (if \code{yInit} is NULL) or to each module in
-#'  each cell population (if \code{yInit} is set). Default 1.
+#'  each cell population (if \code{yInit} is set). Default \code{1}.
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount
 #'  to each feature in each module. Only used if \code{yInit} is set. Default 1.
 #' @param gamma Numeric. Concentration parameter for Eta. Adds a pseudocount
@@ -864,23 +867,23 @@ setMethod("recursiveSplitCell",
 #'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param initialL Integer. Minimum number of modules to try.
-#' @param maxL Integer. Maximum number of modules to try.
+#' @param initialL Integer. Initial number of modules.
+#' @param maxL Integer. Maximum number of modules.
 #' @param tempK Integer. Number of temporary cell populations to identify and
 #'  use in module splitting. Only used if \code{zInit = NULL} Collapsing cells
 #'  to a relatively smaller number of cell popluations will increase the
 #'  speed of module clustering and tend to produce better modules. This number
 #'  should be larger than the number of true cell populations expected in the
-#'  dataset. Default 100.
+#'  dataset. Default \code{100}.
 #' @param zInit Integer vector. Collapse cells to cell populations based on
 #'  labels in \code{zInit} and then perform module splitting. If NULL, no
-#'  collapasing will be performed unless \code{tempK} is specified.
-#'  Default NULL.
+#'  collapsing will be performed unless \code{tempK} is specified.
+#'  Default \code{NULL}.
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
-#'  (column) in the count matrix. Only used if \code{zInit} is set.
+#'  (column) in the count matrix. Default \code{NULL}.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
 #'  to each cell population in each sample. Only used if \code{zInit} is set.
-#'  Default 1.
+#'  Default \code{1}.
 #' @param beta Numeric. Concentration parameter for Phi. Adds a pseudocount
 #'  to each feature module in each cell. Default 1.
 #' @param delta Numeric. Concentration parameter for Psi. Adds a pseudocount

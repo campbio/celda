@@ -26,7 +26,7 @@ output:
 # Celda_CG Results
 
 ## Setup
-The following code loads required librarys, reads in parameters, checks input variables, and sets up display options for the celda_CG results report.
+The following code loads required librarys, reads in parameters, checks input variables, and sets up display options for the **celda_CG Results** report.
 ```{r setup, echo = showSetup}
 require(singleCellTK)
 require(celda)
