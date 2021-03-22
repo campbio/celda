@@ -65,28 +65,28 @@ slot to use if \code{x} is a
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
-\item{initialL}{Integer. Minimum number of modules to try.}
+\item{initialL}{Integer. Initial number of modules.}
 
-\item{maxL}{Integer. Maximum number of modules to try.}
+\item{maxL}{Integer. Maximum number of modules.}
 
 \item{tempK}{Integer. Number of temporary cell populations to identify and
 use in module splitting. Only used if \code{zInit = NULL} Collapsing cells
 to a relatively smaller number of cell popluations will increase the
 speed of module clustering and tend to produce better modules. This number
 should be larger than the number of true cell populations expected in the
-dataset. Default 100.}
+dataset. Default \code{100}.}
 
 \item{zInit}{Integer vector. Collapse cells to cell populations based on
 labels in \code{zInit} and then perform module splitting. If NULL, no
-collapasing will be performed unless \code{tempK} is specified.
-Default NULL.}
+collapsing will be performed unless \code{tempK} is specified.
+Default \code{NULL}.}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
-(column) in the count matrix. Only used if \code{zInit} is set.}
+(column) in the count matrix. Default \code{NULL}.}
 
 \item{alpha}{Numeric. Concentration parameter for Theta. Adds a pseudocount
 to each cell population in each sample. Only used if \code{zInit} is set.
-Default 1.}
+Default \code{1}.}
 
 \item{beta}{Numeric. Concentration parameter for Phi. Adds a pseudocount
 to each feature module in each cell. Default 1.}

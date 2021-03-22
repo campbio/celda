@@ -42,6 +42,7 @@ reducedDimName <- params$reducedDimName
 displayName <- params$displayName
 cellAnnot <- params$cellAnnot
 pdf <- params$pdf
+showSession <- params$showSession
 
 if (!is.null(cellAnnot)) {
   if (!all(cellAnnot %in% colnames(colData(altExp(sce, e = altExpName))))) {
@@ -233,7 +234,7 @@ grid.draw(celdaHeatmap(sce, nfeatures = 10))
 ```
 
 ## Session Information
-```{r session, eval = sessionInfo, echo = sessionInfo}
+```{r session, eval = showSession, echo = showSession}
 sessionInfo()
 ```
 
