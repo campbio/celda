@@ -8,7 +8,7 @@
 #'   can be used to create an HTML report for visualization and exploration
 #'   of the \link{celda_CG} model results. Some of the plotting
 #'   and feature selection functions require the installation of the
-#'   Bioconductor package \link{singleCellTK}.
+#'   Bioconductor package \code{singleCellTK}.
 #' @param sce A \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.

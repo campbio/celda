@@ -125,7 +125,7 @@ Default \code{TRUE}.}
   can be used to create an HTML report for visualization and exploration
   of the \link{celda_CG} model results. Some of the plotting
   and feature selection functions require the installation of the
-  Bioconductor package \link{singleCellTK}.
+  Bioconductor package \code{singleCellTK}.
 }
 \examples{
 data(sceCeldaCG)
