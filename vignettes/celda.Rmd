@@ -224,43 +224,6 @@ plot(plotHeatmap(counts = normCounts,
     showNamesFeature = TRUE))
 ```
 
-# Differential Expression Analysis
-
-celda employs the MAST package [(McDavid A, 2018)](https://bioconductor.org/packages/release/bioc/html/MAST.html) for differential expression analysis of single-cell data. The `differentialExpression` function can determine features that are differentially expressed in one cell subpopulation versus all other subpopulations, between two individual cell subpopulations, or between different groups of cell populations. 
-
-If you wish to compare one cell subpopulation to all others, leave `c2` as `NULL`.
-
-```{r, message=FALSE}
-diffexpClust1 <- differentialExpression(sce, c1 = 1, c2 = NULL)
-
-head(diffexpClust1, 5)
-```
-
-If you wish to compare two cell subpopulations, use both `c1` and `c2` parameters.
-
-```{r, message=FALSE}
-diffexpClust1vs2 <- differentialExpression(sce, c1 = 1, c2 = 2)
-
-diffexpClust1vs2 <- diffexpClust1vs2[diffexpClust1vs2$FDR < 0.05 &
-    abs(diffexpClust1vs2$Log2_FC) > 2, ]
-head(diffexpClust1vs2, 5)
-```
-
-The differentially expressed genes can be visualized further with a heatmap:
-
-```{r}
-diffexpGeneIx <- which(rownames(altExp(sce)) %in% diffexpClust1vs2$Gene)
-normCounts <- normalizeCounts(counts = counts(altExp(sce)), scaleFun = scale)
-```
-
-```{r}
-plot(plotHeatmap(counts = normCounts[, celdaClusters(sce) %in% c(1, 2)],
-    clusterCell = TRUE,
-    z = celdaClusters(sce)[celdaClusters(sce) %in% c(1, 2)],
-    y = celdaModules(sce),
-    featureIx = diffexpGeneIx,
-    showNamesFeature = TRUE))
-```
 
 # Identifying the optimal number of cell subpopulations and feature modules
 

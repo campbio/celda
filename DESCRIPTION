@@ -19,7 +19,7 @@ Depends: R (>= 4.0)
 VignetteBuilder: knitr
 Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         grDevices, graphics, matrixStats, doParallel, digest, methods,
-        reshape2, MAST, S4Vectors, data.table,
+        reshape2, S4Vectors, data.table,
         Rcpp, RcppEigen, uwot, enrichR, stringi, SummarizedExperiment,
         MCMCprecision, ggrepel, Rtsne, withr, dendextend, ggdendro,
         pROC, scater (>= 1.14.4), scran, SingleCellExperiment, dbscan,

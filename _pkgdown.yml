@@ -44,7 +44,6 @@ reference:
   - '`clusterProbability`'
   - '`compareCountMatrix`'
   - '`completeLogLikelihood`'
-  - '`differentialExpression`'
   - '`distinct_colors`'
   - '`eigenMatMultInt`'
   - '`factorizeMatrix.celda_C`'
