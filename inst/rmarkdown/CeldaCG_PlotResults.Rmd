@@ -67,6 +67,12 @@ tab4 <- "#### %s {-}
 space <- "
 
 "
+
+markerHeight <- 9
+if(!is.null(features)) {
+  markerHeight <- max(9, 3 * (length(features) / 3))
+}
+
 dev <- ifelse(isTRUE(pdf), c("png"), c("png", "pdf"))
 opts_chunk$set(
   echo = TRUE,
@@ -184,7 +190,7 @@ kable(table, style = 'html', row.names = FALSE) %>%
 ## Expression of pre-selected markers {.tabset .tabset-fade}
 Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional featuers that contain the name of any marker may also be shown.
 
-```{r plot_markers}
+```{r plot_markers, fig.height = markerHeight, fig.width = 12}
 if(!is.null(features)) {
   ix <- retrieveSCEIndex(
     inSCE = sce,
