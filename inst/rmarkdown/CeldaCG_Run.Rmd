@@ -83,7 +83,7 @@ knitr::opts_chunk$set(
 
 
 ## Selection of features
-Before clustering, features that do not have at least `r `minCounts` in at least `r `minCells` are excluded. If the number of features is more than `r maxFeatures`, then Seurat's VST function is used to select the `r maxFeatures` most variable features. While Celda can handle features with many zero counts, lowering the number of features can reduce computational time.
+Before clustering, features that do not have at least `r minCount` counts in at least `r minCell` cells are excluded. If the number of features is more than `r maxFeatures`, then Seurat's VST function is used to select the `r maxFeatures` most variable features. While Celda can handle features with many zero counts, lowering the number of features can reduce computational time.
 ```{r feature_select, fig.height = 9, fig.width = 18}
 # Select features with minimum counts across a minimum number of cells
 sce <- selectFeatures(
@@ -162,7 +162,7 @@ cellSplit <-
     initialK = initialK,
     maxK = maxK,
     yInit = initial.modules,
-    sampleLabel = sampleList,
+    sampleLabel = sampleLabel,
     reorder = FALSE
   )
 
@@ -233,7 +233,7 @@ if(!is.null(sceFile)) {
 
 
 ## Methods Summary
-Co-clustering of features into modules and cells into subpopulations was performed with the [celda](https://www.biorxiv.org/content/10.1101/2020.11.16.373274v2) package using the ```celda_CG``` model. Features that did not have at least `r minCounts` in at least `r minCells` were excluded in the analysis. `r if(isTRUE(varFilter)) paste0("The top ", maxFeatures, " variable features were selected with the Seurat VST method using the singleCellTK package.")` The number of modules was identified using the ```recursiveSplitModule``` function with ```r paste0("initialL = ", initialL)``` and ```r paste0("maxL = ", maxL)```. The number of cell populations was identified using the ```recursiveSplitCell``` function with  ```r paste0("initialK = ", initialK)``` and ```r paste0("maxK = ", maxK)```. Final values of ```r paste0("L = ", L)```  and ```r paste0("K = ", K)``` were chosen for final analysis based on the curve for the [Rate of Perplexity Change](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-16-S13-S8). [UMAPs](https://arxiv.org/abs/1602.00370) were generated using the ```celdaUmap``` function. [tSNEs](https://lvdmaaten.github.io/publications/papers/JMLR_2008.pdf) were generated with the ```celdaTsne``` function.
+Co-clustering of features into modules and cells into subpopulations was performed with the [celda](https://www.biorxiv.org/content/10.1101/2020.11.16.373274v2) package using the ```celda_CG``` model. Features that did not have at least `r minCount` counts in at least `r minCell` cells were excluded in the analysis. `r if(isTRUE(varFilter)) paste0("The top ", maxFeatures, " variable features were selected with the Seurat VST method using the singleCellTK package.")` The number of modules was identified using the ```recursiveSplitModule``` function with ```r paste0("initialL = ", initialL)``` and ```r paste0("maxL = ", maxL)```. The number of cell populations was identified using the ```recursiveSplitCell``` function with  ```r paste0("initialK = ", initialK)``` and ```r paste0("maxK = ", maxK)```. Final values of ```r paste0("L = ", L)```  and ```r paste0("K = ", K)``` were chosen for final analysis based on the curve for the [Rate of Perplexity Change](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-16-S13-S8). [UMAPs](https://arxiv.org/abs/1602.00370) were generated using the ```celdaUmap``` function. [tSNEs](https://lvdmaaten.github.io/publications/papers/JMLR_2008.pdf) were generated with the ```celdaTsne``` function.
 
 
 ## Session Information
