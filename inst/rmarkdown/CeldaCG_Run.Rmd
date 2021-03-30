@@ -43,8 +43,8 @@ require(gridExtra)
 require(ggplot2)
 
 sce <- params$sce
-L = params$L
-K = params$K
+L <- params$L
+K <- params$K
 sampleName <- params$sampleName
 altExpName <- params$altExpName
 useAssay <- params$useAssay
@@ -52,9 +52,9 @@ initialL <- params$initialL
 maxL <- params$maxL
 initialK <- params$initialK
 maxK <- params$maxK
-minCell = params$minCell
-minCount = params$minCount
-sceFile = params$sceFile
+minCell <- params$minCell
+minCount <- params$minCount
+sceFile <- params$sceFile
 maxFeatures <- params$maxFeatures
 pdf <- params$pdf
 showSession <- params$showSession

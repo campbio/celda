@@ -492,13 +492,13 @@ plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
 
     # Check for duplicate groupClusters
     ta <- table(unlist(groupClusters))
-    if(any(ta > 1)) {
+    if (any(ta > 1)) {
       dup <- names(ta)[ta > 1]
       stop("'groupClusters' had duplicate values for the following clusters: ",
            paste(dup, collapse = ","), ". Clusters need be assigned to a",
            "single group.")
     }
-    
+
     labels <- rep(NA, ncol(x))
     for (i in seq_along(groupClusters)) {
       labels[z %in% groupClusters[[i]]] <- names(groupClusters)[i]

@@ -69,7 +69,7 @@ space <- "
 "
 
 markerHeight <- 9
-if(!is.null(features)) {
+if (!is.null(features)) {
   markerHeight <- max(9, 3 * (length(features) / 3))
 }
 
@@ -98,7 +98,12 @@ plotDimReduceCluster(sce, reducedDimName = reducedDimName, labelClusters = TRUE)
 
 ### Sample Labels
 ```{r celda_samples, fig.height = 9, fig.width = 9}
-plotSCEDimReduceColData(altExp(sce), reducedDimName = reducedDimName, colorBy = "celda_sample_label", labelClusters = FALSE)
+plotSCEDimReduceColData(
+  altExp(sce),
+  reducedDimName = reducedDimName,
+  colorBy = "celda_sample_label",
+  labelClusters = FALSE
+)
 ```
 
 
@@ -180,7 +185,7 @@ This section displays a table of features in each module and can be used as a qu
 
 ```{r celda_modules_table}
 table <- featureModuleTable(sce)
-kable(table, style = 'html', row.names = FALSE) %>%
+kable(table, style = "html", row.names = FALSE) %>%
   kable_styling(bootstrap_options = "striped") %>%
   scroll_box(width = "100%", height = "800px")
 ```
