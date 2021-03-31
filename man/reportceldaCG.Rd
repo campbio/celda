@@ -147,8 +147,11 @@ Default \code{TRUE}.}
 \examples{
 data(sceCeldaCG)
 \dontrun{
-sceCeldaCG <- celdaUmap(sceCeldaCG)
-reportCeldaCG_PlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
-                         features = c("Gene_1", "Gene_100"))
+sceCeldaCG$sum <- colSums(counts(sceCeldaCG))
+sceCeldaCG <- reportCeldaCGRun(sceCeldaCG,
+              initialL=5, maxL=20, initialK=5, maxK=20, L=10, K=5)
+reportCeldaCGPlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
+                         features = c("Gene_1", "Gene_100"),
+                         cellAnnot="sum")
 }
 }
