@@ -86,6 +86,10 @@
 #'  height of the output figure.
 #' @param unit Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 #'  character object defining the unit of all dimensions defined.
+#' @param useRaster Boolean. Rasterizing will make the heatmap a single object
+#' and reduced the memory of the plot and the size of a file. If \code{NULL},
+#' then rasterization will be automatically determined by the underlying
+#' \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}. 
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
 #'  more than one module heatmaps. Otherwise a
@@ -129,6 +133,7 @@ setMethod("moduleHeatmap",
         width = "auto",
         height = "auto",
         unit = "mm",
+        useRaster = TRUE,
         ...) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
@@ -231,6 +236,7 @@ setMethod("moduleHeatmap",
                 showModuleLabel = showModuleLabel,
                 moduleLabel = moduleLabel[i],
                 moduleLabelSize = moduleLabelSize,
+                useRaster = useRaster,
                 unit = unit,
                 ... = ...)
         }
@@ -283,6 +289,7 @@ setMethod("moduleHeatmap",
     showModuleLabel,
     moduleLabel,
     moduleLabelSize,
+    useRaster,
     unit,
     ...) {
 
@@ -364,6 +371,7 @@ setMethod("moduleHeatmap",
             cluster_columns = FALSE,
             heatmap_legend_param = list(title = "Expression"),
             show_heatmap_legend = showHeatmapLegend,
+            use_raster = useRaster,
             top_annotation = ComplexHeatmap::HeatmapAnnotation(
                 cell = factor(zToPlot,
                     levels = stringr::str_sort(unique(zToPlot),
@@ -383,6 +391,7 @@ setMethod("moduleHeatmap",
             cluster_columns = FALSE,
             heatmap_legend_param = list(title = "Expression"),
             show_heatmap_legend = showHeatmapLegend,
+            use_raster = useRaster,
             top_annotation = ComplexHeatmap::HeatmapAnnotation(
                 cell = factor(zToPlot,
                     levels = stringr::str_sort(unique(zToPlot),

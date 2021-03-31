@@ -32,6 +32,7 @@ moduleHeatmap(x, ...)
   width = "auto",
   height = "auto",
   unit = "mm",
+  useRaster = TRUE,
   ...
 )
 }
@@ -141,6 +142,11 @@ height of the output figure.}
 
 \item{unit}{Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 character object defining the unit of all dimensions defined.}
+
+\item{useRaster}{Boolean. Rasterizing will make the heatmap a single object
+and reduced the memory of the plot and the size of a file. If \code{NULL},
+then rasterization will be automatically determined by the underlying
+\link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.}
 }
 \value{
 A \link[multipanelfigure]{multi_panel_figure} object if plotting
