@@ -35,6 +35,7 @@ reportCeldaCGPlotResults(
   altExpName = "featureSubset",
   useAssay = "counts",
   cellAnnot = NULL,
+  cellAnnotLabel = NULL,
   exactMatch = TRUE,
   output_file = "CeldaCG_ResultReport",
   output_dir = ".",
@@ -44,13 +45,15 @@ reportCeldaCGPlotResults(
 )
 }
 \arguments{
-\item{sce}{A \linkS4class{SingleCellExperiment}
-with the matrix located in the assay slot under \code{useAssay}.
-Rows represent features and columns represent cells.}
+\item{sce}{A \linkS4class{SingleCellExperiment} with the matrix located in
+the assay slot under \code{useAssay}. Rows represent features and columns
+represent cells.}
 
-\item{L}{Integer. Final number of feature modules. See \code{celda_CG} for more information.}
+\item{L}{Integer. Final number of feature modules. See \code{celda_CG} for
+more information.}
 
-\item{K}{Integer. Final number of cell populations. See \code{celda_CG} for more information.}
+\item{K}{Integer. Final number of cell populations. See \code{celda_CG} for
+more information.}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
@@ -61,26 +64,35 @@ Rows represent features and columns represent cells.}
 \item{useAssay}{A string specifying which \link{assay} slot to use. Default
 \code{"counts"}.}
 
-\item{initialL}{Integer. Minimum number of modules to try. See \link{recursiveSplitModule} for more information. Defailt \code{10}.}
+\item{initialL}{Integer. Minimum number of modules to try. See
+\link{recursiveSplitModule} for more information. Defailt \code{10}.}
 
-\item{maxL}{Integer. Maximum number of modules to try. See \link{recursiveSplitModule} for more information. Default \code{150}.}
+\item{maxL}{Integer. Maximum number of modules to try. See
+\link{recursiveSplitModule} for more information. Default \code{150}.}
 
 \item{initialK}{Integer. Initial number of cell populations to try.}
 
 \item{maxK}{Integer. Maximum number of cell populations to try.}
 
-\item{minCell}{Integer. Minimum number of cells required for feature selection. See \link{selectFeatures} for more information. Default \code{3}.}
+\item{minCell}{Integer. Minimum number of cells required for feature
+selection. See \link{selectFeatures} for more information. Default
+\code{3}.}
 
-\item{minCount}{Integer. Minimum number of counts required for feature selection. See \link{selectFeatures} for more information. Default \code{3}.}
+\item{minCount}{Integer. Minimum number of counts required for feature
+selection. See \link{selectFeatures} for more information. Default
+\code{3}.}
 
-\item{maxFeatures}{Integer. Maximum number of features to include. If the number of features after filtering for \code{minCell} and \code{minCount} are greater than \code{maxFeature}, then Seurat's VST function is used to select the top variable features. Default \code{5000}.}
+\item{maxFeatures}{Integer. Maximum number of features to include. If the
+number of features after filtering for \code{minCell} and \code{minCount}
+are greater than \code{maxFeature}, then Seurat's VST function is used to
+select the top variable features. Default \code{5000}.}
 
 \item{output_file}{Character. Prefix of the html file. Default
 \code{"CeldaCG_ResultReport"}.}
 
 \item{output_sce_prefix}{Character. The \code{sce} object with
 \code{celda_CG} results will be saved to an \code{.rds} file starting with
- this prefix. Default \code{celda_cg}.}
+this prefix. Default \code{celda_cg}.}
 
 \item{output_dir}{Character. Path to save the html file. Default \code{.}.}
 
@@ -105,7 +117,13 @@ of the \code{sce}. Default \code{NULL}. data. Default \code{"rownames"}.}
 
 \item{cellAnnot}{Character vector. The cell-level annotations to display on
 the reduced dimensional plot. These variables should be present in the
-column data of the \code{sce} object.}
+column data of the \code{sce} object. Default \code{NULL}.}
+
+\item{cellAnnotLabel}{Character vector. Additional cell-level annotations
+to display on the reduced dimensional plot. Variables will be treated
+as categorial and labels for each group will be placed on the plot.
+These variables should be present in the column data of the \code{sce}
+object. Default \code{NULL}.}
 
 \item{exactMatch}{Boolean. Whether to only identify exact matches or to
 identify partial matches using \code{\link{grep}}. Default \code{FALSE}.}
@@ -120,12 +138,11 @@ Default \code{TRUE}.}
 \code{reportCeldaCGRun} will run \link{recursiveSplitModule} and
   \link{recursiveSplitCell} to find the number of modules (\code{L}) and the
   number of cell populations (\code{K}). A final \link{celda_CG} model will
-  be selected from \link{recursiveSplitCell}.
-  After a \link{celda_CG} model has been fit, \code{reportCeldaCGPlotResults}
-  can be used to create an HTML report for visualization and exploration
-  of the \link{celda_CG} model results. Some of the plotting
-  and feature selection functions require the installation of the
-  Bioconductor package \code{singleCellTK}.
+  be selected from \link{recursiveSplitCell}. After a \link{celda_CG} model
+  has been fit, \code{reportCeldaCGPlotResults} can be used to create an HTML
+  report for visualization and exploration of the \link{celda_CG} model
+  results. Some of the plotting and feature selection functions require the
+  installation of the Bioconductor package \code{singleCellTK}.
 }
 \examples{
 data(sceCeldaCG)

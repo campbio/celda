@@ -49,7 +49,12 @@
 #'   of the \code{sce}. Default \code{NULL}. data. Default \code{"rownames"}.
 #' @param cellAnnot Character vector. The cell-level annotations to display on
 #'   the reduced dimensional plot. These variables should be present in the
-#'   column data of the \code{sce} object.
+#'   column data of the \code{sce} object. Default \code{NULL}.
+#' @param cellAnnotLabel Character vector. Additional cell-level annotations
+#'   to display on the reduced dimensional plot. Variables will be treated
+#'   as categorial and labels for each group will be placed on the plot.
+#'   These variables should be present in the column data of the \code{sce}
+#'   object. Default \code{NULL}.
 #' @param exactMatch Boolean. Whether to only identify exact matches or to
 #'   identify partial matches using \code{\link{grep}}. Default \code{FALSE}.
 #' @param output_file Character. Prefix of the html file. Default
@@ -153,6 +158,7 @@ reportCeldaCGPlotResults <-
            altExpName = "featureSubset",
            useAssay = "counts",
            cellAnnot = NULL,
+           cellAnnotLabel = NULL,
            exactMatch = TRUE,
            output_file = "CeldaCG_ResultReport",
            output_dir = ".",
@@ -169,6 +175,7 @@ reportCeldaCGPlotResults <-
         features = features,
         displayName = displayName,
         cellAnnot = cellAnnot,
+        cellAnnotLabel = cellAnnotLabel,
         exactMatch = isTRUE(exactMatch),
         pdf = isTRUE(pdf),
         showSetup = isTRUE(showSetup),
