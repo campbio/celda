@@ -90,7 +90,7 @@
 #' @param useRaster Boolean. Rasterizing will make the heatmap a single object
 #' and reduced the memory of the plot and the size of a file. If \code{NULL},
 #' then rasterization will be automatically determined by the underlying
-#' \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}. 
+#' \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
 #'  more than one module heatmaps. Otherwise a

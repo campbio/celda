@@ -172,13 +172,13 @@ reportCeldaCGPlotResults <-
            pdf = FALSE,
            showSetup = TRUE,
            showSession = TRUE) {
-    
+
     moduleFileName <- NULL
-    if(!is.null(moduleFilePrefix)) {
+    if (!is.null(moduleFilePrefix)) {
       moduleFileName <-
         file.path(normalizePath(output_dir),
                   paste0(moduleFilePrefix, ".csv"))
-    } 
+    }
 
     rmarkdown::render(
       system.file("rmarkdown/CeldaCG_PlotResults.Rmd", package = "celda"),

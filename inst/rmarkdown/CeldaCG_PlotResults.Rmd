@@ -189,11 +189,11 @@ for (i in seq_len(L)) {
     moduleLabel = "Top 100 cells",
     useRaster = TRUE
   )
-
+  
   fig <- multi_panel_figure(rows = 2,
                             columns = 2,
                             figure_name = paste0("fig", i))
-    
+  
   fig <- fill_panel(fig,
                     p1,
                     row = 1,
@@ -260,7 +260,7 @@ kable(table, style = "html", row.names = FALSE) %>%
   kable_styling(bootstrap_options = "striped") %>%
   scroll_box(width = "100%", height = "800px")
 
-if(!is.null(moduleFileName)) {
+if (!is.null(moduleFileName)) {
   featureModuleTable(
     sce,
     useAssay = useAssay,
