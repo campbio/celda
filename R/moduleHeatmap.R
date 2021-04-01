@@ -64,8 +64,9 @@
 #'  Default TRUE.
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for plotting the data. This threshold is applied
-#'  after row scaling. Set to NULL to disable. Default c(-2,2).
-#' @param rowFontSize Integer. Font size for genes.
+#'  after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.
+#' @param rowFontSize Integer. Font size for feature names. If \code{NULL},
+#' then the size will automatically be determined. Default \code{NULL}.
 #' @param showHeatmapLegend Passed to \link[ComplexHeatmap]{Heatmap}. Show
 #'  legend for expression levels.
 #' @param showTopAnnotationLegend Passed to
@@ -122,14 +123,14 @@ setMethod("moduleHeatmap",
         scaleRow = scale,
         showFeaturenames = TRUE,
         trim = c(-2, 2),
-        rowFontSize = 6,
+        rowFontSize = NULL,
         showHeatmapLegend = FALSE,
         showTopAnnotationLegend = FALSE,
         showTopAnnotationName = FALSE,
-        topAnnotationHeight = 1.5,
+        topAnnotationHeight = 5,
         showModuleLabel = TRUE,
         moduleLabel = "auto",
-        moduleLabelSize = 13,
+        moduleLabelSize = NULL,
         width = "auto",
         height = "auto",
         unit = "mm",
@@ -170,9 +171,8 @@ setMethod("moduleHeatmap",
 
         if (moduleLabel == "auto") {
             moduleLabel <- paste0("Module ", as.character(featureModule))
-        } else if (length(moduleLabel) != length(unique(celdaModules(x,
-            altExpName = altExpName)))) {
-            stop("Invalid 'moduleLabel' length!")
+        } else if (length(moduleLabel) != length(featureModule)) {
+            stop("Invalid 'moduleLabel' length")
         }
 
         # factorize counts matrix
@@ -379,7 +379,8 @@ setMethod("moduleHeatmap",
                 show_legend = showTopAnnotationLegend,
                 show_annotation_name = showTopAnnotationName,
                 col = list(cell = ccols),
-                simple_anno_size = grid::unit(topAnnotationHeight, unit)),
+                simple_anno_size = grid::unit(topAnnotationHeight, unit),
+                simple_anno_size_adjust = TRUE),
             ...)
     } else {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
@@ -399,7 +400,8 @@ setMethod("moduleHeatmap",
                 show_legend = showTopAnnotationLegend,
                 show_annotation_name = showTopAnnotationName,
                 col = list(cell = ccols),
-                simple_anno_size = grid::unit(topAnnotationHeight, unit)),
+                simple_anno_size = grid::unit(topAnnotationHeight, unit),
+                simple_anno_size_adjust = TRUE),
             ...)
     }
     return(plt)

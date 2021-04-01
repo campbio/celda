@@ -21,14 +21,14 @@ moduleHeatmap(x, ...)
   scaleRow = scale,
   showFeaturenames = TRUE,
   trim = c(-2, 2),
-  rowFontSize = 6,
+  rowFontSize = NULL,
   showHeatmapLegend = FALSE,
   showTopAnnotationLegend = FALSE,
   showTopAnnotationName = FALSE,
-  topAnnotationHeight = 1.5,
+  topAnnotationHeight = 5,
   showModuleLabel = TRUE,
   moduleLabel = "auto",
-  moduleLabelSize = 13,
+  moduleLabelSize = NULL,
   width = "auto",
   height = "auto",
   unit = "mm",
@@ -109,9 +109,10 @@ Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for plotting the data. This threshold is applied
-after row scaling. Set to NULL to disable. Default c(-2,2).}
+after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.}
 
-\item{rowFontSize}{Integer. Font size for genes.}
+\item{rowFontSize}{Integer. Font size for feature names. If \code{NULL},
+then the size will automatically be determined. Default \code{NULL}.}
 
 \item{showHeatmapLegend}{Passed to \link[ComplexHeatmap]{Heatmap}. Show
 legend for expression levels.}
