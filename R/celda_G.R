@@ -43,7 +43,7 @@
 #'  features will be split into sqrt(L) modules and then each module will be
 #'  subsequently split into another sqrt(L) modules. With 'predefined', values
 #'  in `yInit` will be used to initialize `y`. Default 'split'.
-#' @param yInit Integer vector. Sets initial starting values of y. 
+#' @param yInit Integer vector. Sets initial starting values of y.
 #'  `yInit` can only be used when `yInitialize = 'predefined'`. Default NULL.
 #' @param countChecksum Character. An MD5 checksum for the `counts` matrix.
 #'  Default NULL.

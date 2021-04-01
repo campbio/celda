@@ -283,20 +283,20 @@ setMethod("plotDimReduceGrid",
 #' @param x Numeric matrix or a \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
+#' @param features Character vector. Features in the rownames of counts to plot.
 #' @param reducedDimName The name of the dimension reduction slot in
 #'  \code{reducedDimNames(x)} if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
-#'  \code{dim2} are set.
+#'  \linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
+#'  \code{dim1} and \code{dim2} need to be set. Default \code{NULL}.
 #' @param dim1 Numeric vector. First dimension from data
-#'  dimension reduction output.
+#'  dimension reduction output to be plotted on the x-axis. Default \code{NULL}.
 #' @param dim2 Numeric vector. Second dimension from data dimension
-#'  reduction output.
+#'  reduction output to be plotted on the y-axis. Default \code{NULL}.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param features Character vector. Features in the rownames of counts to plot.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the features.
 #' @param normalize Logical. Whether to normalize the columns of `counts`.
@@ -312,8 +312,12 @@ setMethod("plotDimReduceGrid",
 #' @param limits Passed to \link{scale_colour_gradient2}. The range
 #'  of color scale.
 #' @param size Numeric. Sets size of point on plot. Default 1.
-#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
-#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
+#' @param xlab Character vector. Label for the x-axis. If \code{reducedDimName}
+#' is used, then this will be set to the column name of the first dimension of
+#' that object. Default "Dimension_1".
+#' @param ylab Character vector. Label for the y-axis. If \code{reducedDimName}
+#' is used, then this will be set to the column name of the second dimension of
+#' that object. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`. The color
 #'  will be used to signify the lowest values on the scale.
 #' @param colorMid Character. A color available from `colors()`. The color
@@ -350,12 +354,12 @@ setGeneric("plotDimReduceFeature", function(x, ...) {
 setMethod("plotDimReduceFeature",
     signature(x = "SingleCellExperiment"),
     function(x,
-        reducedDimName,
+        features,
+        reducedDimName = NULL,
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
-        features,
         headers = NULL,
         normalize = FALSE,
         zscore = TRUE,
@@ -375,14 +379,21 @@ setMethod("plotDimReduceFeature",
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         counts <- SummarizedExperiment::assay(x, i = useAssay)
 
-        if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(altExp,
-                reducedDimName)[, 1]
-        }
-
-        if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(altExp,
-                reducedDimName)[, 2]
+        if (is.null(reducedDimName)) {
+          if (is.null(dim1) | is.null(dim2)) {
+            stop("If 'reducedDimName' is not supplied, then 'dim1' and 'dim2' ",
+                 "must be specified.")
+          }
+          if (length(dim1) != length(dim2)) {
+            stop("'dim1' and 'dim2' must be the same length.")
+          }
+        } else{
+          dims <- SingleCellExperiment::reducedDim(altExp,
+                                           reducedDimName)
+          dim1 <- dims[, 1]
+          dim2 <- dims[, 2]
+          xlab <- colnames(dims)[1]
+          ylab <- colnames(dims)[2]
         }
 
         g <- .plotDimReduceFeature(dim1 = dim1,

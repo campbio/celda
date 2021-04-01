@@ -107,7 +107,7 @@ in `yInit` will be used to initialize `y`. Default 'split'.}
 \item{countChecksum}{Character. An MD5 checksum for the `counts` matrix.
 Default NULL.}
 
-\item{yInit}{Integer vector. Sets initial starting values of y. 
+\item{yInit}{Integer vector. Sets initial starting values of y.
 `yInit` can only be used when `yInitialize = 'predefined'`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
