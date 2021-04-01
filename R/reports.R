@@ -57,6 +57,9 @@
 #'   object. Default \code{NULL}.
 #' @param exactMatch Boolean. Whether to only identify exact matches or to
 #'   identify partial matches using \code{\link{grep}}. Default \code{FALSE}.
+#' @param moduleFilePrefix Character. The features in each module will be
+#' written to a a csv file starting with this name. If \code{NULL}, then no
+#' file will be written. Default \code{"module_features"}.
 #' @param output_file Character. Prefix of the html file. Default
 #'   \code{"CeldaCG_ResultReport"}.
 #' @param output_sce_prefix Character. The \code{sce} object with
@@ -163,11 +166,20 @@ reportCeldaCGPlotResults <-
            cellAnnot = NULL,
            cellAnnotLabel = NULL,
            exactMatch = TRUE,
+           moduleFilePrefix = "module_features",
            output_file = "CeldaCG_ResultReport",
            output_dir = ".",
            pdf = FALSE,
            showSetup = TRUE,
            showSession = TRUE) {
+    
+    moduleFileName <- NULL
+    if(!is.null(moduleFilePrefix)) {
+      moduleFileName <-
+        file.path(normalizePath(output_dir),
+                  paste0(moduleFilePrefix, ".csv"))
+    } 
+
     rmarkdown::render(
       system.file("rmarkdown/CeldaCG_PlotResults.Rmd", package = "celda"),
       params = list(
@@ -180,6 +192,7 @@ reportCeldaCGPlotResults <-
         cellAnnot = cellAnnot,
         cellAnnotLabel = cellAnnotLabel,
         exactMatch = isTRUE(exactMatch),
+        moduleFileName = moduleFileName,
         pdf = isTRUE(pdf),
         showSetup = isTRUE(showSetup),
         showSession = isTRUE(showSession)

@@ -37,6 +37,7 @@ reportCeldaCGPlotResults(
   cellAnnot = NULL,
   cellAnnotLabel = NULL,
   exactMatch = TRUE,
+  moduleFilePrefix = "module_features",
   output_file = "CeldaCG_ResultReport",
   output_dir = ".",
   pdf = FALSE,
@@ -127,6 +128,10 @@ object. Default \code{NULL}.}
 
 \item{exactMatch}{Boolean. Whether to only identify exact matches or to
 identify partial matches using \code{\link{grep}}. Default \code{FALSE}.}
+
+\item{moduleFilePrefix}{Character. The features in each module will be
+written to a a csv file starting with this name. If \code{NULL}, then no
+file will be written. Default \code{"module_features"}.}
 
 \item{showSetup}{Boolean. Whether to show the setup code at the beginning.
 Default \code{TRUE}.}

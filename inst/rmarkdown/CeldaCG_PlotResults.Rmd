@@ -11,6 +11,7 @@ params:
   cellAnnot: cellAnnot
   cellAnnotLabel: cellAnnotLabel
   exactMatch: exactMatch
+  moduleFileName: moduleFileName
   pdf: pdf
   showSetup: showSetup
   showSession: showSession
@@ -34,6 +35,8 @@ require(celda)
 require(kableExtra)
 require(grid)
 require(knitr)
+require(ggplot2)
+require(multipanelfigure)
 
 sce <- params$sce
 features <- params$features
@@ -43,6 +46,8 @@ reducedDimName <- params$reducedDimName
 displayName <- params$displayName
 cellAnnot <- params$cellAnnot
 cellAnnotLabel <- params$cellAnnotLabel
+exactMatch <- params$exactMatch
+moduleFileName <- params$moduleFileName
 pdf <- params$pdf
 showSession <- params$showSession
 
@@ -154,14 +159,71 @@ if (!is.null(cellAnnotFinal)) {
 <br><br>
 
 ## Modules {.tabset .tabset-fade}
-Celda performs bi-clustering of features into modules and cells into subpopulations.  Modules are groups of genes that are co-expressed across cells. The *Module Probabilities* tabcolors cells by the probability of each module on a 2-D embedding plot. The *Module Heatmaps* tab contain a heatmap for each module with the cells that express the lowest and highest levels of that module. The *Module Table* tab contains a complete table of all features in each module. 
+Celda performs bi-clustering of features into modules and cells into subpopulations.  Modules are groups of genes that are co-expressed across cells. The *Module Overview* tab contains the probabilities and heatmaps for each module. Module probability plots will color cells by the probability of each module on a 2-D embedding plot. Module heatmaps show the relative expression for the features in a module across the cells. Cells within the heatmap will be ordered from the lowest to highest probability of the module. The *Module Table* tab contains a complete table of all features in each module. 
 
-### Module Probabilities {.tabset .tabset-fade}
+### Module Overview {.tabset .tabset-fade}
 
-Celda estimates the probability of each feature in each cell. For these plots, the probability is scaled to go between 0 and 1.
+Use the tabs to select modules ranging from 1 to `r L`. Module probabilities on the 2-D embedding are scaled to range between 0 and 1. Each column on the heatmap represents a cell and each row represents a feature. Expression values for each feature are z-scored normalized across all cells after normalization. Red represents higher relative expression and blue represents lower relative expression. All cells are shown in the heatmap on the left. Only the top 100 cells with the lowest module probability and the 100 cells with the highest module probability are shown in the heatmap on the right. The column color bar displays the population assignment for each cell. 
+
+```{r celda_module_heatmaps, results = "asis", fig.height = 15, fig.width = 10}
+fig.list <- list()
+for (i in seq_len(L)) {
+  p1 <- plotDimReduceModule(
+    sce,
+    reducedDimName = reducedDimName,
+    useAssay = useAssay,
+    altExpName = altExpName,
+    modules = i
+  )
+  p2 <- moduleHeatmap(
+    sce,
+    featureModule = i,
+    topCells = NULL,
+    moduleLabel = "All cells",
+    useRaster = TRUE
+  )
+  p3 <- moduleHeatmap(
+    sce,
+    featureModule = i,
+    topCells = 100,
+    moduleLabel = "Top 100 cells",
+    useRaster = TRUE
+  )
+
+  fig <- multi_panel_figure(rows = 2,
+                            columns = 2,
+                            figure_name = paste0("fig", i))
+    
+  fig <- fill_panel(fig,
+                    p1,
+                    row = 1,
+                    column = 1:2,
+                    label = "")
+  fig <- fill_panel(fig,
+                    p2,
+                    row = 2,
+                    column = 1,
+                    label = "")
+  fig <- fill_panel(fig,
+                    p3,
+                    row = 2,
+                    column = 2,
+                    label = "")
+  fig.list[[i]] <- fig
+}
+for (i in seq_len(L)) {
+  cat(sprintf(tab4, paste0("L", i)))
+  print(fig.list[[i]])
+  cat(space)
+}
+```
+
+### Module Probability Summary {.tabset .tabset-fade}
+
+Celda orders modules by hierarchical clustering and so modules with similar numbers will have more somewhat more similar expression patterns across cells. Module probability plots are shown for groups of modules in each tab to allow for a quick exploration of these patterns across cells. 
 
 ```{r celda_module_tabs, results = "asis", fig.height = 9, fig.width = 10}
-grids <- seq(0, L, by = 9)
+grids <- seq(0, L, by = 16)
 if (tail(grids, 1) != L) {
   grids <- c(grids, L)
 }
@@ -188,26 +250,24 @@ for (i in seq.int(1, length(grids) - 1)) {
 }
 ```
 
-### Module Heatmaps {.tabset .tabset-fade}
-
-Module heatmaps are below show for each module. Use the dropdown box to select modules ranging from 1 to `r L`. Each column on the heatmap represents a cell and each row represents a feature. Expression values for each feature are z-scored normalized across all cells after normalization. Red represents higher relative expression and blue represents lower relative expression. Only the top 100 cells with the lowest module probability and the 100 cells with the highest module probability are shown for each module. The column color bar displays the population assignment for each cell. 
-
-```{r celda_module_heatmaps, results = "asis", fig.height = 9, fig.width = 10}
-for (i in seq_len(L)) {
-  cat(sprintf(tab4, paste0("L", i)))
-  print(moduleHeatmap(sce, featureModule = i))
-  cat(space)
-}
-```
 
 ### Module Table
-This section displays a table of features in each module and can be used as a quick way to lookup featuers of interest. The features within each module are ordered from those with highest expression at the top to those with lower expression at the bottom.
+This section displays a table of features in each module and can be used as a quick way to lookup features of interest. The features within each module are ordered from those with highest expression at the top to those with lower expression at the bottom (same as in the heatmaps in the previous tab).
 
 ```{r celda_modules_table}
 table <- featureModuleTable(sce)
 kable(table, style = "html", row.names = FALSE) %>%
   kable_styling(bootstrap_options = "striped") %>%
   scroll_box(width = "100%", height = "800px")
+
+if(!is.null(moduleFileName)) {
+  featureModuleTable(
+    sce,
+    useAssay = useAssay,
+    altExpName = altExpName,
+    outputFile = moduleFileName
+  )
+}
 ```
 
 <br><br>
