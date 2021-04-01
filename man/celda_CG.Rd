@@ -144,7 +144,7 @@ Default NULL.}
 is only used when `zInitialize = 'predfined'`. Default NULL.}
 
 \item{yInit}{Integer vector. Sets initial starting values of y.
-'yInit' is only be used when \code{yInitialize = "random"}. Default NULL.}
+'yInit' is only be used when `yInitialize = "predefined"`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}

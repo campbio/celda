@@ -62,7 +62,7 @@
 #' @param zInit Integer vector. Sets initial starting values of z. 'zInit'
 #'  is only used when `zInitialize = 'predfined'`. Default NULL.
 #' @param yInit Integer vector. Sets initial starting values of y.
-#'  'yInit' is only be used when \code{yInitialize = "random"}. Default NULL.
+#'  'yInit' is only be used when `yInitialize = "predefined"`. Default NULL.
 #' @param countChecksum Character. An MD5 checksum for the counts matrix.
 #'  Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named

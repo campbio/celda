@@ -52,18 +52,19 @@ pdf <- params$pdf
 showSession <- params$showSession
 
 cellAnnotFinal <- NULL
-plotLabels <- c() 
-if(length(cellAnnot) > 0) {
+plotLabels <- c()
+if (length(cellAnnot) > 0) {
   cellAnnotFinal <- c(cellAnnotFinal, cellAnnot)
   plotLabels <- c(plotLabels, rep(FALSE, length(cellAnnot)))
 }
-if(length(cellAnnotLabel) > 0) {
+if (length(cellAnnotLabel) > 0) {
   cellAnnotFinal <- c(cellAnnotFinal, cellAnnotLabel)
   plotLabels <- c(plotLabels, rep(TRUE, length(cellAnnotLabel)))
 }
 
 if (!is.null(cellAnnotFinal)) {
-  if (!all(cellAnnotFinal %in% colnames(colData(altExp(sce, e = altExpName))))) {
+  if (!all(cellAnnotFinal %in% colnames(colData(altExp(sce,
+                                                       e = altExpName))))) {
     s <-
       setdiff(cellAnnotFinal, colnames(colData(altExp(sce, e = altExpName))))
     stop(
@@ -131,9 +132,9 @@ plotSCEDimReduceColData(
 if (!is.null(cellAnnotFinal)) {
   for (i in seq_along(cellAnnotFinal)) {
     cat(sprintf(tab4, cellAnnotFinal[i]))
-    
+
     conditionClass <- ifelse(plotLabels[i], "factor", "numeric")
-    
+
     print(
       plotSCEDimReduceColData(
         altExp(sce),
@@ -189,11 +190,11 @@ for (i in seq_len(L)) {
     moduleLabel = "Top 100 cells",
     useRaster = TRUE
   )
-  
+
   fig <- multi_panel_figure(rows = 2,
                             columns = 2,
                             figure_name = paste0("fig", i))
-  
+
   fig <- fill_panel(fig,
                     p1,
                     row = 1,

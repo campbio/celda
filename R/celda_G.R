@@ -43,9 +43,8 @@
 #'  features will be split into sqrt(L) modules and then each module will be
 #'  subsequently split into another sqrt(L) modules. With 'predefined', values
 #'  in `yInit` will be used to initialize `y`. Default 'split'.
-#' @param yInit Integer vector. Sets initial starting values of y. If NULL,
-#'  starting values for each feature will be randomly sampled from `1:L`.
-#'  `yInit` can only be used when `initialize = 'random'`. Default NULL.
+#' @param yInit Integer vector. Sets initial starting values of y. 
+#'  `yInit` can only be used when `yInitialize = 'predefined'`. Default NULL.
 #' @param countChecksum Character. An MD5 checksum for the `counts` matrix.
 #'  Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named
