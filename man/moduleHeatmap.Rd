@@ -32,6 +32,7 @@ moduleHeatmap(x, ...)
   width = "auto",
   height = "auto",
   unit = "mm",
+  ncol = NULL,
   useRaster = TRUE,
   ...
 )
@@ -143,6 +144,10 @@ height of the output figure.}
 
 \item{unit}{Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 character object defining the unit of all dimensions defined.}
+
+\item{ncol}{Integer. Number of columns of module heatmaps. If \code{NULL},
+then this will be automatically calculated so that the number of columns
+and rows will be approximately the same. Default \code{NULL}.}
 
 \item{useRaster}{Boolean. Rasterizing will make the heatmap a single object
 and reduced the memory of the plot and the size of a file. If \code{NULL},

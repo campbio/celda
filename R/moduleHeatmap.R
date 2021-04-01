@@ -87,6 +87,9 @@
 #'  height of the output figure.
 #' @param unit Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 #'  character object defining the unit of all dimensions defined.
+#' @param ncol Integer. Number of columns of module heatmaps. If \code{NULL},
+#' then this will be automatically calculated so that the number of columns
+#' and rows will be approximately the same. Default \code{NULL}.
 #' @param useRaster Boolean. Rasterizing will make the heatmap a single object
 #' and reduced the memory of the plot and the size of a file. If \code{NULL},
 #' then rasterization will be automatically determined by the underlying
@@ -134,6 +137,7 @@ setMethod("moduleHeatmap",
         width = "auto",
         height = "auto",
         unit = "mm",
+        ncol = NULL,
         useRaster = TRUE,
         ...) {
 
@@ -244,7 +248,9 @@ setMethod("moduleHeatmap",
         if (isTRUE(returnHeatmap)) {
             return(plts[[1]])
         } else {
-            ncol <- floor(sqrt(length(plts)))
+            if (is.null(ncol)) {
+              ncol <- floor(sqrt(length(plts)))
+            }
             nrow <- ceiling(length(plts) / ncol)
 
             for (i in seq(length(plts))) {
@@ -253,7 +259,8 @@ setMethod("moduleHeatmap",
                     wrap.grobs = TRUE)
             }
 
-            figure <- multipanelfigure::multi_panel_figure(columns = ncol,
+            figure <- multipanelfigure::multi_panel_figure(
+                columns = ncol,
                 rows = nrow,
                 width = width,
                 height = height,
