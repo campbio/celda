@@ -599,9 +599,8 @@ setMethod("celda_G",
   probs <- matrix(NA, ncol = nG, nrow = L)
   ix <- sample(seq(nG))
   for (i in ix) {
-    probs[, i] <- cG_CalcGibbsProbY(
-      index = i,
-      counts = counts,
+    probs[, i] <- cG_CalcGibbsProbY(index = i,
+      counts = as.numeric(counts[i,]),
       nTSbyC = nTSByC,
       nbyTS = nByTS,
       nGbyTS = nGByTS,
