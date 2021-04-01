@@ -51,20 +51,18 @@
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
 #' @param zInitialize Chararacter. One of 'random', 'split', or 'predefined'.
 #'  With 'random', cells are randomly assigned to a populations. With 'split',
-#'  cells will be split into sqrt(K) populations and then each popluation will
+#'  cells will be split into sqrt(K) populations and then each population will
 #'  be subsequently split into another sqrt(K) populations. With 'predefined',
 #'  values in \code{zInit} will be used to initialize \code{z}. Default 'split'.
-#' @param yInitialize Chararacter. One of 'random', 'split', or 'predefined'.
+#' @param yInitialize Character. One of 'random', 'split', or 'predefined'.
 #'  With 'random', features are randomly assigned to a modules. With 'split',
 #'  features will be split into sqrt(L) modules and then each module will be
 #'  subsequently split into another sqrt(L) modules. With 'predefined', values
 #'  in \code{yInit} will be used to initialize \code{y}. Default 'split'.
-#' @param zInit Integer vector. Sets initial starting values of z. If NULL,
-#'  starting values for each cell will be randomly sampled from 1:K. 'zInit'
-#'  can only be used when \code{initialize = "random"}. Default NULL.
-#' @param yInit Integer vector. Sets initial starting values of y. If NULL,
-#'  starting values for each feature will be randomly sampled from 1:L.
-#'  'yInit' can only be used when \code{initialize = "random"}. Default NULL.
+#' @param zInit Integer vector. Sets initial starting values of z. 'zInit'
+#'  is only used when `zInitialize = 'predfined'`. Default NULL.
+#' @param yInit Integer vector. Sets initial starting values of y.
+#'  'yInit' is only be used when \code{yInitialize = "random"}. Default NULL.
 #' @param countChecksum Character. An MD5 checksum for the counts matrix.
 #'  Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named
