@@ -221,6 +221,58 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// colSumByGroupSparse
+Rcpp::NumericMatrix colSumByGroupSparse(const Eigen::MappedSparseMatrix<double>& counts, const IntegerVector& group);
+RcppExport SEXP _celda_colSumByGroupSparse(SEXP countsSEXP, SEXP groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type group(groupSEXP);
+    rcpp_result_gen = Rcpp::wrap(colSumByGroupSparse(counts, group));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowSumByGroupSparse
+Rcpp::NumericMatrix rowSumByGroupSparse(const Eigen::MappedSparseMatrix<double>& counts, const IntegerVector& group);
+RcppExport SEXP _celda_rowSumByGroupSparse(SEXP countsSEXP, SEXP groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type group(groupSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowSumByGroupSparse(counts, group));
+    return rcpp_result_gen;
+END_RCPP
+}
+// colSumByGroupChangeSparse
+Rcpp::NumericMatrix colSumByGroupChangeSparse(const Eigen::MappedSparseMatrix<double>& counts, const NumericMatrix& px, const IntegerVector& group, const IntegerVector& pgroup);
+RcppExport SEXP _celda_colSumByGroupChangeSparse(SEXP countsSEXP, SEXP pxSEXP, SEXP groupSEXP, SEXP pgroupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type px(pxSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type pgroup(pgroupSEXP);
+    rcpp_result_gen = Rcpp::wrap(colSumByGroupChangeSparse(counts, px, group, pgroup));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowSumByGroupChangeSparse
+Rcpp::NumericMatrix rowSumByGroupChangeSparse(const Eigen::MappedSparseMatrix<double>& counts, const NumericMatrix& px, const IntegerVector& group, const IntegerVector& pgroup);
+RcppExport SEXP _celda_rowSumByGroupChangeSparse(SEXP countsSEXP, SEXP pxSEXP, SEXP groupSEXP, SEXP pgroupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type px(pxSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type pgroup(pgroupSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowSumByGroupChangeSparse(counts, px, group, pgroup));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _colSumByGroup(SEXP, SEXP);
 RcppExport SEXP _colSumByGroup_numeric(SEXP, SEXP);
@@ -246,6 +298,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},
     {"_celda_fastNormPropSqrt", (DL_FUNC) &_celda_fastNormPropSqrt, 2},
     {"_celda_nonzero", (DL_FUNC) &_celda_nonzero, 1},
+    {"_celda_colSumByGroupSparse", (DL_FUNC) &_celda_colSumByGroupSparse, 2},
+    {"_celda_rowSumByGroupSparse", (DL_FUNC) &_celda_rowSumByGroupSparse, 2},
+    {"_celda_colSumByGroupChangeSparse", (DL_FUNC) &_celda_colSumByGroupChangeSparse, 4},
+    {"_celda_rowSumByGroupChangeSparse", (DL_FUNC) &_celda_rowSumByGroupChangeSparse, 4},
     {"_colSumByGroup",               (DL_FUNC) &_colSumByGroup,               2},
     {"_colSumByGroup_numeric",       (DL_FUNC) &_colSumByGroup_numeric,       2},
     {"_colSumByGroupChange",         (DL_FUNC) &_colSumByGroupChange,         4},
