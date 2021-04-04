@@ -43,6 +43,20 @@
   return(res)
 }
 
+#' @useDynLib celda _rowSumByGroupChange_numeric
+.rowSumByGroupChangeNumeric <- function(x, group, L) {
+  group <- factor(group, levels = seq(L))
+  res <- .Call("_rowSumByGroupChange_numeric", x, group)
+  return(res)
+}
+
+#' @useDynLib celda _colSumByGroupChange_numeric
+.colSumByGroupChangeNumeric <- function(x, group, K) {
+  group <- factor(group, levels = seq(K))
+  res <- .Call("_colSumByGroupChange_numeric", x, group)
+  return(res)
+}
+
 #' @useDynLib celda _perplexityG
 .perplexityGLogPx <- function(x, phi, psi, group, L) {
   group <- factor(group, levels = seq(L))
