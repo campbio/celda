@@ -803,8 +803,7 @@ setMethod("celda_C",
   } else {
     stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
   }
-  
-  nCP <- as.integer(colSums(nGByCP))
+  nCP <- colSums(nGByCP)
 
   return(list(
     mCPByS = mCPByS,
@@ -822,14 +821,14 @@ setMethod("celda_C",
   ## Recalculate counts based on new label
   if (inherits(counts, "matrix") & is.integer(counts)) {
     nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
-    nCP <- as.integer(colSums(nGByCP))
+    nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
   } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     nGByCP <- .colSumByGroupChangeNumeric(counts, nGByCP, z, previousZ, K)
-    nCP <- as.integer(colSums(nGByCP))
+    nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
   } else if (inherits(counts, "dgCMatrix")) {
     nGByCP <- colSumByGroupChangeSparse(counts, nGByCP, group = z,
                                         pgroup = previousZ)
-    nCP <- as.integer(Matrix::colSums(nGByCP))
+    nCP <- Matrix::colSums(nGByCP)
   }
   
   nS <- length(unique(s))
