@@ -287,36 +287,6 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
 # #     expect_true(!is.null(plotObj))
 # # })
 #
-# # differentialExpression
-# # test_that(desc = "Testing differentialExpression with celda_C", {
-# #     diffexp_K1 <- differentialExpression(counts = celdaCSim$counts,
-# #         celdaMod = modelC,
-# #         c1 = 1)
-# #     expect_equal(class(diffexp_K1), c("data.table", "data.frame"))
-# #     expect_equal(class(diffExp_K1 <- differentialExpression(
-# #         counts = celdaCSim$counts,
-# #         celdaMod = modelC,
-# #         c1 = c(2, 3),
-# #         c2 = 4,
-# #         log2fcThreshold = 0.5)),
-# #         c("data.table", "data.frame"))
-# #     expect_error(differentialExpression(counts = "counts",
-# #         celdaMod = modelC,
-# #         c1 = 3,
-# #         log2fcThreshold = 0.5),
-# #         "'counts' should be a numeric count matrix")
-# #     expect_error(differentialExpression(
-# #         counts = celdaCSim$counts,
-# #         celdaMod = NULL,
-# #         c1 = 3),
-# #         "'celdaMod' should be an object of class celda_C or celda_CG")
-# #     expect_error(differentialExpression(counts = celdaCSim$counts,
-# #         celdaMod = modelC,
-# #         c1 = NULL,
-# #         log2fcThreshold = 0.5,
-# #         onlyPos = TRUE))
-# # })
-#
 # test_that(desc = paste0("Testing celdaTsne with celda_C when model class is",
 #     "changed, should error"), {
 #         modelX <- modelC

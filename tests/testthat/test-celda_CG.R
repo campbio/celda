@@ -450,38 +450,6 @@
 #     expect_true(!is.null(plotObj))
 # })
 #
-# # differentialExpression
-# # test_that(desc = "Testing differentialExpression for celda_CG", {
-# #     expect_equal(class(diffExpK1 <- differentialExpression(
-# #         counts = celdaCGSim$counts,
-# #         celdaMod = modelCG,
-# #         c1 = 3,
-# #         log2fcThreshold = 0.5,
-# #         onlyPos = TRUE)),
-# #         c("data.table", "data.frame"))
-# #     expect_equal(class(diffExpK1 <- differentialExpression(
-# #         counts = celdaCGSim$counts,
-# #         celdaMod = modelCG,
-# #         c1 = c(2, 3),
-# #         c2 = 4,
-# #         log2fcThreshold = 0.5)),
-# #         c("data.table", "data.frame"))
-# #     expect_error(differentialExpression(counts = "counts",
-# #         celdaMod = modelCG,
-# #         c1 = 3,
-# #         log2fcThreshold = 0.5),
-# #         "'counts' should be a numeric count matrix")
-# #     expect_error(differentialExpression(counts = celdaCGSim$counts,
-# #         celdaMod = NULL,
-# #         c1 = 3),
-# #         "'celdaMod' should be an object of class celda_C or celda_CG")
-# #     expect_error(differentialExpression(counts = celdaCGSim$counts,
-# #         celdaMod = modelCG,
-# #         c1 = NULL,
-# #         log2fcThreshold = 0.5,
-# #         onlyPos = TRUE))
-# # })
-#
 # # plotDimReduce
 # test_that(desc = "Testing plotDimReduce* with celda_CG", {
 #     celdaTsne <- celdaTsne(counts = celdaCGSim$counts,

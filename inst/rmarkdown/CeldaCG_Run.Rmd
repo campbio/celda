@@ -43,8 +43,8 @@ require(gridExtra)
 require(ggplot2)
 
 sce <- params$sce
-L = params$L
-K = params$K
+L <- params$L
+K <- params$K
 sampleName <- params$sampleName
 altExpName <- params$altExpName
 useAssay <- params$useAssay
@@ -52,9 +52,9 @@ initialL <- params$initialL
 maxL <- params$maxL
 initialK <- params$initialK
 maxK <- params$maxK
-minCell = params$minCell
-minCount = params$minCount
-sceFile = params$sceFile
+minCell <- params$minCell
+minCount <- params$minCount
+sceFile <- params$sceFile
 maxFeatures <- params$maxFeatures
 pdf <- params$pdf
 showSession <- params$showSession
@@ -168,9 +168,11 @@ cellSplit <-
 
 # Show results of clustering genes (perplexity plot)
 p3 <-
-  plotGridSearchPerplexity(cellSplit, altExpName = altExpName, sep = 5) + theme(legend.position = "bottom")
+  plotGridSearchPerplexity(cellSplit, altExpName = altExpName, sep = 5) +
+  theme(legend.position = "bottom")
 p4 <-
-  plotGridSearchPerplexityDiff(cellSplit, altExpName = altExpName, sep = 5) + theme(legend.position = "bottom")
+  plotGridSearchPerplexityDiff(cellSplit, altExpName = altExpName, sep = 5) +
+  theme(legend.position = "bottom")
 grid.arrange(p3, p4,  ncol = 2)
 
 # Select the final model and reorder L/K values
@@ -226,7 +228,7 @@ for (i in seq.int(initialK, maxK)) {
 ## Save the final model
 The SCE object with the final celda model will be saved to the file: ```r basename(sceFile)```.
 ```{r saving}
-if(!is.null(sceFile)) {
+if (!is.null(sceFile)) {
   saveRDS(sce, sceFile)
 }
 ```

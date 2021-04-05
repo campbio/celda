@@ -21,17 +21,19 @@ moduleHeatmap(x, ...)
   scaleRow = scale,
   showFeaturenames = TRUE,
   trim = c(-2, 2),
-  rowFontSize = 6,
+  rowFontSize = NULL,
   showHeatmapLegend = FALSE,
   showTopAnnotationLegend = FALSE,
   showTopAnnotationName = FALSE,
-  topAnnotationHeight = 1.5,
+  topAnnotationHeight = 5,
   showModuleLabel = TRUE,
   moduleLabel = "auto",
-  moduleLabelSize = 13,
+  moduleLabelSize = NULL,
   width = "auto",
   height = "auto",
   unit = "mm",
+  ncol = NULL,
+  useRaster = TRUE,
   ...
 )
 }
@@ -108,9 +110,10 @@ Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for plotting the data. This threshold is applied
-after row scaling. Set to NULL to disable. Default c(-2,2).}
+after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.}
 
-\item{rowFontSize}{Integer. Font size for genes.}
+\item{rowFontSize}{Integer. Font size for feature names. If \code{NULL},
+then the size will automatically be determined. Default \code{NULL}.}
 
 \item{showHeatmapLegend}{Passed to \link[ComplexHeatmap]{Heatmap}. Show
 legend for expression levels.}
@@ -141,6 +144,15 @@ height of the output figure.}
 
 \item{unit}{Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 character object defining the unit of all dimensions defined.}
+
+\item{ncol}{Integer. Number of columns of module heatmaps. If \code{NULL},
+then this will be automatically calculated so that the number of columns
+and rows will be approximately the same. Default \code{NULL}.}
+
+\item{useRaster}{Boolean. Rasterizing will make the heatmap a single object
+and reduced the memory of the plot and the size of a file. If \code{NULL},
+then rasterization will be automatically determined by the underlying
+\link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.}
 }
 \value{
 A \link[multipanelfigure]{multi_panel_figure} object if plotting
