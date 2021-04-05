@@ -49,9 +49,17 @@
 #'   of the \code{sce}. Default \code{NULL}. data. Default \code{"rownames"}.
 #' @param cellAnnot Character vector. The cell-level annotations to display on
 #'   the reduced dimensional plot. These variables should be present in the
-#'   column data of the \code{sce} object.
+#'   column data of the \code{sce} object. Default \code{NULL}.
+#' @param cellAnnotLabel Character vector. Additional cell-level annotations
+#'   to display on the reduced dimensional plot. Variables will be treated
+#'   as categorial and labels for each group will be placed on the plot.
+#'   These variables should be present in the column data of the \code{sce}
+#'   object. Default \code{NULL}.
 #' @param exactMatch Boolean. Whether to only identify exact matches or to
 #'   identify partial matches using \code{\link{grep}}. Default \code{FALSE}.
+#' @param moduleFilePrefix Character. The features in each module will be
+#' written to a a csv file starting with this name. If \code{NULL}, then no
+#' file will be written. Default \code{"module_features"}.
 #' @param output_file Character. Prefix of the html file. Default
 #'   \code{"CeldaCG_ResultReport"}.
 #' @param output_sce_prefix Character. The \code{sce} object with
@@ -69,9 +77,12 @@
 #' @examples
 #' data(sceCeldaCG)
 #' \dontrun{
-#' sceCeldaCG <- celdaUmap(sceCeldaCG)
-#' reportCeldaCG_PlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
-#'                          features = c("Gene_1", "Gene_100"))
+#' sceCeldaCG$sum <- colSums(counts(sceCeldaCG))
+#' sceCeldaCG <- reportCeldaCGRun(sceCeldaCG,
+#'               initialL=5, maxL=20, initialK=5, maxK=20, L=10, K=5)
+#' reportCeldaCGPlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
+#'                          features = c("Gene_1", "Gene_100"),
+#'                          cellAnnot="sum")
 #' }
 NULL
 
@@ -153,12 +164,22 @@ reportCeldaCGPlotResults <-
            altExpName = "featureSubset",
            useAssay = "counts",
            cellAnnot = NULL,
+           cellAnnotLabel = NULL,
            exactMatch = TRUE,
+           moduleFilePrefix = "module_features",
            output_file = "CeldaCG_ResultReport",
            output_dir = ".",
            pdf = FALSE,
            showSetup = TRUE,
            showSession = TRUE) {
+
+    moduleFileName <- NULL
+    if (!is.null(moduleFilePrefix)) {
+      moduleFileName <-
+        file.path(normalizePath(output_dir),
+                  paste0(moduleFilePrefix, ".csv"))
+    }
+
     rmarkdown::render(
       system.file("rmarkdown/CeldaCG_PlotResults.Rmd", package = "celda"),
       params = list(
@@ -169,7 +190,9 @@ reportCeldaCGPlotResults <-
         features = features,
         displayName = displayName,
         cellAnnot = cellAnnot,
+        cellAnnotLabel = cellAnnotLabel,
         exactMatch = isTRUE(exactMatch),
+        moduleFileName = moduleFileName,
         pdf = isTRUE(pdf),
         showSetup = isTRUE(showSetup),
         showSession = isTRUE(showSession)

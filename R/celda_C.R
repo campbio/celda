@@ -44,14 +44,13 @@
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
-#' @param zInitialize Chararacter. One of 'random', 'split', or 'predefined'.
+#' @param zInitialize Character. One of 'random', 'split', or 'predefined'.
 #'  With 'random', cells are randomly assigned to a populations. With 'split',
-#'  cells will be split into sqrt(K) populations and then each popluation will
+#'  cells will be split into sqrt(K) populations and then each population will
 #'  be subsequently split into another sqrt(K) populations. With 'predefined',
 #'  values in `zInit` will be used to initialize `z`. Default 'split'.
-#' @param zInit Integer vector. Sets initial starting values of z. If NULL,
-#'  starting values for each cell will be randomly sampled from `1:K`. 'zInit'
-#'  can only be used when `initialize = 'random'`. Default NULL.
+#' @param zInit Integer vector. Sets initial starting values of z. 'zInit'
+#'  is only used when `zInitialize = 'predfined'`. Default NULL.
 #' @param countChecksum Character. An MD5 checksum for the `counts` matrix.
 #'  Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named

@@ -64,8 +64,9 @@
 #'  Default TRUE.
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for plotting the data. This threshold is applied
-#'  after row scaling. Set to NULL to disable. Default c(-2,2).
-#' @param rowFontSize Integer. Font size for genes.
+#'  after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.
+#' @param rowFontSize Integer. Font size for feature names. If \code{NULL},
+#' then the size will automatically be determined. Default \code{NULL}.
 #' @param showHeatmapLegend Passed to \link[ComplexHeatmap]{Heatmap}. Show
 #'  legend for expression levels.
 #' @param showTopAnnotationLegend Passed to
@@ -86,6 +87,13 @@
 #'  height of the output figure.
 #' @param unit Passed to \link[multipanelfigure]{multi_panel_figure}. Single
 #'  character object defining the unit of all dimensions defined.
+#' @param ncol Integer. Number of columns of module heatmaps. If \code{NULL},
+#' then this will be automatically calculated so that the number of columns
+#' and rows will be approximately the same. Default \code{NULL}.
+#' @param useRaster Boolean. Rasterizing will make the heatmap a single object
+#' and reduced the memory of the plot and the size of a file. If \code{NULL},
+#' then rasterization will be automatically determined by the underlying
+#' \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
 #'  more than one module heatmaps. Otherwise a
@@ -118,17 +126,19 @@ setMethod("moduleHeatmap",
         scaleRow = scale,
         showFeaturenames = TRUE,
         trim = c(-2, 2),
-        rowFontSize = 6,
+        rowFontSize = NULL,
         showHeatmapLegend = FALSE,
         showTopAnnotationLegend = FALSE,
         showTopAnnotationName = FALSE,
-        topAnnotationHeight = 1.5,
+        topAnnotationHeight = 5,
         showModuleLabel = TRUE,
         moduleLabel = "auto",
-        moduleLabelSize = 13,
+        moduleLabelSize = NULL,
         width = "auto",
         height = "auto",
         unit = "mm",
+        ncol = NULL,
+        useRaster = TRUE,
         ...) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
@@ -165,9 +175,8 @@ setMethod("moduleHeatmap",
 
         if (moduleLabel == "auto") {
             moduleLabel <- paste0("Module ", as.character(featureModule))
-        } else if (length(moduleLabel) != length(unique(celdaModules(x,
-            altExpName = altExpName)))) {
-            stop("Invalid 'moduleLabel' length!")
+        } else if (length(moduleLabel) != length(featureModule)) {
+            stop("Invalid 'moduleLabel' length")
         }
 
         # factorize counts matrix
@@ -231,6 +240,7 @@ setMethod("moduleHeatmap",
                 showModuleLabel = showModuleLabel,
                 moduleLabel = moduleLabel[i],
                 moduleLabelSize = moduleLabelSize,
+                useRaster = useRaster,
                 unit = unit,
                 ... = ...)
         }
@@ -238,7 +248,9 @@ setMethod("moduleHeatmap",
         if (isTRUE(returnHeatmap)) {
             return(plts[[1]])
         } else {
-            ncol <- floor(sqrt(length(plts)))
+            if (is.null(ncol)) {
+              ncol <- floor(sqrt(length(plts)))
+            }
             nrow <- ceiling(length(plts) / ncol)
 
             for (i in seq(length(plts))) {
@@ -247,7 +259,8 @@ setMethod("moduleHeatmap",
                     wrap.grobs = TRUE)
             }
 
-            figure <- multipanelfigure::multi_panel_figure(columns = ncol,
+            figure <- multipanelfigure::multi_panel_figure(
+                columns = ncol,
                 rows = nrow,
                 width = width,
                 height = height,
@@ -283,6 +296,7 @@ setMethod("moduleHeatmap",
     showModuleLabel,
     moduleLabel,
     moduleLabelSize,
+    useRaster,
     unit,
     ...) {
 
@@ -364,6 +378,7 @@ setMethod("moduleHeatmap",
             cluster_columns = FALSE,
             heatmap_legend_param = list(title = "Expression"),
             show_heatmap_legend = showHeatmapLegend,
+            use_raster = useRaster,
             top_annotation = ComplexHeatmap::HeatmapAnnotation(
                 cell = factor(zToPlot,
                     levels = stringr::str_sort(unique(zToPlot),
@@ -371,7 +386,8 @@ setMethod("moduleHeatmap",
                 show_legend = showTopAnnotationLegend,
                 show_annotation_name = showTopAnnotationName,
                 col = list(cell = ccols),
-                simple_anno_size = grid::unit(topAnnotationHeight, unit)),
+                simple_anno_size = grid::unit(topAnnotationHeight, unit),
+                simple_anno_size_adjust = TRUE),
             ...)
     } else {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
@@ -383,6 +399,7 @@ setMethod("moduleHeatmap",
             cluster_columns = FALSE,
             heatmap_legend_param = list(title = "Expression"),
             show_heatmap_legend = showHeatmapLegend,
+            use_raster = useRaster,
             top_annotation = ComplexHeatmap::HeatmapAnnotation(
                 cell = factor(zToPlot,
                     levels = stringr::str_sort(unique(zToPlot),
@@ -390,7 +407,8 @@ setMethod("moduleHeatmap",
                 show_legend = showTopAnnotationLegend,
                 show_annotation_name = showTopAnnotationName,
                 col = list(cell = ccols),
-                simple_anno_size = grid::unit(topAnnotationHeight, unit)),
+                simple_anno_size = grid::unit(topAnnotationHeight, unit),
+                simple_anno_size_adjust = TRUE),
             ...)
     }
     return(plt)

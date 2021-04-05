@@ -10,12 +10,12 @@ plotDimReduceFeature(x, ...)
 
 \S4method{plotDimReduceFeature}{SingleCellExperiment}(
   x,
-  reducedDimName,
+  features,
+  reducedDimName = NULL,
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
-  features,
   headers = NULL,
   normalize = FALSE,
   zscore = TRUE,
@@ -62,16 +62,18 @@ represent features and columns represent cells.}
 
 \item{...}{Ignored. Placeholder to prevent check warning.}
 
+\item{features}{Character vector. Features in the rownames of counts to plot.}
+
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
-\code{dim2} are set.}
+\linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
+\code{dim1} and \code{dim2} need to be set. Default \code{NULL}.}
 
 \item{dim1}{Numeric vector. First dimension from data
-dimension reduction output.}
+dimension reduction output to be plotted on the x-axis. Default \code{NULL}.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimension
-reduction output.}
+reduction output to be plotted on the y-axis. Default \code{NULL}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
@@ -79,8 +81,6 @@ slot to use if \code{x} is a
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
-
-\item{features}{Character vector. Features in the rownames of counts to plot.}
 
 \item{headers}{Character vector. If `NULL`, the corresponding rownames are
 used as labels. Otherwise, these headers are used to label the features.}
@@ -104,9 +104,13 @@ of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
 
-\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
+\item{xlab}{Character vector. Label for the x-axis. If \code{reducedDimName}
+is used, then this will be set to the column name of the first dimension of
+that object. Default "Dimension_1".}
 
-\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
+\item{ylab}{Character vector. Label for the y-axis. If \code{reducedDimName}
+is used, then this will be set to the column name of the second dimension of
+that object. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`. The color
 will be used to signify the lowest values on the scale.}

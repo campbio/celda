@@ -107,9 +107,8 @@ in `yInit` will be used to initialize `y`. Default 'split'.}
 \item{countChecksum}{Character. An MD5 checksum for the `counts` matrix.
 Default NULL.}
 
-\item{yInit}{Integer vector. Sets initial starting values of y. If NULL,
-starting values for each feature will be randomly sampled from `1:L`.
-`yInit` can only be used when `initialize = 'random'`. Default NULL.}
+\item{yInit}{Integer vector. Sets initial starting values of y.
+`yInit` can only be used when `yInitialize = 'predefined'`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
 `logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
