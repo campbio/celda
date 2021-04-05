@@ -835,7 +835,7 @@ setMethod("plotGridSearchPerplexityDiff",
                 p2 <- dt[K == levels(dt$K)[j] & L == levels(dt$L)[i],
                     perplexity]
                 dt[K == levels(dt$K)[j] & L == levels(dt$L)[i],
-                    perpdiffK := p2 - p1]
+                    "perpdiffK"] <- p2 - p1
             }
         }
 
@@ -871,7 +871,7 @@ setMethod("plotGridSearchPerplexityDiff",
                 p2 <- dt[K == levels(dt$K)[i] & L == levels(dt$L)[j],
                     perplexity]
                 dt[K == levels(dt$K)[i] & L == levels(dt$L)[j],
-                    perpdiffL := p2 - p1]
+                    "perpdiffL"] <- p2 - p1
             }
         }
 
@@ -933,7 +933,7 @@ setMethod("plotGridSearchPerplexityDiff",
         for (i in seq(2, nlevels(dt$K))) {
             p1 <- dt[K == levels(dt$K)[i - 1], perplexity]
             p2 <- dt[K == levels(dt$K)[i], perplexity]
-            dt[K == levels(dt$K)[i], perpdiffK := p2 - p1]
+            dt[K == levels(dt$K)[i], "perpdiffK"] <- p2 - p1
         }
 
         diffMeansByK <- data.table::data.table(stats::aggregate(dt$perpdiffK,
@@ -989,7 +989,7 @@ setMethod("plotGridSearchPerplexityDiff",
         for (i in seq(2, nlevels(dt$L))) {
             p1 <- dt[L == levels(dt$L)[i - 1], perplexity]
             p2 <- dt[L == levels(dt$L)[i], perplexity]
-            dt[L == levels(dt$L)[i], perpdiffL := p2 - p1]
+            dt[L == levels(dt$L)[i], "perpdiffL"] <- p2 - p1
         }
 
         diffMeansByL <- data.table::data.table(stats::aggregate(dt$perpdiffL,

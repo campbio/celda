@@ -620,10 +620,10 @@ retrieveFeatureIndex <- function(features,
     search <- rownames(x)
   } else if (length(ncol(x)) > 0) {
     if (inherits(x, "SummarizedExperiment")) {
-      if (!(by %in% colnames(rowData(x)))) {
+      if (!(by %in% colnames(SummarizedExperiment::rowData(x)))) {
         stop("'by' is not a column in 'rowData(x)'.")
       }
-      search <- rowData(x)[, by]
+      search <- SummarizedExperiment::rowData(x)[, by]
     } else {
       if (!(by %in% colnames(x))) {
         stop("'by' is not a column in 'x'.")

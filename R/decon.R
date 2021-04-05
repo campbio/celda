@@ -204,8 +204,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   )
 
   ## Add results into column annotation
-  colData(x)$decontX_contamination <- result$contamination
-  colData(x)$decontX_clusters <- result$z
+  SummarizedExperiment::colData(x)$decontX_contamination <- result$contamination
+  SummarizedExperiment::colData(x)$decontX_clusters <- result$z
 
   ## Put estimated UMAPs into SCE
   batchIndex <- unique(result$runParams$batch)
@@ -296,14 +296,14 @@ setMethod("decontX", "ANY", function(x,
 GET_FUN <- function(exprs_values, ...) {
   (exprs_values) # To ensure evaluation
   function(object, ...) {
-    assay(object, i = exprs_values, ...)
+    SummarizedExperiment::assay(object, i = exprs_values, ...)
   }
 }
 
 SET_FUN <- function(exprs_values, ...) {
   (exprs_values) # To ensure evaluation
   function(object, ..., value) {
-    assay(object, i = exprs_values, ...) <- value
+    SummarizedExperiment::assay(object, i = exprs_values, ...) <- value
     object
   }
 }
