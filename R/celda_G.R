@@ -693,11 +693,20 @@ setMethod("celda_G",
     stop("Assigned value of feature module greater than the total number",
         " of feature modules!")
   }
-  nTSByC <- .rowSumByGroup(counts, group = y, L = L)
-  nByG <- as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
-  nByTS <- as.integer(.rowSumByGroup(matrix(nByG, ncol = 1),
-    group = y, L = L
-  ))
+  
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    nTSByC <- .rowSumByGroup(counts, group = y, L = L)
+    nByG <- as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    nTSByC <- .rowSumByGroupNumeric(counts, group = y, L = L)
+    nByG <- as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
+  } else if (inherits(counts, "dgCMatrix")) {
+    nTSByC <- rowSumByGroupSparse(counts, group = y)
+    nByG <- as.integer(Matrix::rowSums(counts))
+  } else {
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }
+  nByTS <- as.integer(.rowSumByGroup(matrix(nByG, ncol = 1),group = y, L = L))  
   nGByTS <- tabulate(y, L) + 1 ## Add pseudogene to each state
   nM <- ncol(counts)
   nG <- nrow(counts)
@@ -715,10 +724,17 @@ setMethod("celda_G",
 
 .cGReDecomposeCounts <- function(counts, y, previousY, nTSByC, nByG, L) {
   ## Recalculate counts based on new label
-  nTSByC <- .rowSumByGroupChange(counts, nTSByC, y, previousY, L)
-  nByTS <- as.integer(.rowSumByGroup(matrix(nByG, ncol = 1),
-    group = y, L = L
-  ))
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    nTSByC <- .rowSumByGroupChange(counts, nTSByC, y, previousY, L)
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    nTSByC <- .rowSumByGroupChangeNumeric(counts, nTSByC, y, previousY, L)
+  } else if (inherits(counts, "dgCMatrix")) {
+    nTSByC <- rowSumByGroupChangeSparse(counts, nTSByC, y, previousY) 
+  } else {
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }
+  
+  nByTS <- as.integer(.rowSumByGroup(matrix(nByG, ncol = 1), group = y, L = L))
   nGByTS <- tabulate(y, L) + 1
 
   return(list(

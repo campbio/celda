@@ -77,13 +77,13 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
 #'   "posterior")
 #' @rdname factorizeMatrix
 #' @export
-setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
-        counts <- .processCounts(x)
-        compareCountMatrix(counts, celdaMod)
+        #counts <- .processCounts(x)
+        compareCountMatrix(x, celdaMod)
 
         K <- params(celdaMod)$K
         L <- params(celdaMod)$L
@@ -97,7 +97,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
         s <- as.integer(sampleLabel)
 
         ## Calculate counts one time up front
-        p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
+        p <- .cCGDecomposeCounts(x, s, z, y, K, L)
         nS <- p$nS
         nG <- p$nG
         nM <- p$nM
@@ -279,13 +279,13 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
 #' )
 #' @rdname factorizeMatrix
 #' @export
-setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
-        counts <- .processCounts(x)
-        # compareCountMatrix(counts, celdaMod)
+        #counts <- .processCounts(x)
+        compareCountMatrix(x, celdaMod)
 
         L <- params(celdaMod)$L
         y <- celdaClusters(celdaMod)$y
@@ -293,7 +293,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma
 
-        p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
+        p <- .cGDecomposeCounts(counts = x, y = y, L = L)
         nTSByC <- p$nTSByC
         nByG <- p$nByG
         nByTS <- p$nByTS

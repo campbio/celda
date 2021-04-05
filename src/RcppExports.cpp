@@ -174,6 +174,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// eigenMatMultNumeric
+SEXP eigenMatMultNumeric(const Eigen::Map<Eigen::MatrixXd> A, const Eigen::Map< Eigen::MatrixXd> B);
+RcppExport SEXP _celda_eigenMatMultNumeric(SEXP ASEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map< Eigen::MatrixXd> >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(eigenMatMultNumeric(A, B));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fastNormProp
 SEXP fastNormProp(NumericMatrix R_counts, double R_alpha);
 RcppExport SEXP _celda_fastNormProp(SEXP R_countsSEXP, SEXP R_alphaSEXP) {
@@ -277,12 +289,12 @@ END_RCPP
 RcppExport SEXP _colSumByGroup(SEXP, SEXP);
 RcppExport SEXP _colSumByGroup_numeric(SEXP, SEXP);
 RcppExport SEXP _colSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
-RcppExport SEXP _colSumByGroupChange_numeric(SEXP, SEXP);
+RcppExport SEXP _colSumByGroupChange_numeric(SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP _perplexityG(SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP _rowSumByGroup(SEXP, SEXP);
 RcppExport SEXP _rowSumByGroup_numeric(SEXP, SEXP);
 RcppExport SEXP _rowSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
-RcppExport SEXP _rowSumByGroupChange_numeric(SEXP, SEXP);
+RcppExport SEXP _rowSumByGroupChange_numeric(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_celda_decontXEM", (DL_FUNC) &_celda_decontXEM, 10},
@@ -294,6 +306,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_celda_cG_CalcGibbsProbY_fastRow", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fastRow, 13},
     {"_celda_cG_CalcGibbsProbY", (DL_FUNC) &_celda_cG_CalcGibbsProbY, 13},
     {"_celda_eigenMatMultInt", (DL_FUNC) &_celda_eigenMatMultInt, 2},
+    {"_celda_eigenMatMultNumeric", (DL_FUNC) &_celda_eigenMatMultNumeric, 2},
     {"_celda_fastNormProp", (DL_FUNC) &_celda_fastNormProp, 2},
     {"_celda_fastNormPropLog", (DL_FUNC) &_celda_fastNormPropLog, 2},
     {"_celda_fastNormPropSqrt", (DL_FUNC) &_celda_fastNormPropSqrt, 2},
@@ -305,12 +318,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_colSumByGroup",               (DL_FUNC) &_colSumByGroup,               2},
     {"_colSumByGroup_numeric",       (DL_FUNC) &_colSumByGroup_numeric,       2},
     {"_colSumByGroupChange",         (DL_FUNC) &_colSumByGroupChange,         4},
-    {"_colSumByGroupChange_numeric", (DL_FUNC) &_colSumByGroupChange_numeric, 2},
+    {"_colSumByGroupChange_numeric", (DL_FUNC) &_colSumByGroupChange_numeric, 4},
     {"_perplexityG",                 (DL_FUNC) &_perplexityG,                 4},
     {"_rowSumByGroup",               (DL_FUNC) &_rowSumByGroup,               2},
     {"_rowSumByGroup_numeric",       (DL_FUNC) &_rowSumByGroup_numeric,       2},
     {"_rowSumByGroupChange",         (DL_FUNC) &_rowSumByGroupChange,         4},
-    {"_rowSumByGroupChange_numeric", (DL_FUNC) &_rowSumByGroupChange_numeric, 2},
+    {"_rowSumByGroupChange_numeric", (DL_FUNC) &_rowSumByGroupChange_numeric, 4},
     {NULL, NULL, 0}
 };
 

@@ -2,8 +2,6 @@
 #include <Rinternals.h>
 #include <R_ext/RS.h>
 
-
-
 SEXP _rowSumByGroup(SEXP R_x, SEXP R_group)
 {
   int i, j;
@@ -96,10 +94,6 @@ SEXP _colSumByGroup(SEXP R_x, SEXP R_group)
 
 
 
-
-
-
-
 SEXP _rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 {
   int i, j;
@@ -147,7 +141,6 @@ SEXP _rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 
   return(R_px);
 }
-
 
 
 
@@ -199,6 +192,7 @@ SEXP _colSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 
   return(R_px);
 }
+
 
 
 SEXP _rowSumByGroup_numeric(SEXP R_x, SEXP R_group)
@@ -285,9 +279,6 @@ SEXP _colSumByGroup_numeric(SEXP R_x, SEXP R_group)
 
 
 
-
-
-
 SEXP _rowSumByGroupChange_numeric(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
 {
   int i, j;
@@ -335,7 +326,6 @@ SEXP _rowSumByGroupChange_numeric(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgro
   
   return(R_px);
 }
-
 
 
 

@@ -42,6 +42,15 @@ eigenMatMultInt <- function(A, B) {
     .Call('_celda_eigenMatMultInt', PACKAGE = 'celda', A, B)
 }
 
+#' Fast matrix multiplication for double x double
+#' 
+#' @param A a double matrix
+#' @param B an integer matrix
+#' @return An integer matrix representing the product of A and B
+eigenMatMultNumeric <- function(A, B) {
+    .Call('_celda_eigenMatMultNumeric', PACKAGE = 'celda', A, B)
+}
+
 #' Fast normalization for numeric matrix
 #' 
 #' @param R_counts An integer matrix

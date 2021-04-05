@@ -711,12 +711,16 @@ setMethod("celda_C",
   phi <- fastNormPropLog(nGByCP, beta)
 
   ## Maximization to find best label for each cell
-  if(inherits(counts, "dgCMatrix")) {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    probs <- eigenMatMultInt(phi, counts) + theta[, s]
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    probs <- eigenMatMultNumeric(phi, counts) + theta[, s] 
+  } else if (inherits(counts, "dgCMatrix")) {
     probs <- (t(phi) %*% counts) + theta[, s] 
   } else {
-    probs <- eigenMatMultInt(phi, counts) + theta[, s] 
-  }
-
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }    
+  
   if (isTRUE(doSample)) {
     zPrevious <- z
     z <- apply(probs, 2, which.max)
@@ -787,17 +791,17 @@ setMethod("celda_C",
     ncol = nS
   )
 
-  if (inherits(counts, "matrix") & storage.mode(counts) == "integer") {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
     nGByCP <- .colSumByGroup(counts, group = z, K = K)
     nByC <- as.integer(colSums(counts))
-  } else if (inherits(counts, "matrix") & storage.mode(counts) == "numeric") {
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     nGByCP <- .colSumByGroupNumeric(counts, group = z, K = K)
     nByC <- as.integer(colSums(counts))
   } else if (inherits(counts, "dgCMatrix")) {
     nGByCP <- colSumByGroupSparse(counts, group = z)
     nByC <- as.integer(Matrix::colSums(counts))
   } else {
-    stop("'counts' must be an integer, numeric, or sparse matrix.")
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
   }
   
   nCP <- as.integer(colSums(nGByCP))
@@ -816,10 +820,10 @@ setMethod("celda_C",
 
 .cCReDecomposeCounts <- function(counts, s, z, previousZ, nGByCP, K) {
   ## Recalculate counts based on new label
-  if (inherits(counts, "matrix") & storage.mode(counts) == "integer") {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
     nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
     nCP <- as.integer(colSums(nGByCP))
-  } else if (inherits(counts, "matrix") & storage.mode(counts) == "numeric") {
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     nGByCP <- .colSumByGroupChangeNumeric(counts, nGByCP, z, previousZ, K)
     nCP <- as.integer(colSums(nGByCP))
   } else if (inherits(counts, "dgCMatrix")) {

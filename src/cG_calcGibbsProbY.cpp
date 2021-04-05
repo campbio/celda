@@ -210,7 +210,7 @@ NumericVector cG_CalcGibbsProbY(const int index,
   // The first case of if statement represents when the current feature is already added to that module
   // The second case represents when the current feature is NOT YET added to that module
   for (int col = 0; col < counts.length(); col++) {
-    //k = col * nG + index0; // Index for the current feature in counts matrix
+    //k = col * nG + index0; // Index for the current feature in counts matrix, used when the whole matrix was passed to this function rather than just the row
     k = col; // Index for the current feature in counts matrix
     for (i = 0; i < L; i++) {
       j = col * L + i; // Index for the current module in the n.TS.by.C matrix

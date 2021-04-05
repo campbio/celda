@@ -44,16 +44,18 @@
 }
 
 #' @useDynLib celda _rowSumByGroupChange_numeric
-.rowSumByGroupChangeNumeric <- function(x, group, L) {
+.rowSumByGroupChangeNumeric <- function(x, px, group, pgroup, L) {
   group <- factor(group, levels = seq(L))
-  res <- .Call("_rowSumByGroupChange_numeric", x, group)
+  pgroup <- factor(pgroup, levels = seq(L))
+  res <- .Call("_rowSumByGroupChange_numeric", x, px, group, pgroup)
   return(res)
 }
 
 #' @useDynLib celda _colSumByGroupChange_numeric
-.colSumByGroupChangeNumeric <- function(x, group, K) {
+.colSumByGroupChangeNumeric <- function(x, px, group, pgroup, K) {
   group <- factor(group, levels = seq(K))
-  res <- .Call("_colSumByGroupChange_numeric", x, group)
+  pgroup <- factor(pgroup, levels = seq(K))
+  res <- .Call("_colSumByGroupChange_numeric", x, px, group, pgroup)
   return(res)
 }
 
