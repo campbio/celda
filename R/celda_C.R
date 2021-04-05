@@ -317,7 +317,7 @@ setMethod("celda_C",
     startTime <- Sys.time()
 
     ## Error checking and variable processing
-    counts <- .processCounts(counts)
+    #counts <- .processCounts(counts)
     if (is.null(countChecksum)) {
         countChecksum <- .createCountChecksum(counts)
     }
@@ -437,7 +437,7 @@ setMethod("celda_C",
 
       if (K > 2 & iter != maxIter &
         ((((numIterWithoutImprovement == stopIter &
-          !all(tempLl > ll))) & isTRUE(splitOnLast)) |
+          !all(tempLl >= ll))) & isTRUE(splitOnLast)) |
           (splitOnIter > 0 & iter %% splitOnIter == 0 &
             isTRUE(doCellSplit)))) {
         .logMessages(date(),
@@ -460,7 +460,7 @@ setMethod("celda_C",
           nG,
           alpha,
           beta,
-          zProb = t(nextZ$probs),
+          zProb = t(as.matrix(nextZ$probs)),
           maxClustersToTry = K,
           minCell = 3
         )
@@ -711,7 +711,11 @@ setMethod("celda_C",
   phi <- fastNormPropLog(nGByCP, beta)
 
   ## Maximization to find best label for each cell
-  probs <- eigenMatMultInt(phi, counts) + theta[, s]
+  if(inherits(counts, "dgCMatrix")) {
+    probs <- (t(phi) %*% counts) + theta[, s] 
+  } else {
+    probs <- eigenMatMultInt(phi, counts) + theta[, s] 
+  }
 
   if (isTRUE(doSample)) {
     zPrevious <- z
@@ -782,9 +786,21 @@ setMethod("celda_C",
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
     ncol = nS
   )
-  nGByCP <- .colSumByGroup(counts, group = z, K = K)
+
+  if (inherits(counts, "matrix") & storage.mode(counts) == "integer") {
+    nGByCP <- .colSumByGroup(counts, group = z, K = K)
+    nByC <- as.integer(colSums(counts))
+  } else if (inherits(counts, "matrix") & storage.mode(counts) == "numeric") {
+    nGByCP <- .colSumByGroupNumeric(counts, group = z, K = K)
+    nByC <- as.integer(colSums(counts))
+  } else if (inherits(counts, "dgCMatrix")) {
+    nGByCP <- colSumByGroupSparse(counts, group = z)
+    nByC <- as.integer(Matrix::colSums(counts))
+  } else {
+    stop("'counts' must be an integer, numeric, or sparse matrix.")
+  }
+  
   nCP <- as.integer(colSums(nGByCP))
-  nByC <- as.integer(colSums(counts))
 
   return(list(
     mCPByS = mCPByS,
@@ -800,12 +816,22 @@ setMethod("celda_C",
 
 .cCReDecomposeCounts <- function(counts, s, z, previousZ, nGByCP, K) {
   ## Recalculate counts based on new label
-  nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
+  if (inherits(counts, "matrix") & storage.mode(counts) == "integer") {
+    nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
+    nCP <- as.integer(colSums(nGByCP))
+  } else if (inherits(counts, "matrix") & storage.mode(counts) == "numeric") {
+    nGByCP <- .colSumByGroupChangeNumeric(counts, nGByCP, z, previousZ, K)
+    nCP <- as.integer(colSums(nGByCP))
+  } else if (inherits(counts, "dgCMatrix")) {
+    nGByCP <- colSumByGroupChangeSparse(counts, nGByCP, group = z,
+                                        pgroup = previousZ)
+    nCP <- as.integer(Matrix::colSums(nGByCP))
+  }
+  
   nS <- length(unique(s))
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
     ncol = nS
   )
-  nCP <- as.integer(colSums(nGByCP))
 
   return(list(
     mCPByS = mCPByS,

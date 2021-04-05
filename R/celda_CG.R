@@ -576,7 +576,7 @@ setMethod("celda_CG",
 
       if (L > 2 & iter != maxIter &
         (((numIterWithoutImprovement == stopIter &
-          !all(tempLl > ll)) & isTRUE(splitOnLast)) |
+          !all(tempLl >= ll)) & isTRUE(splitOnLast)) |
           (splitOnIter > 0 & iter %% splitOnIter == 0 &
             isTRUE(doGeneSplit)))) {
         .logMessages(date(),

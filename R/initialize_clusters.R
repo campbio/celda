@@ -111,7 +111,8 @@
         maxIter = 20,
         splitOnIter = -1,
         splitOnLast = FALSE,
-        verbose = FALSE)
+        verbose = FALSE,
+        reorder = FALSE)
       tempZ <- as.integer(as.factor(celdaClusters(clustLabel)$z))
 
       # Reassign clusters with label > 1
@@ -157,7 +158,7 @@
       alpha = alpha,
       beta = beta,
       doSample = FALSE)
-    zProb <- t(probs$probs)
+    zProb <- t(as.matrix(probs$probs))
     zProb[cbind(seq(nrow(zProb)), overallZ)] <- NA
     zSecond <- apply(zProb, 1, which.max)
 
@@ -279,7 +280,8 @@
         maxIter = 20,
         splitOnIter = -1,
         splitOnLast = FALSE,
-        verbose = FALSE
+        verbose = FALSE,
+        reorder = FALSE
       )
       tempY <- as.integer(as.factor(celdaClusters(clustLabel)$y))
 

@@ -276,7 +276,7 @@ setMethod("compareCountMatrix",
         }
         celdaChecksum <- params(celdaMod)$countChecksum
 
-        counts <- .processCounts(counts)
+        #counts <- .processCounts(counts)
         # Checksums are generated in celdaGridSearch and model after processing
         count.md5 <- .createCountChecksum(counts)
         res <- isTRUE(count.md5 == celdaChecksum)
@@ -455,8 +455,14 @@ distinctColors <- function(n,
 # expectations are met
 .validateCounts <- function(counts) {
   # And each row/column of the count matrix must have at least one count
-  countRowSum <- rowSums(counts)
-  countColSum <- colSums(counts)
+  if(inherits(counts, "dgCMatrix")) {
+    countRowSum <- Matrix::rowSums(counts)
+    countColSum <- Matrix::colSums(counts)  
+  } else {
+    countRowSum <- rowSums(counts)
+    countColSum <- colSums(counts)
+  }
+  
   if (sum(countRowSum == 0) > 0 | sum(countColSum == 0) > 0) {
     stop(
       "Each row and column of the count matrix must have at least",

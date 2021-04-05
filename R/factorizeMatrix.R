@@ -200,13 +200,13 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
 #'  factorized matrices for "module" and "sample".
 #' @rdname factorizeMatrix
 #' @export
-setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
-        counts <- .processCounts(x)
-        compareCountMatrix(counts, celdaMod)
+        #counts <- .processCounts(x)
+        compareCountMatrix(x, celdaMod)
 
         K <- params(celdaMod)$K
         z <- celdaClusters(celdaMod)$z
@@ -214,11 +214,9 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
         s <- as.integer(sampleLabel)
-
-        p <- .cCDecomposeCounts(counts, s, z, K)
+        p <- .cCDecomposeCounts(x, s, z, K)
         mCPByS <- p$mCPByS
         nGByCP <- p$nGByCP
-
         KNames <- paste0("K", seq(K))
         rownames(nGByCP) <- matrixNames(celdaMod)$row
         colnames(nGByCP) <- KNames
