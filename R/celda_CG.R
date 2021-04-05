@@ -379,7 +379,7 @@ setMethod("celda_CG",
 
   startTime <- Sys.time()
 
-  counts <- .processCounts(counts)
+  #counts <- .processCounts(counts)
   if (is.null(countChecksum)) {
     countChecksum <- .createCountChecksum(counts)
   }
@@ -554,20 +554,7 @@ setMethod("celda_CG",
       mCPByS <- nextZ$mCPByS
       nTSByCP <- nextZ$nGByCP
       nCP <- nextZ$nCP
-      
-      # Also need to recalculate nGByCP based on new label
-      # This could be done by '.cCReDecomposeCounts', however that also 
-      # calculates additional variables, so just the relevant code for nGByCP
-      # is here.
-      if (inherits(counts, "matrix") & is.integer(counts)) {
-        nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
-      } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-        nGByCP <- .colSumByGroupChangeNumeric(counts, nGByCP, z, previousZ, K)
-      } else if (inherits(counts, "dgCMatrix")) {
-        nGByCP <- colSumByGroupChangeSparse(counts, nGByCP, group = z,
-                                            pgroup = previousZ)
-      }
-      
+      nGByCP <- .colSumByGroupChange(counts, nGByCP, nextZ$z, z, K)
       z <- nextZ$z
 
       ## Perform split on i-th iteration defined by splitOnIter
@@ -642,20 +629,7 @@ setMethod("celda_CG",
         nTSByCP <- res$nTSByCP
         nByTS <- res$nByTS
         nGByTS <- res$nGByTS
-        
-        # Also need to recalculate nTSByC based on new label
-        # This could be done by '.cGReDecomposeCounts', however that also 
-        # calculates additional variables, so just the relevant code for nTSByC
-        # is here.
-        if (inherits(counts, "matrix") & is.integer(counts)) {
-          nTSByC <- .rowSumByGroupChange(counts, nTSByC, y, previousY, L)
-        } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-          nTSByC <- .rowSumByGroupChangeNumeric(counts, nTSByC, y, previousY, L)
-        } else if (inherits(counts, "dgCMatrix")) {
-          nTSByC <- rowSumByGroupChangeSparse(counts, nTSByC, y, previousY)
-        } else {
-          stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
-        }
+        nTSByC <- .rowSumByGroup(counts, group = y, L = L)
       }
 
       if (K > 2 & iter != maxIter &
@@ -902,30 +876,19 @@ setMethod("celda_CG",
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
     ncol = nS
   )
-  if (inherits(counts, "matrix") & is.integer(counts)) {
-    nTSByC <- .rowSumByGroup(counts, group = y, L = L)
-    nGByCP <- .colSumByGroup(counts, group = z, K = K)
-    nTSByCP <- .colSumByGroup(nTSByC, group = z, K = K)
-    nByG <- .rowSums(counts, nrow(counts), ncol(counts))
-    nByC <- .colSums(counts, nrow(counts), ncol(counts))
-    nByTS <- .rowSumByGroup(matrix(nByG, ncol = 1), group = y, L = L)
-  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-    nTSByC <- .rowSumByGroupNumeric(counts, group = y, L = L)
-    nGByCP <- .colSumByGroupNumeric(counts, group = z, K = K)
-    nTSByCP <- .colSumByGroupNumeric(nTSByC, group = z, K = K)
-    nByG <- .rowSums(counts, nrow(counts), ncol(counts))
-    nByC <- .colSums(counts, nrow(counts), ncol(counts))
-    nByTS <- .rowSumByGroupNumeric(matrix(nByG, ncol = 1), group = y, L = L)
-  } else if (inherits(counts, "dgCMatrix")) {
-    nTSByC <- rowSumByGroupSparse(counts, group = y)
-    nGByCP <- .colSumByGroupSparse(counts, group = z)
-    nByTS <- .rowSumByGroupNumeric(matrix(nByG, ncol = 1), group = y, L = L)
-    nTSByCP <- colSumByGroupSparse(nTSByC, group = z)
+
+  nTSByC <- .rowSumByGroup(counts, group = y, L = L)
+  nGByCP <- .colSumByGroup(counts, group = z, K = K)
+  nTSByCP <- .colSumByGroup(nTSByC, group = z, K = K)
+  
+  if (inherits(counts, "dgCMatrix")) {
     nByC <- Matrix::colSums(counts)
     nByG <- Matrix::rowSums(counts)
   } else {
-    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+    nByG <- .rowSums(counts, nrow(counts), ncol(counts))
+    nByC <- .colSums(counts, nrow(counts), ncol(counts))
   }
+  nByTS <- .rowSumByGroup(matrix(nByG, ncol = 1), group = y, L = L)
   nCP <- .colSums(nTSByCP, nrow(nTSByCP), ncol(nTSByCP))
   nGByTS <- tabulate(y, L) + 1 ## Add pseudogene to each module
   nG <- nrow(counts)

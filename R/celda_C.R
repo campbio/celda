@@ -791,20 +791,14 @@ setMethod("celda_C",
     ncol = nS
   )
 
-  if (inherits(counts, "matrix") & is.integer(counts)) {
-    nGByCP <- .colSumByGroup(counts, group = z, K = K)
-    nByC <- as.integer(colSums(counts))
-  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-    nGByCP <- .colSumByGroupNumeric(counts, group = z, K = K)
-    nByC <- as.integer(colSums(counts))
-  } else if (inherits(counts, "dgCMatrix")) {
-    nGByCP <- colSumByGroupSparse(counts, group = z)
-    nByC <- as.integer(Matrix::colSums(counts))
+  nGByCP <- .colSumByGroup(counts, group = z, K = K)
+  nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
+  if (inherits(counts, "dgCMatrix")) {
+    nByC <- Matrix::colSums(counts)
   } else {
-    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+    nByC <- .colSums(counts, nrow(counts), ncol(counts))  
   }
-  nCP <- colSums(nGByCP)
-
+  
   return(list(
     mCPByS = mCPByS,
     nGByCP = nGByCP,
@@ -819,16 +813,12 @@ setMethod("celda_C",
 
 .cCReDecomposeCounts <- function(counts, s, z, previousZ, nGByCP, K) {
   ## Recalculate counts based on new label
-  if (inherits(counts, "matrix") & is.integer(counts)) {
-    nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
-    nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
-  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-    nGByCP <- .colSumByGroupChangeNumeric(counts, nGByCP, z, previousZ, K)
-    nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
-  } else if (inherits(counts, "dgCMatrix")) {
-    nGByCP <- colSumByGroupChangeSparse(counts, nGByCP, group = z,
-                                        pgroup = previousZ)
+  nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
+  
+  if (inherits(counts, "dgCMatrix")) {
     nCP <- Matrix::colSums(nGByCP)
+  } else {
+    nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))  
   }
   
   nS <- length(unique(s))

@@ -442,11 +442,11 @@ distinctColors <- function(n,
 
 
 .processCounts <- function(counts) {
-  counts <- as.matrix(counts)
-  if (typeof(counts) != "integer") {
-    counts <- round(counts)
-    storage.mode(counts) <- "integer"
-  }
+  #counts <- as.matrix(counts)
+  #if (typeof(counts) != "integer") {
+  #  counts <- round(counts)
+  #  storage.mode(counts) <- "integer"
+  #}
   return(counts)
 }
 

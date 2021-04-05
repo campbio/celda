@@ -1,12 +1,66 @@
+.rowSumByGroup <- function(counts, group, L) {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    res <- .rowSumByGroupInteger(counts, group, L)
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    res <- .rowSumByGroupNumeric(counts, group, L)
+  } else if (inherits(counts, "dgCMatrix")) {
+    res <- rowSumByGroupSparse(counts, group)
+  } else {
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }
+  return(res)
+}
+
+.rowSumByGroupChange <- function(counts, pcounts, group, pgroup, L) {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    res <- .rowSumByGroupChangeInteger(counts, pcounts, group, pgroup, L)
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    res <- .rowSumByGroupChangeNumeric(counts, pcounts, group, pgroup, L)
+  } else if (inherits(counts, "dgCMatrix")) {
+    res <- rowSumByGroupChangeSparse(counts, pcounts, group, pgroup)
+  } else {
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }
+  return(res)
+}
+
+.colSumByGroup <- function(counts, group, K) {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    res <- .colSumByGroupInteger(counts, group, K)
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    res <- .colSumByGroupNumeric(counts, group, K)
+  } else if (inherits(counts, "dgCMatrix")) {
+    res <- colSumByGroupSparse(counts, group)
+  } else {
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }
+  return(res)
+}
+
+.colSumByGroupChange <- function(counts, pcounts, group, pgroup, K) {
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    res <- .colSumByGroupChangeInteger(counts, pcounts, group, pgroup, K)
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    res <- .colSumByGroupChangeNumeric(counts, pcounts, group, pgroup, K)
+  } else if (inherits(counts, "dgCMatrix")) {
+    res <- colSumByGroupChangeSparse(counts, pcounts, group, pgroup)
+  } else {
+    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
+  }
+  return(res)
+}
+
+
+
 #' @useDynLib celda _rowSumByGroup
-.rowSumByGroup <- function(x, group, L) {
+.rowSumByGroupInteger <- function(x, group, L) {
   group <- factor(group, levels = seq(L))
   res <- .Call("_rowSumByGroup", x, group)
   return(res)
 }
 
 #' @useDynLib celda _rowSumByGroupChange
-.rowSumByGroupChange <- function(x, px, group, pgroup, L) {
+.rowSumByGroupChangeInteger <- function(x, px, group, pgroup, L) {
   group <- factor(group, levels = seq(L))
   pgroup <- factor(pgroup, levels = seq(L))
   res <- .Call("_rowSumByGroupChange", x, px, group, pgroup)
@@ -14,14 +68,14 @@
 }
 
 #' @useDynLib celda _colSumByGroup
-.colSumByGroup <- function(x, group, K) {
+.colSumByGroupInteger <- function(x, group, K) {
   group <- factor(group, levels = seq(K))
   res <- .Call("_colSumByGroup", x, group)
   return(res)
 }
 
 #' @useDynLib celda _colSumByGroupChange
-.colSumByGroupChange <- function(x, px, group, pgroup, K) {
+.colSumByGroupChangeInteger <- function(x, px, group, pgroup, K) {
   group <- factor(group, levels = seq(K))
   pgroup <- factor(pgroup, levels = seq(K))
   res <- .Call("_colSumByGroupChange", x, px, group, pgroup)

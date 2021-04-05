@@ -44,7 +44,8 @@
       maxIter = 5,
       splitOnIter = -1,
       splitOnLast = FALSE,
-      verbose = FALSE
+      verbose = FALSE,
+      reorder = FALSE
     )
     clustSplit[[i]] <- celdaClusters(clustLabel)$z
   }
@@ -201,7 +202,8 @@
       maxIter = 5,
       splitOnIter = -1,
       splitOnLast = FALSE,
-      verbose = FALSE
+      verbose = FALSE,
+      reorder = FALSE
     )
     clustSplit[[i]] <- celdaClusters(clustLabel)$z
   }
@@ -394,7 +396,8 @@
         maxIter = 5,
         splitOnIter = -1,
         splitOnLast = FALSE,
-        verbose = FALSE
+        verbose = FALSE,
+        reorder = FALSE
       )
       tempZ[ix] <- celdaClusters(clustLabel)$z + currentTopZ
     }
@@ -437,7 +440,8 @@
       maxIter = 5,
       splitOnIter = -1,
       splitOnLast = FALSE,
-      verbose = FALSE
+      verbose = FALSE,
+      reorder = FALSE
     )
     clustSplit[[i]] <- celdaClusters(clustLabel)$y
   }
@@ -630,7 +634,8 @@
       maxIter = 5,
       splitOnIter = -1,
       splitOnLast = FALSE,
-      verbose = FALSE
+      verbose = FALSE,
+      reorder = FALSE
     )
     clustSplit[[i]] <- celdaClusters(clustLabel)$y
   }
