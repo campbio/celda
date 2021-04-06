@@ -317,7 +317,7 @@ setMethod("celda_C",
     startTime <- Sys.time()
 
     ## Error checking and variable processing
-    #counts <- .processCounts(counts)
+    counts <- .processCounts(counts)
     if (is.null(countChecksum)) {
         countChecksum <- .createCountChecksum(counts)
     }

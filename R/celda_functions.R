@@ -275,8 +275,8 @@ setMethod("compareCountMatrix",
             }
         }
         celdaChecksum <- params(celdaMod)$countChecksum
-
-        #counts <- .processCounts(counts)
+        counts <- .processCounts(counts)
+        
         # Checksums are generated in celdaGridSearch and model after processing
         count.md5 <- .createCountChecksum(counts)
         res <- isTRUE(count.md5 == celdaChecksum)
@@ -328,8 +328,8 @@ setMethod("compareCountMatrix",
             }
         }
         celdaChecksum <- celdaMod@countChecksum
-
         counts <- .processCounts(counts)
+        
         # Checksums are generated in celdaGridSearch and model after processing
         count.md5 <- .createCountChecksum(counts)
         res <- isTRUE(count.md5 == celdaChecksum)
@@ -442,11 +442,14 @@ distinctColors <- function(n,
 
 
 .processCounts <- function(counts) {
-  #counts <- as.matrix(counts)
-  #if (typeof(counts) != "integer") {
-  #  counts <- round(counts)
-  #  storage.mode(counts) <- "integer"
-  #}
+  if(!((inherits(counts, "matrix") &
+        (is.integer(counts) | is.numeric(counts))) |
+     inherits(counts, "dgCMatrix")))
+  {
+    stop("'counts' must be a sparse dgCMatrix ",
+         "from the 'Matrix' package or a matrix containing integer or numeric ",
+         "values.")
+  }
   return(counts)
 }
 
@@ -455,14 +458,6 @@ distinctColors <- function(n,
 # expectations are met
 #' @importFrom Matrix rowSums colSums
 .validateCounts <- function(counts) {
-  # And each row/column of the count matrix must have at least one count
-  # if (inherits(counts, "dgCMatrix")) {
-  #   countRowSum <- Matrix::rowSums(counts)
-  #   countColSum <- Matrix::colSums(counts)
-  # } else {
-  #   countRowSum <- rowSums(counts)
-  #   countColSum <- colSums(counts)
-  # }
   countRowSum <- rowSums(counts)
   countColSum <- colSums(counts)
   

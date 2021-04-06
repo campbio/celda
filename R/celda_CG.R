@@ -379,7 +379,7 @@ setMethod("celda_CG",
 
   startTime <- Sys.time()
 
-  #counts <- .processCounts(counts)
+  counts <- .processCounts(counts)
   if (is.null(countChecksum)) {
     countChecksum <- .createCountChecksum(counts)
   }
@@ -917,7 +917,7 @@ setMethod("celda_CG",
     transformationFun) {
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    #counts <- .processCounts(counts)
+    counts <- .processCounts(counts)
 
     ## Checking if maxCells and minClusterSize will work
     if (!is.null(maxCells)) {

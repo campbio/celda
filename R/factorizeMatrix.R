@@ -82,7 +82,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
-        #counts <- .processCounts(x)
+        counts <- .processCounts(x)
         compareCountMatrix(x, celdaMod)
 
         K <- params(celdaMod)$K
@@ -211,7 +211,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
-        #counts <- .processCounts(x)
+        counts <- .processCounts(x)
         compareCountMatrix(x, celdaMod)
 
         z <- celdaClusters(celdaMod)$z
@@ -293,7 +293,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
-        #counts <- .processCounts(x)
+        counts <- .processCounts(x)
         compareCountMatrix(x, celdaMod)
 
         y <- celdaClusters(celdaMod)$y
@@ -381,7 +381,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
 
 .factorizeMatrixCelda_C <- function(sce, useAssay, type) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    #counts <- .processCounts(counts)
+    counts <- .processCounts(counts)
 
     #K <- S4Vectors::metadata(sce)$celda_parameters$K
     z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
@@ -549,7 +549,6 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
 .factorizeMatrixCelda_G <- function(sce, useAssay, type) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    # compareCountMatrix(counts, celdaMod)
 
     #L <- S4Vectors::metadata(sce)$celda_parameters$L
     y <- SummarizedExperiment::rowData(sce)$celda_feature_module
