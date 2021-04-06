@@ -110,7 +110,7 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
     celdaCResK5 <- subsetCeldaList(celdaCResList, params = list(K = 5))
     sce2 <- selectBestModel(celdaCResK5)
     res <- perplexity(sce)
-    res2 <- perplexity(sce, newCounts = counts + 1)
+    res2 <- perplexity(sce, newCounts = as.matrix(counts + 1))
 
     expect_error(res <- perplexity(sce, newCounts = counts[-1, ]))
 })
