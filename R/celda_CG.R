@@ -871,6 +871,7 @@ setMethod("celda_CG",
 # @param y Numeric vector. Denotes feature module labels.
 # @param K Integer. Number of cell populations.
 # @param L Integer. Number of feature modules.
+#' @importFrom Matrix colSums rowSums
 .cCGDecomposeCounts <- function(counts, s, z, y, K, L) {
   nS <- length(unique(s))
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
@@ -880,14 +881,9 @@ setMethod("celda_CG",
   nTSByC <- .rowSumByGroup(counts, group = y, L = L)
   nGByCP <- .colSumByGroup(counts, group = z, K = K)
   nTSByCP <- .colSumByGroup(nTSByC, group = z, K = K)
-  
-  if (inherits(counts, "dgCMatrix")) {
-    nByC <- Matrix::colSums(counts)
-    nByG <- Matrix::rowSums(counts)
-  } else {
-    nByG <- .rowSums(counts, nrow(counts), ncol(counts))
-    nByC <- .colSums(counts, nrow(counts), ncol(counts))
-  }
+
+  nByC <- colSums(counts)
+  nByG <- rowSums(counts)
   nByTS <- .rowSumByGroup(matrix(nByG, ncol = 1), group = y, L = L)
   nCP <- .colSums(nTSByCP, nrow(nTSByCP), ncol(nTSByCP))
   nGByTS <- tabulate(y, L) + 1 ## Add pseudogene to each module

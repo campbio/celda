@@ -711,15 +711,7 @@ setMethod("celda_C",
   phi <- fastNormPropLog(nGByCP, beta)
 
   ## Maximization to find best label for each cell
-  if (inherits(counts, "matrix") & is.integer(counts)) {
-    probs <- eigenMatMultInt(phi, counts) + theta[, s]
-  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-    probs <- eigenMatMultNumeric(phi, counts) + theta[, s] 
-  } else if (inherits(counts, "dgCMatrix")) {
-    probs <- (t(phi) %*% counts) + theta[, s] 
-  } else {
-    stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
-  }    
+  probs <- .countsTimesProbs(counts, phi) + theta[, s]
   
   if (isTRUE(doSample)) {
     zPrevious <- z
@@ -782,6 +774,7 @@ setMethod("celda_C",
 # the count matrix.
 # @param z Numeric vector. Denotes cell population labels.
 # @param K Integer. Number of cell populations.
+#' @importFrom Matrix colSums
 .cCDecomposeCounts <- function(counts, s, z, K) {
   nS <- length(unique(s))
   nG <- nrow(counts)
@@ -793,12 +786,8 @@ setMethod("celda_C",
 
   nGByCP <- .colSumByGroup(counts, group = z, K = K)
   nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
-  if (inherits(counts, "dgCMatrix")) {
-    nByC <- Matrix::colSums(counts)
-  } else {
-    nByC <- .colSums(counts, nrow(counts), ncol(counts))  
-  }
-  
+  nByC <- colSums(counts)
+
   return(list(
     mCPByS = mCPByS,
     nGByCP = nGByCP,
@@ -810,17 +799,11 @@ setMethod("celda_C",
   ))
 }
 
-
+#' @importFrom Matrix colSums
 .cCReDecomposeCounts <- function(counts, s, z, previousZ, nGByCP, K) {
   ## Recalculate counts based on new label
   nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
-  
-  if (inherits(counts, "dgCMatrix")) {
-    nCP <- Matrix::colSums(nGByCP)
-  } else {
-    nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))  
-  }
-  
+  nCP <- colSums(nGByCP)
   nS <- length(unique(s))
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
     ncol = nS
@@ -952,4 +935,21 @@ setMethod("celda_C",
         celdaClusters(celdaCMod)$z
 
     return(sce)
+}
+
+#' @name countsTimesProbs
+#' @title Counts matrix times cell population probabilies
+#' @param counts feature-by-cell matrix
+#' @param phi feature-by-probability matrix
+#' @importMethodsFrom Matrix %*%
+.countsTimesProbs <- function(counts, phi) {
+  ## Maximization to find best label for each cell
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    probs <- eigenMatMultInt(phi, counts) 
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    probs <- eigenMatMultNumeric(phi, counts) 
+  } else {
+    probs <- (t(phi) %*% counts) 
+  } 
+  return(probs)
 }

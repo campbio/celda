@@ -453,15 +453,18 @@ distinctColors <- function(n,
 
 # Perform some simple checks on the counts matrix, to ensure celda modeling
 # expectations are met
+#' @importFrom Matrix rowSums colSums
 .validateCounts <- function(counts) {
   # And each row/column of the count matrix must have at least one count
-  if(inherits(counts, "dgCMatrix")) {
-    countRowSum <- Matrix::rowSums(counts)
-    countColSum <- Matrix::colSums(counts)  
-  } else {
-    countRowSum <- rowSums(counts)
-    countColSum <- colSums(counts)
-  }
+  # if (inherits(counts, "dgCMatrix")) {
+  #   countRowSum <- Matrix::rowSums(counts)
+  #   countColSum <- Matrix::colSums(counts)
+  # } else {
+  #   countRowSum <- rowSums(counts)
+  #   countColSum <- colSums(counts)
+  # }
+  countRowSum <- rowSums(counts)
+  countColSum <- colSums(counts)
   
   if (sum(countRowSum == 0) > 0 | sum(countColSum == 0) > 0) {
     stop(

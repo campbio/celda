@@ -1,9 +1,11 @@
 # celda_C
 library(celda)
 library(SingleCellExperiment)
+library(Matrix)
 context("Testing celda_C")
 
 sceceldaCSim <- simulateCells("celda_C", K = 10)
+counts(sceceldaCSim) <- as(counts(sceceldaCSim), "dgCMatrix")
 scesf <- selectFeatures(sceceldaCSim)
 K <- S4Vectors::metadata(sceceldaCSim)$celda_simulateCellscelda_C$K
 counts <- SummarizedExperiment::assay(scesf, "counts")
@@ -17,7 +19,7 @@ factorized <- factorizeMatrix(sce)
 
 # celda_C
 test_that(desc = "Testing simulation and celda_C model", {
-    expect_equal(typeof(counts), "integer")
+    #expect_equal(typeof(counts), "integer")
     expect_true(all(sweep(factorized$counts$sample,
         2,
         colSums(factorized$counts$sample),
@@ -25,17 +27,6 @@ test_that(desc = "Testing simulation and celda_C model", {
     expect_true(ncol(factorized$proportions$module) == K)
     expect_true(all(is.numeric(logLikelihoodHistory(sce))))
     expect_equal(max(logLikelihoodHistory(sce)), bestLogLikelihood(sce))
-
-    # GitHub #347
-    numericCounts <- counts
-    storage.mode(numericCounts) <- "numeric"
-    expect_true(is(celda_C(counts,
-        sampleLabel = sampleLabel(scesf),
-        K = K,
-        algorithm = "EM",
-        verbose = FALSE,
-        maxIter = 2),
-        "SingleCellExperiment"))
 })
 
 # clusterProbability

@@ -218,7 +218,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
         # Sometimes, fewer clusters get returned by celda_C
         # Taking the max(z) rather than the original K will prevent errors
         # K <- params(celdaMod)$K
-        K <- max(z) 
+        K <- max(z)
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
@@ -300,7 +300,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         # Sometimes, fewer clusters get returned by celda_G
         # Taking the max(y) rather than the original L will prevent errors
         # L <- params(celdaMod)$L
-        L <- max(y) 
+        L <- max(y)
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma
