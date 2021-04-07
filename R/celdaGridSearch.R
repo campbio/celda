@@ -622,6 +622,7 @@ setMethod("selectBestModel", signature(x = "SingleCellExperiment"),
             c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
         runParams <- S4Vectors::metadata(altExp)$celda_grid_search@runParams
         dt <- data.table::as.data.table(runParams)
+        .SD <- NULL # fix check note
         newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
             by = group])
         newRunParams <- newRunParams[, colnames(runParams)]
@@ -654,6 +655,7 @@ setMethod("selectBestModel", signature(x = "celdaList"),
         group <- setdiff(colnames(runParams(x)),
             c("index", "chain", "logLikelihood", "mean_perplexity", "seed"))
         dt <- data.table::as.data.table(runParams(x))
+        .SD <- NULL # fix check note
         newRunParams <- as.data.frame(dt[, .SD[which.max(logLikelihood)],
             by = group])
         newRunParams <- newRunParams[, colnames(runParams(x))]
