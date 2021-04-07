@@ -83,7 +83,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         type = c("counts", "proportion", "posterior")) {
 
         counts <- .processCounts(x)
-        compareCountMatrix(x, celdaMod)
+        compareCountMatrix(counts, celdaMod)
 
         K <- params(celdaMod)$K
 
@@ -103,7 +103,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         s <- as.integer(sampleLabel)
 
         ## Calculate counts one time up front
-        p <- .cCGDecomposeCounts(x, s, z, y, K, L)
+        p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
         nS <- p$nS
         nG <- p$nG
         nM <- p$nM
@@ -212,7 +212,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
         type = c("counts", "proportion", "posterior")) {
 
         counts <- .processCounts(x)
-        compareCountMatrix(x, celdaMod)
+        compareCountMatrix(counts, celdaMod)
 
         z <- celdaClusters(celdaMod)$z
         # Sometimes, fewer clusters get returned by celda_C
@@ -223,7 +223,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
         s <- as.integer(sampleLabel)
-        p <- .cCDecomposeCounts(x, s, z, K)
+        
+        p <- .cCDecomposeCounts(counts, s, z, K)
         mCPByS <- p$mCPByS
         nGByCP <- p$nGByCP
         KNames <- paste0("K", seq(K))
@@ -294,7 +295,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         type = c("counts", "proportion", "posterior")) {
 
         counts <- .processCounts(x)
-        compareCountMatrix(x, celdaMod)
+        compareCountMatrix(counts, celdaMod)
 
         y <- celdaClusters(celdaMod)$y
         # Sometimes, fewer clusters get returned by celda_G
@@ -305,7 +306,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma
 
-        p <- .cGDecomposeCounts(counts = x, y = y, L = L)
+        p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
         nTSByC <- p$nTSByC
         nByG <- p$nByG
         nByTS <- p$nByTS

@@ -171,7 +171,7 @@ setMethod(
     "perplexity", signature(x = "ANY", celdaMod = "celda_G"),
     function(x, celdaMod, newCounts = NULL) {
          counts <- .processCounts(x)
-        # compareCountMatrix(counts, celdaMod)
+         compareCountMatrix(counts, celdaMod)
 
         if (is.null(newCounts)) {
             newCounts <- counts
