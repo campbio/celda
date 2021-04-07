@@ -19,7 +19,7 @@ moduleHeatmap(x, ...)
   normalize = "proportion",
   transformationFun = sqrt,
   scaleRow = scale,
-  showFeaturenames = TRUE,
+  showFeatureNames = TRUE,
   trim = c(-2, 2),
   rowFontSize = NULL,
   showHeatmapLegend = FALSE,
@@ -105,14 +105,14 @@ row. Set to NULL to disable. Occurs after normalization and log
 transformation. For example, \link{scale} will Z-score transform each row.
 Default \link{scale}.}
 
-\item{showFeaturenames}{Logical. Wheter feature names should be displayed.
+\item{showFeatureNames}{Logical. Whether feature names should be displayed.
 Default TRUE.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for plotting the data. This threshold is applied
 after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.}
 
-\item{rowFontSize}{Integer. Font size for feature names. If \code{NULL},
+\item{rowFontSize}{Numeric. Font size for feature names. If \code{NULL},
 then the size will automatically be determined. Default \code{NULL}.}
 
 \item{showHeatmapLegend}{Passed to \link[ComplexHeatmap]{Heatmap}. Show
