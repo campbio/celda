@@ -712,7 +712,7 @@ setMethod("celda_C",
 
   ## Maximization to find best label for each cell
   probs <- .countsTimesProbs(counts, phi) + theta[, s]
-  
+
   if (isTRUE(doSample)) {
     zPrevious <- z
     z <- apply(probs, 2, which.max)
@@ -945,11 +945,11 @@ setMethod("celda_C",
 .countsTimesProbs <- function(counts, phi) {
   ## Maximization to find best label for each cell
   if (inherits(counts, "matrix") & is.integer(counts)) {
-    probs <- eigenMatMultInt(phi, counts) 
+    probs <- eigenMatMultInt(phi, counts)
   } else if (inherits(counts, "matrix") & is.numeric(counts)) {
-    probs <- eigenMatMultNumeric(phi, counts) 
+    probs <- eigenMatMultNumeric(phi, counts)
   } else {
-    probs <- (t(phi) %*% counts) 
-  } 
+    probs <- (t(phi) %*% counts)
+  }
   return(probs)
 }

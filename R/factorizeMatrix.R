@@ -223,7 +223,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
         s <- as.integer(sampleLabel)
-        
+
         p <- .cCDecomposeCounts(counts, s, z, K)
         mCPByS <- p$mCPByS
         nGByCP <- p$nGByCP

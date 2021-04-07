@@ -366,10 +366,10 @@ setMethod("moduleHeatmap",
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
     }
 
-    if(is.null(rowFontSize)) {
+    if (is.null(rowFontSize)) {
         rowFontSize <- min(200 / nrow(filteredNormCounts), 20)
     }
-    
+
     if (isTRUE(showModuleLabel)) {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,

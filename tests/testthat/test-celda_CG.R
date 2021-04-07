@@ -58,7 +58,7 @@ test_that(desc = paste0("Testing simulateCells celda_CG, make sure all genes",
 
 # Ensure logLikelihood calculates the expected values
 test_that(desc = "Testing logLikelihood functions for celda_CG", {
-    expect_lt(logLikelihood(modelCG),0)
+    expect_lt(logLikelihood(modelCG), 0)
 
     fakeZ <- celdaClusters(modelCG)
     fakeZ[1] <- K + 1
@@ -212,4 +212,3 @@ test_that(desc = "Testing plotCeldaViolin with celda_CG", {
             "plot_env",
             "labels"))
 })
-
