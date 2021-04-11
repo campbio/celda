@@ -4,7 +4,7 @@
   } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     res <- .rowSumByGroupNumeric(counts, group, L)
   } else if (inherits(counts, "dgCMatrix")) {
-    res <- rowSumByGroupSparse(counts, group)
+    res <- rowSumByGroupSparse(counts, group, L)
   } else {
     stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
   }
@@ -17,7 +17,7 @@
   } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     res <- .rowSumByGroupChangeNumeric(counts, pcounts, group, pgroup, L)
   } else if (inherits(counts, "dgCMatrix")) {
-    res <- rowSumByGroupChangeSparse(counts, pcounts, group, pgroup)
+    res <- rowSumByGroupChangeSparse(counts, pcounts, group, pgroup, L)
   } else {
     stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
   }
@@ -30,7 +30,7 @@
   } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     res <- .colSumByGroupNumeric(counts, group, K)
   } else if (inherits(counts, "dgCMatrix")) {
-    res <- colSumByGroupSparse(counts, group)
+    res <- colSumByGroupSparse(counts, group, K)
   } else {
     stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
   }
@@ -43,7 +43,7 @@
   } else if (inherits(counts, "matrix") & is.numeric(counts)) {
     res <- .colSumByGroupChangeNumeric(counts, pcounts, group, pgroup, K)
   } else if (inherits(counts, "dgCMatrix")) {
-    res <- colSumByGroupChangeSparse(counts, pcounts, group, pgroup)
+    res <- colSumByGroupChangeSparse(counts, pcounts, group, pgroup, K)
   } else {
     stop("'counts' must be an integer, numeric, or dgCMatrix matrix.")
   }

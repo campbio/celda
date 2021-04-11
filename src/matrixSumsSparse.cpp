@@ -8,20 +8,23 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 Rcpp::NumericMatrix colSumByGroupSparse(
     const Eigen::MappedSparseMatrix<double> &counts,
-    const IntegerVector &group)
+    const IntegerVector &group,
+    const int &K)
 {
   // Perform error checking
   if (counts.cols() != group.size())
   {
     stop("Length of 'group' must be equal to the number of columns in 'counts'.");
   }
-  if (min(group) < 1 || max(group) > counts.cols())
+  if (min(group) < 1 || max(group) > K)
   {
-    stop("The entries in 'group' need to be between 1 and the number of columns in 'counts'.");
+    stop("The entries in 'group' need to be between 1 and 'K'");
   }
-//Need to check that group is a factor, maybe get levels
-
-  NumericMatrix x(counts.rows(), max(group)); 
+  if(K > counts.cols()) {
+    stop("'K' cannot be bigger than the number of columns in 'counts'.");
+  }
+  
+  NumericMatrix x(counts.rows(), K); 
 
   for (int j = 0; j < counts.cols(); ++j)
   {
@@ -40,20 +43,23 @@ Rcpp::NumericMatrix colSumByGroupSparse(
 // [[Rcpp::export]]
 Rcpp::NumericMatrix rowSumByGroupSparse(
     const Eigen::MappedSparseMatrix<double> &counts,
-    const IntegerVector &group)
+    const IntegerVector &group,
+    const int &L)
 {
   // Perform error checking
   if (counts.rows() != group.size())
   {
     stop("Length of 'group' must be equal to the number of rows in 'counts'.");
   }
-  if (min(group) < 1 || max(group) > counts.rows())
+  if (min(group) < 1 || max(group) > L)
   {
-    stop("The entries in 'group' need to be between 1 and the number of rows in 'counts'.");
+    stop("The entries in 'group' need to be between 1 and 'L'.");
   }
-  //Need to check that group is a factor, maybe get levels
+  if(L > counts.rows()) {
+    stop("'L' cannot be bigger than the number of rows in 'counts'.");
+  }
   
-  NumericMatrix x(max(group), counts.cols()); 
+  NumericMatrix x(L, counts.cols()); 
   
   for (int j = 0; j < counts.cols(); ++j)
   {
@@ -80,7 +86,8 @@ Rcpp::NumericMatrix colSumByGroupChangeSparse(
     const Eigen::MappedSparseMatrix<double> &counts,
     const NumericMatrix &px,
     const IntegerVector &group,
-    const IntegerVector &pgroup)
+    const IntegerVector &pgroup,
+    const int &K)
 {
   // Perform error checking
   if (counts.cols() != group.size())
@@ -91,19 +98,22 @@ Rcpp::NumericMatrix colSumByGroupChangeSparse(
   {
     stop("Length of 'group' must equal 'pgroup'.");  
   }
-  if (min(group) < 1 || max(group) > px.cols())
+  if (min(group) < 1 || max(group) > K)
   {
-    stop("The entries in 'group' need to be between 1 and the number of columns in 'ps'.");
+    stop("The entries in 'group' need to be between 1 and 'K'.");
   }
-  if (min(pgroup) < 1 || max(pgroup) > px.cols())
+  if (min(pgroup) < 1 || max(pgroup) > K)
   {
-    stop("The entries in 'pgroup' need to be between 1 and the number of columns in 'ps'.");
+    stop("The entries in 'pgroup' need to be between 1 and 'K'.");
   }
   if(px.rows() != counts.rows()) 
   {
     stop("'px' and 'counts' must have the same number of rows.");
   }
-
+  if(K > counts.cols()) {
+    stop("'K' cannot be bigger than the number of columns in 'counts'.");
+  }
+  
   NumericMatrix x = px; 
   
   for (int j = 0; j < counts.cols(); ++j)
@@ -132,7 +142,8 @@ Rcpp::NumericMatrix rowSumByGroupChangeSparse(
     const Eigen::MappedSparseMatrix<double> &counts,
     const NumericMatrix &px,
     const IntegerVector &group,
-    const IntegerVector &pgroup)
+    const IntegerVector &pgroup,
+    const int &L)
 {
   // Perform error checking
   if (counts.rows() != group.size())
@@ -143,17 +154,20 @@ Rcpp::NumericMatrix rowSumByGroupChangeSparse(
   {
     stop("Length of 'group' must equal 'pgroup'.");
   }
-  if (min(group) < 1 || max(group) > px.rows())
+  if (min(group) < 1 || max(group) > L)
   {
-    stop("The entries in 'group' need to be between 1 and the number of rows in 'px'.");
+    stop("The entries in 'group' need to be between 1 and 'L'.");
   }
-  if (min(pgroup) < 1 || max(pgroup) > px.rows())
+  if (min(pgroup) < 1 || max(pgroup) > L)
   {
-    stop("The entries in 'pgroup' need to be between 1 and the number of rows in 'px'.");
+    stop("The entries in 'pgroup' need to be between 1 and 'L'.");
   }
   if(px.cols() != counts.cols()) 
   {
     stop("'px' and 'counts' must have the same number of rows.");
+  }
+  if(L > counts.rows()) {
+    stop("'L' cannot be bigger than the number of rows in 'counts'.");
   }
   
   NumericMatrix x = px;

@@ -86,19 +86,19 @@ nonzero <- function(R_counts) {
     .Call('_celda_nonzero', PACKAGE = 'celda', R_counts)
 }
 
-colSumByGroupSparse <- function(counts, group) {
-    .Call('_celda_colSumByGroupSparse', PACKAGE = 'celda', counts, group)
+colSumByGroupSparse <- function(counts, group, K) {
+    .Call('_celda_colSumByGroupSparse', PACKAGE = 'celda', counts, group, K)
 }
 
-rowSumByGroupSparse <- function(counts, group) {
-    .Call('_celda_rowSumByGroupSparse', PACKAGE = 'celda', counts, group)
+rowSumByGroupSparse <- function(counts, group, L) {
+    .Call('_celda_rowSumByGroupSparse', PACKAGE = 'celda', counts, group, L)
 }
 
-colSumByGroupChangeSparse <- function(counts, px, group, pgroup) {
-    .Call('_celda_colSumByGroupChangeSparse', PACKAGE = 'celda', counts, px, group, pgroup)
+colSumByGroupChangeSparse <- function(counts, px, group, pgroup, K) {
+    .Call('_celda_colSumByGroupChangeSparse', PACKAGE = 'celda', counts, px, group, pgroup, K)
 }
 
-rowSumByGroupChangeSparse <- function(counts, px, group, pgroup) {
-    .Call('_celda_rowSumByGroupChangeSparse', PACKAGE = 'celda', counts, px, group, pgroup)
+rowSumByGroupChangeSparse <- function(counts, px, group, pgroup, L) {
+    .Call('_celda_rowSumByGroupChangeSparse', PACKAGE = 'celda', counts, px, group, pgroup, L)
 }
 

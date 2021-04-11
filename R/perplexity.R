@@ -418,7 +418,7 @@ setMethod("resamplePerplexity",
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
 setMethod("resamplePerplexity",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         celdaList,
         resample = 5,
