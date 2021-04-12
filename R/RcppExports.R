@@ -42,6 +42,15 @@ eigenMatMultInt <- function(A, B) {
     .Call('_celda_eigenMatMultInt', PACKAGE = 'celda', A, B)
 }
 
+#' Fast matrix multiplication for double x double
+#' 
+#' @param A a double matrix
+#' @param B an integer matrix
+#' @return An integer matrix representing the product of A and B
+eigenMatMultNumeric <- function(A, B) {
+    .Call('_celda_eigenMatMultNumeric', PACKAGE = 'celda', A, B)
+}
+
 #' Fast normalization for numeric matrix
 #' 
 #' @param R_counts An integer matrix
@@ -75,5 +84,21 @@ fastNormPropSqrt <- function(R_counts, R_alpha) {
 #' @return An integer matrix where each row is a row, column indices pair 
 nonzero <- function(R_counts) {
     .Call('_celda_nonzero', PACKAGE = 'celda', R_counts)
+}
+
+colSumByGroupSparse <- function(counts, group, K) {
+    .Call('_celda_colSumByGroupSparse', PACKAGE = 'celda', counts, group, K)
+}
+
+rowSumByGroupSparse <- function(counts, group, L) {
+    .Call('_celda_rowSumByGroupSparse', PACKAGE = 'celda', counts, group, L)
+}
+
+colSumByGroupChangeSparse <- function(counts, px, group, pgroup, K) {
+    .Call('_celda_colSumByGroupChangeSparse', PACKAGE = 'celda', counts, px, group, pgroup, K)
+}
+
+rowSumByGroupChangeSparse <- function(counts, px, group, pgroup, L) {
+    .Call('_celda_rowSumByGroupChangeSparse', PACKAGE = 'celda', counts, px, group, pgroup, L)
 }
 

@@ -121,10 +121,6 @@ if (varFilter) {
 Two stepwise splitting procedures are implemented in celda to help determine the number of modules (L) and the number of cell populations (K), respectively. The ```recursiveSplitModule``` function fits different celda models for a range of L values between `r initialL` to `r maxL`. The first model is fit with ```r paste0("L = ", initialL)```. Then the `celda_G` model is used to split each module into two new modules and the likelihood is re-calculated. The split that produced the best overall likelihood out of all splits is used for the next model with `L+1` modules. Perplexity can be used as a measure of "goodness of fit" for discrete Bayesian models. The perplexity is calculated for each choice of L. The Rate of Perplexity Change (RPC) can be used to determine a better "elbow" in the perplexity plot. The elbow represents a dramatic shift in the amount that the perplexity decreases with each new module and is a good place to start looking at possible choices of ```L```. Note that sometimes going beyond the elbow can be helpful if certain modules should be further split up after visual inspection.
 
 ```{r module_split, fig.height = 9, fig.width = 18}
-# Convert primary assay to matrix so it can be run with celda
-assay(altExp(sce, altExpName), useAssay) <-
-  as.matrix(assay(altExp(sce, altExpName), useAssay))
-
 # Run recursiveModuleSplit to identify modules for different L
 moduleSplit <-
   recursiveSplitModule(

@@ -3,9 +3,9 @@
 \name{perplexity}
 \alias{perplexity}
 \alias{perplexity,SingleCellExperiment,ANY-method}
-\alias{perplexity,matrix,celda_CG-method}
-\alias{perplexity,matrix,celda_C-method}
-\alias{perplexity,matrix,celda_G-method}
+\alias{perplexity,ANY,celda_CG-method}
+\alias{perplexity,ANY,celda_C-method}
+\alias{perplexity,ANY,celda_G-method}
 \title{Calculate the perplexity of a celda model}
 \usage{
 perplexity(x, celdaMod, ...)
@@ -17,11 +17,11 @@ perplexity(x, celdaMod, ...)
   newCounts = NULL
 )
 
-\S4method{perplexity}{matrix,celda_CG}(x, celdaMod, newCounts = NULL)
+\S4method{perplexity}{ANY,celda_CG}(x, celdaMod, newCounts = NULL)
 
-\S4method{perplexity}{matrix,celda_C}(x, celdaMod, newCounts = NULL)
+\S4method{perplexity}{ANY,celda_C}(x, celdaMod, newCounts = NULL)
 
-\S4method{perplexity}{matrix,celda_G}(x, celdaMod, newCounts = NULL)
+\S4method{perplexity}{ANY,celda_G}(x, celdaMod, newCounts = NULL)
 }
 \arguments{
 \item{x}{Can be one of
