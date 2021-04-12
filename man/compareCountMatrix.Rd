@@ -13,8 +13,8 @@ compareCountMatrix(counts, celdaMod, ...)
 \S4method{compareCountMatrix}{ANY,celdaList}(counts, celdaMod, errorOnMismatch = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{counts}{Integer , Numeric, or Sparse matrix. Rows represent features
+and columns represent cells.}
 
 \item{celdaMod}{A \code{celdaModel} or \code{celdaList} object.}
 

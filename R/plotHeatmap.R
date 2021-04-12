@@ -1,8 +1,8 @@
 #' @title Plots heatmap based on Celda model
 #' @description Renders a heatmap based on a matrix of counts where rows are
 #'  features and columns are cells.
-#' @param counts Numeric matrix. Normalized counts matrix where rows represent
-#'  features and columns represent cells. .
+#' @param counts Numeric or sparse matrix. Normalized counts matrix where rows
+#' represent features and columns represent cells. .
 #' @param z Numeric vector. Denotes cell population labels.
 #' @param y Numeric vector. Denotes feature module labels.
 #' @param featureIx Integer vector. Select features for display in heatmap. If
