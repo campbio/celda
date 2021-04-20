@@ -68,7 +68,7 @@ setGeneric("celdaClusters<-",
 
 #' @rdname celdaClusters
 #' @export
-setReplaceMethod("celdaClusters", signature(x = "SingleCellExperiment"),
+setMethod("celdaClusters<-", signature(x = "SingleCellExperiment"),
     function(x, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         SummarizedExperiment::colData(altExp)$celda_cell_cluster <- value
@@ -122,7 +122,7 @@ setGeneric("celdaModules<-",
 
 #' @rdname celdaModules
 #' @export
-setReplaceMethod("celdaModules", signature(sce = "SingleCellExperiment"),
+setMethod("celdaModules<-", signature(sce = "SingleCellExperiment"),
     function(sce, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
         SummarizedExperiment::rowData(altExp)$celda_feature_module <- value
@@ -177,7 +177,7 @@ setGeneric("sampleLabel<-",
 )
 #' @rdname sampleLabel
 #' @export
-setReplaceMethod("sampleLabel", signature(x = "SingleCellExperiment"),
+setMethod("sampleLabel<-", signature(x = "SingleCellExperiment"),
     function(x, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         SummarizedExperiment::colData(altExp)$celda_sample_label <- value

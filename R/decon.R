@@ -338,11 +338,13 @@ setGeneric("decontXcounts<-", function(object, ..., value) {
 })
 
 #' @export
+#' @rdname decontXcounts
 setMethod("decontXcounts", "SingleCellExperiment", GET_FUN("decontXcounts"))
 
 #' @export
-setReplaceMethod(
-  "decontXcounts", c("SingleCellExperiment", "ANY"),
+#' @rdname decontXcounts
+setMethod(
+  "decontXcounts<-", c("SingleCellExperiment", "ANY"),
   SET_FUN("decontXcounts")
 )
 
