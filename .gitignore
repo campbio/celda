@@ -37,4 +37,5 @@ doc
 Meta
 .Rprofile
 renv/
+renv.lock
 
