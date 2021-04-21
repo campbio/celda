@@ -42,11 +42,11 @@ Visualize perplexity differences of every model in a celdaList,
 \examples{
 data(sceCeldaCGGridSearch)
 sce <- resamplePerplexity(sceCeldaCGGridSearch)
-plotGridSearchPerplexityDiff(sce)
+plotGridSearchPerplexityDiff(sce, n = 1)
 data(celdaCGSim, celdaCGGridSearchRes)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
   celdaCGGridSearchRes)
-plotGridSearchPerplexityDiff(celdaCGGridSearchRes)
+plotGridSearchPerplexityDiff(celdaCGGridSearchRes, n = 1)
 }

@@ -284,6 +284,15 @@ setMethod("plotDimReduceGrid",
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
 #' @param features Character vector. Features in the rownames of counts to plot.
+#' @param displayName Character. The column name of
+#'  \code{rowData(x)} that specifies the display names for
+#'  the features. Default \code{NULL}, which displays the row names. Only works
+#'  if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
+#'  \code{headers}.
+#' @param headers Character vector. If \code{NULL}, the corresponding
+#'  rownames are used as labels. Otherwise, these headers are used to label
+#'  the features. Only works if \code{displayName} is \code{NULL} and
+#'  \code{exactMatch} is \code{FALSE}.
 #' @param reducedDimName The name of the dimension reduction slot in
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
@@ -297,8 +306,6 @@ setMethod("plotDimReduceGrid",
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param headers Character vector. If `NULL`, the corresponding rownames are
-#'  used as labels. Otherwise, these headers are used to label the features.
 #' @param normalize Logical. Whether to normalize the columns of `counts`.
 #'  Default \code{FALSE}.
 #' @param zscore Logical. Whether to scale each feature to have a mean 0
@@ -348,19 +355,20 @@ setGeneric("plotDimReduceFeature", function(x, ...) {
 #' plotDimReduceFeature(x = sce,
 #'   reducedDimName = "celda_tSNE",
 #'   normalize = TRUE,
-#'   features = c("Gene_99"),
+#'   features = c("Gene_98", "Gene_99"),
 #'   exactMatch = TRUE)
 #' @export
 setMethod("plotDimReduceFeature",
     signature(x = "SingleCellExperiment"),
     function(x,
         features,
+        displayName = NULL,
+        headers = NULL,
         reducedDimName = NULL,
         dim1 = NULL,
         dim2 = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
-        headers = NULL,
         normalize = FALSE,
         zscore = TRUE,
         exactMatch = TRUE,
@@ -388,12 +396,37 @@ setMethod("plotDimReduceFeature",
             stop("'dim1' and 'dim2' must be the same length.")
           }
         } else{
-          dims <- SingleCellExperiment::reducedDim(altExp,
-                                           reducedDimName)
+          dims <- SingleCellExperiment::reducedDim(altExp, reducedDimName)
           dim1 <- dims[, 1]
           dim2 <- dims[, 2]
           xlab <- colnames(dims)[1]
           ylab <- colnames(dims)[2]
+        }
+
+        featuresIx <- retrieveFeatureIndex(features,
+            counts,
+            by = "rownames",
+            exactMatch = exactMatch)
+
+        if (isFALSE(is.null(displayName))) {
+            headers <- SummarizedExperiment::rowData(x)[[
+                displayName]][featuresIx]
+        } else {
+            if (isFALSE(is.null(headers))) {
+                if (length(headers) != length(features)) {
+                    stop(
+                        "Headers ",
+                        headers,
+                        " should be the same length as features ",
+                        features
+                    )
+                }
+
+                if (isFALSE(exactMatch)) {
+                    warning("exactMatch is FALSE. headers will not be used!")
+                    headers <- NULL
+                }
+            }
         }
 
         g <- .plotDimReduceFeature(dim1 = dim1,
@@ -403,7 +436,7 @@ setMethod("plotDimReduceFeature",
             headers = headers,
             normalize = normalize,
             zscore = zscore,
-            exactMatch = exactMatch,
+            featuresIx = featuresIx,
             trim = trim,
             limits = limits,
             size = size,
@@ -429,7 +462,7 @@ setMethod("plotDimReduceFeature",
 #'   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
 #'   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
 #'   normalize = TRUE,
-#'   features = c("Gene_99"),
+#'   features = c("Gene_98", "Gene_99"),
 #'   exactMatch = TRUE)
 #' @export
 setMethod("plotDimReduceFeature",
@@ -454,6 +487,27 @@ setMethod("plotDimReduceFeature",
         ncol = NULL,
         decreasing = FALSE) {
 
+        if (isFALSE(is.null(headers))) {
+            if (length(headers) != length(features)) {
+                stop(
+                    "Headers ",
+                    headers,
+                    " should be the same length as features ",
+                    features
+                )
+            }
+
+            if (isFALSE(exactMatch)) {
+                warning("exactMatch is FALSE. headers will not be used!")
+                headers <- NULL
+            }
+        }
+
+        featuresIx <- retrieveFeatureIndex(features,
+            x,
+            by = "rownames",
+            exactMatch = exactMatch)
+
         g <- .plotDimReduceFeature(dim1 = dim1,
             dim2 = dim2,
             counts = x,
@@ -461,7 +515,7 @@ setMethod("plotDimReduceFeature",
             headers = headers,
             normalize = normalize,
             zscore = zscore,
-            exactMatch = exactMatch,
+            featuresIx = featuresIx,
             trim = trim,
             limits = limits,
             size = size,
@@ -485,7 +539,7 @@ setMethod("plotDimReduceFeature",
                                  headers,
                                  normalize,
                                  zscore,
-                                 exactMatch,
+                                 featuresIx,
                                  trim,
                                  limits,
                                  size,
@@ -503,32 +557,12 @@ setMethod("plotDimReduceFeature",
     stop("at least one feature is required to create a plot")
   }
 
-  if (isFALSE(is.null(headers))) {
-    if (length(headers) != length(features)) {
-      stop(
-        "Headers ",
-        headers,
-        " should be the same length as features ",
-        features
-      )
-    }
-
-    if (isFALSE(exactMatch)) {
-      warning("exactMatch is FALSE. headers will not be used!")
-      headers <- NULL
-    }
-  }
-
   ## Normalize data if needed
   if (isTRUE(normalize)) {
     counts <- normalizeCounts(counts, transformationFun = sqrt)
   }
 
   # After normalization, features can be selected
-  featuresIx <- retrieveFeatureIndex(features,
-    counts,
-    by = "rownames",
-    exactMatch = exactMatch)
   counts <- as.matrix(counts[featuresIx, , drop = FALSE])
 
   # Scale/zscore data if needed

@@ -11,12 +11,13 @@ plotDimReduceFeature(x, ...)
 \S4method{plotDimReduceFeature}{SingleCellExperiment}(
   x,
   features,
+  displayName = NULL,
+  headers = NULL,
   reducedDimName = NULL,
   dim1 = NULL,
   dim2 = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
-  headers = NULL,
   normalize = FALSE,
   zscore = TRUE,
   exactMatch = TRUE,
@@ -64,6 +65,17 @@ represent features and columns represent cells.}
 
 \item{features}{Character vector. Features in the rownames of counts to plot.}
 
+\item{displayName}{Character. The column name of
+\code{rowData(x)} that specifies the display names for
+the features. Default \code{NULL}, which displays the row names. Only works
+if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
+\code{headers}.}
+
+\item{headers}{Character vector. If \code{NULL}, the corresponding
+rownames are used as labels. Otherwise, these headers are used to label
+the features. Only works if \code{displayName} is \code{NULL} and
+\code{exactMatch} is \code{FALSE}.}
+
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
@@ -81,9 +93,6 @@ slot to use if \code{x} is a
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
-
-\item{headers}{Character vector. If `NULL`, the corresponding rownames are
-used as labels. Otherwise, these headers are used to label the features.}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`.
 Default \code{FALSE}.}
@@ -149,7 +158,7 @@ sce <- celdaTsne(sceCeldaCG)
 plotDimReduceFeature(x = sce,
   reducedDimName = "celda_tSNE",
   normalize = TRUE,
-  features = c("Gene_99"),
+  features = c("Gene_98", "Gene_99"),
   exactMatch = TRUE)
 library(SingleCellExperiment)
 data(sceCeldaCG)
@@ -158,6 +167,6 @@ plotDimReduceFeature(x = counts(sce),
   dim1 = reducedDim(altExp(sce), "celda_tSNE")[, 1],
   dim2 = reducedDim(altExp(sce), "celda_tSNE")[, 2],
   normalize = TRUE,
-  features = c("Gene_99"),
+  features = c("Gene_98", "Gene_99"),
   exactMatch = TRUE)
 }

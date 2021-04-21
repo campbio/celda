@@ -20,6 +20,7 @@ moduleHeatmap(x, ...)
   transformationFun = sqrt,
   scaleRow = scale,
   showFeaturenames = TRUE,
+  displayName = NULL,
   trim = c(-2, 2),
   rowFontSize = NULL,
   showHeatmapLegend = FALSE,
@@ -41,7 +42,8 @@ moduleHeatmap(x, ...)
 \item{x}{A numeric \link{matrix} of counts or a
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
-Rows represent features and columns represent cells.}
+Rows represent features and columns represent cells. Celda
+results must be present under \code{metadata(altExp(x, altExpName))}.}
 
 \item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
@@ -95,18 +97,24 @@ divides the library size of each cell by the mean library size across all
 cells. Default "proportion".}
 
 \item{transformationFun}{Function. Passed to \link{normalizeCounts} if
-\code{normalizedCounts} is \code{NA}. Applys a transformation such as
+\code{normalizedCounts} is \code{NA}. Applies a transformation such as
 \link{sqrt}, \link{log}, \link{log2}, \link{log10}, or \link{log1p}.
-If NULL, no transformation will be applied. Occurs after normalization.
-Default \link{sqrt}.}
+If \code{NULL}, no transformation will be applied. Occurs after
+normalization. Default \link{sqrt}.}
 
 \item{scaleRow}{Function. Which function to use to scale each individual
 row. Set to NULL to disable. Occurs after normalization and log
 transformation. For example, \link{scale} will Z-score transform each row.
 Default \link{scale}.}
 
-\item{showFeaturenames}{Logical. Wheter feature names should be displayed.
+\item{showFeaturenames}{Logical. Whether feature names should be displayed.
 Default TRUE.}
+
+\item{displayName}{Character. The column name of
+\code{rowData(altExp(x, altExpName))} that specifies the display names for
+the features. Default \code{NULL}, which displays the row names. Only works
+if \code{showFeaturenames} is \code{TRUE} and \code{x} is a
+\linkS4class{SingleCellExperiment} object.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for plotting the data. This threshold is applied
@@ -170,5 +178,6 @@ Renders a heatmap for selected \code{featureModule}. Cells are
 }
 \examples{
 data(sceCeldaCG)
-moduleHeatmap(sceCeldaCG, width = 250, height = 250)
+moduleHeatmap(sceCeldaCG, width = 250, height = 250,
+ displayName = "rownames")
 }
