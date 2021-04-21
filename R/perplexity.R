@@ -759,7 +759,7 @@ setGeneric("plotGridSearchPerplexityDiff", function(x, ...) {
 #' @examples
 #' data(sceCeldaCGGridSearch)
 #' sce <- resamplePerplexity(sceCeldaCGGridSearch)
-#' plotGridSearchPerplexityDiff(sce)
+#' plotGridSearchPerplexityDiff(sce, n = 1)
 #' @export
 setMethod("plotGridSearchPerplexityDiff",
     signature(x = "SingleCellExperiment"),
@@ -793,7 +793,7 @@ setMethod("plotGridSearchPerplexityDiff",
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)
-#' plotGridSearchPerplexityDiff(celdaCGGridSearchRes)
+#' plotGridSearchPerplexityDiff(celdaCGGridSearchRes, n = 1)
 #' @export
 setMethod("plotGridSearchPerplexityDiff",
     signature(x = "celdaList"),
