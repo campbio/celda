@@ -484,7 +484,8 @@ setMethod("resamplePerplexity",
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
 #' @param altExpName The name for the \link{altExp} slot
-#'  to use. Default "featureSubset".
+#'  to use. Default "featureSubset". Only works if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object.
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A ggplot plot object showing perplexity as a function of clustering
@@ -564,53 +565,68 @@ setMethod("plotGridSearchPerplexity",
     lMeansByK$L <- as.factor(lMeansByK$L)
 
     if (nlevels(df$K) > 1) {
+        if (nlevels(df$L) > 1) {
+            plot <- ggplot2::ggplot(
+                df,
+                ggplot2::aes_string(x = "K", y = "perplexity")
+            ) +
+                ggplot2::geom_jitter(
+                    height = 0, width = 0.1,
+                    ggplot2::aes_string(color = "L")
+                ) +
+                ggplot2::scale_color_discrete(name = "L") +
+                ggplot2::geom_path(data = lMeansByK, ggplot2::aes_string(
+                    x = "K",
+                    y = "mean_perplexity", group = "L", color = "L"
+                )) +
+                ggplot2::ylab("Perplexity") +
+                ggplot2::xlab("K") +
+                ggplot2::scale_x_discrete(breaks = seq(
+                    min(runParams(celdaList)$K),
+                    max(runParams(celdaList)$K), sep
+                )) +
+                ggplot2::theme_bw() +
+                ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank())
+        } else {
+            plot <- ggplot2::ggplot(
+                df,
+                ggplot2::aes_string(x = "K", y = "perplexity")) +
+                ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+                ggplot2::scale_color_manual(name = "L", values = "black") +
+                ggplot2::geom_path(data = lMeansByK, ggplot2::aes_string(
+                    x = "K",
+                    y = "mean_perplexity", group = "L", color = "L"
+                )) +
+                ggplot2::ylab("Perplexity") +
+                ggplot2::xlab("K") +
+                ggplot2::scale_x_discrete(breaks = seq(
+                    min(runParams(celdaList)$K),
+                    max(runParams(celdaList)$K), sep
+                )) +
+                ggplot2::theme_bw() +
+                ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank())
+        }
+    } else {
         plot <- ggplot2::ggplot(
             df,
-            ggplot2::aes_string(x = "K", y = "perplexity")
-        ) +
-            ggplot2::geom_jitter(
-                height = 0, width = 0.1,
-                ggplot2::aes_string(color = "L")
-            ) +
-            ggplot2::scale_color_discrete(name = "L") +
-            ggplot2::geom_path(data = lMeansByK, ggplot2::aes_string(
-                x = "K",
-                y = "mean_perplexity", group = "L", color = "L"
-            )) +
-            ggplot2::ylab("Perplexity") +
-            ggplot2::xlab("K") +
-            ggplot2::scale_x_discrete(breaks = seq(
-                min(runParams(celdaList)$K),
-                max(runParams(celdaList)$K), sep
-            )) +
-            ggplot2::theme_bw()
-    } else {
-        plot <-
-            ggplot2::ggplot(
-                df,
-                ggplot2::aes_string(x = "L", y = "perplexity")
-            ) +
-            ggplot2::geom_jitter(
-                height = 0, width = 0.1,
-                ggplot2::aes_string(color = "K")
-            ) +
-            ggplot2::scale_color_discrete(name = "K") +
-            ggplot2::geom_path(
-                data = lMeansByK,
-                ggplot2::aes_string(
-                    x = "L", y = "mean_perplexity", group = "K",
-                    color = "K"
-                )
-            ) +
+            ggplot2::aes_string(x = "L", y = "perplexity")) +
+            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+            ggplot2::geom_path(data = lMeansByK,
+                ggplot2::aes_string(x = "L",
+                    y = "mean_perplexity",
+                    group = "K",
+                    color = "K")) +
+            ggplot2::scale_color_manual(name = "K", values = "black") +
             ggplot2::ylab("Perplexity") +
             ggplot2::xlab("L") +
-            ggplot2::scale_x_discrete(breaks = seq(
-                min(runParams(celdaList)$L),
-                max(runParams(celdaList)$L), sep
-            )) +
-            ggplot2::theme_bw()
+            ggplot2::scale_x_discrete(breaks = seq(min(runParams(celdaList)$L),
+                max(runParams(celdaList)$L), sep)) +
+            ggplot2::theme_bw() +
+            ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank())
     }
-
     return(plot)
 }
 
@@ -644,7 +660,7 @@ setMethod("plotGridSearchPerplexity",
 
     plot <-
         ggplot2::ggplot(df, ggplot2::aes_string(x = "K", y = "perplexity")) +
-        ggplot2::geom_jitter(height = 0, width = 0.1) +
+        ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
         ggplot2::geom_path(
             data = meansByK,
             ggplot2::aes_string(x = "K", y = "mean_perplexity", group = 1)
@@ -655,7 +671,9 @@ setMethod("plotGridSearchPerplexity",
             min(runParams(celdaList)$K),
             max(runParams(celdaList)$K), sep
         )) +
-        ggplot2::theme_bw()
+        ggplot2::theme_bw() +
+        ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank())
 
     return(plot)
 }
@@ -684,14 +702,13 @@ setMethod("plotGridSearchPerplexity",
     )
     df$L <- as.factor(df$L)
 
-
     meansByL <- stats::aggregate(df$perplexity, by = list(df$L), FUN = mean)
     colnames(meansByL) <- c("L", "mean_perplexity")
     meansByL$L <- as.factor(meansByL$L)
 
     plot <-
         ggplot2::ggplot(df, ggplot2::aes_string(x = "L", y = "perplexity")) +
-        ggplot2::geom_jitter(height = 0, width = 0.1) +
+        ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
         ggplot2::geom_path(
             data = meansByL,
             ggplot2::aes_string(x = "L", y = "mean_perplexity", group = 1)
@@ -702,7 +719,9 @@ setMethod("plotGridSearchPerplexity",
             min(runParams(celdaList)$L),
             max(runParams(celdaList)$L), sep
         )) +
-        ggplot2::theme_bw()
+        ggplot2::theme_bw() +
+        ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank())
 
     return(plot)
 }
@@ -839,7 +858,8 @@ setMethod("plotGridSearchPerplexityDiff",
             }
         }
 
-        diffMeansByK <- data.table::data.table(stats::aggregate(dt$perpdiffK,
+        diffMeansByK <- data.table::data.table(stats::aggregate(
+            dt$perpdiffK,
             by = list(dt$K, dt$L),
             FUN = mean))
         colnames(diffMeansByK) <- c("K", "L", "meanperpdiffK")
@@ -848,31 +868,50 @@ setMethod("plotGridSearchPerplexityDiff",
         diffMeansByK$rollmean <- data.table::frollmean(
             diffMeansByK$meanperpdiffK, n = n, align = "center")
 
-        plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
-            ggplot2::aes_string(x = "K",
-                y = "perpdiffK")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1, alpha = 0.5,
-                ggplot2::aes_string(color = "L")) +
-            ggplot2::scale_color_discrete(name = "L") +
-            ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
-                ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
-                    color = "L"), size = 1) +
-            ggplot2::ylab("Perplexity difference compared to previous K") +
-            ggplot2::xlab("K") +
-            ggplot2::scale_x_discrete(
-                breaks = seq(min(as.integer(levels(dt$K))),
-                max(as.integer(levels(dt$K))), sep)) +
-            ggplot2::theme_bw()
+        if (nlevels(dt$L) > 1) {
+            plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
+                ggplot2::aes_string(x = "K",
+                    y = "perpdiffK")) +
+                ggplot2::geom_jitter(height = 0, width = 0.1,
+                    ggplot2::aes_string(color = "L")) +
+                ggplot2::scale_color_discrete(name = "L") +
+                ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
+                    ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                        color = "L"), size = 1) +
+                ggplot2::ylab("Rate of perplexity change") +
+                ggplot2::xlab("K") +
+                ggplot2::scale_x_discrete(
+                    breaks = seq(min(as.integer(levels(dt$K))),
+                        max(as.integer(levels(dt$K))), sep)) +
+                ggplot2::theme_bw() +
+                ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank())
+        } else {
+            plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
+                ggplot2::aes_string(x = "K",
+                    y = "perpdiffK")) +
+                ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+                ggplot2::scale_color_manual(name = "L", values = "black") +
+                ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
+                    ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                        color = "L"), size = 1) +
+                ggplot2::ylab("Rate of perplexity change") +
+                ggplot2::xlab("K") +
+                ggplot2::scale_x_discrete(
+                    breaks = seq(min(as.integer(levels(dt$K))),
+                        max(as.integer(levels(dt$K))), sep)) +
+                ggplot2::theme_bw() +
+                ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                    panel.grid.minor = ggplot2::element_blank())
+        }
     } else if (nlevels(dt$L) > 1) {
-        for (i in seq(nlevels(dt$K))) {
-            for (j in seq(2, nlevels(dt$L))) {
-                p1 <- dt[K == levels(dt$K)[i] & L == levels(dt$L)[j - 1],
-                    perplexity]
-                p2 <- dt[K == levels(dt$K)[i] & L == levels(dt$L)[j],
-                    perplexity]
-                dt[K == levels(dt$K)[i] & L == levels(dt$L)[j],
-                    "perpdiffL"] <- p2 - p1
-            }
+        for (j in seq(2, nlevels(dt$L))) {
+            p1 <- dt[K == levels(dt$K) & L == levels(dt$L)[j - 1],
+                perplexity]
+            p2 <- dt[K == levels(dt$K) & L == levels(dt$L)[j],
+                perplexity]
+            dt[K == levels(dt$K) & L == levels(dt$L)[j],
+                "perpdiffL"] <- p2 - p1
         }
 
         diffMeansByL <- data.table::data.table(stats::aggregate(dt$perpdiffL,
@@ -886,20 +925,21 @@ setMethod("plotGridSearchPerplexityDiff",
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1, alpha = 0.5,
-                ggplot2::aes_string(color = "K")) +
-            ggplot2::scale_color_discrete(name = "K") +
+            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+            ggplot2::scale_color_manual(name = "K", values = "black") +
             ggplot2::geom_path(
                 data = diffMeansByL[!is.na(meanperpdiffL), ],
                 ggplot2::aes_string(
                     x = "L", y = "rollmean", group = "K", color = "K"),
                 size = 1) +
-            ggplot2::ylab("Perplexity difference compared to previous L") +
+            ggplot2::ylab("Rate of perplexity change") +
             ggplot2::xlab("L") +
             ggplot2::scale_x_discrete(
                 breaks = seq(min(as.integer(levels(dt$L))),
                 max(as.integer(levels(dt$L))), sep)) +
-            ggplot2::theme_bw()
+            ggplot2::theme_bw() +
+            ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank())
     } else {
         stop("Only one combination of K and L available! Unable to calculate",
             " perplexity differences.")
@@ -956,7 +996,9 @@ setMethod("plotGridSearchPerplexityDiff",
             ggplot2::scale_x_discrete(
                 breaks = seq(min(as.integer(levels(dt$K))),
                 max(as.integer(levels(dt$K))), sep)) +
-            ggplot2::theme_bw()
+            ggplot2::theme_bw() +
+            ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank())
     } else {
         stop("Only one unique K value available! Unable to calculate",
             " perplexity differences.")
@@ -1012,7 +1054,9 @@ setMethod("plotGridSearchPerplexityDiff",
             ggplot2::scale_x_discrete(
                 breaks = seq(min(as.integer(levels(dt$L))),
                 max(as.integer(levels(dt$L))), sep)) +
-            ggplot2::theme_bw()
+            ggplot2::theme_bw() +
+            ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                panel.grid.minor = ggplot2::element_blank())
     } else {
         stop("Only one unique L value available! Unable to calculate",
             " perplexity differences.")

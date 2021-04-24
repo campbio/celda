@@ -289,10 +289,6 @@ setMethod("plotDimReduceGrid",
 #'  the features. Default \code{NULL}, which displays the row names. Only works
 #'  if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
 #'  \code{headers}.
-#' @param headers Character vector. If \code{NULL}, the corresponding
-#'  rownames are used as labels. Otherwise, these headers are used to label
-#'  the features. Only works if \code{displayName} is \code{NULL} and
-#'  \code{exactMatch} is \code{FALSE}.
 #' @param reducedDimName The name of the dimension reduction slot in
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
@@ -301,6 +297,10 @@ setMethod("plotDimReduceGrid",
 #'  dimension reduction output to be plotted on the x-axis. Default \code{NULL}.
 #' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output to be plotted on the y-axis. Default \code{NULL}.
+#' @param headers Character vector. If \code{NULL}, the corresponding
+#'  rownames are used as labels. Otherwise, these headers are used to label
+#'  the features. Only works if \code{displayName} is \code{NULL} and
+#'  \code{exactMatch} is \code{FALSE}.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -344,7 +344,30 @@ setMethod("plotDimReduceGrid",
 #' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @export
-setGeneric("plotDimReduceFeature", function(x, ...) {
+setGeneric("plotDimReduceFeature", function(x,
+    features,
+    displayName = NULL,
+    reducedDimName = NULL,
+    dim1 = NULL,
+    dim2 = NULL,
+    headers = NULL,
+    useAssay = "counts",
+    altExpName = "featureSubset",
+    normalize = FALSE,
+    zscore = TRUE,
+    exactMatch = TRUE,
+    trim = c(-2, 2),
+    limits = c(-2, 2),
+    size = 1,
+    xlab = "Dimension_1",
+    ylab = "Dimension_2",
+    colorLow = "blue4",
+    colorMid = "grey90",
+    colorHigh = "firebrick1",
+    midpoint = 0,
+    ncol = NULL,
+    decreasing = FALSE) {
+
     standardGeneric("plotDimReduceFeature")})
 
 
@@ -363,10 +386,10 @@ setMethod("plotDimReduceFeature",
     function(x,
         features,
         displayName = NULL,
-        headers = NULL,
         reducedDimName = NULL,
         dim1 = NULL,
         dim2 = NULL,
+        headers = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
         normalize = FALSE,
@@ -468,9 +491,9 @@ setMethod("plotDimReduceFeature",
 setMethod("plotDimReduceFeature",
     signature(x = "matrix"),
     function(x,
+        features,
         dim1,
         dim2,
-        features,
         headers = NULL,
         normalize = FALSE,
         zscore = TRUE,

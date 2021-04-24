@@ -6,16 +6,40 @@
 \alias{plotDimReduceFeature,matrix-method}
 \title{Plotting feature expression on a dimension reduction plot}
 \usage{
-plotDimReduceFeature(x, ...)
+plotDimReduceFeature(
+  x,
+  features,
+  displayName = NULL,
+  reducedDimName = NULL,
+  dim1 = NULL,
+  dim2 = NULL,
+  headers = NULL,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  normalize = FALSE,
+  zscore = TRUE,
+  exactMatch = TRUE,
+  trim = c(-2, 2),
+  limits = c(-2, 2),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "blue4",
+  colorMid = "grey90",
+  colorHigh = "firebrick1",
+  midpoint = 0,
+  ncol = NULL,
+  decreasing = FALSE
+)
 
 \S4method{plotDimReduceFeature}{SingleCellExperiment}(
   x,
   features,
   displayName = NULL,
-  headers = NULL,
   reducedDimName = NULL,
   dim1 = NULL,
   dim2 = NULL,
+  headers = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
   normalize = FALSE,
@@ -36,9 +60,9 @@ plotDimReduceFeature(x, ...)
 
 \S4method{plotDimReduceFeature}{matrix}(
   x,
+  features,
   dim1,
   dim2,
-  features,
   headers = NULL,
   normalize = FALSE,
   zscore = TRUE,
@@ -61,8 +85,6 @@ plotDimReduceFeature(x, ...)
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
 
-\item{...}{Ignored. Placeholder to prevent check warning.}
-
 \item{features}{Character vector. Features in the rownames of counts to plot.}
 
 \item{displayName}{Character. The column name of
@@ -70,11 +92,6 @@ represent features and columns represent cells.}
 the features. Default \code{NULL}, which displays the row names. Only works
 if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
 \code{headers}.}
-
-\item{headers}{Character vector. If \code{NULL}, the corresponding
-rownames are used as labels. Otherwise, these headers are used to label
-the features. Only works if \code{displayName} is \code{NULL} and
-\code{exactMatch} is \code{FALSE}.}
 
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
@@ -86,6 +103,11 @@ dimension reduction output to be plotted on the x-axis. Default \code{NULL}.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output to be plotted on the y-axis. Default \code{NULL}.}
+
+\item{headers}{Character vector. If \code{NULL}, the corresponding
+rownames are used as labels. Otherwise, these headers are used to label
+the features. Only works if \code{displayName} is \code{NULL} and
+\code{exactMatch} is \code{FALSE}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
@@ -142,6 +164,8 @@ If \code{FALSE}, the points will be plotted in increasing order where
 the points with largest values will be on top. \code{TRUE} otherwise.
 If \code{NULL}, no sorting is performed. Points will be plotted in their
 current order in \code{x}. Default \code{FALSE}.}
+
+\item{...}{Ignored. Placeholder to prevent check warning.}
 }
 \value{
 The plot as a ggplot object
