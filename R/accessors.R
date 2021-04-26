@@ -71,6 +71,10 @@ setGeneric("celdaClusters<-",
 setMethod("celdaClusters<-", signature(x = "SingleCellExperiment"),
     function(x, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
+        if (!is.factor(value)) {
+            message("Cluster labels are converted to factors.")
+            value <- as.factor(value)
+        }
         SummarizedExperiment::colData(altExp)$celda_cell_cluster <- value
         SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
@@ -125,6 +129,10 @@ setGeneric("celdaModules<-",
 setMethod("celdaModules<-", signature(sce = "SingleCellExperiment"),
     function(sce, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
+        if (!is.factor(value)) {
+            message("Module labels are converted to factors.")
+            value <- as.factor(value)
+        }
         SummarizedExperiment::rowData(altExp)$celda_feature_module <- value
         SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
@@ -180,6 +188,10 @@ setGeneric("sampleLabel<-",
 setMethod("sampleLabel<-", signature(x = "SingleCellExperiment"),
     function(x, altExpName = "featureSubset", value) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
+        if (!is.factor(value)) {
+            message("Sample labels are converted to factors.")
+            value <- as.factor(value)
+        }
         SummarizedExperiment::colData(altExp)$celda_sample_label <- value
         SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)

@@ -813,7 +813,7 @@ setMethod("celda_G",
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaGMod@names$column
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaClusters(celdaGMod)$y
+        as.factor(celdaClusters(celdaGMod)$y)
 
     return(sce)
 }

@@ -1041,11 +1041,11 @@ setMethod("celda_CG",
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCGMod@names$column
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        celdaCGMod@sampleLabel
+        as.factor(celdaCGMod@sampleLabel)
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaClusters(celdaCGMod)$z
+        as.factor(celdaClusters(celdaCGMod)$z)
     SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
-        celdaClusters(celdaCGMod)$y
+        as.factor(celdaClusters(celdaCGMod)$y)
 
     return(sce)
 }

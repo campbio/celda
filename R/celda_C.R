@@ -928,9 +928,9 @@ setMethod("celda_C",
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCMod@names$column
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        celdaCMod@sampleLabel
+        as.factor(celdaCMod@sampleLabel)
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaClusters(celdaCMod)$z
+        as.factor(celdaClusters(celdaCMod)$z)
 
     return(sce)
 }
