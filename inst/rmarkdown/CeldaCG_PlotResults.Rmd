@@ -243,7 +243,7 @@ for (i in seq.int(1, length(grids) - 1)) {
       reducedDimName = reducedDimName,
       useAssay = useAssay,
       altExpName = altExpName,
-      ncol = 3,
+      ncol = 4,
       modules = modules
     )
   )

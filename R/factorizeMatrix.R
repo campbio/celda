@@ -77,7 +77,7 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
 #'   "posterior")
 #' @rdname factorizeMatrix
 #' @export
-setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
@@ -86,9 +86,15 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
         compareCountMatrix(counts, celdaMod)
 
         K <- params(celdaMod)$K
-        L <- params(celdaMod)$L
+
         z <- celdaClusters(celdaMod)$z
         y <- celdaClusters(celdaMod)$y
+        # Sometimes, fewer clusters get returned by celda_C/G
+        # Taking the max(z)/max(y) rather than the original K/L
+        # will prevent errors
+        # K <- params(celdaMod)$K; L <- params(celdaMod)$L
+        K <- max(z)
+        L <- max(y)
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
@@ -200,7 +206,7 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_CG"),
 #'  factorized matrices for "module" and "sample".
 #' @rdname factorizeMatrix
 #' @export
-setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
@@ -208,8 +214,11 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
         counts <- .processCounts(x)
         compareCountMatrix(counts, celdaMod)
 
-        K <- params(celdaMod)$K
         z <- celdaClusters(celdaMod)$z
+        # Sometimes, fewer clusters get returned by celda_C
+        # Taking the max(z) rather than the original K will prevent errors
+        # K <- params(celdaMod)$K
+        K <- max(z)
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
@@ -218,7 +227,6 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
         p <- .cCDecomposeCounts(counts, s, z, K)
         mCPByS <- p$mCPByS
         nGByCP <- p$nGByCP
-
         KNames <- paste0("K", seq(K))
         rownames(nGByCP) <- matrixNames(celdaMod)$row
         colnames(nGByCP) <- KNames
@@ -281,16 +289,19 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_C"),
 #' )
 #' @rdname factorizeMatrix
 #' @export
-setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
     function(x,
         celdaMod,
         type = c("counts", "proportion", "posterior")) {
 
         counts <- .processCounts(x)
-        # compareCountMatrix(counts, celdaMod)
+        compareCountMatrix(counts, celdaMod)
 
-        L <- params(celdaMod)$L
         y <- celdaClusters(celdaMod)$y
+        # Sometimes, fewer clusters get returned by celda_G
+        # Taking the max(y) rather than the original L will prevent errors
+        # L <- params(celdaMod)$L
+        L <- max(y)
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma
@@ -373,8 +384,9 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    #K <- S4Vectors::metadata(sce)$celda_parameters$K
     z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
+    K <- max(z)
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     sampleLabel <- SummarizedExperiment::colData(sce)$celda_sample_label
@@ -431,10 +443,12 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    #K <- S4Vectors::metadata(sce)$celda_parameters$K
+    #L <- S4Vectors::metadata(sce)$celda_parameters$L
     z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
     y <- SummarizedExperiment::rowData(sce)$celda_feature_module
+    K <- max(z)
+    L <- max(y)
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
@@ -536,10 +550,10 @@ setMethod("factorizeMatrix", signature(x = "matrix", celdaMod = "celda_G"),
 .factorizeMatrixCelda_G <- function(sce, useAssay, type) {
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    # compareCountMatrix(counts, celdaMod)
 
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    #L <- S4Vectors::metadata(sce)$celda_parameters$L
     y <- SummarizedExperiment::rowData(sce)$celda_feature_module
+    L <- max(y)
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta
     gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma

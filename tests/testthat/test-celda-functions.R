@@ -37,3 +37,29 @@
 #         length(appendCeldaList(celdaCGGridSearchRes,
 #             celdaCGGridSearchRes)@resList))
 # })
+
+
+# miscellaneous fxns
+# functions used internally
+test_that(desc = "Invoking error from distinctColors function", {
+  expect_error(distinctColors(n = 3, hues = "xx"),
+               paste0("Only color names listed in the 'color' function can be",
+                      " used in 'hues'"))
+})
+
+test_that(desc = "Invoking error from sample labels function", {
+  expect_error(.processSampleLabels("Sample_1", 5),
+               paste0("'sampleLabel' must be the same length as the number",
+                      " of columns in the 'counts' matrix."))
+})
+
+test_that(desc = "Invoking error from .logMessages function", {
+  expect_error(.logMessages(date(), logfile = 5))
+})
+
+test_that(desc = paste0("miscellaneous distance fxns that are not directly",
+                        " used within celda, but will be tested"), {
+                          x <- data.frame(x = seq(2, 4), y = seq(1, 3))
+                          expect_equal(class(.hellingerDist(x)), "dist")
+                          expect_equal(class(.spearmanDist(x)), "dist")
+                        })

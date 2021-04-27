@@ -1,3 +1,7 @@
+Changes in version 1.7.7 (2021-04-12):
+
+    o   Added handling for sparse matrices
+
 Changes in version 1.7.6 (2021-04-04):
 
     o   Added functions for creating HTML reports

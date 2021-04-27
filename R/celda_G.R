@@ -260,7 +260,7 @@ setMethod("celda_G",
     return(sce)
 }
 
-
+#' @importFrom Matrix colSums
 .celda_G <- function(counts,
                      L,
                      beta = 1,
@@ -304,10 +304,8 @@ setMethod("celda_G",
   allChains <- seq(nchains)
 
   # Pre-compute lgamma values
-  lgbeta <- lgamma(seq(0, max(.colSums(
-    counts,
-    nrow(counts), ncol(counts)
-  ))) + beta)
+  cs <- colSums(counts)
+  lgbeta <- lgamma(seq(0, max(cs)) + beta)
   lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
   lgdelta <- c(NA, lgamma((seq(nrow(counts) + L) * delta)))
 
@@ -415,7 +413,7 @@ setMethod("celda_G",
       )
       if (L > 2 & iter != maxIter &
         ((((numIterWithoutImprovement == stopIter &
-          !all(tempLl > ll))) & isTRUE(splitOnLast)) |
+          !all(tempLl >= ll))) & isTRUE(splitOnLast)) |
           (splitOnIter > 0 & iter %% splitOnIter == 0 &
             isTRUE(doGeneSplit)))) {
         .logMessages(date(),
@@ -599,9 +597,8 @@ setMethod("celda_G",
   probs <- matrix(NA, ncol = nG, nrow = L)
   ix <- sample(seq(nG))
   for (i in ix) {
-    probs[, i] <- cG_CalcGibbsProbY(
-      index = i,
-      counts = counts,
+    probs[, i] <- cG_CalcGibbsProbY(index = i,
+      counts = as.numeric(counts[i, ]),
       nTSbyC = nTSByC,
       nbyTS = nByTS,
       nGbyTS = nGByTS,
@@ -689,16 +686,16 @@ setMethod("celda_G",
 # cells.
 # @param y Numeric vector. Denotes feature module labels.
 # @param L Integer. Number of feature modules.
+#' @importFrom Matrix rowSums
 .cGDecomposeCounts <- function(counts, y, L) {
   if (any(y > L)) {
     stop("Assigned value of feature module greater than the total number",
         " of feature modules!")
   }
+
   nTSByC <- .rowSumByGroup(counts, group = y, L = L)
-  nByG <- as.integer(.rowSums(counts, nrow(counts), ncol(counts)))
-  nByTS <- as.integer(.rowSumByGroup(matrix(nByG, ncol = 1),
-    group = y, L = L
-  ))
+  nByG <- rowSums(counts)
+  nByTS <- .rowSumByGroup(matrix(nByG, ncol = 1), group = y, L = L)
   nGByTS <- tabulate(y, L) + 1 ## Add pseudogene to each state
   nM <- ncol(counts)
   nG <- nrow(counts)
@@ -717,9 +714,7 @@ setMethod("celda_G",
 .cGReDecomposeCounts <- function(counts, y, previousY, nTSByC, nByG, L) {
   ## Recalculate counts based on new label
   nTSByC <- .rowSumByGroupChange(counts, nTSByC, y, previousY, L)
-  nByTS <- as.integer(.rowSumByGroup(matrix(nByG, ncol = 1),
-    group = y, L = L
-  ))
+  nByTS <- .rowSumByGroup(matrix(nByG, ncol = 1), group = y, L = L)
   nGByTS <- tabulate(y, L) + 1
 
   return(list(

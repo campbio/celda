@@ -1342,6 +1342,7 @@ setMethod("recursiveSplitModule",
       nchains = 1,
       verbose = FALSE
     )
+    modelInitial@params$countChecksum <- countChecksum
 
     currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
     overallY <- celdaClusters(modelInitial)$y

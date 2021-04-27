@@ -73,7 +73,7 @@ setMethod("perplexity", signature(x = "SingleCellExperiment"),
 #' perplexity <- perplexity(celdaCGSim$counts, celdaCGMod)
 #' @rdname perplexity
 #' @export
-setMethod("perplexity", signature(x = "matrix", celdaMod = "celda_CG"),
+setMethod("perplexity", signature(x = "ANY", celdaMod = "celda_CG"),
     function(x, celdaMod, newCounts = NULL) {
         if (!("celda_CG" %in% class(celdaMod))) {
             stop("The celdaMod provided was not of class celda_CG.")
@@ -106,7 +106,7 @@ setMethod("perplexity", signature(x = "matrix", celdaMod = "celda_CG"),
 
         etaProb <- log(eta) * nGByTS
         geneByPopProb <- log(psi %*% phi)
-        innerLogProb <- eigenMatMultInt(geneByPopProb, newCounts) + theta[, s]
+        innerLogProb <- .countsTimesProbs(newCounts, geneByPopProb) + theta[, s]
         # innerLogProb = (t(geneByPopProb) %*% newCounts) + theta[, s]
 
         log.px <- sum(apply(innerLogProb, 2, matrixStats::logSumExp))
@@ -124,7 +124,7 @@ setMethod("perplexity", signature(x = "matrix", celdaMod = "celda_CG"),
 #' @rdname perplexity
 #' @export
 setMethod(
-    "perplexity", signature(x = "matrix", celdaMod = "celda_C"),
+    "perplexity", signature(x = "ANY", celdaMod = "celda_C"),
     function(x, celdaMod, newCounts = NULL) {
         if (!("celda_C" %in% class(celdaMod))) {
             stop("The celdaMod provided was not of class celda_C.")
@@ -153,7 +153,7 @@ setMethod(
         s <- as.integer(sampleLabel(celdaMod))
 
         # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
-        inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
+        inner.log.prob <- .countsTimesProbs(newCounts, phi) + theta[, s]
         logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
 
         perplexity <- exp(- (logPx / sum(newCounts)))
@@ -168,10 +168,10 @@ setMethod(
 #' @rdname perplexity
 #' @export
 setMethod(
-    "perplexity", signature(x = "matrix", celdaMod = "celda_G"),
+    "perplexity", signature(x = "ANY", celdaMod = "celda_G"),
     function(x, celdaMod, newCounts = NULL) {
-        counts <- .processCounts(x)
-        # compareCountMatrix(counts, celdaMod)
+         counts <- .processCounts(x)
+         compareCountMatrix(counts, celdaMod)
 
         if (is.null(newCounts)) {
             newCounts <- counts
@@ -238,7 +238,7 @@ setMethod(
     s <- as.integer(sampleLabel(sce, altExpName = altExpName))
 
     # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
-    inner.log.prob <- eigenMatMultInt(phi, newCounts) + theta[, s]
+    inner.log.prob <- .countsTimesProbs(newCounts, phi) + theta[, s]
     logPx <- sum(apply(inner.log.prob, 2, matrixStats::logSumExp))
 
     perplexity <- exp(- (logPx / sum(newCounts)))
@@ -280,7 +280,7 @@ setMethod(
 
     etaProb <- log(eta) * nGByTS
     geneByPopProb <- log(psi %*% phi)
-    innerLogProb <- eigenMatMultInt(geneByPopProb, newCounts) + theta[, s]
+    innerLogProb <- .countsTimesProbs(newCounts, geneByPopProb) + theta[, s]
     # innerLogProb = (t(geneByPopProb) %*% newCounts) + theta[, s]
 
     log.px <- sum(apply(innerLogProb, 2, matrixStats::logSumExp))
@@ -418,7 +418,7 @@ setMethod("resamplePerplexity",
 #' plotGridSearchPerplexity(celdaCGGridSearchRes)
 #' @export
 setMethod("resamplePerplexity",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         celdaList,
         resample = 5,
@@ -737,6 +737,7 @@ setMethod("plotGridSearchPerplexity",
 # @param celda.mod A single celda run (usually from the _resList_ property
 # of a celdaList).
 # @return The perplexity for the provided chain as an mpfr number.
+#' @importFrom Matrix colSums t
 .resampleCountMatrix <- function(countMatrix) {
     colsums <- colSums(countMatrix)
     prob <- t(t(countMatrix) / colsums)

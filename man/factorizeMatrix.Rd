@@ -3,9 +3,9 @@
 \name{factorizeMatrix}
 \alias{factorizeMatrix}
 \alias{factorizeMatrix,SingleCellExperiment,ANY-method}
-\alias{factorizeMatrix,matrix,celda_CG-method}
-\alias{factorizeMatrix,matrix,celda_C-method}
-\alias{factorizeMatrix,matrix,celda_G-method}
+\alias{factorizeMatrix,ANY,celda_CG-method}
+\alias{factorizeMatrix,ANY,celda_C-method}
+\alias{factorizeMatrix,ANY,celda_G-method}
 \title{Generate factorized matrices showing each feature's influence on cell
  / gene clustering}
 \usage{
@@ -18,11 +18,11 @@ factorizeMatrix(x, celdaMod, ...)
   type = c("counts", "proportion", "posterior")
 )
 
-\S4method{factorizeMatrix}{matrix,celda_CG}(x, celdaMod, type = c("counts", "proportion", "posterior"))
+\S4method{factorizeMatrix}{ANY,celda_CG}(x, celdaMod, type = c("counts", "proportion", "posterior"))
 
-\S4method{factorizeMatrix}{matrix,celda_C}(x, celdaMod, type = c("counts", "proportion", "posterior"))
+\S4method{factorizeMatrix}{ANY,celda_C}(x, celdaMod, type = c("counts", "proportion", "posterior"))
 
-\S4method{factorizeMatrix}{matrix,celda_G}(x, celdaMod, type = c("counts", "proportion", "posterior"))
+\S4method{factorizeMatrix}{ANY,celda_G}(x, celdaMod, type = c("counts", "proportion", "posterior"))
 }
 \arguments{
 \item{x}{Can be one of

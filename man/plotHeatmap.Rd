@@ -38,8 +38,8 @@ plotHeatmap(
 )
 }
 \arguments{
-\item{counts}{Numeric matrix. Normalized counts matrix where rows represent
-features and columns represent cells. .}
+\item{counts}{Numeric or sparse matrix. Normalized counts matrix where rows
+represent features and columns represent cells. .}
 
 \item{z}{Numeric vector. Denotes cell population labels.}
 

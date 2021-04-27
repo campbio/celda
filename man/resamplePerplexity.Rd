@@ -3,7 +3,7 @@
 \name{resamplePerplexity}
 \alias{resamplePerplexity}
 \alias{resamplePerplexity,SingleCellExperiment-method}
-\alias{resamplePerplexity,matrix-method}
+\alias{resamplePerplexity,ANY-method}
 \title{Calculate and visualize perplexity of all models in a celdaList, with
  count resampling}
 \usage{
@@ -17,7 +17,7 @@ resamplePerplexity(x, ...)
   seed = 12345
 )
 
-\S4method{resamplePerplexity}{matrix}(x, celdaList, resample = 5, seed = 12345)
+\S4method{resamplePerplexity}{ANY}(x, celdaList, resample = 5, seed = 12345)
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a

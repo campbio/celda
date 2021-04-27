@@ -61,7 +61,7 @@
 #'  row. Set to NULL to disable. Occurs after normalization and log
 #'  transformation. For example, \link{scale} will Z-score transform each row.
 #'  Default \link{scale}.
-#' @param showFeaturenames Logical. Whether feature names should be displayed.
+#' @param showFeatureNames Logical. Whether feature names should be displayed.
 #'  Default TRUE.
 #' @param displayName Character. The column name of
 #'  \code{rowData(altExp(x, altExpName))} that specifies the display names for
@@ -71,7 +71,7 @@
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for plotting the data. This threshold is applied
 #'  after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.
-#' @param rowFontSize Integer. Font size for feature names. If \code{NULL},
+#' @param rowFontSize Numeric. Font size for feature names. If \code{NULL},
 #' then the size will automatically be determined. Default \code{NULL}.
 #' @param showHeatmapLegend Passed to \link[ComplexHeatmap]{Heatmap}. Show
 #'  legend for expression levels.
@@ -131,7 +131,7 @@ setMethod("moduleHeatmap",
         normalize = "proportion",
         transformationFun = sqrt,
         scaleRow = scale,
-        showFeaturenames = TRUE,
+        showFeatureNames = TRUE,
         displayName = NULL,
         trim = c(-2, 2),
         rowFontSize = NULL,
@@ -245,7 +245,7 @@ setMethod("moduleHeatmap",
                 topCells = topCells,
                 altExpName = altExpName,
                 scaleRow = scaleRow,
-                showFeaturenames = showFeaturenames,
+                showFeatureNames = showFeatureNames,
                 displayNames = displayNames[featureIndices[[i]]],
                 trim = trim,
                 rowFontSize = rowFontSize,
@@ -302,7 +302,7 @@ setMethod("moduleHeatmap",
     topCells,
     altExpName,
     scaleRow,
-    showFeaturenames,
+    showFeatureNames,
     displayNames,
     trim,
     rowFontSize,
@@ -383,13 +383,17 @@ setMethod("moduleHeatmap",
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
     }
 
+    if (is.null(rowFontSize)) {
+        rowFontSize <- min(200 / nrow(filteredNormCounts), 20)
+    }
+
     if (isTRUE(showModuleLabel)) {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,
             row_title = moduleLabel,
             row_title_gp = gpar(fontsize = moduleLabelSize),
             show_column_names = FALSE,
-            show_row_names = showFeaturenames,
+            show_row_names = showFeatureNames,
             row_labels = displayNames,
             row_names_gp = grid::gpar(fontsize = rowFontSize),
             cluster_rows = FALSE,
@@ -411,7 +415,7 @@ setMethod("moduleHeatmap",
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,
             show_column_names = FALSE,
-            show_row_names = showFeaturenames,
+            show_row_names = showFeatureNames,
             row_labels = displayNames,
             row_names_gp = grid::gpar(fontsize = rowFontSize),
             cluster_rows = FALSE,
