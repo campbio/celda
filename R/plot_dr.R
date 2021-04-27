@@ -671,7 +671,6 @@ setMethod("plotDimReduceFeature",
 #'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceModule", function(x, ...) {
