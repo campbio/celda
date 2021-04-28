@@ -937,7 +937,7 @@ setMethod("celda_CG",
         maxCells <- ncol(counts)
     }
 
-    fm <- .factorizeMatrixCelda_CG(sce, useAssay, type = "counts")
+    fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "counts")
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {
         if (!all(modules %in% modulesToUse)) {

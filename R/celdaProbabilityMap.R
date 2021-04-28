@@ -154,7 +154,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
         sce)$celda_cell_cluster,
         S4Vectors::metadata(sce)$celda_parameters$K) > 0)
 
-    factorized <- .factorizeMatrixCelda_C(sce, useAssay = useAssay,
+    factorized <- factorizeMatrix(x = sce, useAssay = useAssay,
         type = "proportion")
 
     samp <- factorized$proportions$sample[zInclude, , drop = FALSE]
@@ -226,7 +226,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
-    factorized <- .factorizeMatrixCelda_CG(sce, useAssay,
+    factorized <- factorizeMatrix(x = sce, useAssay = useAssay,
         type = c("counts", "proportion"))
     zInclude <- which(tabulate(SummarizedExperiment::colData(
         sce)$celda_cell_cluster,
