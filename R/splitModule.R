@@ -107,7 +107,7 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
 
         newY <- SummarizedExperiment::rowData(x)$celda_feature_module
         newY[ix] <- splitY
-        newL <- max(newY)
+        newL <- length(unique(newY))
 
         newLl <- .logLikelihoodcelda_G(
             counts = counts,
