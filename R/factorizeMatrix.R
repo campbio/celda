@@ -72,6 +72,7 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
             K <- S4Vectors::metadata(altExp)$celda_parameters$K
             z <- SummarizedExperiment::colData(altExp)$celda_cell_cluster
             y <- SummarizedExperiment::rowData(altExp)$celda_feature_module
+            L <- S4Vectors::metadata(altExp)$celda_parameters$L
             alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
             delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
             gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
@@ -85,6 +86,7 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
                 K = K,
                 z = z,
                 y = y,
+                L = L,
                 alpha = alpha,
                 beta = beta,
                 delta = delta,
