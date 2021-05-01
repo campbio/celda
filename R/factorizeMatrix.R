@@ -67,7 +67,8 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
                 beta = beta,
                 sampleLabel = sampleLabel,
                 rNames = rNames,
-                sNames = sNames)
+                sNames = sNames,
+                type = type)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
             K <- S4Vectors::metadata(altExp)$celda_parameters$K
             z <- SummarizedExperiment::colData(altExp)$celda_cell_cluster
@@ -94,7 +95,8 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
                 sampleLabel = sampleLabel,
                 cNames = cNames,
                 rNames = rNames,
-                sNames = sNames)
+                sNames = sNames,
+                type = type)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
             y <- SummarizedExperiment::rowData(altExp)$celda_feature_module
             L <- S4Vectors::metadata(altExp)$celda_parameters$L
@@ -110,7 +112,8 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
                 delta = delta,
                 gamma = gamma,
                 cNames = cNames,
-                rNames = rNames)
+                rNames = rNames,
+                type = type)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
                 "celda_parameters$model must be",
@@ -172,7 +175,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
             sampleLabel = sampleLabel,
             cNames = cNames,
             rNames = rNames,
-            sNames = sNames)
+            sNames = sNames,
+            type = type)
         return(res)
     }
 )
@@ -190,7 +194,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
     sampleLabel,
     cNames,
     rNames,
-    sNames) {
+    sNames,
+    type) {
 
     s <- as.integer(sampleLabel)
 
@@ -325,7 +330,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
             beta = beta,
             sampleLabel = sampleLabel,
             rNames = rNames,
-            sNames = sNames)
+            sNames = sNames,
+            type = type)
         return(res)
     }
 )
@@ -339,7 +345,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
     beta,
     sampleLabel,
     rNames,
-    sNames) {
+    sNames,
+    type) {
 
     s <- as.integer(sampleLabel)
 
@@ -435,7 +442,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
             delta = delta,
             gamma = gamma,
             cNames = cNames,
-            rNames = rNames)
+            rNames = rNames,
+            type = type)
         return(res)
     }
 )
@@ -449,7 +457,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
     delta,
     gamma,
     cNames,
-    rNames) {
+    rNames,
+    type) {
 
     p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
     nTSByC <- p$nTSByC
