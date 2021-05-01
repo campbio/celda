@@ -139,15 +139,14 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         counts <- .processCounts(x)
         compareCountMatrix(counts, celdaMod)
 
-        K <- params(celdaMod)$K
         z <- celdaClusters(celdaMod)$z
         y <- celdaClusters(celdaMod)$y
         # Sometimes, fewer clusters get returned by celda_C/G
-        # Taking the length(unique(z))/length(unique(y)) rather than
+        # Taking the max(z)/max(y) rather than
         # the original K/L will prevent errors
         # K <- params(celdaMod)$K; L <- params(celdaMod)$L
-        K <- length(unique(z))
-        L <- length(unique(y))
+        K <- max(z)
+        L <- max(y)
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
@@ -163,7 +162,6 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
             K = K,
             z = z,
             y = y,
-            K = K,
             L = L,
             alpha = alpha,
             beta = beta,
@@ -182,6 +180,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
     K,
     z,
     y,
+    L,
     alpha,
     beta,
     delta,
@@ -306,10 +305,10 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
 
         z <- celdaClusters(celdaMod)$z
         # Sometimes, fewer clusters get returned by celda_C
-        # Taking the length(unique(z)) rather than the
+        # Taking the max(z) rather than the
         # original K will prevent errors
         # K <- params(celdaMod)$K
-        K <- length(unique(z))
+        K <- max(z)
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
         sampleLabel <- sampleLabel(celdaMod)
@@ -416,10 +415,10 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
 
         y <- celdaClusters(celdaMod)$y
         # Sometimes, fewer clusters get returned by celda_G
-        # Taking the length(unique(y)) rather than the original
+        # Taking the max(y) rather than the original
         # L will prevent errors
         # L <- params(celdaMod)$L
-        L <- length(unique(y))
+        L <- max(y)
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma
