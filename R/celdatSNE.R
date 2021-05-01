@@ -45,13 +45,25 @@
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return \code{sce} with t-SNE coordinates
 #'  (columns "celda_tSNE1" & "celda_tSNE2") added to
 #'  \code{\link{reducedDim}(sce, "celda_tSNE")}.
 #' @export
 setGeneric("celdaTsne",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        maxCells = NULL,
+        minClusterSize = 100,
+        initialDims = 20,
+        modules = NULL,
+        perplexity = 20,
+        maxIter = 2500,
+        normalize = "proportion",
+        scaleFactor = NULL,
+        transformationFun = sqrt,
+        seed = 12345) {
+
         standardGeneric("celdaTsne")
     })
 

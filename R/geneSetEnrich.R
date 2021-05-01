@@ -20,14 +20,20 @@
 #' @param fdr False discovery rate (FDR). Numeric. Cutoff value for adjusted
 #'  p-value, terms with FDR below this value are considered significantly
 #'  enriched.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return List of length 'L' where each member contains the significantly
 #'  enriched terms for the corresponding module.
 #' @importFrom enrichR enrichr
 #' @importFrom enrichR listEnrichrDbs
 #' @export
-setGeneric("geneSetEnrich", function(x, ...) {
-    standardGeneric("geneSetEnrich")})
+setGeneric("geneSetEnrich",
+    function(x,
+        celdaModel,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        databases,
+        fdr = 0.05) {
+
+        standardGeneric("geneSetEnrich")})
 
 
 #' @rdname geneSetEnrich

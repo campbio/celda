@@ -7,7 +7,7 @@
 \title{Subset celda model from SCE object returned from
  \code{celdaGridSearch}}
 \usage{
-subsetCeldaList(x, ...)
+subsetCeldaList(x, params, altExpName = "featureSubset")
 
 \S4method{subsetCeldaList}{SingleCellExperiment}(x, params, altExpName = "featureSubset")
 
@@ -21,8 +21,6 @@ subsetCeldaList(x, ...)
  or \code{recursiveSplitCell}. Must contain a list named
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{params}{List. List of parameters used to subset the matching celda
 models in list \code{"celda_grid_search"} in \code{metadata(x)}.}

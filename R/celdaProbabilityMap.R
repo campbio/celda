@@ -48,7 +48,26 @@
 #'  \link[ComplexHeatmap]{Heatmap-class} objects
 #' @export
 setGeneric("celdaProbabilityMap",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        level = c("cellPopulation", "sample"),
+        ncols = 100,
+        col2 = circlize::colorRamp2(c(-2, 0, 2),
+            c("#1E90FF", "#FFFFFF", "#CD2626")),
+        title1 = "Absolute probability",
+        title2 = "Relative expression",
+        showColumnNames = TRUE,
+        showRowNames = TRUE,
+        rowNamesgp = grid::gpar(fontsize = 8),
+        colNamesgp = grid::gpar(fontsize = 12),
+        clusterRows = FALSE,
+        clusterColumns = FALSE,
+        showHeatmapLegend = TRUE,
+        heatmapLegendParam = list(title = NULL,
+            legend_height = grid::unit(6, "cm")),
+        ...) {
+
         standardGeneric("celdaProbabilityMap")
     })
 

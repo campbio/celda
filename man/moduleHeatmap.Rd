@@ -5,7 +5,36 @@
 \alias{moduleHeatmap,SingleCellExperiment-method}
 \title{Heatmap for featureModules}
 \usage{
-moduleHeatmap(x, ...)
+moduleHeatmap(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  featureModule = NULL,
+  col = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
+  topCells = 100,
+  topFeatures = NULL,
+  normalizedCounts = NA,
+  normalize = "proportion",
+  transformationFun = sqrt,
+  scaleRow = scale,
+  showFeatureNames = TRUE,
+  displayName = NULL,
+  trim = c(-2, 2),
+  rowFontSize = NULL,
+  showHeatmapLegend = FALSE,
+  showTopAnnotationLegend = FALSE,
+  showTopAnnotationName = FALSE,
+  topAnnotationHeight = 5,
+  showModuleLabel = TRUE,
+  moduleLabel = "auto",
+  moduleLabelSize = NULL,
+  width = "auto",
+  height = "auto",
+  unit = "mm",
+  ncol = NULL,
+  useRaster = TRUE,
+  ...
+)
 
 \S4method{moduleHeatmap}{SingleCellExperiment}(
   x,
@@ -44,8 +73,6 @@ moduleHeatmap(x, ...)
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Celda
 results must be present under \code{metadata(altExp(x, altExpName))}.}
-
-\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
@@ -161,6 +188,8 @@ and rows will be approximately the same. Default \code{NULL}.}
 and reduced the memory of the plot and the size of a file. If \code{NULL},
 then rasterization will be automatically determined by the underlying
 \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.}
+
+\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 }
 \value{
 A \link[multipanelfigure]{multi_panel_figure} object if plotting

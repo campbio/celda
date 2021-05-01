@@ -5,7 +5,25 @@
 \alias{celdaProbabilityMap,SingleCellExperiment-method}
 \title{Probability map for a celda model}
 \usage{
-celdaProbabilityMap(sce, ...)
+celdaProbabilityMap(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  level = c("cellPopulation", "sample"),
+  ncols = 100,
+  col2 = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
+  title1 = "Absolute probability",
+  title2 = "Relative expression",
+  showColumnNames = TRUE,
+  showRowNames = TRUE,
+  rowNamesgp = grid::gpar(fontsize = 8),
+  colNamesgp = grid::gpar(fontsize = 12),
+  clusterRows = FALSE,
+  clusterColumns = FALSE,
+  showHeatmapLegend = TRUE,
+  heatmapLegendParam = list(title = NULL, legend_height = grid::unit(6, "cm")),
+  ...
+)
 
 \S4method{celdaProbabilityMap}{SingleCellExperiment}(
   sce,
@@ -30,8 +48,6 @@ celdaProbabilityMap(sce, ...)
 \arguments{
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
-
-\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}
@@ -84,6 +100,8 @@ heatmap.}
 
 \item{heatmapLegendParam}{Passed to \code{heatmap_legend_param} argument of
 \link[ComplexHeatmap]{Heatmap}. Heatmap legend parameters.}
+
+\item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 }
 \value{
 A \link[ComplexHeatmap]{HeatmapList} object containing 2

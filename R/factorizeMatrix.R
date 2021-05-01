@@ -26,10 +26,14 @@
 #'  returns the posterior estimates which include the addition of the Dirichlet
 #'  concentration parameter (essentially as a pseudocount). Default
 #'  \code{"counts"}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @export
 setGeneric("factorizeMatrix",
-    function(x, celdaMod, ...) {
+    function(x,
+        celdaMod,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        type = c("counts", "proportion", "posterior")) {
+
         standardGeneric("factorizeMatrix")})
 
 

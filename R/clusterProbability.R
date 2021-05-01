@@ -15,7 +15,6 @@
 #' @param log Logical. If \code{FALSE}, then the normalized conditional
 #'  probabilities will be returned. If \code{TRUE}, then the unnormalized log
 #'  probabilities will be returned. Default \code{FALSE}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @examples
 #' data(sceCeldaCG)
 #' clusterProb <- clusterProbability(sceCeldaCG, log = TRUE)
@@ -23,7 +22,11 @@
 #'  cluster and/or feature module probabilities.
 #' @export
 setGeneric("clusterProbability",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        log = FALSE) {
+
         standardGeneric("clusterProbability")
     })
 

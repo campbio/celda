@@ -19,7 +19,13 @@
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export
 setGeneric("celdaHeatmap",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        featureIx = NULL,
+        nfeatures = 25,
+        ...) {
+
         standardGeneric("celdaHeatmap")
     })
 

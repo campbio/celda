@@ -48,9 +48,8 @@
 #' @param countChecksum Character. An MD5 checksum for the `counts` matrix.
 #'  Default NULL.
 #' @param logfile Character. Messages will be redirected to a file named
-#'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
+#'  \code{logfile}. If NULL, messages will be printed to stdout. Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link{metadata}
 #'  \code{"celda_parameters"} slot. Column \code{celda_feature_module} in
@@ -62,7 +61,25 @@
 #' data(celdaGSim)
 #' sce <- celda_G(celdaGSim$counts, L = celdaGSim$L, nchains = 1)
 #' @export
-setGeneric("celda_G", function(x, ...) {
+setGeneric("celda_G",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        L,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        yInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        yInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
     standardGeneric("celda_G")})
 
 

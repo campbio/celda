@@ -6,7 +6,32 @@
 \alias{celda_CG,matrix-method}
 \title{Cell and feature clustering with Celda}
 \usage{
-celda_CG(x, ...)
+celda_CG(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  sampleLabel = NULL,
+  K,
+  L,
+  alpha = 1,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  algorithm = c("EM", "Gibbs"),
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  zInitialize = c("split", "random", "predefined"),
+  yInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  zInit = NULL,
+  yInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
 
 \S4method{celda_CG}{SingleCellExperiment}(
   x,
@@ -68,8 +93,6 @@ celda_CG(x, ...)
 with the matrix located in the \link{assay}
 slot under \code{useAssay} in \code{altExp(x, altExpName)}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
 \link{assay} slot to use. Default "counts".}

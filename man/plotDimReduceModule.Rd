@@ -7,7 +7,25 @@
 \title{Plotting Celda module probability on a
  dimension reduction plot}
 \usage{
-plotDimReduceModule(x, ...)
+plotDimReduceModule(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  celdaMod,
+  modules = NULL,
+  rescale = TRUE,
+  limits = c(0, 1),
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  colorLow = "grey90",
+  colorHigh = "firebrick1",
+  ncol = NULL,
+  decreasing = FALSE
+)
 
 \S4method{plotDimReduceModule}{SingleCellExperiment}(
   x,
@@ -39,7 +57,7 @@ plotDimReduceModule(x, ...)
   size = 1,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
-  colorLow = "blue4",
+  colorLow = "grey90",
   colorHigh = "firebrick1",
   ncol = NULL,
   decreasing = FALSE
@@ -67,6 +85,9 @@ slot to use if \code{x} is a
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
+
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
+\code{x} is a matrix object.}
 
 \item{modules}{Character vector. Module(s) from celda model to be plotted.
 e.g. c("1", "2").}
@@ -97,9 +118,6 @@ If \code{FALSE}, the points will be plotted in increasing order where
 the points with largest values will be on top. \code{TRUE} otherwise.
 If \code{NULL}, no sorting is performed. Points will be plotted in their
 current order in \code{x}. Default \code{FALSE}.}
-
-\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
-\code{x} is a matrix object.}
 }
 \value{
 The plot as a ggplot object

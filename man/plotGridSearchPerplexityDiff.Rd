@@ -6,7 +6,7 @@
 \alias{plotGridSearchPerplexityDiff,celdaList-method}
 \title{Visualize perplexity differences of a list of celda models}
 \usage{
-plotGridSearchPerplexityDiff(x, ...)
+plotGridSearchPerplexityDiff(x, altExpName = "featureSubset", sep = 1, n = 10)
 
 \S4method{plotGridSearchPerplexityDiff}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 1, n = 10)
 
@@ -20,8 +20,6 @@ plotGridSearchPerplexityDiff(x, ...)
  or \code{recursiveSplitCell}. Must contain a list named
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

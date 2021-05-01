@@ -6,7 +6,26 @@
 \alias{celda_G,matrix-method}
 \title{Feature clustering with Celda}
 \usage{
-celda_G(x, ...)
+celda_G(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  L,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  stopIter = 10,
+  maxIter = 200,
+  splitOnIter = 10,
+  splitOnLast = TRUE,
+  seed = 12345,
+  nchains = 3,
+  yInitialize = c("split", "random", "predefined"),
+  countChecksum = NULL,
+  yInit = NULL,
+  logfile = NULL,
+  verbose = TRUE
+)
 
 \S4method{celda_G}{SingleCellExperiment}(
   x,
@@ -55,8 +74,6 @@ celda_G(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
 \link{assay} slot to use. Default "counts".}
@@ -111,7 +128,7 @@ Default NULL.}
 `yInit` can only be used when `yInitialize = 'predefined'`. Default NULL.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
-`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
+\code{logfile}. If NULL, messages will be printed to stdout. Default NULL.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }

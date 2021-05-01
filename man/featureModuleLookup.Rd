@@ -5,7 +5,12 @@
 \alias{featureModuleLookup,SingleCellExperiment-method}
 \title{Obtain the gene module of a gene of interest}
 \usage{
-featureModuleLookup(sce, ...)
+featureModuleLookup(
+  sce,
+  feature,
+  altExpName = "featureSubset",
+  exactMatch = TRUE
+)
 
 \S4method{featureModuleLookup}{SingleCellExperiment}(
   sce,
@@ -19,8 +24,6 @@ featureModuleLookup(sce, ...)
 \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{feature}{Character vector. Identify feature modules for the specified
 feature names. \code{feature} must match the rownames of \code{sce}.}

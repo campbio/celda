@@ -6,7 +6,13 @@
 \alias{selectFeatures,matrix-method}
 \title{Simple feature selection by feature counts}
 \usage{
-selectFeatures(x, ...)
+selectFeatures(
+  x,
+  minCount = 3,
+  minCell = 3,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 
 \S4method{selectFeatures}{SingleCellExperiment}(
   x,
@@ -29,8 +35,6 @@ selectFeatures(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{minCount}{Minimum number of counts required for feature selection.}
 

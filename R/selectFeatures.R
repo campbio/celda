@@ -16,13 +16,17 @@
 #'  \link{assay} slot to use. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object with a
 #'  \code{altExpName} \link{altExp} slot. Function
 #'  parameter settings are stored in the \link{metadata}
 #'  \code{"select_features"} slot.
 #' @export
-setGeneric("selectFeatures", function(x, ...) {
+setGeneric("selectFeatures",
+    function(x,
+        minCount = 3,
+        minCell = 3,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
     standardGeneric("selectFeatures")})
 
 

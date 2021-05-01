@@ -46,7 +46,6 @@
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
 #'  \link{metadata} \code{"celda_grid_search"} slot.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @seealso \link{celda_G} for feature clustering, \link{celda_C} for
 #'  clustering of cells, and \link{celda_CG} for simultaneous clustering of
 #'  features and cells. \link{subsetCeldaList} can subset the \code{celdaList}
@@ -68,7 +67,22 @@
 #'   cores = 1)
 #' }
 #' @export
-setGeneric("celdaGridSearch", function(x, ...) {
+setGeneric("celdaGridSearch",
+    function(
+        x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        model,
+        paramsTest,
+        paramsFixed = NULL,
+        maxIter = 200,
+        nchains = 3,
+        cores = 1,
+        bestOnly = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        verbose = TRUE,
+        logfilePrefix = "Celda") {
     standardGeneric("celdaGridSearch")})
 
 
@@ -442,7 +456,6 @@ setMethod("celdaGridSearch",
 #'  models in list \code{"celda_grid_search"} in \code{metadata(x)}.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing
@@ -464,7 +477,9 @@ setMethod("celdaGridSearch",
 #'  chains in parallel. \link{selectBestModel} can get the best model for each
 #'  combination of parameters.
 #' @export
-setGeneric("subsetCeldaList", function(x, ...) {
+setGeneric("subsetCeldaList",
+    function(x, params, altExpName = "featureSubset") {
+
     standardGeneric("subsetCeldaList")})
 
 
@@ -583,7 +598,6 @@ setMethod("subsetCeldaList",
 #'  corresponding celda model object.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return One of
 #' \itemize{
 #'  \item A new \linkS4class{SingleCellExperiment} object containing
@@ -602,7 +616,9 @@ setMethod("subsetCeldaList",
 #'  instead of a \code{celdaList} object.}
 #' @seealso \link{celdaGridSearch} \link{subsetCeldaList}
 #' @export
-setGeneric("selectBestModel", function(x, ...) {
+setGeneric("selectBestModel",
+    function(x, asList = FALSE, altExpName = "featureSubset") {
+
     standardGeneric("selectBestModel")})
 
 

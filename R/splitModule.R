@@ -15,13 +15,18 @@
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A updated \linkS4class{SingleCellExperiment} object with new
 #'  feature modules stored in column \code{celda_feature_module} in
 #'  \code{\link{rowData}(x)}.
 #' @export
 setGeneric("splitModule",
-    function(x, ...) {
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        module,
+        n = 2,
+        seed = 12345) {
+
         standardGeneric("splitModule")
     })
 

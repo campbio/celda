@@ -39,7 +39,6 @@
 #'  number of columns for facet wrap.
 #' @param headers Character vector. If `NULL`, the corresponding rownames are
 #'  used as labels. Otherwise, these headers are used to label the genes.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @param decreasing logical. Specifies the order of plotting the points.
 #'  If \code{FALSE}, the points will be plotted in increasing order where
 #'  the points with largest values will be on top. \code{TRUE} otherwise.
@@ -47,7 +46,25 @@
 #'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
 #' @export
-setGeneric("plotDimReduceGrid", function(x, ...) {
+setGeneric("plotDimReduceGrid",
+    function(x,
+        reducedDimName,
+        dim1 = NULL,
+        dim2 = NULL,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        limits = c(-2, 2),
+        colorLow = "blue4",
+        colorMid = "grey90",
+        colorHigh = "firebrick1",
+        midpoint = 0,
+        varLabel = NULL,
+        ncol = NULL,
+        headers = NULL,
+        decreasing = FALSE) {
     standardGeneric("plotDimReduceGrid")})
 
 
@@ -139,7 +156,7 @@ setMethod("plotDimReduceGrid",
         colorLow = "blue4",
         colorMid = "grey90",
         colorHigh = "firebrick1",
-        midpoint = NULL,
+        midpoint = 0,
         varLabel = NULL,
         ncol = NULL,
         headers = NULL,
@@ -341,7 +358,6 @@ setMethod("plotDimReduceGrid",
 #'  the points with largest values will be on top. \code{TRUE} otherwise.
 #'  If \code{NULL}, no sorting is performed. Points will be plotted in their
 #'  current order in \code{x}. Default \code{FALSE}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @export
 setGeneric("plotDimReduceFeature", function(x,
@@ -673,7 +689,24 @@ setMethod("plotDimReduceFeature",
 #'  current order in \code{x}. Default \code{FALSE}.
 #' @return The plot as a ggplot object
 #' @export
-setGeneric("plotDimReduceModule", function(x, ...) {
+setGeneric("plotDimReduceModule",
+    function(x,
+        reducedDimName,
+        dim1 = NULL,
+        dim2 = NULL,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        celdaMod,
+        modules = NULL,
+        rescale = TRUE,
+        limits = c(0, 1),
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        colorLow = "grey90",
+        colorHigh = "firebrick1",
+        ncol = NULL,
+        decreasing = FALSE) {
     standardGeneric("plotDimReduceModule")})
 
 
@@ -764,7 +797,7 @@ setMethod("plotDimReduceModule",
         size = 1,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
-        colorLow = "blue4",
+        colorLow = "grey90",
         colorHigh = "firebrick1",
         ncol = NULL,
         decreasing = FALSE) {
@@ -900,11 +933,22 @@ setMethod("plotDimReduceModule",
 #'  If NULL, all samples will be plotted together. Default NULL.
 #' @param labelSize Numeric. Sets size of label if labelClusters is TRUE.
 #'  Default 3.5.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The plot as a ggplot object
 #' @importFrom ggrepel geom_text_repel
 #' @export
-setGeneric("plotDimReduceCluster", function(x, ...) {
+setGeneric("plotDimReduceCluster",
+    function(x,
+        reducedDimName,
+        altExpName = "featureSubset",
+        dim1 = NULL,
+        dim2 = NULL,
+        size = 1,
+        xlab = "Dimension_1",
+        ylab = "Dimension_2",
+        specificClusters = NULL,
+        labelClusters = FALSE,
+        groupBy = NULL,
+        labelSize = 3.5) {
     standardGeneric("plotDimReduceCluster")})
 
 
@@ -1109,10 +1153,17 @@ setMethod("plotDimReduceCluster",
 #'  curve. Default \code{TRUE}.
 #' @param dotSize Numeric. Size of points if \code{plotDots = TRUE}.
 #' Default \code{0.1}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Violin plot for each feature, grouped by celda cluster
 #' @export
-setGeneric("plotCeldaViolin", function(x, ...) {
+setGeneric("plotCeldaViolin",
+    function(x,
+        celdaMod,
+        features,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        exactMatch = TRUE,
+        plotDots = TRUE,
+        dotSize = 0.1) {
     standardGeneric("plotCeldaViolin")})
 
 

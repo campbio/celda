@@ -6,7 +6,26 @@
 \alias{recursiveSplitCell,matrix-method}
 \title{Recursive cell splitting}
 \usage{
-recursiveSplitCell(x, ...)
+recursiveSplitCell(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  sampleLabel = NULL,
+  initialK = 5,
+  maxK = 25,
+  tempL = NULL,
+  yInit = NULL,
+  alpha = 1,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  minCell = 3,
+  reorder = TRUE,
+  seed = 12345,
+  perplexity = TRUE,
+  logfile = NULL,
+  verbose = TRUE
+)
 
 \S4method{recursiveSplitCell}{SingleCellExperiment}(
   x,
@@ -55,8 +74,6 @@ recursiveSplitCell(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
 \link{assay}

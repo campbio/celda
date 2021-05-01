@@ -10,7 +10,7 @@
  \linkS4class{SingleCellExperiment} object or celda model
  object.}
 \usage{
-celdaClusters(x, ...)
+celdaClusters(x, altExpName = "featureSubset")
 
 \S4method{celdaClusters}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
@@ -29,8 +29,6 @@ located in the \code{useAssay} assay slot. The
 a \link{altExp} slot with name \code{altExpName} will
 be used. Rows represent features and columns represent cells.
 \item Celda model object.}}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

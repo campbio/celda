@@ -8,7 +8,12 @@
 \alias{celdatosce,celdaList-method}
 \title{Convert old celda model object to \code{SCE} object}
 \usage{
-celdatosce(celdaModel, counts, ...)
+celdatosce(
+  celdaModel,
+  counts,
+  useAssay = "counts",
+  altExpName = "featureSubset"
+)
 
 \S4method{celdatosce}{celda_C}(
   celdaModel,
@@ -45,8 +50,6 @@ using older versions of \code{celda}.}
 \item{counts}{A numeric \link{matrix} of counts used to generate
 \code{celdaModel}. Dimensions and MD5 checksum will be checked by
 \link{compareCountMatrix}.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
 \link{assay} slot to use. Default "counts".}

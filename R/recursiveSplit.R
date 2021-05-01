@@ -137,7 +137,6 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
 #'  \link{metadata} \code{"celda_grid_search"} slot. The models in
@@ -146,7 +145,25 @@
 #' @seealso \link{recursiveSplitModule} for recursive splitting of feature
 #'  modules.
 #' @export
-setGeneric("recursiveSplitCell", function(x, ...) {
+setGeneric("recursiveSplitCell",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        sampleLabel = NULL,
+        initialK = 5,
+        maxK = 25,
+        tempL = NULL,
+        yInit = NULL,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        minCell = 3,
+        reorder = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        logfile = NULL,
+        verbose = TRUE) {
     standardGeneric("recursiveSplitCell")})
 
 
@@ -905,7 +922,6 @@ setMethod("recursiveSplitCell",
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
 #'  \link{metadata} \code{"celda_grid_search"} slot. The models in
@@ -914,7 +930,25 @@ setMethod("recursiveSplitCell",
 #' @seealso \code{recursiveSplitCell} for recursive splitting of cell
 #'  populations.
 #' @export
-setGeneric("recursiveSplitModule", function(x, ...) {
+setGeneric("recursiveSplitModule",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        initialL = 10,
+        maxL = 100,
+        tempK = 100,
+        zInit = NULL,
+        sampleLabel = NULL,
+        alpha = 1,
+        beta = 1,
+        delta = 1,
+        gamma = 1,
+        minFeature = 3,
+        reorder = TRUE,
+        seed = 12345,
+        perplexity = TRUE,
+        verbose = TRUE,
+        logfile = NULL) {
     standardGeneric("recursiveSplitModule")})
 
 

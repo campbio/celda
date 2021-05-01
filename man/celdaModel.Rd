@@ -6,15 +6,13 @@
 \title{Get celda model from a celda
  \link[SingleCellExperiment]{SingleCellExperiment} object}
 \usage{
-celdaModel(sce, ...)
+celdaModel(sce, altExpName = "featureSubset")
 
 \S4method{celdaModel}{SingleCellExperiment}(sce, altExpName = "featureSubset")
 }
 \arguments{
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

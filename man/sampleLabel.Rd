@@ -9,7 +9,7 @@
 \title{Get or set sample labels from a celda
  \linkS4class{SingleCellExperiment}  object}
 \usage{
-sampleLabel(x, ...)
+sampleLabel(x, altExpName = "featureSubset")
 
 \S4method{sampleLabel}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
@@ -27,8 +27,6 @@ sampleLabel(x, altExpName = "featureSubset") <- value
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.
 \item A celda model object.}}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

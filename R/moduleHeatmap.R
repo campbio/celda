@@ -107,7 +107,36 @@
 #' @importFrom methods .hasSlot
 #' @importFrom multipanelfigure multi_panel_figure
 #' @export
-setGeneric("moduleHeatmap", function(x, ...) {
+setGeneric("moduleHeatmap",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        featureModule = NULL,
+        col = circlize::colorRamp2(c(-2, 0, 2),
+            c("#1E90FF", "#FFFFFF", "#CD2626")),
+        topCells = 100,
+        topFeatures = NULL,
+        normalizedCounts = NA,
+        normalize = "proportion",
+        transformationFun = sqrt,
+        scaleRow = scale,
+        showFeatureNames = TRUE,
+        displayName = NULL,
+        trim = c(-2, 2),
+        rowFontSize = NULL,
+        showHeatmapLegend = FALSE,
+        showTopAnnotationLegend = FALSE,
+        showTopAnnotationName = FALSE,
+        topAnnotationHeight = 5,
+        showModuleLabel = TRUE,
+        moduleLabel = "auto",
+        moduleLabelSize = NULL,
+        width = "auto",
+        height = "auto",
+        unit = "mm",
+        ncol = NULL,
+        useRaster = TRUE,
+        ...) {
     standardGeneric("moduleHeatmap")})
 
 

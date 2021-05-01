@@ -164,8 +164,6 @@ If \code{FALSE}, the points will be plotted in increasing order where
 the points with largest values will be on top. \code{TRUE} otherwise.
 If \code{NULL}, no sorting is performed. Points will be plotted in their
 current order in \code{x}. Default \code{FALSE}.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 }
 \value{
 The plot as a ggplot object

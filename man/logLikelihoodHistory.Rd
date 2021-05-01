@@ -6,7 +6,7 @@
 \alias{logLikelihoodHistory,celdaModel-method}
 \title{Get log-likelihood history}
 \usage{
-logLikelihoodHistory(x, ...)
+logLikelihoodHistory(x, altExpName = "featureSubset")
 
 \S4method{logLikelihoodHistory}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
@@ -16,8 +16,6 @@ logLikelihoodHistory(x, ...)
 \item{x}{A \linkS4class{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 model object.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
