@@ -41,29 +41,50 @@ setMethod("perplexity", signature(x = "SingleCellExperiment"),
         altExpName = "featureSubset",
         newCounts = NULL) {
 
+        altExp <- SingleCellExperiment::altExp(x, altExpName)
+
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+        counts <- .processCounts(counts)
+
         if (celdaModel(x, altExpName = altExpName) == "celda_C") {
-            p <- .perplexityCelda_C(sce = x,
+            factorized <- factorizeMatrix(x = x,
                 useAssay = useAssay,
                 altExpName = altExpName,
+                type = "posterior")
+            s <- as.integer(sampleLabel(x, altExpName = altExpName))
+            p <- .perplexityCelda_C(
+                counts = counts,
+                factorized = factorized,
+                s = s,
                 newCounts = newCounts)
-            return(p)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
-            p <- .perplexityCelda_CG(sce = x,
+            factorized <- factorizeMatrix(x = x,
                 useAssay = useAssay,
                 altExpName = altExpName,
+                type = c("posterior", "counts"))
+            s <- as.integer(sampleLabel(x, altExpName = altExpName))
+            p <- .perplexityCelda_CG(counts = counts,
+                factorized = factorized,
+                s = s,
                 newCounts = newCounts)
-            return(p)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
-            p <- .perplexityCelda_G(sce = x,
+            factorized <- factorizeMatrix(x = x,
                 useAssay = useAssay,
                 altExpName = altExpName,
+                type = c("posterior", "counts"))
+            L <- S4Vectors::metadata(altExp)$celda_parameters$L
+            y <- celdaModules(x, altExpName = altExpName)
+            p <- .perplexityCelda_G(counts,
+                factorized,
+                L,
+                y,
                 newCounts = newCounts)
-            return(p)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
                 "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
+        return(p)
     })
 
 
@@ -208,15 +229,11 @@ setMethod(
 )
 
 
-.perplexityCelda_C <- function(sce,
-    useAssay,
-    altExpName,
+.perplexityCelda_C <- function(
+    counts,
+    factorized,
+    s,
     newCounts) {
-
-    altExp <- SingleCellExperiment::altExp(sce, altExpName)
-
-    counts <- SummarizedExperiment::assay(altExp, i = useAssay)
-    counts <- .processCounts(counts)
 
     if (is.null(newCounts)) {
         newCounts <- counts
@@ -226,16 +243,11 @@ setMethod(
 
     if (nrow(newCounts) != nrow(counts)) {
         stop("'newCounts' should have the same number of rows as",
-            " 'assay(altExp(sce, altExpName), i = useAssay)'.")
+            " 'assay(altExp(x, altExpName), i = useAssay)'.")
     }
 
-    factorized <- factorizeMatrix(x = sce,
-        useAssay = useAssay,
-        altExpName = altExpName,
-        type = "posterior")
     theta <- log(factorized$posterior$sample)
     phi <- log(factorized$posterior$module)
-    s <- as.integer(sampleLabel(sce, altExpName = altExpName))
 
     # inner.log.prob = (t(phi) %*% newCounts) + theta[, s]
     inner.log.prob <- .countsTimesProbs(newCounts, phi) + theta[, s]
@@ -246,15 +258,11 @@ setMethod(
 }
 
 
-.perplexityCelda_CG <- function(sce,
-    useAssay,
-    altExpName,
+.perplexityCelda_CG <- function(
+    counts,
+    factorized,
+    s,
     newCounts) {
-
-    altExp <- SingleCellExperiment::altExp(sce, altExpName)
-
-    counts <- SummarizedExperiment::assay(altExp, i = useAssay)
-    counts <- .processCounts(counts)
 
     if (is.null(newCounts)) {
         newCounts <- counts
@@ -263,18 +271,12 @@ setMethod(
     }
     if (nrow(newCounts) != nrow(counts)) {
         stop("newCounts should have the same number of rows as",
-            " 'assay(altExp(sce, altExpName), i = useAssay)'.")
+            " 'assay(altExp(x, altExpName), i = useAssay)'.")
     }
-
-    factorized <- factorizeMatrix(x = sce,
-        useAssay = useAssay,
-        altExpName = altExpName,
-        type = c("posterior", "counts"))
 
     theta <- log(factorized$posterior$sample)
     phi <- factorized$posterior$cellPopulation
     psi <- factorized$posterior$module
-    s <- as.integer(sampleLabel(sce, altExpName = altExpName))
     eta <- factorized$posterior$geneDistribution
     nGByTS <- factorized$counts$geneDistribution
 
@@ -290,15 +292,11 @@ setMethod(
 }
 
 
-.perplexityCelda_G <- function(sce,
-    useAssay,
-    altExpName,
+.perplexityCelda_G <- function(counts,
+    factorized,
+    L,
+    y,
     newCounts) {
-
-    altExp <- SingleCellExperiment::altExp(sce, altExpName)
-
-    counts <- SummarizedExperiment::assay(altExp, i = useAssay)
-    counts <- .processCounts(counts)
 
     if (is.null(newCounts)) {
         newCounts <- counts
@@ -307,14 +305,9 @@ setMethod(
     }
     if (nrow(newCounts) != nrow(counts)) {
         stop("newCounts should have the same number of rows as",
-            " 'assay(altExp(sce, altExpName), i = useAssay)'.")
+            " 'assay(altExp(x, altExpName), i = useAssay)'.")
     }
 
-    factorized <- factorizeMatrix(
-        sce = sce,
-        useAssay = useAssay,
-        altExpName = altExpName,
-        type = c("posterior", "counts"))
     psi <- factorized$posterior$module
     phi <- factorized$posterior$cell
     eta <- factorized$posterior$geneDistribution
@@ -327,8 +320,8 @@ setMethod(
         newCounts,
         phi,
         psi,
-        celdaModules(sce, altExpName = altExpName),
-        S4Vectors::metadata(altExp)$celda_parameters$L
+        y,
+        L
     ) # + sum(etaProb)
     perplexity <- exp(- (logPx / sum(newCounts)))
     return(perplexity)
