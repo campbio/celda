@@ -1549,7 +1549,7 @@ setMethod("recursiveSplitModule",
     )
   }
 
-  ## Summarize paramters of different models
+  ## Summarize parameters of different models
   logliks <- vapply(resList, function(mod) {
     bestLogLikelihood(mod)
   }, double(1))

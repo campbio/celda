@@ -459,10 +459,9 @@ setMethod("resamplePerplexity",
     for (j in seq(resample)) {
         newCounts <- .resampleCountMatrix(counts)
         for (i in seq(length(resList(celdaList)))) {
-            perpRes[i, j] <- perplexity(
-                counts, resList(celdaList)[[i]],
-                newCounts
-            )
+            perpRes[i, j] <- perplexity(x = counts,
+                celdaMod = resList(celdaList)[[i]],
+                newCounts = newCounts)
         }
     }
     celdaList@perplexity <- perpRes
