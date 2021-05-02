@@ -139,12 +139,12 @@ normalizeCounts <- function(counts,
 #'  \code{celda_cell_cluster} in
 #'  \code{\link{colData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-#'  the original cluster
+#'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+#'  that correspond to the original cluster
 #'  labels in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-#'  the new cluster labels.
+#'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+#'  that correspond to the new cluster labels.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell

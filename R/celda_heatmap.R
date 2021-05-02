@@ -44,7 +44,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         model <- celdaModel(sce, altExpName = altExpName)
 
         if (model == "celda_C") {
-            z <- celdaClusters(sce, altExpName = altExpName)
+            z <- as.integer(celdaClusters(sce, altExpName = altExpName))
             g <- .celdaHeatmapCelda_C(
                 counts = counts,
                 z = z,
@@ -53,8 +53,8 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         } else if (model == "celda_CG") {
             fm <- factorizeMatrix(x = sce, useAssay = useAssay,
                 altExpName = altExpName, type = "proportion")
-            z <- celdaClusters(sce, altExpName = altExpName)
-            y <- celdaModules(sce, altExpName = altExpName)
+            z <- as.integer(celdaClusters(sce, altExpName = altExpName))
+            y <- as.integer(celdaModules(sce, altExpName = altExpName))
             g <- .celdaHeatmapCelda_CG(
                 counts = counts,
                 fm = fm,
@@ -65,7 +65,7 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         } else if (model == "celda_G") {
             fm <- factorizeMatrix(x = sce, useAssay = useAssay,
                 altExpName = altExpName, type = "proportion")
-            y <- celdaModules(sce, altExpName = altExpName)
+            y <- as.integer(celdaModules(sce, altExpName = altExpName))
             g <- .celdaHeatmapCelda_G(counts,
                 fm,
                 y,

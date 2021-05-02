@@ -1183,7 +1183,7 @@ setMethod("plotCeldaViolin",
         dotSize = 0.1) {
 
         counts <- SummarizedExperiment::assay(x, i = useAssay)
-        cluster <- celdaClusters(x, altExpName = altExpName)
+        cluster <- as.integer(celdaClusters(x, altExpName = altExpName))
 
         g <- .plotCeldaViolin(counts = counts,
             cluster = cluster,

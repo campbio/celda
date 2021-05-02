@@ -36,8 +36,8 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
         sampleLabel <- sampleLabel(x, altExpName = altExpName)
-        z <- celdaClusters(x, altExpName = altExpName)
-        y <- celdaModules(x, altExpName = altExpName)
+        z <- as.integer(celdaClusters(x, altExpName = altExpName))
+        y <- as.integer(celdaModules(x, altExpName = altExpName))
         K <- S4Vectors::metadata(altExp)$celda_parameters$K
         L <- S4Vectors::metadata(altExp)$celda_parameters$L
         alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
