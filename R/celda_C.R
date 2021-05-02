@@ -955,10 +955,10 @@ setMethod("celda_C",
     return(sce)
 }
 
-#' @name countsTimesProbs
-#' @title Counts matrix times cell population probabilies
-#' @param counts feature-by-cell matrix
-#' @param phi feature-by-probability matrix
+# #' @name countsTimesProbs
+# #' @title Counts matrix times cell population probabilies
+# #' @param counts feature-by-cell matrix
+# #' @param phi feature-by-probability matrix
 #' @importMethodsFrom Matrix %*%
 .countsTimesProbs <- function(counts, phi) {
   ## Maximization to find best label for each cell

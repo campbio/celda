@@ -753,6 +753,13 @@ setMethod("celda_G",
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
+    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+    cNames <- colnames(sce)
+    rNames <- rownames(sce)
 
     if (is.null(maxCells) || maxCells > ncol(counts)) {
         maxCells <- ncol(counts)
@@ -761,7 +768,16 @@ setMethod("celda_G",
         cellIx <- sample(seq(ncol(counts)), maxCells)
     }
 
-    fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "counts")
+    fm <- .factorizeMatrixG(
+        counts = counts,
+        y = y,
+        L = L,
+        beta = beta,
+        delta = delta,
+        gamma = gamma,
+        cNames = cNames,
+        rNames = rNames,
+        type = "counts")
 
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {

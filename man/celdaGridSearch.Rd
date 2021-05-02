@@ -124,7 +124,7 @@ Run Celda with different combinations of parameters and
  but not be displayed in \code{stdout}.
 }
 \examples{
-\dontrun{
+\donttest{
 data(celdaCGSim)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,

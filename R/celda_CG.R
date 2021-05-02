@@ -942,15 +942,29 @@ setMethod("celda_CG",
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
 
+    K <- S4Vectors::metadata(sce)$celda_parameters$K
+    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
+    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
+    L <- S4Vectors::metadata(sce)$celda_parameters$L
+    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
+    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+
+    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
+    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+    sampleLabel <-
+        SummarizedExperiment::colData(sce)$celda_sample_label
+    cNames <- colnames(sce)
+    rNames <- rownames(sce)
+    sNames <- S4Vectors::metadata(sce)$celda_parameters$sampleLevels
+
     ## Checking if maxCells and minClusterSize will work
     if (!is.null(maxCells)) {
         if ((maxCells < ncol(counts)) &
-                (maxCells / minClusterSize <
-                        S4Vectors::metadata(sce)$celda_parameters$K)) {
+                (maxCells / minClusterSize < K)) {
             stop("Cannot distribute ",
                 maxCells,
                 " cells among ",
-                S4Vectors::metadata(sce)$celda_parameters$K,
+                K,
                 " clusters while maintaining a minumum of ",
                 minClusterSize,
                 " cells per cluster. Try increasing 'maxCells' or",
@@ -960,7 +974,21 @@ setMethod("celda_CG",
         maxCells <- ncol(counts)
     }
 
-    fm <- factorizeMatrix(x = sce, useAssay = useAssay, type = "counts")
+    fm <- .factorizeMatrixCG(
+        counts = counts,
+        K = K,
+        z = z,
+        y = y,
+        L = L,
+        alpha = alpha,
+        beta = beta,
+        delta = delta,
+        gamma = gamma,
+        sampleLabel = sampleLabel,
+        cNames = cNames,
+        rNames = rNames,
+        sNames = sNames,
+        type = "counts")
     modulesToUse <- seq(nrow(fm$counts$cell))
     if (!is.null(modules)) {
         if (!all(modules %in% modulesToUse)) {
@@ -976,8 +1004,7 @@ setMethod("celda_CG",
     zInclude <- rep(TRUE, ncol(counts))
 
     if (totalCellsToRemove > 0) {
-        zTa <- tabulate(SummarizedExperiment::colData(sce)$celda_cell_cluster,
-            S4Vectors::metadata(sce)$celda_parameters$K)
+        zTa <- tabulate(z, K)
 
         ## Number of cells that can be sampled from each cluster without
         ## going below the minimum threshold
@@ -995,11 +1022,7 @@ setMethod("celda_CG",
 
         ## Perform sampling for each cluster
         for (i in which(clusterNToSample > 0)) {
-            zInclude[sample(
-                which(SummarizedExperiment::colData(sce)$celda_cell_cluster ==
-                        i),
-                clusterNToSample[i]
-            )] <- FALSE
+            zInclude[sample(which(z == i), clusterNToSample[i])] <- FALSE
         }
     }
     cellIx <- which(zInclude)
