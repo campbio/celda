@@ -489,11 +489,14 @@ setMethod("resamplePerplexity",
 #'  to use. Default "featureSubset". Only works if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
+#' @param alpha Numeric. Passed to \link{geom_jitter}. Opacity of the points.
+#'  Values of alpha range from 0 to 1, with lower values corresponding
+#'  to more transparent colors.
 #' @return A ggplot plot object showing perplexity as a function of clustering
 #'  parameters.
 #' @export
 setGeneric("plotGridSearchPerplexity",
-    function(x, altExpName = "featureSubset", sep = 1) {
+    function(x, altExpName = "featureSubset", sep = 1, alpha = 0.5) {
     standardGeneric("plotGridSearchPerplexity")})
 
 
@@ -505,12 +508,12 @@ setGeneric("plotGridSearchPerplexity",
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 1) {
+    function(x, altExpName = "featureSubset", sep = 1, alpha = 0.5) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
         g <- do.call(paste0(".plotGridSearchPerplexity",
             as.character(class(resList(x)[[1]]))),
-            args = list(celdaList, sep))
+            args = list(celdaList, sep, alpha))
         return(g)
     }
 )
@@ -527,16 +530,16 @@ setMethod("plotGridSearchPerplexity",
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "celdaList"),
-    function(x, sep = 1) {
+    function(x, sep = 1, alpha = 0.5) {
         g <- do.call(paste0(".plotGridSearchPerplexity",
             as.character(class(resList(x)[[1]]))),
-            args = list(x, sep))
+            args = list(x, sep, alpha))
         return(g)
     }
 )
 
 
-.plotGridSearchPerplexitycelda_CG <- function(celdaList, sep) {
+.plotGridSearchPerplexitycelda_CG <- function(celdaList, sep, alpha) {
     if (!all(c("K", "L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs K and L columns.")
     }
@@ -573,7 +576,7 @@ setMethod("plotGridSearchPerplexity",
                 ggplot2::aes_string(x = "K", y = "perplexity")
             ) +
                 ggplot2::geom_jitter(
-                    height = 0, width = 0.1,
+                    height = 0, width = 0.1, alpha = alpha,
                     ggplot2::aes_string(color = "L")
                 ) +
                 ggplot2::scale_color_discrete(name = "L") +
@@ -594,7 +597,8 @@ setMethod("plotGridSearchPerplexity",
             plot <- ggplot2::ggplot(
                 df,
                 ggplot2::aes_string(x = "K", y = "perplexity")) +
-                ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+                ggplot2::geom_jitter(height = 0, width = 0.1,
+                    color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
                 ggplot2::geom_path(data = lMeansByK, ggplot2::aes_string(
                     x = "K",
@@ -614,7 +618,8 @@ setMethod("plotGridSearchPerplexity",
         plot <- ggplot2::ggplot(
             df,
             ggplot2::aes_string(x = "L", y = "perplexity")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+            ggplot2::geom_jitter(height = 0, width = 0.1,
+                color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = lMeansByK,
                 ggplot2::aes_string(x = "L",
                     y = "mean_perplexity",
@@ -633,7 +638,7 @@ setMethod("plotGridSearchPerplexity",
 }
 
 
-.plotGridSearchPerplexitycelda_C <- function(celdaList, sep) {
+.plotGridSearchPerplexitycelda_C <- function(celdaList, sep, alpha) {
     if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
     }
@@ -662,7 +667,8 @@ setMethod("plotGridSearchPerplexity",
 
     plot <-
         ggplot2::ggplot(df, ggplot2::aes_string(x = "K", y = "perplexity")) +
-        ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+        ggplot2::geom_jitter(height = 0, width = 0.1,
+            color = "grey", alpha = alpha) +
         ggplot2::geom_path(
             data = meansByK,
             ggplot2::aes_string(x = "K", y = "mean_perplexity", group = 1)
@@ -681,7 +687,7 @@ setMethod("plotGridSearchPerplexity",
 }
 
 
-.plotGridSearchPerplexitycelda_G <- function(celdaList, sep) {
+.plotGridSearchPerplexitycelda_G <- function(celdaList, sep, alpha) {
     if (!all(c("L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column L.")
     }
@@ -710,7 +716,8 @@ setMethod("plotGridSearchPerplexity",
 
     plot <-
         ggplot2::ggplot(df, ggplot2::aes_string(x = "L", y = "perplexity")) +
-        ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+        ggplot2::geom_jitter(height = 0, width = 0.1,
+            color = "grey", alpha = alpha) +
         ggplot2::geom_path(
             data = meansByL,
             ggplot2::aes_string(x = "L", y = "mean_perplexity", group = 1)
@@ -769,34 +776,40 @@ setMethod("plotGridSearchPerplexity",
 #'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
 #' @param n Integer. Width of the rolling window. Default 10.
+#' @param alpha Numeric. Passed to \link{geom_jitter}. Opacity of the points.
+#'  Values of alpha range from 0 to 1, with lower values corresponding
+#'  to more transparent colors.
 #' @return A ggplot plot object showing perplexity diferences as a function of
 #'  clustering parameters.
 #' @export
-setGeneric("plotGridSearchPerplexityDiff",
-    function(x, altExpName = "featureSubset", sep = 1, n = 10) {
-    standardGeneric("plotGridSearchPerplexityDiff")})
+setGeneric("plotRPC",
+    function(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5) {
+    standardGeneric("plotRPC")})
 
 
-#' @rdname plotGridSearchPerplexityDiff
+#' @rdname plotRPC
 #' @examples
 #' data(sceCeldaCGGridSearch)
 #' sce <- resamplePerplexity(sceCeldaCGGridSearch)
-#' plotGridSearchPerplexityDiff(sce, n = 1)
+#' plotRPC(sce, n = 1)
 #' @export
-setMethod("plotGridSearchPerplexityDiff",
+setMethod("plotRPC",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 1, n = 10) {
+    function(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         model <- altExp@metadata$celda_grid_search@celdaGridSearchParameters$
             model
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
 
         if (model == "celda_C") {
-            g <- .plotGridSearchPerplexityDiffC(celdaList, sep, n = n)
+            g <- .plotRPCC(celdaList, sep, n = n,
+                alpha = alpha)
         } else if (model == "celda_G") {
-            g <- .plotGridSearchPerplexityDiffG(celdaList, sep, n = n)
+            g <- .plotRPCG(celdaList, sep, n = n,
+                alpha = alpha)
         } else if (model == "celda_CG") {
-            g <- .plotGridSearchPerplexityDiffCG(celdaList, sep, n = n)
+            g <- .plotRPCCG(celdaList, sep, n = n,
+                alpha = alpha)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
                 "celda_grid_search@",
@@ -808,27 +821,27 @@ setMethod("plotGridSearchPerplexityDiff",
 )
 
 
-#' @rdname plotGridSearchPerplexityDiff
+#' @rdname plotRPC
 #' @examples
 #' data(celdaCGSim, celdaCGGridSearchRes)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)
-#' plotGridSearchPerplexityDiff(celdaCGGridSearchRes, n = 1)
+#' plotRPC(celdaCGGridSearchRes, n = 1)
 #' @export
-setMethod("plotGridSearchPerplexityDiff",
+setMethod("plotRPC",
     signature(x = "celdaList"),
-    function(x, sep = 1, n = 10) {
-        g <- do.call(paste0(".plotGridSearchPerplexityDiff",
+    function(x, sep = 1, n = 10, alpha = 0.5) {
+        g <- do.call(paste0(".plotRPC",
             unlist(strsplit(as.character(class(resList(x)[[1]])), "_"))[[2]]),
-            args = list(x, sep, n))
+            args = list(x, sep, n, alpha))
         return(g)
     }
 )
 
 
-.plotGridSearchPerplexityDiffCG <- function(celdaList, sep, n) {
+.plotRPCCG <- function(celdaList, sep, n, alpha) {
     # fix check note
     K <- L <- perpdiffK <- meanperpdiffK <- perpdiffL <- meanperpdiffL <- NULL
 
@@ -875,7 +888,7 @@ setMethod("plotGridSearchPerplexityDiff",
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
                 ggplot2::aes_string(x = "K",
                     y = "perpdiffK")) +
-                ggplot2::geom_jitter(height = 0, width = 0.1,
+                ggplot2::geom_jitter(height = 0, width = 0.1, alpha = alpha,
                     ggplot2::aes_string(color = "L")) +
                 ggplot2::scale_color_discrete(name = "L") +
                 ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
@@ -893,7 +906,8 @@ setMethod("plotGridSearchPerplexityDiff",
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
                 ggplot2::aes_string(x = "K",
                     y = "perpdiffK")) +
-                ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+                ggplot2::geom_jitter(height = 0, width = 0.1,
+                    color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
                 ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
                     ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
@@ -928,7 +942,8 @@ setMethod("plotGridSearchPerplexityDiff",
 
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+            ggplot2::geom_jitter(height = 0, width = 0.1,
+                color = "grey", alpha = alpha) +
             ggplot2::scale_color_manual(name = "K", values = "black") +
             ggplot2::geom_path(
                 data = diffMeansByL[!is.na(meanperpdiffL), ],
@@ -952,7 +967,7 @@ setMethod("plotGridSearchPerplexityDiff",
 }
 
 
-.plotGridSearchPerplexityDiffC <- function(celdaList, sep, n) {
+.plotRPCC <- function(celdaList, sep, n, alpha) {
     K <- perpdiffK <- meanperpdiffK <- NULL # fix check note
     if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
@@ -990,7 +1005,8 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+            ggplot2::geom_jitter(height = 0, width = 0.1,
+                color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
                 ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
                 size = 1) +
@@ -1010,7 +1026,7 @@ setMethod("plotGridSearchPerplexityDiff",
 }
 
 
-.plotGridSearchPerplexityDiffG <- function(celdaList, sep, n) {
+.plotRPCG <- function(celdaList, sep, n, alpha) {
     L <- perpdiffL <- meanperpdiffL <- NULL # fix check note
     if (!all(c("L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column L.")
@@ -1048,7 +1064,8 @@ setMethod("plotGridSearchPerplexityDiff",
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
-            ggplot2::geom_jitter(height = 0, width = 0.1, color = "grey") +
+            ggplot2::geom_jitter(height = 0, width = 0.1,
+                color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByL[!is.na(meanperpdiffL), ],
                 ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
                 size = 1) +
