@@ -6,7 +6,14 @@
 \alias{geneSetEnrich,matrix-method}
 \title{Gene set enrichment}
 \usage{
-geneSetEnrich(x, ...)
+geneSetEnrich(
+  x,
+  celdaModel,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  databases,
+  fdr = 0.05
+)
 
 \S4method{geneSetEnrich}{SingleCellExperiment}(
   x,
@@ -25,7 +32,7 @@ with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Rownames of the
 matrix or \linkS4class{SingleCellExperiment} object should be gene names.}
 
-\item{...}{Ignored. Placeholder to prevent check warning.}
+\item{celdaModel}{Celda object of class \code{celda_G} or \code{celda_CG}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
@@ -40,8 +47,6 @@ databases can be viewed by \link[enrichR]{listEnrichrDbs}.}
 \item{fdr}{False discovery rate (FDR). Numeric. Cutoff value for adjusted
 p-value, terms with FDR below this value are considered significantly
 enriched.}
-
-\item{celdaModel}{Celda object of class \code{celda_G} or \code{celda_CG}.}
 }
 \value{
 List of length 'L' where each member contains the significantly

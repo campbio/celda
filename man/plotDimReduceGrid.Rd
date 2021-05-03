@@ -6,7 +6,26 @@
 \alias{plotDimReduceGrid,matrix-method}
 \title{Mapping the dimension reduction plot}
 \usage{
-plotDimReduceGrid(x, ...)
+plotDimReduceGrid(
+  x,
+  reducedDimName,
+  dim1 = NULL,
+  dim2 = NULL,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  limits = c(-2, 2),
+  colorLow = "blue4",
+  colorMid = "grey90",
+  colorHigh = "firebrick1",
+  midpoint = 0,
+  varLabel = NULL,
+  ncol = NULL,
+  headers = NULL,
+  decreasing = FALSE
+)
 
 \S4method{plotDimReduceGrid}{SingleCellExperiment}(
   x,
@@ -40,7 +59,7 @@ plotDimReduceGrid(x, ...)
   colorLow = "blue4",
   colorMid = "grey90",
   colorHigh = "firebrick1",
-  midpoint = NULL,
+  midpoint = 0,
   varLabel = NULL,
   ncol = NULL,
   headers = NULL,
@@ -51,8 +70,6 @@ plotDimReduceGrid(x, ...)
 \item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}. Each
 row of the matrix will be plotted as a separate facet.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a

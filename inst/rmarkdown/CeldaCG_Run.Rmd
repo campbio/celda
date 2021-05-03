@@ -34,7 +34,7 @@ params:
 # Run celda_CG
 
 ## Setup
-The following code loads required librarys, reads in parameters, checks input variables, and sets up display options for the **Celda_CG Run** report.
+The following code loads required libraries, reads in parameters, checks input variables, and sets up display options for the **Celda_CG Run** report.
 ```{r run_setup}
 require(singleCellTK)
 require(celda)
@@ -136,8 +136,7 @@ moduleSplit <-
 sep <- ifelse(maxL > 100, 10, 5)
 p1 <-
   plotGridSearchPerplexity(moduleSplit, altExpName = altExpName, sep = sep)
-p2 <-
-  plotGridSearchPerplexityDiff(moduleSplit, altExpName = altExpName,  sep = sep)
+p2 <- plotRPC(moduleSplit, altExpName = altExpName,  sep = sep)
 grid.arrange(p1, p2,  ncol = 2)
 ```
 
@@ -159,15 +158,15 @@ cellSplit <-
     maxK = maxK,
     yInit = initial.modules,
     sampleLabel = sampleLabel,
-    reorder = FALSE
-  )
+    altExpName = altExpName,
+    useAssay = useAssay,
+    reorder = FALSE)
 
 # Show results of clustering genes (perplexity plot)
 p3 <-
   plotGridSearchPerplexity(cellSplit, altExpName = altExpName, sep = 5) +
   theme(legend.position = "bottom")
-p4 <-
-  plotGridSearchPerplexityDiff(cellSplit, altExpName = altExpName, sep = 5) +
+p4 <- plotRPC(cellSplit, altExpName = altExpName, sep = 5) +
   theme(legend.position = "bottom")
 grid.arrange(p3, p4,  ncol = 2)
 

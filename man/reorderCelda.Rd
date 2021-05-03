@@ -9,7 +9,13 @@
 \title{Reorder cells populations and/or features modules using
  hierarchical clustering}
 \usage{
-reorderCelda(x, celdaMod, ...)
+reorderCelda(
+  x,
+  celdaMod,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  method = "complete"
+)
 
 \S4method{reorderCelda}{SingleCellExperiment,ANY}(
   x,
@@ -37,9 +43,7 @@ cells. This matrix should be the same as the one used to generate
 
 \item{celdaMod}{Celda model object. Only works if \code{x} is an integer
 counts matrix. Ignored if \code{x} is a
-\linkS4class{SingleCellExperiment} object}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
+\linkS4class{SingleCellExperiment} object.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.

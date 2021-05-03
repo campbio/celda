@@ -60,12 +60,12 @@ test_that(desc = paste0("Testing simulateCells celda_CG, make sure all genes",
 test_that(desc = "Testing logLikelihood functions for celda_CG", {
     expect_lt(logLikelihood(modelCG), 0)
 
-    fakeZ <- celdaClusters(modelCG)
+    fakeZ <- as.integer(celdaClusters(modelCG))
     fakeZ[1] <- K + 1
     expect_error(.logLikelihoodcelda_CG(
       K = K,
       L = L,
-      y = celdaModules(modelCG),
+      y = as.integer(celdaModules(modelCG)),
       z = fakeZ,
       delta = 1,
       gamma = 1,
@@ -76,11 +76,11 @@ test_that(desc = "Testing logLikelihood functions for celda_CG", {
         paste0("Assigned value of cell cluster greater than the total ",
         "number of cell clusters!"))
 
-    fakeY <- celdaModules(modelCG)
+    fakeY <- as.integer(celdaModules(modelCG))
     fakeY[1] <- L + 1
     expect_error(.logLikelihoodcelda_CG(
         y = fakeY,
-        z = celdaClusters(modelCG),
+        z = as.integer(celdaClusters(modelCG)),
         delta = 1,
         gamma = 1,
         beta = 1,

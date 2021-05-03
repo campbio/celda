@@ -7,7 +7,7 @@
 \title{Get final celdaModels from a celda model \code{SCE} or celdaList
  object}
 \usage{
-resList(x, ...)
+resList(x, altExpName = "featureSubset")
 
 \S4method{resList}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
@@ -16,8 +16,6 @@ resList(x, ...)
 \arguments{
 \item{x}{An object of class \linkS4class{SingleCellExperiment} or
 \code{celdaList}.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

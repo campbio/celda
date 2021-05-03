@@ -6,7 +6,12 @@
 \title{Get the conditional probabilities of cell in subpopulations from celda
  model}
 \usage{
-clusterProbability(sce, ...)
+clusterProbability(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  log = FALSE
+)
 
 \S4method{clusterProbability}{SingleCellExperiment}(
   sce,
@@ -20,8 +25,6 @@ clusterProbability(sce, ...)
 \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}

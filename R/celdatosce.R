@@ -14,7 +14,6 @@
 #'  \link{assay} slot to use. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \linkS4class{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link{metadata}
 #'  \code{"celda_parameters"} slot.
@@ -23,7 +22,11 @@
 #'  population clusters. Column \code{celda_feature_module} in
 #'  \link{rowData} contain feature modules.
 #' @export
-setGeneric("celdatosce", function(celdaModel, counts, ...) {
+setGeneric("celdatosce",
+    function(celdaModel,
+        counts,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
     standardGeneric("celdatosce")})
 
 

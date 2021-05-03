@@ -6,7 +6,16 @@
 \alias{plotCeldaViolin,matrix-method}
 \title{Feature Expression Violin Plot}
 \usage{
-plotCeldaViolin(x, ...)
+plotCeldaViolin(
+  x,
+  celdaMod,
+  features,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  exactMatch = TRUE,
+  plotDots = TRUE,
+  dotSize = 0.1
+)
 
 \S4method{plotCeldaViolin}{SingleCellExperiment}(
   x,
@@ -32,7 +41,8 @@ plotCeldaViolin(x, ...)
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
 
-\item{...}{Ignored. Placeholder to prevent check warning.}
+\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
+\code{x} is a matrix object.}
 
 \item{features}{Character vector. Uses these genes for plotting.}
 
@@ -53,9 +63,6 @@ curve. Default \code{TRUE}.}
 
 \item{dotSize}{Numeric. Size of points if \code{plotDots = TRUE}.
 Default \code{0.1}.}
-
-\item{celdaMod}{Celda object of class "celda_G" or "celda_CG". Used only if
-\code{x} is a matrix object.}
 }
 \value{
 Violin plot for each feature, grouped by celda cluster

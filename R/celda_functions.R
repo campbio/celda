@@ -139,12 +139,12 @@ normalizeCounts <- function(counts,
 #'  \code{celda_cell_cluster} in
 #'  \code{\link{colData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-#'  the original cluster
+#'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+#'  that correspond to the original cluster
 #'  labels in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-#'  the new cluster labels.
+#'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+#'  that correspond to the new cluster labels.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell
@@ -238,12 +238,12 @@ recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
 #' @param celdaMod A \code{celdaModel} or \code{celdaList} object.
 #' @param errorOnMismatch Logical. Whether to throw an error in the event of
 #'  a mismatch. Default TRUE.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Returns TRUE if provided count matrix matches the one used in the
 #'  celda object and/or \code{errorOnMismatch = FALSE}, FALSE otherwise.
 #' @export
-setGeneric("compareCountMatrix", function(counts, celdaMod, ...) {
-    standardGeneric("compareCountMatrix")})
+setGeneric("compareCountMatrix",
+    function(counts, celdaMod, errorOnMismatch = TRUE) {
+        standardGeneric("compareCountMatrix")})
 
 
 #' @rdname compareCountMatrix
@@ -623,10 +623,10 @@ retrieveFeatureIndex <- function(features,
     search <- rownames(x)
   } else if (length(ncol(x)) > 0) {
     if (inherits(x, "SummarizedExperiment")) {
-      if (!(by %in% colnames(rowData(x)))) {
+      if (!(by %in% colnames(SummarizedExperiment::rowData(x)))) {
         stop("'by' is not a column in 'rowData(x)'.")
       }
-      search <- rowData(x)[, by]
+      search <- SummarizedExperiment::rowData(x)[, by]
     } else {
       if (!(by %in% colnames(x))) {
         stop("'by' is not a column in 'x'.")

@@ -15,7 +15,6 @@
 #' @param log Logical. If \code{FALSE}, then the normalized conditional
 #'  probabilities will be returned. If \code{TRUE}, then the unnormalized log
 #'  probabilities will be returned. Default \code{FALSE}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @examples
 #' data(sceCeldaCG)
 #' clusterProb <- clusterProbability(sceCeldaCG, log = TRUE)
@@ -23,7 +22,11 @@
 #'  cluster and/or feature module probabilities.
 #' @export
 setGeneric("clusterProbability",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        log = FALSE) {
+
         standardGeneric("clusterProbability")
     })
 
@@ -40,18 +43,66 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
         altExpName = "featureSubset",
         log = FALSE) {
 
+        model <- celdaModel(sce, altExpName = altExpName)
         altExp <- SingleCellExperiment::altExp(sce, altExpName)
-        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
-            cp <- .clusterProbabilityCeldaC(sce = altExp,
-                useAssay = useAssay,
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+        beta <- S4Vectors::metadata(altExp)$celda_parameters$beta
+
+        if (model == "celda_C") {
+            s <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_sample_label)
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
+            K <- S4Vectors::metadata(altExp)$celda_parameters$K
+            alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
+
+            cp <- .clusterProbabilityCeldaC(
+                counts = counts,
+                z = z,
+                s = s,
+                K = K,
+                alpha = alpha,
+                beta = beta,
                 log = log)
-        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
-            cp <- .clusterProbabilityCeldaCG(sce = altExp,
-                useAssay = useAssay,
+        } else if (model == "celda_CG") {
+            s <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_sample_label)
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
+            K <- S4Vectors::metadata(altExp)$celda_parameters$K
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
+            L <- S4Vectors::metadata(altExp)$celda_parameters$L
+            alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
+            delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
+            gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
+
+            cp <- .clusterProbabilityCeldaCG(
+                counts = counts,
+                s = s,
+                z = z,
+                y = y,
+                K = K,
+                L = L,
+                alpha = alpha,
+                delta = delta,
+                beta = beta,
+                gamma = gamma,
                 log = log)
-        } else if (celdaModel(sce, altExpName = altExpName) == "celda_G") {
-            cp <- .clusterProbabilityCeldaG(sce = altExp,
-                useAssay = useAssay,
+        } else if (model == "celda_G") {
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
+            L <- S4Vectors::metadata(altExp)$celda_parameters$L
+            delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
+            gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
+
+            cp <- .clusterProbabilityCeldaG(
+                counts = counts,
+                y = y,
+                L = L,
+                delta = delta,
+                beta = beta,
+                gamma = gamma,
                 log = log)
         } else {
             stop("S4Vectors::metadata(altExp(sce, altExpName))$",
@@ -63,15 +114,14 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
 )
 
 
-.clusterProbabilityCeldaC <- function(sce, useAssay, log) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
-    s <- as.integer(SummarizedExperiment::colData(sce)$celda_sample_label)
-
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
+.clusterProbabilityCeldaC <- function(
+    counts,
+    z,
+    s,
+    K,
+    alpha,
+    beta,
+    log) {
 
     p <- .cCDecomposeCounts(counts, s, z, K)
 
@@ -93,23 +143,22 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
     if (!isTRUE(log)) {
         zProb <- .normalizeLogProbs(zProb)
     }
-
     return(list(zProbability = zProb))
 }
 
 
-.clusterProbabilityCeldaCG <- function(sce, useAssay, log) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    s <- as.integer(SummarizedExperiment::colData(sce)$celda_sample_label)
-    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
-    K <- S4Vectors::metadata(sce)$celda_parameters$K
-    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+.clusterProbabilityCeldaCG <- function(
+    counts,
+    s,
+    z,
+    y,
+    K,
+    L,
+    alpha,
+    delta,
+    beta,
+    gamma,
+    log) {
 
     p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
     lgbeta <- lgamma(seq(0, max(p$nCP)) + beta)
@@ -161,14 +210,14 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
 }
 
 
-.clusterProbabilityCeldaG <- function(sce, useAssay, log) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-
-    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
-    L <- S4Vectors::metadata(sce)$celda_parameters$L
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+.clusterProbabilityCeldaG <- function(
+    counts,
+    y,
+    L,
+    delta,
+    beta,
+    gamma,
+    log) {
 
     ## Calculate counts one time up front
     p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
@@ -199,6 +248,5 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
     if (!isTRUE(log)) {
         yProb <- .normalizeLogProbs(yProb)
     }
-
     return(list(yProbability = yProb))
 }

@@ -48,7 +48,26 @@
 #'  \link[ComplexHeatmap]{Heatmap-class} objects
 #' @export
 setGeneric("celdaProbabilityMap",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        level = c("cellPopulation", "sample"),
+        ncols = 100,
+        col2 = circlize::colorRamp2(c(-2, 0, 2),
+            c("#1E90FF", "#FFFFFF", "#CD2626")),
+        title1 = "Absolute probability",
+        title2 = "Relative expression",
+        showColumnNames = TRUE,
+        showRowNames = TRUE,
+        rowNamesgp = grid::gpar(fontsize = 8),
+        colNamesgp = grid::gpar(fontsize = 12),
+        clusterRows = FALSE,
+        clusterColumns = FALSE,
+        showHeatmapLegend = TRUE,
+        heatmapLegendParam = list(title = NULL,
+            legend_height = grid::unit(6, "cm")),
+        ...) {
+
         standardGeneric("celdaProbabilityMap")
     })
 
@@ -81,14 +100,14 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
             legend_height = grid::unit(6, "cm")),
         ...) {
 
-        altExp <- SingleCellExperiment::altExp(sce, altExpName)
         level <- match.arg(level)
         if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
             if (level == "cellPopulation") {
                 warning("'level' has been set to 'sample'")
             }
-            pm <- .celdaProbabilityMapC(sce = altExp,
+            pm <- .celdaProbabilityMapC(sce = sce,
                 useAssay = useAssay,
+                altExpName = altExpName,
                 level = "sample",
                 ncols = ncols,
                 col2 = col2,
@@ -104,8 +123,9 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
                 heatmapLegendParam = heatmapLegendParam,
                 ...)
         } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
-            pm <- .celdaProbabilityMapCG(sce = altExp,
+            pm <- .celdaProbabilityMapCG(sce = sce,
                 useAssay = useAssay,
+                altExpName = altExpName,
                 level = level,
                 ncols = ncols,
                 col2 = col2,
@@ -132,6 +152,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
 
 .celdaProbabilityMapC <- function(sce,
     useAssay,
+    altExpName,
     level,
     ncols,
     col2,
@@ -147,14 +168,13 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     heatmapLegendParam,
     ...) {
 
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
 
     zInclude <- which(tabulate(SummarizedExperiment::colData(
-        sce)$celda_cell_cluster,
-        S4Vectors::metadata(sce)$celda_parameters$K) > 0)
+        altExp)$celda_cell_cluster,
+        S4Vectors::metadata(altExp)$celda_parameters$K) > 0)
 
-    factorized <- .factorizeMatrixCelda_C(sce, useAssay = useAssay,
+    factorized <- factorizeMatrix(x = sce, useAssay = useAssay,
         type = "proportion")
 
     samp <- factorized$proportions$sample[zInclude, , drop = FALSE]
@@ -208,6 +228,7 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
 
 .celdaProbabilityMapCG <- function(sce,
     useAssay,
+    altExpName,
     level,
     ncols,
     col2,
@@ -223,17 +244,17 @@ setMethod("celdaProbabilityMap", signature(sce = "SingleCellExperiment"),
     heatmapLegendParam,
     ...) {
 
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
+    altExp <- SingleCellExperiment::altExp(sce, altExpName)
 
-    factorized <- .factorizeMatrixCelda_CG(sce, useAssay,
+    factorized <- factorizeMatrix(x = sce, useAssay = useAssay,
+        altExpName = altExpName,
         type = c("counts", "proportion"))
     zInclude <- which(tabulate(SummarizedExperiment::colData(
-        sce)$celda_cell_cluster,
-        S4Vectors::metadata(sce)$celda_parameters$K) > 0)
+        altExp)$celda_cell_cluster,
+        S4Vectors::metadata(altExp)$celda_parameters$K) > 0)
     yInclude <- which(tabulate(SummarizedExperiment::rowData(
-        sce)$celda_feature_module,
-        S4Vectors::metadata(sce)$celda_parameters$L) > 0)
+        altExp)$celda_feature_module,
+        S4Vectors::metadata(altExp)$celda_parameters$L) > 0)
 
     if (level == "cellPopulation") {
         pop <- factorized$proportions$cellPopulation[yInclude,

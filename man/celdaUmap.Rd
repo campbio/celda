@@ -6,7 +6,25 @@
 \title{Uniform Manifold Approximation and Projection (UMAP) dimension
  reduction for celda \code{sce} object}
 \usage{
-celdaUmap(sce, ...)
+celdaUmap(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  maxCells = NULL,
+  minClusterSize = 100,
+  modules = NULL,
+  seed = 12345,
+  nNeighbors = 30,
+  minDist = 0.75,
+  spread = 1,
+  pca = TRUE,
+  initialDims = 50,
+  normalize = "proportion",
+  scaleFactor = NULL,
+  transformationFun = sqrt,
+  cores = 1,
+  ...
+)
 
 \S4method{celdaUmap}{SingleCellExperiment}(
   sce,
@@ -31,8 +49,6 @@ celdaUmap(sce, ...)
 \arguments{
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
-
-\item{...}{Additional parameters to pass to \link[uwot]{umap}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}
@@ -99,6 +115,8 @@ be applied. Occurs after applying normalization and scale factor. Default
 \code{NULL}.}
 
 \item{cores}{Number of threads to use. Default 1.}
+
+\item{...}{Additional parameters to pass to \link[uwot]{umap}.}
 }
 \value{
 \code{sce} with UMAP coordinates

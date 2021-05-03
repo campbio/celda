@@ -56,7 +56,6 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link{metadata}
 #'  \code{"celda_parameters"} slot.
@@ -75,7 +74,26 @@
 #' @import Rcpp RcppEigen
 #' @importFrom withr with_seed
 #' @export
-setGeneric("celda_C", function(x, ...) {
+setGeneric("celda_C",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        sampleLabel = NULL,
+        K,
+        alpha = 1,
+        beta = 1,
+        algorithm = c("EM", "Gibbs"),
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        zInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        zInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
     standardGeneric("celda_C")})
 
 
@@ -930,17 +948,17 @@ setMethod("celda_C",
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCMod@names$column
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        celdaCMod@sampleLabel
+        as.factor(celdaCMod@sampleLabel)
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaClusters(celdaCMod)$z
+        as.factor(celdaClusters(celdaCMod)$z)
 
     return(sce)
 }
 
-#' @name countsTimesProbs
-#' @title Counts matrix times cell population probabilies
-#' @param counts feature-by-cell matrix
-#' @param phi feature-by-probability matrix
+# #' @name countsTimesProbs
+# #' @title Counts matrix times cell population probabilies
+# #' @param counts feature-by-cell matrix
+# #' @param phi feature-by-probability matrix
 #' @importMethodsFrom Matrix %*%
 .countsTimesProbs <- function(counts, phi) {
   ## Maximization to find best label for each cell

@@ -6,11 +6,11 @@
 \alias{plotGridSearchPerplexity,celdaList-method}
 \title{Visualize perplexity of a list of celda models}
 \usage{
-plotGridSearchPerplexity(x, ...)
+plotGridSearchPerplexity(x, altExpName = "featureSubset", sep = 1, alpha = 0.5)
 
-\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 1)
+\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 1, alpha = 0.5)
 
-\S4method{plotGridSearchPerplexity}{celdaList}(x, sep = 1)
+\S4method{plotGridSearchPerplexity}{celdaList}(x, sep = 1, alpha = 0.5)
 }
 \arguments{
 \item{x}{Can be one of
@@ -21,12 +21,15 @@ plotGridSearchPerplexity(x, ...)
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
 
-\item{...}{Ignored. Placeholder to prevent check warning.}
-
 \item{altExpName}{The name for the \link{altExp} slot
-to use. Default "featureSubset".}
+to use. Default "featureSubset". Only works if \code{x} is a
+\linkS4class{SingleCellExperiment} object.}
 
 \item{sep}{Numeric. Breaks in the x axis of the resulting plot.}
+
+\item{alpha}{Numeric. Passed to \link{geom_jitter}. Opacity of the points.
+Values of alpha range from 0 to 1, with lower values corresponding
+to more transparent colors.}
 }
 \value{
 A ggplot plot object showing perplexity as a function of clustering

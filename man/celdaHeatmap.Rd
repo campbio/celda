@@ -5,7 +5,14 @@
 \alias{celdaHeatmap,SingleCellExperiment-method}
 \title{Plot celda Heatmap}
 \usage{
-celdaHeatmap(sce, ...)
+celdaHeatmap(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  featureIx = NULL,
+  nfeatures = 25,
+  ...
+)
 
 \S4method{celdaHeatmap}{SingleCellExperiment}(
   sce,
@@ -19,8 +26,6 @@ celdaHeatmap(sce, ...)
 \arguments{
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
-
-\item{...}{Additional parameters passed to \link{plotHeatmap}.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}
@@ -36,6 +41,8 @@ NULL, no subsetting will be performed. Default NULL. \strong{Only used for
 gene module. Default 25. \strong{Only used for \code{sce} containing
 celda_CG or celda_G model results returned by \link{celda_CG} or
 \link{celda_G}.}}
+
+\item{...}{Additional parameters passed to \link{plotHeatmap}.}
 }
 \value{
 list A list containing dendrogram information and the heatmap grob

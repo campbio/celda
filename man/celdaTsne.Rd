@@ -6,7 +6,21 @@
 \title{t-Distributed Stochastic Neighbor Embedding (t-SNE) dimension
  reduction for celda \code{sce} object}
 \usage{
-celdaTsne(sce, ...)
+celdaTsne(
+  sce,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  maxCells = NULL,
+  minClusterSize = 100,
+  initialDims = 20,
+  modules = NULL,
+  perplexity = 20,
+  maxIter = 2500,
+  normalize = "proportion",
+  scaleFactor = NULL,
+  transformationFun = sqrt,
+  seed = 12345
+)
 
 \S4method{celdaTsne}{SingleCellExperiment}(
   sce,
@@ -27,8 +41,6 @@ celdaTsne(sce, ...)
 \arguments{
 \item{sce}{A \linkS4class{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}

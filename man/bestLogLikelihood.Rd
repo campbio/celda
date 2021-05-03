@@ -6,7 +6,7 @@
 \alias{bestLogLikelihood,celdaModel-method}
 \title{Get the log-likelihood}
 \usage{
-bestLogLikelihood(x, ...)
+bestLogLikelihood(x, altExpName = "featureSubset")
 
 \S4method{bestLogLikelihood}{SingleCellExperiment}(x, altExpName = "featureSubset")
 
@@ -16,8 +16,6 @@ bestLogLikelihood(x, ...)
 \item{x}{A \linkS4class{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 model object.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

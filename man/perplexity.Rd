@@ -8,7 +8,13 @@
 \alias{perplexity,ANY,celda_G-method}
 \title{Calculate the perplexity of a celda model}
 \usage{
-perplexity(x, celdaMod, ...)
+perplexity(
+  x,
+  celdaMod,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  newCounts = NULL
+)
 
 \S4method{perplexity}{SingleCellExperiment,ANY}(
   x,
@@ -36,8 +42,6 @@ cells. This matrix should be the same as the one used to generate
 
 \item{celdaMod}{Celda model object. Only works if \code{x} is an integer
 counts matrix.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.

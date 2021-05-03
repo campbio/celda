@@ -26,10 +26,14 @@
 #'  returns the posterior estimates which include the addition of the Dirichlet
 #'  concentration parameter (essentially as a pseudocount). Default
 #'  \code{"counts"}.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @export
 setGeneric("factorizeMatrix",
-    function(x, celdaMod, ...) {
+    function(x,
+        celdaMod,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        type = c("counts", "proportion", "posterior")) {
+
         standardGeneric("factorizeMatrix")})
 
 
@@ -45,15 +49,78 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
         type = c("counts", "proportion", "posterior")) {
 
         altExp <- SingleCellExperiment::altExp(x, e = altExpName)
+        counts <- SummarizedExperiment::assay(altExp, i = useAssay)
+        counts <- .processCounts(counts)
+
+        beta <- S4Vectors::metadata(altExp)$celda_parameters$beta
+        rNames <- rownames(altExp)
 
         if (celdaModel(x, altExpName = altExpName) == "celda_C") {
-            res <- .factorizeMatrixCelda_C(sce = altExp, useAssay = useAssay,
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
+            K <- S4Vectors::metadata(altExp)$celda_parameters$K
+            alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
+            sampleLabel <-
+                SummarizedExperiment::colData(altExp)$celda_sample_label
+            sNames <- S4Vectors::metadata(altExp)$celda_parameters$sampleLevels
+
+            res <- .factorizeMatrixC(
+                counts = counts,
+                z = z,
+                K = K,
+                alpha = alpha,
+                beta = beta,
+                sampleLabel = sampleLabel,
+                rNames = rNames,
+                sNames = sNames,
                 type = type)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
-            res <- .factorizeMatrixCelda_CG(sce = altExp, useAssay = useAssay,
+            K <- S4Vectors::metadata(altExp)$celda_parameters$K
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
+            L <- S4Vectors::metadata(altExp)$celda_parameters$L
+            alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
+            delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
+            gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
+            sampleLabel <-
+                SummarizedExperiment::colData(altExp)$celda_sample_label
+            cNames <- colnames(altExp)
+            sNames <- S4Vectors::metadata(altExp)$celda_parameters$sampleLevels
+
+            res <- .factorizeMatrixCG(
+                counts = counts,
+                K = K,
+                z = z,
+                y = y,
+                L = L,
+                alpha = alpha,
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                sampleLabel = sampleLabel,
+                cNames = cNames,
+                rNames = rNames,
+                sNames = sNames,
                 type = type)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
-            res <- .factorizeMatrixCelda_G(sce = altExp, useAssay = useAssay,
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
+            L <- S4Vectors::metadata(altExp)$celda_parameters$L
+            delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
+            gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma
+            cNames <- colnames(altExp)
+
+            res <- .factorizeMatrixG(
+                counts = counts,
+                y = y,
+                L = L,
+                beta = beta,
+                delta = delta,
+                gamma = gamma,
+                cNames = cNames,
+                rNames = rNames,
                 type = type)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
@@ -85,13 +152,11 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         counts <- .processCounts(x)
         compareCountMatrix(counts, celdaMod)
 
-        K <- params(celdaMod)$K
-
         z <- celdaClusters(celdaMod)$z
         y <- celdaClusters(celdaMod)$y
         # Sometimes, fewer clusters get returned by celda_C/G
-        # Taking the max(z)/max(y) rather than the original K/L
-        # will prevent errors
+        # Taking the max(z)/max(y) rather than
+        # the original K/L will prevent errors
         # K <- params(celdaMod)$K; L <- params(celdaMod)$L
         K <- max(z)
         L <- max(y)
@@ -100,360 +165,46 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         delta <- params(celdaMod)$delta
         gamma <- params(celdaMod)$gamma
         sampleLabel <- sampleLabel(celdaMod)
-        s <- as.integer(sampleLabel)
 
-        ## Calculate counts one time up front
-        p <- .cCGDecomposeCounts(counts, s, z, y, K, L)
-        nS <- p$nS
-        nG <- p$nG
-        nM <- p$nM
-        mCPByS <- p$mCPByS
-        nTSByC <- p$nTSByC
-        nTSByCP <- p$nTSByCP
-        nByG <- p$nByG
-        nByTS <- p$nByTS
-        nGByTS <- p$nGByTS
-        nGByTS[nGByTS == 0] <- 1
+        cNames <- matrixNames(celdaMod)$column
+        rNames <- matrixNames(celdaMod)$row
+        sNames <- matrixNames(celdaMod)$sample
 
-        GByTS <- matrix(0, nrow = length(y), ncol = L)
-        GByTS[cbind(seq(nG), y)] <- p$nByG
-
-        LNames <- paste0("L", seq(L))
-        KNames <- paste0("K", seq(K))
-        colnames(nTSByC) <- matrixNames(celdaMod)$column
-        rownames(nTSByC) <- LNames
-        colnames(GByTS) <- LNames
-        rownames(GByTS) <- matrixNames(celdaMod)$row
-        rownames(mCPByS) <- KNames
-        colnames(mCPByS) <- matrixNames(celdaMod)$sample
-        colnames(nTSByCP) <- KNames
-        rownames(nTSByCP) <- LNames
-
-        countsList <- c()
-        propList <- c()
-        postList <- c()
-        res <- list()
-
-        if (any("counts" %in% type)) {
-            countsList <- list(
-                sample = mCPByS,
-                cellPopulation = nTSByCP,
-                cell = nTSByC,
-                module = GByTS,
-                geneDistribution = nGByTS
-            )
-            res <- c(res, list(counts = countsList))
-        }
-
-        if (any("proportion" %in% type)) {
-            ## Need to avoid normalizing cell/gene states with zero cells/genes
-            uniqueZ <- sort(unique(z))
-            tempNTSByCP <- nTSByCP
-            tempNTSByCP[, uniqueZ] <- normalizeCounts(tempNTSByCP[, uniqueZ],
-                normalize = "proportion"
-            )
-
-            uniqueY <- sort(unique(y))
-            tempGByTS <- GByTS
-            tempGByTS[, uniqueY] <- normalizeCounts(tempGByTS[, uniqueY],
-                normalize = "proportion"
-            )
-            tempNGByTS <- nGByTS / sum(nGByTS)
-
-            propList <- list(
-                sample = normalizeCounts(mCPByS,
-                    normalize = "proportion"
-                ),
-                cellPopulation = tempNTSByCP,
-                cell = normalizeCounts(nTSByC, normalize = "proportion"),
-                module = tempGByTS,
-                geneDistribution = tempNGByTS
-            )
-            res <- c(res, list(proportions = propList))
-        }
-
-        if (any("posterior" %in% type)) {
-            gs <- GByTS
-            gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
-            gs <- normalizeCounts(gs, normalize = "proportion")
-            tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
-
-            postList <- list(
-                sample = normalizeCounts(mCPByS + alpha,
-                    normalize = "proportion"
-                ),
-                cellPopulation = normalizeCounts(nTSByCP + beta,
-                    normalize = "proportion"
-                ),
-                module = gs,
-                geneDistribution = tempNGByTS
-            )
-            res <- c(res, posterior = list(postList))
-        }
+        res <- .factorizeMatrixCG(
+            counts = counts,
+            K = K,
+            z = z,
+            y = y,
+            L = L,
+            alpha = alpha,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            sampleLabel = sampleLabel,
+            cNames = cNames,
+            rNames = rNames,
+            sNames = sNames,
+            type = type)
         return(res)
     }
 )
 
 
-#' @examples
-#' data(celdaCSim, celdaCMod)
-#' factorizedMatrices <- factorizeMatrix(
-#'   celdaCSim$counts,
-#'   celdaCMod, "posterior"
-#' )
-#' @return For celda_C model, a list with elements for "counts", "proportions",
-#'  or "posterior" probabilities. Each element will be a list containing
-#'  factorized matrices for "module" and "sample".
-#' @rdname factorizeMatrix
-#' @export
-setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
-    function(x,
-        celdaMod,
-        type = c("counts", "proportion", "posterior")) {
+.factorizeMatrixCG <- function(counts,
+    K,
+    z,
+    y,
+    L,
+    alpha,
+    beta,
+    delta,
+    gamma,
+    sampleLabel,
+    cNames,
+    rNames,
+    sNames,
+    type) {
 
-        counts <- .processCounts(x)
-        compareCountMatrix(counts, celdaMod)
-
-        z <- celdaClusters(celdaMod)$z
-        # Sometimes, fewer clusters get returned by celda_C
-        # Taking the max(z) rather than the original K will prevent errors
-        # K <- params(celdaMod)$K
-        K <- max(z)
-        alpha <- params(celdaMod)$alpha
-        beta <- params(celdaMod)$beta
-        sampleLabel <- sampleLabel(celdaMod)
-        s <- as.integer(sampleLabel)
-
-        p <- .cCDecomposeCounts(counts, s, z, K)
-        mCPByS <- p$mCPByS
-        nGByCP <- p$nGByCP
-        KNames <- paste0("K", seq(K))
-        rownames(nGByCP) <- matrixNames(celdaMod)$row
-        colnames(nGByCP) <- KNames
-        rownames(mCPByS) <- KNames
-        colnames(mCPByS) <- matrixNames(celdaMod)$sample
-
-        countsList <- c()
-        propList <- c()
-        postList <- c()
-        res <- list()
-
-        if (any("counts" %in% type)) {
-            countsList <- list(sample = mCPByS, module = nGByCP)
-            res <- c(res, list(counts = countsList))
-        }
-
-        if (any("proportion" %in% type)) {
-            ## Need to avoid normalizing cell/gene states with zero cells/genes
-            uniqueZ <- sort(unique(z))
-            tempNGByCP <- nGByCP
-            tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
-                normalize = "proportion"
-            )
-
-            propList <- list(
-                sample = normalizeCounts(mCPByS,
-                    normalize = "proportion"
-                ),
-                module = tempNGByCP
-            )
-            res <- c(res, list(proportions = propList))
-        }
-
-        if (any("posterior" %in% type)) {
-            postList <- list(
-                sample = normalizeCounts(mCPByS + alpha,
-                    normalize = "proportion"
-                ),
-                module = normalizeCounts(nGByCP + beta,
-                    normalize = "proportion"
-                )
-            )
-
-            res <- c(res, posterior = list(postList))
-        }
-
-        return(res)
-    }
-)
-
-
-#' @return For celda_G model, a list with elements for "counts", "proportions",
-#'  or "posterior" probabilities. Each element will be a list containing
-#'  factorized matrices for "module" and "cell".
-#' @examples
-#' data(celdaGSim, celdaGMod)
-#' factorizedMatrices <- factorizeMatrix(
-#'   celdaGSim$counts,
-#'   celdaGMod, "posterior"
-#' )
-#' @rdname factorizeMatrix
-#' @export
-setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
-    function(x,
-        celdaMod,
-        type = c("counts", "proportion", "posterior")) {
-
-        counts <- .processCounts(x)
-        compareCountMatrix(counts, celdaMod)
-
-        y <- celdaClusters(celdaMod)$y
-        # Sometimes, fewer clusters get returned by celda_G
-        # Taking the max(y) rather than the original L will prevent errors
-        # L <- params(celdaMod)$L
-        L <- max(y)
-        beta <- params(celdaMod)$beta
-        delta <- params(celdaMod)$delta
-        gamma <- params(celdaMod)$gamma
-
-        p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
-        nTSByC <- p$nTSByC
-        nByG <- p$nByG
-        nByTS <- p$nByTS
-        nGByTS <- p$nGByTS
-        nGByTS[nGByTS == 0] <- 1
-        nM <- p$nM
-        nG <- p$nG
-        rm(p)
-
-        GByTS <- matrix(0, nrow = length(y), ncol = L)
-        GByTS[cbind(seq(nG), y)] <- nByG
-
-        LNames <- paste0("L", seq(L))
-        colnames(nTSByC) <- matrixNames(celdaMod)$column
-        rownames(nTSByC) <- LNames
-        colnames(GByTS) <- LNames
-        rownames(GByTS) <- matrixNames(celdaMod)$row
-        names(nGByTS) <- LNames
-
-        countsList <- c()
-        propList <- c()
-        postList <- c()
-        res <- list()
-
-        if (any("counts" %in% type)) {
-            countsList <- list(
-                cell = nTSByC,
-                module = GByTS,
-                geneDistribution = nGByTS
-            )
-            res <- c(res, list(counts = countsList))
-        }
-
-        if (any("proportion" %in% type)) {
-            ## Need to avoid normalizing cell/gene states with zero cells/genes
-            uniqueY <- sort(unique(y))
-            tempGByTS <- GByTS
-            tempGByTS[, uniqueY] <- normalizeCounts(tempGByTS[, uniqueY],
-                normalize = "proportion"
-            )
-            tempNGByTS <- nGByTS / sum(nGByTS)
-
-            propList <- list(
-                cell = normalizeCounts(nTSByC,
-                    normalize = "proportion"
-                ),
-                module = tempGByTS,
-                geneDistribution = tempNGByTS
-            )
-            res <- c(res, list(proportions = propList))
-        }
-
-        if (any("posterior" %in% type)) {
-            gs <- GByTS
-            gs[cbind(seq(nG), y)] <- gs[cbind(seq(nG), y)] + delta
-            gs <- normalizeCounts(gs, normalize = "proportion")
-            tempNGByTS <- (nGByTS + gamma) / sum(nGByTS + gamma)
-
-            postList <- list(
-                cell = normalizeCounts(nTSByC + beta,
-                    normalize = "proportion"
-                ),
-                module = gs,
-                geneDistribution = tempNGByTS
-            )
-            res <- c(res, posterior = list(postList))
-        }
-
-        return(res)
-    }
-)
-
-
-.factorizeMatrixCelda_C <- function(sce, useAssay, type) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-
-    #K <- S4Vectors::metadata(sce)$celda_parameters$K
-    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
-    K <- max(z)
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    sampleLabel <- SummarizedExperiment::colData(sce)$celda_sample_label
-    s <- as.integer(sampleLabel)
-
-    p <- .cCDecomposeCounts(counts, s, z, K)
-    mCPByS <- p$mCPByS
-    nGByCP <- p$nGByCP
-
-    KNames <- paste0("K", seq(K))
-    rownames(nGByCP) <- rownames(sce)
-    colnames(nGByCP) <- KNames
-    rownames(mCPByS) <- KNames
-    colnames(mCPByS) <-
-        S4Vectors::metadata(sce)$celda_parameters$sampleLevels
-
-    countsList <- c()
-    propList <- c()
-    postList <- c()
-    res <- list()
-
-    if (any("counts" %in% type)) {
-        countsList <- list(sample = mCPByS, module = nGByCP)
-        res <- c(res, list(counts = countsList))
-    }
-
-    if (any("proportion" %in% type)) {
-        ## Need to avoid normalizing cell/gene states with zero cells/genes
-        uniqueZ <- sort(unique(z))
-        tempNGByCP <- nGByCP
-        tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
-            normalize = "proportion")
-
-        propList <- list(sample = normalizeCounts(mCPByS,
-            normalize = "proportion"),
-            module = tempNGByCP)
-        res <- c(res, list(proportions = propList))
-    }
-
-    if (any("posterior" %in% type)) {
-        postList <- list(sample = normalizeCounts(mCPByS + alpha,
-            normalize = "proportion"),
-            module = normalizeCounts(nGByCP + beta,
-                normalize = "proportion"))
-
-        res <- c(res, posterior = list(postList))
-    }
-
-    return(res)
-}
-
-
-.factorizeMatrixCelda_CG <- function(sce, useAssay, type) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-
-    #K <- S4Vectors::metadata(sce)$celda_parameters$K
-    #L <- S4Vectors::metadata(sce)$celda_parameters$L
-    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
-    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
-    K <- max(z)
-    L <- max(y)
-    alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
-    sampleLabel <- SummarizedExperiment::colData(sce)$celda_sample_label
     s <- as.integer(sampleLabel)
 
     ## Calculate counts one time up front
@@ -474,12 +225,12 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
 
     LNames <- paste0("L", seq(L))
     KNames <- paste0("K", seq(K))
-    colnames(nTSByC) <- colnames(sce)
+    colnames(nTSByC) <- cNames
     rownames(nTSByC) <- LNames
     colnames(GByTS) <- LNames
-    rownames(GByTS) <- rownames(sce)
+    rownames(GByTS) <- rNames
     rownames(mCPByS) <- KNames
-    colnames(mCPByS) <- S4Vectors::metadata(sce)$celda_parameters$sampleLevels
+    colnames(mCPByS) <- sNames
     colnames(nTSByCP) <- KNames
     rownames(nTSByCP) <- LNames
 
@@ -515,7 +266,9 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         tempNGByTS <- nGByTS / sum(nGByTS)
 
         propList <- list(
-            sample = normalizeCounts(mCPByS, normalize = "proportion"),
+            sample = normalizeCounts(mCPByS,
+                normalize = "proportion"
+            ),
             cellPopulation = tempNTSByCP,
             cell = normalizeCounts(nTSByC, normalize = "proportion"),
             module = tempGByTS,
@@ -542,21 +295,178 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         )
         res <- c(res, posterior = list(postList))
     }
+    return(res)
+}
+
+
+#' @examples
+#' data(celdaCSim, celdaCMod)
+#' factorizedMatrices <- factorizeMatrix(
+#'   celdaCSim$counts,
+#'   celdaCMod, "posterior"
+#' )
+#' @return For celda_C model, a list with elements for "counts", "proportions",
+#'  or "posterior" probabilities. Each element will be a list containing
+#'  factorized matrices for "module" and "sample".
+#' @rdname factorizeMatrix
+#' @export
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
+    function(x,
+        celdaMod,
+        type = c("counts", "proportion", "posterior")) {
+
+        counts <- .processCounts(x)
+        compareCountMatrix(counts, celdaMod)
+
+        z <- celdaClusters(celdaMod)$z
+        # Sometimes, fewer clusters get returned by celda_C
+        # Taking the max(z) rather than the
+        # original K will prevent errors
+        # K <- params(celdaMod)$K
+        K <- max(z)
+        alpha <- params(celdaMod)$alpha
+        beta <- params(celdaMod)$beta
+        sampleLabel <- sampleLabel(celdaMod)
+        rNames <- matrixNames(celdaMod)$row
+        sNames <- matrixNames(celdaMod)$sample
+
+        res <- .factorizeMatrixC(
+            counts = counts,
+            z = z,
+            K = K,
+            alpha = alpha,
+            beta = beta,
+            sampleLabel = sampleLabel,
+            rNames = rNames,
+            sNames = sNames,
+            type = type)
+        return(res)
+    }
+)
+
+
+.factorizeMatrixC <- function(
+    counts,
+    z,
+    K,
+    alpha,
+    beta,
+    sampleLabel,
+    rNames,
+    sNames,
+    type) {
+
+    s <- as.integer(sampleLabel)
+
+    p <- .cCDecomposeCounts(counts, s, z, K)
+    mCPByS <- p$mCPByS
+    nGByCP <- p$nGByCP
+    KNames <- paste0("K", seq(K))
+    rownames(nGByCP) <- rNames
+    colnames(nGByCP) <- KNames
+    rownames(mCPByS) <- KNames
+    colnames(mCPByS) <- sNames
+
+    countsList <- c()
+    propList <- c()
+    postList <- c()
+    res <- list()
+
+    if (any("counts" %in% type)) {
+        countsList <- list(sample = mCPByS, module = nGByCP)
+        res <- c(res, list(counts = countsList))
+    }
+
+    if (any("proportion" %in% type)) {
+        ## Need to avoid normalizing cell/gene states with zero cells/genes
+        uniqueZ <- sort(unique(z))
+        tempNGByCP <- nGByCP
+        tempNGByCP[, uniqueZ] <- normalizeCounts(tempNGByCP[, uniqueZ],
+            normalize = "proportion"
+        )
+
+        propList <- list(
+            sample = normalizeCounts(mCPByS,
+                normalize = "proportion"
+            ),
+            module = tempNGByCP
+        )
+        res <- c(res, list(proportions = propList))
+    }
+
+    if (any("posterior" %in% type)) {
+        postList <- list(
+            sample = normalizeCounts(mCPByS + alpha,
+                normalize = "proportion"
+            ),
+            module = normalizeCounts(nGByCP + beta,
+                normalize = "proportion"
+            )
+        )
+
+        res <- c(res, posterior = list(postList))
+    }
 
     return(res)
 }
 
 
-.factorizeMatrixCelda_G <- function(sce, useAssay, type) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
+#' @return For celda_G model, a list with elements for "counts", "proportions",
+#'  or "posterior" probabilities. Each element will be a list containing
+#'  factorized matrices for "module" and "cell".
+#' @examples
+#' data(celdaGSim, celdaGMod)
+#' factorizedMatrices <- factorizeMatrix(
+#'   celdaGSim$counts,
+#'   celdaGMod, "posterior"
+#' )
+#' @rdname factorizeMatrix
+#' @export
+setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
+    function(x,
+        celdaMod,
+        type = c("counts", "proportion", "posterior")) {
 
-    #L <- S4Vectors::metadata(sce)$celda_parameters$L
-    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
-    L <- max(y)
-    beta <- S4Vectors::metadata(sce)$celda_parameters$beta
-    delta <- S4Vectors::metadata(sce)$celda_parameters$delta
-    gamma <- S4Vectors::metadata(sce)$celda_parameters$gamma
+        counts <- .processCounts(x)
+        compareCountMatrix(counts, celdaMod)
+
+        y <- celdaClusters(celdaMod)$y
+        # Sometimes, fewer clusters get returned by celda_G
+        # Taking the max(y) rather than the original
+        # L will prevent errors
+        # L <- params(celdaMod)$L
+        L <- max(y)
+        beta <- params(celdaMod)$beta
+        delta <- params(celdaMod)$delta
+        gamma <- params(celdaMod)$gamma
+        cNames <- matrixNames(celdaMod)$column
+        rNames <- matrixNames(celdaMod)$row
+
+        res <- .factorizeMatrixG(
+            counts = counts,
+            y = y,
+            L = L,
+            beta = beta,
+            delta = delta,
+            gamma = gamma,
+            cNames = cNames,
+            rNames = rNames,
+            type = type)
+        return(res)
+    }
+)
+
+
+.factorizeMatrixG <- function(
+    counts,
+    y,
+    L,
+    beta,
+    delta,
+    gamma,
+    cNames,
+    rNames,
+    type) {
 
     p <- .cGDecomposeCounts(counts = counts, y = y, L = L)
     nTSByC <- p$nTSByC
@@ -572,10 +482,10 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
     GByTS[cbind(seq(nG), y)] <- nByG
 
     LNames <- paste0("L", seq(L))
-    colnames(nTSByC) <- colnames(sce)
+    colnames(nTSByC) <- cNames
     rownames(nTSByC) <- LNames
     colnames(GByTS) <- LNames
-    rownames(GByTS) <- rownames(sce)
+    rownames(GByTS) <- rNames
     names(nGByTS) <- LNames
 
     countsList <- c()

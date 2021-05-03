@@ -3,11 +3,17 @@
 \name{decontXcounts}
 \alias{decontXcounts}
 \alias{decontXcounts<-}
+\alias{decontXcounts,SingleCellExperiment-method}
+\alias{decontXcounts<-,SingleCellExperiment-method}
 \title{Get or set decontaminated counts matrix}
 \usage{
 decontXcounts(object, ...)
 
 decontXcounts(object, ...) <- value
+
+\S4method{decontXcounts}{SingleCellExperiment}(object, ...)
+
+\S4method{decontXcounts}{SingleCellExperiment}(object, ...) <- value
 }
 \arguments{
 \item{object}{A \linkS4class{SingleCellExperiment} object.}

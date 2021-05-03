@@ -9,7 +9,13 @@
 \title{Generate factorized matrices showing each feature's influence on cell
  / gene clustering}
 \usage{
-factorizeMatrix(x, celdaMod, ...)
+factorizeMatrix(
+  x,
+  celdaMod,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  type = c("counts", "proportion", "posterior")
+)
 
 \S4method{factorizeMatrix}{SingleCellExperiment,ANY}(
   x,
@@ -37,8 +43,6 @@ cells. This matrix should be the same as the one used to generate
 
 \item{celdaMod}{Celda model object. Only works if \code{x} is an integer
 counts matrix.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.

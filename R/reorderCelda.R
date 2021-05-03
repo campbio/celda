@@ -22,13 +22,17 @@
 #'  to be used to be used. Default "complete".
 #' @param celdaMod Celda model object. Only works if \code{x} is an integer
 #'  counts matrix. Ignored if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object
-#' @param ... Ignored. Placeholder to prevent check warning.
+#'  \linkS4class{SingleCellExperiment} object.
 #' @return A \linkS4class{SingleCellExperiment} object (or Celda model object)
 #'  with updated cell cluster and/or feature module labels.
 #' @export
 setGeneric("reorderCelda",
-    function(x, celdaMod, ...) {
+    function(x,
+        celdaMod,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        method = "complete") {
+
         standardGeneric("reorderCelda")})
 
 

@@ -8,7 +8,7 @@
 \alias{logLikelihood,matrix,celda_CG-method}
 \title{Calculate the Log-likelihood of a celda model}
 \usage{
-logLikelihood(x, celdaMod, ...)
+logLikelihood(x, celdaMod, useAssay = "counts", altExpName = "featureSubset")
 
 \S4method{logLikelihood}{SingleCellExperiment,ANY}(x, useAssay = "counts", altExpName = "featureSubset")
 
@@ -26,8 +26,6 @@ Rows represent features and columns represent cells.}
 
 \item{celdaMod}{celda model object. Ignored if \code{x} is a
 \linkS4class{SingleCellExperiment} object.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use. Default "counts".}
