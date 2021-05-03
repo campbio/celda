@@ -75,8 +75,8 @@ if (!is.null(cellAnnotFinal)) {
   }
 }
 
-L <- max(celdaModules(sce))
-K <- max(celdaClusters(sce))
+L <- max(as.integer(celdaModules(sce)))
+K <- max(as.integer(celdaClusters(sce)))
 
 # Define tab levels
 tab3 <- "### %s {-}

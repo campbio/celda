@@ -158,8 +158,9 @@ cellSplit <-
     maxK = maxK,
     yInit = initial.modules,
     sampleLabel = sampleLabel,
-    reorder = FALSE
-  )
+    altExpName = altExpName,
+    useAssay = useAssay,
+    reorder = FALSE)
 
 # Show results of clustering genes (perplexity plot)
 p3 <-
