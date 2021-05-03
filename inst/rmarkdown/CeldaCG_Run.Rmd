@@ -34,7 +34,7 @@ params:
 # Run celda_CG
 
 ## Setup
-The following code loads required librarys, reads in parameters, checks input variables, and sets up display options for the **Celda_CG Run** report.
+The following code loads required libraries, reads in parameters, checks input variables, and sets up display options for the **Celda_CG Run** report.
 ```{r run_setup}
 require(singleCellTK)
 require(celda)

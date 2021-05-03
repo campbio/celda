@@ -26,7 +26,7 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         DelayedArray, stringr, Matrix, ComplexHeatmap, multipanelfigure,
         circlize
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
-        BiocManager, BiocStyle, M3DExampleData, TENxPBMCData
+        BiocManager, BiocStyle, M3DExampleData, TENxPBMCData, singleCellTK
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
