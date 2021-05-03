@@ -943,8 +943,8 @@ setMethod("celda_CG",
     counts <- .processCounts(counts)
 
     K <- S4Vectors::metadata(sce)$celda_parameters$K
-    z <- SummarizedExperiment::colData(sce)$celda_cell_cluster
-    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
+    z <- as.integer(SummarizedExperiment::colData(sce)$celda_cell_cluster)
+    y <- as.integer(SummarizedExperiment::rowData(sce)$celda_feature_module)
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     alpha <- S4Vectors::metadata(sce)$celda_parameters$alpha
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta

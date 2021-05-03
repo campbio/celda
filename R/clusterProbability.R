@@ -51,7 +51,8 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
         if (model == "celda_C") {
             s <- as.integer(
                 SummarizedExperiment::colData(altExp)$celda_sample_label)
-            z <- SummarizedExperiment::colData(altExp)$celda_cell_cluster
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
             K <- S4Vectors::metadata(altExp)$celda_parameters$K
             alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
 
@@ -66,9 +67,11 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
         } else if (model == "celda_CG") {
             s <- as.integer(
                 SummarizedExperiment::colData(altExp)$celda_sample_label)
-            z <- SummarizedExperiment::colData(altExp)$celda_cell_cluster
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
             K <- S4Vectors::metadata(altExp)$celda_parameters$K
-            y <- SummarizedExperiment::rowData(altExp)$celda_feature_module
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
             L <- S4Vectors::metadata(altExp)$celda_parameters$L
             alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
             delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
@@ -87,7 +90,8 @@ setMethod("clusterProbability", signature(sce = "SingleCellExperiment"),
                 gamma = gamma,
                 log = log)
         } else if (model == "celda_G") {
-            y <- SummarizedExperiment::rowData(altExp)$celda_feature_module
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
             L <- S4Vectors::metadata(altExp)$celda_parameters$L
             delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
             gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma

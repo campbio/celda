@@ -77,6 +77,7 @@
 #' @examples
 #' data(sceCeldaCG)
 #' \donttest{
+#' library(SingleCellExperiment)
 #' sceCeldaCG$sum <- colSums(counts(sceCeldaCG))
 #' sceCeldaCG <- reportCeldaCGRun(sceCeldaCG,
 #'               initialL=5, maxL=20, initialK=5, maxK=20, L=10, K=5)

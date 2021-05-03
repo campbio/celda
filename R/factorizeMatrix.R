@@ -56,7 +56,8 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
         rNames <- rownames(altExp)
 
         if (celdaModel(x, altExpName = altExpName) == "celda_C") {
-            z <- SummarizedExperiment::colData(altExp)$celda_cell_cluster
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
             K <- S4Vectors::metadata(altExp)$celda_parameters$K
             alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
             sampleLabel <-
@@ -75,8 +76,10 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
                 type = type)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_CG") {
             K <- S4Vectors::metadata(altExp)$celda_parameters$K
-            z <- SummarizedExperiment::colData(altExp)$celda_cell_cluster
-            y <- SummarizedExperiment::rowData(altExp)$celda_feature_module
+            z <- as.integer(
+                SummarizedExperiment::colData(altExp)$celda_cell_cluster)
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
             L <- S4Vectors::metadata(altExp)$celda_parameters$L
             alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
             delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
@@ -102,7 +105,8 @@ setMethod("factorizeMatrix", signature(x = "SingleCellExperiment"),
                 sNames = sNames,
                 type = type)
         } else if (celdaModel(x, altExpName = altExpName) == "celda_G") {
-            y <- SummarizedExperiment::rowData(altExp)$celda_feature_module
+            y <- as.integer(
+                SummarizedExperiment::rowData(altExp)$celda_feature_module)
             L <- S4Vectors::metadata(altExp)$celda_parameters$L
             delta <- S4Vectors::metadata(altExp)$celda_parameters$delta
             gamma <- S4Vectors::metadata(altExp)$celda_parameters$gamma

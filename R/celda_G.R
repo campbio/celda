@@ -753,7 +753,7 @@ setMethod("celda_G",
 
     counts <- SummarizedExperiment::assay(sce, i = useAssay)
     counts <- .processCounts(counts)
-    y <- SummarizedExperiment::rowData(sce)$celda_feature_module
+    y <- as.integer(SummarizedExperiment::rowData(sce)$celda_feature_module)
     L <- S4Vectors::metadata(sce)$celda_parameters$L
     beta <- S4Vectors::metadata(sce)$celda_parameters$beta
     delta <- S4Vectors::metadata(sce)$celda_parameters$delta

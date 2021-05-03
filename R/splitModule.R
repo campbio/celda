@@ -66,7 +66,7 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
         S4Vectors::metadata(altExp)[["celda_parameters"]]$featureModuleLevels <-
             sort(unique(celdaClusters(celdaGMod)$y))
         SummarizedExperiment::rowData(altExp)["celda_feature_module"] <-
-            celdaClusters(celdaGMod)$y
+            as.factor(celdaClusters(celdaGMod)$y)
         SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
@@ -110,7 +110,8 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
             splitY[splitIx] - 1
         splitY[!splitIx] <- module
 
-        newY <- SummarizedExperiment::rowData(x)$celda_feature_module
+        newY <- as.integer(
+            SummarizedExperiment::rowData(x)$celda_feature_module)
         newY[ix] <- splitY
         newL <- max(newY)
 
