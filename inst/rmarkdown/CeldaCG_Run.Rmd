@@ -136,8 +136,7 @@ moduleSplit <-
 sep <- ifelse(maxL > 100, 10, 5)
 p1 <-
   plotGridSearchPerplexity(moduleSplit, altExpName = altExpName, sep = sep)
-p2 <-
-  plotGridSearchPerplexityDiff(moduleSplit, altExpName = altExpName,  sep = sep)
+p2 <- plotRPC(moduleSplit, altExpName = altExpName,  sep = sep)
 grid.arrange(p1, p2,  ncol = 2)
 ```
 
@@ -166,8 +165,7 @@ cellSplit <-
 p3 <-
   plotGridSearchPerplexity(cellSplit, altExpName = altExpName, sep = 5) +
   theme(legend.position = "bottom")
-p4 <-
-  plotGridSearchPerplexityDiff(cellSplit, altExpName = altExpName, sep = 5) +
+p4 <- plotRPC(cellSplit, altExpName = altExpName, sep = 5) +
   theme(legend.position = "bottom")
 grid.arrange(p3, p4,  ncol = 2)
 
