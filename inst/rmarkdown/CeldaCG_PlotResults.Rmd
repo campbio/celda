@@ -291,6 +291,7 @@ if (!is.null(features)) {
         sce,
         reducedDimName = "celda_UMAP",
         features = rownames(sce)[ix],
+        displayName = displayName,
         colorHigh = "red",
         colorMid = "grey",
         colorLow = "blue",
