@@ -46,7 +46,7 @@
 #' @param displayName Character. The name to use for display in scatter plots
 #'   and heatmaps. If \code{NULL}, then the rownames of the \code{sce} object
 #'   will be used. This can also be set to the name of a column in the row data
-#'   of the \code{sce}. Default \code{NULL}. data. Default \code{"rownames"}.
+#'   of \code{sce} or \code{altExp(sce, altExpName)}. Default \code{NULL}.
 #' @param cellAnnot Character vector. The cell-level annotations to display on
 #'   the reduced dimensional plot. These variables should be present in the
 #'   column data of the \code{sce} object. Default \code{NULL}.
@@ -79,11 +79,15 @@
 #' \donttest{
 #' library(SingleCellExperiment)
 #' sceCeldaCG$sum <- colSums(counts(sceCeldaCG))
+#' rowData(sceCeldaCG)$rownames <- rownames(sceCeldaCG)
 #' sceCeldaCG <- reportCeldaCGRun(sceCeldaCG,
-#'               initialL=5, maxL=20, initialK=5, maxK=20, L=10, K=5)
-#' reportCeldaCGPlotResults(sce = sceCeldaCG, reducedDimName = "celda_UMAP",
-#'                          features = c("Gene_1", "Gene_100"),
-#'                          cellAnnot="sum")
+#'     initialL = 5, maxL = 20, initialK = 5,
+#'     maxK = 20, L = 10, K = 5)
+#' reportCeldaCGPlotResults(sce = sceCeldaCG,
+#'     reducedDimName = "celda_UMAP",
+#'     features = c("Gene_1", "Gene_100"),
+#'     displayName = "rownames",
+#'     cellAnnot="sum")
 #' }
 NULL
 

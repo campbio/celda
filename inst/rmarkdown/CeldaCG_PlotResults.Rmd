@@ -37,6 +37,7 @@ require(grid)
 require(knitr)
 require(ggplot2)
 require(multipanelfigure)
+require(SingleCellExperiment)
 
 sce <- params$sce
 features <- params$features
@@ -180,6 +181,7 @@ for (i in seq_len(L)) {
     sce,
     featureModule = i,
     topCells = NULL,
+    displayName = displayName,
     moduleLabel = "All cells",
     useRaster = TRUE
   )
@@ -187,6 +189,7 @@ for (i in seq_len(L)) {
     sce,
     featureModule = i,
     topCells = 100,
+    displayName = displayName,
     moduleLabel = "Top 100 cells",
     useRaster = TRUE
   )
@@ -291,6 +294,7 @@ if (!is.null(features)) {
         sce,
         reducedDimName = "celda_UMAP",
         features = rownames(sce)[ix],
+        displayName = displayName,
         colorHigh = "red",
         colorMid = "grey",
         colorLow = "blue",
