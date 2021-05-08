@@ -19,7 +19,13 @@
 #' @return list A list containing dendrogram information and the heatmap grob
 #' @export
 setGeneric("celdaHeatmap",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        featureIx = NULL,
+        nfeatures = 25,
+        ...) {
+
         standardGeneric("celdaHeatmap")
     })
 
@@ -33,60 +39,72 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
     function(sce, useAssay = "counts", altExpName = "featureSubset",
         featureIx = NULL, nfeatures = 25, ...) {
 
-        if (celdaModel(sce, altExpName = altExpName) == "celda_C") {
-            g <- .celdaHeatmapCelda_C(sce = sce,
-                useAssay = useAssay,
-                altExpName = altExpName,
+        counts <- SummarizedExperiment::assay(sce, i = useAssay)
+        counts <- .processCounts(counts)
+        model <- celdaModel(sce, altExpName = altExpName)
+
+        if (model == "celda_C") {
+            z <- as.integer(celdaClusters(sce, altExpName = altExpName))
+            g <- .celdaHeatmapCelda_C(
+                counts = counts,
+                z = z,
                 featureIx = featureIx,
                 ...)
-            return(g)
-        } else if (celdaModel(sce, altExpName = altExpName) == "celda_CG") {
-            g <- .celdaHeatmapCelda_CG(sce = sce,
-                useAssay = useAssay,
-                altExpName = altExpName,
+        } else if (model == "celda_CG") {
+            fm <- factorizeMatrix(x = sce, useAssay = useAssay,
+                altExpName = altExpName, type = "proportion")
+            z <- as.integer(celdaClusters(sce, altExpName = altExpName))
+            y <- as.integer(celdaModules(sce, altExpName = altExpName))
+            g <- .celdaHeatmapCelda_CG(
+                counts = counts,
+                fm = fm,
+                z = z,
+                y = y,
                 nfeatures = nfeatures,
                 ...)
-            return(g)
-        } else if (celdaModel(sce, altExpName = altExpName) == "celda_G") {
-            g <- .celdaHeatmapCelda_G(sce = sce,
-                useAssay = useAssay,
-                altExpName = altExpName,
+        } else if (model == "celda_G") {
+            fm <- factorizeMatrix(x = sce, useAssay = useAssay,
+                altExpName = altExpName, type = "proportion")
+            y <- as.integer(celdaModules(sce, altExpName = altExpName))
+            g <- .celdaHeatmapCelda_G(counts,
+                fm,
+                y,
                 nfeatures = nfeatures,
                 ...)
-            return(g)
         } else {
             stop("S4Vectors::metadata(altExp(sce, altExpName))$",
                 "celda_parameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
+        return(g)
     }
 )
 
 
-.celdaHeatmapCelda_C <- function(sce,
-    useAssay, altExpName, featureIx, ...) {
+.celdaHeatmapCelda_C <- function(
+    counts,
+    z,
+    featureIx, ...) {
 
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
     norm <- normalizeCounts(counts,
         normalize = "proportion",
         transformationFun = sqrt)
 
     if (is.null(featureIx)) {
-        return(plotHeatmap(norm,
-            z = celdaClusters(sce, altExpName = altExpName), ...))
+        return(plotHeatmap(norm, z, ...))
     }
-
-    return(plotHeatmap(norm[featureIx, ],
-        z = celdaClusters(sce, altExpName = altExpName), ...))
+    return(plotHeatmap(norm[featureIx, ], z = z, ...))
 }
 
 
-.celdaHeatmapCelda_CG <- function(sce, useAssay, altExpName, nfeatures, ...) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-    fm <- factorizeMatrix(x = sce, useAssay = useAssay,
-        altExpName = altExpName, type = "proportion")
+.celdaHeatmapCelda_CG <- function(
+    counts = counts,
+    fm = fm,
+    z = z,
+    y = y,
+    nfeatures,
+    ...) {
+
     top <- topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
     rn <- unlist(top$names)
@@ -94,25 +112,20 @@ setMethod("celdaHeatmap", signature(sce = "SingleCellExperiment"),
         normalize = "proportion",
         transformationFun = sqrt)
     plt <- plotHeatmap(norm[rn, ],
-        z = celdaClusters(sce, altExpName = altExpName),
-        y = celdaModules(sce, altExpName = altExpName)[ix],
+        z = z,
+        y = y[ix],
         ...)
     return(plt)
 }
 
 
-.celdaHeatmapCelda_G <- function(sce, useAssay, altExpName, nfeatures, ...) {
-    counts <- SummarizedExperiment::assay(sce, i = useAssay)
-    counts <- .processCounts(counts)
-    fm <- factorizeMatrix(x = sce, useAssay = useAssay,
-        altExpName = altExpName, type = "proportion")
+.celdaHeatmapCelda_G <- function(counts, fm, y, nfeatures, ...) {
     top <- topRank(fm$proportions$module, n = nfeatures)
     ix <- unlist(top$index)
     rn <- unlist(top$names)
     norm <- normalizeCounts(counts,
         normalize = "proportion",
         transformationFun = sqrt)
-    plt <- plotHeatmap(norm[rn, ], y = celdaModules(sce,
-        altExpName = altExpName)[ix], ...)
+    plt <- plotHeatmap(norm[rn, ], y = y[ix], ...)
     return(plt)
 }

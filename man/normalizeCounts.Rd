@@ -15,8 +15,8 @@ normalizeCounts(
 )
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{counts}{Integer, Numeric or Sparse matrix. Rows represent features
+and columns represent cells.}
 
 \item{normalize}{Character.
 Divides counts by the library sizes for each cell. One of 'proportion',

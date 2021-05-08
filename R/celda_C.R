@@ -56,7 +56,6 @@
 #' @param logfile Character. Messages will be redirected to a file named
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
 #'  parameter settings are stored in the \link{metadata}
 #'  \code{"celda_parameters"} slot.
@@ -75,7 +74,26 @@
 #' @import Rcpp RcppEigen
 #' @importFrom withr with_seed
 #' @export
-setGeneric("celda_C", function(x, ...) {
+setGeneric("celda_C",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        sampleLabel = NULL,
+        K,
+        alpha = 1,
+        beta = 1,
+        algorithm = c("EM", "Gibbs"),
+        stopIter = 10,
+        maxIter = 200,
+        splitOnIter = 10,
+        splitOnLast = TRUE,
+        seed = 12345,
+        nchains = 3,
+        zInitialize = c("split", "random", "predefined"),
+        countChecksum = NULL,
+        zInit = NULL,
+        logfile = NULL,
+        verbose = TRUE) {
     standardGeneric("celda_C")})
 
 
@@ -437,7 +455,7 @@ setMethod("celda_C",
 
       if (K > 2 & iter != maxIter &
         ((((numIterWithoutImprovement == stopIter &
-          !all(tempLl > ll))) & isTRUE(splitOnLast)) |
+          !all(tempLl >= ll))) & isTRUE(splitOnLast)) |
           (splitOnIter > 0 & iter %% splitOnIter == 0 &
             isTRUE(doCellSplit)))) {
         .logMessages(date(),
@@ -460,7 +478,7 @@ setMethod("celda_C",
           nG,
           alpha,
           beta,
-          zProb = t(nextZ$probs),
+          zProb = t(as.matrix(nextZ$probs)),
           maxClustersToTry = K,
           minCell = 3
         )
@@ -711,7 +729,7 @@ setMethod("celda_C",
   phi <- fastNormPropLog(nGByCP, beta)
 
   ## Maximization to find best label for each cell
-  probs <- eigenMatMultInt(phi, counts) + theta[, s]
+  probs <- .countsTimesProbs(counts, phi) + theta[, s]
 
   if (isTRUE(doSample)) {
     zPrevious <- z
@@ -774,6 +792,7 @@ setMethod("celda_C",
 # the count matrix.
 # @param z Numeric vector. Denotes cell population labels.
 # @param K Integer. Number of cell populations.
+#' @importFrom Matrix colSums
 .cCDecomposeCounts <- function(counts, s, z, K) {
   nS <- length(unique(s))
   nG <- nrow(counts)
@@ -782,9 +801,10 @@ setMethod("celda_C",
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
     ncol = nS
   )
+
   nGByCP <- .colSumByGroup(counts, group = z, K = K)
-  nCP <- as.integer(colSums(nGByCP))
-  nByC <- as.integer(colSums(counts))
+  nCP <- .colSums(nGByCP, nrow(nGByCP), ncol(nGByCP))
+  nByC <- colSums(counts)
 
   return(list(
     mCPByS = mCPByS,
@@ -797,15 +817,15 @@ setMethod("celda_C",
   ))
 }
 
-
+#' @importFrom Matrix colSums
 .cCReDecomposeCounts <- function(counts, s, z, previousZ, nGByCP, K) {
   ## Recalculate counts based on new label
   nGByCP <- .colSumByGroupChange(counts, nGByCP, z, previousZ, K)
+  nCP <- colSums(nGByCP)
   nS <- length(unique(s))
   mCPByS <- matrix(as.integer(table(factor(z, levels = seq(K)), s)),
     ncol = nS
   )
-  nCP <- as.integer(colSums(nGByCP))
 
   return(list(
     mCPByS = mCPByS,
@@ -928,9 +948,26 @@ setMethod("celda_C",
     SummarizedExperiment::colData(sce)["colnames"] <-
         celdaCMod@names$column
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        celdaCMod@sampleLabel
+        as.factor(celdaCMod@sampleLabel)
     SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
-        celdaClusters(celdaCMod)$z
+        as.factor(celdaClusters(celdaCMod)$z)
 
     return(sce)
+}
+
+# #' @name countsTimesProbs
+# #' @title Counts matrix times cell population probabilies
+# #' @param counts feature-by-cell matrix
+# #' @param phi feature-by-probability matrix
+#' @importMethodsFrom Matrix %*%
+.countsTimesProbs <- function(counts, phi) {
+  ## Maximization to find best label for each cell
+  if (inherits(counts, "matrix") & is.integer(counts)) {
+    probs <- eigenMatMultInt(phi, counts)
+  } else if (inherits(counts, "matrix") & is.numeric(counts)) {
+    probs <- eigenMatMultNumeric(phi, counts)
+  } else {
+    probs <- (t(phi) %*% counts)
+  }
+  return(probs)
 }

@@ -185,7 +185,7 @@ NumericVector cG_CalcGibbsProbY_fastRow(const int index,
 
 // [[Rcpp::export]]
 NumericVector cG_CalcGibbsProbY(const int index,
-	const IntegerMatrix& counts,
+	const NumericVector& counts,
 	const IntegerMatrix& nTSbyC,
 	const IntegerVector& nbyTS,
 	const IntegerVector& nGbyTS,	
@@ -200,6 +200,7 @@ NumericVector cG_CalcGibbsProbY(const int index,
 
   int index0 = index - 1;
   int current_y = y[index0] - 1;
+  //int current_y = y;
   int i;
   int j,k;
   
@@ -208,8 +209,9 @@ NumericVector cG_CalcGibbsProbY(const int index,
   // Calculate probabilities related to the "n.TS.by.C" part of equation one time up front
   // The first case of if statement represents when the current feature is already added to that module
   // The second case represents when the current feature is NOT YET added to that module
-  for (int col = 0; col < counts.ncol(); col++) {
-    k = col * nG + index0; // Index for the current feature in counts matrix
+  for (int col = 0; col < counts.length(); col++) {
+    //k = col * nG + index0; // Index for the current feature in counts matrix, used when the whole matrix was passed to this function rather than just the row
+    k = col; // Index for the current feature in counts matrix
     for (i = 0; i < L; i++) {
       j = col * L + i; // Index for the current module in the n.TS.by.C matrix
       if (i == current_y) {

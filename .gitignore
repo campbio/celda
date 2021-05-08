@@ -15,6 +15,10 @@
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
+vignettes/*.log
+inst/rmarkdown/*.html
+inst/rmarkdown/*.rds
+inst/rmarkdown/*.csv
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
 # knitr and R markdown default cache directories
@@ -29,6 +33,8 @@ celda.Rproj
 src/*.o
 src/*.dll
 src/*.so
+src-i386/*
+src-x64/*
 etc/*
 # Celda log files with default prefix
 Celda_chain.*log.txt
@@ -37,4 +43,5 @@ doc
 Meta
 .Rprofile
 renv/
+renv.lock
 

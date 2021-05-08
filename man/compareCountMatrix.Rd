@@ -6,19 +6,17 @@
 \alias{compareCountMatrix,ANY,celdaList-method}
 \title{Check count matrix consistency}
 \usage{
-compareCountMatrix(counts, celdaMod, ...)
+compareCountMatrix(counts, celdaMod, errorOnMismatch = TRUE)
 
 \S4method{compareCountMatrix}{ANY,celdaModel}(counts, celdaMod, errorOnMismatch = TRUE)
 
 \S4method{compareCountMatrix}{ANY,celdaList}(counts, celdaMod, errorOnMismatch = TRUE)
 }
 \arguments{
-\item{counts}{Integer matrix. Rows represent features and columns represent
-cells.}
+\item{counts}{Integer , Numeric, or Sparse matrix. Rows represent features
+and columns represent cells.}
 
 \item{celdaMod}{A \code{celdaModel} or \code{celdaList} object.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{errorOnMismatch}{Logical. Whether to throw an error in the event of
 a mismatch. Default TRUE.}

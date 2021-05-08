@@ -46,8 +46,8 @@
 #' @title Normalization of count data
 #' @description Performs normalization, transformation, and/or scaling of a
 #'  counts matrix
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param counts Integer, Numeric or Sparse matrix. Rows represent features
+#' and columns represent cells.
 #' @param normalize Character.
 #'  Divides counts by the library sizes for each cell. One of 'proportion',
 #'  'cpm', 'median', or 'mean'. 'proportion' uses the total counts for each
@@ -77,6 +77,7 @@
 #' data(celdaCGSim)
 #' normalizedCounts <- normalizeCounts(celdaCGSim$counts, "proportion",
 #'   pseudocountNormalize = 1)
+#' @importFrom Matrix colSums
 #' @export
 normalizeCounts <- function(counts,
                             normalize = c("proportion", "cpm",
@@ -88,7 +89,6 @@ normalizeCounts <- function(counts,
                             pseudocountTransform = 0) {
 
   normalize <- match.arg(normalize)
-  counts <- as.matrix(counts)
 
   if (!is.null(transformationFun) &&
     !is.function(transformationFun)) {
@@ -98,11 +98,11 @@ normalizeCounts <- function(counts,
     stop("'scaleFun' needs to be of class 'function'")
   }
   # Perform normalization
-  if (normalize == "proportion") {
+  if (normalize == "proportion" & inherits(counts, "matrix")) {
     norm <- fastNormProp(counts, pseudocountNormalize)
   } else {
     counts <- counts + pseudocountNormalize
-    cs <- .colSums(counts, nrow(counts), ncol(counts))
+    cs <- colSums(counts)
     norm <- switch(
       normalize,
       "proportion" = sweep(counts, 2, cs, "/"),
@@ -139,12 +139,12 @@ normalizeCounts <- function(counts,
 #'  \code{celda_cell_cluster} in
 #'  \code{\link{colData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-#'  the original cluster
+#'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+#'  that correspond to the original cluster
 #'  labels in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
-#'  \code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-#'  the new cluster labels.
+#'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+#'  that correspond to the new cluster labels.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @return \linkS4class{SingleCellExperiment} object with recoded cell
@@ -233,17 +233,17 @@ recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
 #' @title Check count matrix consistency
 #' @description Checks if the counts matrix is the same one used to generate
 #'  the celda model object by comparing dimensions and MD5 checksum.
-#' @param counts Integer matrix. Rows represent features and columns represent
-#'  cells.
+#' @param counts Integer , Numeric, or Sparse matrix. Rows represent features
+#' and columns represent cells.
 #' @param celdaMod A \code{celdaModel} or \code{celdaList} object.
 #' @param errorOnMismatch Logical. Whether to throw an error in the event of
 #'  a mismatch. Default TRUE.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Returns TRUE if provided count matrix matches the one used in the
 #'  celda object and/or \code{errorOnMismatch = FALSE}, FALSE otherwise.
 #' @export
-setGeneric("compareCountMatrix", function(counts, celdaMod, ...) {
-    standardGeneric("compareCountMatrix")})
+setGeneric("compareCountMatrix",
+    function(counts, celdaMod, errorOnMismatch = TRUE) {
+        standardGeneric("compareCountMatrix")})
 
 
 #' @rdname compareCountMatrix
@@ -275,8 +275,8 @@ setMethod("compareCountMatrix",
             }
         }
         celdaChecksum <- params(celdaMod)$countChecksum
-
         counts <- .processCounts(counts)
+
         # Checksums are generated in celdaGridSearch and model after processing
         count.md5 <- .createCountChecksum(counts)
         res <- isTRUE(count.md5 == celdaChecksum)
@@ -328,8 +328,8 @@ setMethod("compareCountMatrix",
             }
         }
         celdaChecksum <- celdaMod@countChecksum
-
         counts <- .processCounts(counts)
+
         # Checksums are generated in celdaGridSearch and model after processing
         count.md5 <- .createCountChecksum(counts)
         res <- isTRUE(count.md5 == celdaChecksum)
@@ -442,10 +442,12 @@ distinctColors <- function(n,
 
 
 .processCounts <- function(counts) {
-  counts <- as.matrix(counts)
-  if (typeof(counts) != "integer") {
-    counts <- round(counts)
-    storage.mode(counts) <- "integer"
+  if (!((inherits(counts, "matrix") &
+        (is.integer(counts) | is.numeric(counts))) |
+     inherits(counts, "dgCMatrix"))) {
+    stop("'counts' must be a sparse dgCMatrix ",
+         "from the 'Matrix' package or a matrix containing integer or numeric ",
+         "values.")
   }
   return(counts)
 }
@@ -453,10 +455,11 @@ distinctColors <- function(n,
 
 # Perform some simple checks on the counts matrix, to ensure celda modeling
 # expectations are met
+#' @importFrom Matrix rowSums colSums
 .validateCounts <- function(counts) {
-  # And each row/column of the count matrix must have at least one count
   countRowSum <- rowSums(counts)
   countColSum <- colSums(counts)
+
   if (sum(countRowSum == 0) > 0 | sum(countColSum == 0) > 0) {
     stop(
       "Each row and column of the count matrix must have at least",

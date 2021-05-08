@@ -6,7 +6,7 @@
 \alias{selectBestModel,celdaList-method}
 \title{Select best chain within each combination of parameters}
 \usage{
-selectBestModel(x, ...)
+selectBestModel(x, asList = FALSE, altExpName = "featureSubset")
 
 \S4method{selectBestModel}{SingleCellExperiment}(x, asList = FALSE, altExpName = "featureSubset")
 
@@ -20,8 +20,6 @@ selectBestModel(x, ...)
  or \code{recursiveSplitCell}. Must contain a list named
  \code{"celda_grid_search"} in \code{metadata(x)}.
  \item celdaList object.}}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{asList}{\code{TRUE} or \code{FALSE}. Whether to return the
 best model as a

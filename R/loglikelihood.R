@@ -11,12 +11,15 @@
 #'  to use. Default "featureSubset".
 #' @param celdaMod celda model object. Ignored if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object.
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return The log-likelihood of the cluster assignment for the
 #'  provided \linkS4class{SingleCellExperiment}.
 #' @seealso `celda_C()` for clustering cells
 #' @export
-setGeneric("logLikelihood", function(x, celdaMod, ...) {
+setGeneric("logLikelihood",
+    function(x,
+        celdaMod,
+        useAssay = "counts",
+        altExpName = "featureSubset") {
     standardGeneric("logLikelihood")
 })
 
@@ -33,8 +36,8 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
         sampleLabel <- sampleLabel(x, altExpName = altExpName)
-        z <- celdaClusters(x, altExpName = altExpName)
-        y <- celdaModules(x, altExpName = altExpName)
+        z <- as.integer(celdaClusters(x, altExpName = altExpName))
+        y <- as.integer(celdaModules(x, altExpName = altExpName))
         K <- S4Vectors::metadata(altExp)$celda_parameters$K
         L <- S4Vectors::metadata(altExp)$celda_parameters$L
         alpha <- S4Vectors::metadata(altExp)$celda_parameters$alpha
@@ -156,13 +159,12 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
 #'  model object.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to
 #'  generate the model.
 #' @export
 setGeneric(
     "logLikelihoodHistory",
-    function(x, ...) {
+    function(x, altExpName = "featureSubset") {
         standardGeneric("logLikelihoodHistory")
     }
 )
@@ -207,11 +209,9 @@ setMethod("logLikelihoodHistory",
 #'  model object.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param ... Ignored. Placeholder to prevent check warning.
 #' @export
-setGeneric(
-    "bestLogLikelihood",
-    function(x, ...) {
+setGeneric("bestLogLikelihood",
+    function(x, altExpName = "featureSubset") {
         standardGeneric("bestLogLikelihood")
     }
 )

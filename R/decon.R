@@ -205,7 +205,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
 
   ## Add results into column annotation
   SummarizedExperiment::colData(x)$decontX_contamination <- result$contamination
-  SummarizedExperiment::colData(x)$decontX_clusters <- result$z
+  SummarizedExperiment::colData(x)$decontX_clusters <- as.factor(result$z)
 
   ## Put estimated UMAPs into SCE
   batchIndex <- unique(result$runParams$batch)
@@ -338,11 +338,13 @@ setGeneric("decontXcounts<-", function(object, ..., value) {
 })
 
 #' @export
+#' @rdname decontXcounts
 setMethod("decontXcounts", "SingleCellExperiment", GET_FUN("decontXcounts"))
 
 #' @export
-setReplaceMethod(
-  "decontXcounts", c("SingleCellExperiment", "ANY"),
+#' @rdname decontXcounts
+setMethod(
+  "decontXcounts<-", c("SingleCellExperiment", "ANY"),
   SET_FUN("decontXcounts")
 )
 

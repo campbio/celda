@@ -9,7 +9,8 @@
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
-#'  Rows represent features and columns represent cells.
+#'  Rows represent features and columns represent cells. Celda
+#'  results must be present under \code{metadata(altExp(x, altExpName))}.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -52,20 +53,25 @@
 #'  divides the library size of each cell by the mean library size across all
 #'  cells. Default "proportion".
 #' @param transformationFun Function. Passed to \link{normalizeCounts} if
-#'  \code{normalizedCounts} is \code{NA}. Applys a transformation such as
+#'  \code{normalizedCounts} is \code{NA}. Applies a transformation such as
 #'  \link{sqrt}, \link{log}, \link{log2}, \link{log10}, or \link{log1p}.
-#'  If NULL, no transformation will be applied. Occurs after normalization.
-#'  Default \link{sqrt}.
+#'  If \code{NULL}, no transformation will be applied. Occurs after
+#'  normalization. Default \link{sqrt}.
 #' @param scaleRow Function. Which function to use to scale each individual
 #'  row. Set to NULL to disable. Occurs after normalization and log
 #'  transformation. For example, \link{scale} will Z-score transform each row.
 #'  Default \link{scale}.
-#' @param showFeaturenames Logical. Wheter feature names should be displayed.
+#' @param showFeatureNames Logical. Whether feature names should be displayed.
 #'  Default TRUE.
+#' @param displayName Character. The column name of
+#'  \code{rowData(altExp(x, altExpName))} that specifies the display names for
+#'  the features. Default \code{NULL}, which displays the row names. Only works
+#'  if \code{showFeaturenames} is \code{TRUE} and \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object.
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for plotting the data. This threshold is applied
 #'  after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.
-#' @param rowFontSize Integer. Font size for feature names. If \code{NULL},
+#' @param rowFontSize Numeric. Font size for feature names. If \code{NULL},
 #' then the size will automatically be determined. Default \code{NULL}.
 #' @param showHeatmapLegend Passed to \link[ComplexHeatmap]{Heatmap}. Show
 #'  legend for expression levels.
@@ -101,14 +107,44 @@
 #' @importFrom methods .hasSlot
 #' @importFrom multipanelfigure multi_panel_figure
 #' @export
-setGeneric("moduleHeatmap", function(x, ...) {
+setGeneric("moduleHeatmap",
+    function(x,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        featureModule = NULL,
+        col = circlize::colorRamp2(c(-2, 0, 2),
+            c("#1E90FF", "#FFFFFF", "#CD2626")),
+        topCells = 100,
+        topFeatures = NULL,
+        normalizedCounts = NA,
+        normalize = "proportion",
+        transformationFun = sqrt,
+        scaleRow = scale,
+        showFeatureNames = TRUE,
+        displayName = NULL,
+        trim = c(-2, 2),
+        rowFontSize = NULL,
+        showHeatmapLegend = FALSE,
+        showTopAnnotationLegend = FALSE,
+        showTopAnnotationName = FALSE,
+        topAnnotationHeight = 5,
+        showModuleLabel = TRUE,
+        moduleLabel = "auto",
+        moduleLabelSize = NULL,
+        width = "auto",
+        height = "auto",
+        unit = "mm",
+        ncol = NULL,
+        useRaster = TRUE,
+        ...) {
     standardGeneric("moduleHeatmap")})
 
 
 #' @rdname moduleHeatmap
 #' @examples
 #' data(sceCeldaCG)
-#' moduleHeatmap(sceCeldaCG, width = 250, height = 250)
+#' moduleHeatmap(sceCeldaCG, width = 250, height = 250,
+#'  displayName = "rownames")
 #' @export
 setMethod("moduleHeatmap",
     signature(x = "SingleCellExperiment"),
@@ -124,7 +160,8 @@ setMethod("moduleHeatmap",
         normalize = "proportion",
         transformationFun = sqrt,
         scaleRow = scale,
-        showFeaturenames = TRUE,
+        showFeatureNames = TRUE,
+        displayName = NULL,
         trim = c(-2, 2),
         rowFontSize = NULL,
         showHeatmapLegend = FALSE,
@@ -214,6 +251,13 @@ setMethod("moduleHeatmap",
             }
         )
 
+        if (is.null(displayName)) {
+            displayNames <- rownames(altExp)
+        } else {
+            displayNames <- SummarizedExperiment::rowData(altExp)[[
+                displayName]]
+        }
+
         z <- celdaClusters(x, altExpName = altExpName)
         y <- celdaModules(x, altExpName = altExpName)
 
@@ -230,7 +274,8 @@ setMethod("moduleHeatmap",
                 topCells = topCells,
                 altExpName = altExpName,
                 scaleRow = scaleRow,
-                showFeaturenames = showFeaturenames,
+                showFeatureNames = showFeatureNames,
+                displayNames = displayNames[featureIndices[[i]]],
                 trim = trim,
                 rowFontSize = rowFontSize,
                 showHeatmapLegend = showHeatmapLegend,
@@ -286,7 +331,8 @@ setMethod("moduleHeatmap",
     topCells,
     altExpName,
     scaleRow,
-    showFeaturenames,
+    showFeatureNames,
+    displayNames,
     trim,
     rowFontSize,
     showHeatmapLegend,
@@ -366,13 +412,18 @@ setMethod("moduleHeatmap",
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
     }
 
+    if (is.null(rowFontSize)) {
+        rowFontSize <- min(200 / nrow(filteredNormCounts), 20)
+    }
+
     if (isTRUE(showModuleLabel)) {
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,
             row_title = moduleLabel,
             row_title_gp = gpar(fontsize = moduleLabelSize),
             show_column_names = FALSE,
-            show_row_names = showFeaturenames,
+            show_row_names = showFeatureNames,
+            row_labels = displayNames,
             row_names_gp = grid::gpar(fontsize = rowFontSize),
             cluster_rows = FALSE,
             cluster_columns = FALSE,
@@ -393,7 +444,8 @@ setMethod("moduleHeatmap",
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,
             show_column_names = FALSE,
-            show_row_names = showFeaturenames,
+            show_row_names = showFeatureNames,
+            row_labels = displayNames,
             row_names_gp = grid::gpar(fontsize = rowFontSize),
             cluster_rows = FALSE,
             cluster_columns = FALSE,

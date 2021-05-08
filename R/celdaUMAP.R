@@ -65,7 +65,24 @@
 #'  \code{\link{reducedDim}(sce, "celda_UMAP")}.
 #' @export
 setGeneric("celdaUmap",
-    function(sce, ...) {
+    function(sce,
+        useAssay = "counts",
+        altExpName = "featureSubset",
+        maxCells = NULL,
+        minClusterSize = 100,
+        modules = NULL,
+        seed = 12345,
+        nNeighbors = 30,
+        minDist = 0.75,
+        spread = 1,
+        pca = TRUE,
+        initialDims = 50,
+        normalize = "proportion",
+        scaleFactor = NULL,
+        transformationFun = sqrt,
+        cores = 1,
+        ...) {
+
         standardGeneric("celdaUmap")
     })
 

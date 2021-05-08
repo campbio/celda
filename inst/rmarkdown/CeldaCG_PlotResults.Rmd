@@ -28,7 +28,7 @@ output:
 # Celda_CG Results
 
 ## Setup
-The following code loads required librarys, reads in parameters, checks input variables, and sets up display options for the **celda_CG Results** report.
+The following code loads required libraries, reads in parameters, checks input variables, and sets up display options for the **celda_CG Results** report.
 ```{r setup, echo = showSetup}
 require(singleCellTK)
 require(celda)
@@ -37,6 +37,7 @@ require(grid)
 require(knitr)
 require(ggplot2)
 require(multipanelfigure)
+require(SingleCellExperiment)
 
 sce <- params$sce
 features <- params$features
@@ -75,8 +76,8 @@ if (!is.null(cellAnnotFinal)) {
   }
 }
 
-L <- max(celdaModules(sce))
-K <- max(celdaClusters(sce))
+L <- max(as.integer(celdaModules(sce)))
+K <- max(as.integer(celdaClusters(sce)))
 
 # Define tab levels
 tab3 <- "### %s {-}
@@ -180,6 +181,7 @@ for (i in seq_len(L)) {
     sce,
     featureModule = i,
     topCells = NULL,
+    displayName = displayName,
     moduleLabel = "All cells",
     useRaster = TRUE
   )
@@ -187,6 +189,7 @@ for (i in seq_len(L)) {
     sce,
     featureModule = i,
     topCells = 100,
+    displayName = displayName,
     moduleLabel = "Top 100 cells",
     useRaster = TRUE
   )
@@ -243,7 +246,7 @@ for (i in seq.int(1, length(grids) - 1)) {
       reducedDimName = reducedDimName,
       useAssay = useAssay,
       altExpName = altExpName,
-      ncol = 3,
+      ncol = 4,
       modules = modules
     )
   )
@@ -291,6 +294,7 @@ if (!is.null(features)) {
         sce,
         reducedDimName = "celda_UMAP",
         features = rownames(sce)[ix],
+        displayName = displayName,
         colorHigh = "red",
         colorMid = "grey",
         colorLow = "blue",

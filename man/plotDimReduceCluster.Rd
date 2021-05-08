@@ -6,7 +6,20 @@
 \alias{plotDimReduceCluster,vector-method}
 \title{Plotting the cell labels on a dimension reduction plot}
 \usage{
-plotDimReduceCluster(x, ...)
+plotDimReduceCluster(
+  x,
+  reducedDimName,
+  altExpName = "featureSubset",
+  dim1 = NULL,
+  dim2 = NULL,
+  size = 1,
+  xlab = "Dimension_1",
+  ylab = "Dimension_2",
+  specificClusters = NULL,
+  labelClusters = FALSE,
+  groupBy = NULL,
+  labelSize = 3.5
+)
 
 \S4method{plotDimReduceCluster}{SingleCellExperiment}(
   x,
@@ -41,8 +54,6 @@ plotDimReduceCluster(x, ...)
 \linkS4class{SingleCellExperiment} object
 containing cluster labels for each cell in \code{"celda_cell_cluster"}
 column in \code{colData(x)}.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a

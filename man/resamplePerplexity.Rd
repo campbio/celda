@@ -3,11 +3,18 @@
 \name{resamplePerplexity}
 \alias{resamplePerplexity}
 \alias{resamplePerplexity,SingleCellExperiment-method}
-\alias{resamplePerplexity,matrix-method}
+\alias{resamplePerplexity,ANY-method}
 \title{Calculate and visualize perplexity of all models in a celdaList, with
  count resampling}
 \usage{
-resamplePerplexity(x, ...)
+resamplePerplexity(
+  x,
+  celdaList,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  resample = 5,
+  seed = 12345
+)
 
 \S4method{resamplePerplexity}{SingleCellExperiment}(
   x,
@@ -17,7 +24,7 @@ resamplePerplexity(x, ...)
   seed = 12345
 )
 
-\S4method{resamplePerplexity}{matrix}(x, celdaList, resample = 5, seed = 12345)
+\S4method{resamplePerplexity}{ANY}(x, celdaList, resample = 5, seed = 12345)
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
@@ -27,7 +34,8 @@ Rows represent features and columns represent cells. Must contain
 "celda_grid_search" slot in \code{metadata(x)} if \code{x} is a
 \linkS4class{SingleCellExperiment} object.}
 
-\item{...}{Ignored. Placeholder to prevent check warning.}
+\item{celdaList}{Object of class 'celdaList'. Used only if \code{x} is a
+matrix object.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
@@ -42,9 +50,6 @@ for evaluating perplexity. Default 5.}
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
-
-\item{celdaList}{Object of class 'celdaList'. Used only if \code{x} is a
-matrix object.}
 }
 \value{
 A \linkS4class{SingleCellExperiment} object or

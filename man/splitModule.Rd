@@ -5,7 +5,14 @@
 \alias{splitModule,SingleCellExperiment-method}
 \title{Split celda feature module}
 \usage{
-splitModule(x, ...)
+splitModule(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  module,
+  n = 2,
+  seed = 12345
+)
 
 \S4method{splitModule}{SingleCellExperiment}(
   x,
@@ -20,8 +27,6 @@ splitModule(x, ...)
 \item{x}{A \linkS4class{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use for \code{x}. Default "counts".}

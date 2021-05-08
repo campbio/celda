@@ -240,8 +240,9 @@ simulateCells <- function(
     SummarizedExperiment::colData(sce)["colnames"] <-
         colnames(simList$counts)
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        simList$sampleLabel
-    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
+        as.factor(simList$sampleLabel)
+    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
+        as.factor(simList$z)
 
     return(sce)
 }
@@ -460,9 +461,11 @@ simulateCells <- function(
     SummarizedExperiment::colData(sce)["colnames"] <-
         colnames(simList$counts)
     SummarizedExperiment::colData(sce)["celda_sample_label"] <-
-        simList$sampleLabel
-    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <- simList$z
-    SummarizedExperiment::rowData(sce)["celda_feature_module"] <- simList$y
+        as.factor(simList$sampleLabel)
+    SummarizedExperiment::colData(sce)["celda_cell_cluster"] <-
+        as.factor(simList$z)
+    SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
+        as.factor(simList$y)
 
     return(sce)
 }
@@ -621,7 +624,8 @@ simulateCells <- function(
     SummarizedExperiment::rowData(sce)["rownames"] <- rownames(simList$counts)
     SummarizedExperiment::colData(sce)["colnames"] <-
         colnames(simList$counts)
-    SummarizedExperiment::rowData(sce)["celda_feature_module"] <- simList$y
+    SummarizedExperiment::rowData(sce)["celda_feature_module"] <-
+        as.factor(simList$y)
 
     return(sce)
 }

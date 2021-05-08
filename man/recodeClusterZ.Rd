@@ -13,13 +13,13 @@ recodeClusterZ(sce, from, to, altExpName = "featureSubset")
 \code{\link{colData}(altExp(sce, altExpName))}.}
 
 \item{from}{Numeric vector. Unique values in the range of
-\code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-the original cluster
+\code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+that correspond to the original cluster
 labels in \code{sce}.}
 
 \item{to}{Numeric vector. Unique values in the range of
-\code{seq(celdaClusters(sce, altExpName = altExpName))} that correspond to
-the new cluster labels.}
+\code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
+that correspond to the new cluster labels.}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}

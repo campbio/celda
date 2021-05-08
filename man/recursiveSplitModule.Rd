@@ -6,7 +6,26 @@
 \alias{recursiveSplitModule,matrix-method}
 \title{Recursive module splitting}
 \usage{
-recursiveSplitModule(x, ...)
+recursiveSplitModule(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  initialL = 10,
+  maxL = 100,
+  tempK = 100,
+  zInit = NULL,
+  sampleLabel = NULL,
+  alpha = 1,
+  beta = 1,
+  delta = 1,
+  gamma = 1,
+  minFeature = 3,
+  reorder = TRUE,
+  seed = 12345,
+  perplexity = TRUE,
+  verbose = TRUE,
+  logfile = NULL
+)
 
 \S4method{recursiveSplitModule}{SingleCellExperiment}(
   x,
@@ -55,8 +74,6 @@ recursiveSplitModule(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a

@@ -6,7 +6,22 @@
 \alias{celdaGridSearch,matrix-method}
 \title{Run Celda in parallel with multiple parameters}
 \usage{
-celdaGridSearch(x, ...)
+celdaGridSearch(
+  x,
+  useAssay = "counts",
+  altExpName = "featureSubset",
+  model,
+  paramsTest,
+  paramsFixed = NULL,
+  maxIter = 200,
+  nchains = 3,
+  cores = 1,
+  bestOnly = TRUE,
+  seed = 12345,
+  perplexity = TRUE,
+  verbose = TRUE,
+  logfilePrefix = "Celda"
+)
 
 \S4method{celdaGridSearch}{SingleCellExperiment}(
   x,
@@ -47,8 +62,6 @@ celdaGridSearch(x, ...)
 \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
-
-\item{...}{Ignored. Placeholder to prevent check warning.}
 
 \item{useAssay}{A string specifying the name of the
 \link{assay} slot to use. Default "counts".}
@@ -111,7 +124,7 @@ Run Celda with different combinations of parameters and
  but not be displayed in \code{stdout}.
 }
 \examples{
-\dontrun{
+\donttest{
 data(celdaCGSim)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
