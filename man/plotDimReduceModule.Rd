@@ -3,7 +3,7 @@
 \name{plotDimReduceModule}
 \alias{plotDimReduceModule}
 \alias{plotDimReduceModule,SingleCellExperiment-method}
-\alias{plotDimReduceModule,matrix-method}
+\alias{plotDimReduceModule,ANY-method}
 \title{Plotting Celda module probability on a
  dimension reduction plot}
 \usage{
@@ -46,7 +46,7 @@ plotDimReduceModule(
   decreasing = FALSE
 )
 
-\S4method{plotDimReduceModule}{matrix}(
+\S4method{plotDimReduceModule}{ANY}(
   x,
   dim1,
   dim2,

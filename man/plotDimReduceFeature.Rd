@@ -3,7 +3,7 @@
 \name{plotDimReduceFeature}
 \alias{plotDimReduceFeature}
 \alias{plotDimReduceFeature,SingleCellExperiment-method}
-\alias{plotDimReduceFeature,matrix-method}
+\alias{plotDimReduceFeature,ANY-method}
 \title{Plotting feature expression on a dimension reduction plot}
 \usage{
 plotDimReduceFeature(
@@ -58,7 +58,7 @@ plotDimReduceFeature(
   decreasing = FALSE
 )
 
-\S4method{plotDimReduceFeature}{matrix}(
+\S4method{plotDimReduceFeature}{ANY}(
   x,
   features,
   dim1,

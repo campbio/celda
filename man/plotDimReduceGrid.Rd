@@ -3,7 +3,7 @@
 \name{plotDimReduceGrid}
 \alias{plotDimReduceGrid}
 \alias{plotDimReduceGrid,SingleCellExperiment-method}
-\alias{plotDimReduceGrid,matrix-method}
+\alias{plotDimReduceGrid,ANY-method}
 \title{Mapping the dimension reduction plot}
 \usage{
 plotDimReduceGrid(
@@ -48,7 +48,7 @@ plotDimReduceGrid(
   decreasing = FALSE
 )
 
-\S4method{plotDimReduceGrid}{matrix}(
+\S4method{plotDimReduceGrid}{ANY}(
   x,
   dim1,
   dim2,
