@@ -439,8 +439,6 @@ setMethod("plotDimReduceFeature",
           dims <- SingleCellExperiment::reducedDim(altExp, reducedDimName)
           dim1 <- dims[, 1]
           dim2 <- dims[, 2]
-          xlab <- colnames(dims)[1]
-          ylab <- colnames(dims)[2]
         }
 
         if (isFALSE(is.null(displayName))) {
