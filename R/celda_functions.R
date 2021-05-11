@@ -532,23 +532,45 @@ distinctColors <- function(n,
 #'  slot to use. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
+#' @param displayName Character. The column name of
+#'  \code{rowData(sce)} that specifies the display names for
+#'  the features. Default \code{NULL}, which displays the row names.
 #' @param outputFile File name for feature module table. If NULL, file will
 #'  not be created. Default NULL.
 #' @return Matrix. Contains a list of features per each column (feature module)
 #' @examples
 #' data(sceCeldaCG)
 #' featureModuleTable(sceCeldaCG)
-#' @importFrom stringi stri_list2matrix
 #' @export
-featureModuleTable <- function(sce, useAssay = "counts",
-    altExpName = "featureSubset", outputFile = NULL) {
+featureModuleTable <- function(sce,
+    useAssay = "counts",
+    altExpName = "featureSubset",
+    displayName = NULL,
+    outputFile = NULL) {
 
   factorizeMatrix <- factorizeMatrix(sce,
       useAssay = useAssay,
       altExpName = altExpName,
       type = "proportion")
   allGenes <- topRank(factorizeMatrix$proportions$module, n = nrow(sce))
-  res <- as.data.frame(stringi::stri_list2matrix(allGenes$names))
+  maxlen <- max(vapply(allGenes$names, length, integer(1)))
+
+  if (is.null(displayName)) {
+      res <- vapply(allGenes$names,
+          FUN = '[',
+          FUN.VALUE = character(length = maxlen),
+          seq(maxlen))
+  } else {
+      dn <- lapply(allGenes$index,
+          FUN = function(v) {
+              rowData(sce)[[displayName]][v]
+          })
+      res <- vapply(dn,
+          FUN = '[',
+          FUN.VALUE = character(length = maxlen),
+          seq(maxlen))
+  }
+
   res <- apply(res, c(1, 2), function(x) {
     if (is.na(x)) {
       return("")
@@ -556,11 +578,7 @@ featureModuleTable <- function(sce, useAssay = "counts",
       return(x)
     }
   })
-  colnames(res) <- gsub(
-    pattern = "V",
-    replacement = "L",
-    x = colnames(res)
-  )
+
   if (is.null(outputFile)) {
     return(res)
   } else {

@@ -8,6 +8,7 @@ featureModuleTable(
   sce,
   useAssay = "counts",
   altExpName = "featureSubset",
+  displayName = NULL,
   outputFile = NULL
 )
 }
@@ -22,6 +23,10 @@ slot to use. Default "counts".}
 
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
+
+\item{displayName}{Character. The column name of
+\code{rowData(sce)} that specifies the display names for
+the features. Default \code{NULL}, which displays the row names.}
 
 \item{outputFile}{File name for feature module table. If NULL, file will
 not be created. Default NULL.}
