@@ -557,7 +557,7 @@ featureModuleTable <- function(sce,
 
   if (is.null(displayName)) {
       res <- vapply(allGenes$names,
-          FUN = '[',
+          FUN = "[",
           FUN.VALUE = character(length = maxlen),
           seq(maxlen))
   } else {
@@ -566,7 +566,7 @@ featureModuleTable <- function(sce,
               rowData(sce)[[displayName]][v]
           })
       res <- vapply(dn,
-          FUN = '[',
+          FUN = "[",
           FUN.VALUE = character(length = maxlen),
           seq(maxlen))
   }
