@@ -145,7 +145,7 @@ setMethod("plotDimReduceGrid",
 #'   varLabel = "tSNE")
 #' @export
 setMethod("plotDimReduceGrid",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         dim1,
         dim2,
@@ -162,6 +162,7 @@ setMethod("plotDimReduceGrid",
         headers = NULL,
         decreasing = FALSE) {
 
+        x <- as.matrix(x)
         g <- .plotDimReduceGrid(dim1 = dim1,
             dim2 = dim2,
             matrix = x,
@@ -438,19 +439,21 @@ setMethod("plotDimReduceFeature",
           dims <- SingleCellExperiment::reducedDim(altExp, reducedDimName)
           dim1 <- dims[, 1]
           dim2 <- dims[, 2]
-          xlab <- colnames(dims)[1]
-          ylab <- colnames(dims)[2]
         }
 
-        featuresIx <- retrieveFeatureIndex(features,
-            counts,
-            by = "rownames",
-            exactMatch = exactMatch)
-
         if (isFALSE(is.null(displayName))) {
+            featuresIx <- retrieveFeatureIndex(features,
+                x,
+                by = displayName,
+                exactMatch = exactMatch)
             headers <- SummarizedExperiment::rowData(x)[[
                 displayName]][featuresIx]
         } else {
+            featuresIx <- retrieveFeatureIndex(features,
+                counts,
+                by = "rownames",
+                exactMatch = exactMatch)
+
             if (isFALSE(is.null(headers))) {
                 if (length(headers) != length(features)) {
                     stop(
@@ -505,7 +508,7 @@ setMethod("plotDimReduceFeature",
 #'   exactMatch = TRUE)
 #' @export
 setMethod("plotDimReduceFeature",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         features,
         dim1,
@@ -526,6 +529,7 @@ setMethod("plotDimReduceFeature",
         ncol = NULL,
         decreasing = FALSE) {
 
+        x <- as.matrix(x)
         if (isFALSE(is.null(headers))) {
             if (length(headers) != length(features)) {
                 stop(
@@ -786,7 +790,7 @@ setMethod("plotDimReduceModule",
 #'   modules = c("1", "2"))
 #' @export
 setMethod("plotDimReduceModule",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         dim1,
         dim2,
@@ -802,6 +806,7 @@ setMethod("plotDimReduceModule",
         ncol = NULL,
         decreasing = FALSE) {
 
+        x <- as.matrix(x)
         factorized <- factorizeMatrix(x = x, celdaMod = celdaMod)
         g <- .plotDimReduceModule(dim1 = dim1,
             dim2 = dim2,
@@ -1138,6 +1143,10 @@ setMethod("plotDimReduceCluster",
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
 #' @param features Character vector. Uses these genes for plotting.
+#' @param displayName Character. The column name of
+#'  \code{rowData(x)} that specifies the display names for
+#'  the features. Default \code{NULL}, which displays the row names. Only works
+#'  if \code{x} is a \linkS4class{SingleCellExperiment} object.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -1159,6 +1168,7 @@ setGeneric("plotCeldaViolin",
     function(x,
         celdaMod,
         features,
+        displayName = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
         exactMatch = TRUE,
@@ -1176,6 +1186,7 @@ setMethod("plotCeldaViolin",
     signature(x = "SingleCellExperiment"),
     function(x,
         features,
+        displayName = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
         exactMatch = TRUE,
@@ -1185,9 +1196,25 @@ setMethod("plotCeldaViolin",
         counts <- SummarizedExperiment::assay(x, i = useAssay)
         cluster <- as.integer(celdaClusters(x, altExpName = altExpName))
 
+        if (is.null(displayName)) {
+            featuresIx <- retrieveFeatureIndex(features,
+                counts,
+                by = "rownames",
+                exactMatch = exactMatch)
+            rnames <- rownames(x)[featuresIx]
+        } else {
+            featuresIx <- retrieveFeatureIndex(features,
+                x,
+                by = displayName,
+                exactMatch = exactMatch)
+            rnames <- SummarizedExperiment::rowData(x)[featuresIx, displayName]
+        }
+
         g <- .plotCeldaViolin(counts = counts,
             cluster = cluster,
             features = features,
+            featuresIx = featuresIx,
+            rnames = rnames,
             exactMatch = exactMatch,
             plotDots = plotDots,
             dotSize = dotSize)
@@ -1204,7 +1231,7 @@ setMethod("plotCeldaViolin",
 #'    features = "Gene_1")
 #' @export
 setMethod("plotCeldaViolin",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         celdaMod,
         features,
@@ -1212,10 +1239,20 @@ setMethod("plotCeldaViolin",
         plotDots = TRUE,
         dotSize = 0.1) {
 
+        x <- as.matrix(x)
         cluster <- celdaClusters(celdaMod)$z
+
+        featuresIx <- retrieveFeatureIndex(features,
+            x,
+            by = "rownames",
+            exactMatch = exactMatch)
+        rnames <- rownames(x)[featuresIx]
+
         g <- .plotCeldaViolin(counts = x,
             cluster = cluster,
             features = features,
+            featuresIx = featuresIx,
+            rnames = rnames,
             exactMatch = exactMatch,
             plotDots = plotDots,
             dotSize = dotSize)
@@ -1227,15 +1264,14 @@ setMethod("plotCeldaViolin",
 .plotCeldaViolin <- function(counts,
     cluster,
     features,
+    featuresIx,
+    rnames,
     exactMatch = TRUE,
     plotDots = TRUE,
     dotSize = 0.1) {
 
-    featuresIx <- retrieveFeatureIndex(features,
-        counts,
-        by = "rownames",
-        exactMatch = exactMatch)
     dataFeature <- as.matrix(counts[featuresIx, , drop = FALSE])
+    rownames(dataFeature) <- rnames
     dataFeature <- as.data.frame(t(dataFeature))
     df <- cbind(cluster, dataFeature)
     df$cluster <- as.factor(df$cluster)

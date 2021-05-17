@@ -3,13 +3,14 @@
 \name{plotCeldaViolin}
 \alias{plotCeldaViolin}
 \alias{plotCeldaViolin,SingleCellExperiment-method}
-\alias{plotCeldaViolin,matrix-method}
+\alias{plotCeldaViolin,ANY-method}
 \title{Feature Expression Violin Plot}
 \usage{
 plotCeldaViolin(
   x,
   celdaMod,
   features,
+  displayName = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
   exactMatch = TRUE,
@@ -20,6 +21,7 @@ plotCeldaViolin(
 \S4method{plotCeldaViolin}{SingleCellExperiment}(
   x,
   features,
+  displayName = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
   exactMatch = TRUE,
@@ -27,7 +29,7 @@ plotCeldaViolin(
   dotSize = 0.1
 )
 
-\S4method{plotCeldaViolin}{matrix}(
+\S4method{plotCeldaViolin}{ANY}(
   x,
   celdaMod,
   features,
@@ -45,6 +47,11 @@ represent features and columns represent cells.}
 \code{x} is a matrix object.}
 
 \item{features}{Character vector. Uses these genes for plotting.}
+
+\item{displayName}{Character. The column name of
+\code{rowData(x)} that specifies the display names for
+the features. Default \code{NULL}, which displays the row names. Only works
+if \code{x} is a \linkS4class{SingleCellExperiment} object.}
 
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
