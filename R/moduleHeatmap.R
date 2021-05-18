@@ -369,9 +369,10 @@ setMethod("moduleHeatmap",
     filteredNormCounts <-
         normCounts[featureIndices, cellIndices, drop = FALSE]
 
-    filteredNormCounts <-
-        filteredNormCounts[rowSums(filteredNormCounts > 0) > 0, ,
-            drop = FALSE]
+    # Show/hide features with 0 counts in these cells in the module
+    # filteredNormCounts <-
+    #     filteredNormCounts[rowSums(filteredNormCounts > 0) > 0, ,
+    #         drop = FALSE]
 
     geneIx <- match(rownames(filteredNormCounts), rownames(normCounts))
     cellIx <- match(colnames(filteredNormCounts), colnames(normCounts))
@@ -420,7 +421,7 @@ setMethod("moduleHeatmap",
         plt <- ComplexHeatmap::Heatmap(matrix = filteredNormCounts,
             col = col,
             row_title = moduleLabel,
-            row_title_gp = gpar(fontsize = moduleLabelSize),
+            row_title_gp = grid::gpar(fontsize = moduleLabelSize),
             show_column_names = FALSE,
             show_row_names = showFeatureNames,
             row_labels = displayNames,
