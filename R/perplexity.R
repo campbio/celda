@@ -511,7 +511,7 @@ setMethod("plotGridSearchPerplexity",
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
         g <- do.call(paste0(".plotGridSearchPerplexity",
-            as.character(class(resList(x)[[1]]))),
+            as.character(class(resList(x, altExpName = altExpName)[[1]]))),
             args = list(celdaList, sep, alpha))
         return(g)
     }
