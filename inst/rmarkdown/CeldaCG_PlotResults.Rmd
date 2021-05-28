@@ -93,7 +93,7 @@ if (!is.null(features)) {
   markerHeight <- max(9, 3 * (length(features) / 3))
 }
 
-dev <- ifelse(isTRUE(pdf), c("png"), c("png", "pdf"))
+dev <- ifelse(isTRUE(pdf), c("png", "pdf"), c("png"))
 opts_chunk$set(
   echo = TRUE,
   cache = FALSE,
