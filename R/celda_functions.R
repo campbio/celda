@@ -563,7 +563,7 @@ featureModuleTable <- function(sce,
   } else {
       dn <- lapply(allGenes$index,
           FUN = function(v) {
-              rowData(sce)[[displayName]][v]
+            SummarizedExperiment::rowData(sce)[[displayName]][v]
           })
       res <- vapply(dn,
           FUN = "[",

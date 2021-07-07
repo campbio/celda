@@ -151,7 +151,7 @@ Default \code{TRUE}.}
 }
 \examples{
 data(sceCeldaCG)
-\donttest{
+\dontrun{
 library(SingleCellExperiment)
 sceCeldaCG$sum <- colSums(counts(sceCeldaCG))
 rowData(sceCeldaCG)$rownames <- rownames(sceCeldaCG)

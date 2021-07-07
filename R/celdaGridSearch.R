@@ -55,7 +55,7 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom methods is
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(celdaCGSim)
 #' ## Run various combinations of parameters with 'celdaGridSearch'
 #' celdaCGGridSearchRes <- celdaGridSearch(celdaCGSim$counts,
