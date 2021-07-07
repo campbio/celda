@@ -1014,23 +1014,17 @@ addLogLikelihood <- function(llA, llB) {
   }
   sce <- scater::logNormCounts(sce, log = TRUE)
 
-  if (nrow(sce) <= varGenes) {
-    topVariableGenes <- seq_len(nrow(sce))
-  } else if (nrow(sce) > varGenes) {
-    sce.var <- scran::modelGeneVar(sce)
-    topVariableGenes <- order(sce.var$bio,
-      decreasing = TRUE
-    )[seq(varGenes)]
-  }
-  sce <- sce[topVariableGenes, ]
-
   if (!is.null(seed)) {
     with_seed(
       seed,
-      resUmap <- scater::calculateUMAP(sce, n_threads = 1)
+      resUmap <- scater::calculateUMAP(sce, ntop = varGenes,
+                                       n_threads = 1,
+                                       exprs_values = "logcounts")
     )
   } else {
-    resUmap <- scater::calculateUMAP(sce, n_threads = 1)
+    resUmap <- scater::calculateUMAP(sce, ntop = varGenes,
+                                     n_threads = 1,
+                                     exprs_values = "logcounts")
   }
 
   z <- NULL
