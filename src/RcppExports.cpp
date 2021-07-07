@@ -140,17 +140,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // cG_CalcGibbsProbY
-NumericVector cG_CalcGibbsProbY(const int index, const NumericVector& counts, const IntegerMatrix& nTSbyC, const IntegerVector& nbyTS, const IntegerVector& nGbyTS, const IntegerVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const double delta);
+NumericVector cG_CalcGibbsProbY(const int index, const NumericVector& counts, const NumericMatrix& nTSbyC, const NumericVector& nbyTS, const IntegerVector& nGbyTS, const NumericVector& nbyG, const IntegerVector& y, const int L, const int nG, const NumericVector& lg_beta, const NumericVector& lg_gamma, const NumericVector& lg_delta, const double delta);
 RcppExport SEXP _celda_cG_CalcGibbsProbY(SEXP indexSEXP, SEXP countsSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nGbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP nGSEXP, SEXP lg_betaSEXP, SEXP lg_gammaSEXP, SEXP lg_deltaSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const int >::type index(indexSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type counts(countsSEXP);
-    Rcpp::traits::input_parameter< const IntegerMatrix& >::type nTSbyC(nTSbyCSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type nbyTS(nbyTSSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type nTSbyC(nTSbyCSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type nbyTS(nbyTSSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type nGbyTS(nGbyTSSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type nbyG(nbyGSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type nbyG(nbyGSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const int >::type L(LSEXP);
     Rcpp::traits::input_parameter< const int >::type nG(nGSEXP);
