@@ -7,16 +7,18 @@
 \usage{
 featureModuleLookup(
   sce,
-  feature,
+  features,
   altExpName = "featureSubset",
-  exactMatch = TRUE
+  exactMatch = TRUE,
+  by = "rownames"
 )
 
 \S4method{featureModuleLookup}{SingleCellExperiment}(
   sce,
-  feature,
+  features,
   altExpName = "featureSubset",
-  exactMatch = TRUE
+  exactMatch = TRUE,
+  by = "rownames"
 )
 }
 \arguments{
@@ -25,7 +27,7 @@ featureModuleLookup(
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
 
-\item{feature}{Character vector. Identify feature modules for the specified
+\item{features}{Character vector. Identify feature modules for the specified
 feature names. \code{feature} must match the rownames of \code{sce}.}
 
 \item{altExpName}{The name for the \link{altExp} slot
@@ -33,18 +35,24 @@ to use. Default "featureSubset".}
 
 \item{exactMatch}{Logical. Whether to look for exactMatch of the gene name
 within counts matrix. Default \code{TRUE}.}
+
+\item{by}{Character. Where to search for \code{features} in the sce object.
+If set to \code{"rownames"} then the features will be searched for among
+rownames(sce). This can also be set to one of the \code{colnames} of
+rowData(sce). Default \code{"rownames"}.}
 }
 \value{
-List. Each entry corresponds to the feature module determined for
-the provided features.
+Numeric vector containing the module numbers for each feature. If
+the feature was not found, then an \code{NA} value will be returned in that
+position. If no features were found, then an error will be given.
 }
 \description{
 This function will output the corresponding feature module for
  a specified vector of genes from a celda_CG or celda_G \code{celdaModel}.
- \code{feature} must match the rownames of \code{sce}.
+ \code{features} must match the rownames of \code{sce}.
 }
 \examples{
 data(sceCeldaCG)
 module <- featureModuleLookup(sce = sceCeldaCG,
-    feature = c("Gene_1", "Gene_XXX"))
+    features = c("Gene_1", "Gene_XXX"))
 }

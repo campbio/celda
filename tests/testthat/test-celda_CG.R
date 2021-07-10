@@ -182,11 +182,7 @@ test_that(desc = "Testing featureModuleLookup with celda_CG", {
     res <- featureModuleLookup(modelCG, "Gene_1")
     expect_true(res == celdaModules(modelCG)[1])
 
-    res <- featureModuleLookup(modelCG, "Gene_2", exactMatch = FALSE)
-    expect_true(length(res) == 11)
-
-    res <- featureModuleLookup(modelCG, "XXXXXXX")
-    expect_true(grepl("No feature", res))
+    expect_error(featureModuleLookup(modelCG, "XXXXXXX"))
 })
 
 
