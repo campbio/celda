@@ -882,7 +882,8 @@ setMethod("plotRPC",
         diffMeansByK$L <- as.factor(diffMeansByK$L)
         diffMeansByK$rollmean <- data.table::frollmean(
             diffMeansByK$meanperpdiffK, n = n, align = "center")
-
+        diffMeansByK <- diffMeansByK[complete.cases(diffMeansByK),]
+        
         if (nlevels(dt$L) > 1) {
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
                 ggplot2::aes_string(x = "K",
@@ -890,7 +891,7 @@ setMethod("plotRPC",
                 ggplot2::geom_jitter(height = 0, width = 0.1, alpha = alpha,
                     ggplot2::aes_string(color = "L")) +
                 ggplot2::scale_color_discrete(name = "L") +
-                ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
+                ggplot2::geom_path(data = diffMeansByK,
                     ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
                         color = "L"), size = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
@@ -908,7 +909,7 @@ setMethod("plotRPC",
                 ggplot2::geom_jitter(height = 0, width = 0.1,
                     color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
-                ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
+                ggplot2::geom_path(data = diffMeansByK,
                     ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
                         color = "L"), size = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
@@ -938,14 +939,15 @@ setMethod("plotRPC",
         diffMeansByL$L <- as.factor(diffMeansByL$L)
         diffMeansByL$rollmean <- data.table::frollmean(
             diffMeansByL$meanperpdiffL, n = n, align = "center")
-
+        diffMeansByL <- diffMeansByL[complete.cases(diffMeansByL),]
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::scale_color_manual(name = "K", values = "black") +
             ggplot2::geom_path(
-                data = diffMeansByL[!is.na(meanperpdiffL), ],
+                data = diffMeansByL,
                 ggplot2::aes_string(
                     x = "L", y = "rollmean", group = "K", color = "K"),
                 size = 1) +
@@ -1000,13 +1002,14 @@ setMethod("plotRPC",
         diffMeansByK$K <- as.factor(diffMeansByK$K)
         diffMeansByK$rollmean <- data.table::frollmean(
             diffMeansByK$meanperpdiffK, n = n, align = "center")
-
+        diffMeansByK <- diffMeansByK[complete.cases(diffMeansByK),]
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
-            ggplot2::geom_path(data = diffMeansByK[!is.na(meanperpdiffK), ],
+            ggplot2::geom_path(data = diffMeansByK,
                 ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
@@ -1059,13 +1062,14 @@ setMethod("plotRPC",
         diffMeansByL$L <- as.factor(diffMeansByL$L)
         diffMeansByL$rollmean <- data.table::frollmean(
             diffMeansByL$meanperpdiffL, n = n, align = "center")
-
+        diffMeansByL <- diffMeansByL[complete.cases(diffMeansByL),]
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
-            ggplot2::geom_path(data = diffMeansByL[!is.na(meanperpdiffL), ],
+            ggplot2::geom_path(data = diffMeansByL,
                 ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
