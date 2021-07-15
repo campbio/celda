@@ -12,9 +12,9 @@ plotDimReduceCluster(
   altExpName = "featureSubset",
   dim1 = NULL,
   dim2 = NULL,
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
+  size = 0.5,
+  xlab = NULL,
+  ylab = NULL,
   specificClusters = NULL,
   labelClusters = FALSE,
   groupBy = NULL,
@@ -25,11 +25,11 @@ plotDimReduceCluster(
   x,
   reducedDimName,
   altExpName = "featureSubset",
-  dim1 = NULL,
-  dim2 = NULL,
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
+  dim1 = 1,
+  dim2 = 2,
+  size = 0.5,
+  xlab = NULL,
+  ylab = NULL,
   specificClusters = NULL,
   labelClusters = FALSE,
   groupBy = NULL,
@@ -40,7 +40,7 @@ plotDimReduceCluster(
   x,
   dim1,
   dim2,
-  size = 1,
+  size = 0.5,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   specificClusters = NULL,
@@ -63,17 +63,21 @@ column in \code{colData(x)}.}
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
-\item{dim1}{Numeric vector. First dimension from data
-dimension reduction output.}
+\item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
+then, this will be used as an index to determine which dimension will be
+plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
+should be a vector which will be plotted on the x-axis. Default \code{1}.}
 
-\item{dim2}{Numeric vector. Second dimension from data
-dimension reduction output.}
+\item{dim2}{Integer or numeric vector. If \code{reducedDimName} is supplied,
+then, this will be used as an index to determine which dimension will be
+plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
+should be a vector which will be plotted on the y-axis. Default \code{2}.}
 
-\item{size}{Numeric. Sets size of point on plot. Default 1.}
+\item{size}{Numeric. Sets size of point on plot. Default \code{0.5}.}
 
-\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
+\item{xlab}{Character vector. Label for the x-axis. Default \code{NULL}.}
 
-\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
+\item{ylab}{Character vector. Label for the y-axis. Default \code{NULL}.}
 
 \item{specificClusters}{Numeric vector.
 Only color cells in the specified clusters.

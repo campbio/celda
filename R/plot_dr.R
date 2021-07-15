@@ -8,7 +8,7 @@
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
-#' @param dim1 Numeric vector. First dimension from data dimension
+#' @param dim1 Numeric vector. Second dimension from data dimension
 #'  reduction output.
 #' @param dim2 Numeric vector. Second dimension from data dimension
 #'  reduction output.
@@ -302,19 +302,23 @@ setMethod("plotDimReduceGrid",
 #'  with the matrix located in the assay slot under \code{useAssay}. Rows
 #'  represent features and columns represent cells.
 #' @param features Character vector. Features in the rownames of counts to plot.
+#' @param reducedDimName The name of the dimension reduction slot in
+#'  \code{reducedDimNames(x)} if \code{x} is a
+#'  \linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
+#'  \code{dim1} and \code{dim2} need to be set. Default \code{NULL}.
 #' @param displayName Character. The column name of
 #'  \code{rowData(x)} that specifies the display names for
 #'  the features. Default \code{NULL}, which displays the row names. Only works
 #'  if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
 #'  \code{headers}.
-#' @param reducedDimName The name of the dimension reduction slot in
-#'  \code{reducedDimNames(x)} if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
-#'  \code{dim1} and \code{dim2} need to be set. Default \code{NULL}.
-#' @param dim1 Numeric vector. First dimension from data
-#'  dimension reduction output to be plotted on the x-axis. Default \code{NULL}.
-#' @param dim2 Numeric vector. Second dimension from data dimension
-#'  reduction output to be plotted on the y-axis. Default \code{NULL}.
+#' @param dim1 Integer or numeric vector. If \code{reducedDimName} is supplied,
+#'  then, this will be used as an index to determine which dimension will be
+#'  plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
+#'  should be a vector which will be plotted on the x-axis. Default \code{1}.
+#' @param dim2 Integer or numeric vector. If \code{reducedDimName} is supplied,
+#'  then, this will be used as an index to determine which dimension will be
+#'  plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
+#'  should be a vector which will be plotted on the y-axis. Default \code{2}.
 #' @param headers Character vector. If \code{NULL}, the corresponding
 #'  rownames are used as labels. Otherwise, these headers are used to label
 #'  the features. Only works if \code{displayName} is \code{NULL} and
@@ -363,8 +367,8 @@ setMethod("plotDimReduceGrid",
 #' @export
 setGeneric("plotDimReduceFeature", function(x,
     features,
-    displayName = NULL,
     reducedDimName = NULL,
+    displayName = NULL,    
     dim1 = NULL,
     dim2 = NULL,
     headers = NULL,
@@ -375,9 +379,9 @@ setGeneric("plotDimReduceFeature", function(x,
     exactMatch = TRUE,
     trim = c(-2, 2),
     limits = c(-2, 2),
-    size = 1,
-    xlab = "Dimension_1",
-    ylab = "Dimension_2",
+    size = 0.5,
+    xlab = NULL,
+    ylab = NULL,
     colorLow = "blue4",
     colorMid = "grey90",
     colorHigh = "firebrick1",
@@ -402,10 +406,10 @@ setMethod("plotDimReduceFeature",
     signature(x = "SingleCellExperiment"),
     function(x,
         features,
+        reducedDimName,
         displayName = NULL,
-        reducedDimName = NULL,
-        dim1 = NULL,
-        dim2 = NULL,
+        dim1 = 1,
+        dim2 = 2,
         headers = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
@@ -414,9 +418,9 @@ setMethod("plotDimReduceFeature",
         exactMatch = TRUE,
         trim = c(-2, 2),
         limits = c(-2, 2),
-        size = 1,
-        xlab = "Dimension_1",
-        ylab = "Dimension_2",
+        size = 0.5,
+        xlab = NULL,
+        ylab = NULL,
         colorLow = "blue4",
         colorMid = "grey90",
         colorHigh = "firebrick1",
@@ -426,21 +430,13 @@ setMethod("plotDimReduceFeature",
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         counts <- SummarizedExperiment::assay(x, i = useAssay)
-
-        if (is.null(reducedDimName)) {
-          if (is.null(dim1) | is.null(dim2)) {
-            stop("If 'reducedDimName' is not supplied, then 'dim1' and 'dim2' ",
-                 "must be specified.")
-          }
-          if (length(dim1) != length(dim2)) {
-            stop("'dim1' and 'dim2' must be the same length.")
-          }
-        } else{
-          dims <- SingleCellExperiment::reducedDim(altExp, reducedDimName)
-          dim1 <- dims[, 1]
-          dim2 <- dims[, 2]
-        }
-
+        reddim <- .processReducedDim(x = altExp,
+                                     reducedDimName = reducedDimName,
+                                     dim1 = dim1,
+                                     dim2 = dim2,
+                                     xlab = xlab,
+                                     ylab = ylab)
+        
         if (isFALSE(is.null(displayName))) {
             featuresIx <- retrieveFeatureIndex(features,
                 x,
@@ -471,8 +467,8 @@ setMethod("plotDimReduceFeature",
             }
         }
 
-        g <- .plotDimReduceFeature(dim1 = dim1,
-            dim2 = dim2,
+        g <- .plotDimReduceFeature(dim1 = reddim$dim1,
+            dim2 = reddim$dim2,
             counts = counts,
             features = features,
             headers = headers,
@@ -482,8 +478,8 @@ setMethod("plotDimReduceFeature",
             trim = trim,
             limits = limits,
             size = size,
-            xlab = xlab,
-            ylab = ylab,
+            xlab = reddim$xlab,
+            ylab = reddim$ylab,
             colorLow = colorLow,
             colorMid = colorMid,
             colorHigh = colorHigh,
@@ -519,7 +515,7 @@ setMethod("plotDimReduceFeature",
         exactMatch = TRUE,
         trim = c(-2, 2),
         limits = c(-2, 2),
-        size = 1,
+        size = 0.5,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         colorLow = "blue4",
@@ -660,10 +656,14 @@ setMethod("plotDimReduceFeature",
 #'  \code{reducedDimNames(x)} if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 #'  \code{dim2} are set.
-#' @param dim1 Numeric vector.
-#'  First dimension from data dimension reduction output.
-#' @param dim2 Numeric vector.
-#'  Second dimension from data dimension reduction output.
+#' @param dim1 Integer or numeric vector. If \code{reducedDimName} is supplied,
+#'  then, this will be used as an index to determine which dimension will be
+#'  plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
+#'  should be a vector which will be plotted on the x-axis. Default \code{1}.
+#' @param dim2 Integer or numeric vector. If \code{reducedDimName} is supplied,
+#'  then, this will be used as an index to determine which dimension will be
+#'  plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
+#'  should be a vector which will be plotted on the y-axis. Default \code{2}.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use if \code{x} is a
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
@@ -673,15 +673,15 @@ setMethod("plotDimReduceFeature",
 #'  \code{x} is a matrix object.
 #' @param modules Character vector. Module(s) from celda model to be plotted.
 #'  e.g. c("1", "2").
-#' @param rescale Logical.
-#'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
-#' @param limits Passed to \link{scale_colour_gradient}. The range
-#'  of color scale.
-#' @param size Numeric. Sets size of point on plot. Default 1.
+#' @param size Numeric. Sets size of point on plot. Default 0.5.
 #' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
 #' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
 #' @param colorLow Character. A color available from `colors()`.
 #'  The color will be used to signify the lowest values on the scale.
+#' @param rescale Logical.
+#'  Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.
+#' @param limits Passed to \link{scale_colour_gradient}. The range
+#'  of color scale.
 #' @param colorHigh Character. A color available from `colors()`.
 #'  The color will be used to signify the highest values on the scale.
 #' @param ncol Integer. Passed to \link[ggplot2]{facet_wrap}. Specify the
@@ -696,17 +696,17 @@ setMethod("plotDimReduceFeature",
 setGeneric("plotDimReduceModule",
     function(x,
         reducedDimName,
-        dim1 = NULL,
-        dim2 = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
         celdaMod,
         modules = NULL,
+        dim1 = NULL,
+        dim2 = NULL,
+        size = 0.5,
+        xlab = NULL,
+        ylab = NULL,
         rescale = TRUE,
         limits = c(0, 1),
-        size = 1,
-        xlab = "Dimension_1",
-        ylab = "Dimension_2",
         colorLow = "grey90",
         colorHigh = "firebrick1",
         ncol = NULL,
@@ -726,49 +726,44 @@ setMethod("plotDimReduceModule",
     signature(x = "SingleCellExperiment"),
     function(x,
         reducedDimName,
-        dim1 = NULL,
-        dim2 = NULL,
         useAssay = "counts",
         altExpName = "featureSubset",
         modules = NULL,
+        dim1 = 1,
+        dim2 = 2,
+        size = 0.5,
+        xlab = NULL,
+        ylab = NULL,
         rescale = TRUE,
         limits = c(0, 1),
-        size = 1,
-        xlab = "Dimension_1",
-        ylab = "Dimension_2",
         colorLow = "grey90",
         colorHigh = "firebrick1",
         ncol = NULL,
         decreasing = FALSE) {
 
+        # Get reduced dim object
         altExp <- SingleCellExperiment::altExp(x, altExpName)
+        reddim <- .processReducedDim(x = altExp,
+                                     reducedDimName = reducedDimName,
+                                     dim1 = dim1,
+                                     dim2 = dim2,
+                                     xlab = xlab,
+                                     ylab = ylab)
 
-        if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(altExp,
-                reducedDimName)[, 1]
-        }
-
-        if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(altExp,
-                reducedDimName)[, 2]
-        }
-
-        counts <- SummarizedExperiment::assay(x, i = useAssay)
         factorized <- factorizeMatrix(x,
             useAssay = useAssay,
             altExpName = altExpName,
             type = "proportion")
 
-        g <- .plotDimReduceModule(dim1 = dim1,
-            dim2 = dim2,
-            counts = counts,
+        g <- .plotDimReduceModule(dim1 = reddim$dim1,
+            dim2 = reddim$dim2,
             factorized = factorized,
             modules = modules,
             rescale = rescale,
             limits = limits,
             size = size,
-            xlab = xlab,
-            ylab = ylab,
+            xlab = reddim$xlab,
+            ylab = reddim$ylab,
             colorLow = colorLow,
             colorHigh = colorHigh,
             ncol = ncol,
@@ -792,32 +787,36 @@ setMethod("plotDimReduceModule",
 setMethod("plotDimReduceModule",
     signature(x = "ANY"),
     function(x,
-        dim1,
-        dim2,
         celdaMod,
         modules = NULL,
-        rescale = TRUE,
-        limits = c(0, 1),
-        size = 1,
+        dim1,
+        dim2,
+        size = 0.5,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
+        rescale = TRUE,
+        limits = c(0, 1),
         colorLow = "grey90",
         colorHigh = "firebrick1",
         ncol = NULL,
         decreasing = FALSE) {
 
-        x <- as.matrix(x)
         factorized <- factorizeMatrix(x = x, celdaMod = celdaMod)
-        g <- .plotDimReduceModule(dim1 = dim1,
-            dim2 = dim2,
-            counts = x,
+        reddim <- .processReducedDim(x = x,
+                                     dim1 = dim1,
+                                     dim2 = dim2,
+                                     xlab = xlab,
+                                     ylab = ylab)
+        
+        g <- .plotDimReduceModule(dim1 = reddim$dim1,
+            dim2 = reddim$dim2,
             factorized = factorized,
             modules = modules,
             rescale = rescale,
             limits = limits,
             size = size,
-            xlab = xlab,
-            ylab = ylab,
+            xlab = reddim$xlab,
+            ylab = reddim$ylab,
             colorLow = colorLow,
             colorHigh = colorHigh,
             ncol = ncol,
@@ -829,7 +828,6 @@ setMethod("plotDimReduceModule",
 
 .plotDimReduceModule <- function(dim1,
     dim2,
-    counts,
     factorized,
     modules,
     rescale,
@@ -921,13 +919,17 @@ setMethod("plotDimReduceModule",
 #'  \code{dim2} are set.
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param dim1 Numeric vector. First dimension from data
-#'  dimension reduction output.
-#' @param dim2 Numeric vector. Second dimension from data
-#'  dimension reduction output.
-#' @param size Numeric. Sets size of point on plot. Default 1.
-#' @param xlab Character vector. Label for the x-axis. Default "Dimension_1".
-#' @param ylab Character vector. Label for the y-axis. Default "Dimension_2".
+#' @param dim1 Integer or numeric vector. If \code{reducedDimName} is supplied,
+#'  then, this will be used as an index to determine which dimension will be
+#'  plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
+#'  should be a vector which will be plotted on the x-axis. Default \code{1}.
+#' @param dim2 Integer or numeric vector. If \code{reducedDimName} is supplied,
+#'  then, this will be used as an index to determine which dimension will be
+#'  plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
+#'  should be a vector which will be plotted on the y-axis. Default \code{2}.
+#' @param size Numeric. Sets size of point on plot. Default \code{0.5}.
+#' @param xlab Character vector. Label for the x-axis. Default \code{NULL}.
+#' @param ylab Character vector. Label for the y-axis. Default \code{NULL}.
 #' @param specificClusters Numeric vector.
 #'  Only color cells in the specified clusters.
 #'  All other cells will be grey.
@@ -947,9 +949,9 @@ setGeneric("plotDimReduceCluster",
         altExpName = "featureSubset",
         dim1 = NULL,
         dim2 = NULL,
-        size = 1,
-        xlab = "Dimension_1",
-        ylab = "Dimension_2",
+        size = 0.5,
+        xlab = NULL,
+        ylab = NULL,
         specificClusters = NULL,
         labelClusters = FALSE,
         groupBy = NULL,
@@ -970,11 +972,11 @@ setMethod("plotDimReduceCluster",
     function(x,
         reducedDimName,
         altExpName = "featureSubset",
-        dim1 = NULL,
-        dim2 = NULL,
-        size = 1,
-        xlab = "Dimension_1",
-        ylab = "Dimension_2",
+        dim1 = 1,
+        dim2 = 2,
+        size = 0.5,
+        xlab = NULL,
+        ylab = NULL,
         specificClusters = NULL,
         labelClusters = FALSE,
         groupBy = NULL,
@@ -989,22 +991,19 @@ setMethod("plotDimReduceCluster",
         }
         cluster <- SummarizedExperiment::colData(altExp)[["celda_cell_cluster"]]
 
-        if (is.null(dim1)) {
-            dim1 <- SingleCellExperiment::reducedDim(altExp,
-                reducedDimName)[, 1]
-        }
+        reddim <- .processReducedDim(x = altExp,
+                                     reducedDimName = reducedDimName,
+                                     dim1 = dim1,
+                                     dim2 = dim2,
+                                     xlab = xlab,
+                                     ylab = ylab)
 
-        if (is.null(dim2)) {
-            dim2 <- SingleCellExperiment::reducedDim(altExp,
-                reducedDimName)[, 2]
-        }
-
-        g <- .plotDimReduceCluster(dim1 = dim1,
-            dim2 = dim2,
+        g <- .plotDimReduceCluster(dim1 = reddim$dim1,
+            dim2 = reddim$dim2,
             cluster = cluster,
             size = size,
-            xlab = xlab,
-            ylab = ylab,
+            xlab = reddim$xlab,
+            ylab = reddim$ylab,
             specificClusters = specificClusters,
             labelClusters = labelClusters,
             groupBy = groupBy,
@@ -1029,7 +1028,7 @@ setMethod("plotDimReduceCluster",
     function(x,
         dim1,
         dim2,
-        size = 1,
+        size = 0.5,
         xlab = "Dimension_1",
         ylab = "Dimension_2",
         specificClusters = NULL,
@@ -1037,12 +1036,17 @@ setMethod("plotDimReduceCluster",
         groupBy = NULL,
         labelSize = 3.5) {
 
-        g <- .plotDimReduceCluster(dim1 = dim1,
-            dim2 = dim2,
+      reddim <- .processReducedDim(x = x,
+                                   dim1 = dim1,
+                                   dim2 = dim2,
+                                   xlab = xlab,
+                                   ylab = ylab)
+      g <- .plotDimReduceCluster(dim1 = reddim$dim1,
+            dim2 = reddim$dim2,
             cluster = x,
             size = size,
-            xlab = xlab,
-            ylab = ylab,
+            xlab = reddim$xlab,
+            ylab = reddim$ylab,
             specificClusters = specificClusters,
             labelClusters = labelClusters,
             groupBy = groupBy,
@@ -1305,3 +1309,59 @@ setMethod("plotCeldaViolin",
 
     return(p)
 }
+
+
+
+
+.processReducedDim <- function(x,
+                           reducedDimName = NULL,
+                           dim1 = NULL,
+                           dim2 = NULL,
+                           xlab = NULL,
+                           ylab = NULL) {
+  if(inherits(x, "SingleCellExperiment") & !is.null(reducedDimName)) {
+    reddim <- SingleCellExperiment::reducedDim(x, reducedDimName)
+    
+    # Get dims to retrieve from redDim object
+    if(is.null(dim1)) dim1 <- 1
+    if(is.null(dim2)) dim2 <- 2
+    
+    # Get labels
+    xlab <- colnames(reddim)[dim1]
+    ylab <- colnames(reddim)[dim2]
+    
+    # Set up return object
+    res <- list(dim1 = reddim[,dim1], dim2 = reddim[,dim2], xlab = xlab, ylab = ylab)
+    
+  } else if (!is.null(dim1) & !is.null(dim2)) {
+    if(inherits(x, c("matrix", "Matrix"))) {
+      if(length(dim1) != ncol(x)) {
+        stop("'dim1' needs to be the same length as 'x'.")
+      }
+      if(length(dim2) != ncol(x)) {
+        stop("'dim2' needs to be the same length as 'x'.")
+      }
+    } else {
+      if(length(dim1) != length(x)) {
+        stop("'dim1' needs to be the same length as 'x'.")
+      }
+      if(length(dim2) != length(x)) {
+        stop("'dim2' needs to be the same length as 'x'.")
+      }
+    }
+    if(is.null(xlab)) xlab <- "Dimension 1"
+    if(is.null(ylab)) ylab <- "Dimension 2"
+    
+    res <- list(dim1 = dim1, dim2 = dim2, xlab = xlab, ylab = ylab)
+    
+  } else {
+    stop("'x' can be supplied as a SingleCelExperiment along with ",
+    "'reducedDimName' and 'dim1' and 'dim2' can be used to specify which ",
+    "dimensions to plot on the x- and y-axis, respectively. Alternatively, ",
+    "'x', 'dim1' and 'dim2' can be supplied as vectors of the same length ",
+    "where 'dim1' is the x-axis, 'dim2', is the y-axis, and 'x' will be used ",
+    "to color the points.")
+  }
+  
+  return(res)
+} 

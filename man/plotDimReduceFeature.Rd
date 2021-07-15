@@ -9,8 +9,8 @@
 plotDimReduceFeature(
   x,
   features,
-  displayName = NULL,
   reducedDimName = NULL,
+  displayName = NULL,
   dim1 = NULL,
   dim2 = NULL,
   headers = NULL,
@@ -21,9 +21,9 @@ plotDimReduceFeature(
   exactMatch = TRUE,
   trim = c(-2, 2),
   limits = c(-2, 2),
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
+  size = 0.5,
+  xlab = NULL,
+  ylab = NULL,
   colorLow = "blue4",
   colorMid = "grey90",
   colorHigh = "firebrick1",
@@ -35,10 +35,10 @@ plotDimReduceFeature(
 \S4method{plotDimReduceFeature}{SingleCellExperiment}(
   x,
   features,
-  displayName = NULL,
   reducedDimName = NULL,
-  dim1 = NULL,
-  dim2 = NULL,
+  displayName = NULL,
+  dim1 = 1,
+  dim2 = 2,
   headers = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
@@ -47,9 +47,9 @@ plotDimReduceFeature(
   exactMatch = TRUE,
   trim = c(-2, 2),
   limits = c(-2, 2),
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
+  size = 0.5,
+  xlab = NULL,
+  ylab = NULL,
   colorLow = "blue4",
   colorMid = "grey90",
   colorHigh = "firebrick1",
@@ -69,7 +69,7 @@ plotDimReduceFeature(
   exactMatch = TRUE,
   trim = c(-2, 2),
   limits = c(-2, 2),
-  size = 1,
+  size = 0.5,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
   colorLow = "blue4",
@@ -87,22 +87,26 @@ represent features and columns represent cells.}
 
 \item{features}{Character vector. Features in the rownames of counts to plot.}
 
+\item{reducedDimName}{The name of the dimension reduction slot in
+\code{reducedDimNames(x)} if \code{x} is a
+\linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
+\code{dim1} and \code{dim2} need to be set. Default \code{NULL}.}
+
 \item{displayName}{Character. The column name of
 \code{rowData(x)} that specifies the display names for
 the features. Default \code{NULL}, which displays the row names. Only works
 if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
 \code{headers}.}
 
-\item{reducedDimName}{The name of the dimension reduction slot in
-\code{reducedDimNames(x)} if \code{x} is a
-\linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
-\code{dim1} and \code{dim2} need to be set. Default \code{NULL}.}
+\item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
+then, this will be used as an index to determine which dimension will be
+plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
+should be a vector which will be plotted on the x-axis. Default \code{1}.}
 
-\item{dim1}{Numeric vector. First dimension from data
-dimension reduction output to be plotted on the x-axis. Default \code{NULL}.}
-
-\item{dim2}{Numeric vector. Second dimension from data dimension
-reduction output to be plotted on the y-axis. Default \code{NULL}.}
+\item{dim2}{Integer or numeric vector. If \code{reducedDimName} is supplied,
+then, this will be used as an index to determine which dimension will be
+plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
+should be a vector which will be plotted on the y-axis. Default \code{2}.}
 
 \item{headers}{Character vector. If \code{NULL}, the corresponding
 rownames are used as labels. Otherwise, these headers are used to label
