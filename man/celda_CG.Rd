@@ -3,7 +3,7 @@
 \name{celda_CG}
 \alias{celda_CG}
 \alias{celda_CG,SingleCellExperiment-method}
-\alias{celda_CG,matrix-method}
+\alias{celda_CG,ANY-method}
 \title{Cell and feature clustering with Celda}
 \usage{
 celda_CG(
@@ -60,7 +60,7 @@ celda_CG(
   verbose = TRUE
 )
 
-\S4method{celda_CG}{matrix}(
+\S4method{celda_CG}{ANY}(
   x,
   useAssay = "counts",
   altExpName = "featureSubset",
@@ -88,11 +88,12 @@ celda_CG(
 )
 }
 \arguments{
-\item{x}{A numeric \link{matrix} of counts or a
-\linkS4class{SingleCellExperiment}
-with the matrix located in the \link{assay}
-slot under \code{useAssay} in \code{altExp(x, altExpName)}.
-Rows represent features and columns represent cells.}
+\item{x}{A \linkS4class{SingleCellExperiment}
+with the matrix located in the assay slot under \code{useAssay}.
+Rows represent features and columns represent cells. Alternatively,
+any matrix-like object that can be coerced to a sparse matrix of class
+"dgCMatrix" can be directly used as input. The matrix will automatically be
+converted to a \linkS4class{SingleCellExperiment} object.}
 
 \item{useAssay}{A string specifying the name of the
 \link{assay} slot to use. Default "counts".}
