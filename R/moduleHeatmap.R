@@ -251,6 +251,7 @@ setMethod("moduleHeatmap",
             }
         )
 
+        # Set up displayName variable if specified
         if (is.null(displayName)) {
             displayNames <- rownames(altExp)
         } else {
@@ -261,8 +262,18 @@ setMethod("moduleHeatmap",
         z <- celdaClusters(x, altExpName = altExpName)
         y <- celdaModules(x, altExpName = altExpName)
 
+        # Get max rowFontSize if multiple modules are selected
+        if (is.null(rowFontSize)) {
+          if(length(featureIndices) > 1) {
+            maxlen <- max(unlist(lapply(featureIndices, length)))
+            maxlen <- maxlen * sqrt(length(featureIndices))
+            rowFontSize <- min(200 / maxlen, 20)
+          } else {
+            rowFontSize <- min(200 / length(featureIndices[[1]]), 20)
+          }
+        }
+        
         plts <- vector("list", length = length(featureModule))
-
         for (i in seq(length(featureModule))) {
             plts[[i]] <- .plotModuleHeatmap(normCounts = normCounts,
                 col = col,
@@ -411,10 +422,6 @@ setMethod("moduleHeatmap",
         trim <- sort(trim)
         filteredNormCounts[filteredNormCounts < trim[1]] <- trim[1]
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
-    }
-
-    if (is.null(rowFontSize)) {
-        rowFontSize <- min(200 / nrow(filteredNormCounts), 20)
     }
 
     if (isTRUE(showModuleLabel)) {
