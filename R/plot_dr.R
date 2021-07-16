@@ -602,6 +602,7 @@ setMethod("plotDimReduceFeature",
   }
 
   # After normalization, features can be selected
+  featuresIx <- featuresIx[stats::complete.cases(featuresIx)]
   counts <- as.matrix(counts[featuresIx, , drop = FALSE])
 
   # Scale/zscore data if needed
