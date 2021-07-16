@@ -552,7 +552,9 @@ featureModuleTable <- function(sce,
       useAssay = useAssay,
       altExpName = altExpName,
       type = "proportion")
-  allGenes <- topRank(factorizeMatrix$proportions$module, n = nrow(sce))
+  altExp <- SingleCellExperiment::altExp(sce, altExpName)
+  
+  allGenes <- topRank(factorizeMatrix$proportions$module, n = nrow(altExp))
   maxlen <- max(vapply(allGenes$names, length, integer(1)))
 
   if (is.null(displayName)) {
@@ -563,7 +565,7 @@ featureModuleTable <- function(sce,
   } else {
       dn <- lapply(allGenes$index,
           FUN = function(v) {
-            SummarizedExperiment::rowData(sce)[[displayName]][v]
+            SummarizedExperiment::rowData(altExp)[[displayName]][v]
           })
       res <- vapply(dn,
           FUN = "[",
