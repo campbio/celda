@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.9.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.9.2</span>
       </span>
     </div>
 
@@ -44,7 +44,7 @@
   </a>
 </li>
 <li>
-  <a href="../../index.html">Installation</a>
+  <a href="../../articles/articles/installation.html">Installation</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -54,15 +54,18 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../../articles/articles/celda_pbmc3k.html">Analysis of PBMC3K with Celda</a>
+      <a href="../../articles/articles/celda_pbmc3k.html">Celda - Analysis of PBMC3K</a>
     </li>
     <li>
-      <a href="../../articles/articles/decontX_pbmc4k.html">Decontamination of PBMC4K with DecontX</a>
+      <a href="../../articles/articles/decontX_pbmc4k.html">DecontX - Decontamination of PBMC4K</a>
     </li>
   </ul>
 </li>
 <li>
   <a href="../../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../../news/index.html">News</a>
 </li>
 <li>
   <a href="https://github.com/campbio/celda">
@@ -125,21 +128,21 @@
 
 <span class="co"># Load PBMC data</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span>
-<span class="va">pbmc4k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html">TENxPBMCData</a></span><span class="op">(</span><span class="st">"pbmc4k"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">$</span><span class="va">Sample</span>, <span class="va">pbmc4k</span><span class="op">$</span><span class="va">Barcode</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">rowData</span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span><span class="op">$</span><span class="va">Symbol_TENx</span></code></pre></div>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html">TENxPBMCData</a></span><span class="op">(</span><span class="st">"pbmc4k"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">Sample</span>, <span class="va">sce</span><span class="op">$</span><span class="va">Barcode</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Symbol_TENx</span></code></pre></div>
 </div>
 <div id="running-decontx" class="section level1">
 <h1 class="hasAnchor">
 <a href="#running-decontx" class="anchor"></a>Running decontX</h1>
 <p>A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the <code>x</code> parameter. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets. The raw/droplet matrix can be used to empirically estimate the distribution of ambient RNA, which is especially useful when cells that contributed to the ambient RNA are not accurately represented in the filtered count matrix containing the cells. For example, cells that were removed via flow cytometry or that were more sensitive to lysis during dissociation may have contributed to the ambient RNA but were not measured in the filtered/cell matrix. The raw/droplet matrix can be input as a sparse matrix or SCE object using the <code>background</code> parameter:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pbmc4k</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/decontX.html">decontX</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pbmc4k</span>, background <span class="op">=</span> <span class="va">raw</span><span class="op">)</span></code></pre></div>
-<p>Note that if cell/column names in the raw/droplet matrix are also found in the filtered counts matrix, then they will be excluded from the raw/droplet matrix before calculation of the ambient RNA distribution. If the raw matrix is not available, then <code>decontX</code> will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:</p>
+<code class="sourceCode R"><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span>, background <span class="op">=</span> <span class="va">raw</span><span class="op">)</span></code></pre></div>
+<p>If cell/column names in the raw/droplet matrix are also found in the filtered counts matrix, then they will be excluded from the raw/droplet matrix before calculation of the ambient RNA distribution. If the raw matrix is not available, then <code>decontX</code> will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pbmc4k</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/decontX.html">decontX</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pbmc4k</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
 <p>Note that in this case <code>decontX</code> will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the <code>z</code> parameter. If you supply a raw matrix via the <code>background</code> parameter, then the <code>z</code> parameter will not have an effect as clustering will not be performed.</p>
-<p>The contamination can be found in the <code>colData(pbmc4k)$decontX_contamination</code> and the decontaminated counts can be accessed with <code><a href="../../reference/decontXcounts.html">decontXcounts(pbmc4k)</a></code>. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in <code>result$contamination</code> and the decontaminated counts in <code>result$decontXcounts</code>.</p>
+<p>The contamination can be found in the <code>colData(sce)$decontX_contamination</code> and the decontaminated counts can be accessed with <code><a href="../../reference/decontXcounts.html">decontXcounts(sce)</a></code>. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in <code>result$contamination</code> and the decontaminated counts in <code>result$decontXcounts</code>.</p>
 </div>
 <div id="plotting-decontx-results" class="section level1">
 <h1 class="hasAnchor">
@@ -149,8 +152,8 @@
 <a href="#cluster-labels-on-umap" class="anchor"></a>Cluster labels on UMAP</h2>
 <p>DecontX creates a UMAP which we can use to plot the cluster labels automatically identified in the analysis. Note that the clustering approach used here is designed to find “broad” cell types rather than individual cell subpopulations within a cell type.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">pbmc4k</span>, <span class="st">"decontX_UMAP"</span><span class="op">)</span>
-<span class="fu"><a href="../../reference/plotDimReduceCluster.html">plotDimReduceCluster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pbmc4k</span><span class="op">$</span><span class="va">decontX_clusters</span>,
+<code class="sourceCode R"><span class="va">umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"decontX_UMAP"</span><span class="op">)</span>
+<span class="fu"><a href="../../reference/plotDimReduceCluster.html">plotDimReduceCluster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sce</span><span class="op">$</span><span class="va">decontX_clusters</span>,
     dim1 <span class="op">=</span> <span class="va">umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, dim2 <span class="op">=</span> <span class="va">umap</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p><img src="decontX_pbmc4k_files/figure-html/UMAP_Clusters-1.png" width="700"></p>
 </div>
@@ -159,8 +162,8 @@
 <a href="#contamination-on-umap" class="anchor"></a>Contamination on UMAP</h2>
 <p>The percentage of contamination in each cell can be plotting on the UMAP to visualize what what clusters may have higher levels of ambient RNA.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXContamination.html">plotDecontXContamination</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span></code></pre></div>
-<p><img src="decontX_pbmc4k_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
+<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXContamination.html">plotDecontXContamination</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
+<p><img src="decontX_pbmc4k_files/figure-html/plot_decon-1.png" width="700"></p>
 </div>
 <div id="expression-of-markers-on-umap" class="section level2">
 <h2 class="hasAnchor">
@@ -168,15 +171,15 @@
 <p>Known marker genes can also be plotted on the UMAP to identify the cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ, S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells, GNLY for NK-cells, and PPBP for megakaryocytes.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span>
-<span class="va">pbmc4k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html">logNormCounts</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span>
-<span class="fu"><a href="../../reference/plotDimReduceFeature.html">plotDimReduceFeature</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">logcounts</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span><span class="op">)</span>,
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>
+<span class="fu"><a href="../../reference/plotDimReduceFeature.html">plotDimReduceFeature</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">logcounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span>,
     dim1 <span class="op">=</span> <span class="va">umap</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,
     dim2 <span class="op">=</span> <span class="va">umap</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>,
     features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD3D"</span>, <span class="st">"CD3E"</span>, <span class="st">"GNLY"</span>,
         <span class="st">"LYZ"</span>, <span class="st">"S100A8"</span>, <span class="st">"S100A9"</span>,
         <span class="st">"CD79A"</span>, <span class="st">"CD79B"</span>, <span class="st">"MS4A1"</span><span class="op">)</span>,
     exactMatch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="decontX_pbmc4k_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+<p><img src="decontX_pbmc4k_files/figure-html/plot_feature-1.png" width="700"></p>
 </div>
 <div id="barplot-of-markers-detected-in-cell-clusters" class="section level2">
 <h2 class="hasAnchor">
@@ -188,21 +191,21 @@
     Monocyte_Markers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"S100A8"</span>, <span class="st">"S100A9"</span>, <span class="st">"LYZ"</span><span class="op">)</span>,
     NKcell_Markers <span class="op">=</span> <span class="st">"GNLY"</span><span class="op">)</span>
 <span class="va">cellTypeMappings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>Tcells <span class="op">=</span> <span class="fl">2</span>, Bcells <span class="op">=</span> <span class="fl">5</span>, Monocytes <span class="op">=</span> <span class="fl">1</span>, NKcells <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>
-<span class="fu"><a href="../../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">pbmc4k</span>,
+<span class="fu"><a href="../../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">sce</span>,
     markers <span class="op">=</span> <span class="va">markers</span>,
     groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,
     assayName <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></code></pre></div>
 <p><img src="decontX_pbmc4k_files/figure-html/barplotCounts-1.png" width="700"></p>
-<p>We can then look to see how much DecontX removed aberrant expression of marker genes in each cell type by changing the <code>assayName</code> to <code>decontXcounts</code>:</p>
+<p>We can then look to see how much decontX removed aberrant expression of marker genes in each cell type by changing the <code>assayName</code> to <code>decontXcounts</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">pbmc4k</span>,
+<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">sce</span>,
     markers <span class="op">=</span> <span class="va">markers</span>,
     groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,
     assayName <span class="op">=</span> <span class="st">"decontXcounts"</span><span class="op">)</span></code></pre></div>
 <p><img src="decontX_pbmc4k_files/figure-html/barplotDecontCounts-1.png" width="700"></p>
 <p>Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells. The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the <code>assayName</code> parameter. This option is only available if the data is stored in <code>SingleCellExperiment</code> object.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">pbmc4k</span>,
+<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">sce</span>,
     markers <span class="op">=</span> <span class="va">markers</span>,
     groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,
     assayName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"counts"</span>, <span class="st">"decontXcounts"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -220,7 +223,7 @@
 <a href="#violin-plot-to-compare-the-distributions-of-original-and-decontaminated-counts" class="anchor"></a>Violin plot to compare the distributions of original and decontaminated counts</h2>
 <p>Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after <code>decontX</code> across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXMarkerExpression.html">plotDecontXMarkerExpression</a></span><span class="op">(</span><span class="va">pbmc4k</span>,
+<code class="sourceCode R"><span class="fu"><a href="../../reference/plotDecontXMarkerExpression.html">plotDecontXMarkerExpression</a></span><span class="op">(</span><span class="va">sce</span>,
     markers <span class="op">=</span> <span class="va">markers</span><span class="op">[[</span><span class="st">"Monocyte_Markers"</span><span class="op">]</span><span class="op">]</span>,
     groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,
     ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
@@ -234,11 +237,11 @@
 <li>This function can plot any assay in a <code>SingleCellExperiment</code>. Therefore you could also examine normalized expression of the original and decontaminated counts. For example:</li>
 </ol>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pbmc4k</span> <span class="op">&lt;-</span> <span class="fu">scater</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html">logNormCounts</a></span><span class="op">(</span><span class="va">pbmc4k</span>,
+<code class="sourceCode R"><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">scater</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>,
     exprs_values <span class="op">=</span> <span class="st">"decontXcounts"</span>,
     name <span class="op">=</span> <span class="st">"dlogcounts"</span><span class="op">)</span>
 
-<span class="fu"><a href="../../reference/plotDecontXMarkerExpression.html">plotDecontXMarkerExpression</a></span><span class="op">(</span><span class="va">pbmc4k</span>,
+<span class="fu"><a href="../../reference/plotDecontXMarkerExpression.html">plotDecontXMarkerExpression</a></span><span class="op">(</span><span class="va">sce</span>,
     markers <span class="op">=</span> <span class="va">markers</span><span class="op">[[</span><span class="st">"Monocyte_Markers"</span><span class="op">]</span><span class="op">]</span>,
     groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,
     ncol <span class="op">=</span> <span class="fl">3</span>,
@@ -258,13 +261,13 @@
 <a href="#adjusting-the-priors-to-influence-contamination-estimates" class="anchor"></a>Adjusting the priors to influence contamination estimates</h2>
 <p>There are ways to force <code>decontX</code> to estimate more or less contamination across a dataset by manipulating the priors. The <code>delta</code> parameter is a numeric vector of length two. It is the concentration parameter for the Dirichlet distribution which serves as the prior for the proportions of native and contamination counts in each cell. The first element is the prior for the proportion of native counts while the second element is the prior for the proportion of contamination counts. These essentially act as pseudocounts for the native and contamination in each cell. If <code>estimateDelta = TRUE</code>, <code>delta</code> is only used to produce a random sample of proportions for an initial value of contamination in each cell. Then <code>delta</code> is updated in each iteration. If <code>estimateDelta = FALSE</code>, then <code>delta</code> is fixed with these values for the entire inference procedure. Fixing <code>delta</code> and setting a high number in the second element will force <code>decontX</code> to be more aggressive and estimate higher levels of contamination in each cell at the expense of potentially removing native expression. For example, in the previous PBMC example, we can see what the estimated <code>delta</code> was by looking in the estimates:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">metadata</span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">)</span><span class="op">$</span><span class="va">decontX</span><span class="op">$</span><span class="va">estimates</span><span class="op">$</span><span class="va">all_cells</span><span class="op">$</span><span class="va">delta</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">metadata</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">decontX</span><span class="op">$</span><span class="va">estimates</span><span class="op">$</span><span class="va">all_cells</span><span class="op">$</span><span class="va">delta</span></code></pre></div>
 <pre><code>## [1] 9.287164 1.038217</code></pre>
 <p>Setting a higher value in the second element of delta and <code>estimateDelta = FALSE</code> will force <code>decontX</code> to estimate higher levels of contamination per cell:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pbmc4k.delta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">pbmc4k</span>, delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">20</span><span class="op">)</span>, estimateDelta <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">sce.delta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span>, delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">20</span><span class="op">)</span>, estimateDelta <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">pbmc4k</span><span class="op">$</span><span class="va">decontX_contamination</span>, <span class="va">pbmc4k.delta</span><span class="op">$</span><span class="va">decontX_contamination</span>,
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">decontX_contamination</span>, <span class="va">sce.delta</span><span class="op">$</span><span class="va">decontX_contamination</span>,
      xlab <span class="op">=</span> <span class="st">"DecontX estimated priors"</span>,
      ylab <span class="op">=</span> <span class="st">"Setting priors to estimate higher contamination"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
@@ -300,7 +303,7 @@
 ## [11] GenomicRanges_1.42.0        GenomeInfoDb_1.26.4        
 ## [13] IRanges_2.24.1              S4Vectors_0.28.1           
 ## [15] BiocGenerics_0.36.0         MatrixGenerics_1.2.1       
-## [17] matrixStats_0.58.0          celda_1.9.1                
+## [17] matrixStats_0.58.0          celda_1.9.2                
 ## 
 ## loaded via a namespace (and not attached):
 ##   [1] AnnotationHub_2.22.0          BiocFileCache_1.14.0         

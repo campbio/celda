@@ -74,7 +74,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.9.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.9.2</span>
       </span>
     </div>
 
@@ -87,7 +87,7 @@
   </a>
 </li>
 <li>
-  <a href="../index.html">Installation</a>
+  <a href="../articles/articles/installation.html">Installation</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -97,15 +97,18 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/articles/celda_pbmc3k.html">Analysis of PBMC3K with Celda</a>
+      <a href="../articles/articles/celda_pbmc3k.html">Celda - Analysis of PBMC3K</a>
     </li>
     <li>
-      <a href="../articles/articles/decontX_pbmc4k.html">Decontamination of PBMC4K with DecontX</a>
+      <a href="../articles/articles/decontX_pbmc4k.html">DecontX - Decontamination of PBMC4K</a>
     </li>
   </ul>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../news/index.html">News</a>
 </li>
 <li>
   <a href="https://github.com/campbio/celda">
@@ -156,7 +159,7 @@
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>celdaGSim</span><span class='op'>)</span>
 <span class='va'>sceCeldaG</span> <span class='op'>&lt;-</span> <span class='fu'><a href='selectFeatures.html'>selectFeatures</a></span><span class='op'>(</span><span class='va'>celdaGSim</span><span class='op'>$</span><span class='va'>counts</span><span class='op'>)</span>
 <span class='va'>sceCeldaG</span> <span class='op'>&lt;-</span> <span class='fu'><a href='celda_G.html'>celda_G</a></span><span class='op'>(</span><span class='va'>sceCeldaG</span>, L <span class='op'>=</span> <span class='va'>celdaGSim</span><span class='op'>$</span><span class='va'>L</span>, nchains <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div><div class='output co'>#&gt; <span class='message'>Starting Celda_G: Clustering genes.</span></div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .. Initializing 'y' in chain 1 with 'split' </span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 1 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 2 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 3 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 4 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 5 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 6 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 7 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 8 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 9 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Determining if any gene clusters should be split.</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... No additional splitting was performed.</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 10 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .... Completed iteration: 11 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Sun Jul 18 18:16:31 2021 .. Finished chain 1</span></div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div><div class='output co'>#&gt; <span class='message'>Completed Celda_G. Total time: 0.3011792 secs</span></div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div></pre>
+</div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div><div class='output co'>#&gt; <span class='message'>Starting Celda_G: Clustering genes.</span></div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .. Initializing 'y' in chain 1 with 'split' </span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 1 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 2 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 3 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 4 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 5 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 6 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 7 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 8 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Completed iteration: 9 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:48 2021 .... Determining if any gene clusters should be split.</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:49 2021 .... No additional splitting was performed.</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:49 2021 .... Completed iteration: 10 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:49 2021 .... Completed iteration: 11 | logLik: -289209.476865707</span></div><div class='output co'>#&gt; <span class='message'>Mon Jul 19 11:01:49 2021 .. Finished chain 1</span></div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div><div class='output co'>#&gt; <span class='message'>Completed Celda_G. Total time: 0.294132 secs</span></div><div class='output co'>#&gt; <span class='message'>--------------------------------------------------</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

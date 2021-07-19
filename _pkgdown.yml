@@ -106,11 +106,13 @@ navbar:
       href: articles/articles/installation.html
     - text: "Vignettes"
       menu:
-      - text: "Analysis of PBMC3K with Celda"
+      - text: "Celda - Analysis of PBMC3K"
         href: articles/articles/celda_pbmc3k.html
-      - text: "Decontamination of PBMC4K with DecontX"
+      - text: "DecontX - Decontamination of PBMC4K"
         href: articles/articles/decontX_pbmc4k.html
     - text: "Reference"
       href: reference/index.html
+    - text: "News"
+      href: news/index.html
     - icon: fa-github
       href: https://github.com/campbio/celda

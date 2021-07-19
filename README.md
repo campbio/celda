@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/campbio/celda.svg?branch=master)](https://travis-ci.org/campbio/celda)
+[![Build Status](https://travis-ci.com/campbio/celda.svg?branch=master)](https://travis-ci.com/campbio/celda)
 [![Coverage Status](https://coveralls.io/repos/github/campbio/celda/badge.svg?branch=master)](https://coveralls.io/github/campbio/celda?branch=master)
 
 # celda: CEllular Latent Dirichlet Allocation
