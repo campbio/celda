@@ -11,7 +11,7 @@
 #'  Rows represent features and columns represent cells. Alternatively,
 #'  any matrix-like object that can be coerced to a sparse matrix of class
 #'  "dgCMatrix" can be directly used as input. The matrix will automatically be
-#'  converted to a \linkS4class{SingleCellExperiment} object. 
+#'  converted to a \linkS4class{SingleCellExperiment} object.
 #' @param useAssay A string specifying the name of the
 #'  \link{assay} slot to use. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
@@ -223,7 +223,7 @@ setMethod("celda_CG",
 
         # Convert to sparse matrix
         x <- methods::as(x, "dgCMatrix")
-      
+
         ls <- list()
         ls[[useAssay]] <- x
         sce <- SingleCellExperiment::SingleCellExperiment(assays = ls)

@@ -882,8 +882,8 @@ setMethod("plotRPC",
         diffMeansByK$L <- as.factor(diffMeansByK$L)
         diffMeansByK$rollmean <- data.table::frollmean(
             diffMeansByK$meanperpdiffK, n = n, align = "center")
-        diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK),]
-        
+        diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK), ]
+
         if (nlevels(dt$L) > 1) {
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
                 ggplot2::aes_string(x = "K",
@@ -939,8 +939,8 @@ setMethod("plotRPC",
         diffMeansByL$L <- as.factor(diffMeansByL$L)
         diffMeansByL$rollmean <- data.table::frollmean(
             diffMeansByL$meanperpdiffL, n = n, align = "center")
-        diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL),]
-        
+        diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL), ]
+
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
@@ -1002,8 +1002,8 @@ setMethod("plotRPC",
         diffMeansByK$K <- as.factor(diffMeansByK$K)
         diffMeansByK$rollmean <- data.table::frollmean(
             diffMeansByK$meanperpdiffK, n = n, align = "center")
-        diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK),]
-        
+        diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK), ]
+
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
@@ -1062,8 +1062,8 @@ setMethod("plotRPC",
         diffMeansByL$L <- as.factor(diffMeansByL$L)
         diffMeansByL$rollmean <- data.table::frollmean(
             diffMeansByL$meanperpdiffL, n = n, align = "center")
-        diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL),]
-        
+        diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL), ]
+
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +

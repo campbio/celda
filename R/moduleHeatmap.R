@@ -264,7 +264,7 @@ setMethod("moduleHeatmap",
 
         # Get max rowFontSize if multiple modules are selected
         if (is.null(rowFontSize)) {
-          if(length(featureIndices) > 1) {
+          if (length(featureIndices) > 1) {
             maxlen <- max(unlist(lapply(featureIndices, length)))
             maxlen <- maxlen * sqrt(length(featureIndices))
             rowFontSize <- min(200 / maxlen, 20)
@@ -272,7 +272,7 @@ setMethod("moduleHeatmap",
             rowFontSize <- min(200 / length(featureIndices[[1]]), 20)
           }
         }
-        
+
         plts <- vector("list", length = length(featureModule))
         for (i in seq(length(featureModule))) {
             plts[[i]] <- .plotModuleHeatmap(normCounts = normCounts,

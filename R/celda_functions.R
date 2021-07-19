@@ -553,7 +553,7 @@ featureModuleTable <- function(sce,
       altExpName = altExpName,
       type = "proportion")
   altExp <- SingleCellExperiment::altExp(sce, altExpName)
-  
+
   allGenes <- topRank(factorizeMatrix$proportions$module, n = nrow(altExp))
   maxlen <- max(vapply(allGenes$names, length, integer(1)))
 

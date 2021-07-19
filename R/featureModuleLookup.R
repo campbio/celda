@@ -44,14 +44,14 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
         by = "rownames") {
 
         modules <- as.numeric(celdaModules(sce, altExpName = altExpName))
-        
+
         if (celdaModel(sce, altExpName = altExpName) %in%
                 c("celda_CG", "celda_G")) {
           altExp <- SingleCellExperiment::altExp(sce, altExpName)
           featureIndex <- retrieveFeatureIndex(features, x = altExp,
                 exactMatch = exactMatch, by = by)
           featureModules <- modules[featureIndex]
-          names(featureModules) <- features  
+          names(featureModules) <- features
         } else {
             stop("S4Vectors::metadata(altExp(sce, altExpName))$",
                 "celda_parameters$model must be",
@@ -60,5 +60,3 @@ setMethod("featureModuleLookup", signature(sce = "SingleCellExperiment"),
         return(featureModules)
     }
 )
-
-
