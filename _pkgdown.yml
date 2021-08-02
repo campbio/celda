@@ -101,7 +101,7 @@ navbar:
   title: "celda"
   left:
     - icon: fa-home fa-lg
-      href: index.html
+      href: http://celda.camplab.net/
     - text: "Installation"
       href: articles/articles/installation.html
     - text: "Vignettes"
