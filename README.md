@@ -1,5 +1,7 @@
-[![Build Status](https://travis-ci.com/campbio/celda.svg?branch=master)](https://travis-ci.com/campbio/celda)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/campbio/celda/workflows/R-CMD-check/badge.svg)](https://github.com/campbio/celda/actions)
 [![Coverage Status](https://coveralls.io/repos/github/campbio/celda/badge.svg?branch=master)](https://coveralls.io/github/campbio/celda?branch=master)
+<!-- badges: end -->
 
 # celda: CEllular Latent Dirichlet Allocation
 
