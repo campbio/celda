@@ -43,7 +43,7 @@ jobs:
 
       - name: Install bluster from GitHub
         run: |
-           install.packages(devtools)
+           install.packages("devtools")
            devtools::install_github("LTLA/bluster")
         shell: Rscript {0}
 
