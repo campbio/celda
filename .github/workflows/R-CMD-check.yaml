@@ -22,8 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
+#          - {os: macOS-latest,   r: 'release'}
+#          - {os: windows-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'release'}
 
     env:
@@ -40,6 +40,12 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+
+      - name: Install bluster from GitHub
+        run: |
+           install.packages(devtools)
+           devtools::install_github("LTLA/bluster")
+        shell: Rscript {0}
 
       - name: Install XQuartz on macOS
         if: runner.os == 'macOS'
