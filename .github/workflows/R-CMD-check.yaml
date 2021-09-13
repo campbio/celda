@@ -41,19 +41,16 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install bluster from GitHub
-        run: |
-           install.packages("devtools")
-           devtools::install_github("LTLA/bluster")
-        shell: Rscript {0}
+#      - name: Install XQuartz on macOS
+#        if: runner.os == 'macOS'
+#        run: brew install xquartz --cask
 
-      - name: Install XQuartz on macOS
-        if: runner.os == 'macOS'
-        run: brew install xquartz --cask
+      - uses: r-lib/actions/setup-tinytex@v1
+      - uses: r-lib/actions/setup-pandoc@v1
 
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
-          extra-packages: rcmdcheck, tinytex
+          extra-packages: rcmdcheck
 
       - name: Check
         env:
