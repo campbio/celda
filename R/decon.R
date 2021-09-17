@@ -162,22 +162,9 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       verbose = TRUE) {
   countsBackground <- NULL
   if (!is.null(background)) {
-    # Remove background barcodes that have already appeared in x
-    dupBarcode <- background$Barcode %in% x$Barcode
-
-    if (any(dupBarcode)) {
-      .logMessages(
-        sum(dupBarcode),
-        " columns in background removed as they are found in filtered matrix",
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-      )
-    }
-
-    background <- background[, !(dupBarcode)]
-
-
+    # Remove cells with the same ID between x and the background matrix
+    background <- .checkBackground(x = x, background = background,
+                                   logfile = logfile, verbose = verbose)
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
     }
@@ -256,20 +243,9 @@ setMethod("decontX", "ANY", function(x,
 
   countsBackground <- NULL
   if (!is.null(background)) {
-    # Remove background barcodes that have already appeared in x
-    dupBarcode <- colnames(background) %in% colnames(x)
-
-    if (any(dupBarcode)) {
-      .logMessages(
-        sum(dupBarcode),
-        " columns in background removed as they are found in filtered matrix",
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-      )
-    }
-
-    countsBackground <- background[, !(dupBarcode)]
+    # Remove cells with the same ID between x and the background matrix
+    background <- .checkBackground(x = x, background = background,
+                                   logfile = logfile, verbose = verbose)
   }
 
   .decontX(
@@ -1367,4 +1343,32 @@ simulateContamination <- function(C = 300,
       "contamination" = contamination
     )
   )
+}
+
+
+.checkBackground <- function(x, background, logfile = NULL, verbose = FALSE) {
+  # Remove background barcodes that have already appeared in x
+  if(!is.null(colnames(background))) {
+    dupBarcode <- colnames(background) %in% colnames(x)
+  } else {
+    dupBarcode <- FALSE
+    warning("No column names were found for the 'background' matrix. ",
+            "No checking was performed between the ids in the 'backgroud' ",
+            "matrix and 'x'.",
+            " Please ensure that no true cells are included in the background ",
+            "matrix. Otherwise, results will be incorrect.")
+  }
+  
+  if (any(dupBarcode)) {
+    .logMessages(
+      sum(dupBarcode),
+      " columns in the background matrix were removed as they were found in",
+      " the filtered matrix.",
+      logfile = logfile,
+      append = TRUE,
+      verbose = verbose
+    )
+    background <- background[, !(dupBarcode)]
+  }
+  return(background)
 }
