@@ -112,24 +112,25 @@ opts_chunk$set(
 Reduced dimensional 2-D plots created by algorithms such as tSNE and UMAP are useful for visualizing the relationship between cells. Each point on the plot represents a single cell. Cells closer together on the plot have more similar expression profiles across all genes. The tabs below show the `r reducedDimName` dimensions colored by different variables. The *Cluster* tab colors cells by the `r K` subpopulation labels identified by celda_CG, The *Sample Labels* tab colors cells by the sample label supplied to celda_CG. If no sample label was supplied to celda_CG, then all cells will be the same color. The *Cell Annotations* tab contains colors points by other pre-specified cell-level annotations.
 
 ### Clusters
-```{r celda_clusters, fig.height = 9, fig.width = 9}
+```{r celda_clusters}
 plotDimReduceCluster(sce, reducedDimName = reducedDimName, labelClusters = TRUE)
 ```
 
 ### Sample Labels
-```{r celda_samples, fig.height = 9, fig.width = 9}
+```{r celda_samples}
 plotSCEDimReduceColData(
   altExp(sce),
   reducedDimName = reducedDimName,
   colorBy = "celda_sample_label",
-  labelClusters = FALSE
+  labelClusters = FALSE,
+  dotSize = 0.5
 )
 ```
 
 
 ### Cell Annotations {.tabset .tabset-fade}
 
-```{r celda_cellAnnot, results = "asis", fig.height = 9, fig.width = 10}
+```{r celda_cellAnnot, results = "asis"}
 if (!is.null(cellAnnotFinal)) {
   for (i in seq_along(cellAnnotFinal)) {
     cat(sprintf(tab4, cellAnnotFinal[i]))
@@ -139,11 +140,11 @@ if (!is.null(cellAnnotFinal)) {
     print(
       plotSCEDimReduceColData(
         altExp(sce),
-        sample = sce$sample,
         colorBy = cellAnnotFinal[i],
         conditionClass = conditionClass,
         reducedDim = reducedDimName,
-        labelClusters = plotLabels[i]
+        labelClusters = plotLabels[i],
+        dotSize = 0.5
       )
     )
     cat(space)
