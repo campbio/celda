@@ -1,3 +1,6 @@
+* Fixed bug in checking background matrix with decontX
+* Switched to using Github Actions for Continuous Integration
+
 # celda 1.9.2
 
 * Added a `NEWS.md` file to track changes to the package.
