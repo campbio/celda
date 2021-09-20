@@ -1,3 +1,8 @@
+---
+title: "DecontX - Decontamination of PBMC4K"
+date: "Compiled `r format(Sys.time(), '%B %d, %Y')`"
+author: "Joshua Campbell, Shiyi Yang, Zhe Wang, Yuan Yin"
+---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, dev = "png")

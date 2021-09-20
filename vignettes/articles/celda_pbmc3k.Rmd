@@ -1,3 +1,8 @@
+---
+title: "Celda - Analysis of PBMC3K"
+date: "Compiled `r format(Sys.time(), '%B %d, %Y')`"
+author: "Joshua Campbell, Zhe Wang"
+---
 
 # Introduction
 
