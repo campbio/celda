@@ -162,8 +162,13 @@ recodeClusterZ <- function(sce, from, to, altExpName = "featureSubset") {
         stop("Provided 'sce' argument does not have a 'celda_cell_cluster'",
             " column in 'colData(altExp(sce, altExpName))'")
     }
-    celdaClusters(sce, altExpName = altExpName) <- plyr::mapvalues(
-        celdaClusters(sce, altExpName = altExpName), from, to)
+    new.clusters <- plyr::mapvalues(celdaClusters(sce,
+                                                  altExpName = altExpName),
+                                    from, to)
+    new.clusters <- factor(new.clusters, levels = 
+                             sort(as.numeric(unique(new.clusters))))
+    
+    celdaClusters(sce, altExpName = altExpName) <- new.clusters
     return(sce)
 }
 
@@ -210,6 +215,12 @@ recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
         stop("Provided 'sce' argument does not have a 'celda_feature_module'",
             " column in 'rowData(altExp(sce, altExpName))'")
     }
+    new.clusters <- plyr::mapvalues(celdaModules(sce,
+                                                  altExpName = altExpName),
+                                  from, to)
+    new.clusters <- factor(new.clusters, levels = 
+                             sort(as.numeric(unique(new.clusters))))
+  
     celdaModules(sce, altExpName = altExpName) <- plyr::mapvalues(
         celdaModules(sce, altExpName = altExpName), from, to)
     return(sce)
