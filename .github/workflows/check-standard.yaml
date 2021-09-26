@@ -41,11 +41,11 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install xquartz --cask
 
-      - uses: r-lib/actions/setup-tinytex@v1
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
-          extra-packages: rcmdcheck
+          extra-packages: rcmdcheck, tinytex
 
+      - uses: r-lib/actions/setup-tinytex@v1
       - uses: r-lib/actions/check-r-package@v1
 
       - name: Show testthat output
