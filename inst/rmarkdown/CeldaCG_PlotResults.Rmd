@@ -169,6 +169,23 @@ Celda performs bi-clustering of features into modules and cells into subpopulati
 Use the tabs to select modules ranging from 1 to `r L`. Module probabilities on the 2-D embedding are scaled to range between 0 and 1. Each column on the heatmap represents a cell and each row represents a feature. Expression values for each feature are z-scored normalized across all cells after normalization. Red represents higher relative expression and blue represents lower relative expression. All cells are shown in the heatmap on the left. Only the top 100 cells with the lowest module probability and the 100 cells with the highest module probability are shown in the heatmap on the right. The column color bar displays the population assignment for each cell. 
 
 ```{r celda_module_heatmaps, results = "asis", fig.height = 15, fig.width = 10}
+p2 <- moduleHeatmap(
+  sce,
+  topCells = NULL,
+  displayName = displayName,
+  moduleLabel = "All cells",
+  useRaster = TRUE,
+  returnAsList = TRUE
+)
+p3 <- moduleHeatmap(
+  sce,
+  topCells = 100,
+  displayName = displayName,
+  moduleLabel = "Top 100 cells",
+  useRaster = TRUE,
+  returnAsList = TRUE
+)
+
 fig.list <- list()
 for (i in seq_len(L)) {
   p1 <- plotDimReduceModule(
@@ -178,22 +195,22 @@ for (i in seq_len(L)) {
     altExpName = altExpName,
     modules = i
   )
-  p2 <- moduleHeatmap(
-    sce,
-    featureModule = i,
-    topCells = NULL,
-    displayName = displayName,
-    moduleLabel = "All cells",
-    useRaster = TRUE
-  )
-  p3 <- moduleHeatmap(
-    sce,
-    featureModule = i,
-    topCells = 100,
-    displayName = displayName,
-    moduleLabel = "Top 100 cells",
-    useRaster = TRUE
-  )
+  # p2 <- moduleHeatmap(
+  #   sce,
+  #   featureModule = i,
+  #   topCells = NULL,
+  #   displayName = displayName,
+  #   moduleLabel = "All cells",
+  #   useRaster = TRUE
+  # )
+  # p3 <- moduleHeatmap(
+  #   sce,
+  #   featureModule = i,
+  #   topCells = 100,
+  #   displayName = displayName,
+  #   moduleLabel = "Top 100 cells",
+  #   useRaster = TRUE
+  # )
 
   fig <- multi_panel_figure(rows = 2,
                             columns = 2,
@@ -205,12 +222,12 @@ for (i in seq_len(L)) {
                     column = 1:2,
                     label = "")
   fig <- fill_panel(fig,
-                    p2,
+                    p2[[i]],
                     row = 2,
                     column = 1,
                     label = "")
   fig <- fill_panel(fig,
-                    p3,
+                    p3[[i]],
                     row = 2,
                     column = 2,
                     label = "")
