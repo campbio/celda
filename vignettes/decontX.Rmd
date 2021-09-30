@@ -12,7 +12,7 @@ author:
   email: camp@bu.edu
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::pdf_document:
+  BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Estimate and remove cross-contamination from ambient RNA in single-cell data with DecontX}
