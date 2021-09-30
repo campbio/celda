@@ -487,6 +487,17 @@ setMethod(
         )
       )
     }
+
+    ## Try to convert class of new matrix to class of original matrix
+    
+    .logMessages(
+      date(),
+      ".. Calculating final decontaminated matrix",
+      logfile = logfile,
+      append = TRUE,
+      verbose = verbose
+    )
+
     estRmat.temp <- calculateNativeMatrix(
       counts = countsBat,
       theta = res$theta,
@@ -495,6 +506,8 @@ setMethod(
       z = as.integer(res$z),
       pseudocount = 1e-20
     )
+
+    # This part needs to be optimized
     estRmat[seq(nrow(counts)), which(batch == bat)] <- estRmat.temp
     dimnames(estRmat) <- list(geneNames, allCellNames)
 
@@ -528,19 +541,17 @@ setMethod(
     "z" = returnZ
   )
 
-  ## Try to convert class of new matrix to class of original matrix
-  if (inherits(counts, "dgCMatrix")) {
+
+  if (inherits(counts, c("DelayedMatrix", "DelayedArray"))) {
+
     .logMessages(
       date(),
-      ".. Finalizing decontaminated matrix",
+      ".. Converting decontaminated matrix to ", class(counts),
       logfile = logfile,
       append = TRUE,
       verbose = verbose
     )
-  }
-
-  if (inherits(counts, c("DelayedMatrix", "DelayedArray"))) {
-
+    
     ## Determine class of seed in DelayedArray
     seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
     if (seed.class == "HDF5ArraySeed") {
