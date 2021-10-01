@@ -546,7 +546,7 @@ setMethod(
 
     .logMessages(
       date(),
-      ".. Converting decontaminated matrix to ", class(counts),
+      ".. Converting decontaminated matrix to", class(counts),
       logfile = logfile,
       append = TRUE,
       verbose = verbose
@@ -1372,14 +1372,16 @@ simulateContamination <- function(C = 300,
   
   if (any(dupBarcode)) {
     .logMessages(
+      date(),
+      ".. ",
       sum(dupBarcode),
-      " columns in the background matrix were removed as they were found in",
+      " cells in the background matrix were removed as they were found in",
       " the filtered matrix.",
       logfile = logfile,
       append = TRUE,
       verbose = verbose
     )
-    background <- background[, !(dupBarcode)]
+    background <- background[, !(dupBarcode), drop = FALSE]
   }
   return(background)
 }
