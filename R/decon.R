@@ -507,8 +507,18 @@ setMethod(
       pseudocount = 1e-20
     )
 
-    # This part needs to be optimized
-    estRmat[seq(nrow(counts)), which(batch == bat)] <- estRmat.temp
+    # Speed up sparse matrix value assignment by cbind -> order recovery
+    allCol <- paste0("col_", seq_len(ncol(estRmat)))
+    colnames(estRmat) <- allCol
+
+    subCol <- paste0("col_", which(batch == bat))
+    colnames(estRmat.temp) <- subCol
+
+    estRmat <- estRmat[, !(allCol %in% subCol)]
+    estRmat <- cbind(estRmat, estRmat.temp)
+
+    # Recover order and set names
+    estRmat <- estRmat[, allCol]
     dimnames(estRmat) <- list(geneNames, allCellNames)
 
     resBatch[[bat]] <- list(
