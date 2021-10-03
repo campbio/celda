@@ -496,7 +496,7 @@ setMethod("recursiveSplitCell",
       verbose = verbose,
       logfile = logfile)
     modelInitial <- .celda_CG(counts,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       K = as.integer(initialK),
       L = as.integer(L),
       zInitialize = "split",
@@ -1272,7 +1272,7 @@ setMethod("recursiveSplitModule",
       logfile = logfile
     )
     modelInitial <- .celda_CG(counts,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       L = initialL,
       K = K,
       zInitialize = "predefined",
@@ -1640,6 +1640,7 @@ setMethod("recursiveSplitModule",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+    SummarizedExperiment::colData(sce)$"celda_sample_label" <- sampleLabel
     return(sce)
 
 }
@@ -1687,5 +1688,6 @@ setMethod("recursiveSplitModule",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+    SummarizedExperiment::colData(sce)$"celda_sample_label" <- sampleLabel
     return(sce)
 }
