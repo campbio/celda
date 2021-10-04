@@ -34,6 +34,7 @@ reference:
   - plotDecontXContamination
   - plotDecontXMarkerExpression
   - plotDecontXMarkerPercentage
+
   - decontXcounts
   
 - title: Functions for determining the numbers of clusters in celda
@@ -101,7 +102,7 @@ navbar:
   title: "celda"
   left:
     - icon: fa-home fa-lg
-      href: http://celda.camplab.net/
+      href: https://www.camplab.net/celda
     - text: "Installation"
       href: articles/articles/installation.html
     - text: "Vignettes"

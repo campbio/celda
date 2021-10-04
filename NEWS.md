@@ -1,6 +1,9 @@
+# celda v1.9.3 (2021-10-04)
+
 * Fixed bug in checking background matrix with decontX
 * Switched to using Github Actions for Continuous Integration
 * Fixed plotting bugs in celda results reports
+* Speed up final step in decontX when creating final decontaminated matrix
 
 # celda v1.9.2 (2021-07-19)
 
