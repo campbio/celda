@@ -141,7 +141,7 @@ grid.arrange(p1, p2,  ncol = 2)
 ```
 
 
-## Determining the number of cell populaitons (K)
+## Determining the number of cell populations (K)
 The ```recursiveSplitCell``` function fits different celda models for a range of ```K``` values from `r initialK` to `r maxK`. The number of modules is set to ```L``` and the module labels from the ```recursiveSplitModule``` output are used for initialization. Similarly, the first model is fit with ```r paste0("K = ", initialK)```. Then the `celda_C` model is used to split each cell population into two new cell populations and the likelihood is re-calculated. The split that produced the best overall likelihood out of all splits is used for the next model with `K+1` cell populations. Perplexity and RPC are calculated as described in the previous section. The elbow can be used as a good starting point for possible choices of ```K```. Lastly, the final model is selected and the modules and cells are reordered using hierarchical clustering so that more similar modules and cell populations will have more similar values of L and K, respectively. Different choices for ```K``` are also visualized in reduced dimensional plots in the next section.
 
 ```{r cell_split}
@@ -182,7 +182,7 @@ Reduced dimensional 2-D plots created by algorithms such as tSNE and UMAP are us
 
 ### tSNE {.tabset .tabset-fade}
 ```{r dimreduce_tsne, results = "asis"}
-sce <- celdaTsne(sce)
+sce <- celdaTsne(sce, useAssay = useAssay, altExpName = altExpName)
 tsne <- reducedDim(altExp(sce, altExpName), "celda_tSNE")
 for (i in seq.int(initialK, maxK)) {
   cat(sprintf(tab4, paste0("K = ", i)))
@@ -202,7 +202,7 @@ for (i in seq.int(initialK, maxK)) {
 
 ### UMAP {.tabset .tabset-fade}
 ```{r dimreduce_umap, results = "asis"}
-sce <- celdaUmap(sce)
+sce <- celdaUmap(sce, useAssay = useAssay, altExpName = altExpName)
 umap <- reducedDim(altExp(sce, altExpName), "celda_UMAP")
 for (i in seq.int(initialK, maxK)) {
   cat(sprintf(tab4, paste0("K = ", i)))

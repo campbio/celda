@@ -76,7 +76,7 @@ row of the matrix will be plotted as a separate facet.}
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
-\item{dim1}{Numeric vector. First dimension from data dimension
+\item{dim1}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
 \item{dim2}{Numeric vector. Second dimension from data dimension

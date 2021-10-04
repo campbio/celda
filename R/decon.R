@@ -162,22 +162,9 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       verbose = TRUE) {
   countsBackground <- NULL
   if (!is.null(background)) {
-    # Remove background barcodes that have already appeared in x
-    dupBarcode <- background$Barcode %in% x$Barcode
-
-    if (any(dupBarcode)) {
-      .logMessages(
-        sum(dupBarcode),
-        " columns in background removed as they are found in filtered matrix",
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-      )
-    }
-
-    background <- background[, !(dupBarcode)]
-
-
+    # Remove cells with the same ID between x and the background matrix
+    background <- .checkBackground(x = x, background = background,
+                                   logfile = logfile, verbose = verbose)
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
     }
@@ -256,20 +243,9 @@ setMethod("decontX", "ANY", function(x,
 
   countsBackground <- NULL
   if (!is.null(background)) {
-    # Remove background barcodes that have already appeared in x
-    dupBarcode <- colnames(background) %in% colnames(x)
-
-    if (any(dupBarcode)) {
-      .logMessages(
-        sum(dupBarcode),
-        " columns in background removed as they are found in filtered matrix",
-        logfile = logfile,
-        append = TRUE,
-        verbose = verbose
-      )
-    }
-
-    countsBackground <- background[, !(dupBarcode)]
+    # Remove cells with the same ID between x and the background matrix
+    background <- .checkBackground(x = x, background = background,
+                                   logfile = logfile, verbose = verbose)
   }
 
   .decontX(
@@ -519,7 +495,21 @@ setMethod(
       z = as.integer(res$z),
       pseudocount = 1e-20
     )
-    estRmat[seq(nrow(counts)), which(batch == bat)] <- estRmat.temp
+
+    # Speed up sparse matrix value assignment by cbind -> order recovery
+    allCol <- paste0("col_", seq_len(ncol(estRmat)))
+    colnames(estRmat) <- allCol
+
+    subCol <- paste0("col_", which(batch == bat))
+    colnames(estRmat.temp) <- subCol
+
+    estRmat <- estRmat[, !(allCol %in% subCol)]
+    estRmat <- cbind(estRmat, estRmat.temp)
+
+    # Recover order
+    estRmat <- estRmat[, allCol]
+
+    ##estRmat[seq(nrow(counts)), which(batch == bat)] <- estRmat.temp
     dimnames(estRmat) <- list(geneNames, allCellNames)
 
     resBatch[[bat]] <- list(
@@ -1014,23 +1004,17 @@ addLogLikelihood <- function(llA, llB) {
   }
   sce <- scater::logNormCounts(sce, log = TRUE)
 
-  if (nrow(sce) <= varGenes) {
-    topVariableGenes <- seq_len(nrow(sce))
-  } else if (nrow(sce) > varGenes) {
-    sce.var <- scran::modelGeneVar(sce)
-    topVariableGenes <- order(sce.var$bio,
-      decreasing = TRUE
-    )[seq(varGenes)]
-  }
-  sce <- sce[topVariableGenes, ]
-
   if (!is.null(seed)) {
     with_seed(
       seed,
-      resUmap <- scater::calculateUMAP(sce, n_threads = 1)
+      resUmap <- scater::calculateUMAP(sce, ntop = varGenes,
+                                       n_threads = 1,
+                                       exprs_values = "logcounts")
     )
   } else {
-    resUmap <- scater::calculateUMAP(sce, n_threads = 1)
+    resUmap <- scater::calculateUMAP(sce, ntop = varGenes,
+                                     n_threads = 1,
+                                     exprs_values = "logcounts")
   }
 
   z <- NULL
@@ -1373,4 +1357,32 @@ simulateContamination <- function(C = 300,
       "contamination" = contamination
     )
   )
+}
+
+
+.checkBackground <- function(x, background, logfile = NULL, verbose = FALSE) {
+  # Remove background barcodes that have already appeared in x
+  if(!is.null(colnames(background))) {
+    dupBarcode <- colnames(background) %in% colnames(x)
+  } else {
+    dupBarcode <- FALSE
+    warning("No column names were found for the 'background' matrix. ",
+            "No checking was performed between the ids in the 'backgroud' ",
+            "matrix and 'x'.",
+            " Please ensure that no true cells are included in the background ",
+            "matrix. Otherwise, results will be incorrect.")
+  }
+  
+  if (any(dupBarcode)) {
+    .logMessages(
+      sum(dupBarcode),
+      " columns in the background matrix were removed as they were found in",
+      " the filtered matrix.",
+      logfile = logfile,
+      append = TRUE,
+      verbose = verbose
+    )
+    background <- background[, !(dupBarcode)]
+  }
+  return(background)
 }

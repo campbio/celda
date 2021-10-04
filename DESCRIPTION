@@ -1,13 +1,12 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.9.0
+Version: 1.9.2
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre")),
-    person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
-    person("Yusuke", "Koga", email="ykoga07@bu.edu", role = c("aut")),
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
-    person("Eric", "Reed", email="reeder@bu.edu", role = c("aut")),
-    person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")))
+    person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")),
+    person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
+    person("Yusuke", "Koga", email="ykoga07@bu.edu", role = c("aut")))
 Description: Celda is a suite of Bayesian hierarchical models for
     clustering single-cell RNA-sequencing (scRNA-seq) data. It is able to
     perform "bi-clustering" and simultaneously cluster genes into gene modules
@@ -26,12 +25,12 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         DelayedArray, stringr, Matrix, ComplexHeatmap, multipanelfigure,
         circlize
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
-        BiocManager, BiocStyle, M3DExampleData, TENxPBMCData, singleCellTK
+        BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian
 NeedsCompilation: yes

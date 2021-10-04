@@ -3,106 +3,116 @@ template:
     bootswatch: yeti
 
 reference:
-- title: Function Documentation
-  desc: Man pages for all functions exported by celda
+- title: Primary celda functions
+  desc: Functions for clustering of cells
   contents:
-  - '`available_models`'
-  - '`calc.perplexity`'
-  - '`calc.perplexity2`'
-  - '`calculateLoglikFromVariables.celda_C`'
-  - '`calculateLoglikFromVariables.celda_CG`'
-  - '`calculateLoglikFromVariables.celda_G`'
-  - '`calculateLoglikFromVariables`'
-  - '`calculatePerplexity.celda_C`'
-  - '`calculatePerplexity.celda_CG`'
-  - '`calculatePerplexity.celda_G`'
-  - '`calculatePerplexity`'
-  - '`calculatePerplexityWithResampling`'
-  - '`calculateTsne`'
-  - '`cC.decomposeCounts`'
-  - '`cCG.decomposeCounts`'
-  - '`celda`'
-  - '`celdaGridSearch`'
-  - '`celdaHeatmap.celda_C`'
-  - '`celdaHeatmap.celda_CG`'
-  - '`celdaHeatmap.celda_G`'
-  - '`celdaHeatmap`'
-  - '`celdaProbabilityMap.celda_C`'
-  - '`celdaProbabilityMap.celda_CG`'
-  - '`celdaProbabilityMap`'
-  - '`celdaTsne.celda_C`'
-  - '`celdaTsne.celda_CG`'
-  - '`celdaTsne.celda_G`'
-  - '`celdaTsne`'
-  - '`celda_C`'
-  - '`celda_CG`'
-  - '`celda_G`'
-  - '`cG.decomposeCounts`'
-  - '`clusterProbability.celda_C`'
-  - '`clusterProbability.celda_CG`'
-  - '`clusterProbability.celda_G`'
-  - '`clusterProbability`'
-  - '`compareCountMatrix`'
-  - '`completeLogLikelihood`'
-  - '`distinct_colors`'
-  - '`eigenMatMultInt`'
-  - '`factorizeMatrix.celda_C`'
-  - '`factorizeMatrix.celda_CG`'
-  - '`factorizeMatrix.celda_G`'
-  - '`factorizeMatrix`'
-  - '`fastNormProp`'
-  - '`fastNormPropLog`'
-  - '`fastNormPropSqrt`'
-  - '`featureModuleLookup.celda_C`'
-  - '`featureModuleLookup.celda_CG`'
-  - '`featureModuleLookup.celda_G`'
-  - '`featureModuleLookup`'
-  - '`finalLogLikelihood`'
-  - '`moduleHeatmap`'
-  - '`normalizeCounts`'
-  - '`pbmc_res`'
-  - '`pbmc_select`'
-  - '`plotDimReduceCluster`'
-  - '`plotDimReduceGene`'
-  - '`plotDimReduceGrid`'
-  - '`plotDimReduceState`'
-  - '`plotGridSearchPerplexity.celda_C`'
-  - '`plotGridSearchPerplexity.celda_CG`'
-  - '`plotGridSearchPerplexity.celda_G`'
-  - '`plotGridSearchPerplexity`'
-  - '`plotHeatmap`'
-  - '`recodeClusterY`'
-  - '`recodeClusterZ`'
-  - '`runParams`'
-  - '`sample.cells`'
-  - '`selectBestModel`'
-  - '`semi_pheatmap`'
-  - '`simulateCells.celda_C`'
-  - '`simulateCells.celda_CG`'
-  - '`simulateCells.celda_G`'
-  - '`simulateCells`'
-  - '`subsetCeldaList`'
-  - '`topRank`'
+  - celda_CG
+  - celda_C
+  - celda_G
+  - reportCeldaCGRun
+  - reportCeldaCGPlotResults
+  - selectFeatures  
+  - splitModule
+
+- title: Visualization functions for celda results
+  desc: Functions for displaying celda resuls on 2-D embeddings, heatmaps, and violin plots
+  contents:
+  - celdaUmap
+  - celdaTsne
+  - moduleHeatmap
+  - celdaProbabilityMap
+  - plotDimReduceCluster
+  - plotDimReduceFeature
+  - plotDimReduceModule
+  - plotCeldaViolin  
+  - celdaHeatmap
+
+- title: Primary decontX functions
+  desc: Functions for estimating and displaying contamination with decontX
+  contents:
+  - decontX
+  - plotDecontXContamination
+  - plotDecontXMarkerExpression
+  - plotDecontXMarkerPercentage
+  - decontXcounts
+  
+- title: Functions for determining the numbers of clusters in celda
+  desc: Functions for running and comparing multiple celda models with different number of modules or cell populations
+  contents:
+  - recursiveSplitCell
+  - recursiveSplitModule
+  - plotRPC
+  - celdaGridSearch
+  - plotGridSearchPerplexity
+  - perplexity
+  - celdaPerplexity  
+  - resamplePerplexity
+  - selectBestModel
+  - resList  
+  - subsetCeldaList  
+  - appendCeldaList
+
+- title: Miscellaneous celda functions 
+  desc: Various functions for manipulation of celda results
+  contents:
+  - celdaClusters
+  - celdaModules
+  - recodeClusterY
+  - recodeClusterZ
+  - reorderCelda  
+  - featureModuleLookup
+  - featureModuleTable
+  - celda
+  - params  
+  - runParams  
+  - factorizeMatrix
+  - bestLogLikelihood
+  - clusterProbability
+  - geneSetEnrich
+  - plotHeatmap
+  - retrieveFeatureIndex
+  - normalizeCounts
+  - distinctColors
+  - matrixNames
+  - logLikelihood
+  - logLikelihoodHistory
+  - topRank
+  - sampleLabel
+
+- title: Simulation functions
+  desc: Functions for generating data from the generative process of each model 
+  contents:
+  - simulateCells
+  - simulateContamination
+
+- title: Data objects
+  desc: Small data objects used in examples
+  contents:
+  - sceCeldaCG
+  - sceCeldaC
+  - sceCeldaG
+  - sceCeldaCGGridSearch
+  - celdaCGGridSearchRes
+  - sampleCells
+  - contaminationSim
+
 
 navbar:
-  structure:
-    left:
-    - home
-    - intro
-    - reference
-    - articles
-    - tutorials
-    - news
-    right: github
-  components:
-    home:
-      icon: fa-home fa-lg
-      href: index.html
-    reference:
-      text: Reference
-      href: reference/index.html
-    articles:
-      text: Articles
+  title: "celda"
+  left:
+    - icon: fa-home fa-lg
+      href: http://celda.camplab.net/
+    - text: "Installation"
+      href: articles/articles/installation.html
+    - text: "Vignettes"
       menu:
-      - text: Analyzing single-cell RNA-seq count data with Celda
-        href: articles/celda-analysis.html
+      - text: "Celda - Analysis of PBMC3K"
+        href: articles/articles/celda_pbmc3k.html
+      - text: "DecontX - Decontamination of PBMC4K"
+        href: articles/articles/decontX_pbmc4k.html
+    - text: "Reference"
+      href: reference/index.html
+    - text: "News"
+      href: news/index.html
+    - icon: fa-github
+      href: https://github.com/campbio/celda

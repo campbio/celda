@@ -6,11 +6,12 @@
 #'  it exists. Otherwise, the \code{useAssay}
 #'  \link{assay} slot in \code{x} will be used if
 #'  \code{x} is a \linkS4class{SingleCellExperiment} object.
-#' @param x A numeric \link{matrix} of counts or a
-#'  \linkS4class{SingleCellExperiment}
-#'  with the matrix located in the assay slot under \code{useAssay} in
-#'  \code{altExp(x, altExpName)}.
-#'  Rows represent features and columns represent cells.
+#' @param x A \linkS4class{SingleCellExperiment}
+#'  with the matrix located in the assay slot under \code{useAssay}.
+#'  Rows represent features and columns represent cells. Alternatively,
+#'  any matrix-like object that can be coerced to a sparse matrix of class
+#'  "dgCMatrix" can be directly used as input. The matrix will automatically be
+#'  converted to a \linkS4class{SingleCellExperiment} object.
 #' @param useAssay A string specifying the name of the
 #'  \link{assay} slot to use. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
@@ -165,7 +166,7 @@ setMethod("celda_C",
 #' @rdname celda_C
 #' @export
 setMethod("celda_C",
-    signature(x = "matrix"),
+    signature(x = "ANY"),
     function(x,
         useAssay = "counts",
         altExpName = "featureSubset",
@@ -185,6 +186,9 @@ setMethod("celda_C",
         zInit = NULL,
         logfile = NULL,
         verbose = TRUE) {
+
+        # Convert to sparse matrix
+        x <- methods::as(x, "dgCMatrix")
 
         ls <- list()
         ls[[useAssay]] <- x

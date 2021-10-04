@@ -9,6 +9,7 @@ moduleHeatmap(
   x,
   useAssay = "counts",
   altExpName = "featureSubset",
+  modules = NULL,
   featureModule = NULL,
   col = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
   topCells = 100,
@@ -33,6 +34,7 @@ moduleHeatmap(
   unit = "mm",
   ncol = NULL,
   useRaster = TRUE,
+  returnAsList = FALSE,
   ...
 )
 
@@ -40,6 +42,7 @@ moduleHeatmap(
   x,
   useAssay = "counts",
   altExpName = "featureSubset",
+  modules = NULL,
   featureModule = NULL,
   col = circlize::colorRamp2(c(-2, 0, 2), c("#1E90FF", "#FFFFFF", "#CD2626")),
   topCells = 100,
@@ -64,6 +67,7 @@ moduleHeatmap(
   unit = "mm",
   ncol = NULL,
   useRaster = TRUE,
+  returnAsList = FALSE,
   ...
 )
 }
@@ -81,9 +85,12 @@ slot to use if \code{x} is a
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
-\item{featureModule}{Integer Vector. The featureModule(s) to display.
+\item{modules}{Integer Vector. The featureModule(s) to display.
 Multiple modules can be included in a vector. Default \code{NULL} which
 plots all module heatmaps.}
+
+\item{featureModule}{Same as \code{modules}. Either can be used to specify
+the modules to display.}
 
 \item{col}{Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
 and colors.}
@@ -188,6 +195,10 @@ and rows will be approximately the same. Default \code{NULL}.}
 and reduced the memory of the plot and the size of a file. If \code{NULL},
 then rasterization will be automatically determined by the underlying
 \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.}
+
+\item{returnAsList}{Boolean. If \code{TRUE}, then a list of plots will be
+returned instead of a single multi-panel figure. These plots can be 
+displayed using the \link[grid]{grid.draw} function. Default \code{FALSE}.}
 
 \item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 }

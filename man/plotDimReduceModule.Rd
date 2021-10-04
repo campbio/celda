@@ -10,17 +10,17 @@
 plotDimReduceModule(
   x,
   reducedDimName,
-  dim1 = NULL,
-  dim2 = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
   celdaMod,
   modules = NULL,
+  dim1 = NULL,
+  dim2 = NULL,
+  size = 0.5,
+  xlab = NULL,
+  ylab = NULL,
   rescale = TRUE,
   limits = c(0, 1),
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
   colorLow = "grey90",
   colorHigh = "firebrick1",
   ncol = NULL,
@@ -30,16 +30,16 @@ plotDimReduceModule(
 \S4method{plotDimReduceModule}{SingleCellExperiment}(
   x,
   reducedDimName,
-  dim1 = NULL,
-  dim2 = NULL,
   useAssay = "counts",
   altExpName = "featureSubset",
   modules = NULL,
+  dim1 = 1,
+  dim2 = 2,
+  size = 0.5,
+  xlab = NULL,
+  ylab = NULL,
   rescale = TRUE,
   limits = c(0, 1),
-  size = 1,
-  xlab = "Dimension_1",
-  ylab = "Dimension_2",
   colorLow = "grey90",
   colorHigh = "firebrick1",
   ncol = NULL,
@@ -48,15 +48,15 @@ plotDimReduceModule(
 
 \S4method{plotDimReduceModule}{ANY}(
   x,
-  dim1,
-  dim2,
   celdaMod,
   modules = NULL,
-  rescale = TRUE,
-  limits = c(0, 1),
-  size = 1,
+  dim1,
+  dim2,
+  size = 0.5,
   xlab = "Dimension_1",
   ylab = "Dimension_2",
+  rescale = TRUE,
+  limits = c(0, 1),
   colorLow = "grey90",
   colorHigh = "firebrick1",
   ncol = NULL,
@@ -73,12 +73,6 @@ represent features and columns represent cells.}
 \linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
-\item{dim1}{Numeric vector.
-First dimension from data dimension reduction output.}
-
-\item{dim2}{Numeric vector.
-Second dimension from data dimension reduction output.}
-
 \item{useAssay}{A string specifying which \link{assay}
 slot to use if \code{x} is a
 \linkS4class{SingleCellExperiment} object. Default "counts".}
@@ -92,17 +86,27 @@ to use. Default "featureSubset".}
 \item{modules}{Character vector. Module(s) from celda model to be plotted.
 e.g. c("1", "2").}
 
+\item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
+then, this will be used as an index to determine which dimension will be
+plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
+should be a vector which will be plotted on the x-axis. Default \code{1}.}
+
+\item{dim2}{Integer or numeric vector. If \code{reducedDimName} is supplied,
+then, this will be used as an index to determine which dimension will be
+plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
+should be a vector which will be plotted on the y-axis. Default \code{2}.}
+
+\item{size}{Numeric. Sets size of point on plot. Default 0.5.}
+
+\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
+
+\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
+
 \item{rescale}{Logical.
 Whether rows of the matrix should be rescaled to [0, 1]. Default TRUE.}
 
 \item{limits}{Passed to \link{scale_colour_gradient}. The range
 of color scale.}
-
-\item{size}{Numeric. Sets size of point on plot. Default 1.}
-
-\item{xlab}{Character vector. Label for the x-axis. Default "Dimension_1".}
-
-\item{ylab}{Character vector. Label for the y-axis. Default "Dimension_2".}
 
 \item{colorLow}{Character. A color available from `colors()`.
 The color will be used to signify the lowest values on the scale.}

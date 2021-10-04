@@ -10,3 +10,7 @@ _pkgdown.yml
 ^Meta$
 renv*
 
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$

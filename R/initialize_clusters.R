@@ -313,10 +313,7 @@
   rm(p)
 
   # Pre-compute lgamma values
-  lgbeta <- lgamma((seq(0, max(.colSums(
-    counts, nrow(counts),
-    ncol(counts)
-  )))) + beta)
+  lgbeta <- lgamma((seq(0, max(colSums(counts)))) + beta)
   lggamma <- lgamma(seq(0, nrow(counts) + L) + gamma)
   lgdelta <- c(NA, lgamma(seq(nrow(counts) + L) * delta))
 

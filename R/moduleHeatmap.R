@@ -16,9 +16,11 @@
 #'  \linkS4class{SingleCellExperiment} object. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
-#' @param featureModule Integer Vector. The featureModule(s) to display.
+#' @param modules Integer Vector. The featureModule(s) to display.
 #'  Multiple modules can be included in a vector. Default \code{NULL} which
 #'  plots all module heatmaps.
+#' @param featureModule Same as \code{modules}. Either can be used to specify
+#' the modules to display. 
 #' @param col Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
 #'  and colors.
 #' @param topCells Integer. Number of cells with the highest and lowest
@@ -100,6 +102,9 @@
 #' and reduced the memory of the plot and the size of a file. If \code{NULL},
 #' then rasterization will be automatically determined by the underlying
 #' \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.
+#' @param returnAsList Boolean. If \code{TRUE}, then a list of plots will be
+#' returned instead of a single multi-panel figure. These plots can be 
+#' displayed using the \link[grid]{grid.draw} function. Default \code{FALSE}.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
 #' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
 #'  more than one module heatmaps. Otherwise a
@@ -111,6 +116,7 @@ setGeneric("moduleHeatmap",
     function(x,
         useAssay = "counts",
         altExpName = "featureSubset",
+        modules = NULL,        
         featureModule = NULL,
         col = circlize::colorRamp2(c(-2, 0, 2),
             c("#1E90FF", "#FFFFFF", "#CD2626")),
@@ -136,6 +142,7 @@ setGeneric("moduleHeatmap",
         unit = "mm",
         ncol = NULL,
         useRaster = TRUE,
+        returnAsList = FALSE,
         ...) {
     standardGeneric("moduleHeatmap")})
 
@@ -151,6 +158,7 @@ setMethod("moduleHeatmap",
     function(x,
         useAssay = "counts",
         altExpName = "featureSubset",
+        modules = NULL,
         featureModule = NULL,
         col = circlize::colorRamp2(c(-2, 0, 2),
             c("#1E90FF", "#FFFFFF", "#CD2626")),
@@ -176,8 +184,15 @@ setMethod("moduleHeatmap",
         unit = "mm",
         ncol = NULL,
         useRaster = TRUE,
+        returnAsList = FALSE,
         ...) {
 
+        # 'modules' is an easier parameter name to remember so we include 
+        # support for both. 
+        if(!is.null(modules)) {
+            featureModule <- modules
+        }
+        
         altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
@@ -212,6 +227,8 @@ setMethod("moduleHeatmap",
 
         if (moduleLabel == "auto") {
             moduleLabel <- paste0("Module ", as.character(featureModule))
+        } else if (length(moduleLabel) == 1 & length(featureModule) > 1) {
+            moduleLabel <- rep(moduleLabel, length(featureModule))
         } else if (length(moduleLabel) != length(featureModule)) {
             stop("Invalid 'moduleLabel' length")
         }
@@ -251,6 +268,7 @@ setMethod("moduleHeatmap",
             }
         )
 
+        # Set up displayName variable if specified
         if (is.null(displayName)) {
             displayNames <- rownames(altExp)
         } else {
@@ -261,8 +279,26 @@ setMethod("moduleHeatmap",
         z <- celdaClusters(x, altExpName = altExpName)
         y <- celdaModules(x, altExpName = altExpName)
 
-        plts <- vector("list", length = length(featureModule))
+        # Get max rowFontSize if multiple modules are selected
+        if (is.null(rowFontSize)) {
+          if (length(featureIndices) > 1 & !isTRUE(returnAsList)) {
+            # If there is more than 1 module selected, then the miniumum size
+            # size will be caculated for each module. This will ensure that
+            # all modules will have the same rowFontSize and the module
+            # heatmaps will have the same width. 
+            maxlen <- max(unlist(lapply(featureIndices, length)))
+            maxlen <- maxlen * sqrt(length(featureIndices))
+            rowFontSize <- rep(min(200 / maxlen, 20), length(featureIndices))
+          } else {
+            # If there is only one plot or each plot will be generated 
+            # separately and returned in a list, then the size of the labels,
+            # will be caculated for each module separately.
+            len <- unlist(lapply(featureIndices, length))
+            rowFontSize <- pmin(200 / len, 20)
+          }
+        }
 
+        plts <- vector("list", length = length(featureModule))
         for (i in seq(length(featureModule))) {
             plts[[i]] <- .plotModuleHeatmap(normCounts = normCounts,
                 col = col,
@@ -277,7 +313,7 @@ setMethod("moduleHeatmap",
                 showFeatureNames = showFeatureNames,
                 displayNames = displayNames[featureIndices[[i]]],
                 trim = trim,
-                rowFontSize = rowFontSize,
+                rowFontSize = rowFontSize[i],
                 showHeatmapLegend = showHeatmapLegend,
                 showTopAnnotationLegend = showTopAnnotationLegend,
                 showTopAnnotationName = showTopAnnotationName,
@@ -304,17 +340,22 @@ setMethod("moduleHeatmap",
                     wrap.grobs = TRUE)
             }
 
-            figure <- multipanelfigure::multi_panel_figure(
-                columns = ncol,
-                rows = nrow,
-                width = width,
-                height = height,
-                unit = unit)
-
-            for (i in seq(length(plts))) {
-                figure <- suppressMessages(multipanelfigure::fill_panel(figure,
-                    plts[[i]], label = ""))
+            if(isTRUE(returnAsList)) {
+                figure <- plts    
+            } else {
+                figure <- multipanelfigure::multi_panel_figure(
+                    columns = ncol,
+                    rows = nrow,
+                    width = width,
+                    height = height,
+                    unit = unit)
+                
+                for (i in seq(length(plts))) {
+                    figure <- suppressMessages(multipanelfigure::fill_panel(figure,
+                                                                            plts[[i]], label = ""))
+                }
             }
+            
             suppressWarnings(return(figure))
         }
     }
@@ -399,6 +440,10 @@ setMethod("moduleHeatmap",
         } else {
             stop("'scaleRow' needs to be of class 'function'")
         }
+        # If the standard deviation was 0 then the values will be NA
+        # Replacing the NAs with zero will keep the row the middle color
+        # rather than grey (default with ComplexHeatmap)
+        filteredNormCounts[is.na(filteredNormCounts)] <- 0
     }
 
     if (!is.null(trim)) {
@@ -411,10 +456,6 @@ setMethod("moduleHeatmap",
         trim <- sort(trim)
         filteredNormCounts[filteredNormCounts < trim[1]] <- trim[1]
         filteredNormCounts[filteredNormCounts > trim[2]] <- trim[2]
-    }
-
-    if (is.null(rowFontSize)) {
-        rowFontSize <- min(200 / nrow(filteredNormCounts), 20)
     }
 
     if (isTRUE(showModuleLabel)) {
