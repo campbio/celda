@@ -1,3 +1,7 @@
+# celda v1.10.0 (2021-12-28)
+
+* Update to match Bioconductor release version
+
 # celda v1.9.3 (2021-10-04)
 
 * Fixed bug in checking background matrix with decontX

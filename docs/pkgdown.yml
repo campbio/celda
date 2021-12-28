@@ -1,4 +1,4 @@
-pandoc: 2.11.4
+pandoc: 2.9.2.1
 pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
@@ -7,5 +7,5 @@ articles:
   articles/installation: installation.html
   celda: celda.html
   decontX: decontX.html
-last_built: 2021-10-04T16:07Z
+last_built: 2021-12-28T19:10Z
 

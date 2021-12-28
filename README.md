@@ -18,10 +18,17 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("celda")
 ```
 
-To install the development version (R >= 3.6) of **celda** from GitHub using `devtools`:
+The latest stable version  of **celda** can be installed from GitHub using `devtools`:
+
 ```
 library(devtools)
 install_github("campbio/celda")
+```
+
+The development version of **celda** can also be installed from GitHub using `devtools`:
+```
+library(devtools)
+install_github("campbio/celda@devel")
 ```
 
 **NOTE** For MAC OSX users, `devtools::install_github()` requires installation of **libgit2.** This can be installed via homebrew:
