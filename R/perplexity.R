@@ -80,8 +80,9 @@ setMethod("perplexity", signature(x = "SingleCellExperiment"),
             y <- celdaModules(x, altExpName = altExpName)
             p <- .perplexityCelda_G(counts,
                 factorized,
-                L,
-                y,
+                L = L,
+                y = y,
+                beta = S4Vectors::metadata(altExp)$celda_parameters$beta,
                 newCounts = newCounts)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
@@ -198,15 +199,6 @@ setMethod(
          counts <- .processCounts(x)
          compareCountMatrix(counts, celdaMod)
 
-        if (is.null(newCounts)) {
-            newCounts <- counts
-        } else {
-            newCounts <- .processCounts(newCounts)
-        }
-        if (nrow(newCounts) != nrow(counts)) {
-            stop("newCounts should have the same number of rows as counts.")
-        }
-
         factorized <- factorizeMatrix(
             x = counts,
             celdaMod = celdaMod,
@@ -217,16 +209,27 @@ setMethod(
         eta <- factorized$posterior$geneDistribution
         nGByTS <- factorized$counts$geneDistribution
 
-        etaProb <- log(eta) * nGByTS
-        # gene.by.cell.prob = log(psi %*% phi)
-        # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
-        logPx <- .perplexityGLogPx(
-            newCounts,
-            phi,
-            psi,
-            celdaClusters(celdaMod)$y,
-            params(celdaMod)$L
-        ) # + sum(etaProb)
+        
+        if (is.null(newCounts)) {
+            newCounts <- counts
+        } else {
+            newCounts <- .processCounts(newCounts)
+            beta <- params(celdaMod)$beta
+            L <- params(celdaMod)$L
+            y <- celdaMod@clusters$y
+            phi <- .rowSumByGroup(newCounts, group = y, L = L) + beta
+            phi <- normalizeCounts(phi, normalize = "proportion")
+        }
+        if (nrow(newCounts) != nrow(counts)) {
+            stop("newCounts should have the same number of rows as counts.")
+        }
+        
+        #etaProb <- log(eta) * nGByTS
+        #gene.by.cell.prob = log(psi %*% phi)
+        #logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+        gene.by.cell.prob <- log(psi %*% phi)
+        logPx <- sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+
         perplexity <- exp(- (logPx / sum(newCounts)))
         return(perplexity)
     }
@@ -300,40 +303,37 @@ setMethod(
     factorized,
     L,
     y,
+    beta,
     newCounts) {
+
+    psi <- factorized$posterior$module
+    phi <- factorized$posterior$cell
+    #eta <- factorized$posterior$geneDistribution
+    #nGByTS <- factorized$counts$geneDistribution
 
     if (is.null(newCounts)) {
         newCounts <- counts
     } else {
         newCounts <- .processCounts(newCounts)
+        phi <- .rowSumByGroup(newCounts, group = y, L = L) + beta
+        phi <- normalizeCounts(phi, normalize = "proportion")
     }
     if (nrow(newCounts) != nrow(counts)) {
-        stop("newCounts should have the same number of rows as",
-            " 'assay(altExp(x, altExpName), i = useAssay)'.")
+        stop("newCounts should have the same number of rows as counts.")
     }
+    
+    #etaProb <- log(eta) * nGByTS
+    #gene.by.cell.prob <- log(psi %*% phi)
 
-    psi <- factorized$posterior$module
-    phi <- factorized$posterior$cell
-    eta <- factorized$posterior$geneDistribution
-    nGByTS <- factorized$counts$geneDistribution
-
-    etaProb <- log(eta) * nGByTS
-    # gene.by.cell.prob = log(psi %*% phi)
-    # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
-    logPx <- .perplexityGLogPx(
-        newCounts,
-        phi,
-        psi,
-        y,
-        L
-    ) # + sum(etaProb)
+    gene.by.cell.prob <- log(psi %*% phi)
+    logPx <- sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+    
     perplexity <- exp(- (logPx / sum(newCounts)))
     return(perplexity)
 }
 
 
-#' @title Calculate and visualize perplexity of all models in a celdaList, with
-#'  count resampling
+#' @title Calculate and visualize perplexity of all models in a celdaList
 #' @description Calculates the perplexity of each model's cluster assignments
 #'  given the provided countMatrix, as well as resamplings of that count
 #'  matrix, providing a distribution of perplexities and a better sense of the
@@ -351,10 +351,19 @@ setMethod(
 #'  to use. Default "featureSubset".
 #' @param celdaList Object of class 'celdaList'. Used only if \code{x} is a
 #'  matrix object.
-#' @param resample Integer. The number of times to resample the counts matrix
-#'  for evaluating perplexity. Default 5.
+#' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
+#' matrix will be resampled according to a multinomial distribution to introduce
+#' noise before caculating perplexity. Default \code{FALSE}.
+#' @param doSubsampling Boolean. If \code{TRUE}, then a subset of cells from
+#' the original counts matrix will be randomly selected. Default \code{TRUE}.
+#' @param numResample Integer. The number of times to resample the counts matrix
+#' for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+#' Default \code{5}.
+#' @param numSubsample Integer. The number of cells to sample from the
+#' the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
+#' Default \code{5000}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
+#'  a default value of \code{12345} is used. If \code{NULL}, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @return A \linkS4class{SingleCellExperiment} object or
 #'  \code{celdaList} object with a \code{perplexity}
@@ -366,7 +375,10 @@ setGeneric("resamplePerplexity",
         celdaList,
         useAssay = "counts",
         altExpName = "featureSubset",
-        resample = 5,
+        doResampling = FALSE,
+        doSubsampling = TRUE,
+        numResample = 5,
+        numSubsample = 5000,
         seed = 12345) {
     standardGeneric("resamplePerplexity")})
 
@@ -382,7 +394,10 @@ setMethod("resamplePerplexity",
     function(x,
         useAssay = "counts",
         altExpName = "featureSubset",
-        resample = 5,
+        doResampling = FALSE,
+        doSubsampling = TRUE,
+        numResample = 5,
+        numSubsample = 5000,
         seed = 12345) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
@@ -393,14 +408,19 @@ setMethod("resamplePerplexity",
             res <- .resamplePerplexity(
                 counts = counts,
                 celdaList = celdaList,
-                resample = resample)
+                doResampling = doResampling,
+                doSubsampling = doSubsampling,
+                numResample = numResample,
+                numSubsample = numSubsample)
         } else {
             with_seed(seed,
                 res <- .resamplePerplexity(
                     counts = counts,
                     celdaList = celdaList,
-                    resample = resample)
-            )
+                    doResampling = doResampling,
+                    doSubsampling = doSubsampling,
+                    numResample = numResample,
+                    numSubsample = numSubsample))
         }
 
         S4Vectors::metadata(altExp)$celda_grid_search <- res
@@ -423,20 +443,29 @@ setMethod("resamplePerplexity",
     signature(x = "ANY"),
     function(x,
         celdaList,
-        resample = 5,
+        doResampling = FALSE,
+        doSubsampling = TRUE,
+        numResample = 5,
+        numSubsample = 5000,
         seed = 12345) {
 
         if (is.null(seed)) {
             res <- .resamplePerplexity(
                 counts = x,
                 celdaList = celdaList,
-                resample = resample)
+                doResampling = doResampling,
+                doSubsampling = doSubsampling,
+                numResample = numResample,
+                numSubsample = numSubsample)
         } else {
             with_seed(seed,
                 res <- .resamplePerplexity(
                     counts = x,
                     celdaList = celdaList,
-                    resample = resample))
+                    doResampling = doResampling,
+                    doSubsampling = doSubsampling,
+                    numResample = numResample,
+                    numSubsample = numSubsample))
         }
 
         return(res)
@@ -446,26 +475,64 @@ setMethod("resamplePerplexity",
 
 .resamplePerplexity <- function(counts,
     celdaList,
-    resample = 5) {
+    doResampling = FALSE,
+    doSubsampling = TRUE,
+    numResample = 5,
+    numSubsample = 5000) {
 
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
     }
-    if (!isTRUE(is.numeric(resample))) {
-        stop("Provided resample parameter was not numeric.")
+    if (!isTRUE(is.logical(doResampling))) {
+        stop("The 'doResampling' parameter needs to be logical (TRUE/FALSE).")
+    } 
+    if (!isTRUE(is.logical(doSubsampling))) {
+        stop("The 'doSubsampling' parameter needs to be logical (TRUE/FALSE).")
+    } 
+    if (!isTRUE(doResampling) & (!is.numeric(numResample) || numResample < 1)) {
+        stop("The 'numResample' parameter needs to be an integer greater ",
+        "than 0.")
+    }
+    if (!isTRUE(doSubsampling) & (!is.numeric(numSubsample) || numSubsample < 1)) {
+        stop("The 'numResample' parameter needs to be an integer between ",
+             "1 and the number of cells.")
     }
 
-    perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
-    for (j in seq(resample)) {
-        newCounts <- .resampleCountMatrix(counts)
-        for (i in seq(length(resList(celdaList)))) {
-            perpRes[i, j] <- perplexity(x = counts,
-                celdaMod = resList(celdaList)[[i]],
-                newCounts = newCounts)
+    if(isTRUE(doSubsampling) & numSubsample < ncol(counts)) {
+        ix <- sample(seq(ncol(counts)), size = numSubsample)
+        newCounts <- counts[,ix]
+        
+    } else {
+        newCounts <- counts
+    }
+    if(isTRUE(doResampling)) {
+        perpRes <- matrix(NA,
+                          nrow = length(resList(celdaList)),
+                          ncol = numResample)
+        for (j in seq(numResample)) {
+            newCounts <- .resampleCountMatrix(newCounts)
+            for (i in seq(length(resList(celdaList)))) {
+                perpRes[i, j] <- perplexity(x = counts,
+                    celdaMod = resList(celdaList)[[i]],
+                    newCounts = newCounts)
+            }
         }
-    }
+        celdaList@perplexity <- perpRes
+        
+    } else {
+        perpRes <- matrix(NA,
+                          nrow = length(resList(celdaList)),
+                          ncol = 1)
+        for (i in seq(length(resList(celdaList)))) {
+            perpRes[i,1] <- perplexity(x = counts,
+                                       celdaMod = resList(celdaList)[[i]],
+                                       newCounts = newCounts)
+        }
+    }    
+   
+    # Add perplexity data.frame to celda list object
     celdaList@perplexity <- perpRes
-
+    
     ## Add mean perplexity to runParams
     perpMean <- apply(perpRes, 1, mean)
     celdaList@runParams$mean_perplexity <- perpMean
@@ -736,15 +803,6 @@ setMethod("plotGridSearchPerplexity",
 
 
 # Resample a counts matrix for evaluating perplexity
-# Normalizes each column (cell) of a countMatrix by the column sum to
-# create a distribution of observing a given number of counts for a given
-# gene in that cell,
-# then samples across all cells.
-# This is primarily used to evaluate the stability of the perplexity for
-# a given K/L combination.
-# @param celda.mod A single celda run (usually from the _resList_ property
-# of a celdaList).
-# @return The perplexity for the provided chain as an mpfr number.
 #' @importFrom Matrix colSums t
 .resampleCountMatrix <- function(countMatrix) {
     colsums <- colSums(countMatrix)

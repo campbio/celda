@@ -95,13 +95,13 @@
 # #         c("index", "chain", "L", "log_likelihood"))
 # #
 # #     celdaGRes <- resamplePerplexity(celdaGSim$counts, celdaGRes,
-# #     resample = 2)
+# #     numResample = 2)
 # #     expect_equal(is.null(celdaGRes@perplexity), FALSE)
 # #     expect_is(celdaGRes, "celdaList")
 # #     expect_error(resamplePerplexity(celdaGSim$counts,
-# #         celdaGRes, resample = "2"))
+# #         celdaGRes, numResample = "2"))
 # #     expect_error(resamplePerplexity(celdaGSim$counts,
-# #         "celdaGRes", resample = 2))
+# #         "celdaGRes", numResample = 2))
 # #
 # #     plotObj <- plotGridSearchPerplexity(celdaGRes)
 # #     expect_is(plotObj, "ggplot")
