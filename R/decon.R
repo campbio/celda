@@ -27,13 +27,13 @@
 #' @param background A numeric matrix of counts or a
 #' \linkS4class{SingleCellExperiment} with the matrix located in the assay
 #' slot under \code{assayName}. It should have the same data format as \code{x}
-#' except it contains the empty droplets instead of cells. When supplied, 
+#' except it contains the empty droplets instead of cells. When supplied,
 #' empirical distribution of transcripts from these empty droplets
 #' will be used as the contamination distribution. Default NULL.
 #' @param bgAssayName Character. Name of the assay to use if \code{background}
 #' is a \linkS4class{SingleCellExperiment}. Default to same as
 #' \code{assayName}.
-#' @param bgBatch Numeric or character vector. Batch labels for 
+#' @param bgBatch Numeric or character vector. Batch labels for
 #' \code{background}. Its unique values should be the same as those in
 #' \code{batch}, such that each batch of cells have their corresponding batch
 #' of empty droplets as background, pointed by this parameter. Default to NULL.
@@ -174,10 +174,10 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                              bgBatch = bgBatch,
                              logfile = logfile,
                              verbose = verbose)
-    
+
     background <- temp$background
     bgBatch <- temp$bgBatch
-    
+
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
     }
@@ -265,10 +265,10 @@ setMethod("decontX", "ANY", function(x,
                              bgBatch = bgBatch,
                              logfile = logfile,
                              verbose = verbose)
-    
+
     background <- temp$background
     bgBatch <- temp$bgBatch
-    
+
   }
 
   .decontX(
@@ -420,9 +420,9 @@ setMethod(
   ## Generate batch labels if none were supplied
   if (is.null(batch)) {
     batch <- rep("all_cells", nC)
-    
+
     # If batch null, bgBatch has to be null
-    if (!is.null(batchBackground)){
+    if (!is.null(batchBackground)) {
       stop(
         "When experiment default to no bacth, background should ",
         "also default to no batch."
@@ -436,7 +436,7 @@ setMethod(
 
     # If batch not null and countsBackground supplied,
     # user has to supply batchBackground as well
-    if (!is.null(countsBackground) & is.null(batchBackground)){
+    if (!is.null(countsBackground) & is.null(batchBackground)) {
       stop(
         "Cell batch, and background are supplied. Please also ",
         "supply background batch."
@@ -540,7 +540,7 @@ setMethod(
     }
 
     ## Try to convert class of new matrix to class of original matrix
-    
+
     .logMessages(
       date(),
       ".. Calculating final decontaminated matrix",
@@ -612,7 +612,7 @@ setMethod(
       append = TRUE,
       verbose = verbose
     )
-    
+
     ## Determine class of seed in DelayedArray
     seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
     if (seed.class == "HDF5ArraySeed") {
@@ -1422,7 +1422,7 @@ simulateContamination <- function(C = 300,
                              logfile = NULL, verbose = FALSE) {
   # Remove background barcodes that have already appeared in x
   # If bgBatch param is supplied, also remove duplicate bgBatch
-  if(!is.null(colnames(background))) {
+  if (!is.null(colnames(background))) {
     dupBarcode <- colnames(background) %in% colnames(x)
   } else {
     dupBarcode <- FALSE
@@ -1432,7 +1432,7 @@ simulateContamination <- function(C = 300,
             " Please ensure that no true cells are included in the background ",
             "matrix. Otherwise, results will be incorrect.")
   }
-  
+
   if (any(dupBarcode)) {
     .logMessages(
       date(),
@@ -1445,8 +1445,8 @@ simulateContamination <- function(C = 300,
       verbose = verbose
     )
     background <- background[, !(dupBarcode), drop = FALSE]
-    
-    if(!is.null(bgBatch)){
+
+    if (!is.null(bgBatch)) {
       if (length(bgBatch) != length(dupBarcode)) {
         stop(
           "Length of bgBatch must be equal to the number of columns",
@@ -1456,9 +1456,9 @@ simulateContamination <- function(C = 300,
       bgBatch <- bgBatch[!(dupBarcode)]
     }
   }
-  
-  re = list(background = background,
+
+  re <- list(background = background,
             bgBatch = bgBatch)
-  
+
   return(re)
 }

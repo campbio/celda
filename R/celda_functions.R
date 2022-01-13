@@ -165,9 +165,9 @@ recodeClusterZ <- function(sce, from, to, altExpName = "featureSubset") {
     new.clusters <- plyr::mapvalues(celdaClusters(sce,
                                                   altExpName = altExpName),
                                     from, to)
-    new.clusters <- factor(new.clusters, levels = 
+    new.clusters <- factor(new.clusters, levels =
                              sort(as.numeric(unique(new.clusters))))
-    
+
     celdaClusters(sce, altExpName = altExpName) <- new.clusters
     return(sce)
 }
@@ -218,9 +218,9 @@ recodeClusterY <- function(sce, from, to, altExpName = "featureSubset") {
     new.clusters <- plyr::mapvalues(celdaModules(sce,
                                                   altExpName = altExpName),
                                   from, to)
-    new.clusters <- factor(new.clusters, levels = 
+    new.clusters <- factor(new.clusters, levels =
                              sort(as.numeric(unique(new.clusters))))
-  
+
     celdaModules(sce, altExpName = altExpName) <- plyr::mapvalues(
         celdaModules(sce, altExpName = altExpName), from, to)
     return(sce)
