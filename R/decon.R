@@ -168,6 +168,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove cells with the same ID between x and the background matrix
+    # Also update bgBatch when background is updated and bgBatch is not null
     temp <- .checkBackground(x = x,
                              background = background,
                              bgBatch = bgBatch,
@@ -258,6 +259,7 @@ setMethod("decontX", "ANY", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove cells with the same ID between x and the background matrix
+    # Also update bgBatch when background is updated and bgBatch is not null
     temp <- .checkBackground(x = x,
                              background = background,
                              bgBatch = bgBatch,
