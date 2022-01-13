@@ -426,6 +426,7 @@ setMethod(
     }
   }
   runParams$batch <- batch
+  runParams$batchBackground <- batchBackground
   batchIndex <- unique(batch)
 
   ## Set result lists upfront for all cells from different batches
@@ -458,7 +459,7 @@ setMethod(
 
     zBat <- NULL
     countsBat <- counts[, batch == bat]
-    bgBat <- countsBackground[, batchBackgound == bat]
+    bgBat <- countsBackground[, batchBackground == bat]
 
     ## Convert to sparse matrix
     if (!inherits(countsBat, "dgCMatrix")) {
