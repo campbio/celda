@@ -170,6 +170,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     # Remove cells with the same ID between x and the background matrix
     background <- .checkBackground(x = x, background = background,
                                    logfile = logfile, verbose = verbose)
+    # Does bgBatch needs to be checked?
+    
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
     }
@@ -392,7 +394,7 @@ setMethod(
   nC <- ncol(counts)
   allCellNames <- colnames(counts)
 
-  ## Set up final deconaminated matrix
+  ## Set up final decontaminated matrix
   estRmat <- Matrix::Matrix(
     data = 0,
     ncol = totalCells,
@@ -404,6 +406,9 @@ setMethod(
   ## Generate batch labels if none were supplied
   if (is.null(batch)) {
     batch <- rep("all_cells", nC)
+    
+    # When no batch, batchBackground can have max 1 batch, depending on if
+    # countsBackground supplied
     batchBackground <- rep("all_cells", ncol(countsBackground))
   }
   runParams$batch <- batch
@@ -439,6 +444,7 @@ setMethod(
 
     zBat <- NULL
     countsBat <- counts[, batch == bat]
+    bgBat <- countsBackground[, bactchBackgound == bat]
 
     ## Convert to sparse matrix
     if (!inherits(countsBat, "dgCMatrix")) {
@@ -451,9 +457,9 @@ setMethod(
       )
       countsBat <- methods::as(countsBat, "dgCMatrix")
     }
-    if (!is.null(countsBackground)) {
-      if (!inherits(countsBackground, "dgCMatrix")) {
-        countsBackground <- methods::as(countsBackground, "dgCMatrix")
+    if (!is.null(bgBat)) {
+      if (!inherits(bgBat, "dgCMatrix")) {
+        bgBat <- methods::as(bgBat, "dgCMatrix")
       }
     }
 
@@ -465,7 +471,7 @@ setMethod(
         counts = countsBat,
         z = zBat,
         batch = bat,
-        countsBackground = countsBackground,
+        countsBackground = bgBat,
         maxIter = maxIter,
         delta = delta,
         estimateDelta = estimateDelta,
@@ -484,7 +490,7 @@ setMethod(
           counts = countsBat,
           z = zBat,
           batch = bat,
-          countsBackground = countsBackground,
+          countsBackground = bgBat,
           maxIter = maxIter,
           delta = delta,
           estimateDelta = estimateDelta,
