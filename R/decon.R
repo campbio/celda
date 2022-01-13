@@ -424,7 +424,7 @@ setMethod(
     # If batch null, bgBatch has to be null
     if (!is.null(batchBackground)){
       stop(
-        "When experiment default to no bacth, background should",
+        "When experiment default to no bacth, background should ",
         "also default to no batch."
       )
     }
@@ -432,6 +432,17 @@ setMethod(
     if (!is.null(countsBackground)) {
       batchBackground <- rep("all_cells", ncol(countsBackground))
     }
+  } else {
+
+    # If batch not null and countsBackground supplied,
+    # user has to supply batchBackground as well
+    if (!is.null(countsBackground) & is.null(batchBackground)){
+      stop(
+        "Cell batch, and background are supplied. Please also ",
+        "supply background batch."
+      )
+    }
+
   }
   runParams$batch <- batch
   runParams$batchBackground <- batchBackground
