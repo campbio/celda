@@ -168,10 +168,14 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove cells with the same ID between x and the background matrix
-    background <- .checkBackground(x = x, background = background,
-                                   logfile = logfile, verbose = verbose)
+    temp <- .checkBackground(x = x,
+                             background = background,
+                             bgBatch = bgBatch,
+                             logfile = logfile,
+                             verbose = verbose)
     
-    # TODO: Does bgBatch needs to be checked?
+    background <- temp$background
+    bgBatch <- temp$bgBatch
     
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
@@ -254,10 +258,14 @@ setMethod("decontX", "ANY", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove cells with the same ID between x and the background matrix
-    background <- .checkBackground(x = x, background = background,
-                                   logfile = logfile, verbose = verbose)
+    temp <- .checkBackground(x = x,
+                             background = background,
+                             bgBatch = bgBatch,
+                             logfile = logfile,
+                             verbose = verbose)
     
-    # TODO: Does bgBatch needs to be checked?
+    background <- temp$background
+    bgBatch <- temp$bgBatch
     
   }
 
@@ -1388,8 +1396,10 @@ simulateContamination <- function(C = 300,
 }
 
 
-.checkBackground <- function(x, background, logfile = NULL, verbose = FALSE) {
+.checkBackground <- function(x, background, bgBatch,
+                             logfile = NULL, verbose = FALSE) {
   # Remove background barcodes that have already appeared in x
+  # If bgBatch param is supplied, also remove duplicate bgBatch
   if(!is.null(colnames(background))) {
     dupBarcode <- colnames(background) %in% colnames(x)
   } else {
@@ -1413,6 +1423,20 @@ simulateContamination <- function(C = 300,
       verbose = verbose
     )
     background <- background[, !(dupBarcode), drop = FALSE]
+    
+    if(!is.null(bgBatch)){
+      if (length(bgBatch) != length(dupBarcode)) {
+        stop(
+          "Length of bgBatch must be equal to the number of columns",
+          "of background matrix."
+          )
+      }
+      bgBatch <- bgBatch[!(dupBarcode)]
+    }
   }
-  return(background)
+  
+  re = list(background = background,
+            bgBatch = bgBatch)
+  
+  return(re)
 }
