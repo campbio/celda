@@ -154,6 +154,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       batch = NULL,
                                                       background = NULL,
                                                       bgAssayName = NULL,
+                                                      bgBatch = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -182,6 +183,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     z = z,
     batch = batch,
     countsBackground = countsBackground,
+    batchBackground = bgBatch,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -234,6 +236,7 @@ setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
                                      background = NULL,
+                                     bgBatch = NULL,
                                      maxIter = 500,
                                      delta = c(10, 10),
                                      estimateDelta = TRUE,
@@ -257,6 +260,7 @@ setMethod("decontX", "ANY", function(x,
     z = z,
     batch = batch,
     countsBackground = countsBackground,
+    batchBackground = bgBatch,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -339,6 +343,7 @@ setMethod(
                      z = NULL,
                      batch = NULL,
                      countsBackground = NULL,
+                     batchBackground = NULL,
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
@@ -369,6 +374,7 @@ setMethod(
   runParams <- list(
     z = z,
     batch = batch,
+    batchBackground = batchBackground,
     maxIter = maxIter,
     delta = delta,
     estimateDelta = estimateDelta,
@@ -398,6 +404,7 @@ setMethod(
   ## Generate batch labels if none were supplied
   if (is.null(batch)) {
     batch <- rep("all_cells", nC)
+    batchBackground <- rep("all_cells", ncol(countsBackground))
   }
   runParams$batch <- batch
   batchIndex <- unique(batch)
