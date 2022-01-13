@@ -458,7 +458,7 @@ setMethod(
 
     zBat <- NULL
     countsBat <- counts[, batch == bat]
-    bgBat <- countsBackground[, bactchBackgound == bat]
+    bgBat <- countsBackground[, batchBackgound == bat]
 
     ## Convert to sparse matrix
     if (!inherits(countsBat, "dgCMatrix")) {
