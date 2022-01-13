@@ -15,6 +15,7 @@ decontX(x, ...)
   batch = NULL,
   background = NULL,
   bgAssayName = NULL,
+  bgBatch = NULL,
   maxIter = 500,
   delta = c(10, 10),
   estimateDelta = TRUE,
@@ -32,6 +33,7 @@ decontX(x, ...)
   z = NULL,
   batch = NULL,
   background = NULL,
+  bgBatch = NULL,
   maxIter = 500,
   delta = c(10, 10),
   estimateDelta = TRUE,
@@ -72,14 +74,19 @@ should be considered different batches. Default NULL.}
 
 \item{background}{A numeric matrix of counts or a
 \linkS4class{SingleCellExperiment} with the matrix located in the assay
-slot under \code{assayName}. It should have the same structure as \code{x}
-except it contains the matrix of empty droplets instead of cells. When
-supplied, empirical distribution of transcripts from these empty droplets
+slot under \code{assayName}. It should have the same data format as \code{x}
+except it contains the empty droplets instead of cells. When supplied, 
+empirical distribution of transcripts from these empty droplets
 will be used as the contamination distribution. Default NULL.}
 
 \item{bgAssayName}{Character. Name of the assay to use if \code{background}
 is a \linkS4class{SingleCellExperiment}. Default to same as
 \code{assayName}.}
+
+\item{bgBatch}{Numeric or character vector. Batch labels for 
+\code{background}. Its unique values should be the same as those in
+\code{batch}, such that each batch of cells have their corresponding batch
+of empty droplets as background, pointed by this parameter. Default to NULL.}
 
 \item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
 
