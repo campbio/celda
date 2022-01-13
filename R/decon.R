@@ -33,6 +33,10 @@
 #' @param bgAssayName Character. Name of the assay to use if \code{background}
 #' is a \linkS4class{SingleCellExperiment}. Default to same as
 #' \code{assayName}.
+#' @param bgBatch Numeric or chracter vector. Batch labels for 
+#' \code{background}. Its unique values should be the same as in \code{batch},
+#' such that each batch of cells have their corresponding background batch.
+#' Default to NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
