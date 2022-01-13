@@ -170,7 +170,8 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     # Remove cells with the same ID between x and the background matrix
     background <- .checkBackground(x = x, background = background,
                                    logfile = logfile, verbose = verbose)
-    # Does bgBatch needs to be checked?
+    
+    # TODO: Does bgBatch needs to be checked?
     
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
@@ -255,6 +256,9 @@ setMethod("decontX", "ANY", function(x,
     # Remove cells with the same ID between x and the background matrix
     background <- .checkBackground(x = x, background = background,
                                    logfile = logfile, verbose = verbose)
+    
+    # TODO: Does bgBatch needs to be checked?
+    
   }
 
   .decontX(
@@ -407,9 +411,9 @@ setMethod(
   if (is.null(batch)) {
     batch <- rep("all_cells", nC)
     
-    # When no batch, batchBackground can have max 1 batch, depending on if
-    # countsBackground supplied
-    batchBackground <- rep("all_cells", ncol(countsBackground))
+    if (!is.null(countsBackground)) {
+      batchBackground <- rep("all_cells", ncol(countsBackground))
+    }
   }
   runParams$batch <- batch
   batchIndex <- unique(batch)
