@@ -246,6 +246,8 @@ setMethod("decontX", "ANY", function(x,
     # Remove cells with the same ID between x and the background matrix
     background <- .checkBackground(x = x, background = background,
                                    logfile = logfile, verbose = verbose)
+
+    countsBackground <- background
   }
 
   .decontX(
