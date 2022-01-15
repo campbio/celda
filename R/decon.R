@@ -26,13 +26,17 @@
 #' should be considered different batches. Default NULL.
 #' @param background A numeric matrix of counts or a
 #' \linkS4class{SingleCellExperiment} with the matrix located in the assay
-#' slot under \code{assayName}. It should have the same structure as \code{x}
-#' except it contains the matrix of empty droplets instead of cells. When
-#' supplied, empirical distribution of transcripts from these empty droplets
+#' slot under \code{assayName}. It should have the same data format as \code{x}
+#' except it contains the empty droplets instead of cells. When supplied,
+#' empirical distribution of transcripts from these empty droplets
 #' will be used as the contamination distribution. Default NULL.
 #' @param bgAssayName Character. Name of the assay to use if \code{background}
 #' is a \linkS4class{SingleCellExperiment}. Default to same as
 #' \code{assayName}.
+#' @param bgBatch Numeric or character vector. Batch labels for
+#' \code{background}. Its unique values should be the same as those in
+#' \code{batch}, such that each batch of cells have their corresponding batch
+#' of empty droplets as background, pointed by this parameter. Default to NULL.
 #' @param maxIter Integer. Maximum iterations of the EM algorithm. Default 500.
 #' @param convergence Numeric. The EM algorithm will be stopped if the maximum
 #' difference in the contamination estimates between the previous and
@@ -150,6 +154,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
                                                       batch = NULL,
                                                       background = NULL,
                                                       bgAssayName = NULL,
+                                                      bgBatch = NULL,
                                                       maxIter = 500,
                                                       delta = c(10, 10),
                                                       estimateDelta = TRUE,
@@ -163,8 +168,16 @@ setMethod("decontX", "SingleCellExperiment", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove cells with the same ID between x and the background matrix
-    background <- .checkBackground(x = x, background = background,
-                                   logfile = logfile, verbose = verbose)
+    # Also update bgBatch when background is updated and bgBatch is not null
+    temp <- .checkBackground(x = x,
+                             background = background,
+                             bgBatch = bgBatch,
+                             logfile = logfile,
+                             verbose = verbose)
+
+    background <- temp$background
+    bgBatch <- temp$bgBatch
+
     if (is.null(bgAssayName)) {
       bgAssayName <- assayName
     }
@@ -178,6 +191,7 @@ setMethod("decontX", "SingleCellExperiment", function(x,
     z = z,
     batch = batch,
     countsBackground = countsBackground,
+    batchBackground = bgBatch,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -230,6 +244,7 @@ setMethod("decontX", "ANY", function(x,
                                      z = NULL,
                                      batch = NULL,
                                      background = NULL,
+                                     bgBatch = NULL,
                                      maxIter = 500,
                                      delta = c(10, 10),
                                      estimateDelta = TRUE,
@@ -244,10 +259,18 @@ setMethod("decontX", "ANY", function(x,
   countsBackground <- NULL
   if (!is.null(background)) {
     # Remove cells with the same ID between x and the background matrix
-    background <- .checkBackground(x = x, background = background,
-                                   logfile = logfile, verbose = verbose)
+    # Also update bgBatch when background is updated and bgBatch is not null
+    temp <- .checkBackground(x = x,
+                             background = background,
+                             bgBatch = bgBatch,
+                             logfile = logfile,
+                             verbose = verbose)
 
+    background <- temp$background
     countsBackground <- background
+    
+    bgBatch <- temp$bgBatch
+
   }
 
   .decontX(
@@ -255,6 +278,7 @@ setMethod("decontX", "ANY", function(x,
     z = z,
     batch = batch,
     countsBackground = countsBackground,
+    batchBackground = bgBatch,
     maxIter = maxIter,
     convergence = convergence,
     iterLogLik = iterLogLik,
@@ -337,6 +361,7 @@ setMethod(
                      z = NULL,
                      batch = NULL,
                      countsBackground = NULL,
+                     batchBackground = NULL,
                      maxIter = 200,
                      convergence = 0.001,
                      iterLogLik = 10,
@@ -367,6 +392,7 @@ setMethod(
   runParams <- list(
     z = z,
     batch = batch,
+    batchBackground = batchBackground,
     maxIter = maxIter,
     delta = delta,
     estimateDelta = estimateDelta,
@@ -384,7 +410,7 @@ setMethod(
   nC <- ncol(counts)
   allCellNames <- colnames(counts)
 
-  ## Set up final deconaminated matrix
+  ## Set up final decontaminated matrix
   estRmat <- Matrix::Matrix(
     data = 0,
     ncol = totalCells,
@@ -396,8 +422,32 @@ setMethod(
   ## Generate batch labels if none were supplied
   if (is.null(batch)) {
     batch <- rep("all_cells", nC)
+
+    # If batch null, bgBatch has to be null
+    if (!is.null(batchBackground)) {
+      stop(
+        "When experiment default to no bacth, background should ",
+        "also default to no batch."
+      )
+    }
+
+    if (!is.null(countsBackground)) {
+      batchBackground <- rep("all_cells", ncol(countsBackground))
+    }
+  } else {
+
+    # If batch not null and countsBackground supplied,
+    # user has to supply batchBackground as well
+    if (!is.null(countsBackground) & is.null(batchBackground)) {
+      stop(
+        "Cell batch, and background are supplied. Please also ",
+        "supply background batch."
+      )
+    }
+
   }
   runParams$batch <- batch
+  runParams$batchBackground <- batchBackground
   batchIndex <- unique(batch)
 
   ## Set result lists upfront for all cells from different batches
@@ -430,6 +480,7 @@ setMethod(
 
     zBat <- NULL
     countsBat <- counts[, batch == bat]
+    bgBat <- countsBackground[, batchBackground == bat]
 
     ## Convert to sparse matrix
     if (!inherits(countsBat, "dgCMatrix")) {
@@ -442,9 +493,9 @@ setMethod(
       )
       countsBat <- methods::as(countsBat, "dgCMatrix")
     }
-    if (!is.null(countsBackground)) {
-      if (!inherits(countsBackground, "dgCMatrix")) {
-        countsBackground <- methods::as(countsBackground, "dgCMatrix")
+    if (!is.null(bgBat)) {
+      if (!inherits(bgBat, "dgCMatrix")) {
+        bgBat <- methods::as(bgBat, "dgCMatrix")
       }
     }
 
@@ -456,7 +507,7 @@ setMethod(
         counts = countsBat,
         z = zBat,
         batch = bat,
-        countsBackground = countsBackground,
+        countsBackground = bgBat,
         maxIter = maxIter,
         delta = delta,
         estimateDelta = estimateDelta,
@@ -475,7 +526,7 @@ setMethod(
           counts = countsBat,
           z = zBat,
           batch = bat,
-          countsBackground = countsBackground,
+          countsBackground = bgBat,
           maxIter = maxIter,
           delta = delta,
           estimateDelta = estimateDelta,
@@ -491,7 +542,7 @@ setMethod(
     }
 
     ## Try to convert class of new matrix to class of original matrix
-    
+
     .logMessages(
       date(),
       ".. Calculating final decontaminated matrix",
@@ -563,7 +614,7 @@ setMethod(
       append = TRUE,
       verbose = verbose
     )
-    
+
     ## Determine class of seed in DelayedArray
     seed.class <- unique(DelayedArray::seedApply(counts, class))[[1]]
     if (seed.class == "HDF5ArraySeed") {
@@ -1369,9 +1420,11 @@ simulateContamination <- function(C = 300,
 }
 
 
-.checkBackground <- function(x, background, logfile = NULL, verbose = FALSE) {
+.checkBackground <- function(x, background, bgBatch,
+                             logfile = NULL, verbose = FALSE) {
   # Remove background barcodes that have already appeared in x
-  if(!is.null(colnames(background))) {
+  # If bgBatch param is supplied, also remove duplicate bgBatch
+  if (!is.null(colnames(background))) {
     dupBarcode <- colnames(background) %in% colnames(x)
   } else {
     dupBarcode <- FALSE
@@ -1381,7 +1434,7 @@ simulateContamination <- function(C = 300,
             " Please ensure that no true cells are included in the background ",
             "matrix. Otherwise, results will be incorrect.")
   }
-  
+
   if (any(dupBarcode)) {
     .logMessages(
       date(),
@@ -1394,6 +1447,20 @@ simulateContamination <- function(C = 300,
       verbose = verbose
     )
     background <- background[, !(dupBarcode), drop = FALSE]
+
+    if (!is.null(bgBatch)) {
+      if (length(bgBatch) != length(dupBarcode)) {
+        stop(
+          "Length of bgBatch must be equal to the number of columns",
+          "of background matrix."
+          )
+      }
+      bgBatch <- bgBatch[!(dupBarcode)]
+    }
   }
-  return(background)
+
+  re <- list(background = background,
+            bgBatch = bgBatch)
+
+  return(re)
 }
