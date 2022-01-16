@@ -267,6 +267,8 @@ setMethod("decontX", "ANY", function(x,
                              verbose = verbose)
 
     background <- temp$background
+    countsBackground <- background
+    
     bgBatch <- temp$bgBatch
 
   }
