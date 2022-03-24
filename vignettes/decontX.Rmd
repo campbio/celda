@@ -213,13 +213,21 @@ library(Seurat)
 counts <- Read10X("path/to/file")
 
 # Convert count matrix to SingleCellExperiment to run on decontX
-sce <- SingleCellExperiment(list(counts = counts)). 
+sce <- SingleCellExperiment(list(counts = counts))
 sce <- decontX(sce)
 
 # Retrieve decontaminated matrix, round to integer, and convert to Seurat object
 decontaminated.matrix <- decontXcounts(sce)
 decontaminated.counts <- round(decontaminated.matrix)
 seuratObject <- CreateSeuratObject(decontaminated.counts)
+```
+
+Conversely, if you have a Seurat object containing raw count matrix and would like to run decontX, simply retrieve the count matrix, convert to SingleCellExperiment, and run on decontX.
+
+```{r seuratIntegration2, eval=FALSE}
+counts <- seurat@assays$RNA@counts
+sce <- SingleCellExperiment(list(counts = counts))
+sce <- decontX(sce)
 ```
 
 
