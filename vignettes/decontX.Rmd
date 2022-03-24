@@ -204,8 +204,8 @@ plot(sce$decontX_contamination, sce.delta$decontX_contamination,
 abline(0, 1, col = "red", lwd = 2)
 ```
 
-## Integration with other packages such as Seurat and singleCellTK
-You can integrate decontX into your scRNA-seq analysis pipelines, such as one provided by  [Seurat](https://cran.r-project.org/web/packages/Seurat/index.html).
+## Integration with packages such as Seurat and singleCellTK
+You can integrate decontX into your scRNA-seq analysis pipelines, such as the one provided by  [Seurat](https://cran.r-project.org/web/packages/Seurat/index.html). Both decontX and Seurat takes input count matrix, although the decontaminated matrix of decontX consists of floating point numbers. As heuristics, you can round the decontaminated matrix to integers before applying it to your Seurat pipeline. 
 
 ```{r seuratIntegration, eval=FALSE}
 library(Seurat)
@@ -217,11 +217,20 @@ sce <- SingleCellExperiment(list(counts = counts)).
 sce <- decontX(sce)
 
 # Retrieve decontaminated matrix, round to integer, and convert to Seurat object
-countsDecontaminated <- decontXcounts(sce)
-seuratObject <- CreateSeuratObject(round(countsDecontaminated))
-
+decontaminated.matrix <- decontXcounts(sce)
+decontaminated.counts <- round(decontaminated.matrix)
+seuratObject <- CreateSeuratObject(decontaminated.counts)
 ```
 
+
+To import datasets into SingleCellExperiment object, the [singleCellTK](https://bioconductor.org/packages/release/bioc/html/singleCellTK.html) package has several importing functions for different preprocessing tools including CellRanger, STARsolo, BUStools, Optimus, DropEST, SEQC, and Alevin/Salmon. For example, the following code can be used as a template to read in the filtered and raw matrices for multiple samples processed with CellRanger:
+
+```{r singleCellTKIntegration, eval=FALSE}
+library(singleCellTK)
+
+sce <- importCellRanger(sampleDirs = c("path/to/sample1/", "path/to/sample2/"))
+sce.raw <- importCellRanger(sampleDirs = c("path/to/sample1/", "path/to/sample2/"), dataType = "raw")
+```
 
 
 # Session Information
