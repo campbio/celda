@@ -65,7 +65,7 @@ A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for
 sce <- decontX(sce, background = raw)
 ```
 
-We would like to stress that `background` input was designed to contain only empty droplets. In case the `background` input contains both cell and empty droplets, for example the raw output from 10X Genomics, the software will try to look up for the cell/column names in the raw matrix (`background`) that are also found in the filtered counts matrix (`x`), and exclude them from the raw matrix. When cell/column names are not available for the input objects, the software will treat the entire raw matrix as empty droplets. This will render incorrect estimation of the ambient RNA profile.
+We would like to stress that `background` input was designed to contain only empty droplets. In case the `background` input contains both cell and empty droplets, for example the raw output from 10X Genomics, the software will try to look up for the cell/column names in the raw matrix (`background`) that are also found in the filtered counts matrix (`x`), and exclude them from the raw matrix. When cell/column names are not available for the input objects, the software will treat the entire `background` input as empty droplets. This will render incorrect estimation of the ambient RNA profile.
 
 If the raw matrix is not available, then `decontX` will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:
 
@@ -203,6 +203,26 @@ plot(sce$decontX_contamination, sce.delta$decontX_contamination,
      ylab = "Setting priors to estimate higher contamination")
 abline(0, 1, col = "red", lwd = 2)
 ```
+
+## Integration with other packages such as Seurat and singleCellTK
+You can integrate decontX into your scRNA-seq analysis pipelines, such as one provided by  [Seurat](https://cran.r-project.org/web/packages/Seurat/index.html).
+
+```{r seuratIntegration, eval=FALSE}
+library(Seurat)
+
+counts <- Read10X("path/to/file")
+
+# Convert count matrix to SingleCellExperiment to run on decontX
+sce <- SingleCellExperiment(list(counts = counts)). 
+sce <- decontX(sce)
+
+# Retrieve decontaminated matrix, round to integer, and convert to Seurat object
+countsDecontaminated <- decontXcounts(sce)
+seuratObject <- CreateSeuratObject(round(countsDecontaminated))
+
+```
+
+
 
 # Session Information
 
