@@ -225,7 +225,7 @@ seuratObject <- CreateSeuratObject(decontaminated.counts)
 Conversely, if you have a Seurat object containing raw count matrix and would like to run decontX, simply retrieve the count matrix, convert to SingleCellExperiment, and run on decontX.
 
 ```{r seuratIntegration2, eval=FALSE}
-counts <- seurat@assays$RNA@counts
+counts <- GetAssayData(object = seuratObject, slot = "counts")
 sce <- SingleCellExperiment(list(counts = counts))
 sce <- decontX(sce)
 ```
