@@ -14,15 +14,15 @@ Description: Celda is a suite of Bayesian hierarchical models for
     Bayesian method to computationally estimate and remove RNA contamination in
     individual cells without empty droplet information. A variety of scRNA-seq
     data visualization functions is also included.
-Depends: R (>= 4.0)
+Depends: R (>= 4.0), SingleCellExperiment, Matrix
 VignetteBuilder: knitr
 Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         grDevices, graphics, matrixStats, doParallel, digest, methods,
         reshape2, S4Vectors, data.table,
         Rcpp, RcppEigen, uwot, enrichR, SummarizedExperiment,
         MCMCprecision, ggrepel, Rtsne, withr,
-        scater (>= 1.14.4), scran, SingleCellExperiment, dbscan,
-        DelayedArray, stringr, Matrix, ComplexHeatmap, multipanelfigure,
+        scater (>= 1.14.4), scran, dbscan,
+        DelayedArray, stringr, ComplexHeatmap, multipanelfigure,
         circlize
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData

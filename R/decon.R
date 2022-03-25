@@ -144,6 +144,8 @@ setGeneric("decontX", function(x, ...) standardGeneric("decontX"))
 
 #' @export
 #' @rdname decontX
+#' @importClassesFrom SingleCellExperiment SingleCellExperiment
+#' @importClassesFrom Matrix dgCMatrix
 setMethod("decontX", "SingleCellExperiment", function(x,
                                                       assayName = "counts",
                                                       z = NULL,
