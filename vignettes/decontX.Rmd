@@ -59,19 +59,21 @@ rownames(sce) <- rowData(sce)$Symbol_TENx
 
 # Running decontX
 
-A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the `x` parameter. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets. The raw/droplet matrix can be used to empirically estimate the distribution of ambient RNA, which is especially useful when cells that contributed to the ambient RNA are not accurately represented in the filtered count matrix containing the cells. For example, cells that were removed via flow cytometry or that were more sensitive to lysis during dissociation may have contributed to the ambient RNA but were not measured in the filtered/cell matrix. The raw/droplet matrix can be input as a sparse matrix or SCE object using the `background` parameter:
+A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the `x` parameter. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets. The raw/droplet matrix can be used to empirically estimate the distribution of ambient RNA, which is especially useful when cells that contributed to the ambient RNA are not accurately represented in the filtered count matrix containing the cells. For example, cells that were removed via flow cytometry or that were more sensitive to lysis during dissociation may have contributed to the ambient RNA but were not measured in the filtered/cell matrix. The raw/droplet matrix can be input as an SCE object or a sparse matrix using the `background` parameter:
 
 ```{r decontX_background, eval=FALSE, message=FALSE}
 sce <- decontX(sce, background = raw)
 ```
 
-If cell/column names in the raw/droplet matrix are also found in the filtered counts matrix, then they will be excluded from the raw/droplet matrix before calculation of the ambient RNA distribution. If the raw matrix is not available, then `decontX` will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:
+We would like to stress that `background` input was designed to contain only empty droplets. In case the `background` input contains both cell and empty droplets, for example the raw output from 10X Genomics, the software will try to look up for the cell/column names in the raw matrix (`background`) that are also found in the filtered counts matrix (`x`), and exclude them from the raw matrix. When cell/column names are not available for the input objects, the software will treat the entire `background` input as empty droplets. This will render incorrect estimation of the ambient RNA profile.
+
+If the raw matrix is not available, then `decontX` will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:
 
 ```{r decontX, eval=TRUE, message=FALSE}
 sce <- decontX(sce)
 ```
 
-Note that in this case `decontX` will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the `z` parameter. If you supply a raw matrix via the `background` parameter, then the `z` parameter will not have an effect as clustering will not be performed.
+Note that in this case `decontX` will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the `z` parameter.
 
 The contamination can be found in the `colData(sce)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(sce)`. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. 
 
@@ -201,6 +203,43 @@ plot(sce$decontX_contamination, sce.delta$decontX_contamination,
      ylab = "Setting priors to estimate higher contamination")
 abline(0, 1, col = "red", lwd = 2)
 ```
+
+## Integration with packages such as Seurat and singleCellTK
+You can integrate decontX into your scRNA-seq analysis pipelines, such as the one provided by  [Seurat](https://cran.r-project.org/web/packages/Seurat/index.html). Both decontX and Seurat takes input count matrix, although the decontaminated matrix of decontX consists of floating point numbers. As heuristics, you can round the decontaminated matrix to integers before applying it to your Seurat pipeline. 
+
+```{r seuratIntegration, eval=FALSE}
+library(Seurat)
+
+counts <- Read10X("path/to/file")
+
+# Convert count matrix to SingleCellExperiment to run on decontX
+sce <- SingleCellExperiment(list(counts = counts))
+sce <- decontX(sce)
+
+# Retrieve decontaminated matrix, round to integer, and convert to Seurat object
+decontaminated.matrix <- decontXcounts(sce)
+decontaminated.counts <- round(decontaminated.matrix)
+seuratObject <- CreateSeuratObject(decontaminated.counts)
+```
+
+Conversely, if you have a Seurat object containing raw count matrix and would like to run decontX, simply retrieve the count matrix, convert to SingleCellExperiment, and run on decontX.
+
+```{r seuratIntegration2, eval=FALSE}
+counts <- GetAssayData(object = seuratObject, slot = "counts")
+sce <- SingleCellExperiment(list(counts = counts))
+sce <- decontX(sce)
+```
+
+
+To import datasets into SingleCellExperiment object, the [singleCellTK](https://bioconductor.org/packages/release/bioc/html/singleCellTK.html) package has several importing functions for different preprocessing tools including CellRanger, STARsolo, BUStools, Optimus, DropEST, SEQC, and Alevin/Salmon. For example, the following code can be used as a template to read in the filtered and raw matrices for multiple samples processed with CellRanger:
+
+```{r singleCellTKIntegration, eval=FALSE}
+library(singleCellTK)
+
+sce <- importCellRanger(sampleDirs = c("path/to/sample1/", "path/to/sample2/"))
+sce.raw <- importCellRanger(sampleDirs = c("path/to/sample1/", "path/to/sample2/"), dataType = "raw")
+```
+
 
 # Session Information
 
