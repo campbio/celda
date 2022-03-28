@@ -59,7 +59,7 @@ to use. Default "featureSubset".}
 
 \item{doResampling}{Boolean. If \code{TRUE}, then each cell in the counts
 matrix will be resampled according to a multinomial distribution to introduce
-noise before caculating perplexity. Default \code{FALSE}.}
+noise before calculating perplexity. Default \code{FALSE}.}
 
 \item{doSubsampling}{Boolean. If \code{TRUE}, then a subset of cells from
 the original counts matrix will be randomly selected. Default \code{TRUE}.}

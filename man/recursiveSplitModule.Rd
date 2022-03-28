@@ -23,6 +23,10 @@ recursiveSplitModule(
   reorder = TRUE,
   seed = 12345,
   perplexity = TRUE,
+  doResampling = FALSE,
+  doSubsampling = TRUE,
+  numResample = 5,
+  numSubsample = 5000,
   verbose = TRUE,
   logfile = NULL
 )
@@ -44,6 +48,10 @@ recursiveSplitModule(
   reorder = TRUE,
   seed = 12345,
   perplexity = TRUE,
+  doResampling = FALSE,
+  doSubsampling = TRUE,
+  numResample = 5,
+  numSubsample = 5000,
   verbose = TRUE,
   logfile = NULL
 )
@@ -65,6 +73,10 @@ recursiveSplitModule(
   reorder = TRUE,
   seed = 12345,
   perplexity = TRUE,
+  doResampling = FALSE,
+  doSubsampling = TRUE,
+  numResample = 5,
+  numSubsample = 5000,
   verbose = TRUE,
   logfile = NULL
 )
@@ -128,7 +140,22 @@ a default value of 12345 is used. If NULL, no calls to
 
 \item{perplexity}{Logical. Whether to calculate perplexity for each model.
 If FALSE, then perplexity can be calculated later with
-\link{resamplePerplexity}. Default TRUE.}
+\link{resamplePerplexity}. Default \code{TRUE}.}
+
+\item{doResampling}{Boolean. If \code{TRUE}, then each cell in the counts
+matrix will be resampled according to a multinomial distribution to introduce
+noise before calculating perplexity. Default \code{FALSE}.}
+
+\item{doSubsampling}{Boolean. If \code{TRUE}, then a subset of cells from
+the original counts matrix will be randomly selected. Default \code{TRUE}.}
+
+\item{numResample}{Integer. The number of times to resample the counts matrix
+for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+Default \code{5}.}
+
+\item{numSubsample}{Integer. The number of cells to sample from the
+the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
+Default \code{5000}.}
 
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 

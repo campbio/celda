@@ -353,7 +353,7 @@ setMethod(
 #'  matrix object.
 #' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
 #' matrix will be resampled according to a multinomial distribution to introduce
-#' noise before caculating perplexity. Default \code{FALSE}.
+#' noise before calculating perplexity. Default \code{FALSE}.
 #' @param doSubsampling Boolean. If \code{TRUE}, then a subset of cells from
 #' the original counts matrix will be randomly selected. Default \code{TRUE}.
 #' @param numResample Integer. The number of times to resample the counts matrix
