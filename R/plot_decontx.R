@@ -371,7 +371,7 @@ plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
       df.list[[i]] <- cbind(df, assay = assayName[i])
     }
     df <- do.call(rbind, df.list)
-    assay <- as.factor(df$assay)
+    assay <- factor(df$assay, levels = assayName)
     if (length(assayName) > 1) {
       legend <- "right"
     }
@@ -397,7 +397,7 @@ plotDecontXMarkerExpression <- function(x, markers, groupClusters = NULL,
   }
   Expression <- df$Expression
   Marker <- df$Marker
-  Assay <- df$assay
+  Assay <- factor(df$assay, levels = assayName)
   Cluster <- df$Cluster
   if (!is.null(groupClusters)) {
     df <- cbind(df, Cell_Type = names(groupClusters)[Cluster])
