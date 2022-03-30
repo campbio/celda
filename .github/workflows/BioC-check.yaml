@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [devel, master]
 
-name: R-CMD-check
+name: BioC-check
 
 jobs:
   R-CMD-check:
@@ -19,8 +19,6 @@ jobs:
       matrix:
         config:
           - {os: macOS-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -35,31 +33,24 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: false
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v1
+        with:
+          extra-packages: rcmdcheck
 
       - name: Install XQuartz on macOS
         if: runner.os == 'macOS'
         run: brew install xquartz --cask
-
-      - name: Install fftw3 on macOS
-        if: runner.os == 'macOS'
-        run: brew install fftw
-
-      - uses: r-lib/actions/setup-r-dependencies@v1
-        with:
-          extra-packages: rcmdcheck, tinytex
-
-      - uses: r-lib/actions/setup-tinytex@v1
-      - uses: r-lib/actions/check-r-package@v1
-
-      - name: Show testthat output
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
+          
+      - name: Run BiocCheck
+        run: |
+          BiocManager::install("BiocCheck")
+          library(BiocCheck)
+          BiocCheck::BiocCheck(".",
+              `quit-with-status` = TRUE,
+              `no-check-R-ver` = TRUE,
+              `no-check-bioc-help` = TRUE
+          )
+        shell: Rscript {0}
+        
