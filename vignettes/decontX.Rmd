@@ -259,6 +259,7 @@ Note that the decontaminated matrix of decontX consists of floating point number
 counts <- GetAssayData(object = seuratObject, slot = "counts")
 sce <- SingleCellExperiment(list(counts = counts))
 sce <- decontX(sce)
+seuratObj[["decontXcounts"]] <- CreateAssayObject(counts = decontXcounts(sce))
 ```
 
 
