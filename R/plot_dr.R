@@ -1131,7 +1131,8 @@ setMethod("plotDimReduceCluster",
       ggrepel::geom_text_repel(
         data = centroid,
         mapping = ggplot2::aes_string(label = "Cluster"),
-        size = labelSize
+        size = labelSize,
+        max.overlaps = Inf
       )
   }
   if (!is.null(x = groupBy)) {
