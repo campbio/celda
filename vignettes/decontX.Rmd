@@ -77,20 +77,13 @@ rownames(sce) <- rowData(sce)$Symbol_TENx
 
 # Running decontX
 
-A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the `x` parameter. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets.
-
-
-## Without the Background
-
-If the raw matrix is supplied via the `background` parameter, then `decontX` will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset:
+A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the `x` parameter. The matrix to use in an SCE object can be specified with the `assayName` parameter, which is set to `"counts"` by default. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets. Here is an example of running decontX without supplying the background:
 
 ```{r decontX, eval=TRUE, message=FALSE}
 sce <- decontX(sce)
 ```
 
-The estimated contamination results can be found in the `colData(sce)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(sce)`. If the input object was a matrix, make sure to save the output into a variable with a different name (e.g. result). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. `decontX` will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the `z` parameter. These results will be used throughout the rest of the vignette. 
-
-## With the Background
+In this scenario, `decontX` will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset. The estimated contamination results can be found in the `colData(sce)$decontX_contamination` and the decontaminated counts can be accessed with `decontXcounts(sce)`. `decontX` will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the `z` parameter. These results will be used throughout the rest of the vignette. 
 
 The raw/droplet matrix can be used to empirically estimate the distribution of ambient RNA, which is especially useful when cells that contributed to the ambient RNA are not accurately represented in the filtered count matrix containing the cells. For example, cells that were removed via flow cytometry or that were more sensitive to lysis during dissociation may have contributed to the ambient RNA but were not measured in the filtered/cell matrix. The raw/droplet matrix can be input as an SCE object or a sparse matrix using the `background` parameter:
 
@@ -99,6 +92,8 @@ sce <- decontX(sce, background = sce.raw)
 ```
 
 Only empty droplets in the background matrix should be used to estimate the ambient RNA. If any cell ids (i.e. `colnames`) in the raw/droplet matrix supplied to the `background` parameter are also found in the filtered counts matrix (`x`), decontX will automatically remove them from the raw matrix. However, if the cell ids are not available for the input matrices, decontX will treat the entire `background` input as empty droplets. All of the outputs are the same as when running decontX without setting the `background` parameter.
+
+> Note: If the input object is just a matrix and not an SCE object, make sure to save the output into a variable with a different name (e.g. `result <- decontX(mat)`). The result object will be a list with contamination in `result$contamination` and the decontaminated counts in `result$decontXcounts`. 
 
 # Plotting DecontX results
 

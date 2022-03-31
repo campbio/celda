@@ -1,3 +1,8 @@
+# celda v1.11.0 (2022-03-31)
+* Improvments to decontX vignette
+* Added ability to subsample to speed up perplexity calculations
+* Added ability to use batch parameter with the raw matrix in decontX
+
 # celda v1.9.3 (2021-10-04)
 
 * Fixed bug in checking background matrix with decontX

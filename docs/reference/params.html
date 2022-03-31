@@ -74,7 +74,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.9.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.11.0</span>
       </span>
     </div>
 
@@ -171,7 +171,30 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>celdaCGMod</span><span class='op'>)</span>
 <span class='fu'>params</span><span class='op'>(</span><span class='va'>celdaCGMod</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in (function (classes, fdef, mtable) {    methods &lt;- .findInheritedMethods(classes, fdef, mtable)    if (length(methods) == 1L)         return(methods[[1L]])    else if (length(methods) == 0L) {        cnames &lt;- paste0("\"", vapply(classes, as.character,             ""), "\"", collapse = ", ")        stop(gettextf("unable to find an inherited method for function %s for signature %s",             sQuote(fdef@generic), sQuote(cnames)), domain = NA)    }    else stop("Internal error in finding inherited methods; didn't return a unique method",         domain = NA)})(list(structure("celda_CG", package = "celda")), new("standardGeneric",     .Data = function (x, ...)     standardGeneric("params"), generic = structure("params", package = "S4Vectors"),     package = "S4Vectors", group = list(), valueClass = character(0),     signature = "x", default = NULL, skeleton = (function (x,         ...)     stop("invalid call in method dispatch to 'params' (no default method)",         domain = NA))(x, ...)), &lt;environment&gt;): unable to find an inherited method for function ‘params’ for signature ‘"celda_CG"’</span></div></pre>
+</div><div class='output co'>#&gt; $K
+#&gt; [1] 5
+#&gt; 
+#&gt; $L
+#&gt; [1] 10
+#&gt; 
+#&gt; $alpha
+#&gt; [1] 1
+#&gt; 
+#&gt; $beta
+#&gt; [1] 1
+#&gt; 
+#&gt; $delta
+#&gt; [1] 1
+#&gt; 
+#&gt; $gamma
+#&gt; [1] 1
+#&gt; 
+#&gt; $seed
+#&gt; [1] 12345
+#&gt; 
+#&gt; $countChecksum
+#&gt; [1] "b47286aed8081daa674f796655314d67"
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
