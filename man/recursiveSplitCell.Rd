@@ -24,9 +24,7 @@ recursiveSplitCell(
   seed = 12345,
   perplexity = TRUE,
   doResampling = FALSE,
-  doSubsampling = TRUE,
   numResample = 5,
-  numSubsample = 5000,
   logfile = NULL,
   verbose = TRUE
 )
@@ -49,9 +47,7 @@ recursiveSplitCell(
   seed = 12345,
   perplexity = TRUE,
   doResampling = FALSE,
-  doSubsampling = TRUE,
   numResample = 5,
-  numSubsample = 5000,
   logfile = NULL,
   verbose = TRUE
 )
@@ -74,9 +70,7 @@ recursiveSplitCell(
   seed = 12345,
   perplexity = TRUE,
   doResampling = FALSE,
-  doSubsampling = TRUE,
   numResample = 5,
-  numSubsample = 5000,
   logfile = NULL,
   verbose = TRUE
 )
@@ -151,16 +145,9 @@ If FALSE, then perplexity can be calculated later with
 matrix will be resampled according to a multinomial distribution to introduce
 noise before calculating perplexity. Default \code{FALSE}.}
 
-\item{doSubsampling}{Boolean. If \code{TRUE}, then a subset of cells from
-the original counts matrix will be randomly selected. Default \code{TRUE}.}
-
 \item{numResample}{Integer. The number of times to resample the counts matrix
-for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
 Default \code{5}.}
-
-\item{numSubsample}{Integer. The number of cells to sample from the
-the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
-Default \code{5000}.}
 
 \item{logfile}{Character. Messages will be redirected to a file named
 "logfile". If NULL, messages will be printed to stdout.  Default NULL.}

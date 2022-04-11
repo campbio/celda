@@ -12,9 +12,7 @@ resamplePerplexity(
   useAssay = "counts",
   altExpName = "featureSubset",
   doResampling = FALSE,
-  doSubsampling = TRUE,
   numResample = 5,
-  numSubsample = 5000,
   seed = 12345
 )
 
@@ -23,9 +21,7 @@ resamplePerplexity(
   useAssay = "counts",
   altExpName = "featureSubset",
   doResampling = FALSE,
-  doSubsampling = TRUE,
   numResample = 5,
-  numSubsample = 5000,
   seed = 12345
 )
 
@@ -33,9 +29,7 @@ resamplePerplexity(
   x,
   celdaList,
   doResampling = FALSE,
-  doSubsampling = TRUE,
   numResample = 5,
-  numSubsample = 5000,
   seed = 12345
 )
 }
@@ -61,16 +55,9 @@ to use. Default "featureSubset".}
 matrix will be resampled according to a multinomial distribution to introduce
 noise before calculating perplexity. Default \code{FALSE}.}
 
-\item{doSubsampling}{Boolean. If \code{TRUE}, then a subset of cells from
-the original counts matrix will be randomly selected. Default \code{TRUE}.}
-
 \item{numResample}{Integer. The number of times to resample the counts matrix
-for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
 Default \code{5}.}
-
-\item{numSubsample}{Integer. The number of cells to sample from the
-the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
-Default \code{5000}.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of \code{12345} is used. If \code{NULL}, no calls to

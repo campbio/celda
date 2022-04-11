@@ -354,14 +354,9 @@ setMethod(
 #' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
 #' matrix will be resampled according to a multinomial distribution to introduce
 #' noise before calculating perplexity. Default \code{FALSE}.
-#' @param doSubsampling Boolean. If \code{TRUE}, then a subset of cells from
-#' the original counts matrix will be randomly selected. Default \code{TRUE}.
 #' @param numResample Integer. The number of times to resample the counts matrix
-#' for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+#' for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
 #' Default \code{5}.
-#' @param numSubsample Integer. The number of cells to sample from the
-#' the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
-#' Default \code{5000}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of \code{12345} is used. If \code{NULL}, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -376,9 +371,7 @@ setGeneric("resamplePerplexity",
         useAssay = "counts",
         altExpName = "featureSubset",
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         seed = 12345) {
     standardGeneric("resamplePerplexity")})
 
@@ -395,9 +388,7 @@ setMethod("resamplePerplexity",
         useAssay = "counts",
         altExpName = "featureSubset",
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         seed = 12345) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
@@ -409,18 +400,14 @@ setMethod("resamplePerplexity",
                 counts = counts,
                 celdaList = celdaList,
                 doResampling = doResampling,
-                doSubsampling = doSubsampling,
-                numResample = numResample,
-                numSubsample = numSubsample)
+                numResample = numResample)
         } else {
             with_seed(seed,
                 res <- .resamplePerplexity(
                     counts = counts,
                     celdaList = celdaList,
                     doResampling = doResampling,
-                    doSubsampling = doSubsampling,
-                    numResample = numResample,
-                    numSubsample = numSubsample))
+                    numResample = numResample))
         }
 
         S4Vectors::metadata(altExp)$celda_grid_search <- res
@@ -444,9 +431,7 @@ setMethod("resamplePerplexity",
     function(x,
         celdaList,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         seed = 12345) {
 
         if (is.null(seed)) {
@@ -454,18 +439,14 @@ setMethod("resamplePerplexity",
                 counts = x,
                 celdaList = celdaList,
                 doResampling = doResampling,
-                doSubsampling = doSubsampling,
-                numResample = numResample,
-                numSubsample = numSubsample)
+                numResample = numResample)
         } else {
             with_seed(seed,
                 res <- .resamplePerplexity(
                     counts = x,
                     celdaList = celdaList,
                     doResampling = doResampling,
-                    doSubsampling = doSubsampling,
-                    numResample = numResample,
-                    numSubsample = numSubsample))
+                    numResample = numResample))
         }
 
         return(res)
@@ -476,9 +457,7 @@ setMethod("resamplePerplexity",
 .resamplePerplexity <- function(counts,
     celdaList,
     doResampling = FALSE,
-    doSubsampling = TRUE,
-    numResample = 5,
-    numSubsample = 5000) {
+    numResample = 5) {
 
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
@@ -486,31 +465,17 @@ setMethod("resamplePerplexity",
     if (!isTRUE(is.logical(doResampling))) {
         stop("The 'doResampling' parameter needs to be logical (TRUE/FALSE).")
     } 
-    if (!isTRUE(is.logical(doSubsampling))) {
-        stop("The 'doSubsampling' parameter needs to be logical (TRUE/FALSE).")
-    } 
     if (!isTRUE(doResampling) & (!is.numeric(numResample) || numResample < 1)) {
         stop("The 'numResample' parameter needs to be an integer greater ",
         "than 0.")
     }
-    if (!isTRUE(doSubsampling) & (!is.numeric(numSubsample) || numSubsample < 1)) {
-        stop("The 'numResample' parameter needs to be an integer between ",
-             "1 and the number of cells.")
-    }
 
-    if(isTRUE(doSubsampling) & numSubsample < ncol(counts)) {
-        ix <- sample(seq(ncol(counts)), size = numSubsample)
-        newCounts <- counts[,ix]
-        
-    } else {
-        newCounts <- counts
-    }
     if(isTRUE(doResampling)) {
         perpRes <- matrix(NA,
                           nrow = length(resList(celdaList)),
                           ncol = numResample)
         for (j in seq(numResample)) {
-            newCounts <- .resampleCountMatrix(newCounts)
+            newCounts <- .resampleCountMatrix(counts)
             for (i in seq(length(resList(celdaList)))) {
                 perpRes[i, j] <- perplexity(x = counts,
                     celdaMod = resList(celdaList)[[i]],
@@ -526,7 +491,7 @@ setMethod("resamplePerplexity",
         for (i in seq(length(resList(celdaList)))) {
             perpRes[i,1] <- perplexity(x = counts,
                                        celdaMod = resList(celdaList)[[i]],
-                                       newCounts = newCounts)
+                                       newCounts = counts)
         }
     }    
    

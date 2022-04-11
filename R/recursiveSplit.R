@@ -137,14 +137,9 @@
 #' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
 #' matrix will be resampled according to a multinomial distribution to introduce
 #' noise before calculating perplexity. Default \code{FALSE}.
-#' @param doSubsampling Boolean. If \code{TRUE}, then a subset of cells from
-#' the original counts matrix will be randomly selected. Default \code{TRUE}.
 #' @param numResample Integer. The number of times to resample the counts matrix
-#' for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+#' for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
 #' Default \code{5}.
-#' @param numSubsample Integer. The number of cells to sample from the
-#' the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
-#' Default \code{5000}.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
@@ -174,9 +169,7 @@ setGeneric("recursiveSplitCell",
         seed = 12345,
         perplexity = TRUE,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         logfile = NULL,
         verbose = TRUE) {
     standardGeneric("recursiveSplitCell")})
@@ -221,9 +214,7 @@ setMethod("recursiveSplitCell",
         seed = 12345,
         perplexity = TRUE,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         logfile = NULL,
         verbose = TRUE) {
 
@@ -263,9 +254,7 @@ setMethod("recursiveSplitCell",
             seed = seed,
             perplexity = perplexity,
             doResampling = doResampling,
-            doSubsampling = doSubsampling,
             numResample = numResample,
-            numSubsample = numSubsample,
             logfile = logfile,
             verbose = verbose)
 
@@ -335,9 +324,7 @@ setMethod("recursiveSplitCell",
         seed = 12345,
         perplexity = TRUE,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         logfile = NULL,
         verbose = TRUE) {
 
@@ -368,9 +355,7 @@ setMethod("recursiveSplitCell",
             seed = seed,
             perplexity = perplexity,
             doResampling = doResampling,
-            doSubsampling = doSubsampling,
             numResample = numResample,
-            numSubsample = numSubsample,
             logfile = logfile,
             verbose = verbose)
 
@@ -415,9 +400,7 @@ setMethod("recursiveSplitCell",
     seed,
     perplexity,
     doResampling,
-    doSubsampling,
     numResample,
-    numSubsample,
     logfile,
     verbose) {
 
@@ -436,9 +419,7 @@ setMethod("recursiveSplitCell",
             reorder = reorder,
             perplexity = perplexity,
             doResampling = doResampling,
-            doSubsampling = doSubsampling,
             numResample = numResample,
-            numSubsample = numSubsample,
             logfile = logfile,
             verbose = verbose)
     } else {
@@ -458,9 +439,7 @@ setMethod("recursiveSplitCell",
                 reorder = reorder,
                 perplexity = perplexity,
                 doResampling = doResampling,
-                doSubsampling = doSubsampling,
                 numResample = numResample,
-                numSubsample = numSubsample,
                 logfile = logfile,
                 verbose = verbose)
         )
@@ -484,9 +463,7 @@ setMethod("recursiveSplitCell",
                                reorder,
                                perplexity,
                                doResampling,
-                               doSubsampling,
                                numResample,
-                               numSubsample,
                                logfile,
                                verbose) {
 
@@ -890,9 +867,7 @@ setMethod("recursiveSplitCell",
     )
     celdaRes <- resamplePerplexity(counts, celdaRes,
                                    doResampling = doResampling,
-                                   doSubsampling = doSubsampling,
-                                   numResample = numResample,
-                                   numSubsample = numSubsample)
+                                   numResample = numResample)
   }
   endTime <- Sys.time()
   .logMessages(
@@ -973,14 +948,9 @@ setMethod("recursiveSplitCell",
 #' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
 #' matrix will be resampled according to a multinomial distribution to introduce
 #' noise before calculating perplexity. Default \code{FALSE}.
-#' @param doSubsampling Boolean. If \code{TRUE}, then a subset of cells from
-#' the original counts matrix will be randomly selected. Default \code{TRUE}.
 #' @param numResample Integer. The number of times to resample the counts matrix
-#' for evaluating perplexity if \code{doSubsampling} is set to \code{TRUE}.
+#' for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
 #' Default \code{5}.
-#' @param numSubsample Integer. The number of cells to sample from the
-#' the counts matrix if \code{doSubsampling} is set to \code{TRUE}. 
-#' Default \code{5000}.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
@@ -1010,9 +980,7 @@ setGeneric("recursiveSplitModule",
         seed = 12345,
         perplexity = TRUE,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         verbose = TRUE,
         logfile = NULL) {
     standardGeneric("recursiveSplitModule")})
@@ -1050,9 +1018,7 @@ setMethod("recursiveSplitModule",
         seed = 12345,
         perplexity = TRUE,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         verbose = TRUE,
         logfile = NULL) {
 
@@ -1092,9 +1058,7 @@ setMethod("recursiveSplitModule",
             seed = seed,
             perplexity = perplexity,
             doResampling = doResampling,
-            doSubsampling = doSubsampling,
             numResample = numResample,
-            numSubsample = numSubsample,
             verbose = verbose,
             logfile = logfile)
 
@@ -1157,9 +1121,7 @@ setMethod("recursiveSplitModule",
         seed = 12345,
         perplexity = TRUE,
         doResampling = FALSE,
-        doSubsampling = TRUE,
         numResample = 5,
-        numSubsample = 5000,
         verbose = TRUE,
         logfile = NULL) {
 
@@ -1190,9 +1152,7 @@ setMethod("recursiveSplitModule",
             seed = seed,
             perplexity = perplexity,
             doResampling = doResampling,
-            doSubsampling = doSubsampling,
             numResample = numResample,
-            numSubsample = numSubsample,
             verbose = verbose,
             logfile = logfile)
 
@@ -1237,9 +1197,7 @@ setMethod("recursiveSplitModule",
     seed,
     perplexity,
     doResampling,
-    doSubsampling,
     numResample,
-    numSubsample,
     verbose,
     logfile) {
 
@@ -1261,9 +1219,7 @@ setMethod("recursiveSplitModule",
             verbose = verbose,
             logfile = logfile,
             doResampling = doResampling,
-            doSubsampling = doSubsampling,
-            numResample = numResample,
-            numSubsample = numSubsample)
+            numResample = numResample)
     } else {
         with_seed(seed,
             celdaList <- .recursiveSplitModule(
@@ -1283,9 +1239,7 @@ setMethod("recursiveSplitModule",
                 verbose = verbose,
                 logfile = logfile,
                 doResampling = doResampling,
-                doSubsampling = doSubsampling,
-                numResample = numResample,
-                numSubsample = numSubsample)
+                numResample = numResample)
         )
     }
 
@@ -1309,9 +1263,7 @@ setMethod("recursiveSplitModule",
                                  verbose = TRUE,
                                  logfile = NULL,
                                  doResampling = FALSE,
-                                 doSubsampling = TRUE,
-                                 numResample = 5,
-                                 numSubsample = 5000) {
+                                 numResample = 5) {
 
   .logMessages(paste(rep("=", 50), collapse = ""),
     logfile = logfile,
@@ -1673,9 +1625,7 @@ setMethod("recursiveSplitModule",
     )
     celdaRes <- resamplePerplexity(counts, celdaRes,
                                    doResampling = doResampling,
-                                   doSubsampling = doSubsampling,
-                                   numResample = numResample,
-                                   numSubsample = numSubsample)
+                                   numResample = numResample)
   }
 
   endTime <- Sys.time()
