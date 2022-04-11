@@ -209,16 +209,10 @@ setMethod(
         eta <- factorized$posterior$geneDistribution
         nGByTS <- factorized$counts$geneDistribution
 
-        
         if (is.null(newCounts)) {
             newCounts <- counts
         } else {
             newCounts <- .processCounts(newCounts)
-            beta <- params(celdaMod)$beta
-            L <- params(celdaMod)$L
-            y <- celdaMod@clusters$y
-            phi <- .rowSumByGroup(newCounts, group = y, L = L) + beta
-            phi <- normalizeCounts(phi, normalize = "proportion")
         }
         if (nrow(newCounts) != nrow(counts)) {
             stop("newCounts should have the same number of rows as counts.")
@@ -315,8 +309,6 @@ setMethod(
         newCounts <- counts
     } else {
         newCounts <- .processCounts(newCounts)
-        phi <- .rowSumByGroup(newCounts, group = y, L = L) + beta
-        phi <- normalizeCounts(phi, normalize = "proportion")
     }
     if (nrow(newCounts) != nrow(counts)) {
         stop("newCounts should have the same number of rows as counts.")
