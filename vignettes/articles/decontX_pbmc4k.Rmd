@@ -59,19 +59,12 @@ The raw matrix can be passed to the `background` parameter in `decontX` as descr
 We will utilize the 10X PBMC 4K dataset as an example in this vignette. This data can be easily retrieved from the package [TENxPBMCData](http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html). Make sure the the column names are set before running decontX.
 
 ```{r load_10X, eval=TRUE, message=FALSE}
-# Install TENxPBMCData if is it not already
-if (!requireNamespace("TENxPBMCData", quietly = TRUE)) {
-  if (!requireNamespace("BiocManager", quietly = TRUE)) {
-    install.packages("BiocManager")
-  }
-  BiocManager::install("TENxPBMCData")
-}
-
 # Load PBMC data
 library(TENxPBMCData)
 sce <- TENxPBMCData("pbmc4k")
 colnames(sce) <- paste(sce$Sample, sce$Barcode, sep = "_")
 rownames(sce) <- rowData(sce)$Symbol_TENx
+counts(sce) <- as(counts(sce), "dgCMatrix")
 ```
 
 
