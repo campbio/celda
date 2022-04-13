@@ -519,7 +519,7 @@ setMethod("resamplePerplexity",
 #'  parameters.
 #' @export
 setGeneric("plotGridSearchPerplexity",
-    function(x, altExpName = "featureSubset", sep = 1, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
     standardGeneric("plotGridSearchPerplexity")})
 
 
@@ -531,7 +531,7 @@ setGeneric("plotGridSearchPerplexity",
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 1, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
         g <- do.call(paste0(".plotGridSearchPerplexity",
@@ -553,7 +553,7 @@ setMethod("plotGridSearchPerplexity",
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "celdaList"),
-    function(x, sep = 1, alpha = 0.5) {
+    function(x, sep = 5, alpha = 0.5) {
         g <- do.call(paste0(".plotGridSearchPerplexity",
             as.character(class(resList(x)[[1]]))),
             args = list(x, sep, alpha))
@@ -777,8 +777,7 @@ setMethod("plotGridSearchPerplexity",
 
 #' @title Visualize perplexity differences of a list of celda models
 #' @description Visualize perplexity differences of every model in a celdaList,
-#'  by unique K/L combinations. Line represents centered moving average with
-#'  windows of length \code{n}.
+#'  by unique K/L combinations. 
 #' @param x Can be one of
 #' \itemize{
 #'  \item A \linkS4class{SingleCellExperiment} object returned from
@@ -789,15 +788,14 @@ setMethod("plotGridSearchPerplexity",
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @param n Integer. Width of the rolling window. Default 10.
 #' @param alpha Numeric. Passed to \link{geom_jitter}. Opacity of the points.
 #'  Values of alpha range from 0 to 1, with lower values corresponding
 #'  to more transparent colors.
-#' @return A ggplot plot object showing perplexity diferences as a function of
+#' @return A ggplot plot object showing perplexity differences as a function of
 #'  clustering parameters.
 #' @export
 setGeneric("plotRPC",
-    function(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
     standardGeneric("plotRPC")})
 
 
@@ -805,24 +803,24 @@ setGeneric("plotRPC",
 #' @examples
 #' data(sceCeldaCGGridSearch)
 #' sce <- resamplePerplexity(sceCeldaCGGridSearch)
-#' plotRPC(sce, n = 1)
+#' plotRPC(sce)
 #' @export
 setMethod("plotRPC",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         model <- altExp@metadata$celda_grid_search@celdaGridSearchParameters$
             model
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
 
         if (model == "celda_C") {
-            g <- .plotRPCC(celdaList, sep, n = n,
+            g <- .plotRPCC(celdaList, sep, 
                 alpha = alpha)
         } else if (model == "celda_G") {
-            g <- .plotRPCG(celdaList, sep, n = n,
+            g <- .plotRPCG(celdaList, sep, 
                 alpha = alpha)
         } else if (model == "celda_CG") {
-            g <- .plotRPCCG(celdaList, sep, n = n,
+            g <- .plotRPCCG(celdaList, sep, 
                 alpha = alpha)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
@@ -842,20 +840,20 @@ setMethod("plotRPC",
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)
-#' plotRPC(celdaCGGridSearchRes, n = 1)
+#' plotRPC(celdaCGGridSearchRes)
 #' @export
 setMethod("plotRPC",
     signature(x = "celdaList"),
-    function(x, sep = 1, n = 10, alpha = 0.5) {
+    function(x, sep = 5, alpha = 0.5) {
         g <- do.call(paste0(".plotRPC",
             unlist(strsplit(as.character(class(resList(x)[[1]])), "_"))[[2]]),
-            args = list(x, sep, n, alpha))
+            args = list(x, sep, alpha))
         return(g)
     }
 )
 
 
-.plotRPCCG <- function(celdaList, sep, n, alpha) {
+.plotRPCCG <- function(celdaList, sep, alpha) {
     # fix check note
     K <- L <- perpdiffK <- meanperpdiffK <- perpdiffL <- meanperpdiffL <- NULL
 
@@ -895,10 +893,9 @@ setMethod("plotRPC",
         colnames(diffMeansByK) <- c("K", "L", "meanperpdiffK")
         diffMeansByK$K <- as.factor(diffMeansByK$K)
         diffMeansByK$L <- as.factor(diffMeansByK$L)
-        diffMeansByK$rollmean <- data.table::frollmean(
-            diffMeansByK$meanperpdiffK, n = n, align = "center")
         diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK), ]
-
+        diffMeansByK$spline <- stats::smooth.spline(diffMeansByK$meanperpdiffK)$y
+        
         if (nlevels(dt$L) > 1) {
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
                 ggplot2::aes_string(x = "K",
@@ -907,7 +904,7 @@ setMethod("plotRPC",
                     ggplot2::aes_string(color = "L")) +
                 ggplot2::scale_color_discrete(name = "L") +
                 ggplot2::geom_path(data = diffMeansByK,
-                    ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                    ggplot2::aes_string(x = "K", y = "spline", group = "L",
                         color = "L"), size = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
                 ggplot2::xlab("K") +
@@ -925,7 +922,7 @@ setMethod("plotRPC",
                     color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
                 ggplot2::geom_path(data = diffMeansByK,
-                    ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                    ggplot2::aes_string(x = "K", y = "spline", group = "L",
                         color = "L"), size = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
                 ggplot2::xlab("K") +
@@ -952,10 +949,9 @@ setMethod("plotRPC",
         colnames(diffMeansByL) <- c("K", "L", "meanperpdiffL")
         diffMeansByL$K <- as.factor(diffMeansByL$K)
         diffMeansByL$L <- as.factor(diffMeansByL$L)
-        diffMeansByL$rollmean <- data.table::frollmean(
-            diffMeansByL$meanperpdiffL, n = n, align = "center")
         diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL), ]
-
+        diffMeansByL$spline <- stats::smooth.spline(diffMeansByL$meanperpdiffL)$y
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
@@ -964,7 +960,7 @@ setMethod("plotRPC",
             ggplot2::geom_path(
                 data = diffMeansByL,
                 ggplot2::aes_string(
-                    x = "L", y = "rollmean", group = "K", color = "K"),
+                    x = "L", y = "spline", group = "K", color = "K"),
                 size = 1) +
             ggplot2::ylab("Rate of perplexity change") +
             ggplot2::xlab("L") +
@@ -983,7 +979,7 @@ setMethod("plotRPC",
 }
 
 
-.plotRPCC <- function(celdaList, sep, n, alpha) {
+.plotRPCC <- function(celdaList, sep, alpha) {
     K <- perpdiffK <- meanperpdiffK <- NULL # fix check note
     if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
@@ -1015,17 +1011,16 @@ setMethod("plotRPC",
             FUN = mean))
         colnames(diffMeansByK) <- c("K", "meanperpdiffK")
         diffMeansByK$K <- as.factor(diffMeansByK$K)
-        diffMeansByK$rollmean <- data.table::frollmean(
-            diffMeansByK$meanperpdiffK, n = n, align = "center")
         diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK), ]
-
+        diffMeansByK$spline <- stats::smooth.spline(diffMeansByK$meanperpdiffK)$y
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByK,
-                ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
+                ggplot2::aes_string(x = "K", y = "spline", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
@@ -1043,7 +1038,7 @@ setMethod("plotRPC",
 }
 
 
-.plotRPCG <- function(celdaList, sep, n, alpha) {
+.plotRPCG <- function(celdaList, sep, alpha) {
     L <- perpdiffL <- meanperpdiffL <- NULL # fix check note
     if (!all(c("L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column L.")
@@ -1075,17 +1070,16 @@ setMethod("plotRPC",
             FUN = mean))
         colnames(diffMeansByL) <- c("L", "meanperpdiffL")
         diffMeansByL$L <- as.factor(diffMeansByL$L)
-        diffMeansByL$rollmean <- data.table::frollmean(
-            diffMeansByL$meanperpdiffL, n = n, align = "center")
         diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL), ]
-
+        diffMeansByL$spline <- stats::smooth.spline(diffMeansByL$meanperpdiffL)$y
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByL,
-                ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
+                ggplot2::aes_string(x = "L", y = "spline", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +

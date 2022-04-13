@@ -6,11 +6,11 @@
 \alias{plotRPC,celdaList-method}
 \title{Visualize perplexity differences of a list of celda models}
 \usage{
-plotRPC(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5)
+plotRPC(x, altExpName = "featureSubset", sep = 5, alpha = 0.5)
 
-\S4method{plotRPC}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5)
+\S4method{plotRPC}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 5, alpha = 0.5)
 
-\S4method{plotRPC}{celdaList}(x, sep = 1, n = 10, alpha = 0.5)
+\S4method{plotRPC}{celdaList}(x, sep = 5, alpha = 0.5)
 }
 \arguments{
 \item{x}{Can be one of
@@ -26,29 +26,26 @@ to use. Default "featureSubset".}
 
 \item{sep}{Numeric. Breaks in the x axis of the resulting plot.}
 
-\item{n}{Integer. Width of the rolling window. Default 10.}
-
 \item{alpha}{Numeric. Passed to \link{geom_jitter}. Opacity of the points.
 Values of alpha range from 0 to 1, with lower values corresponding
 to more transparent colors.}
 }
 \value{
-A ggplot plot object showing perplexity diferences as a function of
+A ggplot plot object showing perplexity differences as a function of
  clustering parameters.
 }
 \description{
 Visualize perplexity differences of every model in a celdaList,
- by unique K/L combinations. Line represents centered moving average with
- windows of length \code{n}.
+ by unique K/L combinations.
 }
 \examples{
 data(sceCeldaCGGridSearch)
 sce <- resamplePerplexity(sceCeldaCGGridSearch)
-plotRPC(sce, n = 1)
+plotRPC(sce)
 data(celdaCGSim, celdaCGGridSearchRes)
 ## Run various combinations of parameters with 'celdaGridSearch'
 celdaCGGridSearchRes <- resamplePerplexity(
   celdaCGSim$counts,
   celdaCGGridSearchRes)
-plotRPC(celdaCGGridSearchRes, n = 1)
+plotRPC(celdaCGGridSearchRes)
 }
