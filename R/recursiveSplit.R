@@ -547,7 +547,7 @@ setMethod("recursiveSplitCell",
         beta = beta
       )
       tempModel <- .celda_CG(counts,
-        sampleLabel = s,
+        sampleLabel = sampleLabel,
         K = as.integer(currentK),
         L = as.integer(L),
         yInit = overallY,
@@ -660,7 +660,7 @@ setMethod("recursiveSplitCell",
       logfile = logfile
     )
     modelInitial <- .celda_C(countsY,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       K = as.integer(initialK),
       zInitialize = "split",
       nchains = 1,
@@ -691,7 +691,7 @@ setMethod("recursiveSplitCell",
         beta = beta
       )
       tempModel <- .celda_C(countsY,
-        sampleLabel = s,
+        sampleLabel = sampleLabel,
         K = as.integer(currentK),
         nchains = 1,
         zInitialize = "random",
@@ -762,7 +762,7 @@ setMethod("recursiveSplitCell",
       logfile = logfile
     )
     modelInitial <- .celda_C(counts,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       K = as.integer(initialK),
       zInitialize = "split",
       nchains = 1,
@@ -784,7 +784,7 @@ setMethod("recursiveSplitCell",
         beta = beta
       )
       tempModel <- .celda_C(counts,
-        sampleLabel = s,
+        sampleLabel = sampleLabel,
         K = as.integer(currentK),
         nchains = 1,
         zInitialize = "random",

@@ -135,7 +135,11 @@ if (!is.null(cellAnnotFinal)) {
   for (i in seq_along(cellAnnotFinal)) {
     cat(sprintf(tab4, cellAnnotFinal[i]))
 
-    conditionClass <- ifelse(plotLabels[i], "factor", "numeric")
+    if(isTRUE(plotLabels[i])) {
+      conditionClass <- "factor"  
+    } else {
+      conditionClass <- NULL
+    }
 
     print(
       plotSCEDimReduceColData(
@@ -339,17 +343,8 @@ The probability matrix on the left contains the probability of each module withi
 print(celdaProbabilityMap(sce))
 ```
 
-### Overview Heatmap
-This general heatmap shows the actual relative expression of the
-top 10 features in each module (rows) for each cell (columns). Rows are z-score
-normalized. The columns of the heatmap are semi-supervised by cell population and the rows are semi-supervised by module. 
-```{r celda_heatmap, fig.height = 15, fig.width = 9}
-grid.draw(celdaHeatmap(sce, nfeatures = 10))
-```
-
-## Session Information
+## Session Information {.unnumbered}
 ```{r session, eval = showSession, echo = showSession}
 sessionInfo()
 ```
 
-<br><br>
