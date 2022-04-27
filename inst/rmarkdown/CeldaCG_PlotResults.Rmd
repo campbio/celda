@@ -321,7 +321,8 @@ if (!is.null(features)) {
       plotDimReduceFeature(
         sce,
         reducedDimName = "celda_UMAP",
-        features = rownames(sce)[ix],
+        features = features,
+        displayName = displayName,
         colorHigh = "red",
         colorMid = "grey",
         colorLow = "blue",
