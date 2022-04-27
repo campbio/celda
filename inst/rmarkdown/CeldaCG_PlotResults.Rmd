@@ -281,7 +281,12 @@ for (i in seq.int(1, length(grids) - 1)) {
 This section displays a table of features in each module and can be used as a quick way to lookup features of interest. The features within each module are ordered from those with highest expression at the top to those with lower expression at the bottom (same as in the heatmaps in the previous tab).
 
 ```{r celda_modules_table}
-table <- featureModuleTable(sce)
+table <- featureModuleTable(
+    sce,
+    useAssay = useAssay,
+    altExpName = altExpName,
+    displayName = displayName
+  )
 kable(table, style = "html", row.names = FALSE) %>%
   kable_styling(bootstrap_options = "striped") %>%
   scroll_box(width = "100%", height = "800px")
@@ -291,6 +296,7 @@ if (!is.null(moduleFileName)) {
     sce,
     useAssay = useAssay,
     altExpName = altExpName,
+    displayName = displayName,
     outputFile = moduleFileName
   )
 }
@@ -316,7 +322,6 @@ if (!is.null(features)) {
         sce,
         reducedDimName = "celda_UMAP",
         features = rownames(sce)[ix],
-        displayName = displayName,
         colorHigh = "red",
         colorMid = "grey",
         colorLow = "blue",

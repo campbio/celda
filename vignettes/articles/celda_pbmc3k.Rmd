@@ -157,7 +157,7 @@ plotGridSearchPerplexity(moduleSplit, altExpName = altExpName, sep = 10)
 The perplexity alone often does not show a clear elbow or "leveling off". However, the rate of perplexity change (RPC) can be more informative to determine when adding new modules does not add much additional information [Zhao et al., 2015](https://doi.org/10.1186/1471-2105-16-S13-S8){target="_blank"}). An RPC closer to zero indicates that the addition of new modules or cell clusters is not substantially decreasing the perplexity. The RPC of models can be visualized using function `plotRPC`:
 
 ```{r module_split_rpc, message = FALSE, warning = FALSE}
-plotRPC(moduleSplit, altExpName = altExpName, sep = 10, n = 30)
+plotRPC(moduleSplit, altExpName = altExpName)
 ```
 
 In this case, we will choose an `L` of 80 as the RPC curve tends to level off at this point:
@@ -182,7 +182,7 @@ The perplexities and RPC of models can be visualized using the same functions `p
 
 ```{r cell_split_perplexity, warning = FALSE}
 plotGridSearchPerplexity(sce)
-plotRPC(sce)
+plotRPC(sce, , altExpName = altExpName)
 ```
 
 The perplexity continues to decrease with larger values of `K`. The RPC generally levels off between 13 and 16 and we choose the model with `K = 14` for downstream analysis. The follow code selects the final `celda_CG` model with `L = 80` and `K = 14`:
@@ -410,7 +410,7 @@ All of the parameters in this function are the same that were used throughout th
 The second report takes in as input an SCE object with a fitted `celda_CG` model and systematically generates several plots that facilitate exploratory analysis including cell subpopulation cluster labels on 2-D embeddings, user-specified annotations on 2-D embeddings, module heatmaps, module probabilities, expression of marker genes on 2-D embeddings, and the celda probability map. The report can be generated with the following code:
 
 ```{r report_results, eval = FALSE}
-reportCeldaCGPlotResults(sce, reducedDimName = "celda_UMAP", features = markers, useAssay = useAssay, altExpName = altExpName, cellAnnot = c("total", "detected", "decontX_contamination", "subsets_mito_percent"), cellAnnotLabel = "scDblFinder_class")
+reportCeldaCGPlotResults(sce, reducedDimName = "celda_UMAP", features = markers, useAssay = useAssay, altExpName = altExpName, cellAnnot = c("total", "detected", "decontX_contamination", "subsets_mito_percent"), cellAnnotLabel = "scDblFinder_doublet_call")
 ```
 
 User-supplied annotations to plot on the 2-D embedding can be specified through the `cellAnnot` and `cellAnnotLabel` variables. Both parameters will allow for plotting of variables stored in the colData of the SCE on the 2-D embedding plot specified by `reducedDimName` parameter. For `cellAnnot`, integer and numeric variables will be plotted as as continuous variables while factors and characters will be plotted as categorical variables. For `cellAnnotLabel`, all variables will be coerced to a factor and the labels of the categories will be plotted on the scatter plot. 
