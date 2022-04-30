@@ -1,3 +1,10 @@
+# celda v1.12.0 (2022-04-30)
+* Update to match Bioconductor 3.15 release version
+
+# celda v1.11.1 (2022-03-31)
+* Fixes to reports
+* Use smoothe splines for perplexity and RPC plots
+
 # celda v1.11.0 (2022-03-31)
 * Improvments to decontX vignette
 * Added ability to subsample to speed up perplexity calculations

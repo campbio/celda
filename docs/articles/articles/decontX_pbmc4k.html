@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.12.0</span>
       </span>
     </div>
 
@@ -106,7 +106,7 @@
       Boston University School of Medicine<br><a class="author_email" href="mailto:#"></a><a href="mailto:camp@bu.edu" class="email">camp@bu.edu</a>
       </address>
                   
-            <h4 class="date">2022-03-31</h4>
+            <h4 class="date">2022-04-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/campbio/celda/blob/master/vignettes/articles/decontX_pbmc4k.Rmd"><code>vignettes/articles/decontX_pbmc4k.Rmd</code></a></small>
       <div class="hidden name"><code>decontX_pbmc4k.Rmd</code></div>
@@ -145,19 +145,12 @@
 <a href="#load-pbmc4k-data-from-10x" class="anchor"></a>Load PBMC4k data from 10X</h1>
 <p>We will utilize the 10X PBMC 4K dataset as an example in this vignette. This data can be easily retrieved from the package <a href="http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html">TENxPBMCData</a>. Make sure the the column names are set before running decontX.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Install TENxPBMCData if is it not already</span>
-<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"TENxPBMCData"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span>
-  <span class="op">}</span>
-  <span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html">install</a></span><span class="op">(</span><span class="st">"TENxPBMCData"</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="co"># Load PBMC data</span>
+<code class="sourceCode R"><span class="co"># Load PBMC data</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span>
 <span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html">TENxPBMCData</a></span><span class="op">(</span><span class="st">"pbmc4k"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">sce</span><span class="op">$</span><span class="va">Sample</span>, <span class="va">sce</span><span class="op">$</span><span class="va">Barcode</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Symbol_TENx</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Symbol_TENx</span>
+<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">as</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"dgCMatrix"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="running-decontx" class="section level1">
 <h1 class="hasAnchor">
@@ -357,7 +350,7 @@
 ##  [1] scater_1.18.6               ggplot2_3.3.5              
 ##  [3] TENxPBMCData_1.8.0          HDF5Array_1.18.1           
 ##  [5] rhdf5_2.34.0                DelayedArray_0.16.2        
-##  [7] celda_1.11.0                Matrix_1.3-2               
+##  [7] celda_1.12.0                Matrix_1.3-2               
 ##  [9] SingleCellExperiment_1.12.0 SummarizedExperiment_1.20.0
 ## [11] Biobase_2.50.0              GenomicRanges_1.42.0       
 ## [13] GenomeInfoDb_1.26.4         IRanges_2.24.1             

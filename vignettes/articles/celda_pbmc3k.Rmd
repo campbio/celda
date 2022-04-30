@@ -157,7 +157,7 @@ plotGridSearchPerplexity(moduleSplit, altExpName = altExpName, sep = 10)
 The perplexity alone often does not show a clear elbow or "leveling off". However, the rate of perplexity change (RPC) can be more informative to determine when adding new modules does not add much additional information [Zhao et al., 2015](https://doi.org/10.1186/1471-2105-16-S13-S8){target="_blank"}). An RPC closer to zero indicates that the addition of new modules or cell clusters is not substantially decreasing the perplexity. The RPC of models can be visualized using function `plotRPC`:
 
 ```{r module_split_rpc, message = FALSE, warning = FALSE}
-plotRPC(moduleSplit, altExpName = altExpName, sep = 10, n = 30)
+plotRPC(moduleSplit, altExpName = altExpName)
 ```
 
 In this case, we will choose an `L` of 80 as the RPC curve tends to level off at this point:

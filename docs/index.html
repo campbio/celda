@@ -37,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.12.0</span>
       </span>
     </div>
 
@@ -112,9 +112,12 @@
 <pre><code>if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("celda")</code></pre>
-<p>To install the development version (R &gt;= 3.6) of <strong>celda</strong> from GitHub using <code>devtools</code>:</p>
+<p>The latest stable version of <strong>celda</strong> can be installed from GitHub using <code>devtools</code>:</p>
 <pre><code><a href="https://devtools.r-lib.org/">library(devtools)
 install_github("campbio/celda")</a></code></pre>
+<p>The development version of <strong>celda</strong> can also be installed from GitHub using <code>devtools</code>:</p>
+<pre><code><a href="https://devtools.r-lib.org/">library(devtools)
+install_github("campbio/celda@devel")</a></code></pre>
 <p><strong>NOTE</strong> For MAC OSX users, <code><a href="https://devtools.r-lib.org/reference/remote-reexports.html">devtools::install_github()</a></code> requires installation of <strong>libgit2.</strong> This can be installed via homebrew:</p>
 <pre><code>brew install libgit2</code></pre>
 <p>Also, if you receive installation errors when Rcpp is being installed and compiled, try following the steps outlined here to solve the issue:</p>
