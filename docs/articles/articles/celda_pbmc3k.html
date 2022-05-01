@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.11.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.12.0</span>
       </span>
     </div>
 
@@ -98,7 +98,7 @@
       <h1 data-toc-skip>Celda - Analysis of PBMC3K</h1>
                         <h4 class="author">Joshua Campbell, Zhe Wang</h4>
             
-            <h4 class="date">Compiled March 31, 2022</h4>
+            <h4 class="date">Compiled April 30, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/campbio/celda/blob/master/vignettes/articles/celda_pbmc3k.Rmd"><code>vignettes/articles/celda_pbmc3k.Rmd</code></a></small>
       <div class="hidden name"><code>celda_pbmc3k.Rmd</code></div>
@@ -223,7 +223,7 @@
 <p><img src="celda_pbmc3k_files/figure-html/module_split_perplexity-1.png" width="700"></p>
 <p>The perplexity alone often does not show a clear elbow or “leveling off”. However, the rate of perplexity change (RPC) can be more informative to determine when adding new modules does not add much additional information <a href="https://doi.org/10.1186/1471-2105-16-S13-S8" target="_blank">Zhao et al., 2015</a>). An RPC closer to zero indicates that the addition of new modules or cell clusters is not substantially decreasing the perplexity. The RPC of models can be visualized using function <code>plotRPC</code>:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../../reference/plotRPC.html">plotRPC</a></span><span class="op">(</span><span class="va">moduleSplit</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, sep <span class="op">=</span> <span class="fl">10</span>, n <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../../reference/plotRPC.html">plotRPC</a></span><span class="op">(</span><span class="va">moduleSplit</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_split_rpc-1.png" width="700"></p>
 <p>In this case, we will choose an <code>L</code> of 80 as the RPC curve tends to level off at this point:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -28248,7 +28248,7 @@ RCE1
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Plot differentially expressed genes that pass additional thresholds 'minClustExprPerc' and 'maxCtrlExprPerc'</span>
 <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotMarkerDiffExp.html">plotMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
-<p><img src="celda_pbmc3k_files/figure-html/diffExp_plot-1.png" width="700"><img src="celda_pbmc3k_files/figure-html/diffExp_plot-2.png" width="700"></p>
+<p><img src="celda_pbmc3k_files/figure-html/diffExp_plot-1.png" width="700"></p>
 <p>Other parameters such as <code>minClustExprPerc</code> (the minimum number of cells expressing the marker gene in the cluster) and <code>maxCtrlExprPerc</code> (the maximum number of cells expression the marker gene in other clusters) can be used to control how specific each marker gene is to each cell populations. Similarly, adding a log2 fold-change cutoff (e.g. 1) can select for markers that are more strongly up-regulated in a cell population.</p>
 </div>
 <div id="violin-plots-for-marker-genes" class="section level2">
@@ -28340,7 +28340,7 @@ RCE1
 ## other attached packages:
 ##  [1] scater_1.18.6               kableExtra_1.3.4           
 ##  [3] knitr_1.31                  ggplot2_3.3.5              
-##  [5] celda_1.11.0                singleCellTK_2.4.1         
+##  [5] celda_1.12.0                singleCellTK_2.5.1         
 ##  [7] TENxPBMCData_1.8.0          HDF5Array_1.18.1           
 ##  [9] rhdf5_2.34.0                DelayedArray_0.16.2        
 ## [11] Matrix_1.3-2                SingleCellExperiment_1.12.0
