@@ -119,7 +119,7 @@ plotDimReduceCluster(sce, reducedDimName = reducedDimName, labelClusters = TRUE)
 ### Sample Labels
 ```{r celda_samples}
 plotSCEDimReduceColData(
-  altExp(sce),
+  altExp(sce, altExpName),
   reducedDimName = reducedDimName,
   colorBy = "celda_sample_label",
   labelClusters = FALSE,
@@ -143,7 +143,7 @@ if (!is.null(cellAnnotFinal)) {
 
     print(
       plotSCEDimReduceColData(
-        altExp(sce),
+        altExp(sce, altExpName),
         colorBy = cellAnnotFinal[i],
         conditionClass = conditionClass,
         reducedDim = reducedDimName,
@@ -305,7 +305,7 @@ if (!is.null(moduleFileName)) {
 <br><br>
 
 ## Expression of pre-selected markers {.tabset .tabset-fade}
-Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional featuers that contain the name of any marker may also be shown.
+Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional features that contain the name of any marker may also be shown.
 
 ```{r plot_markers, fig.height = markerHeight, fig.width = 12}
 if (!is.null(features)) {
