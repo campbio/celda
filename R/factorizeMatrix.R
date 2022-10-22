@@ -152,8 +152,8 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_CG"),
         counts <- .processCounts(x)
         compareCountMatrix(counts, celdaMod)
 
-        z <- celdaClusters(celdaMod)$z
-        y <- celdaClusters(celdaMod)$y
+        z <- as.integer(celdaClusters(celdaMod)$z)
+        y <- as.integer(celdaClusters(celdaMod)$y)
         # Sometimes, fewer clusters get returned by celda_C/G
         # Taking the max(z)/max(y) rather than
         # the original K/L will prevent errors
@@ -318,7 +318,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_C"),
         counts <- .processCounts(x)
         compareCountMatrix(counts, celdaMod)
 
-        z <- celdaClusters(celdaMod)$z
+        z <- as.integer(celdaClusters(celdaMod)$z)
         # Sometimes, fewer clusters get returned by celda_C
         # Taking the max(z) rather than the
         # original K will prevent errors
@@ -430,7 +430,7 @@ setMethod("factorizeMatrix", signature(x = "ANY", celdaMod = "celda_G"),
         counts <- .processCounts(x)
         compareCountMatrix(counts, celdaMod)
 
-        y <- celdaClusters(celdaMod)$y
+        y <- as.integer(celdaClusters(celdaMod)$y)
         # Sometimes, fewer clusters get returned by celda_G
         # Taking the max(y) rather than the original
         # L will prevent errors
