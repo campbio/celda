@@ -24,6 +24,7 @@ reference:
   - plotDimReduceCluster
   - plotDimReduceFeature
   - plotDimReduceModule
+  - plotDimReduceGrid  
   - plotCeldaViolin  
   - celdaHeatmap
 
@@ -34,7 +35,6 @@ reference:
   - plotDecontXContamination
   - plotDecontXMarkerExpression
   - plotDecontXMarkerPercentage
-
   - decontXcounts
   
 - title: Functions for determining the numbers of clusters in celda
@@ -46,13 +46,13 @@ reference:
   - celdaGridSearch
   - plotGridSearchPerplexity
   - perplexity
-  - celdaPerplexity  
   - resamplePerplexity
   - selectBestModel
   - resList  
   - subsetCeldaList  
   - appendCeldaList
-
+  - celdaPerplexity
+  
 - title: Miscellaneous celda functions 
   desc: Various functions for manipulation of celda results
   contents:
@@ -97,7 +97,29 @@ reference:
   - sampleCells
   - contaminationSim
 
-
+- title: internal
+  contents:
+  - availableModels
+  - celdaCGMod
+  - celdaCGSim 
+  - celdaCMod
+  - celdaCSim
+  - celdaGMod
+  - celdaGSim
+  - celdaModel
+  - celdatosce
+  - compareCountMatrix
+  - countChecksum
+  - eigenMatMultInt
+  - eigenMatMultNumeric
+  - fastNormProp
+  - fastNormPropLog
+  - fastNormPropSqrt
+  - nonzero
+  - semiPheatmap
+  - '`celdaPerplexity,celdaList-method`'
+  - '`countChecksum,celdaList-method`'
+  
 navbar:
   title: "celda"
   left:
