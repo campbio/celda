@@ -534,7 +534,7 @@ setMethod("recursiveSplitCell",
       verbose = FALSE,
       reorder = reorder)
     currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
-    overallZ <- celdaClusters(modelInitial)$z
+    overallZ <- as.integer(celdaClusters(modelInitial)$z)
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       # previousY <- overallY
@@ -574,14 +574,14 @@ setMethod("recursiveSplitCell",
       # If the number of clusters is still "currentK", then keep the
       # reordering, otherwise keep the previous configuration
       if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
-        overallZ <- celdaClusters(tempModel)$z
+        overallZ <- as.integer(celdaClusters(tempModel)$z)
       } else {
         overallZ <- tempSplit$z
         ll <- .logLikelihoodcelda_CG(
           counts,
           s,
           overallZ,
-          celdaClusters(tempModel)$y,
+          as.integer(celdaClusters(tempModel)$y),
           currentK,
           L,
           alpha,
@@ -590,7 +590,7 @@ setMethod("recursiveSplitCell",
           gamma
         )
         tempModel <- methods::new("celda_CG",
-          clusters = list(z = overallZ, y = celdaClusters(tempModel)$y),
+          clusters = list(z = overallZ, y = as.integer(celdaClusters(tempModel)$y)),
           params = list(
             K = as.integer(currentK),
             L = as.integer(L),
@@ -670,7 +670,7 @@ setMethod("recursiveSplitCell",
       reorder = reorder
     )
     currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
-    overallZ <- celdaClusters(modelInitial)$z
+    overallZ <- as.integer(celdaClusters(modelInitial)$z)
     ll <- .logLikelihoodcelda_C(
       counts, s, overallZ, currentK,
       alpha, beta
@@ -707,7 +707,7 @@ setMethod("recursiveSplitCell",
       # Handle rare cases where a population has no cells after running
       # the model
       if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
-        overallZ <- celdaClusters(tempModel)$z
+        overallZ <- as.integer(celdaClusters(tempModel)$z)
       } else {
         overallZ <- tempSplit$z
       }
@@ -772,7 +772,7 @@ setMethod("recursiveSplitCell",
       reorder = reorder
     )
     currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
-    overallZ <- celdaClusters(modelInitial)$z
+    overallZ <- as.integer(celdaClusters(modelInitial)$z)
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       tempSplit <- .singleSplitZ(counts,
@@ -798,7 +798,7 @@ setMethod("recursiveSplitCell",
       )
 
       if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
-        overallZ <- celdaClusters(tempModel)$z
+        overallZ <- as.integer(celdaClusters(tempModel)$z)
       } else {
         overallZ <- tempSplit$z
         ll <-
@@ -1336,7 +1336,7 @@ setMethod("recursiveSplitModule",
       verbose = FALSE,
       reorder = reorder)
     currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
-    overallY <- celdaClusters(modelInitial)$y
+    overallY <- as.integer(celdaClusters(modelInitial)$y)
 
     resList <- list(modelInitial)
     while (currentL <= maxL) {
@@ -1365,7 +1365,7 @@ setMethod("recursiveSplitModule",
         zInit = overallZ,
         reorder = reorder
       )
-      overallY <- celdaClusters(tempModel)$y
+      overallY <- as.integer(celdaClusters(tempModel)$y)
 
       ## Add new model to results list and increment L
       .logMessages(
@@ -1428,8 +1428,8 @@ setMethod("recursiveSplitModule",
     )
     modelInitial@params$countChecksum <- countChecksum
 
-    currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
-    overallY <- celdaClusters(modelInitial)$y
+    currentL <- length(unique(as.integer(celdaClusters(modelInitial)$y))) + 1
+    overallY <- as.integer(celdaClusters(modelInitial)$y)
 
     ## Decomposed counts for full count matrix
     p <- .cGDecomposeCounts(counts, overallY, currentL)
@@ -1465,7 +1465,7 @@ setMethod("recursiveSplitModule",
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- celdaClusters(tempModel)$y
+      overallY <- as.integer(celdaClusters(tempModel)$y)
 
       # Adjust decomposed count matrices
       p <- .cGReDecomposeCounts(counts,
@@ -1543,7 +1543,7 @@ setMethod("recursiveSplitModule",
       nchains = 1,
       verbose = FALSE
     )
-    overallY <- celdaClusters(modelInitial)$y
+    overallY <- as.integer(celdaClusters(modelInitial)$y)
     currentL <- length(unique(overallY)) + 1
 
     ## Perform splitting for y labels
@@ -1572,7 +1572,7 @@ setMethod("recursiveSplitModule",
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- celdaClusters(tempModel)$y
+      overallY <- as.integer(celdaClusters(tempModel)$y)
 
       ## Add new model to results list and increment L
       .logMessages(
