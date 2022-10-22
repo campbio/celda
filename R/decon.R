@@ -493,11 +493,11 @@ setMethod(
         append = TRUE,
         verbose = verbose
       )
-      countsBat <- methods::as(countsBat, "dgCMatrix")
+      countsBat <- methods::as(countsBat, "CsparseMatrix")
     }
     if (!is.null(bgBat)) {
       if (!inherits(bgBat, "dgCMatrix")) {
-        bgBat <- methods::as(bgBat, "dgCMatrix")
+        bgBat <- methods::as(bgBat, "CsparseMatrix")
       }
     }
 

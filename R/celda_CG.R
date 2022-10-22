@@ -222,7 +222,7 @@ setMethod("celda_CG",
         verbose = TRUE) {
 
         # Convert to sparse matrix
-        x <- methods::as(x, "dgCMatrix")
+        x <- methods::as(x, "CsparseMatrix")
 
         ls <- list()
         ls[[useAssay]] <- x

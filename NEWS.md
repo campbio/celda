@@ -1,5 +1,6 @@
 # celda v1.13.0 (2022-10-20)
 * Bug fixes related to cluster labels stored as factors and plotting
+* Updated sparse matrix conversion to work with Matrix v1.4-2
 
 # celda v1.12.0 (2022-04-30)
 * Update to match Bioconductor 3.15 release version
