@@ -1,11 +1,11 @@
 pandoc: 2.9.2.1
-pkgdown: 1.6.1
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  articles/celda_pbmc3k: celda_pbmc3k.html
-  articles/decontX_pbmc4k: decontX_pbmc4k.html
-  articles/installation: installation.html
+  celda_pbmc3k: celda_pbmc3k.html
+  decontX_pbmc4k: decontX_pbmc4k.html
+  installation: installation.html
   celda: celda.html
   decontX: decontX.html
-last_built: 2022-04-30T19:13Z
+last_built: 2023-02-15T12:29Z
 
