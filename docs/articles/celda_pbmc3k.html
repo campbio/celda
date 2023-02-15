@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.13.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.14.2</span>
       </span>
     </div>
 
@@ -93,16 +93,14 @@
 
       
 
-      </header><script src="celda_pbmc3k_files/kePrint-0.0.1/kePrint.js"></script><link href="celda_pbmc3k_files/lightable-0.0.1/lightable.css" rel="stylesheet">
+      </header><script src="celda_pbmc3k_files/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="celda_pbmc3k_files/kePrint-0.0.1/kePrint.js"></script><link href="celda_pbmc3k_files/lightable-0.0.1/lightable.css" rel="stylesheet">
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Celda - Analysis of PBMC3K</h1>
-                        <h4 data-toc-skip class="author">Joshua
-Campbell, Zhe Wang</h4>
+                        <h4 data-toc-skip class="author">Joshua Campbell, Zhe Wang</h4>
             
-            <h4 data-toc-skip class="date">Compiled October 22,
-2022</h4>
+            <h4 data-toc-skip class="date">Compiled February 15, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/campbio/celda/blob/HEAD/vignettes/articles/celda_pbmc3k.Rmd" class="external-link"><code>vignettes/articles/celda_pbmc3k.Rmd</code></a></small>
       <div class="hidden name"><code>celda_pbmc3k.Rmd</code></div>
@@ -114,94 +112,37 @@ Campbell, Zhe Wang</h4>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Celda is a Bayesian hierarchical model that can perform bi-clustering
-of features into modules and observations into subpopulations. In this
-tutorial, we will apply Celda to a real-world single-cell RNA sequencing
-(scRNA-seq) dataset of 2,700 Peripheral Blood Mononuclear Cells (PBMCs)
-collected from a healthy donor. This dataset (PBMC3K) is available from
-10X Genomics and can be found on the <a href="https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/pbmc3k" target="_blank" class="external-link">10X website</a>.</p>
-<p>The <code>celda</code> package uses the <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" target="_blank" class="external-link">SingleCellExperiment</a> (SCE) object for management of
-expression matrices, feature/cell annotation data, and metadata. All of
-the functions have an SCE object as the first input parameter. The
-functions operate on a matrix stored in the <code>assay</code> slot of
-the SCE object. The parameter <code>useAssay</code> can be used to
-specify which matrix to use (the default is <code>"counts"</code>).
-Matrices can be of class <code>matrix</code> or <code>dgCMatrix</code>
-from the <a href="https://cran.r-project.org/web/packages/Matrix/index.html" class="external-link">Matrix</a>
-package. While the primary clustering is performed with functions from
-the celda package, the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" class="external-link">singleCellTK</a>
-package is used for some other tasks such as importing data, quality
-control, and marker identification with differential expression.</p>
+<p>Celda is a Bayesian hierarchical model that can perform bi-clustering of features into modules and observations into subpopulations. In this tutorial, we will apply Celda to a real-world single-cell RNA sequencing (scRNA-seq) dataset of 2,700 Peripheral Blood Mononuclear Cells (PBMCs) collected from a healthy donor. This dataset (PBMC3K) is available from 10X Genomics and can be found on the <a href="https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/pbmc3k" target="_blank" class="external-link">10X website</a>.</p>
+<p>The <code>celda</code> package uses the <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" target="_blank" class="external-link">SingleCellExperiment</a> (SCE) object for management of expression matrices, feature/cell annotation data, and metadata. All of the functions have an SCE object as the first input parameter. The functions operate on a matrix stored in the <code>assay</code> slot of the SCE object. The parameter <code>useAssay</code> can be used to specify which matrix to use (the default is <code>"counts"</code>). Matrices can be of class <code>matrix</code> or <code>dgCMatrix</code> from the <a href="https://cran.r-project.org/web/packages/Matrix/index.html" class="external-link">Matrix</a> package. While the primary clustering is performed with functions from the celda package, the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" class="external-link">singleCellTK</a> package is used for some other tasks such as importing data, quality control, and marker identification with differential expression.</p>
 </div>
 <div class="section level2">
 <h2 id="importing-data">Importing data<a class="anchor" aria-label="anchor" href="#importing-data"></a>
 </h2>
-<p>The PBMC3K data can be easily loaded via the Bioconductor package <a href="https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html" target="_blank" class="external-link">TENxPBMCData</a>. <code>TENxPBMCData</code> is an
-experiment package that provides resources for various PBMC datasets
-generated by 10X Genomics. When using this package, the column names of
-returned SCE object are <code>NULL</code> by default. For this example,
-we paste together the name of the sample with the cell barcode to
-generate column names for the SCE object. Additionally, the count matrix
-within <code>sce</code> object is converted from a
-<code>DelayedMatrix</code> object to a sparse matrix
-<code>dgCMatrix</code> object.</p>
+<p>The PBMC3K data can be easily loaded via the Bioconductor package <a href="https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html" target="_blank" class="external-link">TENxPBMCData</a>. <code>TENxPBMCData</code> is an experiment package that provides resources for various PBMC datasets generated by 10X Genomics. When using this package, the column names of returned SCE object are <code>NULL</code> by default. For this example, we paste together the name of the sample with the cell barcode to generate column names for the SCE object. Additionally, the count matrix within <code>sce</code> object is converted from a <code>DelayedMatrix</code> object to a sparse matrix <code>dgCMatrix</code> object.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: package 'IRanges' was built under R version 4.2.1</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: package 'GenomeInfoDb' was built under R version 4.2.1</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: package 'HDF5Array' was built under R version 4.2.1</span></span></code></pre>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html" class="external-link">TENxPBMCData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html" class="external-link">TENxPBMCData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"pbmc3k_"</span>, <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Sequence</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">as</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"dgCMatrix"</span><span class="op">)</span></span></code></pre></div>
-<p>If you have the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" target="_blank" class="external-link">singleCellTK</a> package installed, then this dataset
-can be imported and converted with a single command:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>If you have the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" target="_blank" class="external-link">singleCellTK</a> package installed, then this dataset can be imported and converted with a single command:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/" class="external-link">singleCellTK</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/importExampleData.html" class="external-link">importExampleData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span></code></pre></div>
-<p>To get your own data into a <code>SingleCellExperiment</code> object,
-the <code>singleCellTK</code> package has several importing functions
-for different preprocessing tools including CellRanger, STARsolo,
-BUStools, Optimus, DropEST, SEQC, and Alevin/Salmon. For example, the
-following code can be used as a template to read in multiple samples
-processed with CellRanger:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>To get your own data into a <code>SingleCellExperiment</code> object, the <code>singleCellTK</code> package has several importing functions for different preprocessing tools including CellRanger, STARsolo, BUStools, Optimus, DropEST, SEQC, and Alevin/Salmon. For example, the following code can be used as a template to read in multiple samples processed with CellRanger:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/" class="external-link">singleCellTK</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/importCellRanger.html" class="external-link">importCellRanger</a></span><span class="op">(</span>sampleDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path/to/sample1/"</span>, <span class="st">"path/to/sample2/"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Note:</strong> As a reminder, you can view the assays, column
-annotation, and row annotation stored in the SCE with the commands
-<code>assays(sce)</code>, <code>colData(sce)</code>, and
-<code>rowData(sce)</code>, respectively.</p>
-<p>Finally, we set the <code>rownames</code> of the SCE to the gene
-symbol:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p><strong>Note:</strong> As a reminder, you can view the assays, column annotation, and row annotation stored in the SCE with the commands <code>assays(sce)</code>, <code>colData(sce)</code>, and <code>rowData(sce)</code>, respectively.</p>
+<p>Finally, we set the <code>rownames</code> of the SCE to the gene symbol:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Symbol_TENx</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quality-control">Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
 </h2>
-<p>Quality control and filtering of cells is often needed before
-down-stream analyses such as dimensionality reduction and clustering.
-Typical filtering procedures include exclusion of poor quality cells
-with low numbers of counts/UMIs, estimation and removal of ambient RNA,
-and identification of potential doublet/multiplets. Many tools and
-packages are available to perform these operations and users are free to
-apply their tool(s) of choice as the celda clustering functions will
-work with any matrix stored in an SCE object. The celda package does
-contain a Bayesian method called <a href="https://doi.org/10.1186/s13059-020-1950-6" target="_blank" class="external-link">decontX</a> to estimate and remove transcript
-contamination in individual cells in a scRNA-seq dataset.</p>
-<p>To perform QC, we suggest using the <code>runCellQC</code> function
-in <code>singleCellTK</code> package. This is a wrapper for several
-methods for calculation of QC metrics, doublet detection, and estimation
-of ambient RNA (including decontX). Below is a quick example of how to
-perform standard QC before applying celda. If you have another preferred
-approach or your data has already been QC’ed, you can move to <a href="#featureselection">Feature selection</a> section. For this
-tutorial, we will only run one doublet detection algorithm and one
-decontamination algorithms. For a full list of algorithms that this
-function runs by default, see <code><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">?runCellQC</a></code>. We will also
-quantify the percentage of mitochondrial genes in each cell as this is
-often used as a measure of cell viability.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>Quality control and filtering of cells is often needed before down-stream analyses such as dimensionality reduction and clustering. Typical filtering procedures include exclusion of poor quality cells with low numbers of counts/UMIs, estimation and removal of ambient RNA, and identification of potential doublet/multiplets. Many tools and packages are available to perform these operations and users are free to apply their tool(s) of choice as the celda clustering functions will work with any matrix stored in an SCE object. The celda package does contain a Bayesian method called <a href="https://doi.org/10.1186/s13059-020-1950-6" target="_blank" class="external-link">decontX</a> to estimate and remove transcript contamination in individual cells in a scRNA-seq dataset.</p>
+<p>To perform QC, we suggest using the <code>runCellQC</code> function in <code>singleCellTK</code> package. This is a wrapper for several methods for calculation of QC metrics, doublet detection, and estimation of ambient RNA (including decontX). Below is a quick example of how to perform standard QC before applying celda. If you have another preferred approach or your data has already been QC’ed, you can move to <a href="#featureselection">Feature selection</a> section. For this tutorial, we will only run one doublet detection algorithm and one decontamination algorithms. For a full list of algorithms that this function runs by default, see <code><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">?runCellQC</a></code>. We will also quantify the percentage of mitochondrial genes in each cell as this is often used as a measure of cell viability.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/" class="external-link">singleCellTK</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get list of mitochondrial genes</span></span>
@@ -209,63 +150,35 @@ often used as a measure of cell viability.</p>
 <span></span>
 <span><span class="co"># Run QC</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">runCellQC</a></span><span class="op">(</span><span class="va">sce</span>, sample <span class="op">=</span> <span class="cn">NULL</span>, algorithms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"QCMetrics"</span>, <span class="st">"scDblFinder"</span>, <span class="st">"decontX"</span><span class="op">)</span>, geneSetList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mito<span class="op">=</span><span class="va">mito.genes</span><span class="op">)</span>, geneSetListLocation <span class="op">=</span> <span class="st">"rownames"</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Note:</strong> If you have cells from multiple samples stored
-in the SCE object, make sure to supply the <code>sample</code> parameter
-as the QC tools need to be applied to cells from each sample
-individually.</p>
-<p>Individual sets of QC metrics can be plotted with specific functions.
-For example to plot distributions of total numbers of UMIs derived from
-<code>runPerCellQC</code>, doublet scores from
-<code>runScDblFinder</code>, and contamination scores from
-<code>runDecontX</code> (all of which were run by the
-<code>runCellQC</code> function), the following plotting functions can
-be used:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p><strong>Note:</strong> If you have cells from multiple samples stored in the SCE object, make sure to supply the <code>sample</code> parameter as the QC tools need to be applied to cells from each sample individually.</p>
+<p>Individual sets of QC metrics can be plotted with specific functions. For example to plot distributions of total numbers of UMIs derived from <code>runPerCellQC</code>, doublet scores from <code>runScDblFinder</code>, and contamination scores from <code>runDecontX</code> (all of which were run by the <code>runCellQC</code> function), the following plotting functions can be used:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotRunPerCellQCResults.html" class="external-link">plotRunPerCellQCResults</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/sctk_qc_plot-1.png" width="700"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotScDblFinderResults.html" class="external-link">plotScDblFinderResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"decontX_UMAP"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/sctk_qc_plot-2.png" width="700"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotDecontXResults.html" class="external-link">plotDecontXResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"decontX_UMAP"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/sctk_qc_plot-3.png" width="700"></p>
-<p>An comprehensive HTML report can be generated to visualize and
-explore the QC metrics in greater detail:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>An comprehensive HTML report can be generated to visualize and explore the QC metrics in greater detail:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/reportCellQC.html" class="external-link">reportCellQC</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
-<p>After examining the distributions of various QC metrics, poor quality
-cells will need to be removed. Typically, thresholds for QC metrics
-should exclude cells that are outliers of the distribution (i.e. long
-tails in the violin or density plots). Cells can be removed using the
-<code>subsetSCECols</code> function. Metrics stored in the
-<code>colData</code> of the SCE object can be filtered using the
-<code>colData</code> parameter. Here we will limit to cells with at
-least 600 counts and 300 genes detected:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>After examining the distributions of various QC metrics, poor quality cells will need to be removed. Typically, thresholds for QC metrics should exclude cells that are outliers of the distribution (i.e. long tails in the violin or density plots). Cells can be removed using the <code>subsetSCECols</code> function. Metrics stored in the <code>colData</code> of the SCE object can be filtered using the <code>colData</code> parameter. Here we will limit to cells with at least 600 counts and 300 genes detected:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Filter SCE</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/subsetSCECols.html" class="external-link">subsetSCECols</a></span><span class="op">(</span><span class="va">sce</span>, colData <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"total &gt; 600"</span>, <span class="st">"detected &gt; 300"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># See number of cells after filtering</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 2675</span></span></code></pre>
-<p>Other common metrics to filter on include
-<code>subsets_mito_percent</code> for removal of cells with high
-mitochondrial percentage, <code>decontX_contamination</code> for removal
-of cells with higher levels of contamination from ambient RNA,
-<code>scDblFinder_class</code> to remove doublets (or calls from any of
-the other doublet detection algorithms). See the
-<code>singleCellTK</code> <a href="sctk.camplab.net">documentation</a>
-For more information on performing comprehensive QC and filtering.</p>
+<p>Other common metrics to filter on include <code>subsets_mito_percent</code> for removal of cells with high mitochondrial percentage, <code>decontX_contamination</code> for removal of cells with higher levels of contamination from ambient RNA, <code>scDblFinder_class</code> to remove doublets (or calls from any of the other doublet detection algorithms). See the <code>singleCellTK</code> <a href="sctk.camplab.net">documentation</a> For more information on performing comprehensive QC and filtering.</p>
 </div>
 <div class="section level2">
 <h2 id="featureselection">Feature selection<a class="anchor" aria-label="anchor" href="#featureselection"></a>
 </h2>
-<p>In general, removing features with low numbers of counts across all
-cells is recommended to reduce computational run time. A simple
-selection can be performed by removing features with a minimum number of
-counts in a minimum number of cells using the
-<code>selectFeatures</code> function:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>In general, removing features with low numbers of counts across all cells is recommended to reduce computational run time. A simple selection can be performed by removing features with a minimum number of counts in a minimum number of cells using the <code>selectFeatures</code> function:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Select features with at least 3 counts in at least 3 cells</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">celda</span><span class="op">)</span></span>
 <span><span class="va">useAssay</span> <span class="op">&lt;-</span> <span class="st">"counts"</span></span>
@@ -275,51 +188,15 @@ counts in a minimum number of cells using the
 <span><span class="co"># See number of features after filtering</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span><span class="va">sce</span>, <span class="va">altExpName</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 2639</span></span></code></pre>
-<p>The <code>useAssay</code> parameter is used to denote which
-assay/matrix within the SCE to use for filtering. The default raw counts
-matrix is traditionally stored in the <code>"counts"</code> assay. If
-<code>decontX</code> was previously run during QC, then the
-decontaminated counts can be used by setting this parameter to
-<code>"decontXcounts"</code>. We will save this parameter in a variable
-called <code>useAssay</code> which will be used as input in several
-downstream functions.</p>
-<p><strong>Note:</strong> The subsetted matrix is stored in the
-“alternative experiment” slot (<code>altExp</code>) within the SCE. This
-allows for a matrix with a different number of rows to be stored within
-the same SCE object (rather than creating two SCE objects). The celda
-functions described in the next several sections operate on a matrix
-stored in the <code>altExp</code> slot. The default name given to the
-alternative experiment and used in all downstream celda functions is
-<code>"featureSubset"</code>. If the <code>altExpName</code> parameter
-is changed here, then it will need to be supplied to downstream plotting
-functions as well. The list of alternative experiments in an SCE can be
-view with <code>altExpNames(sce)</code>. If you have already have an SCE
-with selected features or do not want to perform feature selection, then
-you need to set the alternative experiment directly with a command like
-<code>altExp(sce, "featureSubset") &lt;- assay(sce, "counts")</code>. In
-the future, this will be updated to be more simple by utilizing the
-<code>ExperimentSubset</code> package.</p>
-<p>If the number of features is still relatively large (e.g. &gt;5000),
-an alternative approach is to select highly variable features that can
-be used in the downstream clustering. The advantage of this approach is
-that it can greatly speed up celda and can improve with module detection
-among highly variable features with overall lower expression. The
-disadvantage of this approach is that features that do not fall into the
-highly variable group will not be clustered into modules. The celda
-package does not include methods for selection of highly variable genes
-(HVGs). However, the <code>singleCellTK</code> provides wrappers for
-methods used in <a href="https://doi.org/10.1016/j.cell.2019.05.031" target="_blank" class="external-link">Seurat</a> and <a href="https://bioconductor.org/packages/release/bioc/html/scran.html" class="external-link">Scran</a>.
-We recommend keeping at least 2,000-5,000 HVGs for clustering. Here is
-some example code of how to select the top 5,000 most variable genes and
-store it back in the SCE as an <code>altExp</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p>The <code>useAssay</code> parameter is used to denote which assay/matrix within the SCE to use for filtering. The default raw counts matrix is traditionally stored in the <code>"counts"</code> assay. If <code>decontX</code> was previously run during QC, then the decontaminated counts can be used by setting this parameter to <code>"decontXcounts"</code>. We will save this parameter in a variable called <code>useAssay</code> which will be used as input in several downstream functions.</p>
+<p><strong>Note:</strong> The subsetted matrix is stored in the “alternative experiment” slot (<code>altExp</code>) within the SCE. This allows for a matrix with a different number of rows to be stored within the same SCE object (rather than creating two SCE objects). The celda functions described in the next several sections operate on a matrix stored in the <code>altExp</code> slot. The default name given to the alternative experiment and used in all downstream celda functions is <code>"featureSubset"</code>. If the <code>altExpName</code> parameter is changed here, then it will need to be supplied to downstream plotting functions as well. The list of alternative experiments in an SCE can be view with <code>altExpNames(sce)</code>. If you have already have an SCE with selected features or do not want to perform feature selection, then you need to set the alternative experiment directly with a command like <code>altExp(sce, "featureSubset") &lt;- assay(sce, "counts")</code>. In the future, this will be updated to be more simple by utilizing the <code>ExperimentSubset</code> package.</p>
+<p>If the number of features is still relatively large (e.g. &gt;5000), an alternative approach is to select highly variable features that can be used in the downstream clustering. The advantage of this approach is that it can greatly speed up celda and can improve with module detection among highly variable features with overall lower expression. The disadvantage of this approach is that features that do not fall into the highly variable group will not be clustered into modules. The celda package does not include methods for selection of highly variable genes (HVGs). However, the <code>singleCellTK</code> provides wrappers for methods used in <a href="https://doi.org/10.1016/j.cell.2019.05.031" target="_blank" class="external-link">Seurat</a> and <a href="https://bioconductor.org/packages/release/bioc/html/scran.html" class="external-link">Scran</a>. We recommend keeping at least 2,000-5,000 HVGs for clustering. Here is some example code of how to select the top 5,000 most variable genes and store it back in the SCE as an <code>altExp</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/" class="external-link">singleCellTK</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">seuratFindHVG</span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, hvgMethod <span class="op">=</span> <span class="st">"vst"</span><span class="op">)</span></span>
 <span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/getTopHVG.html" class="external-link">getTopHVG</a></span><span class="op">(</span><span class="va">sce</span>, method <span class="op">=</span> <span class="st">"vst"</span>, n <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span><span class="va">sce</span>, <span class="va">altExpName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span><span class="va">g</span>, <span class="op">]</span></span></code></pre></div>
-<p>For the rest of the analysis with the PBMC3K data, we will use the
-first approach where features with at least 3 counts in 3 cells were
-included.</p>
+<p>For the rest of the analysis with the PBMC3K data, we will use the first approach where features with at least 3 counts in 3 cells were included.</p>
 </div>
 <div class="section level2">
 <h2 id="analysis-with-celda">Analysis with Celda<a class="anchor" aria-label="anchor" href="#analysis-with-celda"></a>
@@ -327,136 +204,54 @@ included.</p>
 <div class="section level3">
 <h3 id="bi-clustering-with-known-numbers-of-clusters">Bi-clustering with known numbers of clusters<a class="anchor" aria-label="anchor" href="#bi-clustering-with-known-numbers-of-clusters"></a>
 </h3>
-<p>As mentioned earlier, celda is discrete Bayesian model that is able
-to simultaneously bi-cluster features into modules and cells into cell
-clusters. The primary bi-clustering model can be accessed with the
-function <code>celda_CG</code>. This function operates on a matrix
-stored as an alternative experiment in the <code>altExp</code> slot. If
-you did not perform feature selection as recommended in the previous
-section and your matrix of interest is not currently located in an
-<code>altExp</code> slot, the following code can be used to copy a
-matrix in the main assay slot to the <code>altExp</code> slot:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>useAssay <span class="ot">&lt;-</span> <span class="st">"counts"</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>altExpName <span class="ot">&lt;-</span> <span class="st">"featureSubset"</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">altExp</span>(sce, altExpName) <span class="ot">&lt;-</span> <span class="fu">assay</span>(sce, useAssay)<span class="st">`</span><span class="at">. </span></span></code></pre></div>
-<p>The two major adjustable parameters in this model are <code>L</code>,
-the number of modules, and <code>K</code>, the number of cell
-populations. The following code bi-clusters the PBMC3K dataset into 100
-modules and 15 cell populations:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<p>As mentioned earlier, celda is discrete Bayesian model that is able to simultaneously bi-cluster features into modules and cells into cell clusters. The primary bi-clustering model can be accessed with the function <code>celda_CG</code>. This function operates on a matrix stored as an alternative experiment in the <code>altExp</code> slot. If you did not perform feature selection as recommended in the previous section and your matrix of interest is not currently located in an <code>altExp</code> slot, the following code can be used to copy a matrix in the main assay slot to the <code>altExp</code> slot:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>useAssay &lt;-<span class="st"> "counts"</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>altExpName &lt;-<span class="st"> "featureSubset"</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="kw">altExp</span>(sce, altExpName) &lt;-<span class="st"> </span><span class="kw">assay</span>(sce, useAssay)<span class="st">`</span><span class="dt">. </span></span></code></pre></div>
+<p>The two major adjustable parameters in this model are <code>L</code>, the number of modules, and <code>K</code>, the number of cell populations. The following code bi-clusters the PBMC3K dataset into 100 modules and 15 cell populations:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/celda_CG.html">celda_CG</a></span><span class="op">(</span><span class="va">sce</span>, L <span class="op">=</span> <span class="fl">100</span>, K <span class="op">=</span> <span class="fl">15</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
-<p>However, in most cases, the number of feature modules
-(<code>L</code>) and the number of cell clusters (<code>K</code>) are
-not known beforehand. In the next sections, we outline procedures that
-can be used suggest reasonable choices for these parameters. If the data
-is clustered with the code above by supplying K and L directly to the
-<code>celda_CG</code> function, then you can skip the next section and
-proceed to <a href="#embed">Creating 2-D embeddings</a>.</p>
+<p>However, in most cases, the number of feature modules (<code>L</code>) and the number of cell clusters (<code>K</code>) are not known beforehand. In the next sections, we outline procedures that can be used suggest reasonable choices for these parameters. If the data is clustered with the code above by supplying K and L directly to the <code>celda_CG</code> function, then you can skip the next section and proceed to <a href="#embed">Creating 2-D embeddings</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="finding-the-number-of-modules">Finding the number of modules<a class="anchor" aria-label="anchor" href="#finding-the-number-of-modules"></a>
 </h3>
-<p>In order to help choose a reasonable solutions for L and K, celda
-provides step-wise splitting procedures along with measurements of
-perplexity to suggest reasonable choices for <code>L</code> and
-<code>K</code>. First, the function <code>recursiveSplitModule</code>
-can be used to cluster features into modules for a range of
-<code>L</code>. Within each step, the best split of an existing module
-into 2 new modules is chosen to create the L-th module. The module
-labels of the previous model with <span class="math inline">\(L-1\)</span> modules are used as the initial
-starting values in the next model with <span class="math inline">\(L\)</span> modules. Note that the initialization
-step may take longer with larger numbers of cells in the dataset and the
-splitting procedure will take longer with larger numbers features in the
-dataset. Celda models with a L range between <code>initialL = 10</code>
-and <code>maxL = 150</code> are tested in the example below.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<p>In order to help choose a reasonable solutions for L and K, celda provides step-wise splitting procedures along with measurements of perplexity to suggest reasonable choices for <code>L</code> and <code>K</code>. First, the function <code>recursiveSplitModule</code> can be used to cluster features into modules for a range of <code>L</code>. Within each step, the best split of an existing module into 2 new modules is chosen to create the L-th module. The module labels of the previous model with <span class="math inline">\(L-1\)</span> modules are used as the initial starting values in the next model with <span class="math inline">\(L\)</span> modules. Note that the initialization step may take longer with larger numbers of cells in the dataset and the splitting procedure will take longer with larger numbers features in the dataset. Celda models with a L range between <code>initialL = 10</code> and <code>maxL = 150</code> are tested in the example below.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">moduleSplit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recursiveSplitModule.html">recursiveSplitModule</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, initialL <span class="op">=</span> <span class="fl">10</span>, maxL <span class="op">=</span> <span class="fl">150</span><span class="op">)</span></span></code></pre></div>
-<p>Perplexity has been commonly used in the topic models to measure how
-well a probabilistic model predicts observed samples (<a href="https://dl.acm.org/doi/10.5555/944919.944937" target="_blank" class="external-link">Blei
-et al., 2003</a>). Here, we use perplexity to evaluate the performance
-of individual models by calculating the probability of observing
-expression counts given an estimated Celda model. Rather than performing
-cross-validation which is computationally expensive, a series of test
-sets are created by sampling the counts from each cell according to a
-multinomial distribution defined by dividing the counts for each gene in
-the cell by the total number of counts for that cell. Perplexity is then
-calculated on each test set and can be visualized using function
-<code>plotGridSearchPerplexity</code>. A lower perplexity indicates a
-better model fit.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<p>Perplexity has been commonly used in the topic models to measure how well a probabilistic model predicts observed samples (<a href="https://dl.acm.org/doi/10.5555/944919.944937" target="_blank" class="external-link">Blei et al., 2003</a>). Here, we use perplexity to evaluate the performance of individual models by calculating the probability of observing expression counts given an estimated Celda model. Rather than performing cross-validation which is computationally expensive, a series of test sets are created by sampling the counts from each cell according to a multinomial distribution defined by dividing the counts for each gene in the cell by the total number of counts for that cell. Perplexity is then calculated on each test set and can be visualized using function <code>plotGridSearchPerplexity</code>. A lower perplexity indicates a better model fit.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotGridSearchPerplexity.html">plotGridSearchPerplexity</a></span><span class="op">(</span><span class="va">moduleSplit</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, sep <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_split_perplexity-1.png" width="700"></p>
-<p>The perplexity alone often does not show a clear elbow or “leveling
-off”. However, the rate of perplexity change (RPC) can be more
-informative to determine when adding new modules does not add much
-additional information <a href="https://doi.org/10.1186/1471-2105-16-S13-S8" target="_blank" class="external-link">Zhao
-et al., 2015</a>). An RPC closer to zero indicates that the addition of
-new modules or cell clusters is not substantially decreasing the
-perplexity. The RPC of models can be visualized using function
-<code>plotRPC</code>:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<p>The perplexity alone often does not show a clear elbow or “leveling off”. However, the rate of perplexity change (RPC) can be more informative to determine when adding new modules does not add much additional information <a href="https://doi.org/10.1186/1471-2105-16-S13-S8" target="_blank" class="external-link">Zhao et al., 2015</a>). An RPC closer to zero indicates that the addition of new modules or cell clusters is not substantially decreasing the perplexity. The RPC of models can be visualized using function <code>plotRPC</code>:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotRPC.html">plotRPC</a></span><span class="op">(</span><span class="va">moduleSplit</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_split_rpc-1.png" width="700"></p>
-<p>In this case, we will choose an <code>L</code> of 80 as the RPC curve
-tends to level off at this point:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<p>In this case, we will choose an <code>L</code> of 80 as the RPC curve tends to level off at this point:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">L</span> <span class="op">&lt;-</span> <span class="fl">80</span></span></code></pre></div>
 <div class="line-block">
-<strong>Note:</strong> Perplexity and RPC are
-meant to be guides to give a sense of a possible starting point for
-<code>L</code>. However, they may not always give a clear “leveling off”
-depending of the complexity and quality of the dataset. <strong>Do not
-give up if the choice of L is unclear or imperfect!</strong> If the
-<code>L</code> to choose is unclear from these, then you can set a
-somewhat high number (e.g. 75) and move to the next step of selecting
-<code>K</code>. Later on, manual review of modules using functions such
-as <code>moduleHeatmap</code> can give a sense of whether individual
-modules should be further split up by selecting higher <code>L</code>.
-For example, you can start exploring the cell populations and modules
-with <code>L = 75</code>. If some modules need to be further split, you
-can then try <code>L = 100</code>, <code>L = 125</code>, and so
-on.</div>
+<strong>Note:</strong> Perplexity and RPC are meant to be guides to give a sense of a possible starting point for <code>L</code>. However, they may not always give a clear “leveling off” depending of the complexity and quality of the dataset. <strong>Do not give up if the choice of L is unclear or imperfect!</strong> If the <code>L</code> to choose is unclear from these, then you can set a somewhat high number (e.g. 75) and move to the next step of selecting <code>K</code>. Later on, manual review of modules using functions such as <code>moduleHeatmap</code> can give a sense of whether individual modules should be further split up by selecting higher <code>L</code>. For example, you can start exploring the cell populations and modules with <code>L = 75</code>. If some modules need to be further split, you can then try <code>L = 100</code>, <code>L = 125</code>, and so on.</div>
 </div>
 <div class="section level3">
 <h3 id="finding-the-number-of-cell-subpopulations">Finding the number of cell subpopulations<a class="anchor" aria-label="anchor" href="#finding-the-number-of-cell-subpopulations"></a>
 </h3>
-<p>Now we extract the Celda model of <code>L =</code><span class="math inline">\(L\)</span> with function
-<code>subsetCeldaList</code> and run <code>recursiveSplitCell</code> to
-fit models with a range of <code>K</code> between 3 and 25:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<p>Now we extract the Celda model of <code>L =</code><span class="math inline">\(L\)</span> with function <code>subsetCeldaList</code> and run <code>recursiveSplitCell</code> to fit models with a range of <code>K</code> between 3 and 25:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subsetCeldaList.html">subsetCeldaList</a></span><span class="op">(</span><span class="va">moduleSplit</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>L <span class="op">=</span> <span class="va">L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recursiveSplitCell.html">recursiveSplitCell</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, initialK <span class="op">=</span> <span class="fl">3</span>, maxK <span class="op">=</span> <span class="fl">25</span>, yInit <span class="op">=</span> <span class="fu"><a href="../reference/celdaModules.html">celdaModules</a></span><span class="op">(</span><span class="va">temp</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The perplexities and RPC of models can be visualized using the same
-functions <code>plotGridSearchPerplexity</code> and
-<code>plotRPC</code>.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<p>The perplexities and RPC of models can be visualized using the same functions <code>plotGridSearchPerplexity</code> and <code>plotRPC</code>.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotGridSearchPerplexity.html">plotGridSearchPerplexity</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/cell_split_perplexity-1.png" width="700"></p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotRPC.html">plotRPC</a></span><span class="op">(</span><span class="va">sce</span>, , altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/cell_split_perplexity-2.png" width="700"></p>
-<p>The perplexity continues to decrease with larger values of
-<code>K</code>. The RPC generally levels off between 13 and 16 and we
-choose the model with <code>K = 14</code> for downstream analysis. The
-follow code selects the final <code>celda_CG</code> model with
-<code>L = 80</code> and <code>K = 14</code>:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<p>The perplexity continues to decrease with larger values of <code>K</code>. The RPC generally levels off between 13 and 16 and we choose the model with <code>K = 14</code> for downstream analysis. The follow code selects the final <code>celda_CG</code> model with <code>L = 80</code> and <code>K = 14</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">14</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subsetCeldaList.html">subsetCeldaList</a></span><span class="op">(</span><span class="va">sce</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>L <span class="op">=</span> <span class="va">L</span>, K <span class="op">=</span> <span class="va">K</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Note:</strong> Similar to choosing <code>L</code>, you can
-guess an initial value of <code>K</code> based off of the perplexity and
-RPC plots and then move to the downstream exploratory analyses described
-in the next several sections. After reviewing the cell clusters on 2-D
-embeddings and module heatmaps, you may have to come back to tweak the
-choice of <code>K</code> until you have something that captures the
-cellular heterogeneity within the data without “over-clustering” cells
-into too many subpopulations. This may be an iterative procedure of
-going back-and-forth between choices of <code>K</code> and plotting the
-results. So do not let imperfect perplexity/PRC plots prevent you from
-moving on to the rest of the analysis. Often times, using an initial
-guess for <code>K</code> will allow you to move on in the analysis to
-get a sense of the major sources of biological heterogeneity present in
-the data.</p>
+<p><strong>Note:</strong> Similar to choosing <code>L</code>, you can guess an initial value of <code>K</code> based off of the perplexity and RPC plots and then move to the downstream exploratory analyses described in the next several sections. After reviewing the cell clusters on 2-D embeddings and module heatmaps, you may have to come back to tweak the choice of <code>K</code> until you have something that captures the cellular heterogeneity within the data without “over-clustering” cells into too many subpopulations. This may be an iterative procedure of going back-and-forth between choices of <code>K</code> and plotting the results. So do not let imperfect perplexity/PRC plots prevent you from moving on to the rest of the analysis. Often times, using an initial guess for <code>K</code> will allow you to move on in the analysis to get a sense of the major sources of biological heterogeneity present in the data.</p>
 </div>
 </div>
 <div class="section level2">
@@ -465,75 +260,43 @@ the data.</p>
 <div class="section level3">
 <h3 id="embed">Creating 2-D embeddings<a class="anchor" aria-label="anchor" href="#embed"></a>
 </h3>
-<p>After selecting a celda model with specific values of <code>L</code>
-and <code>K</code>, we can then perform additional exploratory and
-downstream analyses to understand the biology of the transcriptional
-modules and cell populations. We can start by generating a dimension
-reduction plot with the Uniform Manifold Approximation and Projection
-(UMAP) method to visualize the relationships between the cells in a 2-D
-embedding. This can be done with function <code>celdaUmap</code>.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<p>After selecting a celda model with specific values of <code>L</code> and <code>K</code>, we can then perform additional exploratory and downstream analyses to understand the biology of the transcriptional modules and cell populations. We can start by generating a dimension reduction plot with the Uniform Manifold Approximation and Projection (UMAP) method to visualize the relationships between the cells in a 2-D embedding. This can be done with function <code>celdaUmap</code>.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/celdaUmap.html">celdaUmap</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
-<p>Alternatively, a t-distributed stochastic neighbor embedding (t-SNE)
-can be generated using function <code>celdaTsne</code>. The UMAP and
-t-SNE plots generated by <code>celdaUmap</code> and
-<code>celdaTsne</code> are computed based on the module probabilities
-(analogous to using PCs from PCA). The calculated dimension reduction
-coordinates for the cells are stored under the <code>reducedDim</code>
-slot of the <code>altExp</code> slot in the original SCE object. The
-follow command lists the names of the dimensionality reductions that can
-be used in downstream plotting functions in the next few sections:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<p>Alternatively, a t-distributed stochastic neighbor embedding (t-SNE) can be generated using function <code>celdaTsne</code>. The UMAP and t-SNE plots generated by <code>celdaUmap</code> and <code>celdaTsne</code> are computed based on the module probabilities (analogous to using PCs from PCA). The calculated dimension reduction coordinates for the cells are stored under the <code>reducedDim</code> slot of the <code>altExp</code> slot in the original SCE object. The follow command lists the names of the dimensionality reductions that can be used in downstream plotting functions in the next few sections:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDimNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span><span class="va">sce</span>, <span class="va">altExpName</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "decontX_UMAP" "celda_UMAP"</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="plotting-cell-population-cluster-labels">Plotting cell population cluster labels<a class="anchor" aria-label="anchor" href="#plotting-cell-population-cluster-labels"></a>
 </h3>
-<p>The function <code>plotDimReduceCluster</code> can be used to plot
-the cluster labels for cell populations identified by celda on the
-UMAP:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<p>The function <code>plotDimReduceCluster</code> can be used to plot the cluster labels for cell populations identified by celda on the UMAP:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDimReduceCluster.html">plotDimReduceCluster</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span>, labelClusters <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/cell_clusters-1.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="plotting-expression-of-specific-features">Plotting expression of specific features<a class="anchor" aria-label="anchor" href="#plotting-expression-of-specific-features"></a>
 </h3>
-<p>Usually, biological features of some cell populations are known <em>a
-priori</em> and can be identified with known marker genes. The
-expression of selected marker genes can be plotted on the UMAP with the
-function <code>plotDimReduceFeature</code>.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<p>Usually, biological features of some cell populations are known <em>a priori</em> and can be identified with known marker genes. The expression of selected marker genes can be plotted on the UMAP with the function <code>plotDimReduceFeature</code>.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3D"</span>, <span class="st">"IL7R"</span>, <span class="st">"CD4"</span>, <span class="st">"CD8B"</span>, <span class="st">"CD19"</span>, <span class="st">"FCGR3A"</span>, <span class="st">"CD14"</span>, <span class="st">"FCER1A"</span>, <span class="st">"PF4"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plotDimReduceFeature.html">plotDimReduceFeature</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sce</span>, features <span class="op">=</span> <span class="va">markers</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, normalize <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/cell_marker_umap-1.png" width="700"></p>
-<p>The parameter <code>displayName</code> can be used to switch between
-IDs stored in the <code>rownames</code> of the SCE and columns of the
-<code>rowData</code> of the SCE. If the assay denoted by
-<code>useAssay</code> is a raw counts matrix, then setting
-<code>normalize = TRUE</code> is recommended (otherwise the z-score of
-the raw counts will be plotted). When set to <code>TRUE</code>, each
-count will be normalized by dividing by the total number of counts in
-each cell. An alternative approach is to perform normalization with
-another method and then point to the normalized assay with the
-<code>useAssay</code> parameter. For example, normalization can be
-performed with the scater package:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<p>The parameter <code>displayName</code> can be used to switch between IDs stored in the <code>rownames</code> of the SCE and columns of the <code>rowData</code> of the SCE. If the assay denoted by <code>useAssay</code> is a raw counts matrix, then setting <code>normalize = TRUE</code> is recommended (otherwise the z-score of the raw counts will be plotted). When set to <code>TRUE</code>, each count will be normalized by dividing by the total number of counts in each cell. An alternative approach is to perform normalization with another method and then point to the normalized assay with the <code>useAssay</code> parameter. For example, normalization can be performed with the scater package:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plotDimReduceFeature.html">plotDimReduceFeature</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sce</span>, features <span class="op">=</span> <span class="va">markers</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, normalize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p>This second approach may be faster if plotting a lot of marker genes
-or if the dataset is relatively large.</p>
+<p>This second approach may be faster if plotting a lot of marker genes or if the dataset is relatively large.</p>
 </div>
 <div class="section level3">
 <h3 id="plotting-cell-subpopulations-with-labels">Plotting cell subpopulations with labels<a class="anchor" aria-label="anchor" href="#plotting-cell-subpopulations-with-labels"></a>
 </h3>
-<p>Once we identify of various cell subpopulations using the known
-marker genes, these custom labels can be added on the UMAP colored by
-cluster:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<p>Once we identify of various cell subpopulations using the known marker genes, these custom labels can be added on the UMAP colored by cluster:</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plotDimReduceCluster.html">plotDimReduceCluster</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, labelClusters <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1: Megakaryocytes"</span>,</span>
@@ -561,59 +324,30 @@ cluster:</p>
 <div class="section level2">
 <h2 id="probmap">Exploring relationship between modules and cell populations<a class="anchor" aria-label="anchor" href="#probmap"></a>
 </h2>
-<p>Celda has the ability to identify modules of co-expressed features
-and quantify the probability of these modules in each cell population.
-An overview of the relationships between modules and cell subpopulations
-can be explored with the function <code>celdaProbabilityMap</code>. The
-“Absolute probability” heatmap on the left shows the proportion of
-counts in each module for each cell population. The “Absolute
-probability” map gives insights into the absolute abundance of a module
-within a given cell subpopulation. The absolute heatmap can be used to
-explore which modules are higher than other modules <strong>within a
-cell population</strong>. The “Relative expression” map shows the
-standardized (z-scored) module probabilities across cell subpopulations.
-The relative heatmap can be used to explore which modules are relatively
-higher than other modules <strong>across cell populations</strong>.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<p>Celda has the ability to identify modules of co-expressed features and quantify the probability of these modules in each cell population. An overview of the relationships between modules and cell subpopulations can be explored with the function <code>celdaProbabilityMap</code>. The “Absolute probability” heatmap on the left shows the proportion of counts in each module for each cell population. The “Absolute probability” map gives insights into the absolute abundance of a module within a given cell subpopulation. The absolute heatmap can be used to explore which modules are higher than other modules <strong>within a cell population</strong>. The “Relative expression” map shows the standardized (z-scored) module probabilities across cell subpopulations. The relative heatmap can be used to explore which modules are relatively higher than other modules <strong>across cell populations</strong>.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/celdaProbabilityMap.html">celdaProbabilityMap</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/celdaProbabilityMap-1.png" width="960"></p>
-<p>In this plot, we can see a variety of patterns. Modules 15 - 20 are
-highly expressed across most cell populations indicating that they may
-contain housekeeping genes (e.g. ribosomal). Other modules are specific
-to a cell population or groups of cell populations. For example, module
-35 is only on in population 1 while module 70 is expressed across
-populations 2, 3, and to some degree in population 5. The unknown T-cell
-population 13 has highly specific levels of modules 30. In the next
-section, we can look at the genes in these modules to gain insights into
-the biological properties of each of these cell populations.</p>
+<p>In this plot, we can see a variety of patterns. Modules 15 - 20 are highly expressed across most cell populations indicating that they may contain housekeeping genes (e.g. ribosomal). Other modules are specific to a cell population or groups of cell populations. For example, module 35 is only on in population 1 while module 70 is expressed across populations 2, 3, and to some degree in population 5. The unknown T-cell population 13 has highly specific levels of modules 30. In the next section, we can look at the genes in these modules to gain insights into the biological properties of each of these cell populations.</p>
 </div>
 <div class="section level2">
 <h2 id="exploring-feature-modules">Exploring feature modules<a class="anchor" aria-label="anchor" href="#exploring-feature-modules"></a>
 </h2>
-<p>The primary advantage of celda over other tools is that it can
-cluster features that are co-expressed across cells into modules. These
-modules are often more biologically coherent than features correlated
-with principal components from PCA. Below are several ways in which
-modules can be explored and visualized.</p>
+<p>The primary advantage of celda over other tools is that it can cluster features that are co-expressed across cells into modules. These modules are often more biologically coherent than features correlated with principal components from PCA. Below are several ways in which modules can be explored and visualized.</p>
 <div class="section level3">
 <h3 id="table-of-features-in-each-module">Table of features in each module<a class="anchor" aria-label="anchor" href="#table-of-features-in-each-module"></a>
 </h3>
-<p>The function <code>featureModuleTable</code> can be used to get the
-names of all features in each module into a <code>data.frame</code>.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<p>The function <code>featureModuleTable</code> can be used to get the names of all features in each module into a <code>data.frame</code>.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save to a data.frame</span></span>
 <span><span class="va">ta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/featureModuleTable.html">featureModuleTable</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ta</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 154  80</span></span></code></pre>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ta</span><span class="op">[</span>,<span class="st">"L70"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "S100A9"   "S100A8"   "S100A12"  "RBP7"     "FOLR3"    "C19orf59"</span></span></code></pre>
-<p>The parameter <code>displayName</code> can be used to switch between
-IDs stored in the <code>rownames</code> of the SCE and columns of the
-<code>rowData</code> of the SCE. The the <code>outputFile</code>
-parameter is set, the table will be saved to a tab-delimited text file
-instead of to a <code>data.frame</code>:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<p>The parameter <code>displayName</code> can be used to switch between IDs stored in the <code>rownames</code> of the SCE and columns of the <code>rowData</code> of the SCE. The the <code>outputFile</code> parameter is set, the table will be saved to a tab-delimited text file instead of to a <code>data.frame</code>:</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save to file called "modules.txt"</span></span>
 <span><span class="fu"><a href="../reference/featureModuleTable.html">featureModuleTable</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, outputFile <span class="op">=</span> <span class="st">"modules.txt"</span><span class="op">)</span></span></code></pre></div>
 <p>The modules for this model are shown below:</p>
@@ -28456,10 +28190,8 @@ RCE1
 <div class="section level3">
 <h3 id="module-lookup">Module lookup<a class="anchor" aria-label="anchor" href="#module-lookup"></a>
 </h3>
-<p>If you want to quickly find which module a particular feature was
-assigned to, the <code>featureModuleLookup</code> function can be used.
-Here will will look up a marker gene for T-cells called “CD3E”:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<p>If you want to quickly find which module a particular feature was assigned to, the <code>featureModuleLookup</code> function can be used. Here will will look up a marker gene for T-cells called “CD3E”:</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/featureModuleLookup.html">featureModuleLookup</a></span><span class="op">(</span><span class="va">sce</span>, feature <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3E"</span>, <span class="st">"S100A8"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">mod</span></span></code></pre></div>
 <pre><code><span><span class="co">##   CD3E S100A8 </span></span>
@@ -28468,115 +28200,70 @@ Here will will look up a marker gene for T-cells called “CD3E”:</p>
 <div class="section level3">
 <h3 id="module-heatmaps">Module heatmaps<a class="anchor" aria-label="anchor" href="#module-heatmaps"></a>
 </h3>
-<p>The function <code>moduleHeatmap</code> can be used to view the
-expression of features across cells for a specific module. The
-<code>featureModule</code> parameter denotes the module(s) to be
-displayed. Cells are ordered from those with the lowest probability of
-the module on the left to the highest probability on the right.
-Similarly, features are ordered from those with the highest probability
-within the module on the top to the lowest probability on the
-bottom.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<p>The function <code>moduleHeatmap</code> can be used to view the expression of features across cells for a specific module. The <code>featureModule</code> parameter denotes the module(s) to be displayed. Cells are ordered from those with the lowest probability of the module on the left to the highest probability on the right. Similarly, features are ordered from those with the highest probability within the module on the top to the lowest probability on the bottom.</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/moduleHeatmap.html">moduleHeatmap</a></span><span class="op">(</span><span class="va">sce</span>, featureModule <span class="op">=</span> <span class="fl">27</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_heatmap-1.png" width="700"></p>
-<p>The parameter <code>topCells</code> can be used to control the number
-of cells included in the heatmap. By default, only the 100 cells with
-the lowest probabilities and the 100 cells with the highest
-probabilities for each selected module are included
-(i.e. <code>topCells = 100</code> by default). To display all cells,
-this parameter can be set to <code>NULL</code>:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<p>The parameter <code>topCells</code> can be used to control the number of cells included in the heatmap. By default, only the 100 cells with the lowest probabilities and the 100 cells with the highest probabilities for each selected module are included (i.e. <code>topCells = 100</code> by default). To display all cells, this parameter can be set to <code>NULL</code>:</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/moduleHeatmap.html">moduleHeatmap</a></span><span class="op">(</span><span class="va">sce</span>, featureModule <span class="op">=</span> <span class="fl">27</span>, topCells <span class="op">=</span> <span class="cn">NULL</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_heatmap_topcells-1.png" width="700"></p>
-<p><strong>Note:</strong> Multiple modules can be displayed by giving a
-vector of module indices to the parameter <code>featureModule</code>. If
-<code>featureModule</code> is not specified, then all modules will be
-plotted.</p>
+<p><strong>Note:</strong> Multiple modules can be displayed by giving a vector of module indices to the parameter <code>featureModule</code>. If <code>featureModule</code> is not specified, then all modules will be plotted.</p>
 </div>
 <div class="section level3">
 <h3 id="module-probabilities-on-2-d-embeddings">Module probabilities on 2-D embeddings<a class="anchor" aria-label="anchor" href="#module-probabilities-on-2-d-embeddings"></a>
 </h3>
-<p>The function <code>plotDimReduceModule</code> can be used visualize
-the probabilities of a particular module or sets of modules on a reduced
-dimensional plot such as a UMAP. This can be another quick method to see
-how modules are expressed across various cells in 2-D space. As an
-example, we can look at module 70 which contained S100A8:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<p>The function <code>plotDimReduceModule</code> can be used visualize the probabilities of a particular module or sets of modules on a reduced dimensional plot such as a UMAP. This can be another quick method to see how modules are expressed across various cells in 2-D space. As an example, we can look at module 70 which contained S100A8:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDimReduceModule.html">plotDimReduceModule</a></span><span class="op">(</span><span class="va">sce</span>, modules <span class="op">=</span> <span class="fl">70</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_umaps-1.png" width="700"></p>
 <p>Similarly, multiple modules can be plotting in a grid of UMAPs:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDimReduceModule.html">plotDimReduceModule</a></span><span class="op">(</span><span class="va">sce</span>, modules <span class="op">=</span> <span class="fl">70</span><span class="op">:</span><span class="fl">78</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_umaps_grid-1.png" width="700"></p>
-<p>In this grid, we can see that module 70 (which has high levels of
-S100A8 and S100A9) is highly expressed in cell populations 2 and 3,
-module 71 (which contains CD14) can be used to identify all CD14+
-monocytes, module 72 (which contains CST3) is expressed across both CD14
-and FCGR3A (CD16) expressing monocytes, and module 73 (which contains
-CD4) is expressed broadly across both monocytes and dendritic cells as
-well as some T-cell populations. If we were interesting in defining
-transcriptional programs active across all monocytes, we could examine
-the genes found in module 72. If we were interested in defining
-transcriptional programs for all CD14+ monocytes, we could examine the
-genes in module 71. These patterns can also be observed in the <a href="#probmap">Probability Map</a></p>
-<p>In the celda probability map, we saw that the unknown T-cell
-population 13 had high levels of module 30. We can examine both module
-heatmaps and module probability maps to further explore this:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<p>In this grid, we can see that module 70 (which has high levels of S100A8 and S100A9) is highly expressed in cell populations 2 and 3, module 71 (which contains CD14) can be used to identify all CD14+ monocytes, module 72 (which contains CST3) is expressed across both CD14 and FCGR3A (CD16) expressing monocytes, and module 73 (which contains CD4) is expressed broadly across both monocytes and dendritic cells as well as some T-cell populations. If we were interesting in defining transcriptional programs active across all monocytes, we could examine the genes found in module 72. If we were interested in defining transcriptional programs for all CD14+ monocytes, we could examine the genes in module 71. These patterns can also be observed in the <a href="#probmap">Probability Map</a></p>
+<p>In the celda probability map, we saw that the unknown T-cell population 13 had high levels of module 30. We can examine both module heatmaps and module probability maps to further explore this:</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/moduleHeatmap.html">moduleHeatmap</a></span><span class="op">(</span><span class="va">sce</span>, featureModule <span class="op">=</span> <span class="fl">30</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_Tcell_prolif-1.png" width="700"></p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDimReduceModule.html">plotDimReduceModule</a></span><span class="op">(</span><span class="va">sce</span>, modules <span class="op">=</span> <span class="fl">30</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_Tcell_prolif-2.png" width="700"></p>
-<p>Module 30 has high levels of genes associated with proliferation
-including HMGA1, STMN1, PCNA, HMGB2, and TUBA1B. We can therefore
-re-label these cells as “Proliferating T-cells”.</p>
+<p>Module 30 has high levels of genes associated with proliferation including HMGA1, STMN1, PCNA, HMGB2, and TUBA1B. We can therefore re-label these cells as “Proliferating T-cells”.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="identification-and-plotting-of-marker-genes">Identification and plotting of marker genes<a class="anchor" aria-label="anchor" href="#identification-and-plotting-of-marker-genes"></a>
 </h2>
-<p>In addition to examining modules, differential expression can be used
-to identify potential marker genes up-regulated in specific cell
-populations. The function <code>findMarkerDiffExp</code> in the
-<code>singleCellTK</code> package will find markers up-regulated in each
-cell population compared to all the others.</p>
+<p>In addition to examining modules, differential expression can be used to identify potential marker genes up-regulated in specific cell populations. The function <code>findMarkerDiffExp</code> in the <code>singleCellTK</code> package will find markers up-regulated in each cell population compared to all the others.</p>
 <div class="section level3">
 <h3 id="differential-expression-to-identify-marker-genes">Differential expression to identify marker genes<a class="anchor" aria-label="anchor" href="#differential-expression-to-identify-marker-genes"></a>
 </h3>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Normalize counts (if not performed previously)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: package 'scuttle' was built under R version 4.2.1</span></span></code></pre>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run differential expression analysis</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/findMarkerDiffExp.html" class="external-link">findMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, method <span class="op">=</span> <span class="st">"wilcox"</span>, cluster <span class="op">=</span> <span class="fu"><a href="../reference/celdaClusters.html">celdaClusters</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>The function <code>plotMarkerDiffExp</code> can be used to plot the
-results in a heatmap. The <code>topN</code> parameter will plot the top
-N ranked genes for each cluster.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runFindMarker.html" class="external-link">findMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, method <span class="op">=</span> <span class="st">"wilcox"</span>, cluster <span class="op">=</span> <span class="fu"><a href="../reference/celdaClusters.html">celdaClusters</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: 'findMarkerDiffExp' is deprecated.</span></span>
+<span><span class="co">## Use 'runFindMarker' instead.</span></span>
+<span><span class="co">## See help("Deprecated")</span></span></code></pre>
+<p>The function <code>plotMarkerDiffExp</code> can be used to plot the results in a heatmap. The <code>topN</code> parameter will plot the top N ranked genes for each cluster.</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot differentially expressed genes that pass additional thresholds 'minClustExprPerc' and 'maxCtrlExprPerc'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotMarkerDiffExp.html" class="external-link">plotMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotFindMarkerHeatmap.html" class="external-link">plotMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: 'plotMarkerDiffExp' is deprecated.</span></span>
+<span><span class="co">## Use 'plotFindMarkerHeatmap' instead.</span></span>
+<span><span class="co">## See help("Deprecated")</span></span></code></pre>
 <p><img src="celda_pbmc3k_files/figure-html/diffExp_plot-1.png" width="700"></p>
-<p>Other parameters such as <code>minClustExprPerc</code> (the minimum
-number of cells expressing the marker gene in the cluster) and
-<code>maxCtrlExprPerc</code> (the maximum number of cells expression the
-marker gene in other clusters) can be used to control how specific each
-marker gene is to each cell populations. Similarly, adding a log2
-fold-change cutoff (e.g. 1) can select for markers that are more
-strongly up-regulated in a cell population.</p>
+<p>Other parameters such as <code>minClustExprPerc</code> (the minimum number of cells expressing the marker gene in the cluster) and <code>maxCtrlExprPerc</code> (the maximum number of cells expression the marker gene in other clusters) can be used to control how specific each marker gene is to each cell populations. Similarly, adding a log2 fold-change cutoff (e.g. 1) can select for markers that are more strongly up-regulated in a cell population.</p>
 </div>
 <div class="section level3">
 <h3 id="violin-plots-for-marker-genes">Violin plots for marker genes<a class="anchor" aria-label="anchor" href="#violin-plots-for-marker-genes"></a>
 </h3>
-<p>The <code>plotCeldaViolin</code> function can be used to examine the
-distribution of expression of various features across cell population
-clusters derived from celda. Here we can see that the gene CD79A has
-high expression in the B-cell cluster and HMGB2 has high expression in
-the proliferating T-cell population.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<p>The <code>plotCeldaViolin</code> function can be used to examine the distribution of expression of various features across cell population clusters derived from celda. Here we can see that the gene CD79A has high expression in the B-cell cluster and HMGB2 has high expression in the proliferating T-cell population.</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Normalize counts if not performed in previous steps</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span></span>
@@ -28589,44 +28276,14 @@ the proliferating T-cell population.</p>
 <div class="section level2">
 <h2 id="generating-html-reports">Generating HTML reports<a class="anchor" aria-label="anchor" href="#generating-html-reports"></a>
 </h2>
-<p>The celda package comes with two functions for generating
-comprehensive HTML reports that 1) capture the process of selecting K/L
-for a <code>celda_CG</code> model and 2) plot the results from the
-downstream analysis. The first report runs both
-<code>recursiveSplitModule</code> and <code>recursiveSplitCell</code>
-for selection of <code>L</code> and <code>K</code>, respectively. To
-recapitulate the complete analysis presented in this tutorial in the
-HTML report, the following command can be used:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<p>The celda package comes with two functions for generating comprehensive HTML reports that 1) capture the process of selecting K/L for a <code>celda_CG</code> model and 2) plot the results from the downstream analysis. The first report runs both <code>recursiveSplitModule</code> and <code>recursiveSplitCell</code> for selection of <code>L</code> and <code>K</code>, respectively. To recapitulate the complete analysis presented in this tutorial in the HTML report, the following command can be used:</p>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reportceldaCG.html">reportCeldaCGRun</a></span><span class="op">(</span><span class="va">sce</span>, sampleLabel <span class="op">=</span> <span class="cn">NULL</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, minCell <span class="op">=</span> <span class="fl">3</span>, minCount <span class="op">=</span> <span class="fl">3</span>, initialL <span class="op">=</span> <span class="fl">10</span>, maxL <span class="op">=</span> <span class="fl">150</span>, initialK <span class="op">=</span> <span class="fl">3</span>, maxK <span class="op">=</span> <span class="fl">25</span>, L <span class="op">=</span> <span class="fl">80</span>, K <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></code></pre></div>
-<p>All of the parameters in this function are the same that were used
-throughout this tutorial in the <code>selectFeatures</code>,
-<code>recursiveSplitModule</code>, and <code>recursiveSplitCell</code>
-functions. Note that this report does <strong>not</strong> do cell
-filtering, so that must be completed before running this function. The
-returned SCE object will have the <code>celda_CG</code> model with
-selected <code>K</code> and <code>L</code> which can be used in any of
-the downstream plotting functions as well as input into the second
-plotting report described next.</p>
-<p>The second report takes in as input an SCE object with a fitted
-<code>celda_CG</code> model and systematically generates several plots
-that facilitate exploratory analysis including cell subpopulation
-cluster labels on 2-D embeddings, user-specified annotations on 2-D
-embeddings, module heatmaps, module probabilities, expression of marker
-genes on 2-D embeddings, and the celda probability map. The report can
-be generated with the following code:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<p>All of the parameters in this function are the same that were used throughout this tutorial in the <code>selectFeatures</code>, <code>recursiveSplitModule</code>, and <code>recursiveSplitCell</code> functions. Note that this report does <strong>not</strong> do cell filtering, so that must be completed before running this function. The returned SCE object will have the <code>celda_CG</code> model with selected <code>K</code> and <code>L</code> which can be used in any of the downstream plotting functions as well as input into the second plotting report described next.</p>
+<p>The second report takes in as input an SCE object with a fitted <code>celda_CG</code> model and systematically generates several plots that facilitate exploratory analysis including cell subpopulation cluster labels on 2-D embeddings, user-specified annotations on 2-D embeddings, module heatmaps, module probabilities, expression of marker genes on 2-D embeddings, and the celda probability map. The report can be generated with the following code:</p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/reportceldaCG.html">reportCeldaCGPlotResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span>, features <span class="op">=</span> <span class="va">markers</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, cellAnnot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"total"</span>, <span class="st">"detected"</span>, <span class="st">"decontX_contamination"</span>, <span class="st">"subsets_mito_percent"</span><span class="op">)</span>, cellAnnotLabel <span class="op">=</span> <span class="st">"scDblFinder_doublet_call"</span><span class="op">)</span></span></code></pre></div>
-<p>User-supplied annotations to plot on the 2-D embedding can be
-specified through the <code>cellAnnot</code> and
-<code>cellAnnotLabel</code> variables. Both parameters will allow for
-plotting of variables stored in the colData of the SCE on the 2-D
-embedding plot specified by <code>reducedDimName</code> parameter. For
-<code>cellAnnot</code>, integer and numeric variables will be plotted as
-as continuous variables while factors and characters will be plotted as
-categorical variables. For <code>cellAnnotLabel</code>, all variables
-will be coerced to a factor and the labels of the categories will be
-plotted on the scatter plot.</p>
+<p>User-supplied annotations to plot on the 2-D embedding can be specified through the <code>cellAnnot</code> and <code>cellAnnotLabel</code> variables. Both parameters will allow for plotting of variables stored in the colData of the SCE on the 2-D embedding plot specified by <code>reducedDimName</code> parameter. For <code>cellAnnot</code>, integer and numeric variables will be plotted as as continuous variables while factors and characters will be plotted as categorical variables. For <code>cellAnnotLabel</code>, all variables will be coerced to a factor and the labels of the categories will be plotted on the scatter plot.</p>
 </div>
 <div class="section level2">
 <h2 id="other-useful-functions">Other useful functions<a class="anchor" aria-label="anchor" href="#other-useful-functions"></a>
@@ -28634,56 +28291,37 @@ plotted on the scatter plot.</p>
 <div class="section level3">
 <h3 id="matrix-factorization">Matrix factorization<a class="anchor" aria-label="anchor" href="#matrix-factorization"></a>
 </h3>
-<p>The celda model factorizes the original matrix into three
-matrices:</p>
-<p><strong>1) module -</strong> The probability of each feature in each
-module (Psi)</p>
-<p><strong>2) cellPopulation -</strong> The probability of each module
-in each cell population (Phi)</p>
-<p><strong>3) sample -</strong> The probability of each cell population
-in each sample (Theta)</p>
-<p>Additionally, we can calculate the probability of each module within
-each cell (cell). The cell matrix can essentially be used to replace PCs
-from PCA and is useful for downstream visualization (e.g. generating 2-D
-embeddings). All of these matrices can be retrieved with the
-<code>factorizeMatrix</code> function. The matrices are returned in
-three different versions: unnormalized counts, proportions (normalized
-by the total), or posterior estimates (where the Dirichlet concentration
-parameter is added in before normalization).</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<p>The celda model factorizes the original matrix into three matrices:</p>
+<p><strong>1) module -</strong> The probability of each feature in each module (Psi)</p>
+<p><strong>2) cellPopulation -</strong> The probability of each module in each cell population (Phi)</p>
+<p><strong>3) sample -</strong> The probability of each cell population in each sample (Theta)</p>
+<p>Additionally, we can calculate the probability of each module within each cell (cell). The cell matrix can essentially be used to replace PCs from PCA and is useful for downstream visualization (e.g. generating 2-D embeddings). All of these matrices can be retrieved with the <code>factorizeMatrix</code> function. The matrices are returned in three different versions: unnormalized counts, proportions (normalized by the total), or posterior estimates (where the Dirichlet concentration parameter is added in before normalization).</p>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Factorize the original counts matrix</span></span>
 <span><span class="va">fm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/factorizeMatrix.html">factorizeMatrix</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Three different version of each matrix:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fm</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "counts"      "proportions" "posterior"</span></span></code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get normalized proportional matrices</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">cell</span><span class="op">)</span> <span class="co"># Matrix of module probabilities for each cell</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1]   80 2675</span></span></code></pre>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">module</span><span class="op">)</span> <span class="co"># Matrix of feature probabilities for each module</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 2639   80</span></span></code></pre>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">cellPopulation</span><span class="op">)</span> <span class="co"># Matrix of module probabilities for each cell population</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 80 14</span></span></code></pre>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span> <span class="co"># Matrix of cell population probabilities in each sample</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 14  1</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="changing-the-feature-display-name">Changing the feature display name<a class="anchor" aria-label="anchor" href="#changing-the-feature-display-name"></a>
 </h3>
-<p>The parameter <code>displayName</code> can be used to change the
-labels of the rows from the <code>rownames</code> to a column in the
-<code>rowData</code> of the SCE object. The function is available in
-<code>plotDimReduceFeature</code> and <code>moduleHeatmap</code>. For
-example, if we did not change the <code>rownames</code> to
-<code>Symbol_TENx</code> in the beginning of the tutorial, the following
-code still could be run in <code>moduleHeatmap</code> to display the
-gene symbol even if the <code>rownames</code> were set to the original
-Ensembl IDs:</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<p>The parameter <code>displayName</code> can be used to change the labels of the rows from the <code>rownames</code> to a column in the <code>rowData</code> of the SCE object. The function is available in <code>plotDimReduceFeature</code> and <code>moduleHeatmap</code>. For example, if we did not change the <code>rownames</code> to <code>Symbol_TENx</code> in the beginning of the tutorial, the following code still could be run in <code>moduleHeatmap</code> to display the gene symbol even if the <code>rownames</code> were set to the original Ensembl IDs:</p>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/moduleHeatmap.html">moduleHeatmap</a></span><span class="op">(</span><span class="va">sce</span>, featureModule <span class="op">=</span> <span class="fl">27</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, displayName <span class="op">=</span> <span class="st">"Symbol_TENx"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_heatmap_with_display-1.png" width="700"></p>
 </div>
@@ -28691,11 +28329,10 @@ Ensembl IDs:</p>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<details><summary>
-sessionInfo()
-</summary><pre><code><span><span class="co">## R version 4.2.0 (2022-04-22)</span></span>
+<details><p><summary>sessionInfo()</summary></p>
+<pre><code><span><span class="co">## R version 4.2.2 (2022-10-31)</span></span>
 <span><span class="co">## Platform: x86_64-apple-darwin17.0 (64-bit)</span></span>
-<span><span class="co">## Running under: macOS Big Sur/Monterey 10.16</span></span>
+<span><span class="co">## Running under: macOS Big Sur ... 10.16</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Matrix products: default</span></span>
 <span><span class="co">## BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib</span></span>
@@ -28709,104 +28346,106 @@ sessionInfo()
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] scater_1.24.0               scuttle_1.6.3              </span></span>
-<span><span class="co">##  [3] kableExtra_1.3.4            knitr_1.40                 </span></span>
-<span><span class="co">##  [5] ggplot2_3.3.6               celda_1.13.0               </span></span>
-<span><span class="co">##  [7] singleCellTK_2.6.0          TENxPBMCData_1.14.0        </span></span>
-<span><span class="co">##  [9] HDF5Array_1.24.2            rhdf5_2.40.0               </span></span>
-<span><span class="co">## [11] DelayedArray_0.22.0         Matrix_1.4-1               </span></span>
-<span><span class="co">## [13] SingleCellExperiment_1.18.0 SummarizedExperiment_1.26.1</span></span>
-<span><span class="co">## [15] Biobase_2.56.0              GenomicRanges_1.48.0       </span></span>
-<span><span class="co">## [17] GenomeInfoDb_1.32.3         IRanges_2.30.1             </span></span>
-<span><span class="co">## [19] S4Vectors_0.34.0            BiocGenerics_0.42.0        </span></span>
-<span><span class="co">## [21] MatrixGenerics_1.8.1        matrixStats_0.62.0         </span></span>
+<span><span class="co">##  [1] scater_1.26.1               scuttle_1.8.3              </span></span>
+<span><span class="co">##  [3] kableExtra_1.3.4            knitr_1.41                 </span></span>
+<span><span class="co">##  [5] ggplot2_3.4.0               celda_1.14.2               </span></span>
+<span><span class="co">##  [7] singleCellTK_2.8.1          TENxPBMCData_1.16.0        </span></span>
+<span><span class="co">##  [9] HDF5Array_1.26.0            rhdf5_2.42.0               </span></span>
+<span><span class="co">## [11] DelayedArray_0.24.0         Matrix_1.5-3               </span></span>
+<span><span class="co">## [13] SingleCellExperiment_1.20.0 SummarizedExperiment_1.28.0</span></span>
+<span><span class="co">## [15] Biobase_2.58.0              GenomicRanges_1.50.2       </span></span>
+<span><span class="co">## [17] GenomeInfoDb_1.34.4         IRanges_2.32.0             </span></span>
+<span><span class="co">## [19] S4Vectors_0.36.1            BiocGenerics_0.44.0        </span></span>
+<span><span class="co">## [21] MatrixGenerics_1.10.0       matrixStats_0.63.0         </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
 <span><span class="co">##   [1] utf8_1.2.2                    reticulate_1.26              </span></span>
-<span><span class="co">##   [3] R.utils_2.12.0                tidyselect_1.1.2             </span></span>
-<span><span class="co">##   [5] RSQLite_2.2.16                AnnotationDbi_1.58.0         </span></span>
-<span><span class="co">##   [7] grid_4.2.0                    combinat_0.0-8               </span></span>
-<span><span class="co">##   [9] BiocParallel_1.30.3           Rtsne_0.16                   </span></span>
-<span><span class="co">##  [11] scDblFinder_1.10.0            DropletUtils_1.16.0          </span></span>
-<span><span class="co">##  [13] munsell_0.5.0                 ScaledMatrix_1.4.0           </span></span>
-<span><span class="co">##  [15] codetools_0.2-18              ragg_1.2.2                   </span></span>
-<span><span class="co">##  [17] statmod_1.4.37                scran_1.24.0                 </span></span>
+<span><span class="co">##   [3] R.utils_2.12.2                tidyselect_1.2.0             </span></span>
+<span><span class="co">##   [5] RSQLite_2.2.19                AnnotationDbi_1.60.0         </span></span>
+<span><span class="co">##   [7] grid_4.2.2                    combinat_0.0-8               </span></span>
+<span><span class="co">##   [9] BiocParallel_1.32.4           Rtsne_0.16                   </span></span>
+<span><span class="co">##  [11] scDblFinder_1.12.0            DropletUtils_1.18.1          </span></span>
+<span><span class="co">##  [13] munsell_0.5.0                 ScaledMatrix_1.6.0           </span></span>
+<span><span class="co">##  [15] codetools_0.2-18              ragg_1.2.4                   </span></span>
+<span><span class="co">##  [17] statmod_1.4.37                scran_1.26.1                 </span></span>
 <span><span class="co">##  [19] xgboost_1.6.0.1               withr_2.5.0                  </span></span>
 <span><span class="co">##  [21] colorspace_2.0-3              filelock_1.0.2               </span></span>
 <span><span class="co">##  [23] highr_0.9                     rstudioapi_0.14              </span></span>
 <span><span class="co">##  [25] assertive.base_0.0-9          labeling_0.4.2               </span></span>
-<span><span class="co">##  [27] GenomeInfoDbData_1.2.8        GSVAdata_1.32.0              </span></span>
+<span><span class="co">##  [27] GenomeInfoDbData_1.2.9        GSVAdata_1.34.0              </span></span>
 <span><span class="co">##  [29] farver_2.1.1                  bit64_4.0.5                  </span></span>
-<span><span class="co">##  [31] rprojroot_2.0.3               vctrs_0.4.1                  </span></span>
-<span><span class="co">##  [33] generics_0.1.3                xfun_0.32                    </span></span>
-<span><span class="co">##  [35] BiocFileCache_2.4.0           fishpond_2.2.0               </span></span>
+<span><span class="co">##  [31] rprojroot_2.0.3               vctrs_0.5.1                  </span></span>
+<span><span class="co">##  [33] generics_0.1.3                xfun_0.36                    </span></span>
+<span><span class="co">##  [35] BiocFileCache_2.6.0           fishpond_2.4.0               </span></span>
 <span><span class="co">##  [37] R6_2.5.1                      doParallel_1.0.17            </span></span>
-<span><span class="co">##  [39] clue_0.3-61                   ggbeeswarm_0.6.0             </span></span>
-<span><span class="co">##  [41] rsvd_1.0.5                    RcppEigen_0.3.3.9.2          </span></span>
+<span><span class="co">##  [39] clue_0.3-63                   ggbeeswarm_0.7.1             </span></span>
+<span><span class="co">##  [41] rsvd_1.0.5                    RcppEigen_0.3.3.9.3          </span></span>
 <span><span class="co">##  [43] locfit_1.5-9.6                gridGraphics_0.5-1           </span></span>
-<span><span class="co">##  [45] bitops_1.0-7                  rhdf5filters_1.8.0           </span></span>
+<span><span class="co">##  [45] bitops_1.0-7                  rhdf5filters_1.10.0          </span></span>
 <span><span class="co">##  [47] cachem_1.0.6                  assertthat_0.2.1             </span></span>
-<span><span class="co">##  [49] promises_1.2.0.1              BiocIO_1.6.0                 </span></span>
+<span><span class="co">##  [49] promises_1.2.0.1              BiocIO_1.8.0                 </span></span>
 <span><span class="co">##  [51] scales_1.2.1                  beeswarm_0.4.0               </span></span>
-<span><span class="co">##  [53] gtable_0.3.1                  beachmat_2.12.0              </span></span>
-<span><span class="co">##  [55] rlang_1.0.5                   systemfonts_1.0.4            </span></span>
-<span><span class="co">##  [57] GlobalOptions_0.1.2           rtracklayer_1.56.1           </span></span>
-<span><span class="co">##  [59] reshape2_1.4.4                BiocManager_1.30.18          </span></span>
-<span><span class="co">##  [61] yaml_2.3.5                    httpuv_1.6.5                 </span></span>
-<span><span class="co">##  [63] tools_4.2.0                   ellipsis_0.3.2               </span></span>
-<span><span class="co">##  [65] jquerylib_0.1.4               RColorBrewer_1.1-3           </span></span>
-<span><span class="co">##  [67] plyr_1.8.7                    Rcpp_1.0.9                   </span></span>
-<span><span class="co">##  [69] sparseMatrixStats_1.8.0       zlibbioc_1.42.0              </span></span>
-<span><span class="co">##  [71] purrr_0.3.4                   RCurl_1.98-1.8               </span></span>
-<span><span class="co">##  [73] dbscan_1.1-10                 GetoptLong_1.0.5             </span></span>
-<span><span class="co">##  [75] viridis_0.6.2                 cowplot_1.1.1                </span></span>
-<span><span class="co">##  [77] ggrepel_0.9.1                 cluster_2.1.4                </span></span>
-<span><span class="co">##  [79] fs_1.5.2                      svMisc_1.2.3                 </span></span>
-<span><span class="co">##  [81] magrittr_2.0.3                magick_2.7.3                 </span></span>
-<span><span class="co">##  [83] data.table_1.14.2             circlize_0.4.15              </span></span>
-<span><span class="co">##  [85] mime_0.12                     evaluate_0.16                </span></span>
-<span><span class="co">##  [87] xtable_1.8-4                  XML_3.99-0.10                </span></span>
-<span><span class="co">##  [89] shape_1.4.6                   gridExtra_2.3                </span></span>
-<span><span class="co">##  [91] compiler_4.2.0                tibble_3.1.8                 </span></span>
-<span><span class="co">##  [93] crayon_1.5.1                  R.oo_1.25.0                  </span></span>
-<span><span class="co">##  [95] htmltools_0.5.3               later_1.3.0                  </span></span>
-<span><span class="co">##  [97] MCMCprecision_0.4.0           DBI_1.1.3                    </span></span>
-<span><span class="co">##  [99] ExperimentHub_2.4.0           assertive.files_0.0-2        </span></span>
-<span><span class="co">## [101] ComplexHeatmap_2.12.1         dbplyr_2.2.1                 </span></span>
-<span><span class="co">## [103] MASS_7.3-58.1                 rappdirs_0.3.3               </span></span>
-<span><span class="co">## [105] assertive.numbers_0.0-2       cli_3.3.0                    </span></span>
-<span><span class="co">## [107] assertive.types_0.0-3         R.methodsS3_1.8.2            </span></span>
-<span><span class="co">## [109] parallel_4.2.0                metapod_1.4.0                </span></span>
-<span><span class="co">## [111] igraph_1.3.4                  pkgconfig_2.0.3              </span></span>
-<span><span class="co">## [113] pkgdown_2.0.6                 GenomicAlignments_1.32.1     </span></span>
-<span><span class="co">## [115] xml2_1.3.3                    foreach_1.5.2                </span></span>
-<span><span class="co">## [117] svglite_2.1.0                 vipor_0.4.5                  </span></span>
-<span><span class="co">## [119] bslib_0.4.0                   dqrng_0.3.0                  </span></span>
-<span><span class="co">## [121] webshot_0.5.3                 XVector_0.36.0               </span></span>
-<span><span class="co">## [123] rvest_1.0.3                   stringr_1.4.1                </span></span>
-<span><span class="co">## [125] digest_0.6.29                 Biostrings_2.64.1            </span></span>
-<span><span class="co">## [127] rmarkdown_2.16                enrichR_3.1                  </span></span>
-<span><span class="co">## [129] uwot_0.1.14                   edgeR_3.38.4                 </span></span>
-<span><span class="co">## [131] DelayedMatrixStats_1.18.0     restfulr_0.0.15              </span></span>
-<span><span class="co">## [133] curl_4.3.2                    shiny_1.7.2                  </span></span>
-<span><span class="co">## [135] Rsamtools_2.12.0              gtools_3.9.3                 </span></span>
-<span><span class="co">## [137] rjson_0.2.21                  lifecycle_1.0.1              </span></span>
-<span><span class="co">## [139] jsonlite_1.8.0                Rhdf5lib_1.18.2              </span></span>
-<span><span class="co">## [141] BiocNeighbors_1.14.0          desc_1.4.1                   </span></span>
-<span><span class="co">## [143] viridisLite_0.4.1             limma_3.52.2                 </span></span>
-<span><span class="co">## [145] fansi_1.0.3                   pillar_1.8.1                 </span></span>
-<span><span class="co">## [147] lattice_0.20-45               KEGGREST_1.36.3              </span></span>
-<span><span class="co">## [149] fastmap_1.1.0                 httr_1.4.4                   </span></span>
-<span><span class="co">## [151] interactiveDisplayBase_1.34.0 glue_1.6.2                   </span></span>
-<span><span class="co">## [153] FNN_1.1.3.1                   png_0.1-7                    </span></span>
-<span><span class="co">## [155] iterators_1.0.14              multipanelfigure_2.1.2       </span></span>
-<span><span class="co">## [157] bluster_1.6.0                 BiocVersion_3.15.2           </span></span>
-<span><span class="co">## [159] bit_4.0.4                     assertive.properties_0.0-5   </span></span>
-<span><span class="co">## [161] stringi_1.7.8                 sass_0.4.2                   </span></span>
-<span><span class="co">## [163] blob_1.2.3                    textshaping_0.3.6            </span></span>
-<span><span class="co">## [165] BiocSingular_1.12.0           AnnotationHub_3.4.0          </span></span>
-<span><span class="co">## [167] memoise_2.0.1                 dplyr_1.0.10                 </span></span>
-<span><span class="co">## [169] irlba_2.3.5</span></span></code></pre>
+<span><span class="co">##  [53] gtable_0.3.1                  beachmat_2.14.0              </span></span>
+<span><span class="co">##  [55] Cairo_1.6-0                   rlang_1.0.6                  </span></span>
+<span><span class="co">##  [57] systemfonts_1.0.4             GlobalOptions_0.1.2          </span></span>
+<span><span class="co">##  [59] rtracklayer_1.58.0            reshape2_1.4.4               </span></span>
+<span><span class="co">##  [61] BiocManager_1.30.19           yaml_2.3.6                   </span></span>
+<span><span class="co">##  [63] httpuv_1.6.7                  tools_4.2.2                  </span></span>
+<span><span class="co">##  [65] ellipsis_0.3.2                jquerylib_0.1.4              </span></span>
+<span><span class="co">##  [67] RColorBrewer_1.1-3            plyr_1.8.8                   </span></span>
+<span><span class="co">##  [69] Rcpp_1.0.9                    sparseMatrixStats_1.10.0     </span></span>
+<span><span class="co">##  [71] zlibbioc_1.44.0               purrr_1.0.0                  </span></span>
+<span><span class="co">##  [73] RCurl_1.98-1.9                dbscan_1.1-11                </span></span>
+<span><span class="co">##  [75] GetoptLong_1.0.5              viridis_0.6.2                </span></span>
+<span><span class="co">##  [77] cowplot_1.1.1                 ggrepel_0.9.2                </span></span>
+<span><span class="co">##  [79] cluster_2.1.4                 fs_1.5.2                     </span></span>
+<span><span class="co">##  [81] svMisc_1.2.3                  magrittr_2.0.3               </span></span>
+<span><span class="co">##  [83] magick_2.7.3                  data.table_1.14.6            </span></span>
+<span><span class="co">##  [85] circlize_0.4.15               mime_0.12                    </span></span>
+<span><span class="co">##  [87] evaluate_0.19                 xtable_1.8-4                 </span></span>
+<span><span class="co">##  [89] XML_3.99-0.13                 shape_1.4.6                  </span></span>
+<span><span class="co">##  [91] gridExtra_2.3                 compiler_4.2.2               </span></span>
+<span><span class="co">##  [93] tibble_3.1.8                  crayon_1.5.2                 </span></span>
+<span><span class="co">##  [95] R.oo_1.25.0                   htmltools_0.5.4              </span></span>
+<span><span class="co">##  [97] later_1.3.0                   MCMCprecision_0.4.0          </span></span>
+<span><span class="co">##  [99] DBI_1.1.3                     ExperimentHub_2.6.0          </span></span>
+<span><span class="co">## [101] assertive.files_0.0-2         ComplexHeatmap_2.14.0        </span></span>
+<span><span class="co">## [103] dbplyr_2.2.1                  assertive.numbers_0.0-2      </span></span>
+<span><span class="co">## [105] MASS_7.3-58.1                 rappdirs_0.3.3               </span></span>
+<span><span class="co">## [107] cli_3.5.0                     assertive.types_0.0-3        </span></span>
+<span><span class="co">## [109] R.methodsS3_1.8.2             parallel_4.2.2               </span></span>
+<span><span class="co">## [111] metapod_1.6.0                 igraph_1.3.5                 </span></span>
+<span><span class="co">## [113] pkgconfig_2.0.3               pkgdown_2.0.7                </span></span>
+<span><span class="co">## [115] GenomicAlignments_1.34.0      xml2_1.3.3                   </span></span>
+<span><span class="co">## [117] foreach_1.5.2                 svglite_2.1.0                </span></span>
+<span><span class="co">## [119] annotate_1.76.0               vipor_0.4.5                  </span></span>
+<span><span class="co">## [121] bslib_0.4.2                   dqrng_0.3.0                  </span></span>
+<span><span class="co">## [123] webshot_0.5.4                 XVector_0.38.0               </span></span>
+<span><span class="co">## [125] rvest_1.0.3                   stringr_1.5.0                </span></span>
+<span><span class="co">## [127] digest_0.6.31                 graph_1.76.0                 </span></span>
+<span><span class="co">## [129] Biostrings_2.66.0             rmarkdown_2.19               </span></span>
+<span><span class="co">## [131] enrichR_3.1                   uwot_0.1.14                  </span></span>
+<span><span class="co">## [133] edgeR_3.40.1                  DelayedMatrixStats_1.20.0    </span></span>
+<span><span class="co">## [135] GSEABase_1.60.0               restfulr_0.0.15              </span></span>
+<span><span class="co">## [137] curl_4.3.3                    shiny_1.7.4                  </span></span>
+<span><span class="co">## [139] Rsamtools_2.14.0              gtools_3.9.4                 </span></span>
+<span><span class="co">## [141] rjson_0.2.21                  lifecycle_1.0.3              </span></span>
+<span><span class="co">## [143] jsonlite_1.8.4                Rhdf5lib_1.20.0              </span></span>
+<span><span class="co">## [145] BiocNeighbors_1.16.0          desc_1.4.2                   </span></span>
+<span><span class="co">## [147] viridisLite_0.4.1             limma_3.54.0                 </span></span>
+<span><span class="co">## [149] fansi_1.0.3                   pillar_1.8.1                 </span></span>
+<span><span class="co">## [151] lattice_0.20-45               KEGGREST_1.38.0              </span></span>
+<span><span class="co">## [153] fastmap_1.1.0                 httr_1.4.4                   </span></span>
+<span><span class="co">## [155] interactiveDisplayBase_1.36.0 glue_1.6.2                   </span></span>
+<span><span class="co">## [157] FNN_1.1.3.1                   png_0.1-8                    </span></span>
+<span><span class="co">## [159] iterators_1.0.14              multipanelfigure_2.1.2       </span></span>
+<span><span class="co">## [161] bluster_1.8.0                 BiocVersion_3.16.0           </span></span>
+<span><span class="co">## [163] bit_4.0.5                     assertive.properties_0.0-5   </span></span>
+<span><span class="co">## [165] stringi_1.7.8                 sass_0.4.4                   </span></span>
+<span><span class="co">## [167] blob_1.2.3                    textshaping_0.3.6            </span></span>
+<span><span class="co">## [169] BiocSingular_1.14.0           AnnotationHub_3.6.0          </span></span>
+<span><span class="co">## [171] memoise_2.0.1                 dplyr_1.0.10                 </span></span>
+<span><span class="co">## [173] irlba_2.3.5.1</span></span></code></pre>
 </details>
 </div>
   </div>
@@ -28828,7 +28467,7 @@ sessionInfo()
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
