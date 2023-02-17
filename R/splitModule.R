@@ -5,13 +5,13 @@
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
+#' @param module Integer. The module to be split.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use for \code{x}. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
-#'  to use. Default "featureSubset".
-#' @param module Integer. The module to be split.
+#'  to use. Default \code{"featureSubset"}.
 #' @param n Integer. How many modules should \code{module} be split into.
-#'  Default 2.
+#'  Default \code{2}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -21,9 +21,9 @@
 #' @export
 setGeneric("splitModule",
     function(x,
+        module,             
         useAssay = "counts",
         altExpName = "featureSubset",
-        module,
         n = 2,
         seed = 12345) {
 
@@ -39,9 +39,9 @@ setGeneric("splitModule",
 #' @export
 setMethod("splitModule", signature(x = "SingleCellExperiment"),
     function(x,
+        module,             
         useAssay = "counts",
         altExpName = "featureSubset",
-        module,
         n = 2,
         seed = 12345) {
 

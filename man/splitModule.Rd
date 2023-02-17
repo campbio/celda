@@ -7,18 +7,18 @@
 \usage{
 splitModule(
   x,
+  module,
   useAssay = "counts",
   altExpName = "featureSubset",
-  module,
   n = 2,
   seed = 12345
 )
 
 \S4method{splitModule}{SingleCellExperiment}(
   x,
+  module,
   useAssay = "counts",
   altExpName = "featureSubset",
-  module,
   n = 2,
   seed = 12345
 )
@@ -28,16 +28,16 @@ splitModule(
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
+\item{module}{Integer. The module to be split.}
+
 \item{useAssay}{A string specifying which \link{assay}
 slot to use for \code{x}. Default "counts".}
 
 \item{altExpName}{The name for the \link{altExp} slot
-to use. Default "featureSubset".}
-
-\item{module}{Integer. The module to be split.}
+to use. Default \code{"featureSubset"}.}
 
 \item{n}{Integer. How many modules should \code{module} be split into.
-Default 2.}
+Default \code{2}.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 a default value of 12345 is used. If NULL, no calls to
