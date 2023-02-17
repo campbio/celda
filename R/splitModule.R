@@ -5,13 +5,13 @@
 #' @param x A \linkS4class{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
+#' @param module Integer. The module to be split.
 #' @param useAssay A string specifying which \link{assay}
 #'  slot to use for \code{x}. Default "counts".
 #' @param altExpName The name for the \link{altExp} slot
-#'  to use. Default "featureSubset".
-#' @param module Integer. The module to be split.
+#'  to use. Default \code{"featureSubset"}.
 #' @param n Integer. How many modules should \code{module} be split into.
-#'  Default 2.
+#'  Default \code{2}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
@@ -21,9 +21,9 @@
 #' @export
 setGeneric("splitModule",
     function(x,
+        module,             
         useAssay = "counts",
         altExpName = "featureSubset",
-        module,
         n = 2,
         seed = 12345) {
 
@@ -39,9 +39,9 @@ setGeneric("splitModule",
 #' @export
 setMethod("splitModule", signature(x = "SingleCellExperiment"),
     function(x,
+        module,             
         useAssay = "counts",
         altExpName = "featureSubset",
-        module,
         n = 2,
         seed = 12345) {
 
@@ -92,54 +92,66 @@ setMethod("splitModule", signature(x = "SingleCellExperiment"),
     counts <- SummarizedExperiment::assay(x, i = useAssay)
     counts <- .processCounts(counts)
     .validateCounts(counts)
-    ix <- SummarizedExperiment::rowData(x)$celda_feature_module == module
-
-    if (sum(ix) > 1) {
-        tempModel <- .celda_G(
-            counts = counts[ix, , drop = FALSE],
-            L = n,
-            yInitialize = "random",
-            splitOnIter = -1,
-            splitOnLast = FALSE,
-            nchains = 1,
-            verbose = FALSE)
-
-        splitY <- celdaClusters(tempModel)$y
-        splitIx <- celdaClusters(tempModel)$y > 1
-        splitY[splitIx] <- S4Vectors::metadata(x)$celda_parameters$L +
-            splitY[splitIx] - 1
-        splitY[!splitIx] <- module
-
-        newY <- as.integer(
-            SummarizedExperiment::rowData(x)$celda_feature_module)
-        newY[ix] <- splitY
-        newL <- max(newY)
-
-        newLl <- .logLikelihoodcelda_G(
-            counts = counts,
-            y = newY,
-            L = newL,
-            beta = S4Vectors::metadata(x)$celda_parameters$beta,
-            delta = S4Vectors::metadata(x)$celda_parameters$delta,
-            gamma = S4Vectors::metadata(x)$celda_parameters$gamma)
-        model <- methods::new(
-            "celda_G",
-            clusters = list(y = newY),
-            params = list(
-                L = newL,
-                beta = S4Vectors::metadata(x)$celda_parameters$beta,
-                delta = S4Vectors::metadata(x)$celda_parameters$delta,
-                gamma = S4Vectors::metadata(x)$celda_parameters$gamma,
-                countChecksum = .createCountChecksum(counts)
-            ),
-            names = list(row = rownames(x),
-                column = colnames(x),
-                sample = x@metadata$celda_parameters$sampleLevels),
-            finalLogLik = newLl
-        )
-    } else {
-        stop("Module ", module, "contains <= 1 feature. No additional",
-            " splitting was able to be performed.")
-    }
+    
+    L <- S4Vectors::metadata(x)$celda_parameters$L
+    y <- as.numeric(SummarizedExperiment::rowData(x)$celda_feature_module)
+    ix <- y == module
+    
+    if (sum(ix) < n) {
+      stop("Module ", module, " contains less than ", n, " features. ",
+            "Module splitting was not performed.")
+    }      
+      
+    tempModel <- .celda_G(
+      counts = counts[ix, , drop = FALSE],
+      L = n,
+      yInitialize = "random",
+      splitOnIter = -1,
+      splitOnLast = FALSE,
+      nchains = 1,
+      verbose = FALSE
+    )
+    
+    # Need to set some of the features to the original module number.
+    # The remaining features need to have "L + something" as they represent
+    # a new module. Note that there may be more than 1 new module. 
+    splitY <-
+      as.numeric(as.character(celdaClusters(tempModel)$y))
+    splitIx <- splitY > 1
+    splitY[splitIx] <- L + splitY[splitIx] - 1
+    splitY[!splitIx] <- module
+    
+    # Set up new y and L
+    newY <- y
+    newY[ix] <- splitY
+    newL <- max(newY)
+    
+    newLl <- .logLikelihoodcelda_G(
+      counts = counts,
+      y = newY,
+      L = newL,
+      beta = S4Vectors::metadata(x)$celda_parameters$beta,
+      delta = S4Vectors::metadata(x)$celda_parameters$delta,
+      gamma = S4Vectors::metadata(x)$celda_parameters$gamma
+    )
+    
+    model <- methods::new(
+      "celda_G",
+      clusters = list(y = factor(newY, seq(newL))),
+      params = list(
+        L = newL,
+        beta = S4Vectors::metadata(x)$celda_parameters$beta,
+        delta = S4Vectors::metadata(x)$celda_parameters$delta,
+        gamma = S4Vectors::metadata(x)$celda_parameters$gamma,
+        countChecksum = .createCountChecksum(counts)
+      ),
+      names = list(
+        row = rownames(x),
+        column = colnames(x),
+        sample = x@metadata$celda_parameters$sampleLevels
+      ),
+      finalLogLik = newLl
+    )
+    
     return(model)
 }
