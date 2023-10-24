@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.18.0
+Version: 1.19.0
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre")),
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
