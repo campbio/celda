@@ -20,7 +20,7 @@
 #'  Multiple modules can be included in a vector. Default \code{NULL} which
 #'  plots all module heatmaps.
 #' @param featureModule Same as \code{modules}. Either can be used to specify
-#' the modules to display.
+#'  the modules to display.
 #' @param col Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
 #'  and colors.
 #' @param topCells Integer. Number of cells with the highest and lowest
