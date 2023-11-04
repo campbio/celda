@@ -342,7 +342,7 @@ setMethod("moduleHeatmap",
             if (isTRUE(returnAsList)) {
                 figure <- plts
             } else {
-                figure <- marrangeGrob(plts,
+                figure <- gridExtra::marrangeGrob(plts,
                     ncol = ncol,
                     nrow = nrow,
                     layout_matrix = matrix(seq_len(nrow * ncol),
