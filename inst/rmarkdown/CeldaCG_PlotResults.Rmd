@@ -119,7 +119,7 @@ plotDimReduceCluster(sce, reducedDimName = reducedDimName, labelClusters = TRUE)
 ### Sample Labels
 ```{r celda_samples}
 plotSCEDimReduceColData(
-  altExp(sce),
+  altExp(sce, altExpName),
   reducedDimName = reducedDimName,
   colorBy = "celda_sample_label",
   labelClusters = FALSE,
@@ -135,11 +135,15 @@ if (!is.null(cellAnnotFinal)) {
   for (i in seq_along(cellAnnotFinal)) {
     cat(sprintf(tab4, cellAnnotFinal[i]))
 
-    conditionClass <- ifelse(plotLabels[i], "factor", "numeric")
+    if(isTRUE(plotLabels[i])) {
+      conditionClass <- "factor"  
+    } else {
+      conditionClass <- NULL
+    }
 
     print(
       plotSCEDimReduceColData(
-        altExp(sce),
+        altExp(sce, altExpName),
         colorBy = cellAnnotFinal[i],
         conditionClass = conditionClass,
         reducedDim = reducedDimName,
@@ -277,7 +281,12 @@ for (i in seq.int(1, length(grids) - 1)) {
 This section displays a table of features in each module and can be used as a quick way to lookup features of interest. The features within each module are ordered from those with highest expression at the top to those with lower expression at the bottom (same as in the heatmaps in the previous tab).
 
 ```{r celda_modules_table}
-table <- featureModuleTable(sce)
+table <- featureModuleTable(
+    sce,
+    useAssay = useAssay,
+    altExpName = altExpName,
+    displayName = displayName
+  )
 kable(table, style = "html", row.names = FALSE) %>%
   kable_styling(bootstrap_options = "striped") %>%
   scroll_box(width = "100%", height = "800px")
@@ -287,6 +296,7 @@ if (!is.null(moduleFileName)) {
     sce,
     useAssay = useAssay,
     altExpName = altExpName,
+    displayName = displayName,
     outputFile = moduleFileName
   )
 }
@@ -295,7 +305,7 @@ if (!is.null(moduleFileName)) {
 <br><br>
 
 ## Expression of pre-selected markers {.tabset .tabset-fade}
-Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional featuers that contain the name of any marker may also be shown.
+Relative expression profiles are shown for features that match: **`r features`**. The parameter `exactMatch` is set to  ```r exactMatch```. If this parameter was set to ```FALSE```, then  additional features that contain the name of any marker may also be shown.
 
 ```{r plot_markers, fig.height = markerHeight, fig.width = 12}
 if (!is.null(features)) {
@@ -311,7 +321,7 @@ if (!is.null(features)) {
       plotDimReduceFeature(
         sce,
         reducedDimName = "celda_UMAP",
-        features = rownames(sce)[ix],
+        features = features,
         displayName = displayName,
         colorHigh = "red",
         colorMid = "grey",
@@ -339,17 +349,8 @@ The probability matrix on the left contains the probability of each module withi
 print(celdaProbabilityMap(sce))
 ```
 
-### Overview Heatmap
-This general heatmap shows the actual relative expression of the
-top 10 features in each module (rows) for each cell (columns). Rows are z-score
-normalized. The columns of the heatmap are semi-supervised by cell population and the rows are semi-supervised by module. 
-```{r celda_heatmap, fig.height = 15, fig.width = 9}
-grid.draw(celdaHeatmap(sce, nfeatures = 10))
-```
-
-## Session Information
+## Session Information {.unnumbered}
 ```{r session, eval = showSession, echo = showSession}
 sessionInfo()
 ```
 
-<br><br>

@@ -134,6 +134,12 @@
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
 #'  \link{resamplePerplexity}. Default TRUE.
+#' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
+#' matrix will be resampled according to a multinomial distribution to introduce
+#' noise before calculating perplexity. Default \code{FALSE}.
+#' @param numResample Integer. The number of times to resample the counts matrix
+#' for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
+#' Default \code{5}.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
@@ -162,6 +168,8 @@ setGeneric("recursiveSplitCell",
         reorder = TRUE,
         seed = 12345,
         perplexity = TRUE,
+        doResampling = FALSE,
+        numResample = 5,
         logfile = NULL,
         verbose = TRUE) {
     standardGeneric("recursiveSplitCell")})
@@ -205,6 +213,8 @@ setMethod("recursiveSplitCell",
         reorder = TRUE,
         seed = 12345,
         perplexity = TRUE,
+        doResampling = FALSE,
+        numResample = 5,
         logfile = NULL,
         verbose = TRUE) {
 
@@ -243,6 +253,8 @@ setMethod("recursiveSplitCell",
             reorder = reorder,
             seed = seed,
             perplexity = perplexity,
+            doResampling = doResampling,
+            numResample = numResample,
             logfile = logfile,
             verbose = verbose)
 
@@ -311,6 +323,8 @@ setMethod("recursiveSplitCell",
         reorder = TRUE,
         seed = 12345,
         perplexity = TRUE,
+        doResampling = FALSE,
+        numResample = 5,
         logfile = NULL,
         verbose = TRUE) {
 
@@ -340,6 +354,8 @@ setMethod("recursiveSplitCell",
             reorder = reorder,
             seed = seed,
             perplexity = perplexity,
+            doResampling = doResampling,
+            numResample = numResample,
             logfile = logfile,
             verbose = verbose)
 
@@ -383,6 +399,8 @@ setMethod("recursiveSplitCell",
     reorder,
     seed,
     perplexity,
+    doResampling,
+    numResample,
     logfile,
     verbose) {
 
@@ -400,6 +418,8 @@ setMethod("recursiveSplitCell",
             minCell = minCell,
             reorder = reorder,
             perplexity = perplexity,
+            doResampling = doResampling,
+            numResample = numResample,
             logfile = logfile,
             verbose = verbose)
     } else {
@@ -418,6 +438,8 @@ setMethod("recursiveSplitCell",
                 minCell = minCell,
                 reorder = reorder,
                 perplexity = perplexity,
+                doResampling = doResampling,
+                numResample = numResample,
                 logfile = logfile,
                 verbose = verbose)
         )
@@ -440,6 +462,8 @@ setMethod("recursiveSplitCell",
                                minCell,
                                reorder,
                                perplexity,
+                               doResampling,
+                               numResample,
                                logfile,
                                verbose) {
 
@@ -496,7 +520,7 @@ setMethod("recursiveSplitCell",
       verbose = verbose,
       logfile = logfile)
     modelInitial <- .celda_CG(counts,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       K = as.integer(initialK),
       L = as.integer(L),
       zInitialize = "split",
@@ -510,7 +534,7 @@ setMethod("recursiveSplitCell",
       verbose = FALSE,
       reorder = reorder)
     currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
-    overallZ <- celdaClusters(modelInitial)$z
+    overallZ <- as.integer(celdaClusters(modelInitial)$z)
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       # previousY <- overallY
@@ -523,7 +547,7 @@ setMethod("recursiveSplitCell",
         beta = beta
       )
       tempModel <- .celda_CG(counts,
-        sampleLabel = s,
+        sampleLabel = sampleLabel,
         K = as.integer(currentK),
         L = as.integer(L),
         yInit = overallY,
@@ -550,14 +574,14 @@ setMethod("recursiveSplitCell",
       # If the number of clusters is still "currentK", then keep the
       # reordering, otherwise keep the previous configuration
       if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
-        overallZ <- celdaClusters(tempModel)$z
+        overallZ <- as.integer(celdaClusters(tempModel)$z)
       } else {
         overallZ <- tempSplit$z
         ll <- .logLikelihoodcelda_CG(
           counts,
           s,
           overallZ,
-          celdaClusters(tempModel)$y,
+          as.integer(celdaClusters(tempModel)$y),
           currentK,
           L,
           alpha,
@@ -566,7 +590,7 @@ setMethod("recursiveSplitCell",
           gamma
         )
         tempModel <- methods::new("celda_CG",
-          clusters = list(z = overallZ, y = celdaClusters(tempModel)$y),
+          clusters = list(z = overallZ, y = as.integer(celdaClusters(tempModel)$y)),
           params = list(
             K = as.integer(currentK),
             L = as.integer(L),
@@ -636,7 +660,7 @@ setMethod("recursiveSplitCell",
       logfile = logfile
     )
     modelInitial <- .celda_C(countsY,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       K = as.integer(initialK),
       zInitialize = "split",
       nchains = 1,
@@ -646,7 +670,7 @@ setMethod("recursiveSplitCell",
       reorder = reorder
     )
     currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
-    overallZ <- celdaClusters(modelInitial)$z
+    overallZ <- as.integer(celdaClusters(modelInitial)$z)
     ll <- .logLikelihoodcelda_C(
       counts, s, overallZ, currentK,
       alpha, beta
@@ -667,7 +691,7 @@ setMethod("recursiveSplitCell",
         beta = beta
       )
       tempModel <- .celda_C(countsY,
-        sampleLabel = s,
+        sampleLabel = sampleLabel,
         K = as.integer(currentK),
         nchains = 1,
         zInitialize = "random",
@@ -683,7 +707,7 @@ setMethod("recursiveSplitCell",
       # Handle rare cases where a population has no cells after running
       # the model
       if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
-        overallZ <- celdaClusters(tempModel)$z
+        overallZ <- as.integer(celdaClusters(tempModel)$z)
       } else {
         overallZ <- tempSplit$z
       }
@@ -738,7 +762,7 @@ setMethod("recursiveSplitCell",
       logfile = logfile
     )
     modelInitial <- .celda_C(counts,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       K = as.integer(initialK),
       zInitialize = "split",
       nchains = 1,
@@ -748,7 +772,7 @@ setMethod("recursiveSplitCell",
       reorder = reorder
     )
     currentK <- length(unique(celdaClusters(modelInitial)$z)) + 1
-    overallZ <- celdaClusters(modelInitial)$z
+    overallZ <- as.integer(celdaClusters(modelInitial)$z)
     resList <- list(modelInitial)
     while (currentK <= maxK) {
       tempSplit <- .singleSplitZ(counts,
@@ -760,7 +784,7 @@ setMethod("recursiveSplitCell",
         beta = beta
       )
       tempModel <- .celda_C(counts,
-        sampleLabel = s,
+        sampleLabel = sampleLabel,
         K = as.integer(currentK),
         nchains = 1,
         zInitialize = "random",
@@ -774,7 +798,7 @@ setMethod("recursiveSplitCell",
       )
 
       if (length(unique(celdaClusters(tempModel)$z)) == currentK) {
-        overallZ <- celdaClusters(tempModel)$z
+        overallZ <- as.integer(celdaClusters(tempModel)$z)
       } else {
         overallZ <- tempSplit$z
         ll <-
@@ -841,7 +865,9 @@ setMethod("recursiveSplitCell",
       verbose = verbose,
       logfile = NULL
     )
-    celdaRes <- resamplePerplexity(counts, celdaRes)
+    celdaRes <- resamplePerplexity(counts, celdaRes,
+                                   doResampling = doResampling,
+                                   numResample = numResample)
   }
   endTime <- Sys.time()
   .logMessages(
@@ -918,7 +944,13 @@ setMethod("recursiveSplitCell",
 #'  \link[withr]{with_seed} are made.
 #' @param perplexity Logical. Whether to calculate perplexity for each model.
 #'  If FALSE, then perplexity can be calculated later with
-#'  \link{resamplePerplexity}. Default TRUE.
+#'  \link{resamplePerplexity}. Default \code{TRUE}.
+#' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
+#' matrix will be resampled according to a multinomial distribution to introduce
+#' noise before calculating perplexity. Default \code{FALSE}.
+#' @param numResample Integer. The number of times to resample the counts matrix
+#' for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
+#' Default \code{5}.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
@@ -947,6 +979,8 @@ setGeneric("recursiveSplitModule",
         reorder = TRUE,
         seed = 12345,
         perplexity = TRUE,
+        doResampling = FALSE,
+        numResample = 5,
         verbose = TRUE,
         logfile = NULL) {
     standardGeneric("recursiveSplitModule")})
@@ -983,6 +1017,8 @@ setMethod("recursiveSplitModule",
         reorder = TRUE,
         seed = 12345,
         perplexity = TRUE,
+        doResampling = FALSE,
+        numResample = 5,
         verbose = TRUE,
         logfile = NULL) {
 
@@ -1021,6 +1057,8 @@ setMethod("recursiveSplitModule",
             reorder = reorder,
             seed = seed,
             perplexity = perplexity,
+            doResampling = doResampling,
+            numResample = numResample,
             verbose = verbose,
             logfile = logfile)
 
@@ -1082,6 +1120,8 @@ setMethod("recursiveSplitModule",
         reorder = TRUE,
         seed = 12345,
         perplexity = TRUE,
+        doResampling = FALSE,
+        numResample = 5,
         verbose = TRUE,
         logfile = NULL) {
 
@@ -1111,6 +1151,8 @@ setMethod("recursiveSplitModule",
             reorder = reorder,
             seed = seed,
             perplexity = perplexity,
+            doResampling = doResampling,
+            numResample = numResample,
             verbose = verbose,
             logfile = logfile)
 
@@ -1154,6 +1196,8 @@ setMethod("recursiveSplitModule",
     reorder,
     seed,
     perplexity,
+    doResampling,
+    numResample,
     verbose,
     logfile) {
 
@@ -1173,7 +1217,9 @@ setMethod("recursiveSplitModule",
             reorder = reorder,
             perplexity = perplexity,
             verbose = verbose,
-            logfile = logfile)
+            logfile = logfile,
+            doResampling = doResampling,
+            numResample = numResample)
     } else {
         with_seed(seed,
             celdaList <- .recursiveSplitModule(
@@ -1191,7 +1237,9 @@ setMethod("recursiveSplitModule",
                 reorder = reorder,
                 perplexity = perplexity,
                 verbose = verbose,
-                logfile = logfile)
+                logfile = logfile,
+                doResampling = doResampling,
+                numResample = numResample)
         )
     }
 
@@ -1213,7 +1261,9 @@ setMethod("recursiveSplitModule",
                                  reorder = TRUE,
                                  perplexity = TRUE,
                                  verbose = TRUE,
-                                 logfile = NULL) {
+                                 logfile = NULL,
+                                 doResampling = FALSE,
+                                 numResample = 5) {
 
   .logMessages(paste(rep("=", 50), collapse = ""),
     logfile = logfile,
@@ -1272,7 +1322,7 @@ setMethod("recursiveSplitModule",
       logfile = logfile
     )
     modelInitial <- .celda_CG(counts,
-      sampleLabel = s,
+      sampleLabel = sampleLabel,
       L = initialL,
       K = K,
       zInitialize = "predefined",
@@ -1286,7 +1336,7 @@ setMethod("recursiveSplitModule",
       verbose = FALSE,
       reorder = reorder)
     currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
-    overallY <- celdaClusters(modelInitial)$y
+    overallY <- as.integer(celdaClusters(modelInitial)$y)
 
     resList <- list(modelInitial)
     while (currentL <= maxL) {
@@ -1315,7 +1365,7 @@ setMethod("recursiveSplitModule",
         zInit = overallZ,
         reorder = reorder
       )
-      overallY <- celdaClusters(tempModel)$y
+      overallY <- as.integer(celdaClusters(tempModel)$y)
 
       ## Add new model to results list and increment L
       .logMessages(
@@ -1378,8 +1428,8 @@ setMethod("recursiveSplitModule",
     )
     modelInitial@params$countChecksum <- countChecksum
 
-    currentL <- length(unique(celdaClusters(modelInitial)$y)) + 1
-    overallY <- celdaClusters(modelInitial)$y
+    currentL <- length(unique(as.integer(celdaClusters(modelInitial)$y))) + 1
+    overallY <- as.integer(celdaClusters(modelInitial)$y)
 
     ## Decomposed counts for full count matrix
     p <- .cGDecomposeCounts(counts, overallY, currentL)
@@ -1415,7 +1465,7 @@ setMethod("recursiveSplitModule",
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- celdaClusters(tempModel)$y
+      overallY <- as.integer(celdaClusters(tempModel)$y)
 
       # Adjust decomposed count matrices
       p <- .cGReDecomposeCounts(counts,
@@ -1493,7 +1543,7 @@ setMethod("recursiveSplitModule",
       nchains = 1,
       verbose = FALSE
     )
-    overallY <- celdaClusters(modelInitial)$y
+    overallY <- as.integer(celdaClusters(modelInitial)$y)
     currentL <- length(unique(overallY)) + 1
 
     ## Perform splitting for y labels
@@ -1522,7 +1572,7 @@ setMethod("recursiveSplitModule",
         yInit = tempSplit$y,
         reorder = reorder
       )
-      overallY <- celdaClusters(tempModel)$y
+      overallY <- as.integer(celdaClusters(tempModel)$y)
 
       ## Add new model to results list and increment L
       .logMessages(
@@ -1573,7 +1623,9 @@ setMethod("recursiveSplitModule",
       verbose = verbose,
       logfile = NULL
     )
-    celdaRes <- resamplePerplexity(counts, celdaRes)
+    celdaRes <- resamplePerplexity(counts, celdaRes,
+                                   doResampling = doResampling,
+                                   numResample = numResample)
   }
 
   endTime <- Sys.time()
@@ -1640,6 +1692,7 @@ setMethod("recursiveSplitModule",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+    SummarizedExperiment::colData(sce)$"celda_sample_label" <- sampleLabel
     return(sce)
 
 }
@@ -1687,5 +1740,6 @@ setMethod("recursiveSplitModule",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+    SummarizedExperiment::colData(sce)$"celda_sample_label" <- sampleLabel
     return(sce)
 }

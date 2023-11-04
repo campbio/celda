@@ -80,8 +80,9 @@ setMethod("perplexity", signature(x = "SingleCellExperiment"),
             y <- celdaModules(x, altExpName = altExpName)
             p <- .perplexityCelda_G(counts,
                 factorized,
-                L,
-                y,
+                L = L,
+                y = y,
+                beta = S4Vectors::metadata(altExp)$celda_parameters$beta,
                 newCounts = newCounts)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
@@ -198,15 +199,6 @@ setMethod(
          counts <- .processCounts(x)
          compareCountMatrix(counts, celdaMod)
 
-        if (is.null(newCounts)) {
-            newCounts <- counts
-        } else {
-            newCounts <- .processCounts(newCounts)
-        }
-        if (nrow(newCounts) != nrow(counts)) {
-            stop("newCounts should have the same number of rows as counts.")
-        }
-
         factorized <- factorizeMatrix(
             x = counts,
             celdaMod = celdaMod,
@@ -217,16 +209,21 @@ setMethod(
         eta <- factorized$posterior$geneDistribution
         nGByTS <- factorized$counts$geneDistribution
 
-        etaProb <- log(eta) * nGByTS
-        # gene.by.cell.prob = log(psi %*% phi)
-        # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
-        logPx <- .perplexityGLogPx(
-            newCounts,
-            phi,
-            psi,
-            celdaClusters(celdaMod)$y,
-            params(celdaMod)$L
-        ) # + sum(etaProb)
+        if (is.null(newCounts)) {
+            newCounts <- counts
+        } else {
+            newCounts <- .processCounts(newCounts)
+        }
+        if (nrow(newCounts) != nrow(counts)) {
+            stop("newCounts should have the same number of rows as counts.")
+        }
+        
+        #etaProb <- log(eta) * nGByTS
+        #gene.by.cell.prob = log(psi %*% phi)
+        #logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+        gene.by.cell.prob <- log(psi %*% phi)
+        logPx <- sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+
         perplexity <- exp(- (logPx / sum(newCounts)))
         return(perplexity)
     }
@@ -300,7 +297,13 @@ setMethod(
     factorized,
     L,
     y,
+    beta,
     newCounts) {
+
+    psi <- factorized$posterior$module
+    phi <- factorized$posterior$cell
+    #eta <- factorized$posterior$geneDistribution
+    #nGByTS <- factorized$counts$geneDistribution
 
     if (is.null(newCounts)) {
         newCounts <- counts
@@ -308,32 +311,21 @@ setMethod(
         newCounts <- .processCounts(newCounts)
     }
     if (nrow(newCounts) != nrow(counts)) {
-        stop("newCounts should have the same number of rows as",
-            " 'assay(altExp(x, altExpName), i = useAssay)'.")
+        stop("newCounts should have the same number of rows as counts.")
     }
+    
+    #etaProb <- log(eta) * nGByTS
+    #gene.by.cell.prob <- log(psi %*% phi)
 
-    psi <- factorized$posterior$module
-    phi <- factorized$posterior$cell
-    eta <- factorized$posterior$geneDistribution
-    nGByTS <- factorized$counts$geneDistribution
-
-    etaProb <- log(eta) * nGByTS
-    # gene.by.cell.prob = log(psi %*% phi)
-    # logPx = sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
-    logPx <- .perplexityGLogPx(
-        newCounts,
-        phi,
-        psi,
-        y,
-        L
-    ) # + sum(etaProb)
+    gene.by.cell.prob <- log(psi %*% phi)
+    logPx <- sum(gene.by.cell.prob * newCounts) # + sum(etaProb)
+    
     perplexity <- exp(- (logPx / sum(newCounts)))
     return(perplexity)
 }
 
 
-#' @title Calculate and visualize perplexity of all models in a celdaList, with
-#'  count resampling
+#' @title Calculate and visualize perplexity of all models in a celdaList
 #' @description Calculates the perplexity of each model's cluster assignments
 #'  given the provided countMatrix, as well as resamplings of that count
 #'  matrix, providing a distribution of perplexities and a better sense of the
@@ -351,10 +343,14 @@ setMethod(
 #'  to use. Default "featureSubset".
 #' @param celdaList Object of class 'celdaList'. Used only if \code{x} is a
 #'  matrix object.
-#' @param resample Integer. The number of times to resample the counts matrix
-#'  for evaluating perplexity. Default 5.
+#' @param doResampling Boolean. If \code{TRUE}, then each cell in the counts
+#' matrix will be resampled according to a multinomial distribution to introduce
+#' noise before calculating perplexity. Default \code{FALSE}.
+#' @param numResample Integer. The number of times to resample the counts matrix
+#' for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
+#' Default \code{5}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-#'  a default value of 12345 is used. If NULL, no calls to
+#'  a default value of \code{12345} is used. If \code{NULL}, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @return A \linkS4class{SingleCellExperiment} object or
 #'  \code{celdaList} object with a \code{perplexity}
@@ -366,7 +362,8 @@ setGeneric("resamplePerplexity",
         celdaList,
         useAssay = "counts",
         altExpName = "featureSubset",
-        resample = 5,
+        doResampling = FALSE,
+        numResample = 5,
         seed = 12345) {
     standardGeneric("resamplePerplexity")})
 
@@ -382,7 +379,8 @@ setMethod("resamplePerplexity",
     function(x,
         useAssay = "counts",
         altExpName = "featureSubset",
-        resample = 5,
+        doResampling = FALSE,
+        numResample = 5,
         seed = 12345) {
 
         altExp <- SingleCellExperiment::altExp(x, altExpName)
@@ -393,14 +391,15 @@ setMethod("resamplePerplexity",
             res <- .resamplePerplexity(
                 counts = counts,
                 celdaList = celdaList,
-                resample = resample)
+                doResampling = doResampling,
+                numResample = numResample)
         } else {
             with_seed(seed,
                 res <- .resamplePerplexity(
                     counts = counts,
                     celdaList = celdaList,
-                    resample = resample)
-            )
+                    doResampling = doResampling,
+                    numResample = numResample))
         }
 
         S4Vectors::metadata(altExp)$celda_grid_search <- res
@@ -423,20 +422,23 @@ setMethod("resamplePerplexity",
     signature(x = "ANY"),
     function(x,
         celdaList,
-        resample = 5,
+        doResampling = FALSE,
+        numResample = 5,
         seed = 12345) {
 
         if (is.null(seed)) {
             res <- .resamplePerplexity(
                 counts = x,
                 celdaList = celdaList,
-                resample = resample)
+                doResampling = doResampling,
+                numResample = numResample)
         } else {
             with_seed(seed,
                 res <- .resamplePerplexity(
                     counts = x,
                     celdaList = celdaList,
-                    resample = resample))
+                    doResampling = doResampling,
+                    numResample = numResample))
         }
 
         return(res)
@@ -446,26 +448,48 @@ setMethod("resamplePerplexity",
 
 .resamplePerplexity <- function(counts,
     celdaList,
-    resample = 5) {
+    doResampling = FALSE,
+    numResample = 5) {
 
     if (!methods::is(celdaList, "celdaList")) {
         stop("celdaList parameter was not of class celdaList.")
     }
-    if (!isTRUE(is.numeric(resample))) {
-        stop("Provided resample parameter was not numeric.")
+    if (!isTRUE(is.logical(doResampling))) {
+        stop("The 'doResampling' parameter needs to be logical (TRUE/FALSE).")
+    } 
+    if (!isTRUE(doResampling) & (!is.numeric(numResample) || numResample < 1)) {
+        stop("The 'numResample' parameter needs to be an integer greater ",
+        "than 0.")
     }
 
-    perpRes <- matrix(NA, nrow = length(resList(celdaList)), ncol = resample)
-    for (j in seq(resample)) {
-        newCounts <- .resampleCountMatrix(counts)
-        for (i in seq(length(resList(celdaList)))) {
-            perpRes[i, j] <- perplexity(x = counts,
-                celdaMod = resList(celdaList)[[i]],
-                newCounts = newCounts)
+    if(isTRUE(doResampling)) {
+        perpRes <- matrix(NA,
+                          nrow = length(resList(celdaList)),
+                          ncol = numResample)
+        for (j in seq(numResample)) {
+            newCounts <- .resampleCountMatrix(counts)
+            for (i in seq(length(resList(celdaList)))) {
+                perpRes[i, j] <- perplexity(x = counts,
+                    celdaMod = resList(celdaList)[[i]],
+                    newCounts = newCounts)
+            }
         }
-    }
+        celdaList@perplexity <- perpRes
+        
+    } else {
+        perpRes <- matrix(NA,
+                          nrow = length(resList(celdaList)),
+                          ncol = 1)
+        for (i in seq(length(resList(celdaList)))) {
+            perpRes[i,1] <- perplexity(x = counts,
+                                       celdaMod = resList(celdaList)[[i]],
+                                       newCounts = counts)
+        }
+    }    
+   
+    # Add perplexity data.frame to celda list object
     celdaList@perplexity <- perpRes
-
+    
     ## Add mean perplexity to runParams
     perpMean <- apply(perpRes, 1, mean)
     celdaList@runParams$mean_perplexity <- perpMean
@@ -495,7 +519,7 @@ setMethod("resamplePerplexity",
 #'  parameters.
 #' @export
 setGeneric("plotGridSearchPerplexity",
-    function(x, altExpName = "featureSubset", sep = 1, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
     standardGeneric("plotGridSearchPerplexity")})
 
 
@@ -507,7 +531,7 @@ setGeneric("plotGridSearchPerplexity",
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 1, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
         g <- do.call(paste0(".plotGridSearchPerplexity",
@@ -529,7 +553,7 @@ setMethod("plotGridSearchPerplexity",
 #' @export
 setMethod("plotGridSearchPerplexity",
     signature(x = "celdaList"),
-    function(x, sep = 1, alpha = 0.5) {
+    function(x, sep = 5, alpha = 0.5) {
         g <- do.call(paste0(".plotGridSearchPerplexity",
             as.character(class(resList(x)[[1]]))),
             args = list(x, sep, alpha))
@@ -736,15 +760,6 @@ setMethod("plotGridSearchPerplexity",
 
 
 # Resample a counts matrix for evaluating perplexity
-# Normalizes each column (cell) of a countMatrix by the column sum to
-# create a distribution of observing a given number of counts for a given
-# gene in that cell,
-# then samples across all cells.
-# This is primarily used to evaluate the stability of the perplexity for
-# a given K/L combination.
-# @param celda.mod A single celda run (usually from the _resList_ property
-# of a celdaList).
-# @return The perplexity for the provided chain as an mpfr number.
 #' @importFrom Matrix colSums t
 .resampleCountMatrix <- function(countMatrix) {
     colsums <- colSums(countMatrix)
@@ -762,8 +777,7 @@ setMethod("plotGridSearchPerplexity",
 
 #' @title Visualize perplexity differences of a list of celda models
 #' @description Visualize perplexity differences of every model in a celdaList,
-#'  by unique K/L combinations. Line represents centered moving average with
-#'  windows of length \code{n}.
+#'  by unique K/L combinations. 
 #' @param x Can be one of
 #' \itemize{
 #'  \item A \linkS4class{SingleCellExperiment} object returned from
@@ -774,15 +788,14 @@ setMethod("plotGridSearchPerplexity",
 #' @param altExpName The name for the \link{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @param n Integer. Width of the rolling window. Default 10.
 #' @param alpha Numeric. Passed to \link{geom_jitter}. Opacity of the points.
 #'  Values of alpha range from 0 to 1, with lower values corresponding
 #'  to more transparent colors.
-#' @return A ggplot plot object showing perplexity diferences as a function of
+#' @return A ggplot plot object showing perplexity differences as a function of
 #'  clustering parameters.
 #' @export
 setGeneric("plotRPC",
-    function(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
     standardGeneric("plotRPC")})
 
 
@@ -790,24 +803,24 @@ setGeneric("plotRPC",
 #' @examples
 #' data(sceCeldaCGGridSearch)
 #' sce <- resamplePerplexity(sceCeldaCGGridSearch)
-#' plotRPC(sce, n = 1)
+#' plotRPC(sce)
 #' @export
 setMethod("plotRPC",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 1, n = 10, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         model <- altExp@metadata$celda_grid_search@celdaGridSearchParameters$
             model
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
 
         if (model == "celda_C") {
-            g <- .plotRPCC(celdaList, sep, n = n,
+            g <- .plotRPCC(celdaList, sep, 
                 alpha = alpha)
         } else if (model == "celda_G") {
-            g <- .plotRPCG(celdaList, sep, n = n,
+            g <- .plotRPCG(celdaList, sep, 
                 alpha = alpha)
         } else if (model == "celda_CG") {
-            g <- .plotRPCCG(celdaList, sep, n = n,
+            g <- .plotRPCCG(celdaList, sep, 
                 alpha = alpha)
         } else {
             stop("S4Vectors::metadata(altExp(x, altExpName))$",
@@ -827,20 +840,20 @@ setMethod("plotRPC",
 #' celdaCGGridSearchRes <- resamplePerplexity(
 #'   celdaCGSim$counts,
 #'   celdaCGGridSearchRes)
-#' plotRPC(celdaCGGridSearchRes, n = 1)
+#' plotRPC(celdaCGGridSearchRes)
 #' @export
 setMethod("plotRPC",
     signature(x = "celdaList"),
-    function(x, sep = 1, n = 10, alpha = 0.5) {
+    function(x, sep = 5, alpha = 0.5) {
         g <- do.call(paste0(".plotRPC",
             unlist(strsplit(as.character(class(resList(x)[[1]])), "_"))[[2]]),
-            args = list(x, sep, n, alpha))
+            args = list(x, sep, alpha))
         return(g)
     }
 )
 
 
-.plotRPCCG <- function(celdaList, sep, n, alpha) {
+.plotRPCCG <- function(celdaList, sep, alpha) {
     # fix check note
     K <- L <- perpdiffK <- meanperpdiffK <- perpdiffL <- meanperpdiffL <- NULL
 
@@ -880,10 +893,9 @@ setMethod("plotRPC",
         colnames(diffMeansByK) <- c("K", "L", "meanperpdiffK")
         diffMeansByK$K <- as.factor(diffMeansByK$K)
         diffMeansByK$L <- as.factor(diffMeansByK$L)
-        diffMeansByK$rollmean <- data.table::frollmean(
-            diffMeansByK$meanperpdiffK, n = n, align = "center")
         diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK), ]
-
+        diffMeansByK$spline <- stats::smooth.spline(diffMeansByK$meanperpdiffK)$y
+        
         if (nlevels(dt$L) > 1) {
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
                 ggplot2::aes_string(x = "K",
@@ -892,7 +904,7 @@ setMethod("plotRPC",
                     ggplot2::aes_string(color = "L")) +
                 ggplot2::scale_color_discrete(name = "L") +
                 ggplot2::geom_path(data = diffMeansByK,
-                    ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                    ggplot2::aes_string(x = "K", y = "spline", group = "L",
                         color = "L"), size = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
                 ggplot2::xlab("K") +
@@ -910,7 +922,7 @@ setMethod("plotRPC",
                     color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
                 ggplot2::geom_path(data = diffMeansByK,
-                    ggplot2::aes_string(x = "K", y = "rollmean", group = "L",
+                    ggplot2::aes_string(x = "K", y = "spline", group = "L",
                         color = "L"), size = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
                 ggplot2::xlab("K") +
@@ -937,10 +949,9 @@ setMethod("plotRPC",
         colnames(diffMeansByL) <- c("K", "L", "meanperpdiffL")
         diffMeansByL$K <- as.factor(diffMeansByL$K)
         diffMeansByL$L <- as.factor(diffMeansByL$L)
-        diffMeansByL$rollmean <- data.table::frollmean(
-            diffMeansByL$meanperpdiffL, n = n, align = "center")
         diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL), ]
-
+        diffMeansByL$spline <- stats::smooth.spline(diffMeansByL$meanperpdiffL)$y
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L", y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
@@ -949,7 +960,7 @@ setMethod("plotRPC",
             ggplot2::geom_path(
                 data = diffMeansByL,
                 ggplot2::aes_string(
-                    x = "L", y = "rollmean", group = "K", color = "K"),
+                    x = "L", y = "spline", group = "K", color = "K"),
                 size = 1) +
             ggplot2::ylab("Rate of perplexity change") +
             ggplot2::xlab("L") +
@@ -968,7 +979,7 @@ setMethod("plotRPC",
 }
 
 
-.plotRPCC <- function(celdaList, sep, n, alpha) {
+.plotRPCC <- function(celdaList, sep, alpha) {
     K <- perpdiffK <- meanperpdiffK <- NULL # fix check note
     if (!all(c("K") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column K.")
@@ -1000,17 +1011,16 @@ setMethod("plotRPC",
             FUN = mean))
         colnames(diffMeansByK) <- c("K", "meanperpdiffK")
         diffMeansByK$K <- as.factor(diffMeansByK$K)
-        diffMeansByK$rollmean <- data.table::frollmean(
-            diffMeansByK$meanperpdiffK, n = n, align = "center")
         diffMeansByK <- diffMeansByK[stats::complete.cases(diffMeansByK), ]
-
+        diffMeansByK$spline <- stats::smooth.spline(diffMeansByK$meanperpdiffK)$y
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
             ggplot2::aes_string(x = "K",
                 y = "perpdiffK")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByK,
-                ggplot2::aes_string(x = "K", y = "rollmean", group = 1),
+                ggplot2::aes_string(x = "K", y = "spline", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
@@ -1028,7 +1038,7 @@ setMethod("plotRPC",
 }
 
 
-.plotRPCG <- function(celdaList, sep, n, alpha) {
+.plotRPCG <- function(celdaList, sep, alpha) {
     L <- perpdiffL <- meanperpdiffL <- NULL # fix check note
     if (!all(c("L") %in% colnames(runParams(celdaList)))) {
         stop("runParams(celdaList) needs the column L.")
@@ -1060,17 +1070,16 @@ setMethod("plotRPC",
             FUN = mean))
         colnames(diffMeansByL) <- c("L", "meanperpdiffL")
         diffMeansByL$L <- as.factor(diffMeansByL$L)
-        diffMeansByL$rollmean <- data.table::frollmean(
-            diffMeansByL$meanperpdiffL, n = n, align = "center")
         diffMeansByL <- diffMeansByL[stats::complete.cases(diffMeansByL), ]
-
+        diffMeansByL$spline <- stats::smooth.spline(diffMeansByL$meanperpdiffL)$y
+        
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
             ggplot2::aes_string(x = "L",
                 y = "perpdiffL")) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByL,
-                ggplot2::aes_string(x = "L", y = "rollmean", group = 1),
+                ggplot2::aes_string(x = "L", y = "spline", group = 1),
                 size = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +

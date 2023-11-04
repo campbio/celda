@@ -31,14 +31,14 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.9.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.12.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="http://celda.camplab.net/">
+  <a href="https://www.camplab.net/celda">
     <span class="fas fa-home fa-lg"></span>
      
   </a>
@@ -91,14 +91,14 @@
 
       
 
-      </header><script src="celda_pbmc3k_files/header-attrs-2.7/header-attrs.js"></script><script src="celda_pbmc3k_files/kePrint-0.0.1/kePrint.js"></script><link href="celda_pbmc3k_files/lightable-0.0.1/lightable.css" rel="stylesheet">
+      </header><script src="celda_pbmc3k_files/header-attrs-2.7/header-attrs.js"></script><script src="celda_pbmc3k_files/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="celda_pbmc3k_files/kePrint-0.0.1/kePrint.js"></script><link href="celda_pbmc3k_files/lightable-0.0.1/lightable.css" rel="stylesheet">
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Celda - Analysis of PBMC3K</h1>
                         <h4 class="author">Joshua Campbell, Zhe Wang</h4>
             
-            <h4 class="date">Compiled September 29, 2021</h4>
+            <h4 class="date">Compiled April 30, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/campbio/celda/blob/master/vignettes/articles/celda_pbmc3k.Rmd"><code>vignettes/articles/celda_pbmc3k.Rmd</code></a></small>
       <div class="hidden name"><code>celda_pbmc3k.Rmd</code></div>
@@ -124,12 +124,12 @@
 <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">as</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"dgCMatrix"</span><span class="op">)</span></code></pre></div>
 <p>If you have the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" target="_blank">singleCellTK</a> package installed, then this dataset can be imported and converted with a single command:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://compbiomed.github.io/sctk_docs/">singleCellTK</a></span><span class="op">)</span>
-<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/importExampleData.html">importExampleData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/">singleCellTK</a></span><span class="op">)</span>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/importExampleData.html">importExampleData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></code></pre></div>
 <p>To get your own data into a <code>SingleCellExperiment</code> object, the <code>singleCellTK</code> package has several importing functions for different preprocessing tools including CellRanger, STARsolo, BUStools, Optimus, DropEST, SEQC, and Alevin/Salmon. For example, the following code can be used as a template to read in multiple samples processed with CellRanger:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://compbiomed.github.io/sctk_docs/">singleCellTK</a></span><span class="op">)</span>
-<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/importCellRanger.html">importCellRanger</a></span><span class="op">(</span>sampleDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"path/to/sample1/"</span>, <span class="st">"path/to/sample2/"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/">singleCellTK</a></span><span class="op">)</span>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/importCellRanger.html">importCellRanger</a></span><span class="op">(</span>sampleDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"path/to/sample1/"</span>, <span class="st">"path/to/sample2/"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><strong>Note:</strong> As a reminder, you can view the assays, column annotation, and row annotation stored in the SCE with the commands <code>assays(sce)</code>, <code>colData(sce)</code>, and <code>rowData(sce)</code>, respectively.</p>
 <p>Finally, we set the <code>rownames</code> of the SCE to the gene symbol:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -139,33 +139,33 @@
 <h1 class="hasAnchor">
 <a href="#quality-control" class="anchor"></a>Quality Control</h1>
 <p>Quality control and filtering of cells is often needed before down-stream analyses such as dimensionality reduction and clustering. Typical filtering procedures include exclusion of poor quality cells with low numbers of counts/UMIs, estimation and removal of ambient RNA, and identification of potential doublet/multiplets. Many tools and packages are available to perform these operations and users are free to apply their tool(s) of choice as the celda clustering functions will work with any matrix stored in an SCE object. The celda package does contain a Bayesian method called <a href="https://doi.org/10.1186/s13059-020-1950-6" target="_blank">decontX</a> to estimate and remove transcript contamination in individual cells in a scRNA-seq dataset.</p>
-<p>To perform QC, we suggest using the <code>runCellQC</code> function in <code>singleCellTK</code> package. This is a wrapper for several methods for calculation of QC metrics, doublet detection, and estimation of ambient RNA (including decontX). Below is a quick example of how to perform standard QC before applying celda. If you have another preferred approach or your data has already been QC’ed, you can move to <a href="#featureselection">Feature selection</a> section. For this tutorial, we will only run one doublet detection algorithm and one decontamination algorithms. For a full list of algorithms that this function runs by default, see <code><a href="https://compbiomed.github.io/sctk_docs/reference/runCellQC.html">?runCellQC</a></code>. We will also quantify the percentage of mitochondrial genes in each cell as this is often used as a measure of cell viability.</p>
+<p>To perform QC, we suggest using the <code>runCellQC</code> function in <code>singleCellTK</code> package. This is a wrapper for several methods for calculation of QC metrics, doublet detection, and estimation of ambient RNA (including decontX). Below is a quick example of how to perform standard QC before applying celda. If you have another preferred approach or your data has already been QC’ed, you can move to <a href="#featureselection">Feature selection</a> section. For this tutorial, we will only run one doublet detection algorithm and one decontamination algorithms. For a full list of algorithms that this function runs by default, see <code><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html">?runCellQC</a></code>. We will also quantify the percentage of mitochondrial genes in each cell as this is often used as a measure of cell viability.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://compbiomed.github.io/sctk_docs/">singleCellTK</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/">singleCellTK</a></span><span class="op">)</span>
 
 <span class="co"># Get list of mitochondrial genes</span>
 <span class="va">mito.genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"^MT-"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="co"># Run QC</span>
-<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/runCellQC.html">runCellQC</a></span><span class="op">(</span><span class="va">sce</span>, sample <span class="op">=</span> <span class="cn">NULL</span>, algorithms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"QCMetrics"</span>, <span class="st">"scDblFinder"</span>, <span class="st">"decontX"</span><span class="op">)</span>, geneSetList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mito<span class="op">=</span><span class="va">mito.genes</span><span class="op">)</span>, geneSetListLocation <span class="op">=</span> <span class="st">"rownames"</span><span class="op">)</span></code></pre></div>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html">runCellQC</a></span><span class="op">(</span><span class="va">sce</span>, sample <span class="op">=</span> <span class="cn">NULL</span>, algorithms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"QCMetrics"</span>, <span class="st">"scDblFinder"</span>, <span class="st">"decontX"</span><span class="op">)</span>, geneSetList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>mito<span class="op">=</span><span class="va">mito.genes</span><span class="op">)</span>, geneSetListLocation <span class="op">=</span> <span class="st">"rownames"</span><span class="op">)</span></code></pre></div>
 <p><strong>Note:</strong> If you have cells from multiple samples stored in the SCE object, make sure to supply the <code>sample</code> parameter as the QC tools need to be applied to cells from each sample individually.</p>
 <p>Individual sets of QC metrics can be plotted with specific functions. For example to plot distributions of total numbers of UMIs derived from <code>runPerCellQC</code>, doublet scores from <code>runScDblFinder</code>, and contamination scores from <code>runDecontX</code> (all of which were run by the <code>runCellQC</code> function), the following plotting functions can be used:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/plotRunPerCellQCResults.html">plotRunPerCellQCResults</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotRunPerCellQCResults.html">plotRunPerCellQCResults</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/sctk_qc_plot-1.png" width="700"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/plotScDblFinderResults.html">plotScDblFinderResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"decontX_UMAP"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotScDblFinderResults.html">plotScDblFinderResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"decontX_UMAP"</span><span class="op">)</span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/sctk_qc_plot-2.png" width="700"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/plotDecontXResults.html">plotDecontXResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"decontX_UMAP"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotDecontXResults.html">plotDecontXResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"decontX_UMAP"</span><span class="op">)</span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/sctk_qc_plot-3.png" width="700"></p>
 <p>An comprehensive HTML report can be generated to visualize and explore the QC metrics in greater detail:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/reportCellQC.html">reportCellQC</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/reportCellQC.html">reportCellQC</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
 <p>After examining the distributions of various QC metrics, poor quality cells will need to be removed. Typically, thresholds for QC metrics should exclude cells that are outliers of the distribution (i.e. long tails in the violin or density plots). Cells can be removed using the <code>subsetSCECols</code> function. Metrics stored in the <code>colData</code> of the SCE object can be filtered using the <code>colData</code> parameter. Here we will limit to cells with at least 600 counts and 300 genes detected:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Filter SCE</span>
-<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/subsetSCECols.html">subsetSCECols</a></span><span class="op">(</span><span class="va">sce</span>, colData <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"total &gt; 600"</span>, <span class="st">"detected &gt; 300"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/subsetSCECols.html">subsetSCECols</a></span><span class="op">(</span><span class="va">sce</span>, colData <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"total &gt; 600"</span>, <span class="st">"detected &gt; 300"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># See number of cells after filtering</span>
 <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></code></pre></div>
@@ -190,9 +190,9 @@
 <p><strong>Note:</strong> The subsetted matrix is stored in the “alternative experiment” slot (<code>altExp</code>) within the SCE. This allows for a matrix with a different number of rows to be stored within the same SCE object (rather than creating two SCE objects). The celda functions described in the next several sections operate on a matrix stored in the <code>altExp</code> slot. The default name given to the alternative experiment and used in all downstream celda functions is <code>"featureSubset"</code>. If the <code>altExpName</code> parameter is changed here, then it will need to be supplied to downstream plotting functions as well. The list of alternative experiments in an SCE can be view with <code><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExpNames(sce)</a></code>. If you have already have an SCE with selected features or do not want to perform feature selection, then you need to set the alternative experiment directly with a command like <code>altExp(sce, "featureSubset") &lt;- assay(sce, "counts")</code>. In the future, this will be updated to be more simple by utilizing the <code>ExperimentSubset</code> package.</p>
 <p>If the number of features is still relatively large (e.g. &gt;5000), an alternative approach is to select highly variable features that can be used in the downstream clustering. The advantage of this approach is that it can greatly speed up celda and can improve with module detection among highly variable features with overall lower expression. The disadvantage of this approach is that features that do not fall into the highly variable group will not be clustered into modules. The celda package does not include methods for selection of highly variable genes (HVGs). However, the <code>singleCellTK</code> provides wrappers for methods used in <a href="https://doi.org/10.1016/j.cell.2019.05.031" target="_blank">Seurat</a> and <a href="https://bioconductor.org/packages/release/bioc/html/scran.html">Scran</a>. We recommend keeping at least 2,000-5,000 HVGs for clustering. Here is some example code of how to select the top 5,000 most variable genes and store it back in the SCE as an <code>altExp</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://compbiomed.github.io/sctk_docs/">singleCellTK</a></span><span class="op">)</span>
-<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/seuratFindHVG.html">seuratFindHVG</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, hvgMethod <span class="op">=</span> <span class="st">"vst"</span><span class="op">)</span>
-<span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/getTopHVG.html">getTopHVG</a></span><span class="op">(</span><span class="va">sce</span>, method <span class="op">=</span> <span class="st">"vst"</span>, n <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/">singleCellTK</a></span><span class="op">)</span>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/seuratFindHVG.html">seuratFindHVG</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, hvgMethod <span class="op">=</span> <span class="st">"vst"</span><span class="op">)</span>
+<span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/getTopHVG.html">getTopHVG</a></span><span class="op">(</span><span class="va">sce</span>, method <span class="op">=</span> <span class="st">"vst"</span>, n <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">sce</span>, <span class="va">altExpName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span><span class="va">g</span>, <span class="op">]</span></code></pre></div>
 <p>For the rest of the analysis with the PBMC3K data, we will use the first approach where features with at least 3 counts in 3 cells were included.</p>
 </div>
@@ -203,9 +203,9 @@
 <h2 class="hasAnchor">
 <a href="#bi-clustering-with-known-numbers-of-clusters" class="anchor"></a>Bi-clustering with known numbers of clusters</h2>
 <p>As mentioned earlier, celda is discrete Bayesian model that is able to simultaneously bi-cluster features into modules and cells into cell clusters. The primary bi-clustering model can be accessed with the function <code>celda_CG</code>. This function operates on a matrix stored as an alternative experiment in the <code>altExp</code> slot. If you did not perform feature selection as recommended in the previous section and your matrix of interest is not currently located in an <code>altExp</code> slot, the following code can be used to copy a matrix in the main assay slot to the <code>altExp</code> slot:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>useAssay <span class="ot">&lt;-</span> <span class="st">"counts"</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>altExpName <span class="ot">&lt;-</span> <span class="st">"featureSubset"</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">altExp</span>(sce, altExpName) <span class="ot">&lt;-</span> <span class="fu">assay</span>(sce, useAssay)<span class="st">`</span><span class="at">. </span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>useAssay &lt;-<span class="st"> "counts"</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>altExpName &lt;-<span class="st"> "featureSubset"</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="kw">altExp</span>(sce, altExpName) &lt;-<span class="st"> </span><span class="kw">assay</span>(sce, useAssay)<span class="st">`</span><span class="dt">. </span></span></code></pre></div>
 <p>The two major adjustable parameters in this model are <code>L</code>, the number of modules, and <code>K</code>, the number of cell populations. The following code bi-clusters the PBMC3K dataset into 100 modules and 15 cell populations:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/celda_CG.html">celda_CG</a></span><span class="op">(</span><span class="va">sce</span>, L <span class="op">=</span> <span class="fl">100</span>, K <span class="op">=</span> <span class="fl">15</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></code></pre></div>
@@ -223,7 +223,7 @@
 <p><img src="celda_pbmc3k_files/figure-html/module_split_perplexity-1.png" width="700"></p>
 <p>The perplexity alone often does not show a clear elbow or “leveling off”. However, the rate of perplexity change (RPC) can be more informative to determine when adding new modules does not add much additional information <a href="https://doi.org/10.1186/1471-2105-16-S13-S8" target="_blank">Zhao et al., 2015</a>). An RPC closer to zero indicates that the addition of new modules or cell clusters is not substantially decreasing the perplexity. The RPC of models can be visualized using function <code>plotRPC</code>:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../../reference/plotRPC.html">plotRPC</a></span><span class="op">(</span><span class="va">moduleSplit</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, sep <span class="op">=</span> <span class="fl">10</span>, n <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../../reference/plotRPC.html">plotRPC</a></span><span class="op">(</span><span class="va">moduleSplit</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span><span class="op">)</span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_split_rpc-1.png" width="700"></p>
 <p>In this case, we will choose an <code>L</code> of 80 as the RPC curve tends to level off at this point:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -28243,11 +28243,11 @@ RCE1
 <span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span>
 
 <span class="co"># Run differential expression analysis</span>
-<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/findMarkerDiffExp.html">findMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, method <span class="op">=</span> <span class="st">"wilcox"</span>, cluster <span class="op">=</span> <span class="fu"><a href="../../reference/celdaClusters.html">celdaClusters</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/findMarkerDiffExp.html">findMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, method <span class="op">=</span> <span class="st">"wilcox"</span>, cluster <span class="op">=</span> <span class="fu"><a href="../../reference/celdaClusters.html">celdaClusters</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p>The function <code>plotMarkerDiffExp</code> can be used to plot the results in a heatmap. The <code>topN</code> parameter will plot the top N ranked genes for each cluster.</p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Plot differentially expressed genes that pass additional thresholds 'minClustExprPerc' and 'maxCtrlExprPerc'</span>
-<span class="fu"><a href="https://compbiomed.github.io/sctk_docs/reference/plotMarkerDiffExp.html">plotMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotMarkerDiffExp.html">plotMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/diffExp_plot-1.png" width="700"></p>
 <p>Other parameters such as <code>minClustExprPerc</code> (the minimum number of cells expressing the marker gene in the cluster) and <code>maxCtrlExprPerc</code> (the maximum number of cells expression the marker gene in other clusters) can be used to control how specific each marker gene is to each cell populations. Similarly, adding a log2 fold-change cutoff (e.g. 1) can select for markers that are more strongly up-regulated in a cell population.</p>
 </div>
@@ -28321,9 +28321,8 @@ RCE1
 <div id="session-information" class="section level1">
 <h1 class="hasAnchor">
 <a href="#session-information" class="anchor"></a>Session information</h1>
-<details><summary>
-sessionInfo()
-</summary><pre><code>## R version 4.0.4 (2021-02-15)
+<details><p><summary>sessionInfo()</summary></p>
+<pre><code>## R version 4.0.4 (2021-02-15)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
 ## Running under: macOS Big Sur 10.16
 ## 
@@ -28341,7 +28340,7 @@ sessionInfo()
 ## other attached packages:
 ##  [1] scater_1.18.6               kableExtra_1.3.4           
 ##  [3] knitr_1.31                  ggplot2_3.3.5              
-##  [5] celda_1.9.2                 singleCellTK_2.2.0         
+##  [5] celda_1.12.0                singleCellTK_2.5.1         
 ##  [7] TENxPBMCData_1.8.0          HDF5Array_1.18.1           
 ##  [9] rhdf5_2.34.0                DelayedArray_0.16.2        
 ## [11] Matrix_1.3-2                SingleCellExperiment_1.12.0
@@ -28388,7 +28387,7 @@ sessionInfo()
 ##  [67] zlibbioc_1.36.0               purrr_0.3.4                  
 ##  [69] RCurl_1.98-1.2                dbscan_1.1-6                 
 ##  [71] GetoptLong_1.0.5              viridis_0.5.1                
-##  [73] cowplot_1.1.1                 cluster_2.1.1                
+##  [73] cowplot_1.1.1                 cluster_2.1.0                
 ##  [75] ggrepel_0.9.1                 fs_1.5.0                     
 ##  [77] magrittr_2.0.1                data.table_1.14.0            
 ##  [79] RSpectra_0.16-0               magick_2.7.0                 

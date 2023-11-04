@@ -87,13 +87,13 @@ test_that(desc = "Testing celdaGridSearch with celda_C", {
         c("index", "chain", "K", "seed", "logLikelihood"))
     expect_error(plotGridSearchPerplexity(celdaCResList))
 
-    celdaCResList <- resamplePerplexity(celdaCResList, resample = 2)
+    celdaCResList <- resamplePerplexity(celdaCResList, numResample = 2)
     expect_equal(is.null(altExp(
         celdaCResList)@metadata$celda_grid_search@perplexity),
         FALSE)
     expect_true(is(celdaCResList, "SingleCellExperiment"))
-    expect_error(resamplePerplexity(celdaCResList, resample = "2"),
-        "Provided resample parameter was not numeric.")
+    expect_error(resamplePerplexity(celdaCResList, numResample = "2"),
+        "The 'numResample' parameter needs to be an integer greater than 0.")
 
     plotObj <- plotGridSearchPerplexity(celdaCResList)
     expect_is(plotObj, "ggplot")

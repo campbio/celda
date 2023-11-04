@@ -6,11 +6,11 @@
 \alias{plotGridSearchPerplexity,celdaList-method}
 \title{Visualize perplexity of a list of celda models}
 \usage{
-plotGridSearchPerplexity(x, altExpName = "featureSubset", sep = 1, alpha = 0.5)
+plotGridSearchPerplexity(x, altExpName = "featureSubset", sep = 5, alpha = 0.5)
 
-\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 1, alpha = 0.5)
+\S4method{plotGridSearchPerplexity}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 5, alpha = 0.5)
 
-\S4method{plotGridSearchPerplexity}{celdaList}(x, sep = 1, alpha = 0.5)
+\S4method{plotGridSearchPerplexity}{celdaList}(x, sep = 5, alpha = 0.5)
 }
 \arguments{
 \item{x}{Can be one of

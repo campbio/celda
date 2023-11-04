@@ -85,7 +85,7 @@ setMethod("logLikelihood", signature(x = "SingleCellExperiment"),
 setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_C"),
     function(x, celdaMod) {
         sampleLabel <- sampleLabel(celdaMod)
-        z <- celdaClusters(celdaMod)$z
+        z <- as.integer(celdaClusters(celdaMod)$z)
         K <- params(celdaMod)$K
         alpha <- params(celdaMod)$alpha
         beta <- params(celdaMod)$beta
@@ -105,7 +105,7 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_C"),
 #' @export
 setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_G"),
     function(x, celdaMod) {
-        y <- celdaClusters(celdaMod)$y
+        y <- as.integer(celdaClusters(celdaMod)$y)
         L <- params(celdaMod)$L
         beta <- params(celdaMod)$beta
         delta <- params(celdaMod)$delta
@@ -127,8 +127,8 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_G"),
 setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
     function(x, celdaMod) {
         sampleLabel <- sampleLabel(celdaMod)
-        z <- celdaClusters(celdaMod)$z
-        y <- celdaClusters(celdaMod)$y
+        z <- as.integer(celdaClusters(celdaMod)$z)
+        y <- as.integer(celdaClusters(celdaMod)$y)
         K <- params(celdaMod)$K
         L <- params(celdaMod)$L
         alpha <- params(celdaMod)$alpha

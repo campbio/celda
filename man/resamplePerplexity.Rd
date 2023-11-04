@@ -4,15 +4,15 @@
 \alias{resamplePerplexity}
 \alias{resamplePerplexity,SingleCellExperiment-method}
 \alias{resamplePerplexity,ANY-method}
-\title{Calculate and visualize perplexity of all models in a celdaList, with
- count resampling}
+\title{Calculate and visualize perplexity of all models in a celdaList}
 \usage{
 resamplePerplexity(
   x,
   celdaList,
   useAssay = "counts",
   altExpName = "featureSubset",
-  resample = 5,
+  doResampling = FALSE,
+  numResample = 5,
   seed = 12345
 )
 
@@ -20,11 +20,18 @@ resamplePerplexity(
   x,
   useAssay = "counts",
   altExpName = "featureSubset",
-  resample = 5,
+  doResampling = FALSE,
+  numResample = 5,
   seed = 12345
 )
 
-\S4method{resamplePerplexity}{ANY}(x, celdaList, resample = 5, seed = 12345)
+\S4method{resamplePerplexity}{ANY}(
+  x,
+  celdaList,
+  doResampling = FALSE,
+  numResample = 5,
+  seed = 12345
+)
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
@@ -44,11 +51,16 @@ slot to use if \code{x} is a
 \item{altExpName}{The name for the \link{altExp} slot
 to use. Default "featureSubset".}
 
-\item{resample}{Integer. The number of times to resample the counts matrix
-for evaluating perplexity. Default 5.}
+\item{doResampling}{Boolean. If \code{TRUE}, then each cell in the counts
+matrix will be resampled according to a multinomial distribution to introduce
+noise before calculating perplexity. Default \code{FALSE}.}
+
+\item{numResample}{Integer. The number of times to resample the counts matrix
+for evaluating perplexity if \code{doResampling} is set to \code{TRUE}.
+Default \code{5}.}
 
 \item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-a default value of 12345 is used. If NULL, no calls to
+a default value of \code{12345} is used. If \code{NULL}, no calls to
 \link[withr]{with_seed} are made.}
 }
 \value{
