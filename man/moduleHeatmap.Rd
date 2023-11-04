@@ -203,7 +203,7 @@ displayed using the \link[grid]{grid.draw} function. Default \code{FALSE}.}
 \item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
 }
 \value{
-A \link[multipanelfigure]{multi_panel_figure} object if plotting
+A list object if plotting
  more than one module heatmaps. Otherwise a
  \link[ComplexHeatmap]{HeatmapList} object is returned.
 }
@@ -212,9 +212,7 @@ Renders a heatmap for selected \code{featureModule}. Cells are
  ordered from those with the lowest probability of the module on the left to
  the highest probability on the right. Features are ordered from those
  with the highest probability in the module
- on the top to the lowest probability on the bottom. Use of
- \link[multipanelfigure]{save_multi_panel_figure} is recommended for
- outputting figures in various formats.
+ on the top to the lowest probability on the bottom.
 }
 \examples{
 data(sceCeldaCG)

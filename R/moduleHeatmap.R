@@ -3,9 +3,7 @@
 #'  ordered from those with the lowest probability of the module on the left to
 #'  the highest probability on the right. Features are ordered from those
 #'  with the highest probability in the module
-#'  on the top to the lowest probability on the bottom. Use of
-#'  \link[multipanelfigure]{save_multi_panel_figure} is recommended for
-#'  outputting figures in various formats.
+#'  on the top to the lowest probability on the bottom.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
@@ -106,11 +104,10 @@
 #' returned instead of a single multi-panel figure. These plots can be
 #' displayed using the \link[grid]{grid.draw} function. Default \code{FALSE}.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
-#' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
+#' @return A list object if plotting
 #'  more than one module heatmaps. Otherwise a
 #'  \link[ComplexHeatmap]{HeatmapList} object is returned.
 #' @importFrom methods .hasSlot
-#' @importFrom multipanelfigure multi_panel_figure
 #' @export
 setGeneric("moduleHeatmap",
     function(x,
