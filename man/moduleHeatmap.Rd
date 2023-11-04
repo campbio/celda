@@ -29,8 +29,8 @@ moduleHeatmap(
   showModuleLabel = TRUE,
   moduleLabel = "auto",
   moduleLabelSize = NULL,
-  width = "auto",
-  height = "auto",
+  byrow = TRUE,
+  top = NA,
   unit = "mm",
   ncol = NULL,
   useRaster = TRUE,
@@ -62,8 +62,8 @@ moduleHeatmap(
   showModuleLabel = TRUE,
   moduleLabel = "auto",
   moduleLabelSize = NULL,
-  width = "auto",
-  height = "auto",
+  byrow = TRUE,
+  top = NA,
   unit = "mm",
   ncol = NULL,
   useRaster = TRUE,
@@ -178,13 +178,13 @@ automatically pulls module labels from \code{x}.}
 
 \item{moduleLabelSize}{Passed to \link{gpar}. The size of text (in points).}
 
-\item{width}{Passed to \link[multipanelfigure]{multi_panel_figure}. The
-width of the output figure.}
+\item{byrow}{Passed to \link{matrix}. logical. If \code{FALSE} (the default)
+the figure panel is filled by columns, otherwise the figure panel is filled
+by rows.}
 
-\item{height}{Passed to \link[multipanelfigure]{multi_panel_figure}. The
-height of the output figure.}
+\item{top}{Passed to \link[gridExtra]{marrangeGrob}. The title for each page.}
 
-\item{unit}{Passed to \link[multipanelfigure]{multi_panel_figure}. Single
+\item{unit}{Passed to \link[grid]{unit}. Single
 character object defining the unit of all dimensions defined.}
 
 \item{ncol}{Integer. Number of columns of module heatmaps. If \code{NULL},
@@ -197,7 +197,7 @@ then rasterization will be automatically determined by the underlying
 \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.}
 
 \item{returnAsList}{Boolean. If \code{TRUE}, then a list of plots will be
-returned instead of a single multi-panel figure. These plots can be 
+returned instead of a single multi-panel figure. These plots can be
 displayed using the \link[grid]{grid.draw} function. Default \code{FALSE}.}
 
 \item{...}{Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.}
@@ -218,6 +218,5 @@ Renders a heatmap for selected \code{featureModule}. Cells are
 }
 \examples{
 data(sceCeldaCG)
-moduleHeatmap(sceCeldaCG, width = 250, height = 250,
- displayName = "rownames")
+moduleHeatmap(sceCeldaCG, displayName = "rownames")
 }
