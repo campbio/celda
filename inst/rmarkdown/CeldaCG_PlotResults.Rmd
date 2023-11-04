@@ -36,7 +36,7 @@ require(kableExtra)
 require(grid)
 require(knitr)
 require(ggplot2)
-require(multipanelfigure)
+require(gridExtra)
 require(SingleCellExperiment)
 
 sce <- params$sce
