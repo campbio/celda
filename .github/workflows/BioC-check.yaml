@@ -37,9 +37,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          packages: url::https://cran.r-project.org/src/contrib/Archive/dbplyr/dbplyr_2.3.4.tar.gz
           extra-packages: |
             any::rcmdcheck
+            url::https://cran.r-project.org/src/contrib/Archive/dbplyr/dbplyr_2.3.4.tar.gz
 
       - name: Install XQuartz on macOS
         if: runner.os == 'macOS'
