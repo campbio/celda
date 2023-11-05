@@ -3,9 +3,7 @@
 #'  ordered from those with the lowest probability of the module on the left to
 #'  the highest probability on the right. Features are ordered from those
 #'  with the highest probability in the module
-#'  on the top to the lowest probability on the bottom. Use of
-#'  \link[multipanelfigure]{save_multi_panel_figure} is recommended for
-#'  outputting figures in various formats.
+#'  on the top to the lowest probability on the bottom.
 #' @param x A numeric \link{matrix} of counts or a
 #'  \linkS4class{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
@@ -20,7 +18,7 @@
 #'  Multiple modules can be included in a vector. Default \code{NULL} which
 #'  plots all module heatmaps.
 #' @param featureModule Same as \code{modules}. Either can be used to specify
-#' the modules to display. 
+#'  the modules to display.
 #' @param col Passed to \link[ComplexHeatmap]{Heatmap}. Set color boundaries
 #'  and colors.
 #' @param topCells Integer. Number of cells with the highest and lowest
@@ -89,11 +87,11 @@
 #'  vector of the same length as \code{featureModule}. Default "auto", which
 #'  automatically pulls module labels from \code{x}.
 #' @param moduleLabelSize Passed to \link{gpar}. The size of text (in points).
-#' @param width Passed to \link[multipanelfigure]{multi_panel_figure}. The
-#'  width of the output figure.
-#' @param height Passed to \link[multipanelfigure]{multi_panel_figure}. The
-#'  height of the output figure.
-#' @param unit Passed to \link[multipanelfigure]{multi_panel_figure}. Single
+#' @param byrow Passed to \link{matrix}. logical. If \code{FALSE} (the default)
+#'  the figure panel is filled by columns, otherwise the figure panel is filled
+#'  by rows.
+#' @param top Passed to \link[gridExtra]{marrangeGrob}. The title for each page.
+#' @param unit Passed to \link[grid]{unit}. Single
 #'  character object defining the unit of all dimensions defined.
 #' @param ncol Integer. Number of columns of module heatmaps. If \code{NULL},
 #' then this will be automatically calculated so that the number of columns
@@ -103,20 +101,19 @@
 #' then rasterization will be automatically determined by the underlying
 #' \link[ComplexHeatmap]{Heatmap} function. Default \code{TRUE}.
 #' @param returnAsList Boolean. If \code{TRUE}, then a list of plots will be
-#' returned instead of a single multi-panel figure. These plots can be 
+#' returned instead of a single multi-panel figure. These plots can be
 #' displayed using the \link[grid]{grid.draw} function. Default \code{FALSE}.
 #' @param ... Additional parameters passed to \link[ComplexHeatmap]{Heatmap}.
-#' @return A \link[multipanelfigure]{multi_panel_figure} object if plotting
+#' @return A list object if plotting
 #'  more than one module heatmaps. Otherwise a
 #'  \link[ComplexHeatmap]{HeatmapList} object is returned.
 #' @importFrom methods .hasSlot
-#' @importFrom multipanelfigure multi_panel_figure
 #' @export
 setGeneric("moduleHeatmap",
     function(x,
         useAssay = "counts",
         altExpName = "featureSubset",
-        modules = NULL,        
+        modules = NULL,
         featureModule = NULL,
         col = circlize::colorRamp2(c(-2, 0, 2),
             c("#1E90FF", "#FFFFFF", "#CD2626")),
@@ -137,8 +134,8 @@ setGeneric("moduleHeatmap",
         showModuleLabel = TRUE,
         moduleLabel = "auto",
         moduleLabelSize = NULL,
-        width = "auto",
-        height = "auto",
+        byrow = TRUE,
+        top = NA,
         unit = "mm",
         ncol = NULL,
         useRaster = TRUE,
@@ -150,8 +147,7 @@ setGeneric("moduleHeatmap",
 #' @rdname moduleHeatmap
 #' @examples
 #' data(sceCeldaCG)
-#' moduleHeatmap(sceCeldaCG, width = 250, height = 250,
-#'  displayName = "rownames")
+#' moduleHeatmap(sceCeldaCG, displayName = "rownames")
 #' @export
 setMethod("moduleHeatmap",
     signature(x = "SingleCellExperiment"),
@@ -179,20 +175,20 @@ setMethod("moduleHeatmap",
         showModuleLabel = TRUE,
         moduleLabel = "auto",
         moduleLabelSize = NULL,
-        width = "auto",
-        height = "auto",
+        byrow = TRUE,
+        top = NA,
         unit = "mm",
         ncol = NULL,
         useRaster = TRUE,
         returnAsList = FALSE,
         ...) {
 
-        # 'modules' is an easier parameter name to remember so we include 
-        # support for both. 
+        # 'modules' is an easier parameter name to remember so we include
+        # support for both.
         if(!is.null(modules)) {
             featureModule <- modules
         }
-        
+
         altExp <- SingleCellExperiment::altExp(x, altExpName)
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
@@ -285,12 +281,12 @@ setMethod("moduleHeatmap",
             # If there is more than 1 module selected, then the miniumum size
             # size will be caculated for each module. This will ensure that
             # all modules will have the same rowFontSize and the module
-            # heatmaps will have the same width. 
+            # heatmaps will have the same width.
             maxlen <- max(unlist(lapply(featureIndices, length)))
             maxlen <- maxlen * sqrt(length(featureIndices))
             rowFontSize <- rep(min(200 / maxlen, 20), length(featureIndices))
           } else {
-            # If there is only one plot or each plot will be generated 
+            # If there is only one plot or each plot will be generated
             # separately and returned in a list, then the size of the labels,
             # will be caculated for each module separately.
             len <- unlist(lapply(featureIndices, length))
@@ -330,7 +326,7 @@ setMethod("moduleHeatmap",
             return(plts[[1]])
         } else {
             if (is.null(ncol)) {
-              ncol <- floor(sqrt(length(plts)))
+                ncol <- floor(sqrt(length(plts)))
             }
             nrow <- ceiling(length(plts) / ncol)
 
@@ -340,22 +336,19 @@ setMethod("moduleHeatmap",
                     wrap.grobs = TRUE)
             }
 
-            if(isTRUE(returnAsList)) {
-                figure <- plts    
+            if (isTRUE(returnAsList)) {
+                figure <- plts
             } else {
-                figure <- multipanelfigure::multi_panel_figure(
-                    columns = ncol,
-                    rows = nrow,
-                    width = width,
-                    height = height,
-                    unit = unit)
-                
-                for (i in seq(length(plts))) {
-                    figure <- suppressMessages(multipanelfigure::fill_panel(figure,
-                                                                            plts[[i]], label = ""))
-                }
+                figure <- gridExtra::marrangeGrob(plts,
+                    ncol = ncol,
+                    nrow = nrow,
+                    layout_matrix = matrix(seq_len(nrow * ncol),
+                        nrow = nrow,
+                        ncol = ncol,
+                        byrow = TRUE),
+                    top = NA)
             }
-            
+
             suppressWarnings(return(figure))
         }
     }

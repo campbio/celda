@@ -41,3 +41,46 @@ brew install libgit2
 options(buildtools.check = function(action) TRUE)
 ```
 
+Also, if you receive installation errors when Rcpp is being installed and compiled, try following the steps outlined here to solve the issue:
+
+https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/
+
+If you are running R 4.0.0 or later version on MacOS Catalina and you see error `'wchar.h' file not found`, you can try the method in this link:
+
+https://discourse.mc-stan.org/t/dealing-with-catalina-iii/12731/5
+
+If you are trying to install on MacOS in an Apple Silicon computater and you see the following error:
+
+```
+ld: warning: directory not found for option '-L/opt/gfortran/lib/gcc/x86_64-apple-darwin20.0/12.2.0'
+ld: warning: directory not found for option '-L/opt/gfortran/lib'
+ld: library not found for -lgfortran
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make: *** [celda.so] Error 1
+ERROR: compilation failed for package ‘celda’
+```
+
+You can solve this by downloading and installing the gfortran pkg located [here](https://mac.r-project.org/tools/gfortran-12.2-universal.pkg) and then running the following command:
+
+You can solve this by downloading and installing the gfortran pkg located [here](https://mac.r-project.org/tools/gfortran-12.2-universal.pkg) and then running the following command:
+
+```
+sudo /opt/gfortran/bin/gfortran-update-sdk
+```
+
+# Vignettes and examples
+
+To build the vignettes for Celda and DecontX during installation from GitHub, use the following command:
+
+```
+library(devtools)
+install_github("campbio/celda", build_vignettes = TRUE)
+```
+
+Note that installation may take an extra 5-10 minutes for building of the vignettes. The Celda and DecontX vignettes can then be accessed via the following commands:
+```
+vignette("celda")
+vignette("decontX")
+```
+
+

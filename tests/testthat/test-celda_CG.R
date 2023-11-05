@@ -159,7 +159,7 @@ test_that(desc = "Testing celdaHeatmap with celda_CG", {
 test_that(desc = "Testing moduleHeatmap with celda_CG", {
     plt <- moduleHeatmap(modelCG, featureModule = c(2, 3),
                          topCells = 10, topFeatures = 10)
-    expect_is(plt, "multipanelfigure")
+    expect_is(plt, "list")
 })
 
 # celdaProbabiltyMap

@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.14.2
+Version: 1.18.1
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre")),
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
@@ -22,7 +22,7 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         Rcpp, RcppEigen, uwot, enrichR, SummarizedExperiment,
         MCMCprecision, ggrepel, Rtsne, withr,
         scater (>= 1.14.4), scran, dbscan,
-        DelayedArray, stringr, ComplexHeatmap, multipanelfigure,
+        DelayedArray, stringr, ComplexHeatmap, gridExtra,
         circlize
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData

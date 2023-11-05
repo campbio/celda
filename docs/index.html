@@ -39,7 +39,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.14.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.18.1</span>
       </span>
     </div>
 
@@ -113,7 +113,7 @@
 <p>To install the latest stable release of <strong>celda</strong> from <a href="http://bioconductor.org/packages/celda/" class="external-link">Bioconductor</a> (requires R version &gt;= 3.6):</p>
 <pre><code><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"celda"</span><span class="op">)</span></span></code></pre>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"celda"</span><span class="op">)</span></span></code></pre>
 <p>The latest stable version of <strong>celda</strong> can be installed from GitHub using <code>devtools</code>:</p>
 <pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"campbio/celda"</span><span class="op">)</span></span></code></pre>
@@ -126,6 +126,15 @@
 <p><a href="https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/" class="external-link uri">https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/</a></p>
 <p>If you are running R 4.0.0 or later version on MacOS Catalina and you see error <code>'wchar.h' file not found</code>, you can try the method in this link:</p>
 <p><a href="https://discourse.mc-stan.org/t/dealing-with-catalina-iii/12731/5" class="external-link uri">https://discourse.mc-stan.org/t/dealing-with-catalina-iii/12731/5</a></p>
+<p>If you are trying to install on MacOS in an Apple Silicon computater and you see the following error:</p>
+<pre><code>ld: warning: directory not found for option '-L/opt/gfortran/lib/gcc/x86_64-apple-darwin20.0/12.2.0'
+ld: warning: directory not found for option '-L/opt/gfortran/lib'
+ld: library not found for -lgfortran
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make: *** [celda.so] Error 1
+ERROR: compilation failed for package ‘celda’</code></pre>
+<p>You can solve this by downloading and installing the gfortran pkg located <a href="https://mac.r-project.org/tools/gfortran-12.2-universal.pkg" class="external-link">here</a> and then running the following command:</p>
+<pre><code><span><span class="va">sudo</span> <span class="op">/</span><span class="va">opt</span><span class="op">/</span><span class="va">gfortran</span><span class="op">/</span><span class="va">bin</span><span class="op">/</span><span class="va">gfortran</span><span class="op">-</span><span class="va">update</span><span class="op">-</span><span class="va">sdk</span></span></code></pre>
 <p><strong>NOTE</strong> If you are trying to install <strong>celda</strong> using Rstudio and get this error: <code>could not find tools necessary to compile a package</code>, you can try this:</p>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>buildtools.check <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">action</span><span class="op">)</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre>
 </div>
