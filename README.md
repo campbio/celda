@@ -44,6 +44,24 @@ If you are running R 4.0.0 or later version on MacOS Catalina and you see error 
 
 https://discourse.mc-stan.org/t/dealing-with-catalina-iii/12731/5
 
+If you are trying to install on MacOS in an Apple Silicon computater and you see the following error:
+
+```
+ld: warning: directory not found for option '-L/opt/gfortran/lib/gcc/x86_64-apple-darwin20.0/12.2.0'
+ld: warning: directory not found for option '-L/opt/gfortran/lib'
+ld: library not found for -lgfortran
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make: *** [celda.so] Error 1
+ERROR: compilation failed for package ‘celda’
+```
+
+You can solve this by downloading and installing the gfortran pkg located [here](https://mac.r-project.org/tools/gfortran-12.2-universal.pkg) and then running the following command:
+
+```
+sudo /opt/gfortran/bin/gfortran-update-sdk
+```  
+
+
 **NOTE** If you are trying to install **celda** using Rstudio and get this error: `could not find tools necessary to compile a package`, you can try this:
 ```
 options(buildtools.check = function(action) TRUE)
