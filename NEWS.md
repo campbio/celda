@@ -1,3 +1,7 @@
+# celda v1.18.1 (2023-11-05)
+* Update to match Bioconductor release version
+* Removed multipanelfigure as a dependency
+
 # celda v1.14.2 (2023-01-19)
 * Update to match Bioconductor release version
 
