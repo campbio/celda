@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.18.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.18.2</span>
       </span>
     </div>
 
@@ -93,22 +93,31 @@
 
       
 
-      </header><script src="decontX_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Decontamination of ambient RNA in single-cell genomic data with DecontX</h1>
-                        <h4 data-toc-skip class="author">Shiyi (Iris) Yang</h4>
+      <h1 data-toc-skip>Decontamination of ambient RNA in single-cell
+genomic data with DecontX</h1>
+                        <h4 data-toc-skip class="author">Shiyi (Iris)
+Yang</h4>
             <address class="author_afil">
-      Boston University School of Medicine<br><h4 data-toc-skip class="author">Zhe Wang</h4>
+      Boston University School of
+Medicine<br><h4 data-toc-skip class="author">Zhe
+Wang</h4>
             <address class="author_afil">
-      Boston University School of Medicine<br><h4 data-toc-skip class="author">Yuan Yin</h4>
+      Boston University School of
+Medicine<br><h4 data-toc-skip class="author">Yuan
+Yin</h4>
             <address class="author_afil">
-      Boston University School of Medicine<br><h4 data-toc-skip class="author">Joshua Campbell</h4>
+      Boston University School of
+Medicine<br><h4 data-toc-skip class="author">Joshua
+Campbell</h4>
             <address class="author_afil">
-      Boston University School of Medicine<br><a class="author_email" href="mailto:#"></a><a href="mailto:camp@bu.edu" class="email">camp@bu.edu</a>
+      Boston University School of
+Medicine<br><a class="author_email" href="mailto:#"></a><a href="mailto:camp@bu.edu" class="email">camp@bu.edu</a>
       </address>
                   
-            <h4 data-toc-skip class="date">2023-11-06</h4>
+            <h4 data-toc-skip class="date">2024-04-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/campbio/celda/blob/HEAD/vignettes/decontX.Rmd" class="external-link"><code>vignettes/decontX.Rmd</code></a></small>
       <div class="hidden name"><code>decontX.Rmd</code></div>
@@ -123,7 +132,18 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Droplet-based microfluidic devices have become widely used to perform single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in the cell suspension can be aberrantly counted along with a cell’s native mRNA and result in cross-contamination of transcripts between different cell populations. DecontX is a Bayesian method to estimate and remove contamination in individual cells. DecontX assumes the observed expression of a cell is a mixture of counts from two multinomial distributions: (1) a distribution of native transcript counts from the cell’s actual population and (2) a distribution of contaminating transcript counts from all other cell populations captured in the assay. Overall, computational decontamination of single cell counts can aid in downstream clustering and visualization.</p>
+<p>Droplet-based microfluidic devices have become widely used to perform
+single-cell RNA sequencing (scRNA-seq). However, ambient RNA present in
+the cell suspension can be aberrantly counted along with a cell’s native
+mRNA and result in cross-contamination of transcripts between different
+cell populations. DecontX is a Bayesian method to estimate and remove
+contamination in individual cells. DecontX assumes the observed
+expression of a cell is a mixture of counts from two multinomial
+distributions: (1) a distribution of native transcript counts from the
+cell’s actual population and (2) a distribution of contaminating
+transcript counts from all other cell populations captured in the assay.
+Overall, computational decontamination of single cell counts can aid in
+downstream clustering and visualization.</p>
 <p>The package can be loaded using the <code>library</code> command.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">celda</span><span class="op">)</span></span></code></pre></div>
@@ -131,21 +151,41 @@
 <div class="section level2">
 <h2 id="importing-data">Importing data<a class="anchor" aria-label="anchor" href="#importing-data"></a>
 </h2>
-<p>DecontX can take either a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a> object or a counts matrix as input. <code>decontX</code> will attempt to convert any input matrix to class <code>dgCMatrix</code> from package <a href="https://cran.r-project.org/web/packages/Matrix/index.html" class="external-link">Matrix</a> before starting the analysis.</p>
-<p>To import datasets directly into an SCE object, the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" class="external-link">singleCellTK</a> package has several importing functions for different preprocessing tools including CellRanger, STARsolo, BUStools, Optimus, DropEST, SEQC, and Alevin/Salmon. For example, the following code can be used as a template to read in the filtered and raw matrices for multiple samples processed with CellRanger:</p>
+<p>DecontX can take either a <a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a>
+object or a counts matrix as input. <code>decontX</code> will attempt to
+convert any input matrix to class <code>dgCMatrix</code> from package <a href="https://cran.r-project.org/web/packages/Matrix/index.html" class="external-link">Matrix</a>
+before starting the analysis.</p>
+<p>To import datasets directly into an SCE object, the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" class="external-link">singleCellTK</a>
+package has several importing functions for different preprocessing
+tools including CellRanger, STARsolo, BUStools, Optimus, DropEST, SEQC,
+and Alevin/Salmon. For example, the following code can be used as a
+template to read in the filtered and raw matrices for multiple samples
+processed with CellRanger:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/" class="external-link">singleCellTK</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/importCellRanger.html" class="external-link">importCellRanger</a></span><span class="op">(</span>sampleDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path/to/sample1/"</span>, <span class="st">"path/to/sample2/"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Within each sample directory, there should be subfolders called <code>"outs/filtered_feature_bc_matrix/"</code> or <code>"outs/raw_feature_bc_matrix/"</code> with files called <code>matrix.mtx.gz</code>, <code>features.tsv.gz</code> and <code>barcodes.tsv.gz</code>. If these files are in different subdirectories, the <code>importCellRangerV3Sample</code> function can be used to import data from a different directory instead.</p>
-<p>Optionally, the “raw” or “droplet” matrix can also be easily imported by setting the <code>dataType</code> argument to “raw”:</p>
+<p>Within each sample directory, there should be subfolders called
+<code>"outs/filtered_feature_bc_matrix/"</code> or
+<code>"outs/raw_feature_bc_matrix/"</code> with files called
+<code>matrix.mtx.gz</code>, <code>features.tsv.gz</code> and
+<code>barcodes.tsv.gz</code>. If these files are in different
+subdirectories, the <code>importCellRangerV3Sample</code> function can
+be used to import data from a different directory instead.</p>
+<p>Optionally, the “raw” or “droplet” matrix can also be easily imported
+by setting the <code>dataType</code> argument to “raw”:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce.raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/importCellRanger.html" class="external-link">importCellRanger</a></span><span class="op">(</span>sampleDirs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path/to/sample1/"</span>, <span class="st">"path/to/sample2/"</span><span class="op">)</span>, dataType <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span></span></code></pre></div>
-<p>The raw matrix can be passed to the <code>background</code> parameter in <code>decontX</code> as described below. If using Seurat, go to the <a href="#seurat">Working with Seurat</a> section for details on how to convert between SCE and Seurat objects.</p>
+<p>The raw matrix can be passed to the <code>background</code> parameter
+in <code>decontX</code> as described below. If using Seurat, go to the
+<a href="#seurat">Working with Seurat</a> section for details on how to
+convert between SCE and Seurat objects.</p>
 </div>
 <div class="section level2">
 <h2 id="load-pbmc4k-data-from-10x">Load PBMC4k data from 10X<a class="anchor" aria-label="anchor" href="#load-pbmc4k-data-from-10x"></a>
 </h2>
-<p>We will utilize the 10X PBMC 4K dataset as an example in this vignette. This data can be easily retrieved from the package <a href="http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html" class="external-link">TENxPBMCData</a>. Make sure the the column names are set before running decontX.</p>
+<p>We will utilize the 10X PBMC 4K dataset as an example in this
+vignette. This data can be easily retrieved from the package <a href="http://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html" class="external-link">TENxPBMCData</a>.
+Make sure the the column names are set before running decontX.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load PBMC data</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span></span>
@@ -157,16 +197,52 @@
 <div class="section level2">
 <h2 id="running-decontx">Running decontX<a class="anchor" aria-label="anchor" href="#running-decontx"></a>
 </h2>
-<p>A SingleCellExperiment (SCE) object or a sparse matrix containing the counts for filtered cells can be passed to decontX via the <code>x</code> parameter. The matrix to use in an SCE object can be specified with the <code>assayName</code> parameter, which is set to <code>"counts"</code> by default. There are two major ways to run decontX: with and without the raw/droplet matrix containing empty droplets. Here is an example of running decontX without supplying the background:</p>
+<p>A SingleCellExperiment (SCE) object or a sparse matrix containing the
+counts for filtered cells can be passed to decontX via the
+<code>x</code> parameter. The matrix to use in an SCE object can be
+specified with the <code>assayName</code> parameter, which is set to
+<code>"counts"</code> by default. There are two major ways to run
+decontX: with and without the raw/droplet matrix containing empty
+droplets. Here is an example of running decontX without supplying the
+background:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
-<p>In this scenario, <code>decontX</code> will estimate the contamination distribution for each cell cluster based on the profiles of the other cell clusters in the filtered dataset. The estimated contamination results can be found in the <code>colData(sce)$decontX_contamination</code> and the decontaminated counts can be accessed with <code>decontXcounts(sce)</code>. <code>decontX</code> will perform heuristic clustering to quickly define major cell clusters. However if you have your own cell cluster labels, they can be specified with the <code>z</code> parameter. These results will be used throughout the rest of the vignette.</p>
-<p>The raw/droplet matrix can be used to empirically estimate the distribution of ambient RNA, which is especially useful when cells that contributed to the ambient RNA are not accurately represented in the filtered count matrix containing the cells. For example, cells that were removed via flow cytometry or that were more sensitive to lysis during dissociation may have contributed to the ambient RNA but were not measured in the filtered/cell matrix. The raw/droplet matrix can be input as an SCE object or a sparse matrix using the <code>background</code> parameter:</p>
+<p>In this scenario, <code>decontX</code> will estimate the
+contamination distribution for each cell cluster based on the profiles
+of the other cell clusters in the filtered dataset. The estimated
+contamination results can be found in the
+<code>colData(sce)$decontX_contamination</code> and the decontaminated
+counts can be accessed with <code>decontXcounts(sce)</code>.
+<code>decontX</code> will perform heuristic clustering to quickly define
+major cell clusters. However if you have your own cell cluster labels,
+they can be specified with the <code>z</code> parameter. These results
+will be used throughout the rest of the vignette.</p>
+<p>The raw/droplet matrix can be used to empirically estimate the
+distribution of ambient RNA, which is especially useful when cells that
+contributed to the ambient RNA are not accurately represented in the
+filtered count matrix containing the cells. For example, cells that were
+removed via flow cytometry or that were more sensitive to lysis during
+dissociation may have contributed to the ambient RNA but were not
+measured in the filtered/cell matrix. The raw/droplet matrix can be
+input as an SCE object or a sparse matrix using the
+<code>background</code> parameter:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span>, background <span class="op">=</span> <span class="va">sce.raw</span><span class="op">)</span></span></code></pre></div>
-<p>Only empty droplets in the background matrix should be used to estimate the ambient RNA. If any cell ids (i.e. <code>colnames</code>) in the raw/droplet matrix supplied to the <code>background</code> parameter are also found in the filtered counts matrix (<code>x</code>), decontX will automatically remove them from the raw matrix. However, if the cell ids are not available for the input matrices, decontX will treat the entire <code>background</code> input as empty droplets. All of the outputs are the same as when running decontX without setting the <code>background</code> parameter.</p>
+<p>Only empty droplets in the background matrix should be used to
+estimate the ambient RNA. If any cell ids (i.e. <code>colnames</code>)
+in the raw/droplet matrix supplied to the <code>background</code>
+parameter are also found in the filtered counts matrix (<code>x</code>),
+decontX will automatically remove them from the raw matrix. However, if
+the cell ids are not available for the input matrices, decontX will
+treat the entire <code>background</code> input as empty droplets. All of
+the outputs are the same as when running decontX without setting the
+<code>background</code> parameter.</p>
 <blockquote>
-<p>Note: If the input object is just a matrix and not an SCE object, make sure to save the output into a variable with a different name (e.g. <code>result &lt;- decontX(mat)</code>). The result object will be a list with contamination in <code>result$contamination</code> and the decontaminated counts in <code>result$decontXcounts</code>.</p>
+<p>Note: If the input object is just a matrix and not an SCE object,
+make sure to save the output into a variable with a different name
+(e.g. <code>result &lt;- decontX(mat)</code>). The result object will be
+a list with contamination in <code>result$contamination</code> and the
+decontaminated counts in <code>result$decontXcounts</code>.</p>
 </blockquote>
 </div>
 <div class="section level2">
@@ -175,7 +251,10 @@
 <div class="section level3">
 <h3 id="cluster-labels-on-umap">Cluster labels on UMAP<a class="anchor" aria-label="anchor" href="#cluster-labels-on-umap"></a>
 </h3>
-<p>DecontX creates a UMAP which we can use to plot the cluster labels automatically identified in the analysis. Note that the clustering approach used here is designed to find “broad” cell types rather than individual cell subpopulations within a cell type.</p>
+<p>DecontX creates a UMAP which we can use to plot the cluster labels
+automatically identified in the analysis. Note that the clustering
+approach used here is designed to find “broad” cell types rather than
+individual cell subpopulations within a cell type.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"decontX_UMAP"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plotDimReduceCluster.html">plotDimReduceCluster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sce</span><span class="op">$</span><span class="va">decontX_clusters</span>,</span>
@@ -185,7 +264,9 @@
 <div class="section level3">
 <h3 id="contamination-on-umap">Contamination on UMAP<a class="anchor" aria-label="anchor" href="#contamination-on-umap"></a>
 </h3>
-<p>The percentage of contamination in each cell can be plotting on the UMAP to visualize what what clusters may have higher levels of ambient RNA.</p>
+<p>The percentage of contamination in each cell can be plotting on the
+UMAP to visualize what what clusters may have higher levels of ambient
+RNA.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDecontXContamination.html">plotDecontXContamination</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div>
 <p><img src="decontX_files/figure-html/plot_decon-1.png" width="700"></p>
@@ -193,7 +274,10 @@
 <div class="section level3">
 <h3 id="expression-of-markers-on-umap">Expression of markers on UMAP<a class="anchor" aria-label="anchor" href="#expression-of-markers-on-umap"></a>
 </h3>
-<p>Known marker genes can also be plotted on the UMAP to identify the cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ, S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells, GNLY for NK-cells, and PPBP for megakaryocytes.</p>
+<p>Known marker genes can also be plotted on the UMAP to identify the
+cell types for each cluster. We will use CD3D and CD3E for T-cells, LYZ,
+S100A8, and S100A9 for monocytes, CD79A, CD79B, and MS4A1 for B-cells,
+GNLY for NK-cells, and PPBP for megakaryocytes.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
@@ -211,7 +295,10 @@
 <div class="section level3">
 <h3 id="barplot-of-markers-detected-in-cell-clusters">Barplot of markers detected in cell clusters<a class="anchor" aria-label="anchor" href="#barplot-of-markers-detected-in-cell-clusters"></a>
 </h3>
-<p>The percetage of cells within a cluster that have detectable expression of marker genes can be displayed in a barplot. Markers for cell types need to be supplied in a named list. First, the detection of marker genes in the original <code>counts</code> assay is shown:</p>
+<p>The percetage of cells within a cluster that have detectable
+expression of marker genes can be displayed in a barplot. Markers for
+cell types need to be supplied in a named list. First, the detection of
+marker genes in the original <code>counts</code> assay is shown:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Tcell_Markers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3E"</span>, <span class="st">"CD3D"</span><span class="op">)</span>,</span>
 <span>    Bcell_Markers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD79A"</span>, <span class="st">"CD79B"</span>, <span class="st">"MS4A1"</span><span class="op">)</span>,</span>
@@ -223,45 +310,78 @@
 <span>    groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,</span>
 <span>    assayName <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="decontX_files/figure-html/barplotCounts-1.png" width="700"></p>
-<p>We can then look to see how much decontX removed aberrant expression of marker genes in each cell type by changing the <code>assayName</code> to <code>decontXcounts</code>:</p>
+<p>We can then look to see how much decontX removed aberrant expression
+of marker genes in each cell type by changing the <code>assayName</code>
+to <code>decontXcounts</code>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">sce</span>,</span>
 <span>    markers <span class="op">=</span> <span class="va">markers</span>,</span>
 <span>    groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,</span>
 <span>    assayName <span class="op">=</span> <span class="st">"decontXcounts"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="decontX_files/figure-html/barplotDecontCounts-1.png" width="700"></p>
-<p>Percentages of marker genes detected in other cell types were reduced or completely removed. For example, the percentage of cells that expressed Monocyte marker genes was greatly reduced in T-cells, B-cells, and NK-cells. The original counts and decontamined counts can be plotted side-by-side by listing multiple assays in the <code>assayName</code> parameter. This option is only available if the data is stored in <code>SingleCellExperiment</code> object.</p>
+<p>Percentages of marker genes detected in other cell types were reduced
+or completely removed. For example, the percentage of cells that
+expressed Monocyte marker genes was greatly reduced in T-cells, B-cells,
+and NK-cells. The original counts and decontamined counts can be plotted
+side-by-side by listing multiple assays in the <code>assayName</code>
+parameter. This option is only available if the data is stored in
+<code>SingleCellExperiment</code> object.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDecontXMarkerPercentage.html">plotDecontXMarkerPercentage</a></span><span class="op">(</span><span class="va">sce</span>,</span>
 <span>    markers <span class="op">=</span> <span class="va">markers</span>,</span>
 <span>    groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,</span>
 <span>    assayName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"counts"</span>, <span class="st">"decontXcounts"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="decontX_files/figure-html/barplotBoth-1.png" width="700"></p>
-<p>Some helpful hints when using <code>plotDecontXMarkerPercentage</code>:</p>
+<p>Some helpful hints when using
+<code>plotDecontXMarkerPercentage</code>:</p>
 <ol style="list-style-type: decimal">
-<li>Cell clusters can be renamed and re-grouped using the <code>groupCluster</code> parameter, which also needs to be a named list. If <code>groupCluster</code> is used, cell clusters not included in the list will be excluded in the barplot. For example, if we wanted to group T-cells and NK-cells together, we could set <code>cellTypeMappings &lt;- list(NK_Tcells = c(2,6), Bcells = 5, Monocytes = 1)</code>
+<li>Cell clusters can be renamed and re-grouped using the
+<code>groupCluster</code> parameter, which also needs to be a named
+list. If <code>groupCluster</code> is used, cell clusters not included
+in the list will be excluded in the barplot. For example, if we wanted
+to group T-cells and NK-cells together, we could set
+<code>cellTypeMappings &lt;- list(NK_Tcells = c(2,6), Bcells = 5, Monocytes = 1)</code>
 </li>
-<li>The level a gene that needs to be expressed to be considered detected in a cell can be adjusted using the <code>threshold</code> parameter.</li>
-<li>If you are not using a <code>SingleCellExperiment</code>, then you will need to supply the original counts matrix or the decontaminated counts matrix as the first argument to generate the barplots.</li>
+<li>The level a gene that needs to be expressed to be considered
+detected in a cell can be adjusted using the <code>threshold</code>
+parameter.</li>
+<li>If you are not using a <code>SingleCellExperiment</code>, then you
+will need to supply the original counts matrix or the decontaminated
+counts matrix as the first argument to generate the barplots.</li>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="violin-plot-to-compare-the-distributions-of-original-and-decontaminated-counts">Violin plot to compare the distributions of original and decontaminated counts<a class="anchor" aria-label="anchor" href="#violin-plot-to-compare-the-distributions-of-original-and-decontaminated-counts"></a>
+<h3 id="violin-plot-to-compare-the-distributions-of-original-and-decontaminated-counts">Violin plot to compare the distributions of original and
+decontaminated counts<a class="anchor" aria-label="anchor" href="#violin-plot-to-compare-the-distributions-of-original-and-decontaminated-counts"></a>
 </h3>
-<p>Another useful way to assess the amount of decontamination is to view the expression of marker genes before and after <code>decontX</code> across cell types. Here we view the monocyte markers in each cell type. The violin plot shows that the markers have been removed from T-cells, B-cells, and NK-cells, but are largely unaffected in monocytes.</p>
+<p>Another useful way to assess the amount of decontamination is to view
+the expression of marker genes before and after <code>decontX</code>
+across cell types. Here we view the monocyte markers in each cell type.
+The violin plot shows that the markers have been removed from T-cells,
+B-cells, and NK-cells, but are largely unaffected in monocytes.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotDecontXMarkerExpression.html">plotDecontXMarkerExpression</a></span><span class="op">(</span><span class="va">sce</span>,</span>
 <span>    markers <span class="op">=</span> <span class="va">markers</span><span class="op">[[</span><span class="st">"Monocyte_Markers"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>    groupClusters <span class="op">=</span> <span class="va">cellTypeMappings</span>,</span>
 <span>    ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p><img src="decontX_files/figure-html/plotDecontXMarkerExpression-1.png" width="700"></p>
-<p>Some helpful hints when using <code>plotDecontXMarkerExpression</code>:</p>
+<p>Some helpful hints when using
+<code>plotDecontXMarkerExpression</code>:</p>
 <ol style="list-style-type: decimal">
 <li>
-<code>groupClusters</code> works the same way as in <code>plotDecontXMarkerPercentage</code>.</li>
-<li>This function will plot each pair of markers and clusters (or cell type specified by <code>groupClusters</code>). Therefore, you may want to keep the number of markers small in each plot and call the function multiple times for different sets of marker genes.</li>
-<li>You can also plot the individual points by setting <code>plotDots = TRUE</code> and/or log transform the points on the fly by setting <code>log1p = TRUE</code>.</li>
-<li>This function can plot any assay in a <code>SingleCellExperiment</code>. Therefore you could also examine normalized expression of the original and decontaminated counts. For example:</li>
+<code>groupClusters</code> works the same way as in
+<code>plotDecontXMarkerPercentage</code>.</li>
+<li>This function will plot each pair of markers and clusters (or cell
+type specified by <code>groupClusters</code>). Therefore, you may want
+to keep the number of markers small in each plot and call the function
+multiple times for different sets of marker genes.</li>
+<li>You can also plot the individual points by setting
+<code>plotDots = TRUE</code> and/or log transform the points on the fly
+by setting <code>log1p = TRUE</code>.</li>
+<li>This function can plot any assay in a
+<code>SingleCellExperiment</code>. Therefore you could also examine
+normalized expression of the original and decontaminated counts. For
+example:</li>
 </ol>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
@@ -283,16 +403,45 @@
 <div class="section level3">
 <h3 id="choosing-appropriate-cell-clusters">Choosing appropriate cell clusters<a class="anchor" aria-label="anchor" href="#choosing-appropriate-cell-clusters"></a>
 </h3>
-<p>The ability of DecontX to accurately identify contamination is dependent on the cell cluster labels. DecontX assumes that contamination for a cell cluster comes from combination of counts from all other clusters. The default clustering approach used by DecontX tends to select fewer clusters that represent broader cell types. For example, all T-cells tend to be clustered together rather than splitting naive and cytotoxic T-cells into separate clusters. Custom cell type labels can be suppled via the <code>z</code> parameter if some cells are not being clustered appropriately by the default method.</p>
+<p>The ability of DecontX to accurately identify contamination is
+dependent on the cell cluster labels. DecontX assumes that contamination
+for a cell cluster comes from combination of counts from all other
+clusters. The default clustering approach used by DecontX tends to
+select fewer clusters that represent broader cell types. For example,
+all T-cells tend to be clustered together rather than splitting naive
+and cytotoxic T-cells into separate clusters. Custom cell type labels
+can be suppled via the <code>z</code> parameter if some cells are not
+being clustered appropriately by the default method.</p>
 </div>
 <div class="section level3">
 <h3 id="adjusting-the-priors-to-influence-contamination-estimates">Adjusting the priors to influence contamination estimates<a class="anchor" aria-label="anchor" href="#adjusting-the-priors-to-influence-contamination-estimates"></a>
 </h3>
-<p>There are ways to force <code>decontX</code> to estimate more or less contamination across a dataset by manipulating the priors. The <code>delta</code> parameter is a numeric vector of length two. It is the concentration parameter for the Dirichlet distribution which serves as the prior for the proportions of native and contamination counts in each cell. The first element is the prior for the proportion of native counts while the second element is the prior for the proportion of contamination counts. These essentially act as pseudocounts for the native and contamination in each cell. If <code>estimateDelta = TRUE</code>, <code>delta</code> is only used to produce a random sample of proportions for an initial value of contamination in each cell. Then <code>delta</code> is updated in each iteration. If <code>estimateDelta = FALSE</code>, then <code>delta</code> is fixed with these values for the entire inference procedure. Fixing <code>delta</code> and setting a high number in the second element will force <code>decontX</code> to be more aggressive and estimate higher levels of contamination in each cell at the expense of potentially removing native expression. For example, in the previous PBMC example, we can see what the estimated <code>delta</code> was by looking in the estimates:</p>
+<p>There are ways to force <code>decontX</code> to estimate more or less
+contamination across a dataset by manipulating the priors. The
+<code>delta</code> parameter is a numeric vector of length two. It is
+the concentration parameter for the Dirichlet distribution which serves
+as the prior for the proportions of native and contamination counts in
+each cell. The first element is the prior for the proportion of native
+counts while the second element is the prior for the proportion of
+contamination counts. These essentially act as pseudocounts for the
+native and contamination in each cell. If
+<code>estimateDelta = TRUE</code>, <code>delta</code> is only used to
+produce a random sample of proportions for an initial value of
+contamination in each cell. Then <code>delta</code> is updated in each
+iteration. If <code>estimateDelta = FALSE</code>, then
+<code>delta</code> is fixed with these values for the entire inference
+procedure. Fixing <code>delta</code> and setting a high number in the
+second element will force <code>decontX</code> to be more aggressive and
+estimate higher levels of contamination in each cell at the expense of
+potentially removing native expression. For example, in the previous
+PBMC example, we can see what the estimated <code>delta</code> was by
+looking in the estimates:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">metadata</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">decontX</span><span class="op">$</span><span class="va">estimates</span><span class="op">$</span><span class="va">all_cells</span><span class="op">$</span><span class="va">delta</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 9.280108 1.038000</span></span></code></pre>
-<p>Setting a higher value in the second element of delta and <code>estimateDelta = FALSE</code> will force <code>decontX</code> to estimate higher levels of contamination per cell:</p>
+<p>Setting a higher value in the second element of delta and
+<code>estimateDelta = FALSE</code> will force <code>decontX</code> to
+estimate higher levels of contamination per cell:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce.delta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span>, delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">20</span><span class="op">)</span>, estimateDelta <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -305,7 +454,9 @@
 <div class="section level3">
 <h3 id="seurat">Working with Seurat<a class="anchor" aria-label="anchor" href="#seurat"></a>
 </h3>
-<p>If you are using the <a href="https://cran.r-project.org/web/packages/Seurat/index.html" class="external-link">Seurat</a> package for downstream analysis, the following code can be used to read in a matrix and convert between Seurat and SCE objects:</p>
+<p>If you are using the <a href="https://cran.r-project.org/web/packages/Seurat/index.html" class="external-link">Seurat</a>
+package for downstream analysis, the following code can be used to read
+in a matrix and convert between Seurat and SCE objects:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Read counts from CellRanger output</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span>
@@ -316,18 +467,24 @@
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create a Seurat object from a SCE with decontX results</span></span>
-<span><span class="va">seuratObject</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/CreateSeuratObject.html" class="external-link">CreateSeuratObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/decontXcounts.html">decontXcounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Optionally, the “raw” matrix can be also be imported and used as the background:</p>
+<span><span class="va">seuratObject</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/CreateSeuratObject.html" class="external-link">CreateSeuratObject</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/decontXcounts.html">decontXcounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Optionally, the “raw” matrix can be also be imported and used as the
+background:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">counts.raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/Read10X.html" class="external-link">Read10X</a></span><span class="op">(</span><span class="st">"sample/outs/raw_feature_bc_matrix/"</span><span class="op">)</span></span>
 <span><span class="va">sce.raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts.raw</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span>, background <span class="op">=</span> <span class="va">sce.raw</span><span class="op">)</span></span></code></pre></div>
-<p>Note that the decontaminated matrix of decontX consists of floating point numbers and must be rounded to integers before adding it to a Seurat object. If you already have a Seurat object containing the counts matrix and would like to run decontX, you can retrieve the count matrix, create a SCE object, and run decontX, and then add it back to the Seurat object:</p>
+<p>Note that the decontaminated matrix of decontX consists of floating
+point numbers and must be rounded to integers before adding it to a
+Seurat object. If you already have a Seurat object containing the counts
+matrix and would like to run decontX, you can retrieve the count matrix,
+create a SCE object, and run decontX, and then add it back to the Seurat
+object:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seuratObject</span>, slot <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">seuratObject</span>, slot <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/decontX.html">decontX</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
-<span><span class="va">seuratObj</span><span class="op">[[</span><span class="st">"decontXcounts"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/CreateAssayObject.html" class="external-link">CreateAssayObject</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="fu"><a href="../reference/decontXcounts.html">decontXcounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">seuratObj</span><span class="op">[[</span><span class="st">"decontXcounts"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SeuratObject/man/CreateAssayObject.html" class="external-link">CreateAssayObject</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="fu"><a href="../reference/decontXcounts.html">decontXcounts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -335,9 +492,9 @@
 </h2>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## R version 4.3.1 (2023-06-16)</span></span>
+<pre><code><span><span class="co">## R version 4.3.3 (2024-02-29)</span></span>
 <span><span class="co">## Platform: x86_64-apple-darwin20 (64-bit)</span></span>
-<span><span class="co">## Running under: macOS Sonoma 14.1</span></span>
+<span><span class="co">## Running under: macOS Sonoma 14.4.1</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Matrix products: default</span></span>
 <span><span class="co">## BLAS:   /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRblas.0.dylib </span></span>
@@ -354,81 +511,82 @@
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] scater_1.28.0               ggplot2_3.4.2              </span></span>
-<span><span class="co">##  [3] scuttle_1.10.1              TENxPBMCData_1.18.0        </span></span>
-<span><span class="co">##  [5] HDF5Array_1.28.1            rhdf5_2.44.0               </span></span>
-<span><span class="co">##  [7] DelayedArray_0.26.6         S4Arrays_1.0.5             </span></span>
-<span><span class="co">##  [9] abind_1.4-5                 celda_1.18.1               </span></span>
-<span><span class="co">## [11] Matrix_1.6-0                SingleCellExperiment_1.22.0</span></span>
-<span><span class="co">## [13] SummarizedExperiment_1.30.2 Biobase_2.60.0             </span></span>
-<span><span class="co">## [15] GenomicRanges_1.52.0        GenomeInfoDb_1.36.1        </span></span>
-<span><span class="co">## [17] IRanges_2.34.1              S4Vectors_0.38.1           </span></span>
-<span><span class="co">## [19] BiocGenerics_0.46.0         MatrixGenerics_1.12.2      </span></span>
-<span><span class="co">## [21] matrixStats_1.0.0           BiocStyle_2.28.0           </span></span>
+<span><span class="co">##  [1] scater_1.30.1               ggplot2_3.5.0              </span></span>
+<span><span class="co">##  [3] scuttle_1.12.0              TENxPBMCData_1.20.0        </span></span>
+<span><span class="co">##  [5] HDF5Array_1.30.0            rhdf5_2.46.1               </span></span>
+<span><span class="co">##  [7] DelayedArray_0.28.0         SparseArray_1.2.4          </span></span>
+<span><span class="co">##  [9] S4Arrays_1.2.1              abind_1.4-5                </span></span>
+<span><span class="co">## [11] celda_1.18.2                Matrix_1.6-5               </span></span>
+<span><span class="co">## [13] SingleCellExperiment_1.24.0 SummarizedExperiment_1.32.0</span></span>
+<span><span class="co">## [15] Biobase_2.62.0              GenomicRanges_1.54.1       </span></span>
+<span><span class="co">## [17] GenomeInfoDb_1.38.8         IRanges_2.36.0             </span></span>
+<span><span class="co">## [19] S4Vectors_0.40.2            BiocGenerics_0.48.1        </span></span>
+<span><span class="co">## [21] MatrixGenerics_1.14.0       matrixStats_1.2.0          </span></span>
+<span><span class="co">## [23] BiocStyle_2.30.0           </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##   [1] RColorBrewer_1.1-3            jsonlite_1.8.7               </span></span>
-<span><span class="co">##   [3] magrittr_2.0.3                ggbeeswarm_0.7.2             </span></span>
-<span><span class="co">##   [5] farver_2.1.1                  rmarkdown_2.23               </span></span>
-<span><span class="co">##   [7] fs_1.6.3                      zlibbioc_1.46.0              </span></span>
-<span><span class="co">##   [9] ragg_1.2.5                    vctrs_0.6.3                  </span></span>
-<span><span class="co">##  [11] memoise_2.0.1                 DelayedMatrixStats_1.22.1    </span></span>
-<span><span class="co">##  [13] RCurl_1.98-1.12               htmltools_0.5.5              </span></span>
-<span><span class="co">##  [15] AnnotationHub_3.8.0           curl_5.0.1                   </span></span>
-<span><span class="co">##  [17] BiocNeighbors_1.18.0          Rhdf5lib_1.22.0              </span></span>
-<span><span class="co">##  [19] sass_0.4.7                    bslib_0.5.0                  </span></span>
-<span><span class="co">##  [21] desc_1.4.2                    plyr_1.8.8                   </span></span>
-<span><span class="co">##  [23] cachem_1.0.8                  mime_0.12                    </span></span>
-<span><span class="co">##  [25] lifecycle_1.0.3               iterators_1.0.14             </span></span>
-<span><span class="co">##  [27] pkgconfig_2.0.3               rsvd_1.0.5                   </span></span>
-<span><span class="co">##  [29] R6_2.5.1                      fastmap_1.1.1                </span></span>
-<span><span class="co">##  [31] GenomeInfoDbData_1.2.10       shiny_1.7.4.1                </span></span>
-<span><span class="co">##  [33] digest_0.6.33                 colorspace_2.1-0             </span></span>
-<span><span class="co">##  [35] AnnotationDbi_1.62.2          rprojroot_2.0.3              </span></span>
-<span><span class="co">##  [37] irlba_2.3.5.1                 ExperimentHub_2.8.1          </span></span>
-<span><span class="co">##  [39] textshaping_0.3.6             RSQLite_2.3.1                </span></span>
-<span><span class="co">##  [41] beachmat_2.16.0               labeling_0.4.2               </span></span>
-<span><span class="co">##  [43] filelock_1.0.2                WriteXLS_6.4.0               </span></span>
-<span><span class="co">##  [45] fansi_1.0.4                   httr_1.4.6                   </span></span>
-<span><span class="co">##  [47] compiler_4.3.1                bit64_4.0.5                  </span></span>
-<span><span class="co">##  [49] withr_2.5.0                   doParallel_1.0.17            </span></span>
-<span><span class="co">##  [51] BiocParallel_1.34.2           viridis_0.6.4                </span></span>
-<span><span class="co">##  [53] DBI_1.1.3                     highr_0.10                   </span></span>
+<span><span class="co">##   [1] RColorBrewer_1.1-3            rstudioapi_0.15.0            </span></span>
+<span><span class="co">##   [3] jsonlite_1.8.8                magrittr_2.0.3               </span></span>
+<span><span class="co">##   [5] ggbeeswarm_0.7.2              farver_2.1.1                 </span></span>
+<span><span class="co">##   [7] rmarkdown_2.25                fs_1.6.3                     </span></span>
+<span><span class="co">##   [9] zlibbioc_1.48.2               ragg_1.3.0                   </span></span>
+<span><span class="co">##  [11] vctrs_0.6.5                   memoise_2.0.1                </span></span>
+<span><span class="co">##  [13] DelayedMatrixStats_1.24.0     RCurl_1.98-1.14              </span></span>
+<span><span class="co">##  [15] htmltools_0.5.7               AnnotationHub_3.10.0         </span></span>
+<span><span class="co">##  [17] curl_5.2.1                    BiocNeighbors_1.20.2         </span></span>
+<span><span class="co">##  [19] Rhdf5lib_1.24.1               sass_0.4.8                   </span></span>
+<span><span class="co">##  [21] bslib_0.6.1                   desc_1.4.3                   </span></span>
+<span><span class="co">##  [23] plyr_1.8.9                    cachem_1.0.8                 </span></span>
+<span><span class="co">##  [25] mime_0.12                     lifecycle_1.0.4              </span></span>
+<span><span class="co">##  [27] iterators_1.0.14              pkgconfig_2.0.3              </span></span>
+<span><span class="co">##  [29] rsvd_1.0.5                    R6_2.5.1                     </span></span>
+<span><span class="co">##  [31] fastmap_1.1.1                 GenomeInfoDbData_1.2.11      </span></span>
+<span><span class="co">##  [33] shiny_1.8.0                   digest_0.6.35                </span></span>
+<span><span class="co">##  [35] colorspace_2.1-0              AnnotationDbi_1.64.1         </span></span>
+<span><span class="co">##  [37] irlba_2.3.5.1                 ExperimentHub_2.10.0         </span></span>
+<span><span class="co">##  [39] textshaping_0.3.7             RSQLite_2.3.5                </span></span>
+<span><span class="co">##  [41] beachmat_2.18.1               labeling_0.4.3               </span></span>
+<span><span class="co">##  [43] filelock_1.0.3                WriteXLS_6.5.0               </span></span>
+<span><span class="co">##  [45] fansi_1.0.6                   httr_1.4.7                   </span></span>
+<span><span class="co">##  [47] compiler_4.3.3                bit64_4.0.5                  </span></span>
+<span><span class="co">##  [49] withr_3.0.0                   doParallel_1.0.17            </span></span>
+<span><span class="co">##  [51] BiocParallel_1.36.0           viridis_0.6.5                </span></span>
+<span><span class="co">##  [53] DBI_1.2.1                     highr_0.10                   </span></span>
 <span><span class="co">##  [55] rappdirs_0.3.3                rjson_0.2.21                 </span></span>
-<span><span class="co">##  [57] tools_4.3.1                   vipor_0.4.5                  </span></span>
-<span><span class="co">##  [59] beeswarm_0.4.0                interactiveDisplayBase_1.38.0</span></span>
-<span><span class="co">##  [61] httpuv_1.6.11                 MCMCprecision_0.4.0          </span></span>
-<span><span class="co">##  [63] glue_1.6.2                    dbscan_1.1-11                </span></span>
-<span><span class="co">##  [65] rhdf5filters_1.12.1           promises_1.2.0.1             </span></span>
-<span><span class="co">##  [67] grid_4.3.1                    Rtsne_0.16                   </span></span>
+<span><span class="co">##  [57] tools_4.3.3                   vipor_0.4.7                  </span></span>
+<span><span class="co">##  [59] beeswarm_0.4.0                interactiveDisplayBase_1.40.0</span></span>
+<span><span class="co">##  [61] httpuv_1.6.14                 MCMCprecision_0.4.0          </span></span>
+<span><span class="co">##  [63] glue_1.7.0                    dbscan_1.1-12                </span></span>
+<span><span class="co">##  [65] rhdf5filters_1.14.1           promises_1.2.1               </span></span>
+<span><span class="co">##  [67] grid_4.3.3                    Rtsne_0.17                   </span></span>
 <span><span class="co">##  [69] reshape2_1.4.4                generics_0.1.3               </span></span>
-<span><span class="co">##  [71] gtable_0.3.3                  data.table_1.14.8            </span></span>
-<span><span class="co">##  [73] ScaledMatrix_1.8.1            BiocSingular_1.16.0          </span></span>
-<span><span class="co">##  [75] utf8_1.2.3                    XVector_0.40.0               </span></span>
-<span><span class="co">##  [77] RcppAnnoy_0.0.21              ggrepel_0.9.3                </span></span>
-<span><span class="co">##  [79] BiocVersion_3.17.1            foreach_1.5.2                </span></span>
-<span><span class="co">##  [81] pillar_1.9.0                  stringr_1.5.0                </span></span>
-<span><span class="co">##  [83] later_1.3.1                   dplyr_1.1.2                  </span></span>
-<span><span class="co">##  [85] BiocFileCache_2.8.0           lattice_0.21-8               </span></span>
+<span><span class="co">##  [71] gtable_0.3.4                  data.table_1.15.4            </span></span>
+<span><span class="co">##  [73] ScaledMatrix_1.10.0           BiocSingular_1.18.0          </span></span>
+<span><span class="co">##  [75] utf8_1.2.4                    XVector_0.42.0               </span></span>
+<span><span class="co">##  [77] RcppAnnoy_0.0.22              ggrepel_0.9.5                </span></span>
+<span><span class="co">##  [79] BiocVersion_3.18.1            foreach_1.5.2                </span></span>
+<span><span class="co">##  [81] pillar_1.9.0                  stringr_1.5.1                </span></span>
+<span><span class="co">##  [83] later_1.3.2                   dplyr_1.1.4                  </span></span>
+<span><span class="co">##  [85] BiocFileCache_2.10.1          lattice_0.22-5               </span></span>
 <span><span class="co">##  [87] bit_4.0.5                     tidyselect_1.2.0             </span></span>
-<span><span class="co">##  [89] Biostrings_2.68.1             knitr_1.43                   </span></span>
-<span><span class="co">##  [91] gridExtra_2.3                 bookdown_0.34                </span></span>
-<span><span class="co">##  [93] xfun_0.39                     stringi_1.7.12               </span></span>
-<span><span class="co">##  [95] yaml_2.3.7                    evaluate_0.21                </span></span>
-<span><span class="co">##  [97] codetools_0.2-19              RcppEigen_0.3.3.9.3          </span></span>
-<span><span class="co">##  [99] tibble_3.2.1                  BiocManager_1.30.21.1        </span></span>
-<span><span class="co">## [101] cli_3.6.1                     uwot_0.1.16                  </span></span>
-<span><span class="co">## [103] xtable_1.8-4                  systemfonts_1.0.4            </span></span>
-<span><span class="co">## [105] munsell_0.5.0                 jquerylib_0.1.4              </span></span>
-<span><span class="co">## [107] enrichR_3.2                   Rcpp_1.0.11                  </span></span>
-<span><span class="co">## [109] dbplyr_2.3.3                  png_0.1-8                    </span></span>
-<span><span class="co">## [111] parallel_4.3.1                ellipsis_0.3.2               </span></span>
+<span><span class="co">##  [89] Biostrings_2.70.1             knitr_1.45                   </span></span>
+<span><span class="co">##  [91] gridExtra_2.3                 bookdown_0.37                </span></span>
+<span><span class="co">##  [93] xfun_0.41                     stringi_1.8.3                </span></span>
+<span><span class="co">##  [95] yaml_2.3.8                    evaluate_0.23                </span></span>
+<span><span class="co">##  [97] codetools_0.2-19              RcppEigen_0.3.4.0.0          </span></span>
+<span><span class="co">##  [99] tibble_3.2.1                  BiocManager_1.30.22          </span></span>
+<span><span class="co">## [101] cli_3.6.2                     uwot_0.1.16                  </span></span>
+<span><span class="co">## [103] xtable_1.8-4                  systemfonts_1.0.6            </span></span>
+<span><span class="co">## [105] munsell_0.5.1                 jquerylib_0.1.4              </span></span>
+<span><span class="co">## [107] enrichR_3.2                   Rcpp_1.0.12                  </span></span>
+<span><span class="co">## [109] dbplyr_2.4.0                  png_0.1-8                    </span></span>
+<span><span class="co">## [111] parallel_4.3.3                ellipsis_0.3.2               </span></span>
 <span><span class="co">## [113] pkgdown_2.0.7                 blob_1.2.4                   </span></span>
-<span><span class="co">## [115] sparseMatrixStats_1.12.2      bitops_1.0-7                 </span></span>
-<span><span class="co">## [117] viridisLite_0.4.2             scales_1.2.1                 </span></span>
-<span><span class="co">## [119] purrr_1.0.1                   crayon_1.5.2                 </span></span>
-<span><span class="co">## [121] combinat_0.0-8                rlang_1.1.1                  </span></span>
-<span><span class="co">## [123] KEGGREST_1.40.0</span></span></code></pre>
+<span><span class="co">## [115] sparseMatrixStats_1.14.0      bitops_1.0-7                 </span></span>
+<span><span class="co">## [117] viridisLite_0.4.2             scales_1.3.0                 </span></span>
+<span><span class="co">## [119] purrr_1.0.2                   crayon_1.5.2                 </span></span>
+<span><span class="co">## [121] combinat_0.0-8                rlang_1.1.3                  </span></span>
+<span><span class="co">## [123] KEGGREST_1.42.0</span></span></code></pre>
 </div>
   </div>
 
