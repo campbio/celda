@@ -105,7 +105,7 @@ SEXP _rowSumByGroupChange(SEXP R_x, SEXP R_px, SEXP R_group, SEXP R_pgroup)
   int *pgroup = INTEGER(R_pgroup);
   
   // If the grouping variable is not a factor, throw an error
-  if (!isFactor(R_group) | !isFactor(R_pgroup)) {
+  if (!isFactor(R_group) || !isFactor(R_pgroup)) {
     error("The grouping arguments must be factors");
   }
   int nl = nlevels(R_group);
