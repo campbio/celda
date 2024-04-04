@@ -38,6 +38,7 @@ require(knitr)
 require(ggplot2)
 require(gridExtra)
 require(SingleCellExperiment)
+require(multipanelfigure)
 
 sce <- params$sce
 features <- params$features
