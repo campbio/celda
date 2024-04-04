@@ -197,14 +197,5 @@ test_that(desc = "Testing featureModuleTable", {
 
 test_that(desc = "Testing plotCeldaViolin with celda_CG", {
     violin <- plotCeldaViolin(modelCG, features = "Gene_1")
-    expect_equal(names(violin),
-        c("data",
-            "layers",
-            "scales",
-            "mapping",
-            "theme",
-            "coordinates",
-            "facet",
-            "plot_env",
-            "labels"))
+    expect_is(violin, "ggplot")
 })

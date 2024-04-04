@@ -295,15 +295,15 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP _colSumByGroup(void *, void *);
-RcppExport SEXP _colSumByGroup_numeric(void *, void *);
-RcppExport SEXP _colSumByGroupChange(void *, void *, void *, void *);
-RcppExport SEXP _colSumByGroupChange_numeric(void *, void *, void *, void *);
-RcppExport SEXP _perplexityG(void *, void *, void *, void *);
-RcppExport SEXP _rowSumByGroup(void *, void *);
-RcppExport SEXP _rowSumByGroup_numeric(void *, void *);
-RcppExport SEXP _rowSumByGroupChange(void *, void *, void *, void *);
-RcppExport SEXP _rowSumByGroupChange_numeric(void *, void *, void *, void *);
+RcppExport SEXP _colSumByGroup(SEXP, SEXP);
+RcppExport SEXP _colSumByGroup_numeric(SEXP, SEXP);
+RcppExport SEXP _colSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
+RcppExport SEXP _colSumByGroupChange_numeric(SEXP, SEXP, SEXP, SEXP);
+RcppExport SEXP _perplexityG(SEXP, SEXP, SEXP, SEXP);
+RcppExport SEXP _rowSumByGroup(SEXP, SEXP);
+RcppExport SEXP _rowSumByGroup_numeric(SEXP, SEXP);
+RcppExport SEXP _rowSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
+RcppExport SEXP _rowSumByGroupChange_numeric(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_celda_decontXEM", (DL_FUNC) &_celda_decontXEM, 10},
