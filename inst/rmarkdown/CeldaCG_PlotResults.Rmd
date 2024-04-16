@@ -199,42 +199,16 @@ for (i in seq_len(L)) {
     altExpName = altExpName,
     modules = i
   )
-  # p2 <- moduleHeatmap(
-  #   sce,
-  #   featureModule = i,
-  #   topCells = NULL,
-  #   displayName = displayName,
-  #   moduleLabel = "All cells",
-  #   useRaster = TRUE
-  # )
-  # p3 <- moduleHeatmap(
-  #   sce,
-  #   featureModule = i,
-  #   topCells = 100,
-  #   displayName = displayName,
-  #   moduleLabel = "Top 100 cells",
-  #   useRaster = TRUE
-  # )
-
-  fig <- multi_panel_figure(rows = 2,
-                            columns = 2,
-                            figure_name = paste0("fig", i))
-
-  fig <- fill_panel(fig,
-                    p1,
-                    row = 1,
-                    column = 1:2,
-                    label = "")
-  fig <- fill_panel(fig,
-                    p2[[i]],
-                    row = 2,
-                    column = 1,
-                    label = "")
-  fig <- fill_panel(fig,
-                    p3[[i]],
-                    row = 2,
-                    column = 2,
-                    label = "")
+  
+  plts <- list(p1,p2[[i]],p3[[i]])
+  fig <- gridExtra::marrangeGrob(plts,
+                                nrow = 2,
+                                ncol = 2,
+                                layout_matrix = matrix(c(1,1,2,3),
+                                                       nrow = 2,
+                                                       ncol = 2,
+                                                       byrow = TRUE),
+                                top = NA)
   fig.list[[i]] <- fig
 }
 for (i in seq_len(L)) {
