@@ -1,3 +1,7 @@
+# celda v1.18.2 (2024-04-02)
+* Updated Makevar files to new CRAN standards 
+* Fixed unit test causing error
+
 # celda v1.18.1 (2023-11-05)
 * Update to match Bioconductor release version
 * Removed multipanelfigure as a dependency
