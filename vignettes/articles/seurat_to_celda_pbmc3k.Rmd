@@ -1,0 +1,153 @@
+---
+title: "Celda module analysis tutorial"
+author: "Salam AlAbdullatif"
+date: "2024-07-19"
+output: html_document
+---
+
+```{r setup, include=TRUE, message=FALSE}
+#Load library
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(celda)
+library(singleCellTK)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(dendextend)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+source("/restricted/projectnb/camplab/projects/20240719_Codathon/Tutorial/findMarkersTree.R")
+```
+
+## Applying the Seurat clustering algorithm (Optional)
+
+While Celda provides the functionality for cell cluster generation, some users may opt to import cluster labels generated from the popular Seurat pipeline. (https://pubmed.ncbi.nlm.nih.gov/29608179/) We can apply the `convertSeuratToSCE` function contained within the SingleCellTK package for the object conversion.
+
+```{r, warning=FALSE}
+#Seurat pipeline (Taken from https://satijalab.org/seurat/articles/pbmc3k_tutorial):
+##Read in 10X output, PBMC 3K
+## Check seurat fxn if exists:
+pbmc.data <- Read10X(data.dir = "/restricted/projectnb/camplab/projects/20240719_Codathon/Tutorial/filtered_gene_bc_matrices/hg19/")
+##Create Seurat object
+pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
+##Normalize data
+pbmc <- NormalizeData(pbmc, verbose = FALSE)
+##Feature selection
+pbmc <- FindVariableFeatures(pbmc, verbose = FALSE)
+##Linear transformation
+pbmc <- ScaleData(pbmc, verbose = FALSE)
+pbmc <- RunPCA(pbmc, verbose = FALSE)
+pbmc <- RunUMAP(pbmc, dims = 1:10, verbose = FALSE)
+##Generate clusters
+pbmc <- FindNeighbors(pbmc, dims = 1:10, verbose = FALSE)
+pbmc <- FindClusters(pbmc, resolution = 0.5, verbose = FALSE)
+```
+
+## Convert Seurat Object to an SingleCellExperiment (SCE) object (Optional)
+
+```{r}
+#Convert the Seurat object to a SingleCellExperiment object 
+pbmcSce <- convertSeuratToSCE(pbmc, normAssayName = "logcounts")
+```
+
+## Generating feature modules from pre-determined clusters
+
+Generate Celda feature modules based on cell clusters that you have provided through the `recursiveSplitModule` function:
+
+```{r}
+useAssay <- "counts"
+altExpName <- "featureSubset"
+```
+
+
+```{r}
+#Convert Seurat cluster IDs, as Celda requires clusters be numeric vectors starting from 1 (Seurat cluster 0 = Celda cluster 1)
+pbmcSce$seurat_clusters <- as.numeric(as.character(pbmcSce$seurat_clusters)) + 1
+
+pbmcSce <- selectFeatures(pbmcSce)
+#Run recursiveSplitModule; Seurat clusters will be imported in the zInit parameter.
+rsmRes <- recursiveSplitModule(x = pbmcSce, useAssay = "counts", altExpName = "featureSubset", initialL = 2, maxL = 30, zInit = pbmcSce$seurat_clusters, verbose = FALSE)
+```
+
+```{r}
+#Identify the optimal L (number of modules) using the elbow plot
+plotRPC(rsmRes)
+```
+
+A heuristic method that may be applied to identify the optimal number of modules. Based on the elbow plot, the rate of the perplexity change levels off around L = 12 ~ 15. For this tutorial, we will choose L = 15 for the number of modules.
+
+```{r}
+#Subset Celda object
+sce <- subsetCeldaList(rsmRes, list(L = 15))
+```
+
+```{r}
+featureTable <- featureModuleTable(sce, useAssay = useAssay, altExpName = altExpName)
+
+kable(featureTable, style = "html", row.names = FALSE) %>%
+                 kable_styling(bootstrap_options = "striped") %>%
+                 scroll_box(width = "100%", height = "500px")
+```
+
+For instance, we can see that each module represents a set of co-expressing features, such as module L7 (B lymphocytes - CD79A, MS4A1, TCL1A) and module L8 (NK cells - NKG7, GNLY)
+
+## Run DE on Modules
+
+Differential expression tools can also be used on the gene modules in order to identify the modules that define each cell cluster. To do this, first run the `factorizeMatrix` function, which will generate a matrix that measures the contribution of each gene module to each cell population.
+
+```{r DE modules, message=FALSE}
+factorize <- factorizeMatrix(sce, useAssay = useAssay, altExpName = altExpName)
+### Take the module counts, log-normalize, then use for DE, violin plots, etc
+factorizedCounts <- factorize$counts$cell
+factorizedLogcounts <- normalizeCounts(factorizedCounts)
+reducedDim(sce, "factorizeMatrix") <- t(factorizedLogcounts)
+sce <- runFindMarker(sce, useReducedDim = "factorizeMatrix", cluster = "seurat_clusters", useAssay = NULL)
+```
+
+The differential expression results are contained within the metadata slot `findMarker`. The `Gene` column denotes the differentially expressed module, whilst the `Log2_FC` column denotes the level of upregulation of the module in the cluster. 
+
+
+```{r DE module table, message=FALSE, echo = FALSE}
+kable(metadata(sce)$findMarker, style = "html", row.names = FALSE) %>%
+                 kable_styling(bootstrap_options = "striped") %>%
+                 scroll_box(width = "100%", height = "500px")
+```
+
+### Module exploration
+
+Celda provides several methods for the visualization of the module expression within the dataset.
+
+#### UMAP
+
+The function `plotDimReduceModule` can be used visualize the probabilities of a particular module or sets of modules on a reduced dimensional plot such as a UMAP. This can be another quick method to see how modules are expressed across various cells in 2-D space. As an example, we can look at modules L7 and L8:
+
+```{r, fig.width = 5.5, fig.height = 4.5}
+sce <- celdaUmap(sce, useAssay = useAssay, altExpName = altExpName)
+plotDimReduceModule(sce, modules = 7:8, useAssay = useAssay, altExpName = altExpName, reducedDimName = "celda_UMAP")
+```
+
+#### Heatmap
+
+The function `moduleHeatmap` can be used to view the expression of features across cells for a specific module.
+
+```{r, fig.width = 5, fig.height = 8}
+moduleHeatmap(sce, featureModule = 8, useAssay = useAssay, topFeatures = 25)
+```
+
+## Generate a Decision Tree
+
+To identify which modules distinguish which clusters, we can use use decision trees implemented in the `findMarkersTree` function. Upon applying the celda algorithm, we will use the generated factorized counts for the modules (a matrix of modules x cells) and cluster labels, as an input to the findMarkersTree function. 
+
+```{r, message=FALSE}
+classes <- as.integer(celdaClusters(sce)) # needs to be an integer vector 
+DecTree <- findMarkersTree(factorizedCounts, classes)
+```
+
+The output decision tree can be visualized through a dendrogram using the `plotDendro` function:
+
+```{r, warning=FALSE}
+plotDendro(DecTree)
+```
