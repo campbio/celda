@@ -23,7 +23,7 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         MCMCprecision, ggrepel, Rtsne, withr,
         scater (>= 1.14.4), scran, dbscan,
         DelayedArray, stringr, ComplexHeatmap, gridExtra,
-        circlize
+        circlize, dendextend, ggdendro, pROC
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData
 LinkingTo: Rcpp, RcppEigen
