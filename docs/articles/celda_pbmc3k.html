@@ -6,20 +6,19 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Celda - Analysis of PBMC3K • celda</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/yeti/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/yeti/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Celda - Analysis of PBMC3K">
-<meta property="og:description" content="celda">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">celda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.18.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.22.1</span>
       </span>
     </div>
 
@@ -42,24 +41,24 @@
 <li>
   <a href="https://www.camplab.net/celda" class="external-link">
     <span class="fa fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
-  <a href="../articles/articles/installation.html">Installation</a>
+  <a href="../articles/installation.html">Installation</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/articles/celda_pbmc3k.html">Celda - Analysis of PBMC3K</a>
+      <a href="../articles/celda_pbmc3k.html">Celda - Analysis of PBMC3K</a>
     </li>
     <li>
-      <a href="../articles/articles/decontX_pbmc4k.html">DecontX - Decontamination of PBMC4K</a>
+      <a href="../articles/decontX_pbmc4k.html">DecontX - Decontamination of PBMC4K</a>
     </li>
   </ul>
 </li>
@@ -72,7 +71,7 @@
 <li>
   <a href="https://github.com/campbio/celda" class="external-link">
     <span class="fa fa-github"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -80,7 +79,7 @@
 <li>
   <a href="https://github.com/campbio/celda/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -91,7 +90,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><script src="celda_pbmc3k_files/kePrint-0.0.1/kePrint.js"></script><link href="celda_pbmc3k_files/lightable-0.0.1/lightable.css" rel="stylesheet">
 <div class="row">
@@ -101,7 +100,8 @@
                         <h4 data-toc-skip class="author">Joshua
 Campbell, Zhe Wang</h4>
             
-            <h4 data-toc-skip class="date">Compiled April 02, 2024</h4>
+            <h4 data-toc-skip class="date">Compiled February 12,
+2025</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/campbio/celda/blob/HEAD/vignettes/articles/celda_pbmc3k.Rmd" class="external-link"><code>vignettes/articles/celda_pbmc3k.Rmd</code></a></small>
       <div class="hidden name"><code>celda_pbmc3k.Rmd</code></div>
@@ -147,7 +147,7 @@ within <code>sce</code> object is converted from a
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html" class="external-link">TENxPBMCData</a></span><span class="op">(</span><span class="st">"pbmc3k"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"pbmc3k_"</span>, <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Sequence</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"pbmc3k_"</span>, <span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">Sequence</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">as</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"dgCMatrix"</span><span class="op">)</span></span></code></pre></div>
 <p>If you have the <a href="https://bioconductor.org/packages/release/bioc/html/singleCellTK.html" target="_blank" class="external-link">singleCellTK</a> package installed, then this dataset
 can be imported and converted with a single command:</p>
@@ -358,12 +358,15 @@ perplexity to suggest reasonable choices for <code>L</code> and
 can be used to cluster features into modules for a range of
 <code>L</code>. Within each step, the best split of an existing module
 into 2 new modules is chosen to create the L-th module. The module
-labels of the previous model with <span class="math inline">\(L-1\)</span> modules are used as the initial
-starting values in the next model with <span class="math inline">\(L\)</span> modules. Note that the initialization
-step may take longer with larger numbers of cells in the dataset and the
-splitting procedure will take longer with larger numbers features in the
-dataset. Celda models with a L range between <code>initialL = 10</code>
-and <code>maxL = 150</code> are tested in the example below.</p>
+labels of the previous model with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">L-1</annotation></semantics></math>
+modules are used as the initial starting values in the next model with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+modules. Note that the initialization step may take longer with larger
+numbers of cells in the dataset and the splitting procedure will take
+longer with larger numbers features in the dataset. Celda models with a
+L range between <code>initialL = 10</code> and <code>maxL = 150</code>
+are tested in the example below.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">moduleSplit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recursiveSplitModule.html">recursiveSplitModule</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, initialL <span class="op">=</span> <span class="fl">10</span>, maxL <span class="op">=</span> <span class="fl">150</span><span class="op">)</span></span></code></pre></div>
 <p>Perplexity has been commonly used in the topic models to measure how
@@ -415,9 +418,11 @@ on.</div>
 <div class="section level3">
 <h3 id="finding-the-number-of-cell-subpopulations">Finding the number of cell subpopulations<a class="anchor" aria-label="anchor" href="#finding-the-number-of-cell-subpopulations"></a>
 </h3>
-<p>Now we extract the Celda model of <code>L =</code><span class="math inline">\(L\)</span> with function
-<code>subsetCeldaList</code> and run <code>recursiveSplitCell</code> to
-fit models with a range of <code>K</code> between 3 and 25:</p>
+<p>Now we extract the Celda model of
+<code>L =</code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+with function <code>subsetCeldaList</code> and run
+<code>recursiveSplitCell</code> to fit models with a range of
+<code>K</code> between 3 and 25:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subsetCeldaList.html">subsetCeldaList</a></span><span class="op">(</span><span class="va">moduleSplit</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>L <span class="op">=</span> <span class="va">L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recursiveSplitCell.html">recursiveSplitCell</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, initialK <span class="op">=</span> <span class="fl">3</span>, maxK <span class="op">=</span> <span class="fl">25</span>, yInit <span class="op">=</span> <span class="fu"><a href="../reference/celdaModules.html">celdaModules</a></span><span class="op">(</span><span class="va">temp</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -28545,19 +28550,13 @@ cell population compared to all the others.</p>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run differential expression analysis</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runFindMarker.html" class="external-link">findMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, method <span class="op">=</span> <span class="st">"wilcox"</span>, cluster <span class="op">=</span> <span class="fu"><a href="../reference/celdaClusters.html">celdaClusters</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: 'findMarkerDiffExp' is deprecated.</span></span>
-<span><span class="co">## Use 'runFindMarker' instead.</span></span>
-<span><span class="co">## See help("Deprecated")</span></span></code></pre>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runFindMarker.html" class="external-link">runFindMarker</a></span><span class="op">(</span><span class="va">sce</span>, useAssay <span class="op">=</span> <span class="st">"logcounts"</span>, method <span class="op">=</span> <span class="st">"wilcox"</span>, cluster <span class="op">=</span> <span class="fu"><a href="../reference/celdaClusters.html">celdaClusters</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>The function <code>plotMarkerDiffExp</code> can be used to plot the
 results in a heatmap. The <code>topN</code> parameter will plot the top
 N ranked genes for each cluster.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot differentially expressed genes that pass additional thresholds 'minClustExprPerc' and 'maxCtrlExprPerc'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotFindMarkerHeatmap.html" class="external-link">plotMarkerDiffExp</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: 'plotMarkerDiffExp' is deprecated.</span></span>
-<span><span class="co">## Use 'plotFindMarkerHeatmap' instead.</span></span>
-<span><span class="co">## See help("Deprecated")</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/plotFindMarkerHeatmap.html" class="external-link">plotFindMarkerHeatmap</a></span><span class="op">(</span><span class="va">sce</span>, topN <span class="op">=</span> <span class="fl">5</span>, log2fcThreshold <span class="op">=</span> <span class="fl">0</span>, rowLabel <span class="op">=</span> <span class="cn">TRUE</span>, fdrThreshold <span class="op">=</span> <span class="fl">0.05</span>, minClustExprPerc <span class="op">=</span> <span class="fl">0.6</span>, maxCtrlExprPerc <span class="op">=</span> <span class="fl">0.4</span>, minMeanExpr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/diffExp_plot-1.png" width="700"></p>
 <p>Other parameters such as <code>minClustExprPerc</code> (the minimum
 number of cells expressing the marker gene in the cluster) and
@@ -28575,7 +28574,7 @@ distribution of expression of various features across cell population
 clusters derived from celda. Here we can see that the gene CD79A has
 high expression in the B-cell cluster and HMGB2 has high expression in
 the proliferating T-cell population.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Normalize counts if not performed in previous steps</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="va">useAssay</span>, name <span class="op">=</span> <span class="st">"logcounts"</span><span class="op">)</span></span>
@@ -28596,7 +28595,7 @@ downstream analysis. The first report runs both
 for selection of <code>L</code> and <code>K</code>, respectively. To
 recapitulate the complete analysis presented in this tutorial in the
 HTML report, the following command can be used:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reportceldaCG.html">reportCeldaCGRun</a></span><span class="op">(</span><span class="va">sce</span>, sampleLabel <span class="op">=</span> <span class="cn">NULL</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, minCell <span class="op">=</span> <span class="fl">3</span>, minCount <span class="op">=</span> <span class="fl">3</span>, initialL <span class="op">=</span> <span class="fl">10</span>, maxL <span class="op">=</span> <span class="fl">150</span>, initialK <span class="op">=</span> <span class="fl">3</span>, maxK <span class="op">=</span> <span class="fl">25</span>, L <span class="op">=</span> <span class="fl">80</span>, K <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></code></pre></div>
 <p>All of the parameters in this function are the same that were used
 throughout this tutorial in the <code>selectFeatures</code>,
@@ -28614,7 +28613,7 @@ cluster labels on 2-D embeddings, user-specified annotations on 2-D
 embeddings, module heatmaps, module probabilities, expression of marker
 genes on 2-D embeddings, and the celda probability map. The report can
 be generated with the following code:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/reportceldaCG.html">reportCeldaCGPlotResults</a></span><span class="op">(</span><span class="va">sce</span>, reducedDimName <span class="op">=</span> <span class="st">"celda_UMAP"</span>, features <span class="op">=</span> <span class="va">markers</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, cellAnnot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"total"</span>, <span class="st">"detected"</span>, <span class="st">"decontX_contamination"</span>, <span class="st">"subsets_mito_percent"</span><span class="op">)</span>, cellAnnotLabel <span class="op">=</span> <span class="st">"scDblFinder_doublet_call"</span><span class="op">)</span></span></code></pre></div>
 <p>User-supplied annotations to plot on the 2-D embedding can be
 specified through the <code>cellAnnot</code> and
@@ -28649,24 +28648,24 @@ embeddings). All of these matrices can be retrieved with the
 three different versions: unnormalized counts, proportions (normalized
 by the total), or posterior estimates (where the Dirichlet concentration
 parameter is added in before normalization).</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Factorize the original counts matrix</span></span>
 <span><span class="va">fm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/factorizeMatrix.html">factorizeMatrix</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Three different version of each matrix:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fm</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "counts"      "proportions" "posterior"</span></span></code></pre>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get normalized proportional matrices</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">cell</span><span class="op">)</span> <span class="co"># Matrix of module probabilities for each cell</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1]   80 2675</span></span></code></pre>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">module</span><span class="op">)</span> <span class="co"># Matrix of feature probabilities for each module</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 2639   80</span></span></code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">cellPopulation</span><span class="op">)</span> <span class="co"># Matrix of module probabilities for each cell population</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 80 14</span></span></code></pre>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fm</span><span class="op">$</span><span class="va">proportions</span><span class="op">$</span><span class="va">sample</span><span class="op">)</span> <span class="co"># Matrix of cell population probabilities in each sample</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 14  1</span></span></code></pre>
 </div>
@@ -28682,7 +28681,7 @@ example, if we did not change the <code>rownames</code> to
 code still could be run in <code>moduleHeatmap</code> to display the
 gene symbol even if the <code>rownames</code> were set to the original
 Ensembl IDs:</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/moduleHeatmap.html">moduleHeatmap</a></span><span class="op">(</span><span class="va">sce</span>, featureModule <span class="op">=</span> <span class="fl">27</span>, useAssay <span class="op">=</span> <span class="va">useAssay</span>, altExpName <span class="op">=</span> <span class="va">altExpName</span>, displayName <span class="op">=</span> <span class="st">"Symbol_TENx"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="celda_pbmc3k_files/figure-html/module_heatmap_with_display-1.png" width="700"></p>
 </div>
@@ -28692,13 +28691,13 @@ Ensembl IDs:</p>
 </h2>
 <details><summary>
 sessionInfo()
-</summary><pre><code><span><span class="co">## R version 4.3.3 (2024-02-29)</span></span>
-<span><span class="co">## Platform: x86_64-apple-darwin20 (64-bit)</span></span>
-<span><span class="co">## Running under: macOS Sonoma 14.4.1</span></span>
+</summary><pre><code><span><span class="co">## R version 4.4.2 (2024-10-31)</span></span>
+<span><span class="co">## Platform: x86_64-apple-darwin20</span></span>
+<span><span class="co">## Running under: macOS Sequoia 15.3</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Matrix products: default</span></span>
-<span><span class="co">## BLAS:   /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRblas.0.dylib </span></span>
-<span><span class="co">## LAPACK: /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0</span></span>
+<span><span class="co">## BLAS:   /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRblas.0.dylib </span></span>
+<span><span class="co">## LAPACK: /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## locale:</span></span>
 <span><span class="co">## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8</span></span>
@@ -28711,111 +28710,107 @@ sessionInfo()
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] scater_1.30.1               scuttle_1.12.0             </span></span>
-<span><span class="co">##  [3] kableExtra_1.4.0            knitr_1.45                 </span></span>
-<span><span class="co">##  [5] ggplot2_3.5.0               celda_1.18.2               </span></span>
-<span><span class="co">##  [7] singleCellTK_2.12.2         TENxPBMCData_1.20.0        </span></span>
-<span><span class="co">##  [9] HDF5Array_1.30.0            rhdf5_2.46.1               </span></span>
-<span><span class="co">## [11] DelayedArray_0.28.0         SparseArray_1.2.4          </span></span>
-<span><span class="co">## [13] S4Arrays_1.2.1              abind_1.4-5                </span></span>
-<span><span class="co">## [15] Matrix_1.6-5                SingleCellExperiment_1.24.0</span></span>
-<span><span class="co">## [17] SummarizedExperiment_1.32.0 Biobase_2.62.0             </span></span>
-<span><span class="co">## [19] GenomicRanges_1.54.1        GenomeInfoDb_1.38.8        </span></span>
-<span><span class="co">## [21] IRanges_2.36.0              S4Vectors_0.40.2           </span></span>
-<span><span class="co">## [23] BiocGenerics_0.48.1         MatrixGenerics_1.14.0      </span></span>
-<span><span class="co">## [25] matrixStats_1.2.0          </span></span>
+<span><span class="co">##  [1] scater_1.34.0               scuttle_1.16.0             </span></span>
+<span><span class="co">##  [3] kableExtra_1.4.0            knitr_1.49                 </span></span>
+<span><span class="co">##  [5] ggplot2_3.5.1               celda_1.22.1               </span></span>
+<span><span class="co">##  [7] singleCellTK_2.16.0         TENxPBMCData_1.24.0        </span></span>
+<span><span class="co">##  [9] HDF5Array_1.34.0            rhdf5_2.50.2               </span></span>
+<span><span class="co">## [11] DelayedArray_0.32.0         SparseArray_1.6.1          </span></span>
+<span><span class="co">## [13] S4Arrays_1.6.0              abind_1.4-8                </span></span>
+<span><span class="co">## [15] Matrix_1.7-2                SingleCellExperiment_1.28.1</span></span>
+<span><span class="co">## [17] SummarizedExperiment_1.36.0 Biobase_2.66.0             </span></span>
+<span><span class="co">## [19] GenomicRanges_1.58.0        GenomeInfoDb_1.42.3        </span></span>
+<span><span class="co">## [21] IRanges_2.40.1              S4Vectors_0.44.0           </span></span>
+<span><span class="co">## [23] BiocGenerics_0.52.0         MatrixGenerics_1.18.1      </span></span>
+<span><span class="co">## [25] matrixStats_1.5.0          </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## loaded via a namespace (and not attached):</span></span>
-<span><span class="co">##   [1] later_1.3.2                   BiocIO_1.12.0                </span></span>
-<span><span class="co">##   [3] bitops_1.0-7                  filelock_1.0.3               </span></span>
-<span><span class="co">##   [5] tibble_3.2.1                  R.oo_1.26.0                  </span></span>
-<span><span class="co">##   [7] graph_1.80.0                  XML_3.99-0.16.1              </span></span>
-<span><span class="co">##   [9] lifecycle_1.0.4               scDblFinder_1.16.0           </span></span>
-<span><span class="co">##  [11] doParallel_1.0.17             edgeR_4.0.16                 </span></span>
-<span><span class="co">##  [13] lattice_0.22-5                MASS_7.3-60.0.1              </span></span>
-<span><span class="co">##  [15] magrittr_2.0.3                limma_3.58.1                 </span></span>
-<span><span class="co">##  [17] sass_0.4.8                    rmarkdown_2.25               </span></span>
-<span><span class="co">##  [19] jquerylib_0.1.4               yaml_2.3.8                   </span></span>
-<span><span class="co">##  [21] metapod_1.10.1                httpuv_1.6.14                </span></span>
-<span><span class="co">##  [23] reticulate_1.34.0             cowplot_1.1.3                </span></span>
-<span><span class="co">##  [25] RColorBrewer_1.1-3            DBI_1.2.1                    </span></span>
-<span><span class="co">##  [27] zlibbioc_1.48.2               Rtsne_0.17                   </span></span>
-<span><span class="co">##  [29] purrr_1.0.2                   R.utils_2.12.3               </span></span>
-<span><span class="co">##  [31] RCurl_1.98-1.14               WriteXLS_6.5.0               </span></span>
-<span><span class="co">##  [33] rappdirs_0.3.3                circlize_0.4.16              </span></span>
-<span><span class="co">##  [35] GenomeInfoDbData_1.2.11       ggrepel_0.9.5                </span></span>
-<span><span class="co">##  [37] irlba_2.3.5.1                 eds_1.4.0                    </span></span>
-<span><span class="co">##  [39] annotate_1.80.0               dqrng_0.3.2                  </span></span>
-<span><span class="co">##  [41] svglite_2.1.3                 pkgdown_2.0.7                </span></span>
-<span><span class="co">##  [43] DelayedMatrixStats_1.24.0     codetools_0.2-19             </span></span>
-<span><span class="co">##  [45] DropletUtils_1.22.0           xml2_1.3.6                   </span></span>
-<span><span class="co">##  [47] shape_1.4.6.1                 tidyselect_1.2.0             </span></span>
-<span><span class="co">##  [49] farver_2.1.1                  ScaledMatrix_1.10.0          </span></span>
-<span><span class="co">##  [51] viridis_0.6.5                 BiocFileCache_2.10.1         </span></span>
-<span><span class="co">##  [53] GenomicAlignments_1.38.2      jsonlite_1.8.8               </span></span>
-<span><span class="co">##  [55] GetoptLong_1.0.5              BiocNeighbors_1.20.2         </span></span>
-<span><span class="co">##  [57] ellipsis_0.3.2                iterators_1.0.14             </span></span>
-<span><span class="co">##  [59] systemfonts_1.0.6             dbscan_1.1-12                </span></span>
-<span><span class="co">##  [61] foreach_1.5.2                 tools_4.3.3                  </span></span>
-<span><span class="co">##  [63] ragg_1.3.0                    Rcpp_1.0.12                  </span></span>
-<span><span class="co">##  [65] glue_1.7.0                    gridExtra_2.3                </span></span>
-<span><span class="co">##  [67] xfun_0.41                     dplyr_1.1.4                  </span></span>
-<span><span class="co">##  [69] withr_3.0.0                   combinat_0.0-8               </span></span>
-<span><span class="co">##  [71] BiocManager_1.30.22           fastmap_1.1.1                </span></span>
-<span><span class="co">##  [73] MCMCprecision_0.4.0           rhdf5filters_1.14.1          </span></span>
-<span><span class="co">##  [75] bluster_1.12.0                fansi_1.0.6                  </span></span>
-<span><span class="co">##  [77] digest_0.6.35                 rsvd_1.0.5                   </span></span>
-<span><span class="co">##  [79] R6_2.5.1                      mime_0.12                    </span></span>
-<span><span class="co">##  [81] textshaping_0.3.7             colorspace_2.1-0             </span></span>
-<span><span class="co">##  [83] Cairo_1.6-2                   RSQLite_2.3.5                </span></span>
-<span><span class="co">##  [85] R.methodsS3_1.8.2             utf8_1.2.4                   </span></span>
-<span><span class="co">##  [87] generics_0.1.3                data.table_1.15.4            </span></span>
-<span><span class="co">##  [89] FNN_1.1.4                     rtracklayer_1.62.0           </span></span>
-<span><span class="co">##  [91] httr_1.4.7                    uwot_0.1.16                  </span></span>
-<span><span class="co">##  [93] pkgconfig_2.0.3               gtable_0.3.4                 </span></span>
-<span><span class="co">##  [95] blob_1.2.4                    ComplexHeatmap_2.18.0        </span></span>
-<span><span class="co">##  [97] XVector_0.42.0                htmltools_0.5.7              </span></span>
-<span><span class="co">##  [99] clue_0.3-65                   GSEABase_1.64.0              </span></span>
-<span><span class="co">## [101] scales_1.3.0                  png_0.1-8                    </span></span>
-<span><span class="co">## [103] enrichR_3.2                   scran_1.30.2                 </span></span>
-<span><span class="co">## [105] rstudioapi_0.15.0             reshape2_1.4.4               </span></span>
-<span><span class="co">## [107] rjson_0.2.21                  curl_5.2.1                   </span></span>
-<span><span class="co">## [109] GlobalOptions_0.1.2           cachem_1.0.8                 </span></span>
-<span><span class="co">## [111] stringr_1.5.1                 BiocVersion_3.18.1           </span></span>
-<span><span class="co">## [113] parallel_4.3.3                vipor_0.4.7                  </span></span>
-<span><span class="co">## [115] AnnotationDbi_1.64.1          restfulr_0.0.15              </span></span>
-<span><span class="co">## [117] desc_1.4.3                    pillar_1.9.0                 </span></span>
-<span><span class="co">## [119] grid_4.3.3                    vctrs_0.6.5                  </span></span>
-<span><span class="co">## [121] promises_1.2.1                BiocSingular_1.18.0          </span></span>
-<span><span class="co">## [123] dbplyr_2.4.0                  beachmat_2.18.1              </span></span>
-<span><span class="co">## [125] xtable_1.8-4                  cluster_2.1.6                </span></span>
-<span><span class="co">## [127] beeswarm_0.4.0                evaluate_0.23                </span></span>
-<span><span class="co">## [129] magick_2.8.2                  cli_3.6.2                    </span></span>
-<span><span class="co">## [131] locfit_1.5-9.9                compiler_4.3.3               </span></span>
-<span><span class="co">## [133] Rsamtools_2.18.0              rlang_1.1.3                  </span></span>
-<span><span class="co">## [135] crayon_1.5.2                  labeling_0.4.3               </span></span>
-<span><span class="co">## [137] plyr_1.8.9                    fs_1.6.3                     </span></span>
-<span><span class="co">## [139] ggbeeswarm_0.7.2              stringi_1.8.3                </span></span>
-<span><span class="co">## [141] viridisLite_0.4.2             BiocParallel_1.36.0          </span></span>
-<span><span class="co">## [143] munsell_0.5.1                 Biostrings_2.70.1            </span></span>
-<span><span class="co">## [145] ExperimentHub_2.10.0          RcppEigen_0.3.4.0.0          </span></span>
-<span><span class="co">## [147] GSVAdata_1.38.0               sparseMatrixStats_1.14.0     </span></span>
-<span><span class="co">## [149] bit64_4.0.5                   Rhdf5lib_1.24.1              </span></span>
-<span><span class="co">## [151] KEGGREST_1.42.0               statmod_1.5.0                </span></span>
-<span><span class="co">## [153] shiny_1.8.0                   highr_0.10                   </span></span>
-<span><span class="co">## [155] interactiveDisplayBase_1.40.0 AnnotationHub_3.10.0         </span></span>
-<span><span class="co">## [157] igraph_2.0.3                  memoise_2.0.1                </span></span>
-<span><span class="co">## [159] bslib_0.6.1                   bit_4.0.5                    </span></span>
-<span><span class="co">## [161] xgboost_1.7.7.1</span></span></code></pre>
+<span><span class="co">##   [1] BiocIO_1.16.0             bitops_1.0-9             </span></span>
+<span><span class="co">##   [3] filelock_1.0.3            tibble_3.2.1             </span></span>
+<span><span class="co">##   [5] R.oo_1.27.0               pROC_1.18.5              </span></span>
+<span><span class="co">##   [7] graph_1.84.1              XML_3.99-0.18            </span></span>
+<span><span class="co">##   [9] lifecycle_1.0.4           scDblFinder_1.20.0       </span></span>
+<span><span class="co">##  [11] edgeR_4.4.2               doParallel_1.0.17        </span></span>
+<span><span class="co">##  [13] lattice_0.22-6            MASS_7.3-64              </span></span>
+<span><span class="co">##  [15] dendextend_1.19.0         magrittr_2.0.3           </span></span>
+<span><span class="co">##  [17] limma_3.62.2              sass_0.4.9               </span></span>
+<span><span class="co">##  [19] rmarkdown_2.29            jquerylib_0.1.4          </span></span>
+<span><span class="co">##  [21] yaml_2.3.10               metapod_1.14.0           </span></span>
+<span><span class="co">##  [23] reticulate_1.40.0         cowplot_1.1.3            </span></span>
+<span><span class="co">##  [25] DBI_1.2.3                 RColorBrewer_1.1-3       </span></span>
+<span><span class="co">##  [27] zlibbioc_1.52.0           Rtsne_0.17               </span></span>
+<span><span class="co">##  [29] purrr_1.0.4               R.utils_2.12.3           </span></span>
+<span><span class="co">##  [31] RCurl_1.98-1.16           WriteXLS_6.7.0           </span></span>
+<span><span class="co">##  [33] rappdirs_0.3.3            circlize_0.4.16          </span></span>
+<span><span class="co">##  [35] GenomeInfoDbData_1.2.13   ggrepel_0.9.6            </span></span>
+<span><span class="co">##  [37] irlba_2.3.5.1             eds_1.8.0                </span></span>
+<span><span class="co">##  [39] annotate_1.84.0           dqrng_0.4.1              </span></span>
+<span><span class="co">##  [41] svglite_2.1.3             pkgdown_2.1.1            </span></span>
+<span><span class="co">##  [43] DelayedMatrixStats_1.28.1 codetools_0.2-20         </span></span>
+<span><span class="co">##  [45] DropletUtils_1.26.0       xml2_1.3.6               </span></span>
+<span><span class="co">##  [47] tidyselect_1.2.1          shape_1.4.6.1            </span></span>
+<span><span class="co">##  [49] farver_2.1.2              UCSC.utils_1.2.0         </span></span>
+<span><span class="co">##  [51] ScaledMatrix_1.14.0       viridis_0.6.5            </span></span>
+<span><span class="co">##  [53] BiocFileCache_2.14.0      GenomicAlignments_1.42.0 </span></span>
+<span><span class="co">##  [55] jsonlite_1.8.9            GetoptLong_1.0.5         </span></span>
+<span><span class="co">##  [57] BiocNeighbors_2.0.1       iterators_1.0.14         </span></span>
+<span><span class="co">##  [59] systemfonts_1.2.1         dbscan_1.2.2             </span></span>
+<span><span class="co">##  [61] foreach_1.5.2             tools_4.4.2              </span></span>
+<span><span class="co">##  [63] ragg_1.3.3                Rcpp_1.0.14              </span></span>
+<span><span class="co">##  [65] glue_1.8.0                gridExtra_2.3            </span></span>
+<span><span class="co">##  [67] xfun_0.50                 dplyr_1.1.4              </span></span>
+<span><span class="co">##  [69] withr_3.0.2               combinat_0.0-8           </span></span>
+<span><span class="co">##  [71] BiocManager_1.30.25       fastmap_1.2.0            </span></span>
+<span><span class="co">##  [73] MCMCprecision_0.4.0       rhdf5filters_1.18.0      </span></span>
+<span><span class="co">##  [75] bluster_1.16.0            digest_0.6.37            </span></span>
+<span><span class="co">##  [77] rsvd_1.0.5                R6_2.6.0                 </span></span>
+<span><span class="co">##  [79] mime_0.12                 textshaping_1.0.0        </span></span>
+<span><span class="co">##  [81] colorspace_2.1-1          Cairo_1.6-2              </span></span>
+<span><span class="co">##  [83] RSQLite_2.3.9             R.methodsS3_1.8.2        </span></span>
+<span><span class="co">##  [85] tidyr_1.3.1               generics_0.1.3           </span></span>
+<span><span class="co">##  [87] data.table_1.16.4         FNN_1.1.4.1              </span></span>
+<span><span class="co">##  [89] rtracklayer_1.66.0        httr_1.4.7               </span></span>
+<span><span class="co">##  [91] htmlwidgets_1.6.4         uwot_0.2.2               </span></span>
+<span><span class="co">##  [93] pkgconfig_2.0.3           gtable_0.3.6             </span></span>
+<span><span class="co">##  [95] blob_1.2.4                ComplexHeatmap_2.22.0    </span></span>
+<span><span class="co">##  [97] XVector_0.46.0            htmltools_0.5.8.1        </span></span>
+<span><span class="co">##  [99] GSEABase_1.68.0           clue_0.3-66              </span></span>
+<span><span class="co">## [101] scales_1.3.0              png_0.1-8                </span></span>
+<span><span class="co">## [103] ggdendro_0.2.0            enrichR_3.4              </span></span>
+<span><span class="co">## [105] scran_1.34.0              rstudioapi_0.17.1        </span></span>
+<span><span class="co">## [107] reshape2_1.4.4            rjson_0.2.23             </span></span>
+<span><span class="co">## [109] curl_6.2.0                cachem_1.1.0             </span></span>
+<span><span class="co">## [111] GlobalOptions_0.1.2       stringr_1.5.1            </span></span>
+<span><span class="co">## [113] BiocVersion_3.20.0        parallel_4.4.2           </span></span>
+<span><span class="co">## [115] vipor_0.4.7               AnnotationDbi_1.68.0     </span></span>
+<span><span class="co">## [117] restfulr_0.0.15           desc_1.4.3               </span></span>
+<span><span class="co">## [119] pillar_1.10.1             grid_4.4.2               </span></span>
+<span><span class="co">## [121] vctrs_0.6.5               BiocSingular_1.22.0      </span></span>
+<span><span class="co">## [123] dbplyr_2.5.0              beachmat_2.22.0          </span></span>
+<span><span class="co">## [125] xtable_1.8-4              cluster_2.1.8            </span></span>
+<span><span class="co">## [127] beeswarm_0.4.0            evaluate_1.0.3           </span></span>
+<span><span class="co">## [129] magick_2.8.5              cli_3.6.3                </span></span>
+<span><span class="co">## [131] locfit_1.5-9.11           compiler_4.4.2           </span></span>
+<span><span class="co">## [133] Rsamtools_2.22.0          rlang_1.1.5              </span></span>
+<span><span class="co">## [135] crayon_1.5.3              labeling_0.4.3           </span></span>
+<span><span class="co">## [137] plyr_1.8.9                fs_1.6.5                 </span></span>
+<span><span class="co">## [139] ggbeeswarm_0.7.2          stringi_1.8.4            </span></span>
+<span><span class="co">## [141] viridisLite_0.4.2         BiocParallel_1.40.0      </span></span>
+<span><span class="co">## [143] munsell_0.5.1             Biostrings_2.74.1        </span></span>
+<span><span class="co">## [145] ExperimentHub_2.14.0      RcppEigen_0.3.4.0.2      </span></span>
+<span><span class="co">## [147] GSVAdata_1.42.0           sparseMatrixStats_1.18.0 </span></span>
+<span><span class="co">## [149] bit64_4.6.0-1             Rhdf5lib_1.28.0          </span></span>
+<span><span class="co">## [151] KEGGREST_1.46.0           statmod_1.5.0            </span></span>
+<span><span class="co">## [153] AnnotationHub_3.14.0      igraph_2.1.4             </span></span>
+<span><span class="co">## [155] memoise_2.0.1             bslib_0.9.0              </span></span>
+<span><span class="co">## [157] xgboost_1.7.8.1           bit_4.5.0.1</span></span></code></pre>
 </details>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -28828,16 +28823,16 @@ sessionInfo()
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>
