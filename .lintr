@@ -1,0 +1,7 @@
+linters: linters_with_defaults(
+    line_length_linter(80),
+    object_name_linter(styles = c("camelCase", "symbols"))
+  )
+exclusions: list(
+    "R/RcppExports.R"
+  )

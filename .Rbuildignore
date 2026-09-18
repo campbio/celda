@@ -14,3 +14,10 @@ renv*
 ^docs$
 ^pkgdown$
 ^\.github$
+^AGENTS\.md$
+^CLAUDE\.md$
+^GEMINI\.md$
+^Makefile$
+^dev$
+^\.claude$
+^\.lintr$
