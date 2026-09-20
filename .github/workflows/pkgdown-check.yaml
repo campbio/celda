@@ -1,0 +1,33 @@
+# Structure-only check: does NOT build or deploy the pkgdown site.
+# Site builds/deploys are a local maintainer action (make site-deploy).
+on:
+  pull_request:
+    branches: [devel, master]
+
+name: pkgdown-check
+
+jobs:
+  check-pkgdown:
+    runs-on: ubuntu-latest
+    # Non-blocking for now: _pkgdown.yml is missing a required `url:` field
+    # pre-existing on devel/master (see dev/AUDIT.md). Flip to false once fixed.
+    continue-on-error: true
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown
+          needs: website
+
+      - name: Check pkgdown reference index
+        run: pkgdown::check_pkgdown()
+        shell: Rscript {0}
