@@ -8,159 +8,44 @@
 \usage{
 decontX(x, ...)
 
-\S4method{decontX}{SingleCellExperiment}(
-  x,
-  assayName = "counts",
-  z = NULL,
-  batch = NULL,
-  background = NULL,
-  bgAssayName = NULL,
-  bgBatch = NULL,
-  maxIter = 500,
-  delta = c(10, 10),
-  estimateDelta = TRUE,
-  convergence = 0.001,
-  iterLogLik = 10,
-  varGenes = 5000,
-  dbscanEps = 1,
-  seed = 12345,
-  logfile = NULL,
-  verbose = TRUE
-)
+\S4method{decontX}{SingleCellExperiment}(x, ...)
 
-\S4method{decontX}{ANY}(
-  x,
-  z = NULL,
-  batch = NULL,
-  background = NULL,
-  bgBatch = NULL,
-  maxIter = 500,
-  delta = c(10, 10),
-  estimateDelta = TRUE,
-  convergence = 0.001,
-  iterLogLik = 10,
-  varGenes = 5000,
-  dbscanEps = 1,
-  seed = 12345,
-  logfile = NULL,
-  verbose = TRUE
-)
+\S4method{decontX}{ANY}(x, ...)
 }
 \arguments{
 \item{x}{A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
 with the matrix located in the assay slot under \code{assayName}.
-Cells in each batch will be subsetted and converted to a sparse matrix
-of class \code{dgCMatrix} from package \link{Matrix} before analysis. This
-object should only contain filtered cells after cell calling. Empty
-cell barcodes (low expression droplets before cell calling) are not needed
-to run DecontX.}
+This object should only contain filtered cells after cell calling.}
 
-\item{...}{For the generic, further arguments to pass to each method.}
-
-\item{assayName}{Character. Name of the assay to use if \code{x} is a
-\linkS4class{SingleCellExperiment}.}
-
-\item{z}{Numeric or character vector. Cell cluster labels. If NULL,
-PCA will be used to reduce the dimensionality of the dataset initially,
-'\link[uwot]{umap}' from the 'uwot' package
-will be used to further reduce the dataset to 2 dimenions and
-the '\link[dbscan]{dbscan}' function from the 'dbscan' package
-will be used to identify clusters of broad cell types. Default NULL.}
-
-\item{batch}{Numeric or character vector. Batch labels for cells.
-If batch labels are supplied, DecontX is run on cells from each
-batch separately. Cells run in different channels or assays
-should be considered different batches. Default NULL.}
-
-\item{background}{A numeric matrix of counts or a
-\linkS4class{SingleCellExperiment} with the matrix located in the assay
-slot under \code{assayName}. It should have the same data format as \code{x}
-except it contains the empty droplets instead of cells. When supplied,
-empirical distribution of transcripts from these empty droplets
-will be used as the contamination distribution. Default NULL.}
-
-\item{bgAssayName}{Character. Name of the assay to use if \code{background}
-is a \linkS4class{SingleCellExperiment}. Default to same as
-\code{assayName}.}
-
-\item{bgBatch}{Numeric or character vector. Batch labels for
-\code{background}. Its unique values should be the same as those in
-\code{batch}, such that each batch of cells have their corresponding batch
-of empty droplets as background, pointed by this parameter. Default to NULL.}
-
-\item{maxIter}{Integer. Maximum iterations of the EM algorithm. Default 500.}
-
-\item{delta}{Numeric Vector of length 2. Concentration parameters for
-the Dirichlet prior for the contamination in each cell. The first element
-is the prior for the native counts while the second element is the prior for
-the contamination counts. These essentially act as pseudocounts for the
-native and contamination in each cell. If \code{estimateDelta = TRUE},
-this is only used to produce a random sample of proportions for an initial
-value of contamination in each cell. Then
-\code{\link[MCMCprecision]{fit_dirichlet}} is used to update
-\code{delta} in each iteration.
-If \code{estimateDelta = FALSE}, then \code{delta} is fixed with these
-values for the entire inference procedure. Fixing \code{delta} and
-setting a high number in the second element will force \code{decontX}
-to be more aggressive and estimate higher levels of contamination at
-the expense of potentially removing native expression.
-Default \code{c(10, 10)}.}
-
-\item{estimateDelta}{Boolean. Whether to update \code{delta} at each
-iteration.}
-
-\item{convergence}{Numeric. The EM algorithm will be stopped if the maximum
-difference in the contamination estimates between the previous and
-current iterations is less than this. Default 0.001.}
-
-\item{iterLogLik}{Integer. Calculate log likelihood every \code{iterLogLik}
-iteration. Default 10.}
-
-\item{varGenes}{Integer. The number of variable genes to use in
-dimensionality reduction before clustering. Variability is calcualted using
-\code{\link[scran]{modelGeneVar}} function from the 'scran' package.
-Used only when z is not provided. Default 5000.}
-
-\item{dbscanEps}{Numeric. The clustering resolution parameter
-used in '\link[dbscan]{dbscan}' to estimate broad cell clusters.
-Used only when z is not provided. Default 1.}
-
-\item{seed}{Integer. Passed to \link[withr]{with_seed}. For reproducibility,
-a default value of 12345 is used. If NULL, no calls to
-\link[withr]{with_seed} are made.}
-
-\item{logfile}{Character. Messages will be redirected to a file named
-`logfile`. If NULL, messages will be printed to stdout.  Default NULL.}
-
-\item{verbose}{Logical. Whether to print log messages. Default TRUE.}
+\item{...}{Additional arguments passed to \code{\link[decontX]{decontX}}
+(for example \code{assayName}, \code{z}, \code{batch}, \code{background},
+\code{maxIter}, \code{delta}, \code{estimateDelta}, \code{varGenes},
+\code{dbscanEps}, \code{seed}, \code{verbose}). See
+\code{\link[decontX]{decontX}} for the full argument documentation.}
 }
 \value{
-If \code{x} is a matrix-like object, a list will be returned
-with the following items:
-\describe{
-\item{\code{decontXcounts}:}{The decontaminated matrix. Values obtained
-from the variational inference procedure may be non-integer. However,
-integer counts can be obtained by rounding,
-e.g. \code{round(decontXcounts)}.}
-\item{\code{contamination}:}{Percentage of contamination in each cell.}
-\item{\code{estimates}:}{List of estimated parameters for each batch. If z
-was not supplied, then the UMAP coordinates used to generated cell
-cluster labels will also be stored here.}
-\item{\code{z}:}{Cell population/cluster labels used for analysis.}
-\item{\code{runParams}:}{List of arguments used in the function call.}
-}
+If \code{x} is a matrix-like object, a list is returned with the
+decontaminated matrix (\code{decontXcounts}), per-cell contamination
+(\code{contamination}), estimated parameters (\code{estimates}), cluster
+labels (\code{z}), and the run parameters (\code{runParams}).
 
-If \code{x} is a \linkS4class{SingleCellExperiment}, then the decontaminated
-counts will be stored as an assay and can be accessed with
-\code{decontXcounts(x)}. The contamination values and cluster labels
-will be stored in \code{colData(x)}. \code{estimates} and \code{runParams}
-will be stored in \code{metadata(x)$decontX}. The UMAPs used to generated
-cell cluster labels will be stored in
-\code{reducedDims} slot in \code{x}.
+If \code{x} is a \linkS4class{SingleCellExperiment}, the decontaminated
+counts are stored as the \code{decontXcounts} assay (accessed with
+\code{decontXcounts(x)}); contamination and cluster labels are stored in
+\code{colData(x)}; \code{estimates} and \code{runParams} are stored in
+\code{metadata(x)$decontX}; and the UMAPs used to generate cluster labels
+are stored in the \code{reducedDims} slot.
 }
 \description{
 Identifies contamination from factors such as ambient RNA
 in single cell genomic datasets.
+
+As of celda 1.23.0 the DecontX algorithm lives in the standalone
+\pkg{decontX} package. The functions here are thin wrappers that call
+\code{\link[decontX]{decontX}} so the implementation is maintained in a
+single place. The \pkg{decontX} package must be installed
+(\code{BiocManager::install("decontX")}); the wrappers accept and return
+exactly what \code{\link[decontX]{decontX}} does.
 }
 \examples{
 # Generate matrix with contamination
@@ -196,6 +81,10 @@ plotDecontXMarkerPercentage(sce, markers = s$markers,
 # Plot raw counts of indiviual markers genes before
 # and after decontamination
 plotDecontXMarkerExpression(sce, unlist(s$markers))
+}
+\seealso{
+\code{\link[decontX]{decontX}} in the \pkg{decontX} package for the
+full implementation and argument documentation.
 }
 \author{
 Shiyi Yang, Yuan Yin, Joshua Campbell

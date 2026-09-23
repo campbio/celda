@@ -1,3 +1,14 @@
+# celda v1.23.0 (2026-09-22)
+* Migrated the DecontX implementation to the standalone `decontX` Bioconductor
+  package. celda's `decontX()`, `decontXcounts()`, `plotDecontXContamination()`,
+  `plotDecontXMarkerExpression()`, `plotDecontXMarkerPercentage()`, and
+  `simulateContamination()` are now thin, backward-compatible wrappers around
+  the `decontX` package (added to `Suggests`).
+* Removed celda's DecontX C++ backend (`src/DecontX.cpp`) and dropped the
+  DecontX-only dependencies `MCMCprecision`, `scater`, `scran`, and
+  `DelayedArray` from `Imports` (`scater`/`scran` retained in `Suggests` for the
+  vignettes).
+
 # celda v1.22.1 (2024-10-29)
 * Fixed issue with enrichR not being loaded
 

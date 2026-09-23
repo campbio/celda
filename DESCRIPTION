@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.22.1
+Version: 1.23.0
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre")),
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
@@ -10,27 +10,28 @@ Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
 Description: Celda is a suite of Bayesian hierarchical models for
     clustering single-cell RNA-sequencing (scRNA-seq) data. It is able to
     perform "bi-clustering" and simultaneously cluster genes into gene modules
-    and cells into cell subpopulations. It also contains DecontX, a novel
-    Bayesian method to computationally estimate and remove RNA contamination in
-    individual cells without empty droplet information. A variety of scRNA-seq
-    data visualization functions is also included.
+    and cells into cell subpopulations. It also provides wrapper functions for
+    DecontX, a Bayesian method to computationally estimate and remove RNA
+    contamination in individual cells without empty droplet information, which
+    is implemented in the 'decontX' package. A variety of scRNA-seq data
+    visualization functions is also included.
 Depends: R (>= 4.0), SingleCellExperiment, Matrix
 VignetteBuilder: knitr
 Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         grDevices, graphics, matrixStats, doParallel, digest, methods,
         reshape2, S4Vectors, data.table,
         Rcpp, RcppEigen, uwot, enrichR, SummarizedExperiment,
-        MCMCprecision, ggrepel, Rtsne, withr,
-        scater (>= 1.14.4), scran, dbscan,
-        DelayedArray, stringr, ComplexHeatmap, gridExtra,
+        ggrepel, Rtsne, withr, dbscan,
+        stringr, ComplexHeatmap, gridExtra,
         circlize, dendextend, ggdendro, pROC
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
-        BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData
+        BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData,
+        decontX, scater, scran
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian, ImmunoOncology, DataImport
 NeedsCompilation: yes

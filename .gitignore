@@ -44,3 +44,4 @@ Meta
 .Rprofile
 renv/
 renv.lock
+tests/testthat/Rplots.pdf

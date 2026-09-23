@@ -16,3 +16,4 @@ sequentially: `000N-short-title.md`.
 | # | Title | Status | Date |
 |---|-------|--------|------|
 | 0001 | [Record architecture decisions](0001-record-architecture-decisions.md) | Accepted | 2026-09-18 |
+| 0002 | [Migrate DecontX implementation to the standalone decontX package](0002-migrate-decontx-to-standalone-package.md) | Accepted | 2026-09-22 |

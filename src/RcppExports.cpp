@@ -11,72 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// decontXEM
-Rcpp::List decontXEM(const Eigen::MappedSparseMatrix<double>& counts, const NumericVector& counts_colsums, const NumericVector& theta, const bool& estimate_eta, const NumericMatrix& eta, const NumericMatrix& phi, const IntegerVector& z, const bool& estimate_delta, const NumericVector& delta, const double& pseudocount);
-RcppExport SEXP _celda_decontXEM(SEXP countsSEXP, SEXP counts_colsumsSEXP, SEXP thetaSEXP, SEXP estimate_etaSEXP, SEXP etaSEXP, SEXP phiSEXP, SEXP zSEXP, SEXP estimate_deltaSEXP, SEXP deltaSEXP, SEXP pseudocountSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type counts_colsums(counts_colsumsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type estimate_eta(estimate_etaSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type phi(phiSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type z(zSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type estimate_delta(estimate_deltaSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type pseudocount(pseudocountSEXP);
-    rcpp_result_gen = Rcpp::wrap(decontXEM(counts, counts_colsums, theta, estimate_eta, eta, phi, z, estimate_delta, delta, pseudocount));
-    return rcpp_result_gen;
-END_RCPP
-}
-// decontXLogLik
-double decontXLogLik(const Eigen::MappedSparseMatrix<double>& counts, const NumericVector& theta, const NumericMatrix& eta, const NumericMatrix& phi, const IntegerVector& z, const double& pseudocount);
-RcppExport SEXP _celda_decontXLogLik(SEXP countsSEXP, SEXP thetaSEXP, SEXP etaSEXP, SEXP phiSEXP, SEXP zSEXP, SEXP pseudocountSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type phi(phiSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type z(zSEXP);
-    Rcpp::traits::input_parameter< const double& >::type pseudocount(pseudocountSEXP);
-    rcpp_result_gen = Rcpp::wrap(decontXLogLik(counts, theta, eta, phi, z, pseudocount));
-    return rcpp_result_gen;
-END_RCPP
-}
-// decontXInitialize
-Rcpp::List decontXInitialize(const Eigen::MappedSparseMatrix<double>& counts, const NumericVector& theta, const IntegerVector& z, const double& pseudocount);
-RcppExport SEXP _celda_decontXInitialize(SEXP countsSEXP, SEXP thetaSEXP, SEXP zSEXP, SEXP pseudocountSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type z(zSEXP);
-    Rcpp::traits::input_parameter< const double& >::type pseudocount(pseudocountSEXP);
-    rcpp_result_gen = Rcpp::wrap(decontXInitialize(counts, theta, z, pseudocount));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calculateNativeMatrix
-Eigen::SparseMatrix<double> calculateNativeMatrix(const Eigen::MappedSparseMatrix<double>& counts, const NumericVector& theta, const NumericMatrix& eta, const NumericMatrix& phi, const IntegerVector& z, const double& pseudocount);
-RcppExport SEXP _celda_calculateNativeMatrix(SEXP countsSEXP, SEXP thetaSEXP, SEXP etaSEXP, SEXP phiSEXP, SEXP zSEXP, SEXP pseudocountSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::MappedSparseMatrix<double>& >::type counts(countsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type phi(phiSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type z(zSEXP);
-    Rcpp::traits::input_parameter< const double& >::type pseudocount(pseudocountSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculateNativeMatrix(counts, theta, eta, phi, z, pseudocount));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cG_calcGibbsProbY_Simple
 NumericVector cG_calcGibbsProbY_Simple(const IntegerMatrix counts, IntegerVector nGbyTS, IntegerMatrix nTSbyC, IntegerVector nbyTS, IntegerVector nbyG, const IntegerVector y, const int L, const int index, const double gamma, const double beta, const double delta);
 RcppExport SEXP _celda_cG_calcGibbsProbY_Simple(SEXP countsSEXP, SEXP nGbyTSSEXP, SEXP nTSbyCSEXP, SEXP nbyTSSEXP, SEXP nbyGSEXP, SEXP ySEXP, SEXP LSEXP, SEXP indexSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP deltaSEXP) {
@@ -306,10 +240,6 @@ RcppExport SEXP _rowSumByGroupChange(SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP _rowSumByGroupChange_numeric(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_celda_decontXEM", (DL_FUNC) &_celda_decontXEM, 10},
-    {"_celda_decontXLogLik", (DL_FUNC) &_celda_decontXLogLik, 6},
-    {"_celda_decontXInitialize", (DL_FUNC) &_celda_decontXInitialize, 4},
-    {"_celda_calculateNativeMatrix", (DL_FUNC) &_celda_calculateNativeMatrix, 6},
     {"_celda_cG_calcGibbsProbY_Simple", (DL_FUNC) &_celda_cG_calcGibbsProbY_Simple, 11},
     {"_celda_cG_CalcGibbsProbY_ori", (DL_FUNC) &_celda_cG_CalcGibbsProbY_ori, 13},
     {"_celda_cG_CalcGibbsProbY_fastRow", (DL_FUNC) &_celda_cG_CalcGibbsProbY_fastRow, 13},
