@@ -1,3 +1,5 @@
+# Declare ggplot2 non-standard-evaluation variables used in plotDendro aes()
+utils::globalVariables(c("xend", "y", "label"))
 
 #' @title Generate marker decision tree from single-cell clustering output
 #' @description Create a decision tree that identifies gene markers for given
@@ -100,6 +102,8 @@
 #' plotDendro(DecTree)
 #' 
 #' @importFrom methods hasArg
+#' @importFrom stats complete.cases dendrapply model.matrix setNames
+#' @importFrom utils head
 #' @import dbscan
 #' @import uwot
 #' @import pROC

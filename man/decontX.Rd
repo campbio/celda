@@ -48,7 +48,7 @@ single place. The \pkg{decontX} package must be installed
 exactly what \code{\link[decontX]{decontX}} does.
 }
 \examples{
-\dontshow{if (requireNamespace("decontX", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("decontX", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 # Generate matrix with contamination
 s <- simulateContamination(seed = 12345)
 

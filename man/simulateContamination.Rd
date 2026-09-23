@@ -28,7 +28,7 @@ This function generates a list containing two count matrices --
  which must be installed.
 }
 \examples{
-\dontshow{if (requireNamespace("decontX", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("decontX", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 \dontshow{\}) # examplesIf}
 }

@@ -2,7 +2,8 @@ Package: celda
 Title: CEllular Latent Dirichlet Allocation
 Version: 1.23.0
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
-    role = c("aut", "cre")),
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0003-0780-8662")),
     person("Shiyi", "Yang", email="syyang@bu.edu", role = c("aut")),
     person("Zhe", "Wang", email="zhe@bu.edu", role = c("aut")),
     person("Sean", "Corbett", email = "scorbett@bu.edu", role = c("aut")),
@@ -31,8 +32,8 @@ LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.3.3
 URL: https://github.com/campbio/celda, https://www.camplab.net/celda
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian, ImmunoOncology, DataImport
 NeedsCompilation: yes
+RoxygenNote: 7.3.2
