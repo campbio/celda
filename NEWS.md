@@ -13,6 +13,9 @@
   and bumped the R dependency to `R (>= 4.6.0)` in DESCRIPTION; set
   `LazyData: false`; added labels to unlabeled vignette knitr chunks; and added
   the required `url` field to `_pkgdown.yml`.
+* Declared `Seurat` in `Suggests` and namespaced the `Seurat::Idents()` and
+  `Seurat::RunUMAP()` calls in `findMarkersTree()`'s Seurat-object input path,
+  clearing the remaining R CMD check "no visible global function" NOTE.
 
 # celda v1.22.1 (2024-10-29)
 * Fixed issue with enrichR not being loaded

@@ -144,7 +144,7 @@ findMarkersTree <- function(features,
     counts <- as.matrix(seurat@assays$RNA@data)
     
     #get class labels
-    class <- as.character(Idents(seurat))
+    class <- as.character(Seurat::Idents(seurat))
     
     #get feature labels
     featureLabels <- unlist(apply(seurat@reductions$pca@feature.loadings,1,
@@ -238,7 +238,7 @@ findMarkersTree <- function(features,
       
       #if seurat object then use seurat's UMAP parameters
       if(methods::hasArg(seurat)){
-        suppressMessages(seurat <- RunUMAP(seurat, dims = 1:ncol(seurat@reductions$pca@feature.loadings)))
+        suppressMessages(seurat <- Seurat::RunUMAP(seurat, dims = seq_len(ncol(seurat@reductions$pca@feature.loadings))))
         umap <- seurat@reductions$umap@cell.embeddings
       }
       else{

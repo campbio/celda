@@ -27,7 +27,7 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         circlize, dendextend, ggdendro, pROC
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData,
-        decontX, scater
+        decontX, scater, Seurat
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
