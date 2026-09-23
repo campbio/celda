@@ -10,6 +10,8 @@
 /*.tar.gz
 # Output files from R CMD check
 /*.Rcheck/
+# Output folder from BiocCheck
+/*.BiocCheck/
 # RStudio files
 .Rproj.user/
 # produced vignettes
