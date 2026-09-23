@@ -8,7 +8,7 @@
 A \linkS4class{SingleCellExperiment} object
 }
 \usage{
-sceCeldaG
+data(sceCeldaG)
 }
 \description{
 A \linkS4class{SingleCellExperiment} object containing the

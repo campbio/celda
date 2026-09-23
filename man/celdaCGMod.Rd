@@ -8,7 +8,7 @@
 A celda_CG object
 }
 \usage{
-celdaCGMod
+data(celdaCGMod)
 }
 \description{
 celda_CG model object generated from \code{celdaCGSim} using

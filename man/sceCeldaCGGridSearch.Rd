@@ -8,7 +8,7 @@
 A \linkS4class{SingleCellExperiment} object
 }
 \usage{
-sceCeldaCGGridSearch
+data(sceCeldaCGGridSearch)
 }
 \description{
 A \linkS4class{SingleCellExperiment} object containing the
