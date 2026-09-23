@@ -48,6 +48,7 @@ single place. The \pkg{decontX} package must be installed
 exactly what \code{\link[decontX]{decontX}} does.
 }
 \examples{
+\dontshow{if (requireNamespace("decontX", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 # Generate matrix with contamination
 s <- simulateContamination(seed = 12345)
 
@@ -81,6 +82,7 @@ plotDecontXMarkerPercentage(sce, markers = s$markers,
 # Plot raw counts of indiviual markers genes before
 # and after decontamination
 plotDecontXMarkerExpression(sce, unlist(s$markers))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[decontX]{decontX}} in the \pkg{decontX} package for the

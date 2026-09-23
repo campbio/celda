@@ -1189,7 +1189,7 @@ findMarkersTree <- function(features,
     }, features, class)
     
     # Unlist outList so is one list per 'treeLevel'
-    treeLevel <- unlist(outList, recursive = F)
+    treeLevel <- unlist(outList, recursive = FALSE)
     
     # Increase tree depth
     mDepth <- mDepth + 1
@@ -1285,7 +1285,7 @@ findMarkersTree <- function(features,
     group1Vec <- unlist(lapply(
       splitList, function(X) {
         X$group1Consensus
-      }), recursive = F)
+      }), recursive = FALSE)
     
     splitList <- lapply(
       unique(group1Vec),
@@ -1692,9 +1692,9 @@ findMarkersTree <- function(features,
   
   # Get Subsets of the feature matrix
   sRFeat <- features[as.logical(
-    rowSums(X[, splitVector, drop = F])), , drop = F]
+    rowSums(X[, splitVector, drop = FALSE])), , drop = FALSE]
   sLFeat <- features[as.logical(
-    rowSums(X[, !splitVector, drop = F])), , drop = F]
+    rowSums(X[, !splitVector, drop = FALSE])), , drop = FALSE]
   
   # Get pseudo-determinant of covariance matrices
   DETR <- .psdet(cov(sRFeat))
@@ -1756,7 +1756,7 @@ findMarkersTree <- function(features,
 .addAlternativeSplit <- function(tree, features, class) {
   
   # Unlist decsision tree
-  DecTree <- unlist(tree, recursive = F)
+  DecTree <- unlist(tree, recursive = FALSE)
   
   # Get leaves
   groupList <- lapply(DecTree, function(split) {
@@ -1813,13 +1813,13 @@ findMarkersTree <- function(features,
     
     # Subset class and features
     cSub <- droplevels(class[sampKeep])
-    fSub <- features[sampKeep, featKeep, drop = F]
+    fSub <- features[sampKeep, featKeep, drop = FALSE]
     
     # Get best alternative split
     altStats <- do.call(rbind, lapply(
       colnames(fSub),
       function(feat, splitMetric, features, class, cInt) {
-        Val <- splitMetric(feat, cSub, fSub, rPerf = F)
+        Val <- splitMetric(feat, cSub, fSub, rPerf = FALSE)
         
         # Get node1 classes
         node1Class <- class[features[, feat] > Val]
@@ -1852,7 +1852,7 @@ findMarkersTree <- function(features,
           feat = feat,
           val = Val,
           stat = HM,
-          stringsAsFactors = F))
+          stringsAsFactors = FALSE))
       }, .splitMetricModF1, fSub, cSub, group2only))
     altStats <- altStats[order(altStats$stat, decreasing = TRUE), ]
     
@@ -1947,7 +1947,7 @@ getDecisions <- function(rules, features) {
       if (sum(ruleClass$direction == 1) > 1){
         ruleClass <- ruleClass[order(
           ruleClass$direction
-          , decreasing = T), ]
+          , decreasing = TRUE), ]
         ruleClass <- ruleClass[c(which.max(
           ruleClass$stat[ruleClass$direction == 1]),
           which(ruleClass$direction == -1)), , drop = FALSE]
@@ -2006,7 +2006,7 @@ getDecisions <- function(rules, features) {
 .convertToDendrogram <- function(tree, class, splitNames = NULL) {
   
   # Unlist decision tree (one element for each split)
-  DecTree <- unlist(tree, recursive = F)
+  DecTree <- unlist(tree, recursive = FALSE)
   
   if(is.null(splitNames)){
     # Name split by gene and threshold
@@ -2288,7 +2288,7 @@ subUnderscore <- function(x, n) unlist(lapply(
               direction = rep(sdir, length(feat)),
               value = rep(val, each = length(groups)),
               stat = rep(stat, each = length(groups)),
-              stringsAsFactors = F
+              stringsAsFactors = FALSE
             )
           }))
           
@@ -2441,7 +2441,7 @@ plotDendro <- function(tree,
   
   # Remove duplicated labels
   dendSegsLabelled <- dendSegsLabelled[order(dendSegsLabelled$y,
-                                             decreasing = T), ]
+                                             decreasing = TRUE), ]
   dendSegsLabelled <- dendSegsLabelled[
     !duplicated(dendSegsLabelled[,
                                  c("xend", "x", "yend",
@@ -2760,7 +2760,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     
     #order the metaclusters by size
     colOrder <- data.frame(groupName = names(
-      sort(table(tree$metaclusterLabels), decreasing = T)), 
+      sort(table(tree$metaclusterLabels), decreasing = TRUE)), 
       groupIndex = seq_along(unique(tree$metaclusterLabels)))
     
     #order the markers for metaclusters
@@ -2913,7 +2913,7 @@ plotMarkerHeatmap <- function(tree, counts, branchPoint, featureLabels,
     
     #order the clusters such that up-regulated come first
     colOrder <- data.frame(groupName = unique(
-      branch[order(branch$direction, decreasing = T),"class"]),
+      branch[order(branch$direction, decreasing = TRUE),"class"]),
       groupIndex = seq_along(unique(branch$class)))
     
     #order the markers for clusters

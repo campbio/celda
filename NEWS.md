@@ -6,8 +6,13 @@
   the `decontX` package (added to `Suggests`).
 * Removed celda's DecontX C++ backend (`src/DecontX.cpp`) and dropped the
   DecontX-only dependencies `MCMCprecision`, `scater`, `scran`, and
-  `DelayedArray` from `Imports` (`scater`/`scran` retained in `Suggests` for the
+  `DelayedArray` from `Imports` (`scater` retained in `Suggests` for the
   vignettes).
+* Bioconductor release readiness: replaced `T`/`F` logical literals with
+  `TRUE`/`FALSE` in `findMarkersTree.R` (BiocCheck WARNING); added a `URL` field
+  and bumped the R dependency to `R (>= 4.6.0)` in DESCRIPTION; set
+  `LazyData: false`; added labels to unlabeled vignette knitr chunks; and added
+  the required `url` field to `_pkgdown.yml`.
 
 # celda v1.22.1 (2024-10-29)
 * Fixed issue with enrichR not being loaded

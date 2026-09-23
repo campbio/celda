@@ -260,7 +260,7 @@ seuratObj[["decontXcounts"]] <- CreateAssayObject(counts = decontXcounts(sce))
 
 # Session Information
 
-```{r}
+```{r sessionInfo}
 sessionInfo()
 ```
 

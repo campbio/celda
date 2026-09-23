@@ -28,7 +28,9 @@ This function generates a list containing two count matrices --
  which must be installed.
 }
 \examples{
+\dontshow{if (requireNamespace("decontX", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[decontX]{simulateContamination}}

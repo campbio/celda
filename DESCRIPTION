@@ -15,7 +15,7 @@ Description: Celda is a suite of Bayesian hierarchical models for
     contamination in individual cells without empty droplet information, which
     is implemented in the 'decontX' package. A variety of scRNA-seq data
     visualization functions is also included.
-Depends: R (>= 4.0), SingleCellExperiment, Matrix
+Depends: R (>= 4.6.0), SingleCellExperiment, Matrix
 VignetteBuilder: knitr
 Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         grDevices, graphics, matrixStats, doParallel, digest, methods,
@@ -26,12 +26,13 @@ Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
         circlize, dendextend, ggdendro, pROC
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData,
-        decontX, scater, scran
+        decontX, scater
 LinkingTo: Rcpp, RcppEigen
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 7.3.3
+URL: https://github.com/campbio/celda, https://www.camplab.net/celda
 BugReports: https://github.com/campbio/celda/issues
 biocViews: SingleCell, GeneExpression, Clustering, Sequencing, Bayesian, ImmunoOncology, DataImport
 NeedsCompilation: yes

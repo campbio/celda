@@ -96,7 +96,7 @@ table(rowData(simsce)$celda_feature_module)
 
 A simple heuristic feature selection is performed to reduce the size of features used for clustering. To speed up the process, only features with at least 3 counts in at least 3 cells are included in downstream clustering for this data. A subset `SingleCellExperiment` object with filtered features is stored in `altExp(simsce, "featureSubset")` slot by default.
 
-```{r, warning = FALSE, message = FALSE}
+```{r selectFeatures, warning = FALSE, message = FALSE}
 simsce <- selectFeatures(simsce)
 ```
 
@@ -169,13 +169,13 @@ In the previous example, the best `K` (the number of cell clusters) and `L` (the
 
 Functions `recursiveSplitModule` and `recursiveSplitCell` offer a fast method to generate a celda model with optimum `K` and `L`. First, `recursiveSplitModule` is used to determine the optimal `L`. `recursiveSplitModule` first splits features into however many modules are specified in `initialL`. The module labels are then recursively split in a way that would generate the highest log-likelihood, all the way up to `maxL`.
 
-```{r, message = FALSE}
+```{r recursiveSplitModule, message = FALSE}
 moduleSplit <- recursiveSplitModule(simsce, initialL = 2, maxL = 15)
 ```
 
 Perplexity is a statistical measure of how well a probability model can predict new data. Lower perplexity indicates a better model. The perplexity of each model can be visualized with `plotGridSearchPerplexity`. In general, visual inspection of the plot can be used to select the optimal number of modules (`L`) or cell populations (`K`) by identifying the "elbow" - where the rate of decrease in the perplexity starts to drop off.
 
-```{r}
+```{r plotGridSearchPerplexityModule}
 plotGridSearchPerplexity(moduleSplit)
 ```
 

@@ -38,7 +38,7 @@
 #' @seealso \code{\link[decontX]{decontX}} in the \pkg{decontX} package for the
 #' full implementation and argument documentation.
 #'
-#' @examples
+#' @examplesIf requireNamespace("decontX", quietly = TRUE)
 #' # Generate matrix with contamination
 #' s <- simulateContamination(seed = 12345)
 #'
@@ -194,7 +194,7 @@ setMethod(
 #' parameters used in the simulation.
 #' @author Shiyi Yang, Yuan Yin, Joshua Campbell
 #' @seealso \code{\link[decontX]{simulateContamination}}
-#' @examples
+#' @examplesIf requireNamespace("decontX", quietly = TRUE)
 #' contaminationSim <- simulateContamination(K = 3, delta = c(1, 10))
 #' @export
 simulateContamination <- function(...) {
