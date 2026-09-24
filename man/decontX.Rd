@@ -64,9 +64,6 @@ umap <- reducedDim(sce)
 plotDimReduceCluster(x = sce$decontX_clusters,
     dim1 = umap[, 1], dim2 = umap[, 2], )
 
-# The marker plots below are wrapped in \donttest{} as a temporary
-# workaround; see the maintainer note below the roxygen block in R/decon.R.
-\donttest{
 # Plot percentage of marker genes detected
 # in each cell cluster before decontamination
 s$markers
@@ -85,7 +82,6 @@ plotDecontXMarkerPercentage(sce, markers = s$markers,
 # Plot raw counts of indiviual markers genes before
 # and after decontamination
 plotDecontXMarkerExpression(sce, unlist(s$markers))
-}
 \dontshow{\}) # examplesIf}
 }
 \seealso{

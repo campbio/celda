@@ -54,9 +54,6 @@
 #' plotDimReduceCluster(x = sce$decontX_clusters,
 #'     dim1 = umap[, 1], dim2 = umap[, 2], )
 #'
-#' # The marker plots below are wrapped in \donttest{} as a temporary
-#' # workaround; see the maintainer note below the roxygen block in R/decon.R.
-#' \donttest{
 #' # Plot percentage of marker genes detected
 #' # in each cell cluster before decontamination
 #' s$markers
@@ -75,17 +72,7 @@
 #' # Plot raw counts of indiviual markers genes before
 #' # and after decontamination
 #' plotDecontXMarkerExpression(sce, unlist(s$markers))
-#' }
 NULL
-
-# TODO(decontX deprecation, added 2026-09-23): The decontX man-page example
-# above wraps the plotDecontXMarker*() calls in \donttest{} because they
-# currently surface a `scuttle::normalizeCounts` deprecation warning from
-# inside the decontX package (via scuttle::logNormCounts). R CMD check treats
-# that warning as an error, turning the R-CMD-check CI jobs red. REMOVE the
-# \donttest{} wrapper (and this note) once decontX no longer calls the
-# deprecated scuttle::normalizeCounts path, so these examples run under check
-# again.
 
 
 # Ensure the decontX package (which now owns the implementation) is available.
