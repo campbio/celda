@@ -9,25 +9,40 @@ on:
 name: R-CMD-check
 
 jobs:
+  # Decide which platforms to check based on the triggering event:
+  # - pull_request (development): Linux only, for a fast dev loop.
+  # - push to devel/master (incorporating a branch): full macOS/Windows/Linux
+  #   matrix, so cross-platform issues are caught when code lands.
+  matrix-prep:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo 'matrix={"config":[{"os":"ubuntu-latest","r":"release"},{"os":"macOS-latest","r":"release"},{"os":"windows-latest","r":"release"}]}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix={"config":[{"os":"ubuntu-latest","r":"release"}]}' >> "$GITHUB_OUTPUT"
+          fi
+
   R-CMD-check:
+    needs: matrix-prep
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
-      matrix:
-        config:
-          - {os: macOS-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
+      matrix: ${{ fromJSON(needs.matrix-prep.outputs.matrix) }}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v2 
+      - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-pandoc@v2
 
