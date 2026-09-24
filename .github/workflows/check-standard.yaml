@@ -35,7 +35,11 @@ jobs:
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          args: 'c("--no-manual", "--as-cran")'
+          # Plain R CMD check (no --as-cran): Bioconductor does not use CRAN's
+          # incoming checks, and --as-cran adds a spurious compilation-flags
+          # NOTE plus a CRAN/p3m index probe that 404s inside the container.
+          # Bioc-specific rules are covered by the separate BiocCheck workflow.
+          args: 'c("--no-manual")'
 
       - name: Show testthat output
         if: always()
