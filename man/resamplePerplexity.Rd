@@ -35,20 +35,20 @@ resamplePerplexity(
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
-\linkS4class{SingleCellExperiment} returned from \link{celdaGridSearch}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} returned from \link{celdaGridSearch}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Must contain
 "celda_grid_search" slot in \code{metadata(x)} if \code{x} is a
-\linkS4class{SingleCellExperiment} object.}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
 \item{celdaList}{Object of class 'celdaList'. Used only if \code{x} is a
 matrix object.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Default "counts".}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{doResampling}{Boolean. If \code{TRUE}, then each cell in the counts
@@ -64,7 +64,7 @@ a default value of \code{12345} is used. If \code{NULL}, no calls to
 \link[withr]{with_seed} are made.}
 }
 \value{
-A \linkS4class{SingleCellExperiment} object or
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object or
  \code{celdaList} object with a \code{perplexity}
  property, detailing the perplexity of all K/L combinations that appeared in
  the celdaList's models.

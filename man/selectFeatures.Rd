@@ -32,7 +32,7 @@ selectFeatures(
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
-\linkS4class{SingleCellExperiment}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
@@ -41,24 +41,24 @@ Rows represent features and columns represent cells.}
 \item{minCell}{Minimum number of cells required for feature selection.}
 
 \item{useAssay}{A string specifying the name of the
-\link{assay} slot to use. Default "counts".}
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
-A \linkS4class{SingleCellExperiment} object with a
- \code{altExpName} \link{altExp} slot. Function
- parameter settings are stored in the \link{metadata}
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with a
+ \code{altExpName} \link[SingleCellExperiment]{altExp} slot. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
  \code{"select_features"} slot.
 }
 \description{
 A simple heuristic feature selection procedure.
  Select features with at least \code{minCount} counts
- in at least \code{minCell} cells. A \linkS4class{SingleCellExperiment}
+ in at least \code{minCell} cells. A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
  object with subset features will be stored in the
- \link{altExp} slot with name \code{altExpName}.
- The name of the \code{assay} slot in \link{altExp}
+ \link[SingleCellExperiment]{altExp} slot with name \code{altExpName}.
+ The name of the \code{assay} slot in \link[SingleCellExperiment]{altExp}
  will be the same as \code{useAssay}.
 }
 \examples{

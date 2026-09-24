@@ -81,7 +81,7 @@ plotDimReduceFeature(
 )
 }
 \arguments{
-\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+\item{x}{Numeric matrix or a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}. Rows
 represent features and columns represent cells.}
 
@@ -89,13 +89,13 @@ represent features and columns represent cells.}
 
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
-\linkS4class{SingleCellExperiment} object. If \code{NULL}, then both
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. If \code{NULL}, then both
 \code{dim1} and \code{dim2} need to be set. Default \code{NULL}.}
 
 \item{displayName}{Character. The column name of
 \code{rowData(x)} that specifies the display names for
 the features. Default \code{NULL}, which displays the row names. Only works
-if \code{x} is a \linkS4class{SingleCellExperiment} object. Overwrites
+if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Overwrites
 \code{headers}.}
 
 \item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
@@ -113,11 +113,11 @@ rownames are used as labels. Otherwise, these headers are used to label
 the features. Only works if \code{displayName} is \code{NULL} and
 \code{exactMatch} is \code{FALSE}.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Default "counts".}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{normalize}{Logical. Whether to normalize the columns of `counts`.
@@ -134,7 +134,7 @@ and standard deviation of 1. Default \code{TRUE}.}
 and upper bounds for the data. This threshold is applied after row scaling.
 Set to NULL to disable. Default \code{c(-1,1)}.}
 
-\item{limits}{Passed to \link{scale_colour_gradient2}. The range
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
 of color scale.}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}

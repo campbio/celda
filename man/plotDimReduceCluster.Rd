@@ -51,16 +51,16 @@ plotDimReduceCluster(
 }
 \arguments{
 \item{x}{Integer vector of cell cluster labels or a
-\linkS4class{SingleCellExperiment} object
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 containing cluster labels for each cell in \code{"celda_cell_cluster"}
 column in \code{colData(x)}.}
 
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
@@ -102,7 +102,7 @@ Create a scatterplot for each row of a normalized
  data dimension reduction tool.
  The cells are colored by "celda_cell_cluster" column in
   \code{colData(altExp(x, altExpName))} if \code{x} is a
-  \linkS4class{SingleCellExperiment} object, or \code{x} if \code{x} is
+  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object, or \code{x} if \code{x} is
   a integer vector of cell cluster labels.
 }
 \examples{

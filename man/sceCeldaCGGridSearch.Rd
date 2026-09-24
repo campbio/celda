@@ -5,13 +5,13 @@
 \alias{sceCeldaCGGridSearch}
 \title{sceCeldaCGGridSearch}
 \format{
-A \linkS4class{SingleCellExperiment} object
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 }
 \usage{
 data(sceCeldaCGGridSearch)
 }
 \description{
-A \linkS4class{SingleCellExperiment} object containing the
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
  results of running \link{selectFeatures} and \link{celdaGridSearch} on
  \link{celdaCGSim}.
 }

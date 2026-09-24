@@ -21,15 +21,15 @@ clusterProbability(
 )
 }
 \arguments{
-\item{sce}{A \linkS4class{SingleCellExperiment} object returned by
+\item{sce}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{log}{Logical. If \code{FALSE}, then the normalized conditional

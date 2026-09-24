@@ -5,14 +5,14 @@
 #'  with the highest probability in the module
 #'  on the top to the lowest probability on the bottom.
 #' @param x A numeric \link{matrix} of counts or a
-#'  \linkS4class{SingleCellExperiment}
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells. Celda
 #'  results must be present under \code{metadata(altExp(x, altExpName))}.
-#' @param useAssay A string specifying which \link{assay}
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param modules Integer Vector. The featureModule(s) to display.
 #'  Multiple modules can be included in a vector. Default \code{NULL} which
@@ -67,7 +67,7 @@
 #'  \code{rowData(altExp(x, altExpName))} that specifies the display names for
 #'  the features. Default \code{NULL}, which displays the row names. Only works
 #'  if \code{showFeaturenames} is \code{TRUE} and \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object.
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param trim Numeric vector. Vector of length two that specifies the lower
 #'  and upper bounds for plotting the data. This threshold is applied
 #'  after row scaling. Set to NULL to disable. Default \code{c(-2,2)}.

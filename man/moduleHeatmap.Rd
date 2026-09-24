@@ -73,16 +73,16 @@ moduleHeatmap(
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
-\linkS4class{SingleCellExperiment}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Celda
 results must be present under \code{metadata(altExp(x, altExpName))}.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Default "counts".}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{modules}{Integer Vector. The featureModule(s) to display.
@@ -148,7 +148,7 @@ Default TRUE.}
 \code{rowData(altExp(x, altExpName))} that specifies the display names for
 the features. Default \code{NULL}, which displays the row names. Only works
 if \code{showFeaturenames} is \code{TRUE} and \code{x} is a
-\linkS4class{SingleCellExperiment} object.}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
 \item{trim}{Numeric vector. Vector of length two that specifies the lower
 and upper bounds for plotting the data. This threshold is applied

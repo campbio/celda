@@ -16,7 +16,7 @@ decontXcounts(object, ...) <- value
 \S4method{decontXcounts}{SingleCellExperiment}(object, ...) <- value
 }
 \arguments{
-\item{object}{A \linkS4class{SingleCellExperiment} object.}
+\item{object}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
 \item{...}{For the generic, further arguments to pass to each method.}
 
@@ -25,13 +25,13 @@ decontXcounts(object, ...) <- value
 \value{
 If getting, the assay from \code{object} with the name
 \code{decontXcounts} will be returned. If setting, a
-\linkS4class{SingleCellExperiment} object will be returned with
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object will be returned with
 \code{decontXcounts} listed in the \code{assay} slot.
 }
 \description{
 Gets or sets the decontaminated counts matrix from a
-a \linkS4class{SingleCellExperiment} object.
+a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 }
 \seealso{
-\code{\link{assay}} and \code{\link{assay<-}}
+\code{\link[SummarizedExperiment]{assay}} and \code{\link[SummarizedExperiment]{assay<-}}
 }

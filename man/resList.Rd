@@ -14,10 +14,10 @@ resList(x, altExpName = "featureSubset")
 \S4method{resList}{celdaList}(x)
 }
 \arguments{
-\item{x}{An object of class \linkS4class{SingleCellExperiment} or
+\item{x}{An object of class \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} or
 \code{celdaList}.}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{

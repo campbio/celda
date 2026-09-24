@@ -86,13 +86,13 @@
 #'  features. Module labels will also be updated during sampling and thus
 #'  may end up slightly different than \code{yInit}.
 #' @param x A numeric \link{matrix} of counts or a
-#'  \linkS4class{SingleCellExperiment}
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
 #' @param useAssay A string specifying the name of the
-#'  \link{assay}
+#'  \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
@@ -143,9 +143,9 @@
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
-#' @return A \linkS4class{SingleCellExperiment} object. Function
+#' @return A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
-#'  \link{metadata} \code{"celda_grid_search"} slot. The models in
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
 #'  the list will be of class \code{celda_C} if \code{yInit = NULL} or
 #'  \code{celda_CG} if \code{zInit} is set.
 #' @seealso \link{recursiveSplitModule} for recursive splitting of feature
@@ -902,13 +902,13 @@ setMethod("recursiveSplitCell",
 #'  procedure is much faster than randomly initializing each model with a
 #'  different L.
 #' @param x A numeric \link{matrix} of counts or a
-#'  \linkS4class{SingleCellExperiment}
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link{assay}
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \link[SingleCellExperiment]{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param initialL Integer. Initial number of modules.
 #' @param maxL Integer. Maximum number of modules.
@@ -954,9 +954,9 @@ setMethod("recursiveSplitCell",
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @param logfile Character. Messages will be redirected to a file named
 #'  "logfile". If NULL, messages will be printed to stdout.  Default NULL.
-#' @return A \linkS4class{SingleCellExperiment} object. Function
+#' @return A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Function
 #'  parameter settings and celda model results are stored in the
-#'  \link{metadata} \code{"celda_grid_search"} slot. The models in
+#'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
 #'  the list will be of class \link{celda_G} if \code{zInit = NULL} or
 #'  \link{celda_CG} if \code{zInit} is set.
 #' @seealso \code{recursiveSplitCell} for recursive splitting of cell

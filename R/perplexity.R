@@ -3,17 +3,17 @@
 #'  model can predict new data. Lower perplexity indicates a better model.
 #' @param x Can be one of
 #'  \itemize{
-#'  \item A \linkS4class{SingleCellExperiment} object returned by
+#'  \item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G} or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
 #'  \item Integer counts matrix. Rows represent features and columns represent
 #'  cells. This matrix should be the same as the one used to generate
 #'  \code{celdaMod}.}
-#' @param useAssay A string specifying which \link{assay}
-#'  slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #'  Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod Celda model object. Only works if \code{x} is an integer
 #'  counts matrix.
@@ -331,15 +331,15 @@ setMethod(
 #'  matrix, providing a distribution of perplexities and a better sense of the
 #'  quality of a given K/L choice.
 #' @param x A numeric \link{matrix} of counts or a
-#'  \linkS4class{SingleCellExperiment} returned from \link{celdaGridSearch}
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} returned from \link{celdaGridSearch}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells. Must contain
 #'  "celda_grid_search" slot in \code{metadata(x)} if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object.
-#' @param useAssay A string specifying which \link{assay}
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaList Object of class 'celdaList'. Used only if \code{x} is a
 #'  matrix object.
@@ -352,7 +352,7 @@ setMethod(
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of \code{12345} is used. If \code{NULL}, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @return A \linkS4class{SingleCellExperiment} object or
+#' @return A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object or
 #'  \code{celdaList} object with a \code{perplexity}
 #'  property, detailing the perplexity of all K/L combinations that appeared in
 #'  the celdaList's models.
@@ -503,16 +503,16 @@ setMethod("resamplePerplexity",
 #'  K/L combinations
 #' @param x Can be one of
 #' \itemize{
-#'  \item A \linkS4class{SingleCellExperiment} object returned from
+#'  \item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned from
 #'  \code{celdaGridSearch}, \code{recursiveSplitModule},
 #'  or \code{recursiveSplitCell}. Must contain a list named
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset". Only works if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object.
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @param alpha Numeric. Passed to \link{geom_jitter}. Opacity of the points.
+#' @param alpha Numeric. Passed to \link[ggplot2]{geom_jitter}. Opacity of the points.
 #'  Values of alpha range from 0 to 1, with lower values corresponding
 #'  to more transparent colors.
 #' @return A ggplot plot object showing perplexity as a function of clustering
@@ -780,15 +780,15 @@ setMethod("plotGridSearchPerplexity",
 #'  by unique K/L combinations. 
 #' @param x Can be one of
 #' \itemize{
-#'  \item A \linkS4class{SingleCellExperiment} object returned from
+#'  \item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned from
 #'  \code{celdaGridSearch}, \code{recursiveSplitModule},
 #'  or \code{recursiveSplitCell}. Must contain a list named
 #'  \code{"celda_grid_search"} in \code{metadata(x)}.
 #'  \item celdaList object.}
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sep Numeric. Breaks in the x axis of the resulting plot.
-#' @param alpha Numeric. Passed to \link{geom_jitter}. Opacity of the points.
+#' @param alpha Numeric. Passed to \link[ggplot2]{geom_jitter}. Opacity of the points.
 #'  Values of alpha range from 0 to 1, with lower values corresponding
 #'  to more transparent colors.
 #' @return A ggplot plot object showing perplexity differences as a function of

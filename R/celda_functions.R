@@ -134,10 +134,10 @@ normalizeCounts <- function(counts,
 #' @title Recode cell cluster labels
 #' @description Recode cell subpopulaton clusters using a mapping in the
 #'  \code{from} and \code{to} arguments.
-#' @param sce \linkS4class{SingleCellExperiment} object returned from
+#' @param sce \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned from
 #'  \link{celda_C} or \link{celda_CG}. Must contain column
 #'  \code{celda_cell_cluster} in
-#'  \code{\link{colData}(altExp(sce, altExpName))}.
+#'  \code{\link[SummarizedExperiment]{colData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
 #'  that correspond to the original cluster
@@ -145,9 +145,9 @@ normalizeCounts <- function(counts,
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
 #'  that correspond to the new cluster labels.
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
-#' @return \linkS4class{SingleCellExperiment} object with recoded cell
+#' @return \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with recoded cell
 #'  cluster labels.
 #' @examples
 #' data(sceCeldaCG)
@@ -194,18 +194,18 @@ recodeClusterZ <- function(sce, from, to, altExpName = "featureSubset") {
 #' @title Recode feature module labels
 #' @description Recode feature module clusters using a mapping in the
 #'  \code{from} and \code{to} arguments.
-#' @param sce \linkS4class{SingleCellExperiment} object returned from
+#' @param sce \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned from
 #'  \link{celda_G} or \link{celda_CG}. Must contain column
 #'  \code{celda_feature_module} in
-#'  \code{\link{rowData}(altExp(sce, altExpName))}.
+#'  \code{\link[SummarizedExperiment]{rowData}(altExp(sce, altExpName))}.
 #' @param from Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the original module labels
 #'  in \code{sce}.
 #' @param to Numeric vector. Unique values in the range of
 #'  \code{seq(celdaModules(sce))} that correspond to the new module labels.
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
-#' @return @return \linkS4class{SingleCellExperiment} object with recoded
+#' @return @return \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with recoded
 #'  feature module labels.
 #' @examples
 #' data(sceCeldaCG)
@@ -542,13 +542,13 @@ distinctColors <- function(n,
 #' @title Output a feature module table
 #' @description Creates a table that contains the list of features in
 #'  each feature module.
-#' @param sce A \linkS4class{SingleCellExperiment} object returned by
+#' @param sce A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 #'  \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link{assay}
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param displayName Character. The column name of
 #'  \code{rowData(sce)} that specifies the display names for
@@ -615,18 +615,18 @@ featureModuleTable <- function(sce,
 
 #' @title Retrieve row index for a set of features
 #' @description This will return indices of features among the rownames
-#' or rowData of a data.frame, matrix, or a \linkS4class{SummarizedExperiment}
-#' object including a \linkS4class{SingleCellExperiment}.
+#' or rowData of a data.frame, matrix, or a \link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}
+#' object including a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}.
 #' Partial matching (i.e. grepping) can be used by setting
 #' \code{exactMatch = FALSE}.
 #' @param features Character vector of feature names to find in the rows of
 #' \code{x}.
-#' @param x A data.frame, matrix, or \linkS4class{SingleCellExperiment}
+#' @param x A data.frame, matrix, or \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #' object to search.
 #' @param by Character. Where to search for features in \code{x}. If set to
 #' \code{"rownames"} then the features will be searched for among
 #' \code{rownames(x)}. If \code{x} inherits from class
-#' \linkS4class{SummarizedExperiment}, then \code{by} can be one of the
+#' \link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}, then \code{by} can be one of the
 #' fields in the row annotation data.frame (i.e. one of
 #' \code{colnames(rowData(x))}).
 #' @param exactMatch Boolean. Whether to only identify exact matches

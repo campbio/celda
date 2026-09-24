@@ -7,7 +7,7 @@
 plotDecontXMarkerPercentage(x, markers, ...)
 }
 \arguments{
-\item{x}{Either a \linkS4class{SingleCellExperiment} or
+\item{x}{Either a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} or
 a matrix-like object of counts.}
 
 \item{markers}{List. A named list indicating the marker genes

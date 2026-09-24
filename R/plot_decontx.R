@@ -9,7 +9,7 @@
 #' 1.23.0 this is a thin wrapper around
 #' \code{\link[decontX]{plotDecontXContamination}} in the \pkg{decontX} package,
 #' which must be installed.
-#' @param x Either a \linkS4class{SingleCellExperiment} with \code{decontX}
+#' @param x Either a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} with \code{decontX}
 #' results stored in \code{metadata(x)$decontX} or the result from running
 #' decontX on a count matrix.
 #' @param ... Additional arguments passed to
@@ -35,7 +35,7 @@ plotDecontXContamination <- function(x, ...) {
 #' decontamination with \code{\link{decontX}}. As of celda 1.23.0 this is a
 #' thin wrapper around \code{\link[decontX]{plotDecontXMarkerPercentage}} in the
 #' \pkg{decontX} package, which must be installed.
-#' @param x Either a \linkS4class{SingleCellExperiment} or
+#' @param x Either a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} or
 #' a matrix-like object of counts.
 #' @param markers List. A named list indicating the marker genes
 #' for each cell type of interest.
@@ -63,7 +63,7 @@ plotDecontXMarkerPercentage <- function(x, markers, ...) {
 #' \code{\link{decontX}}. As of celda 1.23.0 this is a thin wrapper around
 #' \code{\link[decontX]{plotDecontXMarkerExpression}} in the \pkg{decontX}
 #' package, which must be installed.
-#' @param x Either a \linkS4class{SingleCellExperiment} or
+#' @param x Either a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} or
 #' a matrix-like object of counts.
 #' @param markers List or vector of marker genes to plot.
 #' @param ... Additional arguments passed to

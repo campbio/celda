@@ -24,16 +24,16 @@ splitModule(
 )
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object
+\item{x}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
 \item{module}{Integer. The module to be split.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use for \code{x}. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default \code{"featureSubset"}.}
 
 \item{n}{Integer. How many modules should \code{module} be split into.
@@ -44,9 +44,9 @@ a default value of 12345 is used. If NULL, no calls to
 \link[withr]{with_seed} are made.}
 }
 \value{
-A updated \linkS4class{SingleCellExperiment} object with new
+A updated \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with new
  feature modules stored in column \code{celda_feature_module} in
- \code{\link{rowData}(x)}.
+ \code{\link[SummarizedExperiment]{rowData}(x)}.
 }
 \description{
 Manually select a celda feature module to split into 2 or

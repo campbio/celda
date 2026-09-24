@@ -13,7 +13,7 @@ decontX(x, ...)
 \S4method{decontX}{ANY}(x, ...)
 }
 \arguments{
-\item{x}{A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
+\item{x}{A numeric matrix of counts or a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 with the matrix located in the assay slot under \code{assayName}.
 This object should only contain filtered cells after cell calling.}
 
@@ -29,7 +29,7 @@ decontaminated matrix (\code{decontXcounts}), per-cell contamination
 (\code{contamination}), estimated parameters (\code{estimates}), cluster
 labels (\code{z}), and the run parameters (\code{runParams}).
 
-If \code{x} is a \linkS4class{SingleCellExperiment}, the decontaminated
+If \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}, the decontaminated
 counts are stored as the \code{decontXcounts} assay (accessed with
 \code{decontXcounts(x)}); contamination and cluster labels are stored in
 \code{colData(x)}; \code{estimates} and \code{runParams} are stored in

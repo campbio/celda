@@ -52,24 +52,24 @@ using older versions of \code{celda}.}
 \link{compareCountMatrix}.}
 
 \item{useAssay}{A string specifying the name of the
-\link{assay} slot to use. Default "counts".}
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
-A \linkS4class{SingleCellExperiment} object. Function
- parameter settings are stored in the \link{metadata}
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
  \code{"celda_parameters"} slot.
  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
- \link{colData} contain sample labels and celda cell
+ \link[SummarizedExperiment]{colData} contain sample labels and celda cell
  population clusters. Column \code{celda_feature_module} in
- \link{rowData} contain feature modules.
+ \link[SummarizedExperiment]{rowData} contain feature modules.
 }
 \description{
 Convert a old celda model object (\code{celda_C},
  \code{celda_G}, or \code{celda_CG} object) to a
- \linkS4class{SingleCellExperiment} object containing celda model
+ \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing celda model
  information in \code{metadata} slot. Counts matrix is stored in the
  \code{"counts"} assay slot in \code{assays}.
 }

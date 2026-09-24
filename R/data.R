@@ -101,10 +101,10 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 
 #' @title sceCeldaC
 #' @usage data(sceCeldaC)
-#' @description A \linkS4class{SingleCellExperiment} object containing the
+#' @description A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
 #'  results of running \link{selectFeatures} and \link{celda_C} on
 #'  \link{celdaCSim}.
-#' @format A \linkS4class{SingleCellExperiment} object
+#' @format A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #' @examples
 #' data(celdaCSim)
 #' sceCeldaC <- selectFeatures(celdaCSim$counts)
@@ -117,10 +117,10 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 
 #' @title sceCeldaG
 #' @usage data(sceCeldaG)
-#' @description A \linkS4class{SingleCellExperiment} object containing the
+#' @description A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
 #'  results of running \link{selectFeatures} and \link{celda_G} on
 #'  \link{celdaGSim}.
-#' @format A \linkS4class{SingleCellExperiment} object
+#' @format A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #' @examples
 #' data(celdaGSim)
 #' sceCeldaG <- selectFeatures(celdaGSim$counts)
@@ -130,10 +130,10 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 
 #' @title sceCeldaCG
 #' @usage data(sceCeldaCG)
-#' @description A \linkS4class{SingleCellExperiment} object containing the
+#' @description A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
 #'  results of running \link{selectFeatures} and \link{celda_CG} on
 #'  \link{celdaCGSim}.
-#' @format A \linkS4class{SingleCellExperiment} object
+#' @format A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #' @examples
 #' data(celdaCGSim)
 #' sceCeldaCG <- selectFeatures(celdaCGSim$counts)
@@ -147,10 +147,10 @@ availableModels <- c("celda_C", "celda_G", "celda_CG")
 
 #' @title sceCeldaCGGridSearch
 #' @usage data(sceCeldaCGGridSearch)
-#' @description A \linkS4class{SingleCellExperiment} object containing the
+#' @description A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
 #'  results of running \link{selectFeatures} and \link{celdaGridSearch} on
 #'  \link{celdaCGSim}.
-#' @format A \linkS4class{SingleCellExperiment} object
+#' @format A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #' @examples
 #' data(celdaCGSim)
 #' sce <- selectFeatures(celdaCGSim$counts)

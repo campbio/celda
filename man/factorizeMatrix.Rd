@@ -33,7 +33,7 @@ factorizeMatrix(
 \arguments{
 \item{x}{Can be one of
 \itemize{
-\item A \linkS4class{SingleCellExperiment} object returned by
+\item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 \link{celda_C}, \link{celda_G} or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot in \code{altExp(x, altExpName)}.
 Rows represent features and columns represent cells.
@@ -44,11 +44,11 @@ cells. This matrix should be the same as the one used to generate
 \item{celdaMod}{Celda model object. Only works if \code{x} is an integer
 counts matrix.}
 
-\item{useAssay}{A string specifying which \link{assay}
-slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
+slot to use if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{type}{Character vector. A vector containing one or more of "counts",

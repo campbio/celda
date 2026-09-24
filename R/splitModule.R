@@ -2,22 +2,22 @@
 #' @description Manually select a celda feature module to split into 2 or
 #'  more modules. Useful for splitting up modules that show divergent
 #'  expression of features in multiple cell clusters.
-#' @param x A \linkS4class{SingleCellExperiment} object
+#' @param x A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells.
 #' @param module Integer. The module to be split.
-#' @param useAssay A string specifying which \link{assay}
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use for \code{x}. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default \code{"featureSubset"}.
 #' @param n Integer. How many modules should \code{module} be split into.
 #'  Default \code{2}.
 #' @param seed Integer. Passed to \link[withr]{with_seed}. For reproducibility,
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
-#' @return A updated \linkS4class{SingleCellExperiment} object with new
+#' @return A updated \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with new
 #'  feature modules stored in column \code{celda_feature_module} in
-#'  \code{\link{rowData}(x)}.
+#'  \code{\link[SummarizedExperiment]{rowData}(x)}.
 #' @export
 setGeneric("splitModule",
     function(x,

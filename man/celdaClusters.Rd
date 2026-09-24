@@ -7,7 +7,7 @@
 \alias{celdaClusters<-}
 \alias{celdaClusters<-,SingleCellExperiment-method}
 \title{Get or set the cell cluster labels from a celda
- \linkS4class{SingleCellExperiment} object or celda model
+ \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object or celda model
  object.}
 \usage{
 celdaClusters(x, altExpName = "featureSubset")
@@ -23,24 +23,24 @@ celdaClusters(x, altExpName = "featureSubset") <- value
 \arguments{
 \item{x}{Can be one of
 \itemize{
-\item A \linkS4class{SingleCellExperiment} object returned by
+\item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 \link{celda_C}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot. The
-a \link{altExp} slot with name \code{altExpName} will
+a \link[SingleCellExperiment]{altExp} slot with name \code{altExpName} will
 be used. Rows represent features and columns represent cells.
 \item Celda model object.}}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{value}{Character vector of cell cluster labels for replacements. Works
-only if \code{x} is a \linkS4class{SingleCellExperiment} object.}
+only if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 }
 \value{
 One of
 \itemize{
  \item Character vector if \code{x} is a
- \linkS4class{SingleCellExperiment} object.
+ \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
  Contains cell cluster labels for each cell in x.
  \item List if \code{x} is a celda model object. Contains cell cluster
  labels (for celda_C and celdaCG

@@ -8,7 +8,7 @@
 #'   report for visualization and exploration of the \link{celda_CG} model
 #'   results. Some of the plotting and feature selection functions require the
 #'   installation of the Bioconductor package \code{singleCellTK}.
-#' @param sce A \linkS4class{SingleCellExperiment} with the matrix located in
+#' @param sce A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} with the matrix located in
 #'   the assay slot under \code{useAssay}. Rows represent features and columns
 #'   represent cells.
 #' @param L Integer. Final number of feature modules. See \code{celda_CG} for
@@ -17,9 +17,9 @@
 #'   more information.
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'   (column) in the count matrix.
-#' @param altExpName The name for the \link{altExp} slot to use. Default
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot to use. Default
 #'   \code{"featureSubset"}.
-#' @param useAssay A string specifying which \link{assay} slot to use. Default
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay} slot to use. Default
 #'   \code{"counts"}.
 #' @param initialL Integer. Minimum number of modules to try. See
 #'   \link{recursiveSplitModule} for more information. Defailt \code{10}.

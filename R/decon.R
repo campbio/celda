@@ -12,7 +12,7 @@
 #'
 #' @name decontX
 #'
-#' @param x A numeric matrix of counts or a \linkS4class{SingleCellExperiment}
+#' @param x A numeric matrix of counts or a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #' with the matrix located in the assay slot under \code{assayName}.
 #' This object should only contain filtered cells after cell calling.
 #' @param ... Additional arguments passed to \code{\link[decontX]{decontX}}
@@ -26,7 +26,7 @@
 #' (\code{contamination}), estimated parameters (\code{estimates}), cluster
 #' labels (\code{z}), and the run parameters (\code{runParams}).
 #'
-#' If \code{x} is a \linkS4class{SingleCellExperiment}, the decontaminated
+#' If \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}, the decontaminated
 #' counts are stored as the \code{decontXcounts} assay (accessed with
 #' \code{decontXcounts(x)}); contamination and cluster labels are stored in
 #' \code{colData(x)}; \code{estimates} and \code{runParams} are stored in
@@ -134,16 +134,16 @@ SET_FUN <- function(exprs_values, ...) {
 #' @title Get or set decontaminated counts matrix
 #'
 #' @description Gets or sets the decontaminated counts matrix from a
-#' a \linkS4class{SingleCellExperiment} object.
+#' a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @name decontXcounts
-#' @param object A \linkS4class{SingleCellExperiment} object.
+#' @param object A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param value A matrix to save as an assay called \code{decontXcounts}
 #' @param ... For the generic, further arguments to pass to each method.
 #' @return If getting, the assay from \code{object} with the name
 #' \code{decontXcounts} will be returned. If setting, a
-#' \linkS4class{SingleCellExperiment} object will be returned with
+#' \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object will be returned with
 #' \code{decontXcounts} listed in the \code{assay} slot.
-#' @seealso \code{\link{assay}} and \code{\link{assay<-}}
+#' @seealso \code{\link[SummarizedExperiment]{assay}} and \code{\link[SummarizedExperiment]{assay<-}}
 NULL
 
 #' @export

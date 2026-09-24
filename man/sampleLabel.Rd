@@ -7,7 +7,7 @@
 \alias{sampleLabel<-,SingleCellExperiment-method}
 \alias{sampleLabel,celdaModel-method}
 \title{Get or set sample labels from a celda
- \linkS4class{SingleCellExperiment}  object}
+ \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}  object}
 \usage{
 sampleLabel(x, altExpName = "featureSubset")
 
@@ -22,17 +22,17 @@ sampleLabel(x, altExpName = "featureSubset") <- value
 \arguments{
 \item{x}{Can be one of
 \itemize{
-\item A \linkS4class{SingleCellExperiment} object returned by
+\item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.
 \item A celda model object.}}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{value}{Character vector of sample labels for replacements. Works
-only is \code{x} is a \linkS4class{SingleCellExperiment} object.}
+only is \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 }
 \value{
 Character vector. Contains the sample labels provided at model

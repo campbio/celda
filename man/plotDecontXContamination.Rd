@@ -7,7 +7,7 @@
 plotDecontXContamination(x, ...)
 }
 \arguments{
-\item{x}{Either a \linkS4class{SingleCellExperiment} with \code{decontX}
+\item{x}{Either a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} with \code{decontX}
 results stored in \code{metadata(x)$decontX} or the result from running
 decontX on a count matrix.}
 
