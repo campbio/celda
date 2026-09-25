@@ -1,18 +1,18 @@
 #' @title Gene set enrichment
 #' @description Identify and return significantly-enriched terms for each gene
-#'  module in a Celda object or a \linkS4class{SingleCellExperiment} object.
+#'  module in a Celda object or a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #'  Performs gene set enrichment analysis for Celda
 #'  identified modules using the \link[enrichR]{enrichr}.
 #' @author Ahmed Youssef, Zhe Wang
 #' @param x A numeric \link{matrix} of counts or a
-#'  \linkS4class{SingleCellExperiment}
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells. Rownames of the
-#'  matrix or \linkS4class{SingleCellExperiment} object should be gene names.
-#' @param useAssay A string specifying which \link{assay}
+#'  matrix or \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object should be gene names.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaModel Celda object of class \code{celda_G} or \code{celda_CG}.
 #' @param databases Character vector. Name of reference database. Available

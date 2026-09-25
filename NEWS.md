@@ -1,3 +1,22 @@
+# celda v1.23.0 (2026-09-22)
+* Migrated the DecontX implementation to the standalone `decontX` Bioconductor
+  package. celda's `decontX()`, `decontXcounts()`, `plotDecontXContamination()`,
+  `plotDecontXMarkerExpression()`, `plotDecontXMarkerPercentage()`, and
+  `simulateContamination()` are now thin, backward-compatible wrappers around
+  the `decontX` package (added to `Suggests`).
+* Removed celda's DecontX C++ backend (`src/DecontX.cpp`) and dropped the
+  DecontX-only dependencies `MCMCprecision`, `scater`, `scran`, and
+  `DelayedArray` from `Imports` (`scater` retained in `Suggests` for the
+  vignettes).
+* Bioconductor release readiness: replaced `T`/`F` logical literals with
+  `TRUE`/`FALSE` in `findMarkersTree.R` (BiocCheck WARNING); added a `URL` field
+  and bumped the R dependency to `R (>= 4.6.0)` in DESCRIPTION; set
+  `LazyData: false`; added labels to unlabeled vignette knitr chunks; and added
+  the required `url` field to `_pkgdown.yml`.
+* Declared `Seurat` in `Suggests` and namespaced the `Seurat::Idents()` and
+  `Seurat::RunUMAP()` calls in `findMarkersTree()`'s Seurat-object input path,
+  clearing the remaining R CMD check "no visible global function" NOTE.
+
 # celda v1.22.1 (2024-10-29)
 * Fixed issue with enrichR not being loaded
 

@@ -8,7 +8,7 @@
 An object as returned from old celdaGridSearch()
 }
 \usage{
-celdaCGGridSearchRes
+data(celdaCGGridSearchRes)
 }
 \description{
 Example results of old celdaGridSearch on celdaCGSim

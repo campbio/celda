@@ -33,6 +33,13 @@ The package can be loaded using the `library` command.
 library(celda)
 ```
 
+> **Note:** As of celda 1.23.0, the DecontX algorithm is maintained in the
+> standalone [decontX](https://bioconductor.org/packages/decontX/) package. The
+> `decontX`, `plotDecontX*`, and `simulateContamination` functions in celda are
+> thin wrappers around it, so the [decontX](https://bioconductor.org/packages/decontX/)
+> package must be installed (`BiocManager::install("decontX")`) to run the code
+> in this vignette.
+
 # Importing data
 
 DecontX can take either a [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) object or a counts matrix as input. `decontX` will attempt to convert any input matrix to class `dgCMatrix` from package [Matrix](https://cran.r-project.org/web/packages/Matrix/index.html) before starting the analysis.

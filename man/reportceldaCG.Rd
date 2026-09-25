@@ -46,7 +46,7 @@ reportCeldaCGPlotResults(
 )
 }
 \arguments{
-\item{sce}{A \linkS4class{SingleCellExperiment} with the matrix located in
+\item{sce}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} with the matrix located in
 the assay slot under \code{useAssay}. Rows represent features and columns
 represent cells.}
 
@@ -59,10 +59,10 @@ more information.}
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix.}
 
-\item{altExpName}{The name for the \link{altExp} slot to use. Default
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot to use. Default
 \code{"featureSubset"}.}
 
-\item{useAssay}{A string specifying which \link{assay} slot to use. Default
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay} slot to use. Default
 \code{"counts"}.}
 
 \item{initialL}{Integer. Minimum number of modules to try. See

@@ -67,13 +67,13 @@ plotDimReduceGrid(
 )
 }
 \arguments{
-\item{x}{Numeric matrix or a \linkS4class{SingleCellExperiment} object
+\item{x}{Numeric matrix or a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 with the matrix located in the assay slot under \code{useAssay}. Each
 row of the matrix will be plotted as a separate facet.}
 
 \item{reducedDimName}{The name of the dimension reduction slot in
 \code{reducedDimNames(x)} if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Ignored if both \code{dim1} and
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Ignored if both \code{dim1} and
 \code{dim2} are set.}
 
 \item{dim1}{Numeric vector. Second dimension from data dimension
@@ -82,11 +82,11 @@ reduction output.}
 \item{dim2}{Numeric vector. Second dimension from data dimension
 reduction output.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Default "counts".}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{size}{Numeric. Sets size of point on plot. Default 1.}
@@ -95,7 +95,7 @@ to use. Default "featureSubset".}
 
 \item{ylab}{Character vector. Label for the y-axis. Default 'Dimension_2'.}
 
-\item{limits}{Passed to \link{scale_colour_gradient2}. The range
+\item{limits}{Passed to \link[ggplot2]{scale_colour_gradient2}. The range
 of color scale.}
 
 \item{colorLow}{Character. A color available from `colors()`.

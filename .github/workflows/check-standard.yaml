@@ -9,7 +9,55 @@ on:
 name: R-CMD-check
 
 jobs:
-  R-CMD-check:
+  # Linux check inside the Bioconductor devel container. This matches the
+  # environment Bioconductor's own build system uses and pulls dependencies
+  # prebuilt, so it is fast and reliable. Runs on every pull request and on
+  # pushes to devel/master.
+  linux-bioc:
+    runs-on: ubuntu-latest
+    container:
+      image: bioconductor/bioconductor_docker:devel
+
+    name: linux (bioc-devel)
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::rcmdcheck
+            url::https://cran.r-project.org/src/contrib/Archive/dbplyr/dbplyr_2.3.4.tar.gz
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          # Plain R CMD check (no --as-cran): Bioconductor does not use CRAN's
+          # incoming checks, and --as-cran adds a spurious compilation-flags
+          # NOTE plus a CRAN/p3m index probe that 404s inside the container.
+          # Bioc-specific rules are covered by the separate BiocCheck workflow.
+          args: 'c("--no-manual")'
+
+      - name: Show testthat output
+        if: always()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: linux-bioc-devel-results
+          path: check
+
+  # macOS and Windows run only on pull requests to devel/master, as a
+  # cross-platform gate before a branch is incorporated. They are skipped on
+  # direct pushes to devel/master (event_name == "push").
+  cross-platform:
+    if: github.event_name == 'pull_request'
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -20,14 +68,13 @@ jobs:
         config:
           - {os: macOS-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v2 
+      - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-pandoc@v2
 

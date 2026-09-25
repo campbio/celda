@@ -12,7 +12,7 @@ A matrix of simulated gene counts with 10 rows (genes) and 10
 \url{http://github.com/campbio/celda}
 }
 \usage{
-sampleCells
+data(sampleCells)
 }
 \description{
 A matrix of simulated gene counts.

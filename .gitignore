@@ -10,6 +10,8 @@
 /*.tar.gz
 # Output files from R CMD check
 /*.Rcheck/
+# Output folder from BiocCheck
+/*.BiocCheck/
 # RStudio files
 .Rproj.user/
 # produced vignettes
@@ -44,3 +46,4 @@ Meta
 .Rprofile
 renv/
 renv.lock
+tests/testthat/Rplots.pdf

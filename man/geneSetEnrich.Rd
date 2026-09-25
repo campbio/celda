@@ -27,18 +27,18 @@ geneSetEnrich(
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
-\linkS4class{SingleCellExperiment}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Rownames of the
-matrix or \linkS4class{SingleCellExperiment} object should be gene names.}
+matrix or \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object should be gene names.}
 
 \item{celdaModel}{Celda object of class \code{celda_G} or \code{celda_CG}.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
-\linkS4class{SingleCellExperiment} object. Default "counts".}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{databases}{Character vector. Name of reference database. Available
@@ -54,7 +54,7 @@ List of length 'L' where each member contains the significantly
 }
 \description{
 Identify and return significantly-enriched terms for each gene
- module in a Celda object or a \linkS4class{SingleCellExperiment} object.
+ module in a Celda object or a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
  Performs gene set enrichment analysis for Celda
  identified modules using the \link[enrichR]{enrichr}.
 }

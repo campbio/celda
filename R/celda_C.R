@@ -1,20 +1,20 @@
 #' @title Cell clustering with Celda
 #' @description Clusters the columns of a count matrix containing single-cell
 #'  data into K subpopulations. The
-#'  \code{useAssay} \link{assay} slot in
-#'  \code{altExpName} \link{altExp} slot will be used if
+#'  \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+#'  \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
 #'  it exists. Otherwise, the \code{useAssay}
-#'  \link{assay} slot in \code{x} will be used if
-#'  \code{x} is a \linkS4class{SingleCellExperiment} object.
-#' @param x A \linkS4class{SingleCellExperiment}
+#'  \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+#'  \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
+#' @param x A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #'  with the matrix located in the assay slot under \code{useAssay}.
 #'  Rows represent features and columns represent cells. Alternatively,
 #'  any matrix-like object that can be coerced to a sparse matrix of class
 #'  "dgCMatrix" can be directly used as input. The matrix will automatically be
-#'  converted to a \linkS4class{SingleCellExperiment} object.
+#'  converted to a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param useAssay A string specifying the name of the
-#'  \link{assay} slot to use. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix.
@@ -58,10 +58,10 @@
 #'  `logfile`. If NULL, messages will be printed to stdout.  Default NULL.
 #' @param verbose Logical. Whether to print log messages. Default TRUE.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object. Function
-#'  parameter settings are stored in the \link{metadata}
+#'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
 #'  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
-#'  \link{colData} contain sample labels and celda cell
+#'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters.
 #' @seealso \link{celda_G} for feature clustering and \link{celda_CG} for
 #'  simultaneous clustering of features and cells. \link{celdaGridSearch} can

@@ -15,7 +15,7 @@ selectBestModel(x, asList = FALSE, altExpName = "featureSubset")
 \arguments{
 \item{x}{Can be one of
 \itemize{
- \item A \linkS4class{SingleCellExperiment} object returned from
+ \item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned from
  \code{celdaGridSearch}, \code{recursiveSplitModule},
  or \code{recursiveSplitCell}. Must contain a list named
  \code{"celda_grid_search"} in \code{metadata(x)}.
@@ -26,21 +26,21 @@ best model as a
 \code{celdaList} object or not. If \code{FALSE}, return the best model as a
 corresponding celda model object.}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
 One of
 \itemize{
- \item A new \linkS4class{SingleCellExperiment} object containing
+ \item A new \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing
  one model with the best log-likelihood for each set of parameters in
  \code{metadata(x)}. If there is only one set of parameters,
- a new \linkS4class{SingleCellExperiment} object
+ a new \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
  with the matching model stored in the
- \link{metadata}
+ \link[S4Vectors]{metadata}
  \code{"celda_parameters"} slot will be returned. Otherwise, a new
- \linkS4class{SingleCellExperiment} object with the subset models stored
- in the \link{metadata}
+ \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with the subset models stored
+ in the \link[S4Vectors]{metadata}
  \code{"celda_grid_search"} slot will be returned.
  \item A new \code{celdaList} object containing one model with the best
  log-likelihood for each set of parameters. If only one set of parameters

@@ -13,11 +13,11 @@ logLikelihoodHistory(x, altExpName = "featureSubset")
 \S4method{logLikelihoodHistory}{celdaModel}(x)
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object
+\item{x}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 model object.}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{

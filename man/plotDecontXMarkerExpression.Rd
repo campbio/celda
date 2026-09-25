@@ -4,90 +4,34 @@
 \alias{plotDecontXMarkerExpression}
 \title{Plots expression of marker genes before and after decontamination}
 \usage{
-plotDecontXMarkerExpression(
-  x,
-  markers,
-  groupClusters = NULL,
-  assayName = c("counts", "decontXcounts"),
-  z = NULL,
-  exactMatch = TRUE,
-  by = "rownames",
-  log1p = FALSE,
-  ncol = NULL,
-  plotDots = FALSE,
-  dotSize = 0.1
-)
+plotDecontXMarkerExpression(x, markers, ...)
 }
 \arguments{
-\item{x}{Either a \linkS4class{SingleCellExperiment}
-or a matrix-like object of counts.}
+\item{x}{Either a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} or
+a matrix-like object of counts.}
 
-\item{markers}{Character Vector or List. A character vector
-or list of character vectors
-with the names of the marker genes of interest.}
+\item{markers}{List or vector of marker genes to plot.}
 
-\item{groupClusters}{List. A named list that allows
-cell clusters labels coded in
-\code{z} to be regrouped and renamed on the fly. For example,
-\code{list(Tcells=c(1, 2), Bcells=7)} would recode clusters
-1 and 2 to "Tcells"
-and cluster 7 to "Bcells". Note that if this is used, clusters
-in \code{z} not found
-in \code{groupClusters} will be excluded. Default \code{NULL}.}
-
-\item{assayName}{Character vector. Name(s) of the assay(s) to
-plot if \code{x} is a
-\linkS4class{SingleCellExperiment}. If more than one assay is listed, then
-side-by-side violin plots will be generated.
-Default \code{c("counts", "decontXcounts")}.}
-
-\item{z}{Character, Integer, or Vector.
-Indicates the cluster labels for each cell.
-If \code{x} is a \linkS4class{SingleCellExperiment} and \code{z = NULL},
-then the cluster labels from \code{\link{decontX}} will be retreived from the
-\code{colData} of \code{x} (i.e. \code{colData(x)$decontX_clusters}).
-If \code{z} is a single character or integer, then that column will be
-retrived from \code{colData} of \code{x}. (i.e. \code{colData(x)[,z]}).
-If \code{x} is a counts matrix, then \code{z} will need to be a vector
-the same length as the number of columns in \code{x} that indicate
-the cluster to which each cell belongs. Default \code{NULL}.}
-
-\item{exactMatch}{Boolean. Whether to only identify exact matches
-for the markers or to identify partial matches using \code{\link{grep}}.
-See \code{\link{retrieveFeatureIndex}} for more details.
-Default \code{TRUE}.}
-
-\item{by}{Character. Where to search for the markers if \code{x} is a
-\linkS4class{SingleCellExperiment}. See \code{\link{retrieveFeatureIndex}}
-for more details. If \code{x} is a matrix, then this must be set to
-\code{"rownames"}. Default \code{"rownames"}.}
-
-\item{log1p}{Boolean. Whether to apply the function \code{log1p} to the data
-before plotting. This function will add a pseudocount of 1 and then log
-transform the expression values. Default \code{FALSE}.}
-
-\item{ncol}{Integer. Number of columns to make in the plot.
-Default \code{NULL}.}
-
-\item{plotDots}{Boolean. If \code{TRUE}, the
-expression of features will be plotted as points in addition to the violin
-curve. Default \code{FALSE}.}
-
-\item{dotSize}{Numeric. Size of points if \code{plotDots = TRUE}.
-Default \code{0.1}.}
+\item{...}{Additional arguments passed to
+\code{\link[decontX]{plotDecontXMarkerExpression}} (for example
+\code{groupClusters}, \code{assayName}, \code{z}, \code{exactMatch},
+\code{by}, \code{log1p}, \code{ncol}, \code{plotDots}, \code{dotSize}).}
 }
 \value{
 Returns a \code{ggplot} object.
 }
 \description{
-Generates a violin plot that shows the counts of marker
-genes in cells across specific clusters or cell types. Can be used to view
-the expression of marker genes in different cell types before and after
-decontamination with \code{\link{decontX}}.
+Generates a violin plot that shows the expression of marker
+genes across clusters or cell types. Can be used to view the expression of
+marker genes in different cell types before and after decontamination with
+\code{\link{decontX}}. As of celda 1.23.0 this is a thin wrapper around
+\code{\link[decontX]{plotDecontXMarkerExpression}} in the \pkg{decontX}
+package, which must be installed.
 }
 \seealso{
-See \code{\link{decontX}} for a full example of how to estimate
-and plot contamination.
+\code{\link[decontX]{plotDecontXMarkerExpression}}. See
+\code{\link{decontX}} for a full example of how to estimate and plot
+contamination.
 }
 \author{
 Shiyi Yang, Joshua Campbell

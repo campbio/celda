@@ -5,13 +5,13 @@
 \alias{sceCeldaCG}
 \title{sceCeldaCG}
 \format{
-A \linkS4class{SingleCellExperiment} object
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 }
 \usage{
-sceCeldaCG
+data(sceCeldaCG)
 }
 \description{
-A \linkS4class{SingleCellExperiment} object containing the
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
  results of running \link{selectFeatures} and \link{celda_CG} on
  \link{celdaCGSim}.
 }

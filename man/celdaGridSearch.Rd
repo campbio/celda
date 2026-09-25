@@ -59,14 +59,14 @@ celdaGridSearch(
 }
 \arguments{
 \item{x}{A numeric \link{matrix} of counts or a
-\linkS4class{SingleCellExperiment}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells.}
 
 \item{useAssay}{A string specifying the name of the
-\link{assay} slot to use. Default "counts".}
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{model}{Celda model. Options available in \link{availableModels}.}
@@ -109,9 +109,9 @@ execution. Default TRUE.}
 and main process. Default "Celda".}
 }
 \value{
-A \linkS4class{SingleCellExperiment} object. Function
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Function
  parameter settings and celda model results are stored in the
- \link{metadata} \code{"celda_grid_search"} slot.
+ \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot.
 }
 \description{
 Run Celda with different combinations of parameters and

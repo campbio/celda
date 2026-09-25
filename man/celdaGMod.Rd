@@ -8,7 +8,7 @@
 A celda_G object
 }
 \usage{
-celdaGMod
+data(celdaGMod)
 }
 \description{
 Old celda_G results generated from celdaGsim

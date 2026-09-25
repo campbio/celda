@@ -1,18 +1,18 @@
 #' @title Calculate the Log-likelihood of a celda model
 #' @description Calculate the log-likelihood for cell population
 #'  and feature module cluster assignments on the count matrix, per celda model.
-#' @param x A \linkS4class{SingleCellExperiment} object returned by
+#' @param x A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link{assay}
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod celda model object. Ignored if \code{x} is a
-#'  \linkS4class{SingleCellExperiment} object.
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @return The log-likelihood of the cluster assignment for the
-#'  provided \linkS4class{SingleCellExperiment}.
+#'  provided \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}.
 #' @seealso `celda_C()` for clustering cells
 #' @export
 setGeneric("logLikelihood",
@@ -154,10 +154,10 @@ setMethod("logLikelihood", signature(x = "matrix", celdaMod = "celda_CG"),
 #' @title Get log-likelihood history
 #' @description Retrieves the complete log-likelihood from all iterations of
 #'  Gibbs sampling used to generate a celda model.
-#' @param x A \linkS4class{SingleCellExperiment} object
+#' @param x A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @return Numeric. The log-likelihood at each step of Gibbs sampling used to
 #'  generate the model.
@@ -204,10 +204,10 @@ setMethod("logLikelihoodHistory",
 #'  sampling used to generate a celdaModel.
 #' @return Numeric. The log-likelihood at the final step of Gibbs sampling used
 #'  to generate the model.
-#' @param x A \linkS4class{SingleCellExperiment} object
+#' @param x A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object
 #'  returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}, or a celda
 #'  model object.
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @export
 setGeneric("bestLogLikelihood",

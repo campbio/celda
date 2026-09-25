@@ -8,7 +8,7 @@
 A list of counts and properties as returned from old simulateCells()
 }
 \usage{
-celdaGSim
+data(celdaGSim)
 }
 \description{
 An old example simulated count matrix from the celda_G model.

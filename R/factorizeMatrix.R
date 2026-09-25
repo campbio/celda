@@ -4,17 +4,17 @@
 #'  feature in each cell population or each cell population in each sample.
 #' @param x Can be one of
 #'  \itemize{
-#'  \item A \linkS4class{SingleCellExperiment} object returned by
+#'  \item A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G} or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot in \code{altExp(x, altExpName)}.
 #'  Rows represent features and columns represent cells.
 #'  \item Integer counts matrix. Rows represent features and columns represent
 #'  cells. This matrix should be the same as the one used to generate
 #'  \code{celdaMod}.}
-#' @param useAssay A string specifying which \link{assay}
-#'  slot to use if \code{x} is a \linkS4class{SingleCellExperiment} object.
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
+#'  slot to use if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #'  Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param celdaMod Celda model object. Only works if \code{x} is an integer
 #'  counts matrix.

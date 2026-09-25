@@ -2,7 +2,7 @@
 #' @title Convert old celda model object to \code{SCE} object
 #' @description Convert a old celda model object (\code{celda_C},
 #'  \code{celda_G}, or \code{celda_CG} object) to a
-#'  \linkS4class{SingleCellExperiment} object containing celda model
+#'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing celda model
 #'  information in \code{metadata} slot. Counts matrix is stored in the
 #'  \code{"counts"} assay slot in \code{assays}.
 #' @param celdaModel A \code{celdaModel} or \code{celdaList} object generated
@@ -11,16 +11,16 @@
 #'  \code{celdaModel}. Dimensions and MD5 checksum will be checked by
 #'  \link{compareCountMatrix}.
 #' @param useAssay A string specifying the name of the
-#'  \link{assay} slot to use. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#'  \link[SummarizedExperiment]{assay} slot to use. Default "counts".
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
-#' @return A \linkS4class{SingleCellExperiment} object. Function
-#'  parameter settings are stored in the \link{metadata}
+#' @return A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Function
+#'  parameter settings are stored in the \link[S4Vectors]{metadata}
 #'  \code{"celda_parameters"} slot.
 #'  Columns \code{celda_sample_label} and \code{celda_cell_cluster} in
-#'  \link{colData} contain sample labels and celda cell
+#'  \link[SummarizedExperiment]{colData} contain sample labels and celda cell
 #'  population clusters. Column \code{celda_feature_module} in
-#'  \link{rowData} contain feature modules.
+#'  \link[SummarizedExperiment]{rowData} contain feature modules.
 #' @export
 setGeneric("celdatosce",
     function(celdaModel,

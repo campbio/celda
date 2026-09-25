@@ -50,10 +50,10 @@ celdaUmap(
 \item{sce}{A \link[SingleCellExperiment]{SingleCellExperiment} object
 returned by \link{celda_C}, \link{celda_G}, or \link{celda_CG}.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{maxCells}{Integer. Maximum number of cells to plot. Cells will be
@@ -121,7 +121,7 @@ be applied. Occurs after applying normalization and scale factor. Default
 \value{
 \code{sce} with UMAP coordinates
  (columns "celda_UMAP1" & "celda_UMAP2") added to
- \code{\link{reducedDim}(sce, "celda_UMAP")}.
+ \code{\link[SingleCellExperiment]{reducedDim}(sce, "celda_UMAP")}.
 }
 \description{
 Embeds cells in two dimensions using \link[uwot]{umap} based on

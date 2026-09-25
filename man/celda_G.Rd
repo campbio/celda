@@ -70,17 +70,17 @@ celda_G(
 )
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment}
+\item{x}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 with the matrix located in the assay slot under \code{useAssay}.
 Rows represent features and columns represent cells. Alternatively,
 any matrix-like object that can be coerced to a sparse matrix of class
 "dgCMatrix" can be directly used as input. The matrix will automatically be
-converted to a \linkS4class{SingleCellExperiment} object.}
+converted to a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
 \item{useAssay}{A string specifying the name of the
-\link{assay} slot to use. Default "counts".}
+\link[SummarizedExperiment]{assay} slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 
 \item{L}{Integer. Number of feature modules.}
@@ -135,19 +135,19 @@ Default NULL.}
 \item{verbose}{Logical. Whether to print log messages. Default TRUE.}
 }
 \value{
-A \linkS4class{SingleCellExperiment} object. Function
- parameter settings are stored in the \link{metadata}
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Function
+ parameter settings are stored in the \link[S4Vectors]{metadata}
  \code{"celda_parameters"} slot. Column \code{celda_feature_module} in
- \link{rowData} contains feature modules.
+ \link[SummarizedExperiment]{rowData} contains feature modules.
 }
 \description{
 Clusters the rows of a count matrix containing single-cell data
  into L modules. The
- \code{useAssay} \link{assay} slot in
- \code{altExpName} \link{altExp} slot will be used if
+ \code{useAssay} \link[SummarizedExperiment]{assay} slot in
+ \code{altExpName} \link[SingleCellExperiment]{altExp} slot will be used if
  it exists. Otherwise, the \code{useAssay}
- \link{assay} slot in \code{x} will be used if
- \code{x} is a \linkS4class{SingleCellExperiment} object.
+ \link[SummarizedExperiment]{assay} slot in \code{x} will be used if
+ \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 }
 \examples{
 data(celdaGSim)

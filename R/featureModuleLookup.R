@@ -2,13 +2,13 @@
 #' @description This function will output the corresponding feature module for
 #'  a specified vector of genes from a celda_CG or celda_G \code{celdaModel}.
 #'  \code{features} must match the rownames of \code{sce}.
-#' @param sce A \linkS4class{SingleCellExperiment} object returned by
+#' @param sce A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 #'  \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
 #' @param features Character vector. Identify feature modules for the specified
 #'  feature names. \code{feature} must match the rownames of \code{sce}.
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param exactMatch Logical. Whether to look for exactMatch of the gene name
 #'  within counts matrix. Default \code{TRUE}.

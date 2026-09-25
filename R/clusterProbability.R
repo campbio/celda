@@ -4,13 +4,13 @@
 #'  each subpopulation given all other cell cluster assignments and/or
 #'  each feature belonging to each module given all other feature cluster
 #'  assignments in a celda model.
-#' @param sce A \linkS4class{SingleCellExperiment} object returned by
+#' @param sce A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 #'  \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 #'  located in the \code{useAssay} assay slot.
 #'  Rows represent features and columns represent cells.
-#' @param useAssay A string specifying which \link{assay}
+#' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use. Default "counts".
-#' @param altExpName The name for the \link{altExp} slot
+#' @param altExpName The name for the \link[SingleCellExperiment]{altExp} slot
 #'  to use. Default "featureSubset".
 #' @param log Logical. If \code{FALSE}, then the normalized conditional
 #'  probabilities will be returned. If \code{TRUE}, then the unnormalized log

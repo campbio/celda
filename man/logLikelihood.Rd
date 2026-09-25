@@ -19,23 +19,23 @@ logLikelihood(x, celdaMod, useAssay = "counts", altExpName = "featureSubset")
 \S4method{logLikelihood}{matrix,celda_CG}(x, celdaMod)
 }
 \arguments{
-\item{x}{A \linkS4class{SingleCellExperiment} object returned by
+\item{x}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned by
 \link{celda_C}, \link{celda_G}, or \link{celda_CG}, with the matrix
 located in the \code{useAssay} assay slot.
 Rows represent features and columns represent cells.}
 
 \item{celdaMod}{celda model object. Ignored if \code{x} is a
-\linkS4class{SingleCellExperiment} object.}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
-\item{useAssay}{A string specifying which \link{assay}
+\item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use. Default "counts".}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
 The log-likelihood of the cluster assignment for the
- provided \linkS4class{SingleCellExperiment}.
+ provided \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}.
 }
 \description{
 Calculate the log-likelihood for cell population

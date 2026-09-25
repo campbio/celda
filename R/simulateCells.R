@@ -1,5 +1,5 @@
 #' @title Simulate count data from the celda generative models.
-#' @description This function generates a \linkS4class{SingleCellExperiment}
+#' @description This function generates a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 #'  containing a simulated counts matrix in the \code{"counts"} assay slot, as
 #'  well as various parameters used in the simulation which can be
 #'  useful for running celda and are stored in \code{metadata} slot. The user
@@ -41,13 +41,13 @@
 #'  \link[withr]{with_seed} are made.
 #' @return A \link[SingleCellExperiment]{SingleCellExperiment} object with
 #'  simulated count matrix stored in the "counts" assay slot. Function
-#'  parameter settings are stored in the \link{metadata} slot. For
+#'  parameter settings are stored in the \link[S4Vectors]{metadata} slot. For
 #'  \code{"celda_CG"} and \code{"celda_C"} models,
 #'  columns \code{celda_sample_label} and \code{celda_cell_cluster} in
-#'  \link{colData} contain simulated sample labels and
+#'  \link[SummarizedExperiment]{colData} contain simulated sample labels and
 #'  cell population clusters. For \code{"celda_CG"} and \code{"celda_G"}
 #'  models, column \code{celda_feature_module} in
-#'  \link{rowData} contains simulated gene modules.
+#'  \link[SummarizedExperiment]{rowData} contains simulated gene modules.
 #' @examples
 #' sce <- simulateCells()
 #' @export

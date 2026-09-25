@@ -7,10 +7,10 @@
 recodeClusterZ(sce, from, to, altExpName = "featureSubset")
 }
 \arguments{
-\item{sce}{\linkS4class{SingleCellExperiment} object returned from
+\item{sce}{\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object returned from
 \link{celda_C} or \link{celda_CG}. Must contain column
 \code{celda_cell_cluster} in
-\code{\link{colData}(altExp(sce, altExpName))}.}
+\code{\link[SummarizedExperiment]{colData}(altExp(sce, altExpName))}.}
 
 \item{from}{Numeric vector. Unique values in the range of
 \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
@@ -21,11 +21,11 @@ labels in \code{sce}.}
 \code{seq(max(as.integer(celdaClusters(sce, altExpName = altExpName))))}
 that correspond to the new cluster labels.}
 
-\item{altExpName}{The name for the \link{altExp} slot
+\item{altExpName}{The name for the \link[SingleCellExperiment]{altExp} slot
 to use. Default "featureSubset".}
 }
 \value{
-\linkS4class{SingleCellExperiment} object with recoded cell
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with recoded cell
  cluster labels.
 }
 \description{
