@@ -108,3 +108,17 @@ required to build from source.
 - pkgdown site (`docs/`) is currently committed directly to the main branch
   rather than served from `gh-pages`; see `dev/RELEASE.md` for the planned
   migration.
+
+### Examples, vignettes, and tutorials
+Many celda users are novice R users, so code in roxygen `@examples`,
+vignettes (`vignettes/`, `vignettes/articles/`), and tutorials must always be
+simple enough to copy, paste, and run without modification:
+- Walk through the workflow step by step, one operation per line, with
+  descriptively named intermediate objects.
+- Rely on default arguments; only set the parameters being demonstrated.
+- Avoid compact or clever idioms (long pipe chains, nested calls,
+  `lapply`/`do.call` tricks, ad hoc helper functions) where a few plain lines
+  would do.
+- Use bundled datasets or `simulateCells()` instead of downloading or
+  heavily pre-processing data.
+- Add a short comment explaining what each step does.
