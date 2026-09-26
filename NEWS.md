@@ -1,4 +1,8 @@
 # celda v1.23.0 (2026-09-22)
+* Replaced deprecated `ggplot2::aes_string()` (and `size` for line geoms) with
+  tidy-eval `aes()` / `linewidth` in the dimension-reduction, violin, and
+  perplexity plotting functions, silencing ggplot2 deprecation warnings
+  (#418).
 * Migrated the DecontX implementation to the standalone `decontX` Bioconductor
   package. celda's `decontX()`, `decontXcounts()`, `plotDecontXContamination()`,
   `plotDecontXMarkerExpression()`, `plotDecontXMarkerPercentage()`, and
