@@ -223,10 +223,10 @@ setMethod("plotDimReduceGrid",
     headers <- ggplot2::as_labeller(headers)
 
     g <- ggplot2::ggplot(m,
-                         ggplot2::aes_string(x = xlab, y = ylab)) +
+                         ggplot2::aes(x = .data[[xlab]], y = .data[[ylab]])) +
       ggplot2::geom_point(stat = "identity",
                           size = size,
-                          ggplot2::aes_string(color = m$Expression)) +
+                          ggplot2::aes(color = .data$Expression)) +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient2(
         limits = limits,
@@ -253,10 +253,10 @@ setMethod("plotDimReduceGrid",
     }
   } else {
     g <- ggplot2::ggplot(m,
-                         ggplot2::aes_string(x = xlab, y = ylab)) +
+                         ggplot2::aes(x = .data[[xlab]], y = .data[[ylab]])) +
       ggplot2::geom_point(stat = "identity",
                           size = size,
-                          ggplot2::aes_string(color = m$Expression)) +
+                          ggplot2::aes(color = .data$Expression)) +
       ggplot2::facet_wrap(~ facet) +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_gradient2(
@@ -869,10 +869,10 @@ setMethod("plotDimReduceModule",
   }
 
   g <-
-    ggplot2::ggplot(m, ggplot2::aes_string(x = xlab, y = ylab)) +
+    ggplot2::ggplot(m, ggplot2::aes(x = .data[[xlab]], y = .data[[ylab]])) +
     ggplot2::geom_point(stat = "identity",
                         size = size,
-                        ggplot2::aes_string(color = m$Expression)) +
+                        ggplot2::aes(color = .data$Expression)) +
     ggplot2::facet_wrap(~ facet) +
     ggplot2::theme_bw() +
     ggplot2::scale_colour_gradient(
@@ -1089,10 +1089,10 @@ setMethod("plotDimReduceCluster",
   }
 
   g <-
-    ggplot2::ggplot(df, ggplot2::aes_string(x = xlab, y = ylab)) +
+    ggplot2::ggplot(df, ggplot2::aes(x = .data[[xlab]], y = .data[[ylab]])) +
     ggplot2::geom_point(stat = "identity",
                         size = size,
-                        ggplot2::aes_string(color = "Cluster")) +
+                        ggplot2::aes(color = .data$Cluster)) +
     ggplot2::theme(
       panel.grid.major = ggplot2::element_blank(),
       panel.grid.minor = ggplot2::element_blank(),
@@ -1123,14 +1123,14 @@ setMethod("plotDimReduceCluster",
     colnames(centroid)[seq(2)] <- c(xlab, ylab)
     g <- g + ggplot2::geom_point(
       data = centroid,
-      mapping = ggplot2::aes_string(x = xlab,
-                                    y = ylab),
+      mapping = ggplot2::aes(x = .data[[xlab]],
+                             y = .data[[ylab]]),
       size = 0,
       alpha = 0
     ) +
       ggrepel::geom_text_repel(
         data = centroid,
-        mapping = ggplot2::aes_string(label = "Cluster"),
+        mapping = ggplot2::aes(label = .data$Cluster),
         size = labelSize,
         max.overlaps = Inf
       )
@@ -1290,9 +1290,9 @@ setMethod("plotCeldaViolin",
   colorPal <- distinctColors(length(unique(cluster)))
 
   p <- ggplot2::ggplot(m,
-                       ggplot2::aes_string(x = "Cluster",
-                                           y = "Expression",
-                                           fill = "Cluster")) +
+                       ggplot2::aes(x = .data$Cluster,
+                                    y = .data$Expression,
+                                    fill = .data$Cluster)) +
     ggplot2::facet_wrap(~ Feature) +
     ggplot2::geom_violin(trim = TRUE, scale = "width") +
     ggplot2::scale_fill_manual(values = colorPal) +

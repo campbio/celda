@@ -596,16 +596,16 @@ setMethod("plotGridSearchPerplexity",
         if (nlevels(df$L) > 1) {
             plot <- ggplot2::ggplot(
                 df,
-                ggplot2::aes_string(x = "K", y = "perplexity")
+                ggplot2::aes(x = .data$K, y = .data$perplexity)
             ) +
                 ggplot2::geom_jitter(
                     height = 0, width = 0.1, alpha = alpha,
-                    ggplot2::aes_string(color = "L")
+                    ggplot2::aes(color = .data$L)
                 ) +
                 ggplot2::scale_color_discrete(name = "L") +
-                ggplot2::geom_path(data = lMeansByK, ggplot2::aes_string(
-                    x = "K",
-                    y = "mean_perplexity", group = "L", color = "L"
+                ggplot2::geom_path(data = lMeansByK, ggplot2::aes(
+                    x = .data$K,
+                    y = .data$mean_perplexity, group = .data$L, color = .data$L
                 )) +
                 ggplot2::ylab("Perplexity") +
                 ggplot2::xlab("K") +
@@ -619,13 +619,13 @@ setMethod("plotGridSearchPerplexity",
         } else {
             plot <- ggplot2::ggplot(
                 df,
-                ggplot2::aes_string(x = "K", y = "perplexity")) +
+                ggplot2::aes(x = .data$K, y = .data$perplexity)) +
                 ggplot2::geom_jitter(height = 0, width = 0.1,
                     color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
-                ggplot2::geom_path(data = lMeansByK, ggplot2::aes_string(
-                    x = "K",
-                    y = "mean_perplexity", group = "L", color = "L"
+                ggplot2::geom_path(data = lMeansByK, ggplot2::aes(
+                    x = .data$K,
+                    y = .data$mean_perplexity, group = .data$L, color = .data$L
                 )) +
                 ggplot2::ylab("Perplexity") +
                 ggplot2::xlab("K") +
@@ -640,14 +640,14 @@ setMethod("plotGridSearchPerplexity",
     } else {
         plot <- ggplot2::ggplot(
             df,
-            ggplot2::aes_string(x = "L", y = "perplexity")) +
+            ggplot2::aes(x = .data$L, y = .data$perplexity)) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = lMeansByK,
-                ggplot2::aes_string(x = "L",
-                    y = "mean_perplexity",
-                    group = "K",
-                    color = "K")) +
+                ggplot2::aes(x = .data$L,
+                    y = .data$mean_perplexity,
+                    group = .data$K,
+                    color = .data$K)) +
             ggplot2::scale_color_manual(name = "K", values = "black") +
             ggplot2::ylab("Perplexity") +
             ggplot2::xlab("L") +
@@ -689,12 +689,12 @@ setMethod("plotGridSearchPerplexity",
     meansByK$K <- as.factor(meansByK$K)
 
     plot <-
-        ggplot2::ggplot(df, ggplot2::aes_string(x = "K", y = "perplexity")) +
+        ggplot2::ggplot(df, ggplot2::aes(x = .data$K, y = .data$perplexity)) +
         ggplot2::geom_jitter(height = 0, width = 0.1,
             color = "grey", alpha = alpha) +
         ggplot2::geom_path(
             data = meansByK,
-            ggplot2::aes_string(x = "K", y = "mean_perplexity", group = 1)
+            ggplot2::aes(x = .data$K, y = .data$mean_perplexity, group = 1)
         ) +
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("K") +
@@ -738,12 +738,12 @@ setMethod("plotGridSearchPerplexity",
     meansByL$L <- as.factor(meansByL$L)
 
     plot <-
-        ggplot2::ggplot(df, ggplot2::aes_string(x = "L", y = "perplexity")) +
+        ggplot2::ggplot(df, ggplot2::aes(x = .data$L, y = .data$perplexity)) +
         ggplot2::geom_jitter(height = 0, width = 0.1,
             color = "grey", alpha = alpha) +
         ggplot2::geom_path(
             data = meansByL,
-            ggplot2::aes_string(x = "L", y = "mean_perplexity", group = 1)
+            ggplot2::aes(x = .data$L, y = .data$mean_perplexity, group = 1)
         ) +
         ggplot2::ylab("Perplexity") +
         ggplot2::xlab("L") +
@@ -898,14 +898,14 @@ setMethod("plotRPC",
         
         if (nlevels(dt$L) > 1) {
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
-                ggplot2::aes_string(x = "K",
-                    y = "perpdiffK")) +
+                ggplot2::aes(x = .data$K,
+                    y = .data$perpdiffK)) +
                 ggplot2::geom_jitter(height = 0, width = 0.1, alpha = alpha,
-                    ggplot2::aes_string(color = "L")) +
+                    ggplot2::aes(color = .data$L)) +
                 ggplot2::scale_color_discrete(name = "L") +
                 ggplot2::geom_path(data = diffMeansByK,
-                    ggplot2::aes_string(x = "K", y = "spline", group = "L",
-                        color = "L"), size = 1) +
+                    ggplot2::aes(x = .data$K, y = .data$spline, group = .data$L,
+                        color = .data$L), linewidth = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
                 ggplot2::xlab("K") +
                 ggplot2::scale_x_discrete(
@@ -916,14 +916,14 @@ setMethod("plotRPC",
                     panel.grid.minor = ggplot2::element_blank())
         } else {
             plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
-                ggplot2::aes_string(x = "K",
-                    y = "perpdiffK")) +
+                ggplot2::aes(x = .data$K,
+                    y = .data$perpdiffK)) +
                 ggplot2::geom_jitter(height = 0, width = 0.1,
                     color = "grey", alpha = alpha) +
                 ggplot2::scale_color_manual(name = "L", values = "black") +
                 ggplot2::geom_path(data = diffMeansByK,
-                    ggplot2::aes_string(x = "K", y = "spline", group = "L",
-                        color = "L"), size = 1) +
+                    ggplot2::aes(x = .data$K, y = .data$spline, group = .data$L,
+                        color = .data$L), linewidth = 1) +
                 ggplot2::ylab("Rate of perplexity change") +
                 ggplot2::xlab("K") +
                 ggplot2::scale_x_discrete(
@@ -953,15 +953,16 @@ setMethod("plotRPC",
         diffMeansByL$spline <- stats::smooth.spline(diffMeansByL$meanperpdiffL)$y
         
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
-            ggplot2::aes_string(x = "L", y = "perpdiffL")) +
+            ggplot2::aes(x = .data$L, y = .data$perpdiffL)) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::scale_color_manual(name = "K", values = "black") +
             ggplot2::geom_path(
                 data = diffMeansByL,
-                ggplot2::aes_string(
-                    x = "L", y = "spline", group = "K", color = "K"),
-                size = 1) +
+                ggplot2::aes(
+                    x = .data$L, y = .data$spline,
+                    group = .data$K, color = .data$K),
+                linewidth = 1) +
             ggplot2::ylab("Rate of perplexity change") +
             ggplot2::xlab("L") +
             ggplot2::scale_x_discrete(
@@ -1015,13 +1016,13 @@ setMethod("plotRPC",
         diffMeansByK$spline <- stats::smooth.spline(diffMeansByK$meanperpdiffK)$y
         
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffK), ],
-            ggplot2::aes_string(x = "K",
-                y = "perpdiffK")) +
+            ggplot2::aes(x = .data$K,
+                y = .data$perpdiffK)) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByK,
-                ggplot2::aes_string(x = "K", y = "spline", group = 1),
-                size = 1) +
+                ggplot2::aes(x = .data$K, y = .data$spline, group = 1),
+                linewidth = 1) +
             ggplot2::ylab("Perplexity difference compared to previous K") +
             ggplot2::xlab("K") +
             ggplot2::scale_x_discrete(
@@ -1074,13 +1075,13 @@ setMethod("plotRPC",
         diffMeansByL$spline <- stats::smooth.spline(diffMeansByL$meanperpdiffL)$y
         
         plot <- ggplot2::ggplot(dt[!is.na(perpdiffL), ],
-            ggplot2::aes_string(x = "L",
-                y = "perpdiffL")) +
+            ggplot2::aes(x = .data$L,
+                y = .data$perpdiffL)) +
             ggplot2::geom_jitter(height = 0, width = 0.1,
                 color = "grey", alpha = alpha) +
             ggplot2::geom_path(data = diffMeansByL,
-                ggplot2::aes_string(x = "L", y = "spline", group = 1),
-                size = 1) +
+                ggplot2::aes(x = .data$L, y = .data$spline, group = 1),
+                linewidth = 1) +
             ggplot2::ylab("Perplexity difference compared to previous L") +
             ggplot2::xlab("L") +
             ggplot2::scale_x_discrete(
