@@ -1,124 +1,114 @@
-# AGENTS.md
+# celda: notes for coding agents
 
-## Campbell Lab Playbook (common across lab packages — v2.0, do not edit per-repo)
+The shared development standards (r-bioc-dev-standards) load automatically
+at session start in Claude Code. This file adds only what is specific to
+this package. Other agents (for example through GEMINI.md) don't get them
+automatically: read
+https://raw.githubusercontent.com/campbio/r-bioc-dev-standards/v1/standards.md
+(or the cached copy in `~/.cache/r-bioc-dev-standards/v1/`) before
+starting, and follow it; those agents also aren't bound by
+`.claude/settings.json`.
 
-### Common commands
-make test / make check / make bioccheck / make docs / make lint / make site
-(See Makefile for definitions. These are the ONLY sanctioned entry points.
-Run `make test` after every change; `make check` before opening a PR.)
+## About
 
-### Git and PR workflow
-- Branch from devel; all work lands via PR. Never push to devel or master.
-- Use plan mode for any non-trivial change.
-- Run /code-review before requesting human review.
-- Every user-facing change gets a NEWS.md entry.
-
-### Coding conventions
-- Style enforced by lintr/styler (config in repo); <= 80-char lines (BiocCheck).
-- roxygen2 owns man/ and NAMESPACE — NEVER hand-edit them.
-- Use accessor functions, not @ slot access, outside class definition files.
-
-### Documentation (pkgdown)
-- The website is GENERATED. Improve docs by editing roxygen comments, vignettes,
-  and _pkgdown.yml — never files under docs/ or the gh-pages branch.
-- New exported functions MUST be added to the _pkgdown.yml reference index;
-  verify with pkgdown::check_pkgdown().
-- To preview one changed page: pkgdown::build_article("<name>") or
-  build_reference_index(). NEVER run a full build_site() as verification —
-  full site builds/deploys are a local maintainer action (make site-deploy).
-- Files under vignettes/articles/ are pkgdown-only and NOT checked by
-  R CMD check — knit locally when you edit them.
-
-### Shiny app rules (packages with inst/shiny only)
-- The app contains NO analysis logic. Server code only wires inputs to
-  exported package functions and renders results. New app features are
-  implemented as tested, exported functions first.
-- Reactive logic is tested with shiny::testServer(); the golden path is
-  covered by a small shinytest2 smoke suite (make test-app).
-- UI changes are verified with a screenshot of the RUNNING app
-  (make app + browser), not just passing tests.
-- inst/ code is invisible to R CMD check — tests and lintr are the only
-  guards; inst/shiny is included in the lint paths.
-
-### Versioning and releases
-- Bioconductor even/odd x.y.z scheme; releases ~April and ~October.
-- Follow dev/RELEASE.md for the release checklist.
-
-### Safety rules
-- No structural refactors (file splits, DESCRIPTION dependency changes,
-  class redesign) without an approved ADR — propose via a GitHub issue.
-- Never commit secrets, tokens, or absolute local paths.
-- Architectural decisions are recorded in dev/adr/ (see template and index
-  there). Never store anything in docs/ — that is pkgdown build output.
-- Maintainer docs (release, roadmap, audits) live in dev/, not the root.
-
-## This package: celda
-
-### Project overview
 celda is a suite of Bayesian hierarchical models for clustering single-cell
-RNA-seq data, able to bi-cluster genes into modules and cells into
-subpopulations simultaneously. It also includes DecontX, a Bayesian method to
-estimate and remove ambient RNA contamination from droplet-based scRNA-seq
-without requiring empty-droplet data.
+RNA-seq data. It can bi-cluster genes into modules and cells into
+subpopulations at the same time. Distributed through Bioconductor. There is
+no Shiny app, so those parts of the standards don't apply.
 
-### Repository map
-- Class/model definitions: `R/aaa.R` (S4 classes), `R/celda_C.R`, `R/celda_G.R`,
-  `R/celda_CG.R`, `R/celdaGridSearch.R`, `R/decon.R`, `R/accessors.R`
+DecontX used to live here and now lives in the separate decontX package
+(ADR-0002). celda keeps a thin compatibility layer; see Related packages.
+
+## Layout
+
+- Class and model definitions: `R/aaa.R` (S4 classes), `R/celda_C.R`,
+  `R/celda_G.R`, `R/celda_CG.R`, `R/celdaGridSearch.R`, `R/accessors.R`
 - Plotting: `R/celda_heatmap.R`, `R/plotHeatmap.R`, `R/plot_dr.R`,
   `R/plot_decontx.R`, `R/moduleHeatmap.R`, `R/celdaProbabilityMap.R`,
   `R/semi_pheatmap.R`, `R/elbow.R`
 - Dimensionality reduction: `R/celdatSNE.R`, `R/celdaUMAP.R`
-- Data import/simulation: `R/simulateCells.R`, `R/celdatosce.R`, `R/data.R`,
-  precomputed objects in `data/*.rda`
-- Vignettes: `vignettes/celda.Rmd`, `vignettes/decontX.Rmd`,
-  `vignettes/articles/`; report templates in `inst/rmarkdown/`
+- Data import and simulation: `R/simulateCells.R`, `R/celdatosce.R`,
+  `R/data.R`, with precomputed objects in `data/*.rda`
+- `R/decon.R`: the DecontX compatibility layer (see Related packages).
+- `R/celda_functions.R`: shared helpers, some copied into decontX.
+- Compiled code (Rcpp/RcppEigen, `LinkingTo: Rcpp, RcppEigen`): the Gibbs
+  sampling helper `src/cG_calcGibbsProbY.cpp` and matrix utilities
+  (`eigenMatMultInt.cpp`, `matrixNorm.cpp`, `matrixSums.c`,
+  `matrixSumsSparse.cpp`, `perplexity.c`). `R/RcppExports.R` and
+  `src/RcppExports.cpp` are generated by `Rcpp::compileAttributes()`.
+- Vignettes: `vignettes/celda.Rmd`, `vignettes/decontX.Rmd`; pkgdown-only
+  articles in `vignettes/articles/`; report templates in `inst/rmarkdown/`.
+  R CMD check doesn't run the articles, so after editing one, ask the
+  developer to render it (`pkgdown::build_article("<name>")`); there's no
+  make target for it yet.
+- pkgdown output (`docs/`) is committed on the main branch rather than
+  served from `gh-pages`; see `dev/RELEASE.md` for the planned migration.
+  Treat it as generated.
+- Style: 2-space indentation, set in `.lintr`
+  (`indentation_linter(indent = 2L)`) to match the existing code. Converting
+  to 4 spaces would be a separate maintainer decision and its own PR.
+  Naming is camelCase.
 
-### Object model
-S4 classes rooted in `celdaModel` (slots: `params`, `names`, `completeLogLik`,
-`finalLogLik`, `clusters`), extended by `celda_C` (cell clustering, adds
-`sampleLabel`), `celda_G` (feature/gene-module clustering), and `celda_CG`
-(bi-clustering, `contains = c("celda_C", "celda_G")`). `celdaList` holds grid
-search results (`runParams`, `resList`, `countChecksum`, `perplexity`). Most
-user-facing workflows wrap results into a `SingleCellExperiment` rather than
-manipulating the S4 model objects directly. `R/accessors.R` defines get/set
-generics dispatching on either `SingleCellExperiment` or `celdaModel`
-(`celdaClusters`, `celdaModules`, `sampleLabel`, `params`, `matrixNames`,
-`runParams`, `resList`, `celdaModel`, `celdaPerplexity`, `countChecksum`).
-DecontX (`R/decon.R`) defines its own generics (`decontX`, `decontXcounts`)
-operating on `SingleCellExperiment` or matrix-like input. Use these accessors,
-not `@` slot access, outside the class definition files.
+## Object model
 
-### Environment setup
-R >= 4.0. `BiocManager::install("celda", dependencies = TRUE)`. Uses Rcpp/
-RcppEigen (`LinkingTo: Rcpp, RcppEigen` in DESCRIPTION) — a C++ toolchain is
-required to build from source.
+S4 classes rooted in `celdaModel` (slots: `params`, `names`,
+`completeLogLik`, `finalLogLik`, `clusters`):
+- `celda_C` (cell clustering, adds `sampleLabel`)
+- `celda_G` (feature/gene-module clustering)
+- `celda_CG` (bi-clustering, `contains = c("celda_C", "celda_G")`)
+- `celdaList` holds grid-search results (`runParams`, `resList`,
+  `countChecksum`, `perplexity`).
 
-### Package-specific notes
-- No Shiny app in this package (`inst/` only holds `rmarkdown/` report
-  templates) — the Shiny app rules above do not apply here.
-- Rcpp/C++ (`src/*.cpp`, `src/*.c`) backs the Gibbs sampling helpers
-  (`cG_calcGibbsProbY.cpp`), DecontX's EM/log-likelihood routines
-  (`DecontX.cpp`), and matrix utilities (`eigenMatMultInt.cpp`,
-  `matrixNorm.cpp`, `matrixSums.c`, `matrixSumsSparse.cpp`, `perplexity.c`).
-  `R/RcppExports.R` is auto-generated (`Rcpp::compileAttributes()`) — never
-  hand-edit it.
-- Slow tests: `tests/testthat/test-celda_G.R` and `test-celda_C.R` run real
-  Gibbs sampling via `simulateCells()` + `celdaGridSearch()` and are the
-  slowest part of `make test`.
-- pkgdown site (`docs/`) is currently committed directly to the main branch
-  rather than served from `gh-pages`; see `dev/RELEASE.md` for the planned
-  migration.
+Most user-facing workflows wrap results in a `SingleCellExperiment` rather
+than handling the model objects directly. `R/accessors.R` defines get/set
+generics that dispatch on either `SingleCellExperiment` or `celdaModel`:
+`celdaClusters`, `celdaModules`, `sampleLabel`, `params`, `matrixNames`,
+`runParams`, `resList`, `celdaModel`, `celdaPerplexity`, `countChecksum`.
+Use these, never `@`, outside the class definition files.
 
-### Examples, vignettes, and tutorials
-Many celda users are novice R users, so code in roxygen `@examples`,
-vignettes (`vignettes/`, `vignettes/articles/`), and tutorials must always be
-simple enough to copy, paste, and run without modification:
-- Walk through the workflow step by step, one operation per line, with
-  descriptively named intermediate objects.
-- Rely on default arguments; only set the parameters being demonstrated.
-- Avoid compact or clever idioms (long pipe chains, nested calls,
-  `lapply`/`do.call` tricks, ad hoc helper functions) where a few plain lines
-  would do.
-- Use bundled datasets or `simulateCells()` instead of downloading or
-  heavily pre-processing data.
-- Add a short comment explaining what each step does.
+## Tests
+
+- Slow: `tests/testthat/test-celda_G.R` and `test-celda_C.R` run real Gibbs
+  sampling through `simulateCells()` and `celdaGridSearch()`. Use
+  `make test-one` with other filters while developing.
+- `test-decon.R` exercises the DecontX compatibility layer and needs the
+  decontX package (in Suggests).
+- Lint backlog: `make lint` reports about 5,350 lints, mostly indentation
+  and line length in older code. Fix only lines you change.
+
+## Extra make targets
+
+The standard targets come from the shared `standards.mk` in
+r-bioc-dev-standards; the Makefile holds only these extras. Both are
+people only: the Makefile refuses them when run from Claude Code (it
+checks `CLAUDECODE`, in any position on the command line), and
+`.claude/settings.json` denies them too.
+
+- `site`: full local pkgdown build (slow).
+- `site-deploy`: builds the site and pushes it to `gh-pages`. Agents never
+  build or deploy the site.
+
+## Setup in a new worktree
+
+- Install every package in Suggests (`devtools::install_dev_deps()`);
+  `make check` and `make check-full` require them.
+- A C++ toolchain is needed to build from source. The first build compiles
+  `src/`, which takes a few minutes.
+
+## Related packages
+
+- **decontX:** celda's `R/decon.R` is a thin layer that forwards
+  `decontX()` and `simulateContamination()` to the decontX package
+  (decontX is in celda's Suggests), and defines the `decontXcounts()`
+  accessors. So changes to decontX's exported API or results affect celda.
+  decontX's `R/celda_functions.R` copies helpers from celda's
+  `R/celda_functions.R` (`.logMessages`, `.rdirichlet`,
+  `retrieveFeatureIndex`); keep the two copies from drifting, and
+  coordinate cross-package changes through issues. decontX's ADR-0003
+  plans to reverse the celda/decontX dependency.
+- **singleCellTK** imports celda (and reaches DecontX through it); check
+  it when celda's exported API changes.
+
+## Overrides
+
+None.

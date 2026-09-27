@@ -21,3 +21,4 @@ renv*
 ^dev$
 ^\.claude$
 ^\.lintr$
+^\.worktrees$
