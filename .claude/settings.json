@@ -1,41 +1,112 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(make test)",
+      "Bash(make test-one:*)",
       "Bash(make check)",
+      "Bash(make check-full)",
       "Bash(make bioccheck)",
       "Bash(make docs)",
       "Bash(make lint)",
-      "Bash(make build)",
-      "Bash(git status*)",
-      "Bash(git diff*)",
-      "Bash(git log*)",
-      "Bash(git show*)",
-      "Bash(git branch*)",
-      "Bash(git blame*)"
+      "Bash(make coverage)",
+      "Bash(make site-check)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch)",
+      "Bash(git branch -a)",
+      "Bash(git branch -r)",
+      "Bash(git branch -vv)",
+      "Bash(git branch --show-current)",
+      "Bash(git remote -v)",
+      "Bash(git fetch)",
+      "Bash(git fetch --all)",
+      "Bash(git fetch --all --prune)",
+      "Bash(git fetch origin)",
+      "Bash(git fetch upstream)",
+      "Bash(git fetch bioc)",
+      "Bash(git fetch campbio)",
+      "Bash(git switch -c:*)",
+      "Bash(git checkout -b:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git blame:*)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(gh pr create *)",
+      "Bash(git branch -d*)",
+      "Bash(git branch -D*)",
+      "Bash(git branch * -d*)",
+      "Bash(git branch * -D*)",
+      "Bash(git branch --delete*)",
+      "Bash(git branch * --delete*)"
     ],
     "deny": [
-      "Edit(man/**)",
-      "Write(man/**)",
+      "Bash(git push bioc:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push * +*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)",
+      "Bash(make * -*)",
+      "Bash(git switch -c * -*)",
+      "Bash(git checkout -b * -*)",
+      "Bash(git fetch * --upload-pack*)",
+      "Bash(git * --output*)",
+      "Bash(rm -r:*)",
+      "Bash(rm -rf:*)",
+      "Edit(man/*.Rd)",
+      "Write(man/*.Rd)",
       "Edit(NAMESPACE)",
       "Write(NAMESPACE)",
       "Edit(docs/**)",
       "Write(docs/**)",
-      "Bash(git push --force*)",
-      "Bash(git push -f*)",
-      "Bash(rm -rf*)",
-      "Bash(rm -r*)",
-      "Bash(git clean*)"
+      "Edit(R/RcppExports.R)",
+      "Write(R/RcppExports.R)",
+      "Edit(src/RcppExports.cpp)",
+      "Write(src/RcppExports.cpp)",
+      "Edit(R/stanmodels.R)",
+      "Write(R/stanmodels.R)",
+      "Edit(src/stanExports_*)",
+      "Write(src/stanExports_*)",
+      "Edit(.claude/settings.json)",
+      "Write(.claude/settings.json)",
+      "Edit(Makefile)",
+      "Write(Makefile)",
+      "Edit(dev/hooks/**)",
+      "Write(dev/hooks/**)",
+      "Edit(.lintr)",
+      "Write(.lintr)",
+      "Edit(~/.cache/r-bioc-dev-standards/**)",
+      "Write(~/.cache/r-bioc-dev-standards/**)",
+      "Bash(make site)",
+      "Bash(make site-deploy)"
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash dev/hooks/load-standards.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "bash dev/hooks/lint-changed.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\""
+            "command": "bash dev/hooks/lint-changed.sh"
           }
         ]
       }
