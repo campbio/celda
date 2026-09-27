@@ -8,6 +8,10 @@
 # Package settings. Uncomment to change a default (see standards.mk).
 # FORCE_SUGGESTS = FALSE
 
+# Extra targets that only people may run (list them in AGENTS.md too), e.g.
+# PEOPLE_ONLY := clean site-deploy
+PEOPLE_ONLY := site site-deploy
+
 # Guards. Settings allow `make test-one` with any arguments, so this file
 # checks them itself, before anything else runs:
 # - FILTER may contain only letters, digits, '.', '_' and '-' (checked on
@@ -15,7 +19,9 @@
 # - no other variable may be set on the command line, since one could
 #   change which makefile, shell, or source is used (environment variables
 #   still work, e.g. R_BIOC_STANDARDS_REF=<branch> make help);
-# - test-one must be the only target.
+# - test-one and article must be the only target;
+# - PEOPLE_ONLY targets refuse to run from Claude Code, which sets
+#   CLAUDECODE in its shell (settings deny rules match only exact commands).
 _ok_chars := a b c d e f g h i j k l m n o p q r s t u v w x y z \
   A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 . _ -
 _strip_ok = $(if $(2),$(call _strip_ok,$(subst $(firstword $(2)),,$(1)),$(wordlist 2,$(words $(2)),$(2))),$(1))
@@ -33,9 +39,14 @@ _cmdline_vars := $(filter-out FILTER,$(foreach v,$(.VARIABLES),$(if $(filter com
 ifneq ($(_cmdline_vars),)
   $(error Only FILTER=<pattern> may be set on the make command line (found: $(_cmdline_vars)); set other variables in the environment or above)
 endif
-ifneq ($(filter test-one,$(MAKECMDGOALS)),)
+ifneq ($(filter test-one article,$(MAKECMDGOALS)),)
   ifneq ($(words $(MAKECMDGOALS)),1)
-    $(error make test-one must be run on its own)
+    $(error make $(firstword $(filter test-one article,$(MAKECMDGOALS))) must be run on its own)
+  endif
+endif
+ifneq ($(CLAUDECODE),)
+  ifneq ($(filter $(PEOPLE_ONLY),$(MAKECMDGOALS)),)
+    $(error $(filter $(PEOPLE_ONLY),$(MAKECMDGOALS)) is for people only; ask the developer to run it)
   endif
 endif
 
@@ -53,16 +64,6 @@ $(STANDARDS_MK):
 # Extra targets for this package go below, each listed in AGENTS.md. To
 # replace a standard target, define it here; make warns that it overrides
 # the shared recipe.
-
-# People-only targets refuse to run under Claude Code, which sets CLAUDECODE
-# in its shell. This catches them in any position (`make docs site-deploy`),
-# which the settings deny rules can't.
-_people_only := site site-deploy
-ifneq ($(CLAUDECODE),)
-  ifneq ($(filter $(_people_only),$(MAKECMDGOALS)),)
-    $(error $(filter $(_people_only),$(MAKECMDGOALS)) is for people only; ask the developer to run it)
-  endif
-endif
 
 .PHONY: site site-deploy
 

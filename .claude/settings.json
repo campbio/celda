@@ -11,6 +11,7 @@
       "Bash(make lint)",
       "Bash(make coverage)",
       "Bash(make site-check)",
+      "Bash(make article:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
