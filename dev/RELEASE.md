@@ -1,47 +1,71 @@
 # Release checklist
 
-celda follows the Bioconductor release cadence: devel version bumps happen
-~April and ~October, with each Bioconductor release freeze shortly before.
-Bioconductor uses an even/odd `x.y.z` minor-version scheme — `y` is odd on
-`devel`, even on `release`; `z` resets to `0`/`1` at each bump (see
-`NEWS.md` for the pattern, e.g. the `1.22.0` "match Bioconductor release
-version" entries).
+celda follows the Bioconductor release cadence: releases in about April and
+October, each with a freeze shortly before. Versions are x.y.z: `y` is odd
+on `devel` and even on the release branch. Bioconductor makes the `y` bumps
+at release time; you bump `z` by 1 for every change that goes to the
+Bioconductor git server, and never change `x` or `y` yourself (see the
+shared standards).
+
+Remotes: `bioc` is `git@git.bioconductor.org:packages/celda.git`; the
+shared GitHub repo is `campbio` in the maintainer's clone. Check with
+`git remote -v` before any push.
 
 ## Before the freeze
 
-1. Sync with the upstream Bioconductor git mirror
-   (`git.bioconductor.org/packages/celda`) if not already configured as a
-   remote — celda currently only has the GitHub `origin` remote; add
-   `git.bioconductor.org` here when first needed.
-2. Confirm the `Version:` field in `DESCRIPTION` follows the even/odd rule for
-   the branch you're releasing.
-3. Run `make check` and `make bioccheck`; triage any WARNING/NOTE into a fix
-   plan (as GitHub issues, not silent fixes) — fix, re-run, PR the fixes.
-4. Update `NEWS.md` with a summary of user-facing changes since the last
-   release.
+1. Sync with Bioconductor: `git fetch bioc`, then on `devel`
+   `git merge bioc/devel`, and push `devel` to GitHub.
+2. Confirm the `Version:` field in `DESCRIPTION` follows the even/odd rule
+   for the branch.
+3. Run `make check-full` and `make bioccheck`. Triage every WARNING and NOTE
+   into GitHub issues rather than silent fixes, then fix, re-run, and open
+   PRs for the fixes. `make bioccheck` prints the tarball size; the limit is
+   10 MB (5 MB per file).
+4. Make sure `NEWS.md` on `devel` has a section for the version going into
+   the release, and that it's pushed to Bioconductor before the release
+   branch is cut, so the release branch has it too.
+
+## On release day
+
+Bioconductor creates `RELEASE_X_Y` and bumps devel. Bring both to GitHub,
+so the stable-branch sync (`.github/workflows/sync-stable.yaml`) can update
+`master` and tag the release:
+
+```bash
+git fetch bioc
+git checkout devel && git merge bioc/devel && git push campbio devel
+git push campbio bioc/RELEASE_X_Y:refs/heads/RELEASE_X_Y
+```
+
+The sync runs daily, or start it from the Actions tab. It picks up the new
+release once https://bioconductor.org/config.yaml names it.
 
 ## After release
 
 - Check the Bioconductor build report for celda
-  (bioconductor.org/checkResults) across all platforms.
+  (https://bioconductor.org/checkResults/) across all platforms. It is the
+  authoritative status; CI is only an early warning.
 - File issues for any platform-specific failures that CI didn't catch.
-- Bump the devel branch version per the even/odd scheme for the next cycle.
 
 ## pkgdown site
 
-celda's `docs/` is currently committed directly to the branch that GitHub
-Pages serves, rather than deployed to a dedicated `gh-pages` branch. Planned
-migration (do this deliberately, with a human at the keyboard — see
-`AGENTS.md` / the setup playbook for the full procedure):
+The public site is https://www.camplab.net/celda. `docs/` is committed on
+`master`, but this repo has no GitHub Pages site of its own (checked
+2026-09-27), so find out where camplab.net serves the site from before
+changing how `docs/` is published. Because `master` is now an automatic
+copy of the current release branch, `master`'s `docs/` is the release
+branch's `docs/`.
 
-1. Check the repo's Settings → Pages source.
+Planned migration to a `gh-pages` deployment (a maintainer action, with a
+person at the keyboard):
+
+1. Confirm where the site is served from today.
 2. `make site` locally and review the output.
-3. `pkgdown::deploy_to_branch()` to push the rendered site to `gh-pages`.
-4. Flip Settings → Pages source to `gh-pages` root; confirm the live URL
-   still serves (reversible by flipping back).
-5. Remove the committed `docs/` from the main branch and add `docs/` to
+3. `make site-deploy` to push the rendered site to `gh-pages`.
+4. Point the site at `gh-pages` and confirm the live URL still serves
+   (reversible by pointing it back).
+5. Remove the committed `docs/` from the branches and add `docs/` to
    `.gitignore` (leave prior history alone).
 
-CI only runs `pkgdown::check_pkgdown()` (structure check) — it never builds
-or deploys the site. Site deploys are a maintainer-only local action
-(`make site-deploy`).
+CI only runs `pkgdown::check_pkgdown()` (`make site-check` locally); it
+never builds or deploys the site.
