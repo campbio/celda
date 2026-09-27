@@ -1,3 +1,9 @@
+# celda v1.22.1 (2024-10-29)
+* Fixed issue with enrichR not being loaded
+
+# celda v1.22.0 (2024-10-29)
+* Update to match Bioconductor release version
+
 # celda v1.18.2 (2024-04-02)
 * Updated Makevar files to new CRAN standards 
 * Fixed unit test causing error

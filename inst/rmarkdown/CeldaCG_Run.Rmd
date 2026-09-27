@@ -101,7 +101,7 @@ varFilter <-
 if (varFilter) {
   temp.sce <- sce
   temp.sce <-
-    seuratFindHVG(inSCE = temp.sce, useAssay = useAssay)
+    runSeuratFindHVG(inSCE = temp.sce, useAssay = useAssay)
   o <-
     head(
       order(

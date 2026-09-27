@@ -70,6 +70,14 @@ setMethod("geneSetEnrich",
             modules[[i]] <- as.character(genes[genes$module == i, "gene"])
         }
 
+        # Need to attach enrichR so it can establish a connection
+        err <- tryCatch(
+          {
+            attachNamespace("enrichR")
+          },
+          error = function(e) {}
+        )
+        
         # enrichment analysis
         enrichment <- lapply(modules, function(module) {
             invisible(utils::capture.output(table <- enrichR::enrichr(

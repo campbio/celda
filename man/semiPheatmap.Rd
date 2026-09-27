@@ -314,13 +314,4 @@ dcols = stats::dist(t(test), method = "minkowski")
 pheatmap(test,
     clusteringDistanceRows = drows,
     clusteringDistanceCols = dcols)
-
-# Modify ordering of the clusters using clustering callback option
-callback = function(hc, mat) {
-    sv = svd(t(mat))$v[, 1]
-    dend = reorder(as.dendrogram(hc), wts = sv)
-    as.hclust(dend)
-}
-
-pheatmap(test, clusteringCallback = callback)
 }

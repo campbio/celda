@@ -52,7 +52,15 @@ reference:
   - subsetCeldaList  
   - appendCeldaList
   - celdaPerplexity
-  
+
+- title: Finding moudules that identify clusters using trees
+  desc: Using decision trees to find madules that uniquely identify each cluster from all other clusters
+  contents:
+  - findMarkersTree
+  - getDecisions
+  - plotDendro
+  - plotMarkerHeatmap
+
 - title: Miscellaneous celda functions 
   desc: Various functions for manipulation of celda results
   contents:
@@ -126,13 +134,13 @@ navbar:
     - icon: fa-home fa-lg
       href: https://www.camplab.net/celda
     - text: "Installation"
-      href: articles/articles/installation.html
+      href: articles/installation.html
     - text: "Vignettes"
       menu:
       - text: "Celda - Analysis of PBMC3K"
-        href: articles/articles/celda_pbmc3k.html
+        href: articles/celda_pbmc3k.html
       - text: "DecontX - Decontamination of PBMC4K"
-        href: articles/articles/decontX_pbmc4k.html
+        href: articles/decontX_pbmc4k.html
     - text: "Reference"
       href: reference/index.html
     - text: "News"
