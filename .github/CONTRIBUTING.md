@@ -14,6 +14,9 @@ contributors and AI coding agents working in this repo.
   (kept in sync by `.github/workflows/sync-stable.yaml`). Don't commit to
   it or open PRs against it; a check fails any PR aimed at it.
 - All changes land via pull request against `devel`, reviewed before merge.
+  The one exception is the maintainer's Bioconductor sync on release day,
+  which pushes `devel` and `RELEASE_X_Y` directly (see
+  [`dev/RELEASE.md`](../dev/RELEASE.md)).
 
 ## Workflow
 

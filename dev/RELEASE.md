@@ -54,7 +54,9 @@ The public site is https://www.camplab.net/celda. `docs/` is committed on
 2026-09-27), so find out where camplab.net serves the site from before
 changing how `docs/` is published. Because `master` is now an automatic
 copy of the current release branch, `master`'s `docs/` is the release
-branch's `docs/`.
+branch's `docs/`. The sync's first run replaces `master`'s old `docs/`
+(from 1.18.2) with the release branch's, so confirm where the site is
+served from before that first run.
 
 Planned migration to a `gh-pages` deployment (a maintainer action, with a
 person at the keyboard):
