@@ -1,5 +1,7 @@
 linters: linters_with_defaults(
     line_length_linter(80),
+    # celda is written with 2-space indentation; keep it (see AGENTS.md).
+    indentation_linter = indentation_linter(indent = 2L),
     object_name_linter(styles = c("camelCase", "symbols"))
   )
 exclusions: list(
