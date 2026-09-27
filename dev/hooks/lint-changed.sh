@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# Report-only lint on a single touched file. Does NOT rewrite anything —
-# auto-styling buries real changes in formatting diffs while there's a lint
-# backlog (see dev/AUDIT.md). Run manually with `make lint` for the full
-# package, or `styler::style_file()` yourself if you want a file reformatted.
-set -euo pipefail
+# PostToolUse hook stub for Claude Code. It runs the shared lint hook, which
+# dev/hooks/load-standards.sh downloads at each session start. Does nothing
+# if no copy has been downloaded yet.
+#
+# Copy this file to dev/hooks/lint-changed.sh in each package and register
+# it in .claude/settings.json (see ADOPTING.md).
+# Source: https://github.com/campbio/r-bioc-dev-standards
 
-file="${1:-${CLAUDE_TOOL_INPUT_FILE_PATH:-}}"
-
-case "$file" in
-  *.R)
-    Rscript -e "lintr::lint('$file')"
-    ;;
-esac
+hook="${XDG_CACHE_HOME:-$HOME/.cache}/r-bioc-dev-standards/${R_BIOC_STANDARDS_REF:-v1}/lint-changed.sh"
+[ -f "$hook" ] && exec bash "$hook"
+exit 0
