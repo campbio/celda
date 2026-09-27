@@ -54,10 +54,20 @@ $(STANDARDS_MK):
 # replace a standard target, define it here; make warns that it overrides
 # the shared recipe.
 
+# People-only targets refuse to run under Claude Code, which sets CLAUDECODE
+# in its shell. This catches them in any position (`make docs site-deploy`),
+# which the settings deny rules can't.
+_people_only := site site-deploy
+ifneq ($(CLAUDECODE),)
+  ifneq ($(filter $(_people_only),$(MAKECMDGOALS)),)
+    $(error $(filter $(_people_only),$(MAKECMDGOALS)) is for people only; ask the developer to run it)
+  endif
+endif
+
 .PHONY: site site-deploy
 
 site:  ## Full local pkgdown build (people only; slow)
 	Rscript -e 'pkgdown::build_site()'
 
-site-deploy:  ## Maintainer action: build locally, push to gh-pages (people only)
-	Rscript -e 'pkgdown::deploy_to_branch()'
+site-deploy:  ## Build and push the site to gh-pages on campbio (PKGDOWN_REMOTE overrides; people only)
+	Rscript -e 'pkgdown::deploy_to_branch(remote = Sys.getenv("PKGDOWN_REMOTE", "campbio"))'
