@@ -25,14 +25,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   r: 'release'}
+          - {os: ubuntu-latest, r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      # Check against Bioconductor devel, as the Bioconductor builders do.
+      # Update at each Bioconductor release (see ADR 0004).
+      R_BIOC_VERSION: "3.24"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -46,19 +49,11 @@ jobs:
         with:
           extra-packages: |
             any::rcmdcheck
+            bioc::BiocCheck
             url::https://cran.r-project.org/src/contrib/Archive/dbplyr/dbplyr_2.3.4.tar.gz
 
-      - name: Install XQuartz on macOS
-        if: runner.os == 'macOS'
-        run: brew install xquartz --cask
-
-      - name: Install fftw3 on macOS
-        if: runner.os == 'macOS'
-        run: brew install fftw
-          
       - name: Run BiocCheck
         run: |
-          BiocManager::install("BiocCheck")
           library(BiocCheck)
           BiocCheck::BiocCheck(".",
               `quit-with-status` = TRUE,
