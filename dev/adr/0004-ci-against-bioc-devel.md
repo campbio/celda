@@ -1,8 +1,8 @@
 # 4. Run GitHub CI against Bioconductor devel
 
-Status: Proposed
+Status: Accepted
 
-Date: 2026-10-09. Needs the maintainer's approval.
+Approved by the maintainer (2026-10-09).
 
 ## Context
 
