@@ -1,3 +1,11 @@
+# celda v1.29.2 (2026-10-09)
+* Fixed the `decontX` vignette, which failed to build on Bioconductor devel
+  with "'groupClusters' not found in 'z': 6". It hard-coded cluster numbers
+  from decontX's heuristic clustering, which differ between decontX versions
+  and platforms. The vignette now maps each cell type to the cluster where its
+  marker genes are detected most often, as the decontX package's own vignette
+  does.
+
 # celda v1.23.0 (2026-09-22)
 * Replaced deprecated `ggplot2::aes_string()` (and `size` for line geoms) with
   tidy-eval `aes()` / `linewidth` in the dimension-reduction, violin, and

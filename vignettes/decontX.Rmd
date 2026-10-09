@@ -131,12 +131,45 @@ plotDimReduceFeature(as.matrix(logcounts(sce)),
 ## Barplot of markers detected in cell clusters
 The percetage of cells within a cluster that have detectable expression of marker genes can be displayed in a barplot. Markers for cell types need to be supplied in a named list. First, the detection of marker genes in the original `counts` assay is shown:
 
-```{r barplotCounts}
+```{r markers}
 markers <- list(Tcell_Markers = c("CD3E", "CD3D"),
     Bcell_Markers = c("CD79A", "CD79B", "MS4A1"),
     Monocyte_Markers = c("S100A8", "S100A9", "LYZ"),
     NKcell_Markers = "GNLY")
-cellTypeMappings <- list(Tcells = 2, Bcells = 5, Monocytes = 1, NKcells = 6)
+```
+
+To label the plots by cell type instead of by cluster number, the barplot
+functions take a `groupClusters` argument: a named list that maps each cell
+type to the cluster number(s) it corresponds to. The cluster numbers assigned
+by the heuristic clustering can differ between decontX versions and platforms,
+so here we work out the mapping from the marker genes. The resulting
+`cellTypeMappings` looks like this:
+
+```{r deriveMapping, echo=FALSE}
+# The cluster numbers are not stable across decontX versions/platforms, so
+# rather than hardcoding them we assign each cell type to the cluster in which
+# its marker genes are detected most frequently.
+cellTypeMappings <- lapply(markers, function(genes) {
+    detectionRate <- tapply(colMeans(counts(sce)[genes, , drop = FALSE] > 0),
+        sce$decontX_clusters, mean)
+    as.integer(names(which.max(detectionRate)))
+})
+names(cellTypeMappings) <- c("Tcells", "Bcells", "Monocytes", "NKcells")
+```
+
+```{r showMapping}
+cellTypeMappings
+```
+
+You can also build this list by hand: inspect `sce$decontX_clusters`, decide
+which cluster corresponds to each cell type, and write it out, e.g.
+`cellTypeMappings <- list(Tcells = 2, Bcells = 5, Monocytes = 1, NKcells = 6)`
+(your cluster numbers may differ). A single cell type can also span several
+clusters: give it a vector of cluster numbers. For example,
+`cellTypeMappings <- list(Tcells = c(2, 4), Bcells = 5, Monocytes = 1, NKcells = 6)`
+groups clusters 2 and 4 together as T-cells.
+
+```{r barplotCounts}
 plotDecontXMarkerPercentage(sce,
     markers = markers,
     groupClusters = cellTypeMappings,
