@@ -40,6 +40,11 @@ git push campbio bioc/RELEASE_X_Y:refs/heads/RELEASE_X_Y
 The sync runs daily, or start it from the Actions tab. It picks up the new
 release once https://bioconductor.org/config.yaml names it.
 
+Then set `R_BIOC_VERSION` in `.github/workflows/check-standard.yaml` and
+`BioC-check.yaml` to the new devel version (the `devel_version` in
+config.yaml), so CI keeps testing against Bioconductor devel (ADR 0004).
+Open the change as a PR against `devel`.
+
 ## After release
 
 - Check the Bioconductor build report for celda

@@ -18,3 +18,4 @@ sequentially: `000N-short-title.md`.
 | 0001 | [Record architecture decisions](0001-record-architecture-decisions.md) | Accepted | 2026-09-18 |
 | 0002 | [Migrate DecontX implementation to the standalone decontX package](0002-migrate-decontx-to-standalone-package.md) | Accepted | 2026-09-22 |
 | 0003 | [Declare Seurat as a Suggests dependency](0003-declare-seurat-as-suggests.md) | Accepted | 2026-09-23 |
+| 0004 | [Run GitHub CI against Bioconductor devel](0004-ci-against-bioc-devel.md) | Accepted | 2026-10-09 |
