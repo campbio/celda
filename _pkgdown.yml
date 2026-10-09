@@ -141,8 +141,8 @@ navbar:
       menu:
       - text: "Celda - Analysis of PBMC3K"
         href: articles/celda_pbmc3k.html
-      - text: "DecontX - Decontamination of PBMC4K"
-        href: articles/decontX_pbmc4k.html
+      - text: "DecontX - Decontamination of PBMC4K (decontX package)"
+        href: https://bioconductor.org/packages/release/bioc/vignettes/decontX/inst/doc/decontX.html
     - text: "Reference"
       href: reference/index.html
     - text: "News"

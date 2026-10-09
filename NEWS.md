@@ -1,3 +1,10 @@
+# celda v1.29.3 (2026-10-09)
+* The `decontX` vignette is now a short pointer to the decontX package's
+  vignette, which has the full, maintained DecontX tutorial; celda no longer
+  keeps its own copy. The duplicate pkgdown article (`decontX_pbmc4k`) was
+  removed, and the site's DecontX menu entry now links to the decontX vignette
+  on Bioconductor.
+
 # celda v1.29.2 (2026-10-09)
 * Fixed the `decontX` vignette, which failed to build on Bioconductor devel
   with "'groupClusters' not found in 'z': 6". It hard-coded cluster numbers
