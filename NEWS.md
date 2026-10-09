@@ -1,4 +1,4 @@
-# celda v1.23.0 (2026-09-22)
+# celda v1.29.1 (2026-09-25)
 * Replaced deprecated `ggplot2::aes_string()` (and `size` for line geoms) with
   tidy-eval `aes()` / `linewidth` in the dimension-reduction, violin, and
   perplexity plotting functions, silencing ggplot2 deprecation warnings
