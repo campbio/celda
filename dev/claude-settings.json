@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch campbio)",
+      "Bash(git blame:*)"
+    ],
+    "ask": [],
+    "deny": [
+      "Write(man/*.Rd)",
+      "Write(NAMESPACE)",
+      "Write(docs/**)",
+      "Write(R/RcppExports.R)",
+      "Write(src/RcppExports.cpp)",
+      "Write(R/stanmodels.R)",
+      "Write(src/stanExports_*)",
+      "Write(.claude/settings.json)",
+      "Write(dev/claude-settings.json)",
+      "Write(Makefile)",
+      "Write(dev/hooks/**)",
+      "Write(.lintr)",
+      "Write(~/.cache/r-bioc-dev-standards/**)",
+      "Bash(make site)",
+      "Bash(make site-deploy)"
+    ]
+  },
+  "hooks": {}
+}
