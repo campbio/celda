@@ -48,4 +48,4 @@ renv/
 renv.lock
 tests/testthat/Rplots.pdf
 .worktrees/
-.claude/settings.local.json
+.claude
