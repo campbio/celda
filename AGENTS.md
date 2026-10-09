@@ -9,6 +9,12 @@ https://raw.githubusercontent.com/campbio/r-bioc-dev-standards/v1/standards.md
 starting, and follow it; those agents also aren't bound by
 `.claude/settings.json`.
 
+In Claude Code, if the standards aren't in your context at session start,
+this clone has no `.claude/settings.json`, so neither the standards nor
+the permission guardrails are active: stop, and ask the developer to run
+`make claude-setup` in a terminal outside Claude Code (not with `!`, which
+runs inside it and is refused), then restart `claude`.
+
 ## About
 
 celda is a suite of Bayesian hierarchical models for clustering single-cell
@@ -82,7 +88,7 @@ The standard targets come from the shared `standards.mk` in
 r-bioc-dev-standards; the Makefile holds only these extras. Both are
 people only: they're in the Makefile's `PEOPLE_ONLY`, so make refuses
 them when run from Claude Code (in any position on the command line), and
-`.claude/settings.json` denies them too.
+`dev/claude-settings.json` denies them too.
 
 - `site`: full local pkgdown build (slow).
 - `site-deploy`: builds the site and pushes it to `gh-pages`. Agents never
