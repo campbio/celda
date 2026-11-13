@@ -124,3 +124,23 @@ test_that(desc = "Testing plotRPC builds without ggplot2 warnings", {
     expect_no_warning(ggplot2::ggplot_build(plotRPC(sce, plotKnees = TRUE)))
   }
 })
+
+test_that(desc = "Testing recursiveSplitModule useMetaCells rejects NA zInit", {
+  zNA <- rsZ
+  zNA[1] <- NA
+  expect_error(
+    recursiveSplitModule(rsSim,
+      initialL = 3, maxL = 4, zInit = zNA, useMetaCells = TRUE,
+      verbose = FALSE
+    ),
+    "'zInit' contains NA"
+  )
+})
+
+test_that(desc = "Testing recursiveSplitCell clears an old tempY", {
+  expect_false(is.null(S4Vectors::metadata(altExp(rsCellC))$tempY))
+  rerun <- recursiveSplitCell(rsCellC,
+    initialK = 2, maxK = 3, yInit = rsY, verbose = FALSE
+  )
+  expect_null(S4Vectors::metadata(altExp(rerun))$tempY)
+})

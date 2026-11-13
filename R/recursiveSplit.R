@@ -282,9 +282,8 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-        if (!is.null(celdaList$tempY)) {
-            S4Vectors::metadata(altExp)[["tempY"]] <- celdaList$tempY
-        }
+        # Assigning NULL removes a tempY left by an earlier run
+        S4Vectors::metadata(altExp)[["tempY"]] <- celdaList$tempY
         SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
@@ -386,9 +385,8 @@ setMethod("recursiveSplitCell",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
-        if (!is.null(celdaList$tempY)) {
-            S4Vectors::metadata(altExp)[["tempY"]] <- celdaList$tempY
-        }
+        # Assigning NULL removes a tempY left by an earlier run
+        S4Vectors::metadata(altExp)[["tempY"]] <- celdaList$tempY
         SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
@@ -942,8 +940,10 @@ setMethod("recursiveSplitCell",
 #'  fixed while the modules are split: each model is fit by \link{celda_CG}
 #'  with \code{zInitialize = "fixed"}. If \code{FALSE}, \code{zInit} only
 #'  initializes the cell clusters, which can still change
-#'  (\code{zInitialize = "predefined"}). Requires \code{zInit}.
-#'  Default \code{FALSE}.
+#'  (\code{zInitialize = "predefined"}). Requires \code{zInit} with no
+#'  \code{NA} values. Models number the clusters 1 to K, and may renumber
+#'  them when \code{reorder = TRUE}, so use the partition rather than the
+#'  numbers to match them to \code{zInit}. Default \code{FALSE}.
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix. Default \code{NULL}.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
@@ -1335,6 +1335,13 @@ setMethod("recursiveSplitModule",
   s <- as.integer(sampleLabel)
 
   if (!is.null(zInit)) {
+    # A fixed z can't place unlabelled cells
+    if (isTRUE(useMetaCells) && anyNA(zInit)) {
+      stop(
+        "'zInit' contains NA values; every cell needs a label when ",
+        "useMetaCells is TRUE."
+      )
+    }
     # Labels can be any type, e.g. meta-cell names from findMetaCells()
     zInit <- as.integer(factor(zInit))
     # With useMetaCells, z stays as given; otherwise it is only a start

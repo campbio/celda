@@ -113,8 +113,10 @@ Default \code{NULL}.}
 fixed while the modules are split: each model is fit by \link{celda_CG}
 with \code{zInitialize = "fixed"}. If \code{FALSE}, \code{zInit} only
 initializes the cell clusters, which can still change
-(\code{zInitialize = "predefined"}). Requires \code{zInit}.
-Default \code{FALSE}.}
+(\code{zInitialize = "predefined"}). Requires \code{zInit} with no
+\code{NA} values. Models number the clusters 1 to K, and may renumber
+them when \code{reorder = TRUE}, so use the partition rather than the
+numbers to match them to \code{zInit}. Default \code{FALSE}.}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix. Default \code{NULL}.}

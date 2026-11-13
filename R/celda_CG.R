@@ -57,7 +57,9 @@
 #'  With 'predefined', values in \code{zInit} will be used to initialize
 #'  \code{z}. With 'fixed', \code{z} is set to \code{zInit} and is not
 #'  updated during fitting, so only the feature modules \code{y} are
-#'  estimated. 'predefined' and 'fixed' require \code{zInit}. Default 'split'.
+#'  estimated; with \code{reorder = TRUE} the cell clusters may be
+#'  renumbered, but each keeps the same cells. 'predefined' and 'fixed'
+#'  require \code{zInit}. Default 'split'.
 #' @param yInitialize Character. One of 'random', 'split', or 'predefined'.
 #'  With 'random', features are randomly assigned to a modules. With 'split',
 #'  features will be split into sqrt(L) modules and then each module will be
