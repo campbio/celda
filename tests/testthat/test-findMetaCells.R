@@ -182,3 +182,59 @@ test_that(desc = "Testing findMetaCells labels work as useMetaCells zInit", {
     expect_length(unique(paste(celdaClusters(mod)$z, sceMeta$metacell)), nMeta)
   }
 })
+
+test_that(desc = "Testing findMetaCells with cells empty after filtering", {
+  m <- as.matrix(counts(sceSim))
+  lastGene <- nrow(m)
+  # Cell 1 keeps one count, on a gene that no other cell has, so the gene
+  # fails the per-sample filter and cell 1 has no counts on kept genes
+  m[, 1] <- 0
+  m[lastGene, ] <- 0
+  m[lastGene, 1] <- 1
+  sceEmpty <- sceSim
+  counts(sceEmpty) <- m
+  expect_message(
+    res <- findMetaCells(sceEmpty,
+      initK = 2, maxK = 8, tempL = 10, minCellMeta = 10,
+      sampleLabel = sampleLabel, verbose = FALSE
+    ),
+    "1 cell\\(s\\) have no counts on the genes kept"
+  )
+  expect_false(anyNA(res$metacell))
+  expect_true(grepl("^Sample_1_K[0-9]+$", res$metacell[1]))
+  expect_true(all(table(res$metacell) >= 10))
+})
+
+test_that(desc = "Testing findMetaCells checks K and kneePoint", {
+  expect_error(
+    findMetaCells(sceSim, initK = 5, maxK = 3, verbose = FALSE),
+    "'maxK' must be at least 'initK'"
+  )
+  expect_error(
+    findMetaCells(sceSim, initK = -1, verbose = FALSE),
+    "'initK' must be a positive integer"
+  )
+  expect_error(
+    findMetaCells(sceSim, maxK = 2.5, verbose = FALSE),
+    "'maxK' must be a positive integer"
+  )
+  expect_error(
+    findMetaCells(sceSim, kneePoint = NULL, verbose = FALSE),
+    "'kneePoint' must be 1 or 2"
+  )
+})
+
+test_that(desc = "Testing findMetaCells starts a fresh log when quiet", {
+  quietLog <- tempfile(fileext = ".log")
+  small <- c(
+    which(sampleLabel == "Sample_1"),
+    which(sampleLabel == "Sample_2")[seq(5)]
+  )
+  for (i in seq(2)) {
+    suppressMessages(findMetaCells(sceSim[, small],
+      initK = 2, maxK = 4, tempL = 10,
+      sampleLabel = sampleLabel[small], logfile = quietLog, verbose = FALSE
+    ))
+  }
+  expect_equal(sum(grepl("fewer than minCellMeta", readLines(quietLog))), 1)
+})

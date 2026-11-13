@@ -38,7 +38,9 @@
 #'  labelled \code{<sample>_K<n>}. The labels can be passed to
 #'  \link{recursiveSplitModule} as \code{zInit}. A sample with fewer than
 #'  \code{minCellMeta} cells becomes a single meta-cell,
-#'  \code{<sample>_K1}, with a message.
+#'  \code{<sample>_K1}, with a message. Cells with no counts on the genes
+#'  kept for their sample are left out of the fit and then added to their
+#'  nearest meta-cell, also with a message.
 #' @export
 #'
 #' @examples
@@ -67,11 +69,22 @@ findMetaCells <- function(
   verbose = TRUE
 ) {
   # Check the arguments before any slow work starts
-  if (!kneePoint %in% c(1L, 2L)) {
+  if (length(kneePoint) != 1 || !kneePoint %in% c(1L, 2L)) {
     stop("'kneePoint' must be 1 or 2.", call. = FALSE)
   }
   if (isTRUE(initK == 0) || (!is.null(maxK) && isTRUE(maxK == 0))) {
     stop("Value of K cannot be zero.", call. = FALSE)
+  }
+  if (!.isPositiveInteger(initK)) {
+    stop("'initK' must be a positive integer.", call. = FALSE)
+  }
+  if (!is.null(maxK)) {
+    if (!.isPositiveInteger(maxK)) {
+      stop("'maxK' must be a positive integer.", call. = FALSE)
+    }
+    if (maxK < initK) {
+      stop("'maxK' must be at least 'initK'.", call. = FALSE)
+    }
   }
   validTempL <- !is.null(tempL) && is.numeric(tempL) &&
     length(tempL) == 1 && tempL >= 1
@@ -96,7 +109,11 @@ findMetaCells <- function(
   )
   samples <- levels(sampleLabel)
   startTime <- Sys.time()
-  # append = FALSE: every run starts a new log file
+  # Every run starts a new log file. .logMessages() writes nothing when
+  # verbose = FALSE, so clear the file here rather than rely on append = FALSE
+  if (!is.null(logfile) && file.exists(logfile)) {
+    unlink(logfile)
+  }
   .logMessages("Meta-cell aggregation starts!\nSystem time: ",
     startTime,
     logfile = logfile,
@@ -106,10 +123,26 @@ findMetaCells <- function(
   # One label per input cell, filled in sample by sample, so the result
   # keeps the input's cell order
   metacell <- rep(NA_character_, ncol(inSCE))
+  allCounts <- SummarizedExperiment::assay(inSCE, "counts")
   for (s in samples) {
     idx <- which(sampleLabel == s)
-    sce <- inSCE[, idx]
-    nCells <- ncol(sce)
+    # Only the counts are needed, so don't copy other assays or altExps
+    sampleCounts <- allCounts[, idx, drop = FALSE]
+    sce <- SingleCellExperiment::SingleCellExperiment(
+      assays = list(counts = sampleCounts)
+    )
+    # Keep genes seen in this sample (>= 3 counts in >= 3 cells); they are
+    # stored in the "featureSubset" altExp
+    sce <- selectFeatures(sce,
+      minCount = 3, minCell = 3,
+      useAssay = "counts"
+    )
+    # Cells with no counts on the kept genes can't be clustered on them;
+    # fit without them and add each to its nearest meta-cell afterwards
+    empty <- Matrix::colSums(SummarizedExperiment::assay(
+      SingleCellExperiment::altExp(sce, "featureSubset"), "counts"
+    )) == 0
+    nCells <- sum(!empty)
     # A sample smaller than one meta-cell becomes a single meta-cell.
     # verbose = TRUE so the note is always printed (or written to the log)
     if (nCells < minCellMeta) {
@@ -124,20 +157,17 @@ findMetaCells <- function(
       metacell[idx] <- paste0(s, "_K1")
       next
     }
+    if (any(empty)) {
+      sce <- sce[, !empty]
+    }
 
     # Upper limit for K: sqrt(cells), at least 10 and at most 100,
     # unless the user gave one
     sampleMaxK <- if (is.null(maxK)) {
-      pmin(pmax(round(sqrt(nCells)), 10), 100)
+      max(pmin(pmax(round(sqrt(nCells)), 10), 100), initK)
     } else {
       maxK
     }
-    # Keep genes seen in this sample (>= 3 counts in >= 3 cells); they are
-    # stored in the "featureSubset" altExp
-    sce <- selectFeatures(sce,
-      minCount = 3, minCell = 3,
-      useAssay = "counts"
-    )
     .logMessages("Sample: ",
       s,
       logfile = logfile,
@@ -201,7 +231,22 @@ findMetaCells <- function(
     # Take the model with K = bestK, then merge clusters below minCellMeta
     sce <- subsetCeldaList(sce, list(K = bestK))
     sce <- .updateMetaCellLabel(sce, sampleName = s, minCellMeta = minCellMeta)
-    metacell[idx] <- sce$metacell
+    sampleLabels <- rep(NA_character_, length(idx))
+    sampleLabels[!empty] <- sce$metacell
+    if (any(empty)) {
+      sampleLabels[empty] <- .nearestMetaCell(
+        sampleCounts, sampleLabels, empty
+      )
+      .logMessages("Sample '", s, "': ", sum(empty),
+        " cell(s) have no counts on the genes kept for this sample; ",
+        "each was added to its nearest meta-cell.",
+        sep = "",
+        logfile = logfile,
+        append = TRUE,
+        verbose = TRUE
+      )
+    }
+    metacell[idx] <- sampleLabels
   }
 
   elapsed <- difftime(Sys.time(), startTime, units = "auto")
@@ -326,4 +371,36 @@ findMetaCells <- function(
   )
 
   sce
+}
+
+# TRUE for a single whole number of at least 1
+.isPositiveInteger <- function(x) {
+  is.numeric(x) && length(x) == 1 && !is.na(x) && x >= 1 && x == round(x)
+}
+
+# Label each cell where `isEmpty` is TRUE with its nearest meta-cell. Cells
+# are compared on log CPM of the genes those cells express (library size
+# from all genes), and meta-cells by their average profile. Cells with no
+# counts at all go to the largest meta-cell.
+.nearestMetaCell <- function(counts, labels, isEmpty) {
+  assignedCells <- which(!isEmpty)
+  groups <- split(assignedCells, labels[assignedCells])
+  largest <- names(which.max(lengths(groups)))
+  genes <- Matrix::rowSums(counts[, isEmpty, drop = FALSE]) > 0
+  if (!any(genes)) {
+    return(rep(largest, sum(isEmpty)))
+  }
+  libSize <- pmax(Matrix::colSums(counts), 1)
+  logCpm <- log1p(
+    t(t(as.matrix(counts[genes, , drop = FALSE])) / libSize) * 1e6
+  )
+  centroids <- do.call(cbind, lapply(groups, function(cells) {
+    rowMeans(logCpm[, cells, drop = FALSE])
+  }))
+  vapply(which(isEmpty), function(cell) {
+    if (sum(counts[, cell]) == 0) {
+      return(largest)
+    }
+    names(which.min(colSums((centroids - logCpm[, cell])^2)))
+  }, character(1))
 }

@@ -64,7 +64,9 @@ The input
  labelled \code{<sample>_K<n>}. The labels can be passed to
  \link{recursiveSplitModule} as \code{zInit}. A sample with fewer than
  \code{minCellMeta} cells becomes a single meta-cell,
- \code{<sample>_K1}, with a message.
+ \code{<sample>_K1}, with a message. Cells with no counts on the genes
+ kept for their sample are left out of the fit and then added to their
+ nearest meta-cell, also with a message.
 }
 \description{
 Groups the cells of each sample into meta-cells: small sets
