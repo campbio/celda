@@ -929,8 +929,9 @@ setMethod("recursiveSplitCell",
 #'  speed of module clustering and tend to produce better modules. This number
 #'  should be larger than the number of true cell populations expected in the
 #'  dataset. Default \code{100}.
-#' @param zInit Integer vector. Collapse cells to cell populations based on
-#'  labels in \code{zInit} and then perform module splitting. If NULL, no
+#' @param zInit Vector or factor. Collapse cells to cell populations based on
+#'  labels in \code{zInit}, one per cell, and then perform module splitting.
+#'  Labels can be integers, characters, or factor levels. If NULL, no
 #'  collapsing will be performed unless \code{tempK} is specified.
 #'  Default \code{NULL}.
 #' @param useMetaCells Logical. If \code{TRUE}, the cell labels in
@@ -1058,7 +1059,7 @@ setMethod("recursiveSplitModule",
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
 
         if (isTRUE(useMetaCells) && is.null(zInit)) {
-          stop("'zInit' needs to specified when useMetaCells is set to TRUE")
+            stop("'zInit' needs to be specified when useMetaCells is TRUE")
         }
 
         if (!is.null(zInit)) {
@@ -1159,7 +1160,7 @@ setMethod("recursiveSplitModule",
         xClass <- "matrix"
 
         if (isTRUE(useMetaCells) && is.null(zInit)) {
-          stop("'zInit' needs to be specified when useMetaCells is set to TRUE")
+            stop("'zInit' needs to be specified when useMetaCells is TRUE")
         }
 
         if (!is.null(zInit)) {
@@ -1330,7 +1331,12 @@ setMethod("recursiveSplitModule",
   )
   s <- as.integer(sampleLabel)
 
-  if (!is.null(zInit) && !isTRUE(useMetaCells)) {
+  if (!is.null(zInit)) {
+    # Labels can be any type, e.g. meta-cell names from findMetaCells()
+    zInit <- as.integer(factor(zInit))
+    # With useMetaCells, z stays as given; otherwise it is only a start
+    zMode <- if (isTRUE(useMetaCells)) "fixed" else "predefined"
+
     # Create collapsed module matrix
     K <- length(unique(zInit))
     .logMessages(
@@ -1362,7 +1368,7 @@ setMethod("recursiveSplitModule",
       sampleLabel = sampleLabel,
       L = initialL,
       K = K,
-      zInitialize = "predefined",
+      zInitialize = zMode,
       yInitialize = "split",
       nchains = 1,
       zInit = overallZ,
@@ -1397,7 +1403,7 @@ setMethod("recursiveSplitModule",
         nchains = 1,
         verbose = FALSE,
         yInitialize = "predefined",
-        zInitialize = "predefined",
+        zInitialize = zMode,
         yInit = tempSplit$y,
         zInit = overallZ,
         reorder = reorder
@@ -1419,111 +1425,6 @@ setMethod("recursiveSplitModule",
       currentL <- currentL + 1
     }
 
-    runK <- vapply(resList, function(mod) {
-      params(mod)$K
-    }, integer(1))
-    runL <- vapply(resList, function(mod) {
-      params(mod)$L
-    }, integer(1))
-    runParams <- data.frame(
-      index = seq.int(1, length(resList)),
-      L = runL,
-      K = runK,
-      stringsAsFactors = FALSE
-    )
-  } else if (!is.null(zInit) && isTRUE(useMetaCells)) {
-      # Create collapsed module matrix
-      K <- length(unique(zInit))
-      .logMessages(
-        date(),
-        ".. Collapsing to",
-        K,
-        "cell populations",
-        append = TRUE,
-        verbose = verbose,
-        logfile = logfile
-      )
-      overallZ <- .initializeCluster(
-        N = K,
-        len = ncol(counts),
-        initial = zInit
-      )
-      countsZ <- .colSumByGroup(counts, overallZ, K)
-
-      # Create initial model with initialL and predifined z labels
-      .logMessages(
-        date(),
-        ".. Initializing with",
-        initialL,
-        "modules",
-        append = TRUE,
-        verbose = verbose,
-        logfile = logfile
-      )
-      modelInitial <- .celda_CG(
-        counts,
-        L = initialL,
-        K = K,
-        zInitialize = "fixed",
-        yInitialize = "split",
-        nchains = 1,
-        zInit = overallZ,
-        alpha = alpha,
-        beta = beta,
-        gamma = gamma,
-        delta = delta,
-        verbose = FALSE,
-        reorder = reorder
-      )
-      modelInitial@params$countChecksum <- countChecksum
-
-      currentL <- length(unique(as.integer(celdaClusters(modelInitial)$y))) + 1
-      overallY <- as.integer(celdaClusters(modelInitial)$y)
-
-      resList <- list(modelInitial)
-      while (currentL <= maxL) {
-        # Allow features to cluster further
-        previousY <- overallY
-        tempSplit <- .singleSplitY(
-          countsZ,
-          overallY,
-          currentL,
-          minFeature = 3,
-          beta = beta,
-          delta = delta,
-          gamma = gamma
-        )
-        tempModel <- .celda_CG(
-          counts,
-          L = currentL,
-          K = K,
-          stopIter = 5,
-          splitOnIter = -1,
-          splitOnLast = FALSE,
-          nchains = 1,
-          verbose = FALSE,
-          zInit = overallZ,
-          zInitialize = "fixed",
-          yInitialize = "predefined",
-          yInit = tempSplit$y,
-          reorder = reorder
-        )
-        overallY <- as.integer(celdaClusters(tempModel)$y)
-
-        ## Add new model to results list and increment L
-        .logMessages(
-          date(),
-          ".. Created module",
-          currentL,
-          "| logLik:",
-          bestLogLikelihood(tempModel),
-          append = TRUE,
-          verbose = verbose,
-          logfile = NULL
-        )
-        resList <- c(resList, list(tempModel))
-        currentL <- currentL + 1
-      }
     runK <- vapply(resList, function(mod) {
       params(mod)$K
     }, integer(1))

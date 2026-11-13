@@ -119,3 +119,16 @@ test_that(desc = "Testing .findKnee", {
     expect_equal(.findKnee(K, P, nPoints = 2), 12)
     expect_equal(.findKnee(K, rep(5, length(K))), 2)
 })
+
+test_that(desc = "Testing findMetaCells labels work as zInit with useMetaCells", {
+  sce <- selectFeatures(sceMeta, minCount = 0, minCell = 0)
+  res <- recursiveSplitModule(sce,
+    initialL = 3, maxL = 4, zInit = sceMeta$metacell, useMetaCells = TRUE,
+    verbose = FALSE
+  )
+  nMeta <- length(unique(sceMeta$metacell))
+  for (mod in resList(res)) {
+    expect_equal(params(mod)$K, nMeta)
+    expect_length(unique(paste(celdaClusters(mod)$z, sceMeta$metacell)), nMeta)
+  }
+})

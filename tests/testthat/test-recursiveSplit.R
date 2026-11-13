@@ -36,6 +36,32 @@ expectedKnee <- function(sce, by) {
   .findKnee(rp[[by]], rp$mean_perplexity, nPoints = 1)
 }
 
+samePartition <- function(a, b) {
+  length(unique(paste(a, b))) == length(unique(b))
+}
+
+test_that(desc = "Testing recursiveSplitModule with character zInit", {
+  zChar <- paste0("pop_", rsZ)
+  for (useMeta in c(FALSE, TRUE)) {
+    res <- recursiveSplitModule(rsSim,
+      initialL = 3, maxL = 4, zInit = zChar, useMetaCells = useMeta,
+      verbose = FALSE
+    )
+    expect_equal(runParams(res)$L, 3:4)
+  }
+  # With useMetaCells = TRUE the cell partition stays as given
+  for (mod in resList(res)) {
+    expect_true(samePartition(celdaClusters(mod)$z, zChar))
+  }
+})
+
+test_that(desc = "Testing recursiveSplitModule useMetaCells needs zInit", {
+  expect_error(
+    recursiveSplitModule(rsSim, useMetaCells = TRUE, verbose = FALSE),
+    "'zInit' needs to be specified"
+  )
+})
+
 test_that(desc = "Testing plotRPC knees for celda_C models", {
   g <- plotRPC(rsCellC, plotKnees = TRUE, knees = 1)
   expect_equal(kneeLayerData(g)$pos, expectedKnee(rsCellC, "K"))
