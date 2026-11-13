@@ -34,10 +34,11 @@
 #'  the console. Default NULL.
 #' @returns The input
 #'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment},
-#'  with cells grouped by sample, and new colData columns
-#'  \code{metacell}, labelled \code{<sample>_K<n>}, and
-#'  \code{celda_sample_label}. Samples with fewer than \code{minCellMeta}
-#'  cells are skipped (with a message) and left out.
+#'  with cells in the same order and a new colData column \code{metacell},
+#'  labelled \code{<sample>_K<n>}. The labels can be passed to
+#'  \link{recursiveSplitModule} as \code{zInit}. A sample with fewer than
+#'  \code{minCellMeta} cells becomes a single meta-cell,
+#'  \code{<sample>_K1}, with a message.
 #' @export
 #'
 #' @examples
@@ -93,21 +94,25 @@ findMetaCells <- function(
                        logfile = logfile,
                        append = FALSE,
                        verbose = verbose)
-  sceList <- list()
+  # One label per input cell, filled in sample by sample, so the result
+  # keeps the input's cell order
+  metacell <- rep(NA_character_, ncol(inSCE))
   for (s in samples) {
-
-    sce <- inSCE[, sampleLabel == s]
+    idx <- which(sampleLabel == s)
+    sce <- inSCE[, idx]
     nCells <- ncol(sce)
-    # A sample smaller than one meta-cell is skipped, not a reason to stop.
+    # A sample smaller than one meta-cell becomes a single meta-cell.
     # verbose = TRUE so the note is always printed (or written to the log)
     if (nCells < minCellMeta) {
       .logMessages("Sample '", s, "' has ", nCells,
-                           " cells, fewer than minCellMeta (", minCellMeta,
-                           "). Skipping it.",
-                           sep = "",
-                           logfile = logfile,
-                           append = TRUE,
-                           verbose = TRUE)
+        " cells, fewer than minCellMeta (", minCellMeta,
+        "), so its cells form one meta-cell.",
+        sep = "",
+        logfile = logfile,
+        append = TRUE,
+        verbose = TRUE
+      )
+      metacell[idx] <- paste0(s, "_K1")
       next
     }
 
@@ -179,11 +184,7 @@ findMetaCells <- function(
     # Take the model with K = bestK, then merge clusters below minCellMeta
     sce <- celda::subsetCeldaList(sce, list(K = bestK))
     sce <- .updateMetaCellLabel(sce, sampleName = s, minCellMeta = minCellMeta)
-
-    # Each sample selected its own genes, so the altExps cannot be combined
-    # across samples; drop them before cbind
-    SingleCellExperiment::altExp(sce, "featureSubset") <- NULL
-    sceList[[s]] <- sce
+    metacell[idx] <- sce$metacell
   }
 
   elapsed <- difftime(Sys.time(), startTime, units = "auto")
@@ -192,11 +193,8 @@ findMetaCells <- function(
                        logfile = logfile,
                        append = TRUE,
                        verbose = verbose)
-  if (length(sceList) == 0) {
-    stop("No sample has at least minCellMeta (", minCellMeta, ") cells.",
-         call. = FALSE)
-  }
-  return(do.call(SingleCellExperiment::cbind, sceList))
+  SummarizedExperiment::colData(inSCE)$metacell <- metacell
+  inSCE
 }
 
 # Kneedle algorithm: find the "knee" (point of strongest bend) of a falling

@@ -81,22 +81,44 @@ test_that(desc = "Testing findMetaCells sampleLabel error checking", {
         "contains NA values")
 })
 
-test_that(desc = "Testing findMetaCells skips samples below minCellMeta", {
-    keep <- c(which(sampleLabel == "Sample_1"),
-        which(sampleLabel == "Sample_2")[seq(5)])
-    expect_message(res <- findMetaCells(sceSim[, keep],
-        initK = 2,
-        maxK = 8,
-        tempL = 10,
-        sampleLabel = sampleLabel[keep],
-        verbose = FALSE),
-        "Sample 'Sample_2' has 5 cells, fewer than minCellMeta \\(10\\)")
-    expect_equal(unique(as.character(res$celda_sample_label)), "Sample_1")
-    expect_equal(ncol(res), sum(sampleLabel == "Sample_1"))
-    expect_error(suppressMessages(findMetaCells(sceSim[, seq(12)],
-        sampleLabel = rep(c("a", "b"), 6),
-        verbose = FALSE)),
-        "No sample has at least minCellMeta")
+test_that(desc = "Testing findMetaCells keeps small samples as one meta-cell", {
+  keep <- c(
+    which(sampleLabel == "Sample_1"),
+    which(sampleLabel == "Sample_2")[seq(5)]
+  )
+  expect_message(
+    res <- findMetaCells(sceSim[, keep],
+      initK = 2, maxK = 8, tempL = 10,
+      sampleLabel = sampleLabel[keep], verbose = FALSE
+    ),
+    "Sample 'Sample_2' has 5 cells, fewer than minCellMeta \\(10\\)"
+  )
+  expect_identical(colnames(res), colnames(sceSim)[keep])
+  isSmall <- sampleLabel[keep] == "Sample_2"
+  expect_true(all(res$metacell[isSmall] == "Sample_2_K1"))
+  expect_true(all(grepl("^Sample_1_K[0-9]+$", res$metacell[!isSmall])))
+
+  # Every sample too small: one meta-cell per sample, no error
+  res <- suppressMessages(findMetaCells(sceSim[, seq(12)],
+    sampleLabel = rep(c("a", "b"), 6), verbose = FALSE
+  ))
+  expect_identical(res$metacell, rep(c("a_K1", "b_K1"), 6))
+})
+
+test_that(desc = "Testing findMetaCells keeps the input cell order", {
+  set.seed(1)
+  ord <- sample(ncol(sceSim))
+  shuffled <- sceSim[, ord]
+  altExp(shuffled, "userSubset") <- shuffled[seq(20), ]
+  res <- findMetaCells(shuffled,
+    initK = 2, maxK = 8, tempL = 10, minCellMeta = 10,
+    sampleLabel = sampleLabel[ord], verbose = FALSE
+  )
+  expect_identical(colnames(res), colnames(shuffled))
+  # Each cell's label names its own sample
+  expect_identical(sub("_K[0-9]+$", "", res$metacell), sampleLabel[ord])
+  # The input's own altExps are kept
+  expect_true("userSubset" %in% altExpNames(res))
 })
 
 test_that(desc = "Testing findMetaCells argument checking", {
