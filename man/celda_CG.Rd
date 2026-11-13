@@ -24,7 +24,7 @@ celda_CG(
   splitOnLast = TRUE,
   seed = 12345,
   nchains = 3,
-  zInitialize = c("split", "random", "predefined"),
+  zInitialize = c("split", "random", "predefined", "fixed"),
   yInitialize = c("split", "random", "predefined"),
   countChecksum = NULL,
   zInit = NULL,
@@ -51,7 +51,7 @@ celda_CG(
   splitOnLast = TRUE,
   seed = 12345,
   nchains = 3,
-  zInitialize = c("split", "random", "predefined"),
+  zInitialize = c("split", "random", "predefined", "fixed"),
   yInitialize = c("split", "random", "predefined"),
   countChecksum = NULL,
   zInit = NULL,
@@ -78,7 +78,7 @@ celda_CG(
   splitOnLast = TRUE,
   seed = 12345,
   nchains = 3,
-  zInitialize = c("split", "random", "predefined"),
+  zInitialize = c("split", "random", "predefined", "fixed"),
   yInitialize = c("split", "random", "predefined"),
   countChecksum = NULL,
   zInit = NULL,
@@ -149,11 +149,14 @@ a default value of 12345 is used. If NULL, no calls to
 
 \item{nchains}{Integer. Number of random cluster initializations. Default 3.}
 
-\item{zInitialize}{Chararacter. One of 'random', 'split', or 'predefined'.
-With 'random', cells are randomly assigned to a populations. With 'split',
-cells will be split into sqrt(K) populations and then each population will
-be subsequently split into another sqrt(K) populations. With 'predefined',
-values in \code{zInit} will be used to initialize \code{z}. Default 'split'.}
+\item{zInitialize}{Chararacter. One of 'random', 'split', 'predefined', or
+'fixed'. With 'random', cells are randomly assigned to a populations. With
+'split', cells will be split into sqrt(K) populations and then each
+population will be subsequently split into another sqrt(K) populations.
+With 'predefined', values in \code{zInit} will be used to initialize
+\code{z}. With 'fixed', \code{z} is set to \code{zInit} and is not
+updated during fitting, so only the feature modules \code{y} are
+estimated. 'predefined' and 'fixed' require \code{zInit}. Default 'split'.}
 
 \item{yInitialize}{Character. One of 'random', 'split', or 'predefined'.
 With 'random', features are randomly assigned to a modules. With 'split',

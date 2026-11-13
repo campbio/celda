@@ -159,7 +159,10 @@ A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} o
  parameter settings and celda model results are stored in the
  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
  the list will be of class \code{celda_C} if \code{yInit = NULL} or
- \code{celda_CG} if \code{zInit} is set.
+ \code{celda_CG} if \code{zInit} is set. If \code{tempL} is set and
+ \code{yInit} is NULL, the temporary feature modules are also saved as
+ \code{tempY} (one module label per feature) in
+ \code{metadata(altExp(x, altExpName))}.
 }
 \description{
 Uses the \link{celda_C} model to cluster cells into
