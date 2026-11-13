@@ -6,11 +6,25 @@
 \alias{plotRPC,celdaList-method}
 \title{Visualize perplexity differences of a list of celda models}
 \usage{
-plotRPC(x, altExpName = "featureSubset", sep = 5, alpha = 0.5)
+plotRPC(
+  x,
+  altExpName = "featureSubset",
+  sep = 5,
+  alpha = 0.5,
+  plotKnees = FALSE,
+  knees = 1:3
+)
 
-\S4method{plotRPC}{SingleCellExperiment}(x, altExpName = "featureSubset", sep = 5, alpha = 0.5)
+\S4method{plotRPC}{SingleCellExperiment}(
+  x,
+  altExpName = "featureSubset",
+  sep = 5,
+  alpha = 0.5,
+  plotKnees = FALSE,
+  knees = 1:3
+)
 
-\S4method{plotRPC}{celdaList}(x, sep = 5, alpha = 0.5)
+\S4method{plotRPC}{celdaList}(x, sep = 5, alpha = 0.5, plotKnees = FALSE, knees = 1:3)
 }
 \arguments{
 \item{x}{Can be one of
@@ -29,6 +43,15 @@ to use. Default "featureSubset".}
 \item{alpha}{Numeric. Passed to \link[ggplot2]{geom_jitter}. Opacity of the points.
 Values of alpha range from 0 to 1, with lower values corresponding
 to more transparent colors.}
+
+\item{plotKnees}{Logical. If \code{TRUE}, adds dashed vertical lines and
+labels marking the knee points detected on the mean perplexity curve.
+Default \code{FALSE}.}
+
+\item{knees}{Integer vector. Which knee points to plot (e.g. \code{1:3}
+for the first three). Knee 1 is the sharpest bend; each later knee is
+found on the part of the curve after the previous one. Each value must be
+between 1 and 5. Default \code{1:3}.}
 }
 \value{
 A ggplot plot object showing perplexity differences as a function of
@@ -37,6 +60,16 @@ A ggplot plot object showing perplexity differences as a function of
 \description{
 Visualize perplexity differences of every model in a celdaList,
  by unique K/L combinations.
+}
+\details{
+With \code{plotKnees = TRUE}, knee points are found on the mean
+ perplexity of the models with the kneedle method and drawn as dashed
+ lines with labels, on the parameter shown on the x axis: K for
+ \code{celda_C} models, L for \code{celda_G} models, and whichever of K
+ or L varies for \code{celda_CG} models. Knees can't be plotted for
+ \code{celda_CG} models that differ in both K and L. A knee on the
+ smallest K or L is dropped with a warning, since the plot starts at the
+ second value.
 }
 \examples{
 data(sceCeldaCGGridSearch)

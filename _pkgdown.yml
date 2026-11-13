@@ -42,6 +42,7 @@ reference:
 - title: Functions for determining the numbers of clusters in celda
   desc: Functions for running and comparing multiple celda models with different number of modules or cell populations
   contents:
+  - findMetaCells
   - recursiveSplitCell
   - recursiveSplitModule
   - plotRPC

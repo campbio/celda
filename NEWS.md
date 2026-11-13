@@ -1,3 +1,19 @@
+# celda (development version)
+* New `findMetaCells()` groups the cells of each sample into meta-cells:
+  small sets of similar cells found with `recursiveSplitCell()` and a
+  kneedle choice of K, with meta-cells smaller than `minCellMeta` merged into
+  their nearest neighbour. Results are returned in the input's cell order;
+  a sample with fewer than `minCellMeta` cells becomes one meta-cell.
+  Based on work by Nageen Zahra (#429).
+* `celda_CG()` gains `zInitialize = "fixed"`, which keeps the cell clusters
+  at `zInit` and fits only the feature modules.
+* `recursiveSplitModule()` gains `useMetaCells`, which keeps `zInit` fixed
+  while modules are split, so meta-cells from `findMetaCells()` can be used
+  directly. `zInit` can now hold character or factor labels.
+* `plotRPC()` gains `plotKnees` and `knees` to mark knee points of the mean
+  perplexity curve. For `celda_CG` results they are placed on whichever of K
+  or L varies.
+
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
   vignette, which has the full, maintained DecontX tutorial; celda no longer

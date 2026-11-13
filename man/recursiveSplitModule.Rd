@@ -14,6 +14,7 @@ recursiveSplitModule(
   maxL = 100,
   tempK = 100,
   zInit = NULL,
+  useMetaCells = FALSE,
   sampleLabel = NULL,
   alpha = 1,
   beta = 1,
@@ -37,6 +38,7 @@ recursiveSplitModule(
   maxL = 100,
   tempK = 100,
   zInit = NULL,
+  useMetaCells = FALSE,
   sampleLabel = NULL,
   alpha = 1,
   beta = 1,
@@ -60,6 +62,7 @@ recursiveSplitModule(
   maxL = 100,
   tempK = 100,
   zInit = NULL,
+  useMetaCells = FALSE,
   sampleLabel = NULL,
   alpha = 1,
   beta = 1,
@@ -99,10 +102,21 @@ speed of module clustering and tend to produce better modules. This number
 should be larger than the number of true cell populations expected in the
 dataset. Default \code{100}.}
 
-\item{zInit}{Integer vector. Collapse cells to cell populations based on
-labels in \code{zInit} and then perform module splitting. If NULL, no
+\item{zInit}{Vector or factor. Collapse cells to cell populations based on
+labels in \code{zInit}, one per cell, and then perform module splitting.
+Labels can be integers, characters, or factor levels. If NULL, no
 collapsing will be performed unless \code{tempK} is specified.
 Default \code{NULL}.}
+
+\item{useMetaCells}{Logical. If \code{TRUE}, the cell labels in
+\code{zInit} (for example meta-cells from \link{findMetaCells}) are kept
+fixed while the modules are split: each model is fit by \link{celda_CG}
+with \code{zInitialize = "fixed"}. If \code{FALSE}, \code{zInit} only
+initializes the cell clusters, which can still change
+(\code{zInitialize = "predefined"}). Requires \code{zInit} with no
+\code{NA} values. Models number the clusters 1 to K, and may renumber
+them when \code{reorder = TRUE}, so use the partition rather than the
+numbers to match them to \code{zInit}. Default \code{FALSE}.}
 
 \item{sampleLabel}{Vector or factor. Denotes the sample label for each cell
 (column) in the count matrix. Default \code{NULL}.}

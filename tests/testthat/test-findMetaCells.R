@@ -1,0 +1,240 @@
+# findMetaCells
+library(celda)
+context("Testing findMetaCells")
+
+sceSim <- simulateCells("celda_CG",
+  S = 2, K = 4, L = 6, G = 200,
+  CRange = c(60, 80), seed = 3
+)
+sampleLabel <- as.character(sceSim$celda_sample_label)
+logfile <- tempfile(fileext = ".log")
+sceMeta <- findMetaCells(sceSim,
+  initK = 2,
+  maxK = 8,
+  tempL = 10,
+  minCellMeta = 10,
+  sampleLabel = sampleLabel,
+  logfile = logfile
+)
+
+test_that(desc = "Testing findMetaCells output", {
+  expect_true(is(sceMeta, "SingleCellExperiment"))
+  expect_setequal(colnames(sceMeta), colnames(sceSim))
+  expect_true("metacell" %in% colnames(colData(sceMeta)))
+  expect_true(all(grepl("^Sample_[12]_K[0-9]+$", sceMeta$metacell)))
+  expect_true(all(table(sceMeta$metacell) >= 10))
+})
+
+test_that(desc = "Testing findMetaCells keeps meta-cells within a sample", {
+  origSample <- sampleLabel[match(colnames(sceMeta), colnames(sceSim))]
+  expect_equal(as.character(sceMeta$celda_sample_label), origSample)
+  expect_equal(sub("_K[0-9]+$", "", sceMeta$metacell), origSample)
+  samplesPerMeta <- tapply(
+    origSample, sceMeta$metacell,
+    function(x) length(unique(x))
+  )
+  expect_true(all(samplesPerMeta == 1))
+})
+
+test_that(desc = "Testing findMetaCells is reproducible with a seed", {
+  sceMeta2 <- findMetaCells(sceSim,
+    initK = 2,
+    maxK = 8,
+    tempL = 10,
+    minCellMeta = 10,
+    sampleLabel = sampleLabel,
+    verbose = FALSE
+  )
+  expect_identical(sceMeta2$metacell, sceMeta$metacell)
+})
+
+test_that(desc = "Testing findMetaCells logfile", {
+  logLines <- readLines(logfile)
+  expect_true(any(grepl("Meta-cell aggregation starts", logLines)))
+  expect_equal(sum(grepl("^Sample:", logLines)), 2)
+  expect_equal(sum(grepl(
+    "Starting recursive cell population",
+    logLines
+  )), 2)
+  expect_true(any(grepl("Completed meta-cell aggregation", logLines)))
+})
+
+test_that(desc = "Testing findMetaCells with sampleLabel = NULL", {
+  sceOne <- sceSim[, sampleLabel == "Sample_1"]
+  res <- findMetaCells(sceOne,
+    initK = 2,
+    maxK = 8,
+    tempL = 10,
+    verbose = FALSE
+  )
+  expect_true(all(grepl("^Sample_1_K[0-9]+$", res$metacell)))
+  sceOne$sample <- "tumor1"
+  expect_warning(
+    findMetaCells(sceOne,
+      initK = 2,
+      maxK = 8,
+      tempL = 10,
+      verbose = FALSE
+    ),
+    "all cells are treated as one sample"
+  )
+})
+
+test_that(desc = "Testing findMetaCells sampleLabel error checking", {
+  expect_error(
+    findMetaCells(sceSim,
+      sampleLabel = sampleLabel[-1],
+      verbose = FALSE
+    ),
+    "must be the same length"
+  )
+  naLabel <- sampleLabel
+  naLabel[seq(5)] <- NA
+  expect_error(
+    findMetaCells(sceSim,
+      sampleLabel = naLabel,
+      verbose = FALSE
+    ),
+    "contains NA values"
+  )
+})
+
+test_that(desc = "Testing findMetaCells keeps small samples as one meta-cell", {
+  keep <- c(
+    which(sampleLabel == "Sample_1"),
+    which(sampleLabel == "Sample_2")[seq(5)]
+  )
+  expect_message(
+    res <- findMetaCells(sceSim[, keep],
+      initK = 2, maxK = 8, tempL = 10,
+      sampleLabel = sampleLabel[keep], verbose = FALSE
+    ),
+    "Sample 'Sample_2' has 5 cells, fewer than minCellMeta \\(10\\)"
+  )
+  expect_identical(colnames(res), colnames(sceSim)[keep])
+  isSmall <- sampleLabel[keep] == "Sample_2"
+  expect_true(all(res$metacell[isSmall] == "Sample_2_K1"))
+  expect_true(all(grepl("^Sample_1_K[0-9]+$", res$metacell[!isSmall])))
+
+  # Every sample too small: one meta-cell per sample, no error
+  res <- suppressMessages(findMetaCells(sceSim[, seq(12)],
+    sampleLabel = rep(c("a", "b"), 6), verbose = FALSE
+  ))
+  expect_identical(res$metacell, rep(c("a_K1", "b_K1"), 6))
+})
+
+test_that(desc = "Testing findMetaCells keeps the input cell order", {
+  set.seed(1)
+  ord <- sample(ncol(sceSim))
+  shuffled <- sceSim[, ord]
+  altExp(shuffled, "userSubset") <- shuffled[seq(20), ]
+  res <- findMetaCells(shuffled,
+    initK = 2, maxK = 8, tempL = 10, minCellMeta = 10,
+    sampleLabel = sampleLabel[ord], verbose = FALSE
+  )
+  expect_identical(colnames(res), colnames(shuffled))
+  # Each cell's label names its own sample
+  expect_identical(sub("_K[0-9]+$", "", res$metacell), sampleLabel[ord])
+  # The input's own altExps are kept
+  expect_true("userSubset" %in% altExpNames(res))
+})
+
+test_that(desc = "Testing findMetaCells argument checking", {
+  expect_error(
+    findMetaCells(sceSim, kneePoint = 3, verbose = FALSE),
+    "'kneePoint' must be 1 or 2"
+  )
+  expect_error(
+    findMetaCells(sceSim, initK = 0, verbose = FALSE),
+    "Value of K cannot be zero"
+  )
+  expect_error(
+    findMetaCells(sceSim, maxK = 0, verbose = FALSE),
+    "Value of K cannot be zero"
+  )
+  expect_error(
+    findMetaCells(sceSim, tempL = NULL, verbose = FALSE),
+    "'tempL' must be a positive integer"
+  )
+  expect_error(
+    findMetaCells(sceSim, tempL = 0, verbose = FALSE),
+    "'tempL' must be a positive integer"
+  )
+})
+
+test_that(desc = "Testing .findKnee", {
+  ks <- seq(2, 20)
+  perp <- 20 + 80 * exp(-0.3 * (ks - 2))
+  expect_equal(.findKnee(ks, perp, nPoints = 1), 8)
+  expect_equal(.findKnee(ks, perp, nPoints = 2), 12)
+  expect_equal(.findKnee(ks, rep(5, length(ks))), 2)
+})
+
+test_that(desc = "Testing findMetaCells labels work as useMetaCells zInit", {
+  sce <- selectFeatures(sceMeta, minCount = 0, minCell = 0)
+  res <- recursiveSplitModule(sce,
+    initialL = 3, maxL = 4, zInit = sceMeta$metacell, useMetaCells = TRUE,
+    verbose = FALSE
+  )
+  nMeta <- length(unique(sceMeta$metacell))
+  for (mod in resList(res)) {
+    expect_equal(params(mod)$K, nMeta)
+    expect_length(unique(paste(celdaClusters(mod)$z, sceMeta$metacell)), nMeta)
+  }
+})
+
+test_that(desc = "Testing findMetaCells with cells empty after filtering", {
+  m <- as.matrix(counts(sceSim))
+  lastGene <- nrow(m)
+  # Cell 1 keeps one count, on a gene that no other cell has, so the gene
+  # fails the per-sample filter and cell 1 has no counts on kept genes
+  m[, 1] <- 0
+  m[lastGene, ] <- 0
+  m[lastGene, 1] <- 1
+  sceEmpty <- sceSim
+  counts(sceEmpty) <- m
+  expect_message(
+    res <- findMetaCells(sceEmpty,
+      initK = 2, maxK = 8, tempL = 10, minCellMeta = 10,
+      sampleLabel = sampleLabel, verbose = FALSE
+    ),
+    "1 cell\\(s\\) have no counts on the genes kept"
+  )
+  expect_false(anyNA(res$metacell))
+  expect_true(grepl("^Sample_1_K[0-9]+$", res$metacell[1]))
+  expect_true(all(table(res$metacell) >= 10))
+})
+
+test_that(desc = "Testing findMetaCells checks K and kneePoint", {
+  expect_error(
+    findMetaCells(sceSim, initK = 5, maxK = 3, verbose = FALSE),
+    "'maxK' must be at least 'initK'"
+  )
+  expect_error(
+    findMetaCells(sceSim, initK = -1, verbose = FALSE),
+    "'initK' must be a positive integer"
+  )
+  expect_error(
+    findMetaCells(sceSim, maxK = 2.5, verbose = FALSE),
+    "'maxK' must be a positive integer"
+  )
+  expect_error(
+    findMetaCells(sceSim, kneePoint = NULL, verbose = FALSE),
+    "'kneePoint' must be 1 or 2"
+  )
+})
+
+test_that(desc = "Testing findMetaCells starts a fresh log when quiet", {
+  quietLog <- tempfile(fileext = ".log")
+  small <- c(
+    which(sampleLabel == "Sample_1"),
+    which(sampleLabel == "Sample_2")[seq(5)]
+  )
+  for (i in seq(2)) {
+    suppressMessages(findMetaCells(sceSim[, small],
+      initK = 2, maxK = 4, tempL = 10,
+      sampleLabel = sampleLabel[small], logfile = quietLog, verbose = FALSE
+    ))
+  }
+  expect_equal(sum(grepl("fewer than minCellMeta", readLines(quietLog))), 1)
+})
