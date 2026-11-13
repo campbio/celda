@@ -800,8 +800,12 @@ setMethod("plotGridSearchPerplexity",
 #'  between 1 and 5. Default \code{1:3}.
 #' @details With \code{plotKnees = TRUE}, knee points are found on the mean
 #'  perplexity of the models with the kneedle method and drawn as dashed
-#'  lines with labels: at K for \code{celda_C} models, and at L for
-#'  \code{celda_G} and \code{celda_CG} models.
+#'  lines with labels, on the parameter shown on the x axis: K for
+#'  \code{celda_C} models, L for \code{celda_G} models, and whichever of K
+#'  or L varies for \code{celda_CG} models. Knees can't be plotted for
+#'  \code{celda_CG} models that differ in both K and L. A knee on the
+#'  smallest K or L is dropped with a warning, since the plot starts at the
+#'  second value.
 #' @return A ggplot plot object showing perplexity differences as a function of
 #'  clustering parameters.
 #' @export
@@ -841,54 +845,90 @@ setMethod("plotRPC",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
         if (isTRUE(plotKnees)) {
-          if (!is.numeric(knees) || anyNA(knees) || any(knees < 1)) {
-            stop("'knees' must be a vector of positive integers.")
-          }
-          knees <- sort(unique(as.integer(knees)))
-          if (any(knees > 5)) {
-            stop("'knees' cannot exceed 5.",
-                 "Requested: ", paste(knees, collapse = ", "), ".")
-          }
-
-          rp <- runParams(celdaList)
-          if (model == "celda_C") {
-            R <- rp$K
-          }
-          else if (model == "celda_G" || model == "celda_CG") {
-            R <- rp$L
-          }
-          else {
-            stop("Model must be one of 'celda_C', 'celda_G', or 'celda_CG'")
-          }
-          P <- rp$mean_perplexity
-          o <- order(R); R <- R[o]; P <- P[o]
-          pos <- list()
-          for (i in knees) {
-            n <- paste("knee point",i)
-            pos[[n]] <- .findKnee(R, P, nPoints = i)
-            }
-          lv  <- sort(unique(R))[-1]
-
-          kneeDf <- data.frame(knee = knees, pos = unlist(pos), nx = match(pos, lv))
-          labelRpc <- stats::aggregate(knee ~ nx + pos, data = kneeDf,
-                                       FUN = function(k) paste(k, collapse = " & "))
-          labelRpc$label <- paste0("knee point ", labelRpc$knee, " = ", labelRpc$pos)
-          labelRpc$y <- -Inf
-          labelRpc$vjust <- -0.5 - 1.5 * (seq_len(nrow(labelRpc)) - 1)
-          labelRpc$hjust <- ifelse(labelRpc$nx > 0.7 * length(lv), 1.05, -0.05)
-          g <- g + ggplot2::geom_vline(xintercept = labelRpc$nx,
-                                       linetype = "dashed", colour = "red") +
-            ggplot2::geom_text(
-              data = labelRpc,
-              ggplot2::aes(x = .data$nx, y = .data$y, label = .data$label,
-                           vjust = .data$vjust, hjust = .data$hjust)
-              , color = "red"
-            )
+            g <- .addRPCKnees(g, runParams(celdaList), model, knees)
         }
-
         return(g)
     }
 )
+
+
+# Mark knee points of the mean perplexity curve on an RPC plot. The knees
+# are placed on the parameter the plot's x axis shows: K for celda_C, L for
+# celda_G, and whichever of K or L varies for celda_CG (as in .plotRPCCG).
+.addRPCKnees <- function(g, rp, model, knees) {
+  if (!is.numeric(knees) || anyNA(knees) || any(knees < 1)) {
+    stop("'knees' must be a vector of positive integers.")
+  }
+  knees <- sort(unique(as.integer(knees)))
+  if (any(knees > 5)) {
+    stop(
+      "'knees' cannot exceed 5. Requested: ",
+      paste(knees, collapse = ", "), "."
+    )
+  }
+
+  by <- switch(model,
+    celda_C = "K",
+    celda_G = "L",
+    celda_CG = {
+      varyK <- length(unique(rp$K)) > 1
+      varyL <- length(unique(rp$L)) > 1
+      if (varyK && varyL) {
+        stop(
+          "'plotKnees' needs models that differ in only K or only L; ",
+          "these models differ in both."
+        )
+      }
+      if (varyK) "K" else "L"
+    }
+  )
+
+  ord <- order(rp[[by]])
+  values <- rp[[by]][ord]
+  perplexity <- rp$mean_perplexity[ord]
+  pos <- vapply(knees, function(i) {
+    .findKnee(values, perplexity, nPoints = i)
+  }, numeric(1))
+
+  # The RPC plot starts at the second value, since each point is a
+  # difference from the previous one; knees on the first value can't be
+  # shown
+  shown <- sort(unique(values))[-1]
+  kneeDf <- data.frame(knee = knees, pos = pos, nx = match(pos, shown))
+  if (anyNA(kneeDf$nx)) {
+    warning(
+      "Knee point(s) ", paste(kneeDf$knee[is.na(kneeDf$nx)], collapse = ", "),
+      " fall on the first ", by, ", which the RPC plot does not show."
+    )
+    kneeDf <- kneeDf[!is.na(kneeDf$nx), ]
+  }
+  if (nrow(kneeDf) == 0) {
+    return(g)
+  }
+
+  labelRpc <- stats::aggregate(knee ~ nx + pos,
+    data = kneeDf,
+    FUN = function(k) paste(k, collapse = " & ")
+  )
+  labelRpc$label <- paste0(
+    "knee point ", labelRpc$knee, " = ", labelRpc$pos
+  )
+  labelRpc$y <- -Inf
+  labelRpc$vjust <- -0.5 - 1.5 * (seq_len(nrow(labelRpc)) - 1)
+  labelRpc$hjust <- ifelse(labelRpc$nx > 0.7 * length(shown), 1.05, -0.05)
+  g +
+    ggplot2::geom_vline(
+      xintercept = labelRpc$nx, linetype = "dashed", colour = "red"
+    ) +
+    ggplot2::geom_text(
+      data = labelRpc,
+      ggplot2::aes(
+        x = .data$nx, y = .data$y, label = .data$label,
+        vjust = .data$vjust, hjust = .data$hjust
+      ),
+      color = "red"
+    )
+}
 
 
 #' @rdname plotRPC
