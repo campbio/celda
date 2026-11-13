@@ -572,30 +572,29 @@ setMethod("celda_CG",
       nTSByC <- .rowSumByGroupChange(counts, nTSByC, nextY$y, y, L)
       y <- nextY$y
 
-      ## Gibbs or EM sampling for each cell
-    if(!fixedZ){
-      nextZ <- do.call(.cCCalcEMProbZ, list(
-        counts = nTSByC,
-        mCPByS = mCPByS,
-        nGByCP = nTSByCP,
-        nCP = nCP,
-        nByC = nByC,
-        z = z,
-        s = s,
-        K = K,
-        nG = L,
-        nM = nM,
-        alpha = alpha,
-        beta = beta
-      ))
-      mCPByS <- nextZ$mCPByS
-      nTSByCP <- nextZ$nGByCP
-      nCP <- nextZ$nCP
-      nGByCP <- .colSumByGroupChange(counts, nGByCP, nextZ$z, z, K)
-      z <- nextZ$z
-    } else {
-      nextZ <- NULL
-    }
+      ## Gibbs or EM sampling for each cell, unless z is fixed
+      if (!fixedZ) {
+        nextZ <- do.call(algorithmFun, list(
+          counts = nTSByC,
+          mCPByS = mCPByS,
+          nGByCP = nTSByCP,
+          nCP = nCP,
+          nByC = nByC,
+          z = z,
+          s = s,
+          K = K,
+          nG = L,
+          nM = nM,
+          alpha = alpha,
+          beta = beta
+        ))
+        mCPByS <- nextZ$mCPByS
+        nTSByCP <- nextZ$nGByCP
+        nCP <- nextZ$nCP
+        nGByCP <- .colSumByGroupChange(counts, nGByCP, nextZ$z, z, K)
+        z <- nextZ$z
+      }
+
       ## Perform split on i-th iteration defined by splitOnIter
       tempLl <- .cCGCalcLL(
         K = K,

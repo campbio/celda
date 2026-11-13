@@ -199,3 +199,45 @@ test_that(desc = "Testing plotCeldaViolin with celda_CG", {
     violin <- plotCeldaViolin(modelCG, features = "Gene_1")
     expect_is(violin, "ggplot")
 })
+
+test_that(desc = "Testing celda_CG uses the algorithm argument for z", {
+  fitAlgorithm <- function(algorithm) {
+    celda_CG(
+      celdaCGSim,
+      sampleLabel = celdaCGSim$celda_sample_label,
+      K = K,
+      L = L,
+      algorithm = algorithm,
+      nchains = 1,
+      maxIter = 10,
+      verbose = FALSE
+    )
+  }
+  em <- fitAlgorithm("EM")
+  gibbs <- fitAlgorithm("Gibbs")
+  expect_false(isTRUE(all.equal(
+    logLikelihoodHistory(em),
+    logLikelihoodHistory(gibbs)
+  )))
+})
+
+test_that(desc = "Testing celda_CG with zInitialize = 'fixed'", {
+  zFixed <- as.integer(celdaCGSim$celda_cell_cluster)
+  fixedModel <- celda_CG(
+    celdaCGSim,
+    sampleLabel = celdaCGSim$celda_sample_label,
+    K = K,
+    L = L,
+    zInitialize = "fixed",
+    zInit = zFixed,
+    nchains = 1,
+    maxIter = 10,
+    verbose = FALSE
+  )
+  # Labels may be renumbered by reordering, but the partition is unchanged
+  expect_length(unique(paste(celdaClusters(fixedModel), zFixed)), K)
+  expect_error(
+    celda_CG(celdaCGSim, K = K, L = L, zInitialize = "fixed", verbose = FALSE),
+    "'zInit' needs to specified"
+  )
+})
