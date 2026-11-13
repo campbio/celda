@@ -64,7 +64,28 @@ test_that(desc = "Testing recursiveSplitModule useMetaCells needs zInit", {
 
 test_that(desc = "Testing plotRPC knees for celda_C models", {
   g <- plotRPC(rsCellC, plotKnees = TRUE, knees = 1)
+  knee <- kneeLayerData(g)
+  expect_equal(knee$pos, expectedKnee(rsCellC, "K"))
+  # The line is drawn at the knee's position on the discrete x axis
+  xLevels <- ggplot2::layer_scales(g)$x$range$range
+  expect_equal(xLevels[knee$nx], as.character(knee$pos))
+})
+
+test_that(desc = "Testing plotRPC knees for celdaList input", {
+  celdaList <- S4Vectors::metadata(altExp(rsCellC))$celda_grid_search
+  g <- plotRPC(celdaList, plotKnees = TRUE, knees = 1)
   expect_equal(kneeLayerData(g)$pos, expectedKnee(rsCellC, "K"))
+})
+
+test_that(desc = "Testing plotRPC knees use the mean of repeated values", {
+  rp <- data.frame(
+    K = rep(2:7, each = 2),
+    mean_perplexity = rep(c(100, 60, 40, 35, 33, 32), each = 2) +
+      c(-30, 30)
+  )
+  g <- ggplot2::ggplot()
+  knee <- kneeLayerData(.addRPCKnees(g, rp, "celda_C", knees = 1))
+  expect_equal(knee$pos, .findKnee(2:7, c(100, 60, 40, 35, 33, 32)))
 })
 
 test_that(desc = "Testing plotRPC knees for celda_CG models varying K", {

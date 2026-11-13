@@ -883,9 +883,11 @@ setMethod("plotRPC",
     }
   )
 
-  ord <- order(rp[[by]])
-  values <- rp[[by]][ord]
-  perplexity <- rp$mean_perplexity[ord]
+  # One mean perplexity per value (several chains can share a K or L), the
+  # same curve the RPC plot shows
+  means <- tapply(rp$mean_perplexity, rp[[by]], mean)
+  values <- as.numeric(names(means))
+  perplexity <- as.numeric(means)
   pos <- vapply(knees, function(i) {
     .findKnee(values, perplexity, nPoints = i)
   }, numeric(1))
@@ -942,10 +944,14 @@ setMethod("plotRPC",
 #' @export
 setMethod("plotRPC",
     signature(x = "celdaList"),
-    function(x, sep = 5, alpha = 0.5) {
+    function(x, sep = 5, alpha = 0.5, plotKnees = FALSE, knees = 1:3) {
+        model <- as.character(class(resList(x)[[1]]))
         g <- do.call(paste0(".plotRPC",
-            unlist(strsplit(as.character(class(resList(x)[[1]])), "_"))[[2]]),
+            unlist(strsplit(model, "_"))[[2]]),
             args = list(x, sep, alpha))
+        if (isTRUE(plotKnees)) {
+            g <- .addRPCKnees(g, runParams(x), model, knees)
+        }
         return(g)
     }
 )
