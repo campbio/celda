@@ -44,24 +44,28 @@
 #' @examples
 #' library(celda)
 #' # Simulated counts with 2 samples
-#' sce <- simulateCells("celda_CG", S = 2, K = 5, L = 10, G = 200,
-#'                      CRange = c(150, 200), seed = 12345)
-#' sce <- findMetaCells(sce, initK = 3, maxK = 8, tempL = 20,
-#'                      sampleLabel = sce$celda_sample_label,
-#'                      minCellMeta = 10, verbose = FALSE)
+#' sce <- simulateCells("celda_CG",
+#'   S = 2, K = 5, L = 10, G = 200,
+#'   CRange = c(150, 200), seed = 12345
+#' )
+#' sce <- findMetaCells(sce,
+#'   initK = 3, maxK = 8, tempL = 20,
+#'   sampleLabel = sce$celda_sample_label,
+#'   minCellMeta = 10, verbose = FALSE
+#' )
 #' table(sce$metacell)
-
 findMetaCells <- function(
-    inSCE,
-    initK = 5,
-    maxK = NULL,
-    minCellMeta = 10,
-    tempL = 50,
-    sampleLabel = NULL,
-    kneePoint = 2,
-    seed = 12345,
-    logfile = NULL,
-    verbose = TRUE) {
+  inSCE,
+  initK = 5,
+  maxK = NULL,
+  minCellMeta = 10,
+  tempL = 50,
+  sampleLabel = NULL,
+  kneePoint = 2,
+  seed = 12345,
+  logfile = NULL,
+  verbose = TRUE
+) {
   # Check the arguments before any slow work starts
   if (!kneePoint %in% c(1L, 2L)) {
     stop("'kneePoint' must be 1 or 2.", call. = FALSE)
@@ -69,31 +73,36 @@ findMetaCells <- function(
   if (isTRUE(initK == 0) || (!is.null(maxK) && isTRUE(maxK == 0))) {
     stop("Value of K cannot be zero.", call. = FALSE)
   }
-  if (is.null(tempL) || !is.numeric(tempL) || length(tempL) != 1 ||
-      tempL < 1) {
+  validTempL <- !is.null(tempL) && is.numeric(tempL) &&
+    length(tempL) == 1 && tempL >= 1
+  if (!validTempL) {
     stop("'tempL' must be a positive integer.", call. = FALSE)
   }
   # Same rules as other celda functions: one label per cell, NULL = one sample
-  if (is.null(sampleLabel) &&
-      "sample" %in% colnames(SummarizedExperiment::colData(inSCE))) {
+  hasSampleColumn <- "sample" %in%
+    colnames(SummarizedExperiment::colData(inSCE))
+  if (is.null(sampleLabel) && hasSampleColumn) {
     warning("'sampleLabel' is NULL, so all cells are treated as one sample. ",
-            "colData(inSCE)$sample is not used; pass ",
-            "sampleLabel = inSCE$sample to build meta-cells per sample.",
-            call. = FALSE)
+      "colData(inSCE)$sample is not used; pass ",
+      "sampleLabel = inSCE$sample to build meta-cells per sample.",
+      call. = FALSE
+    )
   }
   if (anyNA(sampleLabel)) {
     stop("'sampleLabel' contains NA values.", call. = FALSE)
   }
   sampleLabel <- .processSampleLabels(sampleLabel,
-                                              numCells = ncol(inSCE))
+    numCells = ncol(inSCE)
+  )
   samples <- levels(sampleLabel)
   startTime <- Sys.time()
   # append = FALSE: every run starts a new log file
   .logMessages("Meta-cell aggregation starts!\nSystem time: ",
-                       startTime,
-                       logfile = logfile,
-                       append = FALSE,
-                       verbose = verbose)
+    startTime,
+    logfile = logfile,
+    append = FALSE,
+    verbose = verbose
+  )
   # One label per input cell, filled in sample by sample, so the result
   # keeps the input's cell order
   metacell <- rep(NA_character_, ncol(inSCE))
@@ -119,31 +128,35 @@ findMetaCells <- function(
     # Upper limit for K: sqrt(cells), at least 10 and at most 100,
     # unless the user gave one
     sampleMaxK <- if (is.null(maxK)) {
-      k <- pmin(pmax(round(sqrt(nCells)), 10), 100)
+      pmin(pmax(round(sqrt(nCells)), 10), 100)
     } else {
       maxK
     }
-    # Keep genes seen in this sample (>= 3 counts in >= 3 cells); stored in
-    # altExp(sce, "featureSubset")
-    sce <- celda::selectFeatures(sce, minCount = 3, minCell = 3,
-                                 useAssay = "counts")
+    # Keep genes seen in this sample (>= 3 counts in >= 3 cells); they are
+    # stored in the "featureSubset" altExp
+    sce <- selectFeatures(sce,
+      minCount = 3, minCell = 3,
+      useAssay = "counts"
+    )
     .logMessages("Sample: ",
-                         s,
-                         logfile = logfile,
-                         append = TRUE,
-                         verbose = verbose)
+      s,
+      logfile = logfile,
+      append = TRUE,
+      verbose = verbose
+    )
     # ------------------------------------
     # 1) recursive cell split to explore K
     # ------------------------------------
     .logMessages("running recursiveSplitCell from K = ",
-                         initK, " to K = ", sampleMaxK,
-                         logfile = logfile,
-                         append = TRUE,
-                         verbose = verbose)
+      initK, " to K = ", sampleMaxK,
+      logfile = logfile,
+      append = TRUE,
+      verbose = verbose
+    )
     # recursiveSplitCell starts its own log with append = FALSE, which would
     # erase this log. Give it a temporary file and append that to the log.
     rscLog <- if (is.null(logfile)) NULL else tempfile(fileext = ".log")
-    sce <- celda::recursiveSplitCell(
+    sce <- recursiveSplitCell(
       sce,
       initialK = initK,
       maxK = sampleMaxK,
@@ -152,7 +165,8 @@ findMetaCells <- function(
       useAssay = "counts",
       seed = seed,
       logfile = rscLog,
-      verbose = verbose)
+      verbose = verbose
+    )
     if (!is.null(rscLog) && file.exists(rscLog)) {
       file.append(logfile, rscLog)
       unlink(rscLog)
@@ -164,7 +178,7 @@ findMetaCells <- function(
     # One model per K was fitted above; read back the perplexity of each
     altExpObj <- SingleCellExperiment::altExp(sce, "featureSubset")
     gridSearch <- S4Vectors::metadata(altExpObj)$celda_grid_search
-    perplexDf <- gridSearch@runParams[, c("K", "mean_perplexity")]
+    perplexDf <- runParams(gridSearch)[, c("K", "mean_perplexity")]
 
     # ------------------------------------------
     # 3) run kneedle algorithm to find optimal k
@@ -172,27 +186,31 @@ findMetaCells <- function(
     # Perplexity falls as K grows; the knee is where adding clusters stops
     # paying off
     bestK <- .findKnee(perplexDf$K, perplexDf$mean_perplexity,
-                       nPoints = kneePoint)
+      nPoints = kneePoint
+    )
     # A knee at maxK usually means maxK was too small for this sample
     if (bestK == max(perplexDf$K)) {
       warning("Sample '", s, "': selected K is at maxK (", bestK,
-              "); the upper bound is binding, not the curve.", call. = FALSE)
+        "); the upper bound is binding, not the curve.",
+        call. = FALSE
+      )
     }
     # ---------------------------------------------
     # 4) Add updated metacell labels to the colData
     # ---------------------------------------------
     # Take the model with K = bestK, then merge clusters below minCellMeta
-    sce <- celda::subsetCeldaList(sce, list(K = bestK))
+    sce <- subsetCeldaList(sce, list(K = bestK))
     sce <- .updateMetaCellLabel(sce, sampleName = s, minCellMeta = minCellMeta)
     metacell[idx] <- sce$metacell
   }
 
   elapsed <- difftime(Sys.time(), startTime, units = "auto")
   .logMessages("Completed meta-cell aggregation. Total time: ",
-                       format(round(elapsed, 2)),
-                       logfile = logfile,
-                       append = TRUE,
-                       verbose = verbose)
+    format(round(elapsed, 2)),
+    logfile = logfile,
+    append = TRUE,
+    verbose = verbose
+  )
   SummarizedExperiment::colData(inSCE)$metacell <- metacell
   inSCE
 }
@@ -205,26 +223,27 @@ findMetaCells <- function(
 #     (measured straight down).
 # For nPoints > 1, repeat on the part of the curve from the knee to the end,
 # so nPoints = 2 returns the second knee.
-.findKnee <- function(K, P, nPoints = 1L) {
-  # A flat curve has no knee; return the first K
-  if (min(K) == max(K) || min(P) == max(P)) {
-    return(K[1])
+.findKnee <- function(values, perplexity, nPoints = 1L) {
+  # A flat curve has no knee; return the first value
+  if (min(values) == max(values) || min(perplexity) == max(perplexity)) {
+    return(values[1])
   }
-  x <- (K - min(K)) / (max(K) - min(K))
-  y <- (P - min(P)) / (max(P) - min(P))
+  x <- (values - min(values)) / (max(values) - min(values))
+  y <- (perplexity - min(perplexity)) / (max(perplexity) - min(perplexity))
 
-  x1 <- x[1]; y1 <- y[1]
-  xl <- x[length(x)]; yl <- y[length(y)]
+  x1 <- x[1]
+  y1 <- y[1]
+  xl <- x[length(x)]
+  yl <- y[length(y)]
 
   # Straight line from the first to the last point, and the gap below it
   strLine <- y1 + (((yl - y1) / (xl - x1)) * (x - x1))
-  dist <- strLine - y
-  i <- which.max(dist)
-  k1 <- K[i]
+  i <- which.max(strLine - y)
   if (nPoints == 1L) {
-    return(k1)
+    values[i]
   } else {
-    return(.findKnee(K[i:length(K)], P[i:length(P)], nPoints = nPoints - 1L))
+    rest <- seq(i, length(values))
+    .findKnee(values[rest], perplexity[rest], nPoints = nPoints - 1L)
   }
 }
 
@@ -236,38 +255,43 @@ findMetaCells <- function(
 # Euclidean distance between their average scores.
 .updateMetaCellLabel <- function(sce, sampleName, minCellMeta = 10) {
   colDat <- SingleCellExperiment::colData(sce)
-  colDat$metacell <- as.character(celda::celdaClusters(sce))
+  colDat$metacell <- as.character(celdaClusters(sce))
 
   smallCluster <- names(which(table(colDat$metacell) < minCellMeta))
   if (length(smallCluster) > 0) {
     counts <- SummarizedExperiment::assay(
-      SingleCellExperiment::altExp(sce, "featureSubset"), "counts")
+      SingleCellExperiment::altExp(sce, "featureSubset"), "counts"
+    )
 
     # Temporary gene modules saved by the local recursiveSplitCell
     tempY <- S4Vectors::metadata(
-      SingleCellExperiment::altExp(sce, "featureSubset"))[["tempY"]]
+      SingleCellExperiment::altExp(sce, "featureSubset")
+    )[["tempY"]]
 
     # Module-by-cell counts -> log CPM -> scaled cell-by-module scores
     countsY <- .rowSumByGroup(
       counts,
       tempY,
-      length(unique(tempY)))
+      length(unique(tempY))
+    )
 
-    countsY <- celda::normalizeCounts(
+    countsY <- normalizeCounts(
       countsY,
       scaleFactor = 1e6,
-      transformationFun = log1p)
+      transformationFun = log1p
+    )
 
     countsY <- scale(t(countsY)) # cell-by-module matrix
     colnames(countsY) <- paste0("L", seq_len(ncol(countsY)))
     rownames(countsY) <- colnames(sce)
 
-    while(length(smallCluster) > 0) {
+    while (length(smallCluster) > 0) {
       # Average module scores of each current cluster
       clusters <- unique(colDat$metacell)
       centroidK <- matrix(
         nrow = length(clusters),
-        ncol = ncol(countsY))
+        ncol = ncol(countsY)
+      )
       rownames(centroidK) <- clusters
       colnames(centroidK) <- colnames(countsY)
 
@@ -294,10 +318,12 @@ findMetaCells <- function(
   # Renumber the surviving clusters 1..n and name them <sample>_K<n>
   prevLabel <- unique(colDat$metacell)
   newLabel <- seq_along(prevLabel)
-  labelMap <- setNames(newLabel, prevLabel)
+  labelMap <- stats::setNames(newLabel, prevLabel)
 
-  SummarizedExperiment::colData(sce)$metacell <- paste0(sampleName, "_K",
-                         labelMap[as.character(colDat$metacell)])
+  SummarizedExperiment::colData(sce)$metacell <- paste0(
+    sampleName, "_K",
+    labelMap[as.character(colDat$metacell)]
+  )
 
-  return(sce)
+  sce
 }

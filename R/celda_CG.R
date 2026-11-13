@@ -103,7 +103,7 @@ setGeneric("celda_CG",
         splitOnLast = TRUE,
         seed = 12345,
         nchains = 3,
-                    zInitialize = c("split", "random", "predefined", "fixed"),
+        zInitialize = c("split", "random", "predefined", "fixed"),
         yInitialize = c("split", "random", "predefined"),
         countChecksum = NULL,
         zInit = NULL,
@@ -134,7 +134,7 @@ setMethod("celda_CG",
         splitOnLast = TRUE,
         seed = 12345,
         nchains = 3,
-                   zInitialize = c("split", "random", "predefined", "fixed"),
+        zInitialize = c("split", "random", "predefined", "fixed"),
         yInitialize = c("split", "random", "predefined"),
         countChecksum = NULL,
         zInit = NULL,
@@ -216,7 +216,7 @@ setMethod("celda_CG",
         splitOnLast = TRUE,
         seed = 12345,
         nchains = 3,
-                   zInitialize = c("split", "random", "predefined", "fixed"),
+        zInitialize = c("split", "random", "predefined", "fixed"),
         yInitialize = c("split", "random", "predefined"),
         countChecksum = NULL,
         zInit = NULL,
@@ -318,7 +318,7 @@ setMethod("celda_CG",
             reorder = TRUE
         )
     } else {
-    withr::with_seed(
+        with_seed(
             seed,
             celdaCGMod <- .celda_CG(
                 counts = counts,
@@ -424,19 +424,18 @@ setMethod("celda_CG",
   )
   zInitialize <- match.arg(zInitialize)
   yInitialize <- match.arg(yInitialize)
-  # update
+  # With "fixed", z stays at zInit and only y is updated
   fixedZ <- identical(zInitialize, "fixed")
-  if (zInitialize == "predefined" || zInitialize == "fixed") {
-    if (is.null(zInit)) {
-      stop("'zInit' needs to specified when zInitialize = 'predefined' or 'fixed'.")
-    }
+  if (zInitialize %in% c("predefined", "fixed") && is.null(zInit)) {
+    stop(
+      "'zInit' needs to be specified when zInitialize = 'predefined' ",
+      "or 'fixed'."
+    )
+  }
+  if (yInitialize == "predefined" && is.null(yInit)) {
+    stop("'yInit' needs to be specified when yInitialize = 'predefined'.")
   }
 
-  if (yInitialize == "predefined") {
-    if (is.null(yInit)) {
-      stop("'yInit' needs to specified when yInitialize = 'predefined'.")
-    }
-  }
   allChains <- seq(nchains)
 
   # Pre-compute lgamma values
@@ -465,8 +464,7 @@ setMethod("celda_CG",
       append = TRUE,
       verbose = verbose
     )
-    # update
-    if (zInitialize == "predefined" || zInitialize == "fixed") {
+    if (zInitialize %in% c("predefined", "fixed")) {
       z <- .initializeCluster(K,
         ncol(counts),
         initial = zInit,
@@ -670,7 +668,7 @@ setMethod("celda_CG",
         nTSByC <- .rowSumByGroup(counts, group = y, L = L)
       }
 
-    if (!fixedZ && K > 2 & iter != maxIter &
+      if (!fixedZ && K > 2 & iter != maxIter &
         (((numIterWithoutImprovement == stopIter &
           !all(tempLl > ll)) & isTRUE(splitOnLast)) |
           (splitOnIter > 0 & iter %% splitOnIter == 0 &

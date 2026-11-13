@@ -34,6 +34,7 @@
   return(list(ll = bestLl, z = bestZ))
 }
 
+
 .singleSplitY <- function(counts,
                           y,
                           L,
@@ -71,6 +72,7 @@
   }
   return(list(ll = bestLl, y = bestY))
 }
+
 
 #' @title Recursive cell splitting
 #' @description Uses the \link{celda_C} model to cluster cells into
@@ -259,7 +261,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-            altExp <- .createSCERecursiveSplitCell(celdaList = celdaList$celdaRes,
+        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList$celdaRes,
             sce = altExp,
             xClass = xClass,
             useAssay = useAssay,
@@ -280,9 +282,9 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-            if (!is.null(celdaList$tempY)) {
-              S4Vectors::metadata(altExp)[["tempY"]]   <- celdaList$tempY
-            }
+        if (!is.null(celdaList$tempY)) {
+            S4Vectors::metadata(altExp)[["tempY"]] <- celdaList$tempY
+        }
         SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
@@ -364,7 +366,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-            altExp <- .createSCERecursiveSplitCell(celdaList = celdaList$celdaRes,
+        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList$celdaRes,
             sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
@@ -384,9 +386,9 @@ setMethod("recursiveSplitCell",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
-            if (!is.null(celdaList$tempY)) {
-              S4Vectors::metadata(altExp)[["tempY"]]   <- celdaList$tempY
-            }
+        if (!is.null(celdaList$tempY)) {
+            S4Vectors::metadata(altExp)[["tempY"]] <- celdaList$tempY
+        }
         SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
@@ -431,7 +433,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
     } else {
-    withr::with_seed(
+        with_seed(
             seed,
             celdaList <- .recursiveSplitCell(counts = counts,
                 sampleLabel = sampleLabel,
@@ -901,9 +903,10 @@ setMethod("recursiveSplitCell",
 
   return(list(
     celdaRes = celdaRes,
-    tempY    = tempY     # gene module assignments (Branch 2 only, NULL otherwise)
+    tempY = tempY # temporary modules; NULL unless tempL was used
   ))
 }
+
 
 #' @title Recursive module splitting
 #' @description Uses the \link{celda_G} model to cluster features into modules
@@ -1257,7 +1260,7 @@ setMethod("recursiveSplitModule",
             doResampling = doResampling,
             numResample = numResample)
     } else {
-        withr::with_seed(seed,
+        with_seed(seed,
             celdaList <- .recursiveSplitModule(
                 counts = counts,
                 initialL = initialL,

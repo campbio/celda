@@ -238,6 +238,6 @@ test_that(desc = "Testing celda_CG with zInitialize = 'fixed'", {
   expect_length(unique(paste(celdaClusters(fixedModel), zFixed)), K)
   expect_error(
     celda_CG(celdaCGSim, K = K, L = L, zInitialize = "fixed", verbose = FALSE),
-    "'zInit' needs to specified"
+    "'zInit' needs to be specified"
   )
 })
