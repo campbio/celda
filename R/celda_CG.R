@@ -50,11 +50,14 @@
 #'  a default value of 12345 is used. If NULL, no calls to
 #'  \link[withr]{with_seed} are made.
 #' @param nchains Integer. Number of random cluster initializations. Default 3.
-#' @param zInitialize Chararacter. One of 'random', 'split', or 'predefined'.
-#'  With 'random', cells are randomly assigned to a populations. With 'split',
-#'  cells will be split into sqrt(K) populations and then each population will
-#'  be subsequently split into another sqrt(K) populations. With 'predefined',
-#'  values in \code{zInit} will be used to initialize \code{z}. Default 'split'.
+#' @param zInitialize Chararacter. One of 'random', 'split', 'predefined', or
+#'  'fixed'. With 'random', cells are randomly assigned to a populations. With
+#'  'split', cells will be split into sqrt(K) populations and then each
+#'  population will be subsequently split into another sqrt(K) populations.
+#'  With 'predefined', values in \code{zInit} will be used to initialize
+#'  \code{z}. With 'fixed', \code{z} is set to \code{zInit} and is not
+#'  updated during fitting, so only the feature modules \code{y} are
+#'  estimated. 'predefined' and 'fixed' require \code{zInit}. Default 'split'.
 #' @param yInitialize Character. One of 'random', 'split', or 'predefined'.
 #'  With 'random', features are randomly assigned to a modules. With 'split',
 #'  features will be split into sqrt(L) modules and then each module will be
@@ -100,7 +103,7 @@ setGeneric("celda_CG",
         splitOnLast = TRUE,
         seed = 12345,
         nchains = 3,
-        zInitialize = c("split", "random", "predefined"),
+                    zInitialize = c("split", "random", "predefined", "fixed"),
         yInitialize = c("split", "random", "predefined"),
         countChecksum = NULL,
         zInit = NULL,
@@ -131,7 +134,7 @@ setMethod("celda_CG",
         splitOnLast = TRUE,
         seed = 12345,
         nchains = 3,
-        zInitialize = c("split", "random", "predefined"),
+                   zInitialize = c("split", "random", "predefined", "fixed"),
         yInitialize = c("split", "random", "predefined"),
         countChecksum = NULL,
         zInit = NULL,
@@ -213,7 +216,7 @@ setMethod("celda_CG",
         splitOnLast = TRUE,
         seed = 12345,
         nchains = 3,
-        zInitialize = c("split", "random", "predefined"),
+                   zInitialize = c("split", "random", "predefined", "fixed"),
         yInitialize = c("split", "random", "predefined"),
         countChecksum = NULL,
         zInit = NULL,
@@ -315,7 +318,7 @@ setMethod("celda_CG",
             reorder = TRUE
         )
     } else {
-        with_seed(
+    withr::with_seed(
             seed,
             celdaCGMod <- .celda_CG(
                 counts = counts,
@@ -378,7 +381,7 @@ setMethod("celda_CG",
                       splitOnIter = 10,
                       splitOnLast = TRUE,
                       nchains = 3,
-                      zInitialize = c("split", "random", "predefined"),
+                      zInitialize = c("split", "random", "predefined", "fixed"),
                       yInitialize = c("split", "random", "predefined"),
                       countChecksum = NULL,
                       zInit = NULL,
@@ -421,7 +424,19 @@ setMethod("celda_CG",
   )
   zInitialize <- match.arg(zInitialize)
   yInitialize <- match.arg(yInitialize)
+  # update
+  fixedZ <- identical(zInitialize, "fixed")
+  if (zInitialize == "predefined" || zInitialize == "fixed") {
+    if (is.null(zInit)) {
+      stop("'zInit' needs to specified when zInitialize = 'predefined' or 'fixed'.")
+    }
+  }
 
+  if (yInitialize == "predefined") {
+    if (is.null(yInit)) {
+      stop("'yInit' needs to specified when yInitialize = 'predefined'.")
+    }
+  }
   allChains <- seq(nchains)
 
   # Pre-compute lgamma values
@@ -450,11 +465,8 @@ setMethod("celda_CG",
       append = TRUE,
       verbose = verbose
     )
-
-    if (zInitialize == "predefined") {
-      if (is.null(zInit)) {
-        stop("'zInit' needs to specified when initilize.z == 'given'.")
-      }
+    # update
+    if (zInitialize == "predefined" || zInitialize == "fixed") {
       z <- .initializeCluster(K,
         ncol(counts),
         initial = zInit,
@@ -476,9 +488,6 @@ setMethod("celda_CG",
     }
 
     if (yInitialize == "predefined") {
-      if (is.null(yInit)) {
-        stop("'yInit' needs to specified when initilize.y == 'given'.")
-      }
       y <- .initializeCluster(L,
         nrow(counts),
         initial = yInit,
@@ -564,7 +573,8 @@ setMethod("celda_CG",
       y <- nextY$y
 
       ## Gibbs or EM sampling for each cell
-      nextZ <- do.call(algorithmFun, list(
+    if(!fixedZ){
+      nextZ <- do.call(.cCCalcEMProbZ, list(
         counts = nTSByC,
         mCPByS = mCPByS,
         nGByCP = nTSByCP,
@@ -583,7 +593,9 @@ setMethod("celda_CG",
       nCP <- nextZ$nCP
       nGByCP <- .colSumByGroupChange(counts, nGByCP, nextZ$z, z, K)
       z <- nextZ$z
-
+    } else {
+      nextZ <- NULL
+    }
       ## Perform split on i-th iteration defined by splitOnIter
       tempLl <- .cCGCalcLL(
         K = K,
@@ -659,7 +671,7 @@ setMethod("celda_CG",
         nTSByC <- .rowSumByGroup(counts, group = y, L = L)
       }
 
-      if (K > 2 & iter != maxIter &
+    if (!fixedZ && K > 2 & iter != maxIter &
         (((numIterWithoutImprovement == stopIter &
           !all(tempLl > ll)) & isTRUE(splitOnLast)) |
           (splitOnIter > 0 & iter %% splitOnIter == 0 &

@@ -34,7 +34,6 @@
   return(list(ll = bestLl, z = bestZ))
 }
 
-
 .singleSplitY <- function(counts,
                           y,
                           L,
@@ -72,7 +71,6 @@
   }
   return(list(ll = bestLl, y = bestY))
 }
-
 
 #' @title Recursive cell splitting
 #' @description Uses the \link{celda_C} model to cluster cells into
@@ -147,7 +145,10 @@
 #'  parameter settings and celda model results are stored in the
 #'  \link[S4Vectors]{metadata} \code{"celda_grid_search"} slot. The models in
 #'  the list will be of class \code{celda_C} if \code{yInit = NULL} or
-#'  \code{celda_CG} if \code{zInit} is set.
+#'  \code{celda_CG} if \code{zInit} is set. If \code{tempL} is set and
+#'  \code{yInit} is NULL, the temporary feature modules are also saved as
+#'  \code{tempY} (one module label per feature) in
+#'  \code{metadata(altExp(x, altExpName))}.
 #' @seealso \link{recursiveSplitModule} for recursive splitting of feature
 #'  modules.
 #' @export
@@ -258,7 +259,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList,
+            altExp <- .createSCERecursiveSplitCell(celdaList = celdaList$celdaRes,
             sce = altExp,
             xClass = xClass,
             useAssay = useAssay,
@@ -278,6 +279,10 @@ setMethod("recursiveSplitCell",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+
+            if (!is.null(celdaList$tempY)) {
+              S4Vectors::metadata(altExp)[["tempY"]]   <- celdaList$tempY
+            }
         SingleCellExperiment::altExp(x, altExpName) <- altExp
         return(x)
     }
@@ -359,7 +364,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
 
-        altExp <- .createSCERecursiveSplitCell(celdaList = celdaList,
+            altExp <- .createSCERecursiveSplitCell(celdaList = celdaList$celdaRes,
             sce = SingleCellExperiment::altExp(sce, altExpName),
             xClass = xClass,
             useAssay = useAssay,
@@ -379,6 +384,9 @@ setMethod("recursiveSplitCell",
             perplexity = perplexity,
             logfile = logfile,
             verbose = verbose)
+            if (!is.null(celdaList$tempY)) {
+              S4Vectors::metadata(altExp)[["tempY"]]   <- celdaList$tempY
+            }
         SingleCellExperiment::altExp(sce, altExpName) <- altExp
         return(sce)
     }
@@ -423,7 +431,7 @@ setMethod("recursiveSplitCell",
             logfile = logfile,
             verbose = verbose)
     } else {
-        with_seed(
+    withr::with_seed(
             seed,
             celdaList <- .recursiveSplitCell(counts = counts,
                 sampleLabel = sampleLabel,
@@ -496,7 +504,8 @@ setMethod("recursiveSplitCell",
     column = colnames(counts),
     sample = levels(sampleLabel)
   )
-
+  tempY <- NULL
+  # Branch 1: y-Init is specified
   if (!is.null(yInit)) {
     # Create collapsed module matrix
     L <- length(unique(yInit))
@@ -631,7 +640,7 @@ setMethod("recursiveSplitCell",
       K = as.integer(runK),
       stringsAsFactors = FALSE
     )
-  } else if (!is.null(tempL)) {
+  } else if (!is.null(tempL)) { # Branch 2: tempL is specified
     L <- tempL
     .logMessages(date(),
       ".. Collapsing to",
@@ -890,9 +899,11 @@ setMethod("recursiveSplitCell",
     verbose = verbose
   )
 
-  return(celdaRes)
+  return(list(
+    celdaRes = celdaRes,
+    tempY    = tempY     # gene module assignments (Branch 2 only, NULL otherwise)
+  ))
 }
-
 
 #' @title Recursive module splitting
 #' @description Uses the \link{celda_G} model to cluster features into modules
@@ -922,6 +933,13 @@ setMethod("recursiveSplitCell",
 #'  labels in \code{zInit} and then perform module splitting. If NULL, no
 #'  collapsing will be performed unless \code{tempK} is specified.
 #'  Default \code{NULL}.
+#' @param useMetaCells Logical. If \code{TRUE}, the cell labels in
+#'  \code{zInit} (for example meta-cells from \link{findMetaCells}) are kept
+#'  fixed while the modules are split: each model is fit by \link{celda_CG}
+#'  with \code{zInitialize = "fixed"}. If \code{FALSE}, \code{zInit} only
+#'  initializes the cell clusters, which can still change
+#'  (\code{zInitialize = "predefined"}). Requires \code{zInit}.
+#'  Default \code{FALSE}.
 #' @param sampleLabel Vector or factor. Denotes the sample label for each cell
 #'  (column) in the count matrix. Default \code{NULL}.
 #' @param alpha Numeric. Concentration parameter for Theta. Adds a pseudocount
@@ -970,6 +988,7 @@ setGeneric("recursiveSplitModule",
         maxL = 100,
         tempK = 100,
         zInit = NULL,
+        useMetaCells = FALSE,
         sampleLabel = NULL,
         alpha = 1,
         beta = 1,
@@ -1008,6 +1027,7 @@ setMethod("recursiveSplitModule",
         maxL = 100,
         tempK = 100,
         zInit = NULL,
+        useMetaCells = FALSE,
         sampleLabel = NULL,
         alpha = 1,
         beta = 1,
@@ -1037,6 +1057,10 @@ setMethod("recursiveSplitModule",
 
         counts <- SummarizedExperiment::assay(altExp, i = useAssay)
 
+        if (isTRUE(useMetaCells) && is.null(zInit)) {
+          stop("'zInit' needs to specified when useMetaCells is set to TRUE")
+        }
+
         if (!is.null(zInit)) {
             model <- "celda_CG"
         } else {
@@ -1048,6 +1072,7 @@ setMethod("recursiveSplitModule",
             maxL = maxL,
             tempK = tempK,
             zInit = zInit,
+            useMetaCells = useMetaCells,
             sampleLabel = sampleLabel,
             alpha = alpha,
             beta = beta,
@@ -1071,6 +1096,7 @@ setMethod("recursiveSplitModule",
             maxL = maxL,
             tempK = tempK,
             zInit = zInit,
+            useMetaCells = useMetaCells,
             sampleLabel = sampleLabel,
             alpha = alpha,
             beta = beta,
@@ -1111,6 +1137,7 @@ setMethod("recursiveSplitModule",
         maxL = 100,
         tempK = 100,
         zInit = NULL,
+        useMetaCells = FALSE,
         sampleLabel = NULL,
         alpha = 1,
         beta = 1,
@@ -1131,6 +1158,10 @@ setMethod("recursiveSplitModule",
         SingleCellExperiment::altExp(sce, altExpName) <- sce
         xClass <- "matrix"
 
+        if (isTRUE(useMetaCells) && is.null(zInit)) {
+          stop("'zInit' needs to be specified when useMetaCells is set to TRUE")
+        }
+
         if (!is.null(zInit)) {
             model <- "celda_CG"
         } else {
@@ -1142,6 +1173,7 @@ setMethod("recursiveSplitModule",
             maxL = maxL,
             tempK = tempK,
             zInit = zInit,
+            useMetaCells = useMetaCells,
             sampleLabel = sampleLabel,
             alpha = alpha,
             beta = beta,
@@ -1165,6 +1197,7 @@ setMethod("recursiveSplitModule",
             maxL = maxL,
             tempK = tempK,
             zInit = zInit,
+            useMetaCells = useMetaCells,
             sampleLabel = sampleLabel,
             alpha = alpha,
             beta = beta,
@@ -1187,6 +1220,7 @@ setMethod("recursiveSplitModule",
     maxL,
     tempK,
     zInit,
+    useMetaCells,
     sampleLabel,
     alpha,
     beta,
@@ -1208,6 +1242,7 @@ setMethod("recursiveSplitModule",
             maxL = maxL,
             tempK = tempK,
             zInit = zInit,
+            useMetaCells = useMetaCells,
             sampleLabel = sampleLabel,
             alpha = alpha,
             beta = beta,
@@ -1221,13 +1256,14 @@ setMethod("recursiveSplitModule",
             doResampling = doResampling,
             numResample = numResample)
     } else {
-        with_seed(seed,
+        withr::with_seed(seed,
             celdaList <- .recursiveSplitModule(
                 counts = counts,
                 initialL = initialL,
                 maxL = maxL,
                 tempK = tempK,
                 zInit = zInit,
+                useMetaCells = useMetaCells,
                 sampleLabel = sampleLabel,
                 alpha = alpha,
                 beta = beta,
@@ -1252,6 +1288,7 @@ setMethod("recursiveSplitModule",
                                  maxL = 100,
                                  tempK = 100,
                                  zInit = NULL,
+                                 useMetaCells = FALSE,
                                  sampleLabel = NULL,
                                  alpha = 1,
                                  beta = 1,
@@ -1293,7 +1330,7 @@ setMethod("recursiveSplitModule",
   )
   s <- as.integer(sampleLabel)
 
-  if (!is.null(zInit)) {
+  if (!is.null(zInit) && !isTRUE(useMetaCells)) {
     # Create collapsed module matrix
     K <- length(unique(zInit))
     .logMessages(
@@ -1382,6 +1419,111 @@ setMethod("recursiveSplitModule",
       currentL <- currentL + 1
     }
 
+    runK <- vapply(resList, function(mod) {
+      params(mod)$K
+    }, integer(1))
+    runL <- vapply(resList, function(mod) {
+      params(mod)$L
+    }, integer(1))
+    runParams <- data.frame(
+      index = seq.int(1, length(resList)),
+      L = runL,
+      K = runK,
+      stringsAsFactors = FALSE
+    )
+  } else if (!is.null(zInit) && isTRUE(useMetaCells)) {
+      # Create collapsed module matrix
+      K <- length(unique(zInit))
+      .logMessages(
+        date(),
+        ".. Collapsing to",
+        K,
+        "cell populations",
+        append = TRUE,
+        verbose = verbose,
+        logfile = logfile
+      )
+      overallZ <- .initializeCluster(
+        N = K,
+        len = ncol(counts),
+        initial = zInit
+      )
+      countsZ <- .colSumByGroup(counts, overallZ, K)
+
+      # Create initial model with initialL and predifined z labels
+      .logMessages(
+        date(),
+        ".. Initializing with",
+        initialL,
+        "modules",
+        append = TRUE,
+        verbose = verbose,
+        logfile = logfile
+      )
+      modelInitial <- .celda_CG(
+        counts,
+        L = initialL,
+        K = K,
+        zInitialize = "fixed",
+        yInitialize = "split",
+        nchains = 1,
+        zInit = overallZ,
+        alpha = alpha,
+        beta = beta,
+        gamma = gamma,
+        delta = delta,
+        verbose = FALSE,
+        reorder = reorder
+      )
+      modelInitial@params$countChecksum <- countChecksum
+
+      currentL <- length(unique(as.integer(celdaClusters(modelInitial)$y))) + 1
+      overallY <- as.integer(celdaClusters(modelInitial)$y)
+
+      resList <- list(modelInitial)
+      while (currentL <= maxL) {
+        # Allow features to cluster further
+        previousY <- overallY
+        tempSplit <- .singleSplitY(
+          countsZ,
+          overallY,
+          currentL,
+          minFeature = 3,
+          beta = beta,
+          delta = delta,
+          gamma = gamma
+        )
+        tempModel <- .celda_CG(
+          counts,
+          L = currentL,
+          K = K,
+          stopIter = 5,
+          splitOnIter = -1,
+          splitOnLast = FALSE,
+          nchains = 1,
+          verbose = FALSE,
+          zInit = overallZ,
+          zInitialize = "fixed",
+          yInitialize = "predefined",
+          yInit = tempSplit$y,
+          reorder = reorder
+        )
+        overallY <- as.integer(celdaClusters(tempModel)$y)
+
+        ## Add new model to results list and increment L
+        .logMessages(
+          date(),
+          ".. Created module",
+          currentL,
+          "| logLik:",
+          bestLogLikelihood(tempModel),
+          append = TRUE,
+          verbose = verbose,
+          logfile = NULL
+        )
+        resList <- c(resList, list(tempModel))
+        currentL <- currentL + 1
+      }
     runK <- vapply(resList, function(mod) {
       params(mod)$K
     }, integer(1))
@@ -1707,6 +1849,7 @@ setMethod("recursiveSplitModule",
     maxL,
     tempK,
     zInit,
+    useMetaCells,
     sampleLabel,
     alpha,
     beta,
@@ -1730,6 +1873,7 @@ setMethod("recursiveSplitModule",
             maxL = maxL,
             tempK = tempK,
             zInit = zInit,
+            useMetaCells = useMetaCells,
             alpha = alpha,
             beta = beta,
             delta = delta,

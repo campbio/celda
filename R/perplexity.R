@@ -791,11 +791,23 @@ setMethod("plotGridSearchPerplexity",
 #' @param alpha Numeric. Passed to \link[ggplot2]{geom_jitter}. Opacity of the points.
 #'  Values of alpha range from 0 to 1, with lower values corresponding
 #'  to more transparent colors.
+#' @param plotKnees Logical. If \code{TRUE}, adds dashed vertical lines and
+#'  labels marking the knee points detected on the mean perplexity curve.
+#'  Default \code{FALSE}.
+#' @param knees Integer vector. Which knee points to plot (e.g. \code{1:3}
+#'  for the first three). Knee 1 is the sharpest bend; each later knee is
+#'  found on the part of the curve after the previous one. Each value must be
+#'  between 1 and 5. Default \code{1:3}.
+#' @details With \code{plotKnees = TRUE}, knee points are found on the mean
+#'  perplexity of the models with the kneedle method and drawn as dashed
+#'  lines with labels: at K for \code{celda_C} models, and at L for
+#'  \code{celda_G} and \code{celda_CG} models.
 #' @return A ggplot plot object showing perplexity differences as a function of
 #'  clustering parameters.
 #' @export
 setGeneric("plotRPC",
-    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5,
+             plotKnees = FALSE, knees = 1:3) {
     standardGeneric("plotRPC")})
 
 
@@ -807,12 +819,12 @@ setGeneric("plotRPC",
 #' @export
 setMethod("plotRPC",
     signature(x = "SingleCellExperiment"),
-    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5) {
+    function(x, altExpName = "featureSubset", sep = 5, alpha = 0.5,
+             plotKnees = FALSE, knees = 1:3) {
         altExp <- SingleCellExperiment::altExp(x, altExpName)
         model <- altExp@metadata$celda_grid_search@celdaGridSearchParameters$
             model
         celdaList <- S4Vectors::metadata(altExp)$celda_grid_search
-
         if (model == "celda_C") {
             g <- .plotRPCC(celdaList, sep, 
                 alpha = alpha)
@@ -828,6 +840,52 @@ setMethod("plotRPC",
                 "celdaGridSearchParameters$model must be",
                 " one of 'celda_C', 'celda_G', or 'celda_CG'")
         }
+        if (isTRUE(plotKnees)) {
+          if (!is.numeric(knees) || anyNA(knees) || any(knees < 1)) {
+            stop("'knees' must be a vector of positive integers.")
+          }
+          knees <- sort(unique(as.integer(knees)))
+          if (any(knees > 5)) {
+            stop("'knees' cannot exceed 5.",
+                 "Requested: ", paste(knees, collapse = ", "), ".")
+          }
+
+          rp <- runParams(celdaList)
+          if (model == "celda_C") {
+            R <- rp$K
+          }
+          else if (model == "celda_G" || model == "celda_CG") {
+            R <- rp$L
+          }
+          else {
+            stop("Model must be one of 'celda_C', 'celda_G', or 'celda_CG'")
+          }
+          P <- rp$mean_perplexity
+          o <- order(R); R <- R[o]; P <- P[o]
+          pos <- list()
+          for (i in knees) {
+            n <- paste("knee point",i)
+            pos[[n]] <- .findKnee(R, P, nPoints = i)
+            }
+          lv  <- sort(unique(R))[-1]
+
+          kneeDf <- data.frame(knee = knees, pos = unlist(pos), nx = match(pos, lv))
+          labelRpc <- stats::aggregate(knee ~ nx + pos, data = kneeDf,
+                                       FUN = function(k) paste(k, collapse = " & "))
+          labelRpc$label <- paste0("knee point ", labelRpc$knee, " = ", labelRpc$pos)
+          labelRpc$y <- -Inf
+          labelRpc$vjust <- -0.5 - 1.5 * (seq_len(nrow(labelRpc)) - 1)
+          labelRpc$hjust <- ifelse(labelRpc$nx > 0.7 * length(lv), 1.05, -0.05)
+          g <- g + ggplot2::geom_vline(xintercept = labelRpc$nx,
+                                       linetype = "dashed", colour = "red") +
+            ggplot2::geom_text(
+              data = labelRpc,
+              ggplot2::aes(x = .data$nx, y = .data$y, label = .data$label,
+                           vjust = .data$vjust, hjust = .data$hjust)
+              , color = "red"
+            )
+        }
+
         return(g)
     }
 )
