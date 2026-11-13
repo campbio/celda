@@ -24,7 +24,7 @@ plotRPC(
   knees = 1:3
 )
 
-\S4method{plotRPC}{celdaList}(x, sep = 5, alpha = 0.5)
+\S4method{plotRPC}{celdaList}(x, sep = 5, alpha = 0.5, plotKnees = FALSE, knees = 1:3)
 }
 \arguments{
 \item{x}{Can be one of
