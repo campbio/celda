@@ -5,7 +5,8 @@
 \alias{availableModels}
 \title{available models}
 \format{
-An object of class \code{character} of length 3.
+A character vector of length 3 naming the celda models:
+ \code{"celda_C"}, \code{"celda_G"}, and \code{"celda_CG"}.
 }
 \usage{
 availableModels
