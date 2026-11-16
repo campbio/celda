@@ -135,48 +135,68 @@ import(uwot)
 import(withr)
 importClassesFrom(Matrix,dgCMatrix)
 importClassesFrom(SingleCellExperiment,SingleCellExperiment)
-importFrom(Matrix,colSums)
-importFrom(Matrix,rowSums)
-importFrom(Matrix,t)
+importFrom(Matrix,
+  colSums,
+  rowSums,
+  t
+)
 importFrom(RColorBrewer,brewer.pal)
 importFrom(Rtsne,Rtsne)
 importFrom(data.table,as.data.table)
-importFrom(dendextend,get_leaves_attr)
-importFrom(dendextend,get_nodes_attr)
-importFrom(dendextend,get_nodes_xy)
+importFrom(dendextend,
+  get_leaves_attr,
+  get_nodes_attr,
+  get_nodes_xy
+)
 importFrom(digest,digest)
 importFrom(doParallel,registerDoParallel)
-importFrom(enrichR,enrichr)
-importFrom(enrichR,listEnrichrDbs)
-importFrom(ggdendro,dendro_data)
-importFrom(ggdendro,ggdendrogram)
+importFrom(enrichR,
+  enrichr,
+  listEnrichrDbs
+)
+importFrom(ggdendro,
+  dendro_data,
+  ggdendrogram
+)
 importFrom(ggrepel,geom_text_repel)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,colors)
-importFrom(grDevices,hsv)
-importFrom(grDevices,rgb2hsv)
+importFrom(grDevices,
+  colorRampPalette,
+  colors,
+  hsv,
+  rgb2hsv
+)
 importFrom(grid,grid.pretty)
-importFrom(gtable,gtable)
-importFrom(gtable,gtable_add_grob)
-importFrom(gtable,gtable_height)
-importFrom(gtable,gtable_width)
+importFrom(gtable,
+  gtable,
+  gtable_add_grob,
+  gtable_height,
+  gtable_width
+)
 importFrom(matrixStats,logSumExp)
-importFrom(methods,.hasSlot)
-importFrom(methods,hasArg)
-importFrom(methods,is)
-importFrom(methods,new)
-importFrom(pROC,auc)
-importFrom(pROC,coords)
-importFrom(pROC,roc)
+importFrom(methods,
+  .hasSlot,
+  hasArg,
+  is,
+  new
+)
+importFrom(pROC,
+  auc,
+  coords,
+  roc
+)
 importFrom(plyr,mapvalues)
 importFrom(reshape2,melt)
-importFrom(scales,brewer_pal)
-importFrom(scales,dscale)
-importFrom(scales,hue_pal)
-importFrom(stats,complete.cases)
-importFrom(stats,dendrapply)
-importFrom(stats,model.matrix)
-importFrom(stats,setNames)
+importFrom(scales,
+  brewer_pal,
+  dscale,
+  hue_pal
+)
+importFrom(stats,
+  complete.cases,
+  dendrapply,
+  model.matrix,
+  setNames
+)
 importFrom(utils,head)
 importFrom(withr,with_seed)
 importMethodsFrom(Matrix,"%*%")

@@ -1,4 +1,8 @@
 #' @title available models
+#' @docType data
+#' @format A character vector of length 3 naming the celda models:
+#'  \code{"celda_C"}, \code{"celda_G"}, and \code{"celda_CG"}.
+#' @keywords datasets
 #' @export
 availableModels <- c("celda_C", "celda_G", "celda_CG")
 

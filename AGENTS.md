@@ -102,6 +102,9 @@ them when run from Claude Code (in any position on the command line), and
   `make check` and `make check-full` require them.
 - A C++ toolchain is needed to build from source. The first build compiles
   `src/`, which takes a few minutes.
+- `make docs` needs roxygen2 8.1.1 or later. roxygen2 7.x puts
+  `RoxygenNote` back in DESCRIPTION and splits the NAMESPACE imports
+  into one line each.
 
 ## Related packages
 
