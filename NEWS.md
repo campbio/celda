@@ -13,6 +13,10 @@
 * `plotRPC()` gains `plotKnees` and `knees` to mark knee points of the mean
   perplexity curve. For `celda_CG` results they are placed on whichever of K
   or L varies.
+* `retrieveFeatureIndex()` no longer matches a feature that is `NA` to a row
+  named `NA` (or, with `exactMatch = FALSE`, to every row); such features are
+  reported as not present. A `by` that is not a single string now stops with
+  a clear error (#428).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
