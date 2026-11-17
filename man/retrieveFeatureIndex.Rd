@@ -14,14 +14,14 @@ retrieveFeatureIndex(
 }
 \arguments{
 \item{features}{Character vector of feature names to find in the rows of
-\code{x}.}
+\code{x}. Features that are \code{NA} never match.}
 
 \item{x}{A data.frame, matrix, or \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment}
 object to search.}
 
-\item{by}{Character. Where to search for features in \code{x}. If set to
-\code{"rownames"} then the features will be searched for among
-\code{rownames(x)}. If \code{x} inherits from class
+\item{by}{A single character string. Where to search for features in
+\code{x}. If set to \code{"rownames"} then the features will be searched
+for among \code{rownames(x)}. If \code{x} inherits from class
 \link[SummarizedExperiment:SummarizedExperiment-class]{SummarizedExperiment}, then \code{by} can be one of the
 fields in the row annotation data.frame (i.e. one of
 \code{colnames(rowData(x))}).}

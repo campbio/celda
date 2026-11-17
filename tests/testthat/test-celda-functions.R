@@ -63,3 +63,29 @@ test_that(desc = paste0("miscellaneous distance fxns that are not directly",
                           expect_equal(class(.hellingerDist(x)), "dist")
                           expect_equal(class(.spearmanDist(x)), "dist")
                         })
+
+test_that("retrieveFeatureIndex never matches an NA feature", {
+  counts <- matrix(1:6, nrow = 3, dimnames = list(c("A", NA, "C"), NULL))
+  expect_warning(
+    idx <- retrieveFeatureIndex(c("A", NA), counts),
+    regexp = "not present in 'x': NA"
+  )
+  expect_equal(idx, c(1L, NA))
+  # Only the "not present" warning, not one about NA matching every row
+  warnings <- capture_warnings(
+    idx <- retrieveFeatureIndex(c("A", NA), counts, exactMatch = FALSE)
+  )
+  expect_length(warnings, 1)
+  expect_match(warnings, "not present in 'x': NA")
+  expect_equal(idx, c(1L, NA))
+})
+
+test_that("retrieveFeatureIndex needs 'by' to be a single string", {
+  counts <- matrix(1:6, nrow = 3, dimnames = list(c("A", "B", "C"), NULL))
+  expect_error(retrieveFeatureIndex("A", counts, by = c("rownames", "x")),
+    regexp = "'by' must be a single character string"
+  )
+  expect_error(retrieveFeatureIndex("A", counts, by = NA),
+    regexp = "'by' must be a single character string"
+  )
+})
