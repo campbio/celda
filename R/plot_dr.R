@@ -593,9 +593,7 @@ setMethod("plotDimReduceFeature",
   # features that weren't found so the rest stay on the right panels.
   found <- !is.na(featuresIx)
   featuresIx <- featuresIx[found]
-  if (!is.null(headers)) {
-    headers <- headers[found]
-  }
+  headers <- headers[found]
   counts <- as.matrix(counts[featuresIx, , drop = FALSE])
 
   # Scale/zscore data if needed
