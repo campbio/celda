@@ -17,6 +17,9 @@
   named `NA`, or, with `exactMatch = FALSE`, warns that it matched multiple
   items; such features are reported as not present. A `by` that is not a
   single string now stops with a clear error (#428).
+* `plotDimReduceFeature()` no longer puts labels from `headers` or
+  `displayName` on the wrong panels when one of the `features` is not
+  found (#433).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
