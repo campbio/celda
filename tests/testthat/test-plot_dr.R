@@ -2,9 +2,9 @@
 library(SingleCellExperiment)
 
 set.seed(12345)
-counts <- matrix(stats::rpois(30, lambda = 5),
-                 nrow = 3,
-                 dimnames = list(c("A", "B", "C"), paste0("cell", 1:10)))
+countsMat <- matrix(stats::rpois(30, lambda = 5),
+                    nrow = 3,
+                    dimnames = list(c("A", "B", "C"), paste0("cell", 1:10)))
 dim1 <- stats::rnorm(10)
 dim2 <- stats::rnorm(10)
 
@@ -16,7 +16,7 @@ dim2 <- stats::rnorm(10)
 
 test_that("plotDimReduceFeature keeps headers on the right panels", {
   expect_warning(
-    g <- plotDimReduceFeature(counts,
+    g <- plotDimReduceFeature(countsMat,
                               features = c("A", "missing", "C"),
                               dim1 = dim1,
                               dim2 = dim2,
@@ -28,7 +28,7 @@ test_that("plotDimReduceFeature keeps headers on the right panels", {
 })
 
 test_that("plotDimReduceFeature keeps displayName labels on the right panels", {
-  sce <- SingleCellExperiment(assays = list(counts = counts))
+  sce <- SingleCellExperiment(assays = list(counts = countsMat))
   rowData(sce)$symbol <- c("symA", "symB", "symC")
   altExp(sce, "featureSubset") <- sce
   reducedDim(altExp(sce, "featureSubset"), "dr") <- cbind(dim1, dim2)
