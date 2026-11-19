@@ -80,3 +80,21 @@ test_that("plotDimReduceFeature checks headers length with displayName", {
     regexp = "should be the same length"
   )
 })
+
+test_that("plotDimReduceFeature falls back to displayName if exactMatch FALSE", {
+  sce <- SingleCellExperiment(assays = list(counts = countsMat))
+  rowData(sce)$symbol <- c("symA", "symB", "symC")
+  altExp(sce, "featureSubset") <- sce
+  reducedDim(altExp(sce, "featureSubset"), "dr") <- cbind(dim1, dim2)
+
+  expect_warning(
+    g <- plotDimReduceFeature(sce,
+                              features = c("symA", "symC"),
+                              reducedDimName = "dr",
+                              displayName = "symbol",
+                              headers = c("hA", "hC"),
+                              exactMatch = FALSE),
+    regexp = "headers will not be used"
+  )
+  expect_equal(.facetLabels(g), c("symA", "symC"))
+})
