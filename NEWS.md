@@ -25,7 +25,8 @@
   `headers`. `displayName` is still used to look up `features`, and
   `headers` of the wrong length now stop with an error in this case too.
   As elsewhere, `headers` are dropped with a warning when
-  `exactMatch = FALSE` (#434).
+  `exactMatch = FALSE`. The error and warning about `headers` are reworded
+  to be clearer (#434).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's

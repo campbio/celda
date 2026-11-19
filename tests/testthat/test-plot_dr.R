@@ -77,7 +77,7 @@ test_that("plotDimReduceFeature checks headers length with displayName", {
                          reducedDimName = "dr",
                          displayName = "symbol",
                          headers = c("hA", "hB", "hC")),
-    regexp = "should be the same length"
+    regexp = "must be the same length as .features. \\(3 and 2\\)"
   )
 })
 
@@ -94,7 +94,7 @@ test_that("plotDimReduceFeature falls back to displayName if exactMatch FALSE", 
                               displayName = "symbol",
                               headers = c("hA", "hC"),
                               exactMatch = FALSE),
-    regexp = "headers will not be used"
+    regexp = "not used because .exactMatch. is FALSE"
   )
   expect_equal(.facetLabels(g), c("symA", "symC"))
 })

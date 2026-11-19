@@ -550,13 +550,11 @@ setMethod("plotDimReduceFeature",
     return(NULL)
   }
   if (length(headers) != length(features)) {
-    stop("Headers ",
-         headers,
-         " should be the same length as features ",
-         features)
+    stop("'headers' must be the same length as 'features' (",
+         length(headers), " and ", length(features), ").")
   }
   if (isFALSE(exactMatch)) {
-    warning("exactMatch is FALSE. headers will not be used!")
+    warning("'headers' are not used because 'exactMatch' is FALSE.")
     return(NULL)
   }
   headers
