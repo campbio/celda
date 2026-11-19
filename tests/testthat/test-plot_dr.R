@@ -46,3 +46,37 @@ test_that("plotDimReduceFeature keeps displayName labels on the right panels", {
   expect_equal(levels(g$data$facet), c("A", "C"))
   expect_equal(.facetLabels(g), c("symA", "symC"))
 })
+
+test_that("plotDimReduceFeature uses headers over displayName", {
+  sce <- SingleCellExperiment(assays = list(counts = countsMat))
+  rowData(sce)$symbol <- c("symA", "symB", "symC")
+  altExp(sce, "featureSubset") <- sce
+  reducedDim(altExp(sce, "featureSubset"), "dr") <- cbind(dim1, dim2)
+
+  expect_warning(
+    g <- plotDimReduceFeature(sce,
+                              features = c("symA", "missing", "symC"),
+                              reducedDimName = "dr",
+                              displayName = "symbol",
+                              headers = c("hA", "hMissing", "hC")),
+    regexp = "not present in 'x': missing"
+  )
+  expect_equal(levels(g$data$facet), c("A", "C"))
+  expect_equal(.facetLabels(g), c("hA", "hC"))
+})
+
+test_that("plotDimReduceFeature checks headers length with displayName", {
+  sce <- SingleCellExperiment(assays = list(counts = countsMat))
+  rowData(sce)$symbol <- c("symA", "symB", "symC")
+  altExp(sce, "featureSubset") <- sce
+  reducedDim(altExp(sce, "featureSubset"), "dr") <- cbind(dim1, dim2)
+
+  expect_error(
+    plotDimReduceFeature(sce,
+                         features = c("symA", "symC"),
+                         reducedDimName = "dr",
+                         displayName = "symbol",
+                         headers = c("hA", "hB", "hC")),
+    regexp = "should be the same length"
+  )
+})
