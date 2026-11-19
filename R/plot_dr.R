@@ -301,8 +301,10 @@ setMethod("plotDimReduceGrid",
 #' @param displayName Character. The column name of
 #'  \code{rowData(x)} that specifies the display names for
 #'  the features. Default \code{NULL}, which displays the row names. Only works
-#'  if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Overwrites
-#'  \code{headers}.
+#'  if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
+#'  If \code{headers} is also set, \code{features} are still matched in this
+#'  column but the panels are labeled with \code{headers} (unless
+#'  \code{exactMatch} is \code{FALSE}).
 #' @param dim1 Integer or numeric vector. If \code{reducedDimName} is supplied,
 #'  then, this will be used as an index to determine which dimension will be
 #'  plotted on the x-axis. If \code{reducedDimName} is not supplied, then this
@@ -312,9 +314,10 @@ setMethod("plotDimReduceGrid",
 #'  plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
 #'  should be a vector which will be plotted on the y-axis. Default \code{2}.
 #' @param headers Character vector. If \code{NULL}, the corresponding
-#'  rownames are used as labels. Otherwise, these headers are used to label
-#'  the features. Only works if \code{displayName} is \code{NULL} and
-#'  \code{exactMatch} is \code{FALSE}.
+#'  rownames (or \code{displayName} values) are used as labels. Otherwise,
+#'  these headers are used to label the features and must be the same length
+#'  as \code{features}. Takes precedence over \code{displayName}. Only works
+#'  if \code{exactMatch} is \code{TRUE}. Default \code{NULL}.
 #' @param useAssay A string specifying which \link[SummarizedExperiment]{assay}
 #'  slot to use if \code{x} is a
 #'  \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default "counts".
@@ -430,31 +433,22 @@ setMethod("plotDimReduceFeature",
               ylab = ylab
             )
 
+            headers <- .checkHeaders(headers, features, exactMatch)
+
             if (isFALSE(is.null(displayName))) {
               featuresIx <- retrieveFeatureIndex(features,
                                                  x,
                                                  by = displayName,
                                                  exactMatch = exactMatch)
-        headers <- SummarizedExperiment::rowData(x)[[displayName]][featuresIx]
+              if (is.null(headers)) {
+                displayNames <- SummarizedExperiment::rowData(x)[[displayName]]
+                headers <- displayNames[featuresIx]
+              }
             } else {
               featuresIx <- retrieveFeatureIndex(features,
                                                  counts,
                                                  by = "rownames",
                                                  exactMatch = exactMatch)
-
-              if (isFALSE(is.null(headers))) {
-                if (length(headers) != length(features)) {
-                  stop("Headers ",
-                       headers,
-                       " should be the same length as features ",
-                       features)
-                }
-
-                if (isFALSE(exactMatch)) {
-                  warning("exactMatch is FALSE. headers will not be used!")
-                  headers <- NULL
-                }
-              }
             }
 
             g <- .plotDimReduceFeature(
@@ -516,19 +510,7 @@ setMethod("plotDimReduceFeature",
                    ncol = NULL,
                    decreasing = FALSE) {
             x <- as.matrix(x)
-            if (isFALSE(is.null(headers))) {
-              if (length(headers) != length(features)) {
-                stop("Headers ",
-                     headers,
-                     " should be the same length as features ",
-                     features)
-              }
-
-              if (isFALSE(exactMatch)) {
-                warning("exactMatch is FALSE. headers will not be used!")
-                headers <- NULL
-              }
-            }
+            headers <- .checkHeaders(headers, features, exactMatch)
 
             featuresIx <- retrieveFeatureIndex(features,
                                                x,
@@ -558,6 +540,25 @@ setMethod("plotDimReduceFeature",
             )
             return(g)
           })
+
+
+# Check user 'headers' for plotDimReduceFeature(). They must match
+# 'features' in length, and are dropped with a warning when
+# 'exactMatch' is FALSE. Returns the headers to use, or NULL.
+.checkHeaders <- function(headers, features, exactMatch) {
+  if (is.null(headers)) {
+    return(NULL)
+  }
+  if (length(headers) != length(features)) {
+    stop("'headers' must be the same length as 'features' (",
+         length(headers), " and ", length(features), ").")
+  }
+  if (isFALSE(exactMatch)) {
+    warning("'headers' are not used because 'exactMatch' is FALSE.")
+    return(NULL)
+  }
+  headers
+}
 
 
 .plotDimReduceFeature <- function(dim1,

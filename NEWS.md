@@ -20,6 +20,13 @@
 * `plotDimReduceFeature()` no longer puts labels from `headers` or
   `displayName` on the wrong panels when one of the `features` is not
   found (#433).
+* `plotDimReduceFeature()` now labels the panels with `headers` when both
+  `headers` and `displayName` are given, instead of silently ignoring
+  `headers`. `displayName` is still used to look up `features`, and
+  `headers` of the wrong length now stop with an error in this case too.
+  As elsewhere, `headers` are dropped with a warning when
+  `exactMatch = FALSE`. The error and warning about `headers` are reworded
+  to be clearer (#434).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
