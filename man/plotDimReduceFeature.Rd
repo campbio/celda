@@ -95,9 +95,10 @@ represent features and columns represent cells.}
 \item{displayName}{Character. The column name of
 \code{rowData(x)} that specifies the display names for
 the features. Default \code{NULL}, which displays the row names. Only works
-if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. If \code{headers}
-is also set, \code{features} are still matched in this column but the
-panels are labeled with \code{headers}.}
+if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
+If \code{headers} is also set, \code{features} are still matched in this
+column but the panels are labeled with \code{headers} (unless
+\code{exactMatch} is \code{FALSE}).}
 
 \item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
 then, this will be used as an index to determine which dimension will be
