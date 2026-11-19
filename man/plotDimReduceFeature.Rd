@@ -95,8 +95,9 @@ represent features and columns represent cells.}
 \item{displayName}{Character. The column name of
 \code{rowData(x)} that specifies the display names for
 the features. Default \code{NULL}, which displays the row names. Only works
-if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Overwrites
-\code{headers}.}
+if \code{x} is a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. If \code{headers}
+is also set, \code{features} are still matched in this column but the
+panels are labeled with \code{headers}.}
 
 \item{dim1}{Integer or numeric vector. If \code{reducedDimName} is supplied,
 then, this will be used as an index to determine which dimension will be
@@ -109,9 +110,10 @@ plotted on the y-axis. If \code{reducedDimName} is not supplied, then this
 should be a vector which will be plotted on the y-axis. Default \code{2}.}
 
 \item{headers}{Character vector. If \code{NULL}, the corresponding
-rownames are used as labels. Otherwise, these headers are used to label
-the features. Only works if \code{displayName} is \code{NULL} and
-\code{exactMatch} is \code{FALSE}.}
+rownames (or \code{displayName} values) are used as labels. Otherwise,
+these headers are used to label the features and must be the same length
+as \code{features}. Takes precedence over \code{displayName}. Only works
+if \code{exactMatch} is \code{TRUE}. Default \code{NULL}.}
 
 \item{useAssay}{A string specifying which \link[SummarizedExperiment]{assay}
 slot to use if \code{x} is a
