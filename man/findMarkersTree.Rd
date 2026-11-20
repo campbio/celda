@@ -58,7 +58,7 @@ without a positive marker are merged into one metacluster (names joined
 with "+") whose clusters are separated in its own subtree.}
 
 \item{reuseFeatures}{Logical. Whether or not a feature can be used more than
-once on the same cluster. Default is TRUE.}
+once on the same cluster. Default is FALSE.}
 
 \item{altSplit}{Logical. Whether or not to force a marker for clusters that
 are solely defined by the absence of markers. Default is TRUE.}

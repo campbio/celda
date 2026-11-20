@@ -1,14 +1,15 @@
 # findMarkersTree
 library(celda)
 
-# Build a small features-by-cells matrix with 4 classes of 20 cells.
+# Build a small features-by-cells matrix with `nClass` classes of 20 cells.
 # f1 marks class 1 and f2 marks class 2. f3 is high in classes 1-3 and low
-# in class 4, so it separates class 3 from 4 but is not a one-off marker.
+# in the others, so it separates class 3 from class 4 (and above) but is not
+# a one-off marker. Classes 4 and above differ only by noise.
 # With `f3Class3Only = TRUE`, f3 is high only in class 3, apart from three
 # class-3 cells, so its one-off statistic is about 0.94.
-.markerTreeFixture <- function(f3Class3Only = FALSE) {
+.markerTreeFixture <- function(nClass = 4, f3Class3Only = FALSE) {
   withr::with_seed(410, {
-    class <- rep(seq_len(4), each = 20)
+    class <- rep(seq_len(nClass), each = 20)
     n <- length(class)
     f1 <- ifelse(class == 1, runif(n, 5, 6), runif(n, 0, 1))
     f2 <- ifelse(class == 2, runif(n, 5, 6), runif(n, 0, 1))
@@ -23,6 +24,10 @@ library(celda)
   colnames(features) <- paste0("Cell_", seq_len(n))
   list(features = features, class = class)
 }
+
+# These tests supply `metaclusters` so that the top-level threshold loop is
+# reached without the UMAP step of `autoMetaclusters = TRUE`, which is the
+# path from issue 410. Both paths share the loop.
 
 test_that("findMarkersTree merges metaclusters left without markers", {
   fixture <- .markerTreeFixture()
@@ -46,9 +51,46 @@ test_that("findMarkersTree merges metaclusters left without markers", {
   subtreeRules <- tree$rules[[paste0(merged, "(3)")]]
   f3Up <- subtreeRules$feature == "f3" & subtreeRules$direction == 1
   expect_true(any(f3Up & subtreeRules$metacluster == merged))
+  expect_s3_class(plotDendro(tree), "ggplot")
 })
 
-test_that("findMarkersTree skips alternative splits without features", {
+test_that("findMarkersTree merges a multi-cluster metacluster", {
+  fixture <- .markerTreeFixture(nClass = 5)
+  metaclusters <- list(M1 = 1, M2 = 2, M3 = 3, M4 = c(4, 5))
+  expect_warning(
+    tree <- findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = metaclusters
+    ),
+    regexp = "M3\\(3\\), M4 have no positive marker"
+  )
+  merged <- "M3+M4"
+  expect_setequal(unique(tree$metaclusterLabels), c("M1", "M2", merged))
+  expect_named(
+    tree$rules,
+    c("M1(1)", "M2(2)", paste0(merged, c("(3)", "(4)", "(5)"))),
+    ignore.order = TRUE
+  )
+})
+
+test_that("findMarkersTree keeps a single metacluster without markers", {
+  fixture <- .markerTreeFixture(nClass = 3)
+  metaclusters <- list(M1 = 1, M2 = 2, M3 = 3)
+  expect_warning(
+    tree <- findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = metaclusters
+    ),
+    regexp = "Metacluster M3\\(3\\) has no positive marker"
+  )
+  expect_named(tree$rules, c("M1(1)", "M2(2)", "M3(3)"), ignore.order = TRUE)
+  expect_false(any(tree$rules[["M3(3)"]]$direction == 1))
+  expect_s3_class(plotDendro(tree), "ggplot")
+})
+
+test_that("findMarkersTree skips ambiguous alternative splits", {
   fixture <- .markerTreeFixture()
   expect_message(
     tree <- findMarkersTree(

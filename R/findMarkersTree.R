@@ -35,7 +35,7 @@ utils::globalVariables(c("xend", "y", "label"))
 #'  without a positive marker are merged into one metacluster (names joined
 #'  with "+") whose clusters are separated in its own subtree.
 #' @param reuseFeatures Logical. Whether or not a feature can be used more than
-#'  once on the same cluster. Default is TRUE.
+#'  once on the same cluster. Default is FALSE.
 #' @param altSplit Logical. Whether or not to force a marker for clusters that
 #'  are solely defined by the absence of markers. Default is TRUE.
 #' @param consecutiveOneoff Logical. Whether or not to allow one-off splits at
@@ -483,7 +483,7 @@ findMarkersTree <- function(features,
     # positive marker come last and have no split of their own
     nTopSplits <- sum(!names(finalTree[[1]][[1]]) %in%
                         c("statUsed", "fUsed", "dirs"))
-    topLevelMarkers <- topLevelMarkers[seq_len(nTopSplits)]
+    topLevelMarkers <- head(topLevelMarkers, nTopSplits)
 
     #create tree dendrogram
     tree$dendro <-
@@ -1851,16 +1851,16 @@ findMarkersTree <- function(features,
   nodes <- topLevel[!names(topLevel) %in% c("statUsed", "fUsed", "dirs")]
   marked <- unlist(lapply(nodes, function(node) node$group1Consensus))
   noMarker <- sort(setdiff(unique(metaclusterLabels), marked))
-  avoid <- paste("To avoid this, set 'reuseFeatures = TRUE' or build the",
-                 "tree without metaclusters.")
 
+  # Every metacluster has a marker, so there is nothing to report
   if (length(noMarker) == 0) {
     return(unchanged)
   }
   if (length(noMarker) == 1) {
     warning("Metacluster ", noMarker, " has no positive marker at the ",
-            "top level, and no unused features are left to find one. ",
-            avoid, call. = FALSE)
+            "top level, and fewer than two unused features are left to ",
+            "find one. It is identified by the absence of the other ",
+            "metaclusters' markers.", call. = FALSE)
     return(unchanged)
   }
 
@@ -1868,9 +1868,11 @@ findMarkersTree <- function(features,
   # single-cluster metaclusters, which the output step would strip anyway
   mergedName <- paste(sub("\\(.*\\)$", "", noMarker), collapse = "+")
   warning("Metaclusters ", paste(noMarker, collapse = ", "), " have no ",
-          "positive marker at the top level, and no unused features are ",
-          "left to separate them. They were merged into ", mergedName,
-          " and are separated in its own subtree. ", avoid, call. = FALSE)
+          "positive marker at the top level, and fewer than two unused ",
+          "features are left to separate them. They were merged into ",
+          mergedName, " and are separated in its own subtree. To avoid ",
+          "this, set 'reuseFeatures = TRUE' or build the tree without ",
+          "metaclusters.", call. = FALSE)
 
   mergedClusters <- sort(unique(class[metaclusterLabels %in% noMarker]))
   inMerge <- vapply(metaclusters, function(clusters) {
