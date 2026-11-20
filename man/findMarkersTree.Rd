@@ -52,8 +52,8 @@ Counts matrix has to be provided as well.}
 metric. Smaller values will result in more one-off splits. Default is 0.90.
 When metaclusters are used, the threshold for the top-level tree is
 lowered by 10\% at a time until every metacluster has a positive marker.
-If \code{reuseFeatures = FALSE} and fewer than two features are left
-unused, it stops lowering with a warning, and metaclusters still
+If \code{reuseFeatures = FALSE} and no unused feature could become a
+marker that way, it stops lowering with a warning, and metaclusters still
 without a positive marker are merged into one metacluster (names joined
 with "+") whose clusters are separated in its own subtree.}
 

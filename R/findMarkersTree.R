@@ -30,8 +30,8 @@ utils::globalVariables(c("xend", "y", "label"))
 #'  metric. Smaller values will result in more one-off splits. Default is 0.90.
 #'  When metaclusters are used, the threshold for the top-level tree is
 #'  lowered by 10\% at a time until every metacluster has a positive marker.
-#'  If \code{reuseFeatures = FALSE} and fewer than two features are left
-#'  unused, it stops lowering with a warning, and metaclusters still
+#'  If \code{reuseFeatures = FALSE} and no unused feature could become a
+#'  marker that way, it stops lowering with a warning, and metaclusters still
 #'  without a positive marker are merged into one metacluster (names joined
 #'  with "+") whose clusters are separated in its own subtree.
 #' @param reuseFeatures Logical. Whether or not a feature can be used more than
@@ -320,6 +320,9 @@ findMarkersTree <- function(features,
     
     #create list to store split off classes at each threshold
     markerThreshold <- list()
+
+    # Names of metaclusters merged because they had no positive marker
+    mergedNames <- character(0)
     
     # Create top-level tree
     
@@ -358,26 +361,23 @@ findMarkersTree <- function(features,
           break
         }
         else{
-          # A lower threshold only uses up more features, so stop once
-          # fewer than two are left to find new markers with
-          nUnused <- sum(!colnames(features) %in% topLevel$fUsed)
-          if (!reuseFeatures && nUnused < 2) {
+          # A lower threshold can only add a marker through a feature the
+          # top-level split has not used, so stop lowering it once none
+          # of those would mark a metacluster that has no marker
+          stopLowering <- !reuseFeatures &&
+            !.canAddTopMarker(features, metaclusterLabels, topLevel,
+                              oneoffMetric)
+          if (stopLowering) {
             merged <- .mergeUnmarkedMetaclusters(
-              topLevel, metaclusterLabels, metaclusters, class
+              topLevel, metaclusterLabels, metaclusters, class, mergedNames
             )
             metaclusterLabels <- merged$metaclusterLabels
             metaclusters <- merged$metaclusters
-            if (merged$merged) {
-              tree <- .generateTreeList(
-                features,
-                as.factor(metaclusterLabels),
-                oneoffMetric,
-                tmpThreshold,
-                reuseFeatures,
-                consecutiveOneoff
-              )
-              tree <- .addAlternativeSplit(tree, features,
-                                           as.factor(metaclusterLabels))
+
+            # Rebuild the top-level tree with the merged metacluster
+            if (!is.null(merged$mergedName)) {
+              mergedNames <- c(mergedNames, merged$mergedName)
+              next
             }
             break
           }
@@ -647,7 +647,8 @@ findMarkersTree <- function(features,
           labels <- as.character(labels)
           labels <- labels[labels != metacluster]
           labels <- c(labels, unique(subtypeLabels)
-                      [grep(metacluster,unique(subtypeLabels))])
+                      [grep(metacluster, unique(subtypeLabels),
+                            fixed = TRUE)])
           attributes(node)$classLabels <- labels
           
           # Assign new member count for this branch
@@ -1837,42 +1838,80 @@ findMarkersTree <- function(features,
   tree
 }
 
+# Get the metaclusters that no node of the top-level split `topLevel`
+# marks, i.e. that are in no node's group 1
+.unmarkedMetaclusters <- function(topLevel, metaclusterLabels) {
+  nodes <- topLevel[!names(topLevel) %in% c("statUsed", "fUsed", "dirs")]
+  marked <- unlist(lapply(nodes, function(node) node$group1Consensus))
+  sort(setdiff(unique(metaclusterLabels), marked))
+}
+
+# Whether lowering the top-level threshold could still give a metacluster
+# without a positive marker one: some feature not yet used by the top-level
+# split has a one-off statistic above 0, so it passes the threshold once
+# that is low enough, and its split singles out such a metacluster.
+.canAddTopMarker <- function(features, metaclusterLabels, topLevel,
+                             oneoffMetric) {
+  unused <- setdiff(colnames(features), topLevel$fUsed)
+  if (length(unused) == 0) {
+    return(FALSE)
+  }
+  if (oneoffMetric == "modified F1") {
+    splitMetric <- .splitMetricModF1
+  } else {
+    splitMetric <- .splitMetricPairwiseAUC
+  }
+  labels <- as.factor(metaclusterLabels)
+  fUnused <- features[, unused, drop = FALSE]
+  stats <- .splitMetricRecursive(fUnused, labels, splitMetric = splitMetric)
+  stats <- stats[!is.na(stats) & stats > 0]
+  noMarker <- .unmarkedMetaclusters(topLevel, metaclusterLabels)
+  helps <- vapply(names(stats), function(feat) {
+    split <- .getSplit(feat, stats, fUnused, labels, splitMetric)
+    length(split$group1Consensus) == 1 &&
+      split$group1Consensus %in% noMarker
+  }, FUN.VALUE = logical(1))
+  any(helps)
+}
+
 # Warn about the metaclusters that have no positive marker in the top-level
 # split `topLevel`. If there are two or more, merge them into one
 # metacluster, named by joining their names with "+", so that they are
 # separated in its own subtree. Metaclusters to merge are found by their
 # clusters rather than by name, since single-cluster metaclusters are
-# labelled "name(cluster)" in `metaclusterLabels`.
+# labelled "name(cluster)" in `metaclusterLabels`. `mergedNames` holds
+# metaclusters made by earlier merges, which were already warned about.
 .mergeUnmarkedMetaclusters <- function(topLevel, metaclusterLabels,
-                                       metaclusters, class) {
+                                       metaclusters, class, mergedNames) {
   unchanged <- list(metaclusterLabels = metaclusterLabels,
                     metaclusters = metaclusters,
-                    merged = FALSE)
-  nodes <- topLevel[!names(topLevel) %in% c("statUsed", "fUsed", "dirs")]
-  marked <- unlist(lapply(nodes, function(node) node$group1Consensus))
-  noMarker <- sort(setdiff(unique(metaclusterLabels), marked))
+                    mergedName = NULL)
+  noMarker <- .unmarkedMetaclusters(topLevel, metaclusterLabels)
 
-  # Every metacluster has a marker, so there is nothing to report
-  if (length(noMarker) == 0) {
+  # Name metaclusters as in the output, without the "(cluster)" of
+  # single-cluster metaclusters
+  baseNames <- sub("\\(.*\\)$", "", noMarker)
+
+  # Nothing to report if every metacluster has a marker, or the one
+  # without is an earlier merge
+  onlyEarlierMerge <- length(noMarker) == 1 && noMarker %in% mergedNames
+  if (length(noMarker) == 0 || onlyEarlierMerge) {
     return(unchanged)
   }
   if (length(noMarker) == 1) {
-    warning("Metacluster ", noMarker, " has no positive marker at the ",
-            "top level, and fewer than two unused features are left to ",
-            "find one. It is identified by the absence of the other ",
-            "metaclusters' markers.", call. = FALSE)
+    warning("Metacluster ", baseNames, " has no positive marker at the ",
+            "top level, and no unused feature can become one. It is ",
+            "identified by the absence of the other metaclusters' ",
+            "markers.", call. = FALSE)
     return(unchanged)
   }
 
-  # Name the merged metacluster by base names, dropping the "(cluster)" of
-  # single-cluster metaclusters, which the output step would strip anyway
-  mergedName <- paste(sub("\\(.*\\)$", "", noMarker), collapse = "+")
-  warning("Metaclusters ", paste(noMarker, collapse = ", "), " have no ",
-          "positive marker at the top level, and fewer than two unused ",
-          "features are left to separate them. They were merged into ",
-          mergedName, " and are separated in its own subtree. To avoid ",
-          "this, set 'reuseFeatures = TRUE' or build the tree without ",
-          "metaclusters.", call. = FALSE)
+  mergedName <- paste(baseNames, collapse = "+")
+  warning("Metaclusters ", paste(baseNames, collapse = ", "), " have no ",
+          "positive marker at the top level, and no unused feature can ",
+          "separate them. They were merged into ", mergedName, " and are ",
+          "separated in its own subtree. To avoid this, build the tree ",
+          "without metaclusters.", call. = FALSE)
 
   mergedClusters <- sort(unique(class[metaclusterLabels %in% noMarker]))
   inMerge <- vapply(metaclusters, function(clusters) {
@@ -1884,7 +1923,7 @@ findMarkersTree <- function(features,
 
   list(metaclusterLabels = metaclusterLabels,
        metaclusters = metaclusters,
-       merged = TRUE)
+       mergedName = mergedName)
 }
 
 # Add an alternative split that gives a positive marker to `cInt`, a class
@@ -1922,6 +1961,12 @@ findMarkersTree <- function(features,
   cSub <- droplevels(class[sampKeep])
   fSub <- features[sampKeep, featKeep, drop = FALSE]
 
+  # Get the other classes and their sizes
+  altClasses <- unique(cSub)[unique(cSub) != cInt]
+  altSizes <- vapply(altClasses, function(cAlt) {
+    sum(cSub == cAlt)
+  }, FUN.VALUE = double(1))
+
   # Score each unused feature for separating out this class
   altStats <- do.call(rbind, lapply(colnames(fSub), function(feat) {
     splitVal <- .splitMetricModF1(feat, cSub, fSub, rPerf = FALSE)
@@ -1934,10 +1979,6 @@ findMarkersTree <- function(features,
     prec <- mean(node1Class == cInt)
 
     # Get the worst sensitivity of the other classes
-    altClasses <- unique(cSub)[unique(cSub) != cInt]
-    altSizes <- vapply(altClasses, function(cAlt) {
-      sum(cSub == cAlt)
-    }, FUN.VALUE = double(1))
     altWrong <- vapply(altClasses, function(cAlt) {
       sum(node1Class == cAlt)
     }, FUN.VALUE = double(1))

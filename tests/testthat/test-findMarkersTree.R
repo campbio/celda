@@ -38,7 +38,7 @@ test_that("findMarkersTree merges metaclusters left without markers", {
       fixture$class,
       metaclusters = metaclusters
     ),
-    regexp = "M3\\(3\\), M4\\(4\\).*no positive marker"
+    regexp = "Metaclusters M3, M4 have no positive marker"
   )
   merged <- "M3+M4"
   expect_setequal(unique(tree$metaclusterLabels), c("M1", "M2", merged))
@@ -51,6 +51,13 @@ test_that("findMarkersTree merges metaclusters left without markers", {
   subtreeRules <- tree$rules[[paste0(merged, "(3)")]]
   f3Up <- subtreeRules$feature == "f3" & subtreeRules$direction == 1
   expect_true(any(f3Up & subtreeRules$metacluster == merged))
+  # The root of the dendrogram holds every cluster, merged ones included
+  root <- attributes(tree$dendro)
+  expect_setequal(
+    root$classLabels,
+    c("M1(1)", "M2(2)", paste0(merged, c("(3)", "(4)")))
+  )
+  expect_equal(root$members, 4)
   expect_s3_class(plotDendro(tree), "ggplot")
 })
 
@@ -63,7 +70,7 @@ test_that("findMarkersTree merges a multi-cluster metacluster", {
       fixture$class,
       metaclusters = metaclusters
     ),
-    regexp = "M3\\(3\\), M4 have no positive marker"
+    regexp = "Metaclusters M3, M4 have no positive marker"
   )
   merged <- "M3+M4"
   expect_setequal(unique(tree$metaclusterLabels), c("M1", "M2", merged))
@@ -83,7 +90,7 @@ test_that("findMarkersTree keeps a single metacluster without markers", {
       fixture$class,
       metaclusters = metaclusters
     ),
-    regexp = "Metacluster M3\\(3\\) has no positive marker"
+    regexp = "Metacluster M3 has no positive marker"
   )
   expect_named(tree$rules, c("M1(1)", "M2(2)", "M3(3)"), ignore.order = TRUE)
   expect_false(any(tree$rules[["M3(3)"]]$direction == 1))
