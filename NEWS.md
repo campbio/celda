@@ -34,7 +34,8 @@
   if it picks out that class. With metaclusters, the threshold is no longer
   lowered once fewer than two features are left unused: metaclusters still
   without a positive marker are merged and separated in their own subtree,
-  with a warning, instead of the threshold being lowered indefinitely
+  with a warning, instead of the threshold being lowered indefinitely.
+  The documented default of `reuseFeatures` is corrected to `FALSE`
   (#410).
 
 # celda v1.29.3 (2026-10-09)
