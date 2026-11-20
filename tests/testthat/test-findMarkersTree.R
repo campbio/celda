@@ -152,8 +152,28 @@ test_that("one-off splits each mark exactly one class", {
     threshold = 0.7,
     oneoffMetric = "modified F1"
   )
+  # The fixture's premise: f1 passes the threshold, and its split marks two
+  # classes
+  f1Alone <- celda:::.getSplit(
+    "f1",
+    c(f1 = 1),
+    t(fixture$features),
+    as.factor(fixture$class),
+    celda:::.splitMetricModF1
+  )
+  expect_identical(f1Alone$group1Consensus, c("1", "3"))
+  f1Stat <- celda:::.splitMetricModF1(
+    "f1",
+    as.factor(fixture$class),
+    t(fixture$features),
+    rPerf = TRUE
+  )
+  expect_gte(f1Stat, 0.7)
+
   expect_identical(split$statUsed, "One-off")
   nodes <- split[names(split) != "statUsed"]
+  nodeFeatures <- unlist(lapply(nodes, function(node) node$featureName))
+  expect_false("f1" %in% nodeFeatures)
   expect_true(all(nzchar(names(nodes))))
   group1 <- lapply(nodes, function(node) node$group1Consensus)
   expect_true(all(lengths(group1) == 1))
@@ -187,4 +207,16 @@ test_that("findMarkersTree works when a one-off split marks two classes", {
   f4Up <- rules$feature == "f4" & rules$direction == 1
   expect_true(any(rules$class == 1 & f4Up))
   expect_s3_class(suppressWarnings(plotDendro(tree)), "ggplot")
+})
+
+test_that("a balanced split is used when no one-off split marks one class", {
+  fixture <- .multiClassFixture()
+  split <- celda:::.wrapSplitHybrid(
+    t(fixture$features["f1", , drop = FALSE]),
+    as.factor(fixture$class),
+    threshold = 0.7,
+    oneoffMetric = "modified F1"
+  )
+  expect_identical(split$statUsed, "Split")
+  expect_length(split[names(split) != "statUsed"], 1)
 })
