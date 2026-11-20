@@ -220,3 +220,38 @@ test_that("a balanced split is used when no one-off split marks one class", {
   expect_identical(split$statUsed, "Split")
   expect_length(split[names(split) != "statUsed"], 1)
 })
+
+# Silence only pROC's deprecation of coords(transpose = TRUE), which
+# .splitMetricPairwiseAUC() still uses
+.withoutTransposeWarning <- function(expr) {
+  withCallingHandlers(expr, warning = function(w) {
+    if (grepl("transpose=TRUE", conditionMessage(w), fixed = TRUE)) {
+      invokeRestart("muffleWarning")
+    }
+  })
+}
+
+test_that("findMarkersTree with pairwise AUC keeps one class per node", {
+  fixture <- .multiClassFixture()
+  split <- .withoutTransposeWarning(celda:::.wrapSplitHybrid(
+    t(fixture$features),
+    as.factor(fixture$class),
+    threshold = 0.7,
+    oneoffMetric = "pairwise AUC"
+  ))
+  nodes <- split[names(split) != "statUsed"]
+  group1 <- lapply(nodes, function(node) node$group1Consensus)
+  expect_true(all(lengths(group1) == 1))
+  expect_true(all(nzchar(names(nodes))))
+
+  tree <- .withoutTransposeWarning(findMarkersTree(
+    fixture$features,
+    fixture$class,
+    oneoffMetric = "pairwise AUC",
+    threshold = 0.7,
+    autoMetaclusters = FALSE
+  ))
+  rules <- do.call(rbind, tree$rules)
+  expect_true(all(nzchar(rules$feature)))
+  expect_named(tree$rules, c("1", "2", "3"), ignore.order = TRUE)
+})
