@@ -27,6 +27,15 @@
   As elsewhere, `headers` are dropped with a warning when
   `exactMatch = FALSE`. The error and warning about `headers` are reworded
   to be clearer (#434).
+* `findMarkersTree()` no longer fails with "subscript out of bounds" when
+  more than one cluster or metacluster has no positive marker, as can happen
+  at a low `threshold` once the top-level tree has used up the features.
+  An alternative split is now tried for each such class, and only added
+  if it picks out that class. With metaclusters, the threshold is no longer
+  lowered once fewer than two features are left unused: metaclusters still
+  without a positive marker are merged and separated in their own subtree,
+  with a warning, instead of the threshold being lowered indefinitely
+  (#410).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
