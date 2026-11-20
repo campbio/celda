@@ -1294,12 +1294,29 @@ findMarkersTree <- function(features,
       class,
       splitMetric = splitMetric)
     splitStats <- splitStats[splitStats >= threshold]
+
+    # Get the split of each feature, keeping only splits that mark exactly
+    # one class: a split that marks no class, or several, is not a one-off
+    # marker
+    splitList <- lapply(
+      names(splitStats),
+      .getSplit,
+      splitStats,
+      features,
+      class,
+      splitMetric
+    )
+    marksOne <- vapply(splitList, function(split) {
+      length(split$group1Consensus) == 1
+    }, FUN.VALUE = logical(1))
+    splitList <- splitList[marksOne]
+    splitStats <- splitStats[marksOne]
     statUsed <- "One-off"
   } else {
     splitStats <- integer(0)
   }
-  
-  
+
+
   # If no one-2-one split meets threshold, run semi-supervised clustering
   if (length(splitStats) == 0) {
     splitMetric <- .splitMetricIGpIGd
@@ -1307,33 +1324,35 @@ findMarkersTree <- function(features,
                                         class,
                                         splitMetric = splitMetric)[1] # Use top
     statUsed <- "Split"
+
+    # Get split for best gene
+    splitList <- lapply(
+      names(splitStats),
+      .getSplit,
+      splitStats,
+      features,
+      class,
+      splitMetric
+    )
   }
-  
-  # Get split for best gene
-  splitList <- lapply(
-    names(splitStats),
-    .getSplit,
-    splitStats,
-    features,
-    class,
-    splitMetric)
-  
+
   
   # Combine feature rules when same group1 class arises
   
   if (length(splitList) > 1) {
     
-    group1Vec <- unlist(lapply(
-      splitList, function(X) {
-        X$group1Consensus
-      }), recursive = FALSE)
+    # Each one-off split marks exactly one class, so this lines up with
+    # splitList
+    splitClass <- vapply(splitList, function(X) {
+      X$group1Consensus
+    }, FUN.VALUE = character(1))
     
     splitList <- lapply(
-      unique(group1Vec),
-      function(group1, splitList, group1Vec) {
+      unique(splitClass),
+      function(group1, splitList, splitClass) {
         
         # Get subset with same group1
-        splitListSub <- splitList[group1Vec == group1]
+        splitListSub <- splitList[splitClass == group1]
         
         # Get feature, value, and stat for these
         splitFeature <- unlist(lapply(
@@ -1359,7 +1378,7 @@ findMarkersTree <- function(features,
         splitSingle$stat <- splitStat
         
         return(splitSingle)
-      }, splitList, group1Vec)
+      }, splitList, splitClass)
   }
   
   names(splitList) <- unlist(lapply(
