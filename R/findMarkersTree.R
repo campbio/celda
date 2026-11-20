@@ -28,8 +28,14 @@ utils::globalVariables(c("xend", "y", "label"))
 #' \emph{RunPCA} and \emph{FindClusters} must have been run on the object.
 #' @param threshold Numeric between 0 and 1. The threshold for the oneoff
 #'  metric. Smaller values will result in more one-off splits. Default is 0.90.
+#'  When metaclusters are used, the threshold for the top-level tree is
+#'  lowered by 10\% at a time until every metacluster has a positive marker.
+#'  If \code{reuseFeatures = FALSE} and no unused feature could become a
+#'  marker that way, it stops lowering with a warning, and metaclusters still
+#'  without a positive marker are merged into one metacluster (names joined
+#'  with "+") whose clusters are separated in its own subtree.
 #' @param reuseFeatures Logical. Whether or not a feature can be used more than
-#'  once on the same cluster. Default is TRUE.
+#'  once on the same cluster. Default is FALSE.
 #' @param altSplit Logical. Whether or not to force a marker for clusters that
 #'  are solely defined by the absence of markers. Default is TRUE.
 #' @param consecutiveOneoff Logical. Whether or not to allow one-off splits at
@@ -314,6 +320,9 @@ findMarkersTree <- function(features,
     
     #create list to store split off classes at each threshold
     markerThreshold <- list()
+
+    # Names of metaclusters merged because they had no positive marker
+    mergedNames <- character(0)
     
     # Create top-level tree
     
@@ -352,6 +361,27 @@ findMarkersTree <- function(features,
           break
         }
         else{
+          # A lower threshold can only add a marker through a feature the
+          # top-level split has not used, so stop lowering it once none
+          # of those would mark a metacluster that has no marker
+          stopLowering <- !reuseFeatures &&
+            !.canAddTopMarker(features, metaclusterLabels, topLevel,
+                              oneoffMetric)
+          if (stopLowering) {
+            merged <- .mergeUnmarkedMetaclusters(
+              topLevel, metaclusterLabels, metaclusters, class, mergedNames
+            )
+            metaclusterLabels <- merged$metaclusterLabels
+            metaclusters <- merged$metaclusters
+
+            # Rebuild the top-level tree with the merged metacluster
+            if (!is.null(merged$mergedName)) {
+              mergedNames <- c(mergedNames, merged$mergedName)
+              next
+            }
+            break
+          }
+
           #decrease threshold by 10%
           tmpThreshold <- tmpThreshold*0.9
           message("Decreasing classifier threshold to ",tmpThreshold)
@@ -448,7 +478,13 @@ findMarkersTree <- function(features,
       markers <- cluster[cluster$direction==1, "feature"]
       return(paste(markers, collapse = ";"))
     }))
-    
+
+    # Name only the top-level splits: the rules of metaclusters without a
+    # positive marker come last and have no split of their own
+    nTopSplits <- sum(!names(finalTree[[1]][[1]]) %in%
+                        c("statUsed", "fUsed", "dirs"))
+    topLevelMarkers <- head(topLevelMarkers, nTopSplits)
+
     #create tree dendrogram
     tree$dendro <-
       .convertToDendrogram(finalTree, as.factor(metaclusterLabels),
@@ -611,7 +647,8 @@ findMarkersTree <- function(features,
           labels <- as.character(labels)
           labels <- labels[labels != metacluster]
           labels <- c(labels, unique(subtypeLabels)
-                      [grep(metacluster,unique(subtypeLabels))])
+                      [grep(metacluster, unique(subtypeLabels),
+                            fixed = TRUE)])
           attributes(node)$classLabels <- labels
           
           # Assign new member count for this branch
@@ -1790,120 +1827,216 @@ findMarkersTree <- function(features,
   group1Vec <- unique(unlist(lapply(groupList, function(g) g$group1)))
   group2Vec <- unique(unlist(lapply(groupList, function(g) g$group2)))
   
-  # Get group that is never up-regulated
+  # Get groups that are never up-regulated
   group2only <- group2Vec[!group2Vec %in% group1Vec]
-  
-  # Check whether there are solely downregulated splits
-  AltSplitInd <- which(unlist(lapply(groupList, function(g, group2only) {
-    group2only %in% g$group2
-  }, group2only)))
-  
-  if (length(AltSplitInd) > 0) {
-    
-    AltDec <- max(which(unlist(lapply(groupList, function(g, group2only) {
-      group2only %in% g$group2
-    }, group2only))))
-    
-    # Get split
-    downSplit <- DecTree[[AltDec]]
-    downNode <- downSplit[[1]]
-    
-    # Get classes to rerun
-    branchClasses <- names(downNode$group1Prop)
-    
-    # Get samples from these classes and features from this cluster
-    sampKeep <- class %in% branchClasses
-    featKeep <- !colnames(features) %in% downSplit$fUsed
-    
-    # Subset class and features
-    cSub <- droplevels(class[sampKeep])
-    fSub <- features[sampKeep, featKeep, drop = FALSE]
-    
-    # Get best alternative split
-    altStats <- do.call(rbind, lapply(
-      colnames(fSub),
-      function(feat, splitMetric, features, class, cInt) {
-        Val <- splitMetric(feat, cSub, fSub, rPerf = FALSE)
-        
-        # Get node1 classes
-        node1Class <- class[features[, feat] > Val]
-        
-        # Get sensitivity/precision/altSens
-        Sens <- sum(node1Class == cInt) / sum(class == cInt)
-        Prec <- mean(node1Class == cInt)
-        
-        # Get Sensitivity of Alternate Classes
-        AltClasses <- unique(class)[unique(class) != cInt]
-        AltSizes <- vapply(
-          AltClasses,
-          function(cAlt, class) {
-            sum(class == cAlt)
-          }, class, FUN.VALUE = double(1))
-        AltWrong <- vapply(
-          AltClasses,
-          function(cAlt, node1Class) {
-            sum(node1Class == cAlt)
-          }, node1Class, FUN.VALUE = double(1))
-        AltSens <- min(1 - (AltWrong / AltSizes))
-        
-        # Get harmonic mean
-        HM <- (3 * Sens * Prec * AltSens) /
-          (Sens * Prec + Prec * AltSens + Sens * AltSens)
-        HM[is.nan(HM)] <- 0
-        
-        # Return
-        return(data.frame(
-          feat = feat,
-          val = Val,
-          stat = HM,
-          stringsAsFactors = FALSE))
-      }, .splitMetricModF1, fSub, cSub, group2only))
-    altStats <- altStats[order(altStats$stat, decreasing = TRUE), ]
-    
-    # Get alternative splits
-    splitStats <- altStats$stat[1]
-    names(splitStats) <- altStats$feat[1]
-    altSplit <- .getSplit(
-      altStats$feat[1],
-      splitStats,
-      fSub,
-      cSub,
-      .splitMetricModF1)
-    
-    # Check that this split out the group2 of interest
-    if (length(altSplit$group1Consensus) == 1) {
-      
-      # Add it to split
-      downSplit[[length(downSplit) + 1]] <- altSplit
-      names(downSplit)[length(downSplit)] <- altStats$feat[1]
-      downSplit <- downSplit[c(
-        which(!names(downSplit) %in% c("statUsed", "fUsed", "dirs")),
-        which(names(downSplit) %in% c("statUsed", "fUsed", "dirs")))]
-      
-      # Get index of split to add it to
-      branchLengths <- unlist(lapply(tree, length))
-      branchCum <- cumsum(branchLengths)
-      wBranch <- min(which(branchCum >= AltDec))
-      if(wBranch==1){
-        wSplit <- 1
-      }
-      else{
-        wSplit <- which(seq(
-          (branchCum[(wBranch - 1)] + 1),
-          branchCum[wBranch]) == AltDec)
-      }
-      
-      # Add it to decision tree
-      tree[[wBranch]][[wSplit]] <- downSplit
-    } else {
-      cat("No non-ambiguous rule to separate", group2only, "from",
-          branchClasses, ". No alternative split added.")
-    }
-  } else {
-    #  print("No solely down-regulated cluster to add alternative split.")
+
+  # Add an alternative split for each of these groups in turn
+  for (cInt in group2only) {
+    tree <- .addAlternativeSplitClass(tree, groupList, features, class, cInt)
   }
-  
-  return(tree)
+
+  tree
+}
+
+# Get the metaclusters that no node of the top-level split `topLevel`
+# marks, i.e. that are in no node's group 1
+.unmarkedMetaclusters <- function(topLevel, metaclusterLabels) {
+  nodes <- topLevel[!names(topLevel) %in% c("statUsed", "fUsed", "dirs")]
+  marked <- unlist(lapply(nodes, function(node) node$group1Consensus))
+  sort(setdiff(unique(metaclusterLabels), marked))
+}
+
+# Whether lowering the top-level threshold could still give a metacluster
+# without a positive marker one: some feature not yet used by the top-level
+# split has a one-off statistic above 0, so it passes the threshold once
+# that is low enough, and its split singles out such a metacluster.
+.canAddTopMarker <- function(features, metaclusterLabels, topLevel,
+                             oneoffMetric) {
+  unused <- setdiff(colnames(features), topLevel$fUsed)
+  if (length(unused) == 0) {
+    return(FALSE)
+  }
+  if (oneoffMetric == "modified F1") {
+    splitMetric <- .splitMetricModF1
+  } else {
+    splitMetric <- .splitMetricPairwiseAUC
+  }
+  labels <- as.factor(metaclusterLabels)
+  fUnused <- features[, unused, drop = FALSE]
+  stats <- .splitMetricRecursive(fUnused, labels, splitMetric = splitMetric)
+  stats <- stats[!is.na(stats) & stats > 0]
+  noMarker <- .unmarkedMetaclusters(topLevel, metaclusterLabels)
+  helps <- vapply(names(stats), function(feat) {
+    split <- .getSplit(feat, stats, fUnused, labels, splitMetric)
+    length(split$group1Consensus) == 1 &&
+      split$group1Consensus %in% noMarker
+  }, FUN.VALUE = logical(1))
+  any(helps)
+}
+
+# Warn about the metaclusters that have no positive marker in the top-level
+# split `topLevel`. If there are two or more, merge them into one
+# metacluster, named by joining their names with "+", so that they are
+# separated in its own subtree. Metaclusters to merge are found by their
+# clusters rather than by name, since single-cluster metaclusters are
+# labelled "name(cluster)" in `metaclusterLabels`. `mergedNames` holds
+# metaclusters made by earlier merges, which were already warned about.
+.mergeUnmarkedMetaclusters <- function(topLevel, metaclusterLabels,
+                                       metaclusters, class, mergedNames) {
+  unchanged <- list(metaclusterLabels = metaclusterLabels,
+                    metaclusters = metaclusters,
+                    mergedName = NULL)
+  noMarker <- .unmarkedMetaclusters(topLevel, metaclusterLabels)
+
+  # Name metaclusters as in the output, without the "(cluster)" of
+  # single-cluster metaclusters
+  baseNames <- sub("\\(.*\\)$", "", noMarker)
+
+  # Nothing to report if every metacluster has a marker, or the one
+  # without is an earlier merge
+  onlyEarlierMerge <- length(noMarker) == 1 && noMarker %in% mergedNames
+  if (length(noMarker) == 0 || onlyEarlierMerge) {
+    return(unchanged)
+  }
+  if (length(noMarker) == 1) {
+    warning("Metacluster ", baseNames, " has no positive marker at the ",
+            "top level, and no unused feature can become one. It is ",
+            "identified by the absence of the other metaclusters' ",
+            "markers.", call. = FALSE)
+    return(unchanged)
+  }
+
+  mergedName <- paste(baseNames, collapse = "+")
+  warning("Metaclusters ", paste(baseNames, collapse = ", "), " have no ",
+          "positive marker at the top level, and no unused feature can ",
+          "separate them. They were merged into ", mergedName, " and are ",
+          "separated in its own subtree. To avoid this, build the tree ",
+          "without metaclusters.", call. = FALSE)
+
+  mergedClusters <- sort(unique(class[metaclusterLabels %in% noMarker]))
+  inMerge <- vapply(metaclusters, function(clusters) {
+    all(clusters %in% mergedClusters)
+  }, FUN.VALUE = logical(1))
+  metaclusters <- metaclusters[!inMerge]
+  metaclusters[mergedName] <- list(mergedClusters)
+  metaclusterLabels[metaclusterLabels %in% noMarker] <- mergedName
+
+  list(metaclusterLabels = metaclusterLabels,
+       metaclusters = metaclusters,
+       mergedName = mergedName)
+}
+
+# Add an alternative split that gives a positive marker to `cInt`, a class
+# defined only by down-regulated features. The split is added to the last
+# split in which `cInt` is in group 2. `groupList` holds the group 1 and
+# group 2 classes of each split, as made by .addAlternativeSplit().
+.addAlternativeSplitClass <- function(tree, groupList, features, class,
+                                      cInt) {
+
+  # Get the last split in which this class is in group 2
+  altDec <- max(which(vapply(groupList, function(g) {
+    cInt %in% g$group2
+  }, FUN.VALUE = logical(1))))
+
+  # Get split from the current tree, which includes splits already added
+  decTree <- unlist(tree, recursive = FALSE)
+  downSplit <- decTree[[altDec]]
+  downNode <- downSplit[[1]]
+
+  # Get classes to rerun
+  branchClasses <- names(downNode$group1Prop)
+  otherClasses <- paste(branchClasses[branchClasses != cInt],
+                        collapse = ", ")
+
+  # Get samples from these classes and features from this cluster
+  sampKeep <- class %in% branchClasses
+  featKeep <- !colnames(features) %in% downSplit$fUsed
+  if (!any(featKeep)) {
+    message("No unused features to separate ", cInt, " from ",
+            otherClasses, ". No alternative split added.")
+    return(tree)
+  }
+
+  # Subset class and features
+  cSub <- droplevels(class[sampKeep])
+  fSub <- features[sampKeep, featKeep, drop = FALSE]
+
+  # Get the other classes and their sizes
+  altClasses <- unique(cSub)[unique(cSub) != cInt]
+  altSizes <- vapply(altClasses, function(cAlt) {
+    sum(cSub == cAlt)
+  }, FUN.VALUE = double(1))
+
+  # Score each unused feature for separating out this class
+  altStats <- do.call(rbind, lapply(colnames(fSub), function(feat) {
+    splitVal <- .splitMetricModF1(feat, cSub, fSub, rPerf = FALSE)
+
+    # Get node1 classes
+    node1Class <- cSub[fSub[, feat] > splitVal]
+
+    # Get sensitivity and precision for this class
+    sens <- sum(node1Class == cInt) / sum(cSub == cInt)
+    prec <- mean(node1Class == cInt)
+
+    # Get the worst sensitivity of the other classes
+    altWrong <- vapply(altClasses, function(cAlt) {
+      sum(node1Class == cAlt)
+    }, FUN.VALUE = double(1))
+    altSens <- min(1 - (altWrong / altSizes))
+
+    # Get harmonic mean
+    harmonicMean <- (3 * sens * prec * altSens) /
+      (sens * prec + prec * altSens + sens * altSens)
+    harmonicMean[is.nan(harmonicMean)] <- 0
+
+    data.frame(feat = feat, val = splitVal, stat = harmonicMean,
+               stringsAsFactors = FALSE)
+  }))
+  altStats <- altStats[order(altStats$stat, decreasing = TRUE), ]
+
+  # Get alternative splits
+  splitStats <- altStats$stat[1]
+  names(splitStats) <- altStats$feat[1]
+  altSplit <- .getSplit(
+    altStats$feat[1],
+    splitStats,
+    fSub,
+    cSub,
+    .splitMetricModF1
+  )
+
+  # Check that this split separates out the class of interest
+  if (!identical(altSplit$group1Consensus, cInt)) {
+    message("No unambiguous rule to separate ", cInt, " from ",
+            otherClasses, ". No alternative split added.")
+    return(tree)
+  }
+
+  # Add it to split, and record its feature as used
+  downSplit[[length(downSplit) + 1]] <- altSplit
+  names(downSplit)[length(downSplit)] <- altStats$feat[1]
+  downSplit$fUsed <- c(downSplit$fUsed, altStats$feat[1])
+  downSplit <- downSplit[c(
+    which(!names(downSplit) %in% c("statUsed", "fUsed", "dirs")),
+    which(names(downSplit) %in% c("statUsed", "fUsed", "dirs"))
+  )]
+
+  # Get index of split to add it to
+  branchLengths <- unlist(lapply(tree, length))
+  branchCum <- cumsum(branchLengths)
+  wBranch <- min(which(branchCum >= altDec))
+  if (wBranch == 1) {
+    wSplit <- 1
+  } else {
+    wSplit <- which(
+      seq(branchCum[(wBranch - 1)] + 1, branchCum[wBranch]) == altDec
+    )
+  }
+
+  # Add it to decision tree
+  tree[[wBranch]][[wSplit]] <- downSplit
+
+  tree
 }
 
 #' @title Gets cluster estimates using rules generated by
@@ -2311,6 +2444,9 @@ subUnderscore <- function(x, n) unlist(lapply(
   if(topLevelMeta){
     orderedClass <- unique(
       class2featuresIndices[class2featuresIndices$direction==1,"class"])
+
+    # Keep classes without a positive marker too, after the others
+    orderedClass <- c(orderedClass, setdiff(levels(class), orderedClass))
   }
   else{
     orderedClass <- levels(class)
