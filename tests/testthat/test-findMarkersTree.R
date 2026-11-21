@@ -126,3 +126,132 @@ test_that("findMarkersTree adds an alternative split to its own class", {
   expect_true(any(rules3$feature == "f3" & rules3$direction == 1))
   expect_false(any(rules4$direction == 1))
 })
+
+# Classes 1 and 2 have 40 cells, class 3 has 4. f4 marks class 1 and f2
+# marks class 2. f1 is high in class 1 and in two class-3 cells, so its
+# best one-off split (statistic about 0.74) marks both class 1 and class 3.
+.multiClassFixture <- function() {
+  withr::with_seed(440, {
+    class <- rep(c(1, 2, 3), c(40, 40, 4))
+    n <- length(class)
+    f4 <- ifelse(class == 1, runif(n, 5, 6), runif(n, 0, 1))
+    f2 <- ifelse(class == 2, runif(n, 5, 6), runif(n, 0, 1))
+    f1 <- ifelse(class == 1, runif(n, 5, 6), runif(n, 0, 1))
+    f1[which(class == 3)[1:2]] <- c(5.5, 5.6)
+  })
+  features <- rbind(f1 = f1, f2 = f2, f4 = f4)
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  list(features = features, class = class)
+}
+
+test_that("one-off splits each mark exactly one class", {
+  fixture <- .multiClassFixture()
+  split <- celda:::.wrapSplitHybrid(
+    t(fixture$features),
+    as.factor(fixture$class),
+    threshold = 0.7,
+    oneoffMetric = "modified F1"
+  )
+  # The fixture's premise: f1 passes the threshold, and its split marks two
+  # classes
+  f1Alone <- celda:::.getSplit(
+    "f1",
+    c(f1 = 1),
+    t(fixture$features),
+    as.factor(fixture$class),
+    celda:::.splitMetricModF1
+  )
+  expect_identical(f1Alone$group1Consensus, c("1", "3"))
+  f1Stat <- celda:::.splitMetricModF1(
+    "f1",
+    as.factor(fixture$class),
+    t(fixture$features),
+    rPerf = TRUE
+  )
+  expect_gte(f1Stat, 0.7)
+
+  expect_identical(split$statUsed, "One-off")
+  nodes <- split[names(split) != "statUsed"]
+  nodeFeatures <- unlist(lapply(nodes, function(node) node$featureName))
+  expect_false("f1" %in% nodeFeatures)
+  expect_true(all(nzchar(names(nodes))))
+  group1 <- lapply(nodes, function(node) node$group1Consensus)
+  expect_true(all(lengths(group1) == 1))
+  expect_false(anyDuplicated(unlist(group1)) > 0)
+  # Every feature of a node, split on its own, marks that node's class
+  for (node in nodes) {
+    for (feat in node$featureName) {
+      alone <- celda:::.getSplit(
+        feat,
+        node$stat[node$featureName == feat],
+        t(fixture$features),
+        as.factor(fixture$class),
+        celda:::.splitMetricModF1
+      )
+      expect_identical(alone$group1Consensus, node$group1Consensus)
+    }
+  }
+})
+
+test_that("findMarkersTree works when a one-off split marks two classes", {
+  fixture <- .multiClassFixture()
+  tree <- findMarkersTree(
+    fixture$features,
+    fixture$class,
+    threshold = 0.7,
+    autoMetaclusters = FALSE
+  )
+  rules <- do.call(rbind, tree$rules)
+  expect_false(anyNA(rules$feature))
+  expect_true(all(nzchar(rules$feature)))
+  f4Up <- rules$feature == "f4" & rules$direction == 1
+  expect_true(any(rules$class == 1 & f4Up))
+  expect_s3_class(suppressWarnings(plotDendro(tree)), "ggplot")
+})
+
+test_that("a balanced split is used when no one-off split marks one class", {
+  fixture <- .multiClassFixture()
+  split <- celda:::.wrapSplitHybrid(
+    t(fixture$features["f1", , drop = FALSE]),
+    as.factor(fixture$class),
+    threshold = 0.7,
+    oneoffMetric = "modified F1"
+  )
+  expect_identical(split$statUsed, "Split")
+  expect_length(split[names(split) != "statUsed"], 1)
+})
+
+# Silence only pROC's deprecation of coords(transpose = TRUE), which
+# .splitMetricPairwiseAUC() still uses
+.withoutTransposeWarning <- function(expr) {
+  withCallingHandlers(expr, warning = function(w) {
+    if (grepl("transpose=TRUE", conditionMessage(w), fixed = TRUE)) {
+      invokeRestart("muffleWarning")
+    }
+  })
+}
+
+test_that("findMarkersTree with pairwise AUC keeps one class per node", {
+  fixture <- .multiClassFixture()
+  split <- .withoutTransposeWarning(celda:::.wrapSplitHybrid(
+    t(fixture$features),
+    as.factor(fixture$class),
+    threshold = 0.7,
+    oneoffMetric = "pairwise AUC"
+  ))
+  nodes <- split[names(split) != "statUsed"]
+  group1 <- lapply(nodes, function(node) node$group1Consensus)
+  expect_true(all(lengths(group1) == 1))
+  expect_true(all(nzchar(names(nodes))))
+
+  tree <- .withoutTransposeWarning(findMarkersTree(
+    fixture$features,
+    fixture$class,
+    oneoffMetric = "pairwise AUC",
+    threshold = 0.7,
+    autoMetaclusters = FALSE
+  ))
+  rules <- do.call(rbind, tree$rules)
+  expect_true(all(nzchar(rules$feature)))
+  expect_named(tree$rules, c("1", "2", "3"), ignore.order = TRUE)
+})
