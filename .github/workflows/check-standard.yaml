@@ -33,9 +33,14 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          # treelayout is temporary: ggtree (devel, needed through
+          # singleCellTK in Suggests) imports it, but it is newer than the
+          # container's CRAN snapshot (2026-10-28). Remove it once the
+          # bioconductor_docker:devel image's snapshot includes it.
           extra-packages: |
             any::rcmdcheck
             url::https://cran.r-project.org/src/contrib/Archive/dbplyr/dbplyr_2.3.4.tar.gz
+            url::https://cran.r-project.org/src/contrib/treelayout_0.1.0.tar.gz
 
       - uses: r-lib/actions/check-r-package@v2
         with:
