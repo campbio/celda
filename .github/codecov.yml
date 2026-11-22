@@ -1,0 +1,4 @@
+# Codecov settings. The codecov/patch and codecov/project checks and the
+# report on codecov.io are kept; the PR comment is turned off because each
+# new comment sends a GitHub notification email.
+comment: false
