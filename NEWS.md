@@ -38,6 +38,13 @@
   indefinitely. Merged metacluster names (joined with "+") are now matched
   correctly when the dendrogram is built. The documented default of
   `reuseFeatures` is corrected to `FALSE` (#410).
+* `findMarkersTree()` keeps only one-off splits that mark exactly one
+  cluster. Splits that marked no cluster, or whose cut also took in half or
+  more of another cluster's cells, were kept before and threw off how
+  features were grouped by cluster: markers could be attributed to the wrong
+  cluster, and an empty node could make `findMarkersTree()` or
+  `plotDendro()` fail with "argument is of length zero" or "replacement has
+  length zero". Markers can change for trees that had such splits (#440).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
