@@ -31,16 +31,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Temporary (#451): the image pins CRAN to a 2026-10-28 snapshot,
+      # older than what ggtree (devel, needed through singleCellTK in
+      # Suggests) requires: treelayout, and tidytree >= 0.4.9. Use current
+      # CRAN, as the Bioconductor devel builders do. Remove this step once
+      # the bioconductor_docker:devel image's snapshot is newer.
+      - name: Use current CRAN instead of the container's snapshot
+        run: |
+          echo 'options(repos = c(getOption("repos")[names(getOption("repos")) != "CRAN"], CRAN = "https://p3m.dev/cran/__linux__/noble/latest"))' >> ~/.Rprofile
+          Rscript -e 'getOption("repos")'
+        shell: bash
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # treelayout is temporary: ggtree (devel, needed through
-          # singleCellTK in Suggests) imports it, but it is newer than the
-          # container's CRAN snapshot (2026-10-28). Remove it once the
-          # bioconductor_docker:devel image's snapshot includes it.
           extra-packages: |
             any::rcmdcheck
             url::https://cran.r-project.org/src/contrib/Archive/dbplyr/dbplyr_2.3.4.tar.gz
-            url::https://cran.r-project.org/src/contrib/treelayout_0.1.0.tar.gz
 
       - uses: r-lib/actions/check-r-package@v2
         with:
