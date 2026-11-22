@@ -45,6 +45,18 @@
   cluster, and an empty node could make `findMarkersTree()` or
   `plotDendro()` fail with "argument is of length zero" or "replacement has
   length zero". Markers can change for trees that had such splits (#440).
+* With metaclusters, `findMarkersTree()` now merges the metaclusters of a
+  balanced split at the top level and separates them in their own subtree,
+  as intended. Before, the merged tree was checked against the tree before
+  the merge, so the merge was always rejected and the threshold was lowered
+  instead, which could leave a metacluster without a positive marker (#442).
+  When a merge was accepted, single-cluster metaclusters were not found in
+  the metacluster list, so the merged metacluster got no subtree of its own
+  and its clusters were never separated (#441). Merged metaclusters are now
+  named without the "(cluster)" of single-cluster metaclusters, for example
+  "M1+M2", as for metaclusters merged for lack of markers. Trees, markers,
+  and performance can change for metacluster runs that had a balanced split
+  at the top level.
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
