@@ -304,16 +304,15 @@ findMarkersTree <- function(features,
     }
     
     # Rename metaclusters with just one cluster
-    oneCluster <- names(metaclusters[lengths(metaclusters) == 1])
+    isSingle <- lengths(metaclusters) == 1
+    oneCluster <- names(metaclusters)[isSingle]
     if(length(oneCluster) > 0){
       oneClusterIndices <- which(metaclusterLabels %in% oneCluster)
-      metaclusterLabels[oneClusterIndices] <- 
+      metaclusterLabels[oneClusterIndices] <-
         paste0(metaclusterLabels[oneClusterIndices],"(",
                class[oneClusterIndices],")")
-      isSingle <- lengths(metaclusters) == 1
       names(metaclusters)[isSingle] <-
-        paste0(names(metaclusters)[isSingle], "(",
-               unlist(metaclusters[isSingle]), ")")
+        paste0(oneCluster, "(", unlist(metaclusters[isSingle]), ")")
     }
     
     #create temporary variables for top-level tree
@@ -358,7 +357,7 @@ findMarkersTree <- function(features,
       #if no more balanced split 
       if(length(tree) == 1){
         #if all clusters have positive markers
-        if(length(tree[[1]][[1]]) == (length(metaclusters)+3)){
+        if (.allTopMarked(tree, metaclusters)) {
           break
         }
         else{
@@ -422,9 +421,8 @@ findMarkersTree <- function(features,
 
         # If the new tree still has a balanced split, or some merged
         # metaclusters have no marker
-        allMarked <- length(tmpTree[[1]][[1]]) ==
-          (length(merged$metaclusters) + 3)
-        if ((length(tmpTree) > 1) || !allMarked) {
+        if ((length(tmpTree) > 1) ||
+            !.allTopMarked(tmpTree, merged$metaclusters)) {
 
           #decrease threshold by 10%
           tmpThreshold <- tmpThreshold*0.9
@@ -1883,6 +1881,13 @@ findMarkersTree <- function(features,
       split$group1Consensus %in% noMarker
   }, FUN.VALUE = logical(1))
   any(helps)
+}
+
+# Whether the top-level split of `tree` has a node, and so a positive
+# marker, for every metacluster in `metaclusters`. Besides its nodes, the
+# split holds "statUsed", "fUsed" and "dirs".
+.allTopMarked <- function(tree, metaclusters) {
+  length(tree[[1]][[1]]) == length(metaclusters) + 3
 }
 
 # Merge the metaclusters labelled `toMerge` in `metaclusterLabels` into one
