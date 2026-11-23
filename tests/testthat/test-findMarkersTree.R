@@ -439,6 +439,63 @@ test_that("findMarkersTree keeps metacluster names with parentheses", {
     as.character(layer$data$label)
   }))
   expect_true(all(names(metaclusters) %in% plotLabels))
+  # Leaves show the clusters
+  leafLabels <- plot$scales$get_scales("x")$labels
+  expect_setequal(leafLabels, as.character(seq_len(4)))
+})
+
+test_that("merged metaclusters keep names with parentheses", {
+  fixture <- .markerTreeFixture()
+  metaclusters <- list("A (x)" = 1, "B (y)" = 2, "C (z)" = 3, "D (w)" = 4)
+  expect_warning(
+    tree <- suppressMessages(findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = metaclusters
+    )),
+    regexp = "Metaclusters C (z), D (w) have no positive marker",
+    fixed = TRUE
+  )
+  expect_setequal(unique(tree$metaclusterLabels),
+                  c("A (x)", "B (y)", "C (z)+D (w)"))
+})
+
+test_that("branch points group class labels that contain spaces", {
+  # Level 1 splits classes "T (a)" and "T (b)" from "T (c)" and "T (d)".
+  # Level 2 has a one-off split in each branch.
+  rulesRow <- function(cl, feature, direction, statUsed, level) {
+    data.frame(feature = feature, direction = direction, stat = 0.9,
+               statUsed = statUsed, level = level, class = cl,
+               stringsAsFactors = FALSE)
+  }
+  classes <- c("T (a)", "T (b)", "T (c)", "T (d)")
+  rules <- lapply(seq_along(classes), function(i) {
+    cl <- classes[i]
+    left <- i <= 2
+    rbind(
+      rulesRow(cl, "f0", if (left) 1 else -1, "Split", 1),
+      rulesRow(cl, if (left) "fx" else "fy", if (i %% 2 == 1) 1 else -1,
+               "One-off", 2)
+    )
+  })
+  names(rules) <- classes
+  branchPoints <- celda:::.createBranchPoints(rules, character(0))
+  levelTwo <- branchPoints[startsWith(names(branchPoints), "level_2")]
+  groups <- lapply(levelTwo, function(br) sort(unique(br$class)))
+  expect_setequal(groups, list(classes[1:2], classes[3:4]))
+})
+
+test_that("a balanced top-level split's feature can still become a marker", {
+  fixture <- .markerTreeFixture()
+  # The top level is a balanced split on f1 of M1 and M2 against M3 and
+  # M4, so no metacluster has a marker of its own. f1 alone singles out M1.
+  features <- t(fixture$features)[, "f1", drop = FALSE]
+  labels <- paste0("M", fixture$class)
+  topLevel <- list(f1 = list(group1Consensus = c("M1", "M2"),
+                             group2Consensus = c("M3", "M4")),
+                   statUsed = "Split", fUsed = "f1", dirs = 1)
+  expect_true(celda:::.canAddTopMarker(features, labels, topLevel,
+                                       "modified F1"))
 })
 
 # Classes 1-12 have 10 cells each. Metacluster M1 holds classes 1 and 2,

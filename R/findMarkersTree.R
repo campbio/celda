@@ -1866,11 +1866,17 @@ findMarkersTree <- function(features,
 
 # Whether lowering the top-level threshold could still give a metacluster
 # without a positive marker one: some feature not yet used by the top-level
-# split has a one-off statistic above 0, so it passes the threshold once
-# that is low enough, and its split singles out such a metacluster.
+# one-off split (or any feature, if the split is balanced) has a one-off
+# statistic above 0, so it passes the threshold once that is low enough,
+# and its split singles out such a metacluster.
 .canAddTopMarker <- function(features, metaclusterLabels, topLevel,
                              oneoffMetric) {
-  unused <- setdiff(colnames(features), topLevel$fUsed)
+  # A balanced split is replaced by one-off splits once any feature passes
+  # the threshold, so then its own feature can become a marker too
+  unused <- colnames(features)
+  if (topLevel$statUsed != "Split") {
+    unused <- setdiff(unused, topLevel$fUsed)
+  }
   if (length(unused) == 0) {
     return(FALSE)
   }
