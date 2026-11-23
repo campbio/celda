@@ -1416,7 +1416,7 @@ findMarkersTree <- function(features,
       # get AUC value for this feat-cluster pair
       rocK2 <- pROC::roc(currentLabels, currentFeatureSubset,direction = "<", quiet=TRUE)
       aucK2 <- rocK2$auc
-      coordK2 <- pROC::coords(rocK2, "best", ret = "threshold", transpose = TRUE)[1]
+      coordK2 <- pROC::coords(rocK2, "best", ret = "threshold")$threshold[1]
       
       # Concatenate vectors
       statK2 <- c(threshold = coordK2, auc = aucK2)
@@ -2706,7 +2706,7 @@ plotDendro <- function(tree,
                                     y = dendSegsLabelled$y,
                                     label = dendSegsLabelled$label),
                        size = boxSize,
-                       label.size = 1,
+                       linewidth = 1,
                        fontface = "bold",
                        vjust = 1,
                        nudge_y = 0.1,

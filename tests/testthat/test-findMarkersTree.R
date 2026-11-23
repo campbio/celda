@@ -249,7 +249,25 @@ test_that("findMarkersTree works when a one-off split marks two classes", {
   expect_true(all(nzchar(rules$feature)))
   f4Up <- rules$feature == "f4" & rules$direction == 1
   expect_true(any(rules$class == 1 & f4Up))
-  expect_s3_class(suppressWarnings(plotDendro(tree)), "ggplot")
+  expect_s3_class(plotDendro(tree), "ggplot")
+})
+
+test_that("plotDendro does not use ggplot2's deprecated label.size", {
+  # Show soft deprecations every time, not once per session (#445)
+  withr::local_options(lifecycle_verbosity = "warning")
+  fixture <- .multiClassFixture()
+  tree <- findMarkersTree(
+    fixture$features,
+    fixture$class,
+    threshold = 0.7,
+    autoMetaclusters = FALSE
+  )
+  # expect_no_warning() skips deprecations unless their class is named
+  plot <- expect_no_warning(
+    plotDendro(tree),
+    class = "lifecycle_warning_deprecated"
+  )
+  expect_s3_class(plot, "ggplot")
 })
 
 test_that("a balanced split is used when no one-off split marks one class", {
@@ -264,19 +282,10 @@ test_that("a balanced split is used when no one-off split marks one class", {
   expect_length(split[names(split) != "statUsed"], 1)
 })
 
-# Silence only pROC's deprecation of coords(transpose = TRUE), which
-# .splitMetricPairwiseAUC() still uses
-.withoutTransposeWarning <- function(expr) {
-  withCallingHandlers(expr, warning = function(w) {
-    if (grepl("transpose=TRUE", conditionMessage(w), fixed = TRUE)) {
-      invokeRestart("muffleWarning")
-    }
-  })
-}
-
 test_that("findMarkersTree with pairwise AUC keeps one class per node", {
   fixture <- .multiClassFixture()
-  split <- .withoutTransposeWarning(celda:::.wrapSplitHybrid(
+  # pROC's deprecated coords(transpose = TRUE) is no longer used (#447)
+  split <- expect_no_warning(celda:::.wrapSplitHybrid(
     t(fixture$features),
     as.factor(fixture$class),
     threshold = 0.7,
@@ -287,7 +296,7 @@ test_that("findMarkersTree with pairwise AUC keeps one class per node", {
   expect_true(all(lengths(group1) == 1))
   expect_true(all(nzchar(names(nodes))))
 
-  tree <- .withoutTransposeWarning(findMarkersTree(
+  tree <- expect_no_warning(findMarkersTree(
     fixture$features,
     fixture$class,
     oneoffMetric = "pairwise AUC",
