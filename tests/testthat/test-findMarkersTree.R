@@ -97,6 +97,49 @@ test_that("findMarkersTree keeps a single metacluster without markers", {
   expect_s3_class(plotDendro(tree), "ggplot")
 })
 
+# Classes 1, 2 and 3 have 20 cells each. f1 is high in classes 1 and 2, so
+# it marks them together but neither alone, and f3 marks class 3. f2 is only
+# slightly higher in class 2, too weak to be a top-level marker, but enough
+# to separate classes 1 and 2 from each other.
+.balancedSplitFixture <- function() {
+  withr::with_seed(441, {
+    class <- rep(seq_len(3), each = 20)
+    n <- length(class)
+    f1 <- ifelse(class %in% c(1, 2), runif(n, 5, 6), runif(n, 0, 1))
+    f2 <- ifelse(class == 2, runif(n, 0.6, 1.6), runif(n, 0, 1))
+    f3 <- ifelse(class == 3, runif(n, 5, 6), runif(n, 0, 1))
+  })
+  features <- rbind(f1 = f1, f2 = f2, f3 = f3)
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  list(features = features, class = class)
+}
+
+test_that("findMarkersTree merges metaclusters in a top-level balanced split", {
+  fixture <- .balancedSplitFixture()
+  metaclusters <- list(M1 = 1, M2 = 2, M3 = 3)
+  expect_no_warning(
+    tree <- suppressMessages(findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = metaclusters
+    ))
+  )
+  merged <- "M1+M2"
+  expect_setequal(unique(tree$metaclusterLabels), c(merged, "M3"))
+  expect_setequal(unique(tree$classLabels), c("1", "2", "3"))
+  expect_named(
+    tree$rules,
+    c(paste0(merged, c("(1)", "(2)")), "M3(3)"),
+    ignore.order = TRUE
+  )
+  expect_true(paste0(merged, "_level_1") %in% names(tree$branchPoints))
+  # The merged clusters are separated in their own subtree by f2
+  subtreeRules <- tree$rules[[paste0(merged, "(2)")]]
+  f2Up <- subtreeRules$feature == "f2" & subtreeRules$direction == 1
+  expect_true(any(f2Up & subtreeRules$level == 2))
+  expect_s3_class(plotDendro(tree), "ggplot")
+})
+
 test_that("findMarkersTree skips ambiguous alternative splits", {
   fixture <- .markerTreeFixture()
   expect_message(
