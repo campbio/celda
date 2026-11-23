@@ -326,23 +326,25 @@ findMarkersTree <- function(features,
     
     # Create top-level tree
     
+    # Build the top-level tree for metacluster labels `labels`, with an
+    # alternative node for the solely down-regulated leaf
+    buildTopTree <- function(labels) {
+      topTree <- .generateTreeList(
+        features,
+        as.factor(labels),
+        oneoffMetric,
+        tmpThreshold,
+        reuseFeatures,
+        consecutiveOneoff
+      )
+      .addAlternativeSplit(topTree, features, as.factor(labels))
+    }
+
     #while there is still a balanced split at the top-level
     while(TRUE){
       #create tree
       message("Building top-level tree across all metaclusters...")
-      tree <-
-        .generateTreeList(
-          features,
-          as.factor(metaclusterLabels),
-          oneoffMetric,
-          tmpThreshold,
-          reuseFeatures,
-          consecutiveOneoff
-        )
-      
-      # Add alternative node for the solely down-regulated leaf
-      tree <- .addAlternativeSplit(tree, features,
-                                   as.factor(metaclusterLabels))
+      tree <- buildTopTree(metaclusterLabels)
       
       #store clusters with markers at current threshold
       topLevel <- tree[[1]][[1]]
@@ -360,13 +362,8 @@ findMarkersTree <- function(features,
         break
       }
 
-      # A lower threshold can only add a marker through a feature the
-      # top-level split has not used. The top-level split does not depend on
-      # reuseFeatures, so this holds for both settings.
-      canLower <- .canAddTopMarker(features, metaclusterLabels, topLevel,
-                                   oneoffMetric)
-
       # With a balanced split, try merging the metaclusters it separates
+      tmpTree <- NULL
       if (length(tree) > 1) {
         upClass <- .balancedMergeClasses(tree, metaclusterLabels)
         if (!is.null(upClass)) {
@@ -375,19 +372,7 @@ findMarkersTree <- function(features,
           tmpMeta <- merged$metaclusterLabels
 
           #create top-level tree again
-          tmpTree <-
-            .generateTreeList(
-              features,
-              as.factor(tmpMeta),
-              oneoffMetric,
-              tmpThreshold,
-              reuseFeatures,
-              consecutiveOneoff
-            )
-
-          # Add alternative node for the solely down-regulated leaf
-          tmpTree <- .addAlternativeSplit(tmpTree, features,
-                                          as.factor(tmpMeta))
+          tmpTree <- buildTopTree(tmpMeta)
 
           # Keep the merged metaclusters and their tree if it has no
           # balanced split and every merged metacluster has a marker
@@ -399,13 +384,19 @@ findMarkersTree <- function(features,
             tree <- tmpTree
             break
           }
-
-          # A lower threshold might still give the merged tree its markers
-          canLower <- canLower ||
-            .canAddTopMarker(features, tmpMeta, tmpTree[[1]][[1]],
-                             oneoffMetric)
         }
       }
+
+      # A lower threshold can only add a marker through a feature the
+      # top-level split has not used. The top-level split does not depend on
+      # reuseFeatures, so this holds for both settings. With a balanced
+      # split, a lower threshold might instead give the merged tree its
+      # markers.
+      canLower <- .canAddTopMarker(features, metaclusterLabels, topLevel,
+                                   oneoffMetric) ||
+        (!is.null(tmpTree) &&
+           .canAddTopMarker(features, tmpMeta, tmpTree[[1]][[1]],
+                            oneoffMetric))
 
       # Once no lower threshold can add a marker, merge the metaclusters
       # that have none and build the top-level tree again
@@ -511,6 +502,12 @@ findMarkersTree <- function(features,
         featUse <-
           featUse[!featUse %in% 
                     tmpRules[tmpRules$direction == 1, "feature"]]
+      }
+      if (length(featUse) == 0) {
+        stop("No features are left to split the clusters of metacluster ",
+             .metaclusterDisplayNames(metacluster, metaclusterLabels, class),
+             ", as all are its top-level markers. Set reuseFeatures = TRUE ",
+             "to use them again.", call. = FALSE)
       }
       
       # Features of this metacluster's cells, kept a matrix when only one
@@ -830,7 +827,7 @@ findMarkersTree <- function(features,
     tree$branchPoints <- branchPoints
     
     #return class labels
-    tree$classLabels <- .subtypeClusters(subtypeLabels, subtypeLabels, class)
+    tree$classLabels <- as.character(class)
     tree$metaclusterLabels <- .metaclusterDisplayNames(
       metaclusterLabels, metaclusterLabels, class
     )
@@ -1856,10 +1853,14 @@ findMarkersTree <- function(features,
 }
 
 # Get the metaclusters that no node of the top-level split `topLevel`
-# marks, i.e. that are in no node's group 1
+# marks alone, i.e. that are not the only class in a node's group 1
 .unmarkedMetaclusters <- function(topLevel, metaclusterLabels) {
   nodes <- topLevel[!names(topLevel) %in% c("statUsed", "fUsed", "dirs")]
-  marked <- unlist(lapply(nodes, function(node) node$group1Consensus))
+  group1 <- lapply(nodes, function(node) node$group1Consensus)
+
+  # A balanced split's group 1 can hold several metaclusters, which then
+  # share their marker
+  marked <- unlist(group1[lengths(group1) == 1])
   sort(setdiff(unique(metaclusterLabels), marked))
 }
 
@@ -1883,12 +1884,15 @@ findMarkersTree <- function(features,
   stats <- .splitMetricRecursive(fUnused, labels, splitMetric = splitMetric)
   stats <- stats[!is.na(stats) & stats > 0]
   noMarker <- .unmarkedMetaclusters(topLevel, metaclusterLabels)
-  helps <- vapply(names(stats), function(feat) {
+  for (feat in names(stats)) {
     split <- .getSplit(feat, stats, fUnused, labels, splitMetric)
-    length(split$group1Consensus) == 1 &&
+    singlesOut <- length(split$group1Consensus) == 1 &&
       split$group1Consensus %in% noMarker
-  }, FUN.VALUE = logical(1))
-  any(helps)
+    if (singlesOut) {
+      return(TRUE)
+    }
+  }
+  FALSE
 }
 
 # Whether the top-level split of `tree` has a node, and so a positive
@@ -1960,6 +1964,13 @@ findMarkersTree <- function(features,
   # without is an earlier merge
   onlyEarlierMerge <- length(noMarker) == 1 && noMarker %in% mergedNames
   if (length(noMarker) == 0 || onlyEarlierMerge) {
+    return(unchanged)
+  }
+  # Merging every metacluster would leave a single class
+  if (setequal(noMarker, unique(metaclusterLabels))) {
+    warning("No metacluster has a positive marker of its own at the top ",
+            "level, and no unused feature can become one. To avoid this, ",
+            "build the tree without metaclusters.", call. = FALSE)
     return(unchanged)
   }
   if (length(noMarker) == 1) {

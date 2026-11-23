@@ -309,7 +309,8 @@ test_that("findMarkersTree with pairwise AUC keeps one class per node", {
 
 test_that("findMarkersTree stops lowering the threshold with reuseFeatures", {
   # Issue 438: f3 separates class 3 from class 4 in a balanced split, but
-  # can never mark M3, M4 or their merge alone
+  # can never mark M3, M4 or their merge alone. This goes through the
+  # balanced-split branch of the loop (issue 455).
   fixture <- .markerTreeFixture()
   metaclusters <- list(M1 = 1, M2 = 2, M3 = 3, M4 = 4)
   expect_warning(
@@ -472,4 +473,58 @@ test_that("findMarkersTree relabels a metacluster's nodes exactly", {
   expect_false(anyDuplicated(root$classLabels) > 0)
   expect_equal(root$members, 12)
   expect_setequal(root$classLabels, names(tree$rules))
+})
+
+# A top-level balanced split of metaclusters A and B against C, with the
+# fields .generateTreeList() adds
+.balancedTopLevel <- function() {
+  list(f = list(group1Consensus = c("A", "B"), group2Consensus = "C"),
+       statUsed = "Split", fUsed = "f", dirs = 1)
+}
+
+test_that("metaclusters sharing a balanced split's marker are unmarked", {
+  labels <- rep(c("A", "B", "C"), each = 2)
+  expect_identical(
+    celda:::.unmarkedMetaclusters(.balancedTopLevel(), labels),
+    c("A", "B", "C")
+  )
+  oneOff <- list(f = list(group1Consensus = "A",
+                          group2Consensus = c("B", "C")),
+                 statUsed = "One-off", fUsed = "f", dirs = 1)
+  expect_identical(celda:::.unmarkedMetaclusters(oneOff, labels),
+                   c("B", "C"))
+})
+
+test_that("metaclusters are not all merged into one", {
+  labels <- rep(c("A", "B", "C"), each = 2)
+  metaclusters <- list(A = c(1, 2), B = c(3, 4), C = c(5, 6))
+  class <- seq_len(6)
+  expect_warning(
+    merged <- celda:::.mergeUnmarkedMetaclusters(
+      .balancedTopLevel(), labels, metaclusters, class, character(0)
+    ),
+    regexp = "No metacluster has a positive marker of its own"
+  )
+  expect_null(merged$mergedName)
+  expect_identical(merged$metaclusterLabels, labels)
+})
+
+test_that("findMarkersTree explains when no feature is left for a subtree", {
+  # g and h both mark M2, so neither is left to split classes 3 and 4
+  withr::with_seed(455, {
+    class <- rep(seq_len(4), each = 20)
+    n <- length(class)
+    g <- ifelse(class %in% c(3, 4), runif(n, 5, 6), runif(n, 0, 1))
+    h <- ifelse(class %in% c(3, 4), runif(n, 5, 6), runif(n, 0, 1))
+  })
+  features <- rbind(g = g, h = h)
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  expect_error(
+    suppressWarnings(suppressMessages(findMarkersTree(
+      features,
+      class,
+      metaclusters = list(M1 = c(1, 2), M2 = c(3, 4))
+    ))),
+    regexp = "No features are left to split the clusters of metacluster M2"
+  )
 })
