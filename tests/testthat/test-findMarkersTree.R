@@ -298,3 +298,178 @@ test_that("findMarkersTree with pairwise AUC keeps one class per node", {
   expect_true(all(nzchar(rules$feature)))
   expect_named(tree$rules, c("1", "2", "3"), ignore.order = TRUE)
 })
+
+# Stop `expr` with an error once it has run for `seconds`, so that a
+# threshold loop that never ends fails the test instead of hanging it
+.withTimeLimit <- function(expr, seconds = 60) {
+  setTimeLimit(elapsed = seconds, transient = TRUE)
+  on.exit(setTimeLimit(elapsed = Inf))
+  expr
+}
+
+test_that("findMarkersTree stops lowering the threshold with reuseFeatures", {
+  # Issue 438: f3 separates class 3 from class 4 in a balanced split, but
+  # can never mark M3, M4 or their merge alone
+  fixture <- .markerTreeFixture()
+  metaclusters <- list(M1 = 1, M2 = 2, M3 = 3, M4 = 4)
+  expect_warning(
+    tree <- .withTimeLimit(suppressMessages(findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = metaclusters,
+      reuseFeatures = TRUE
+    ))),
+    regexp = "Metaclusters M3, M4 have no positive marker"
+  )
+  merged <- "M3+M4"
+  expect_setequal(unique(tree$metaclusterLabels), c("M1", "M2", merged))
+  expect_named(
+    tree$rules,
+    c("M1(1)", "M2(2)", paste0(merged, c("(3)", "(4)"))),
+    ignore.order = TRUE
+  )
+})
+
+# Build a tree whose first level-2 node has `up` in group 1 and `down` in
+# group 2, as made by .generateTreeList()
+.levelTwoTree <- function(up, down) {
+  list(list(list()), list(list(list(group1Consensus = up,
+                                    group2Consensus = down))))
+}
+
+test_that("a balanced split is merged only when that leaves two classes", {
+  labels <- c("M1(1)", "M2(2)", "M3(3)", "M4(4)")
+  mergeClasses <- celda:::.balancedMergeClasses
+  # Two up-regulated metaclusters are merged
+  expect_identical(
+    mergeClasses(.levelTwoTree(c("M3(3)", "M4(4)"), "M2(2)"), labels),
+    c("M3(3)", "M4(4)")
+  )
+  # A split of two single metaclusters merges them
+  expect_identical(
+    mergeClasses(.levelTwoTree("M3(3)", "M4(4)"), labels),
+    c("M3(3)", "M4(4)")
+  )
+  # A one-off of one metacluster against several merges nothing
+  expect_null(mergeClasses(.levelTwoTree("M2(2)", c("M3(3)", "M4(4)")),
+                           labels))
+  # Merging every metacluster into one is not done
+  expect_null(mergeClasses(.levelTwoTree("M1(1)", "M2(2)"),
+                           c("M1(1)", "M2(2)")))
+  expect_null(mergeClasses(.levelTwoTree(labels, character(0)), labels))
+})
+
+# Classes 1-4 have 20 cells each. g marks classes 3 and 4 (metacluster M2)
+# and h is high in classes 1 and 3, so it is the only feature left to split
+# each metacluster
+.twoMetaclusterFixture <- function() {
+  withr::with_seed(455, {
+    class <- rep(seq_len(4), each = 20)
+    n <- length(class)
+    g <- ifelse(class %in% c(3, 4), runif(n, 5, 6), runif(n, 0, 1))
+    h <- ifelse(class %in% c(1, 3), runif(n, 5, 6), runif(n, 0, 1))
+  })
+  features <- rbind(g = g, h = h)
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  list(features = features, class = class)
+}
+
+test_that("findMarkersTree splits a metacluster with one feature left", {
+  fixture <- .twoMetaclusterFixture()
+  expect_warning(
+    tree <- suppressMessages(findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = list(M1 = c(1, 2), M2 = c(3, 4))
+    )),
+    regexp = "Metacluster M1 has no positive marker"
+  )
+  expect_named(tree$rules, c("M1(1)", "M1(2)", "M2(3)", "M2(4)"),
+               ignore.order = TRUE)
+})
+
+# Classes 1-4 have 20 cells each. f1 marks class 1, f2 marks class 2 and b
+# marks classes 3 and 4 together. f3 is high in class 3 only, so it splits
+# classes 3 and 4.
+.namedMetaclusterFixture <- function() {
+  withr::with_seed(455, {
+    class <- rep(seq_len(4), each = 20)
+    n <- length(class)
+    f1 <- ifelse(class == 1, runif(n, 5, 6), runif(n, 0, 1))
+    f2 <- ifelse(class == 2, runif(n, 5, 6), runif(n, 0, 1))
+    b <- ifelse(class %in% c(3, 4), runif(n, 5, 6), runif(n, 0, 1))
+    f3 <- ifelse(class == 3, runif(n, 5, 6), runif(n, 0, 1))
+  })
+  features <- rbind(f1 = f1, f2 = f2, b = b, f3 = f3)
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  list(features = features, class = class)
+}
+
+test_that("findMarkersTree keeps metacluster names with parentheses", {
+  # Issue 455: "(cluster)" was removed from names with a greedy regex
+  fixture <- .namedMetaclusterFixture()
+  metaclusters <- list("T (CD4)" = 1, "T (CD8)" = 2, "B (all)" = c(3, 4))
+  expect_no_warning(
+    tree <- suppressMessages(findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = metaclusters
+    ))
+  )
+  expect_setequal(unique(tree$metaclusterLabels), names(metaclusters))
+  expect_identical(tree$classLabels, as.character(fixture$class))
+  expect_named(
+    tree$rules,
+    c("T (CD4)(1)", "T (CD8)(2)", "B (all)(3)", "B (all)(4)"),
+    ignore.order = TRUE
+  )
+  for (label in names(tree$rules)) {
+    rules <- tree$rules[[label]]
+    expect_identical(unique(rules$class),
+                     sub("^.*\\((.*)\\)$", "\\1", label))
+    expect_identical(unique(rules$metacluster),
+                     sub("\\([^()]*\\)$", "", label))
+  }
+  expect_setequal(unique(tree$branchPoints$top_level$metacluster),
+                  names(metaclusters))
+  expect_true("B (all)_level_1" %in% names(tree$branchPoints))
+  plot <- plotDendro(tree)
+  plotLabels <- unlist(lapply(plot$layers, function(layer) {
+    as.character(layer$data$label)
+  }))
+  expect_true(all(names(metaclusters) %in% plotLabels))
+})
+
+# Classes 1-12 have 10 cells each. Metacluster M1 holds classes 1 and 2,
+# which m1 marks, and f1 marks class 1. Each other class k has its own
+# metacluster, M2 to M11, marked by f<k>.
+.manyMetaclusterFixture <- function() {
+  withr::with_seed(444, {
+    class <- rep(seq_len(12), each = 10)
+    n <- length(class)
+    features <- t(vapply(seq_len(12), function(k) {
+      ifelse(class == k, runif(n, 5, 6), runif(n, 0, 1))
+    }, FUN.VALUE = double(n)))
+    m1 <- ifelse(class %in% c(1, 2), runif(n, 5, 6), runif(n, 0, 1))
+  })
+  features <- rbind(features[-2, ], m1)
+  rownames(features) <- c(paste0("f", c(1, 3:12)), "m1")
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  metaclusters <- c(list(M1 = c(1, 2)),
+                    stats::setNames(as.list(3:12), paste0("M", 2:11)))
+  list(features = features, class = class, metaclusters = metaclusters)
+}
+
+test_that("findMarkersTree relabels a metacluster's nodes exactly", {
+  # Issue 444: M1 must not pick up the clusters of M10 and M11
+  fixture <- .manyMetaclusterFixture()
+  tree <- suppressMessages(findMarkersTree(
+    fixture$features,
+    fixture$class,
+    metaclusters = fixture$metaclusters
+  ))
+  root <- attributes(tree$dendro)
+  expect_false(anyDuplicated(root$classLabels) > 0)
+  expect_equal(root$members, 12)
+  expect_setequal(root$classLabels, names(tree$rules))
+})
