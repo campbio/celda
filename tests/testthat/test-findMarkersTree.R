@@ -283,26 +283,35 @@ test_that("a balanced split is used when no one-off split marks one class", {
 })
 
 test_that("findMarkersTree with pairwise AUC keeps one class per node", {
+  # pROC's deprecated coords(transpose = TRUE) is no longer used (#447).
+  # Matching the message also catches it if pROC makes it a lifecycle
+  # deprecation, which expect_no_warning() otherwise skips
+  withr::local_options(lifecycle_verbosity = "warning")
   fixture <- .multiClassFixture()
-  # pROC's deprecated coords(transpose = TRUE) is no longer used (#447)
-  split <- expect_no_warning(celda:::.wrapSplitHybrid(
-    t(fixture$features),
-    as.factor(fixture$class),
-    threshold = 0.7,
-    oneoffMetric = "pairwise AUC"
-  ))
+  split <- expect_no_warning(
+    celda:::.wrapSplitHybrid(
+      t(fixture$features),
+      as.factor(fixture$class),
+      threshold = 0.7,
+      oneoffMetric = "pairwise AUC"
+    ),
+    message = "transpose"
+  )
   nodes <- split[names(split) != "statUsed"]
   group1 <- lapply(nodes, function(node) node$group1Consensus)
   expect_true(all(lengths(group1) == 1))
   expect_true(all(nzchar(names(nodes))))
 
-  tree <- expect_no_warning(findMarkersTree(
-    fixture$features,
-    fixture$class,
-    oneoffMetric = "pairwise AUC",
-    threshold = 0.7,
-    autoMetaclusters = FALSE
-  ))
+  tree <- expect_no_warning(
+    findMarkersTree(
+      fixture$features,
+      fixture$class,
+      oneoffMetric = "pairwise AUC",
+      threshold = 0.7,
+      autoMetaclusters = FALSE
+    ),
+    message = "transpose"
+  )
   rules <- do.call(rbind, tree$rules)
   expect_true(all(nzchar(rules$feature)))
   expect_named(tree$rules, c("1", "2", "3"), ignore.order = TRUE)
