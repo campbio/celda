@@ -52,10 +52,10 @@ Counts matrix has to be provided as well.}
 metric. Smaller values will result in more one-off splits. Default is 0.90.
 When metaclusters are used, the threshold for the top-level tree is
 lowered by 10\% at a time until every metacluster has a positive marker.
-If \code{reuseFeatures = FALSE} and no unused feature could become a
-marker that way, it stops lowering with a warning, and metaclusters still
-without a positive marker are merged into one metacluster (names joined
-with "+") whose clusters are separated in its own subtree.}
+Once no unused feature could become a marker that way, it stops lowering
+with a warning, and metaclusters still without a positive marker are
+merged into one metacluster (names joined with "+") whose clusters are
+separated in its own subtree.}
 
 \item{reuseFeatures}{Logical. Whether or not a feature can be used more than
 once on the same cluster. Default is FALSE.}

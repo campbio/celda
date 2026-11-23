@@ -30,10 +30,10 @@ utils::globalVariables(c("xend", "y", "label"))
 #'  metric. Smaller values will result in more one-off splits. Default is 0.90.
 #'  When metaclusters are used, the threshold for the top-level tree is
 #'  lowered by 10\% at a time until every metacluster has a positive marker.
-#'  If \code{reuseFeatures = FALSE} and no unused feature could become a
-#'  marker that way, it stops lowering with a warning, and metaclusters still
-#'  without a positive marker are merged into one metacluster (names joined
-#'  with "+") whose clusters are separated in its own subtree.
+#'  Once no unused feature could become a marker that way, it stops lowering
+#'  with a warning, and metaclusters still without a positive marker are
+#'  merged into one metacluster (names joined with "+") whose clusters are
+#'  separated in its own subtree.
 #' @param reuseFeatures Logical. Whether or not a feature can be used more than
 #'  once on the same cluster. Default is FALSE.
 #' @param altSplit Logical. Whether or not to force a marker for clusters that
@@ -326,23 +326,25 @@ findMarkersTree <- function(features,
     
     # Create top-level tree
     
+    # Build the top-level tree for metacluster labels `labels`, with an
+    # alternative node for the solely down-regulated leaf
+    buildTopTree <- function(labels) {
+      topTree <- .generateTreeList(
+        features,
+        as.factor(labels),
+        oneoffMetric,
+        tmpThreshold,
+        reuseFeatures,
+        consecutiveOneoff
+      )
+      .addAlternativeSplit(topTree, features, as.factor(labels))
+    }
+
     #while there is still a balanced split at the top-level
     while(TRUE){
       #create tree
       message("Building top-level tree across all metaclusters...")
-      tree <-
-        .generateTreeList(
-          features,
-          as.factor(metaclusterLabels),
-          oneoffMetric,
-          tmpThreshold,
-          reuseFeatures,
-          consecutiveOneoff
-        )
-      
-      # Add alternative node for the solely down-regulated leaf
-      tree <- .addAlternativeSplit(tree, features,
-                                   as.factor(metaclusterLabels))
+      tree <- buildTopTree(metaclusterLabels)
       
       #store clusters with markers at current threshold
       topLevel <- tree[[1]][[1]]
@@ -354,88 +356,66 @@ findMarkersTree <- function(features,
         )
       }
       
-      #if no more balanced split 
-      if(length(tree) == 1){
-        #if all clusters have positive markers
-        if (.allTopMarked(tree, metaclusters)) {
-          break
-        }
-        else{
-          # A lower threshold can only add a marker through a feature the
-          # top-level split has not used, so stop lowering it once none
-          # of those would mark a metacluster that has no marker
-          stopLowering <- !reuseFeatures &&
-            !.canAddTopMarker(features, metaclusterLabels, topLevel,
-                              oneoffMetric)
-          if (stopLowering) {
-            merged <- .mergeUnmarkedMetaclusters(
-              topLevel, metaclusterLabels, metaclusters, class, mergedNames
-            )
-            metaclusterLabels <- merged$metaclusterLabels
-            metaclusters <- merged$metaclusters
+      # Keep the tree once it has no balanced split and every metacluster
+      # has a positive marker
+      if (length(tree) == 1 && .allTopMarked(tree, metaclusters)) {
+        break
+      }
 
-            # Rebuild the top-level tree with the merged metacluster
-            if (!is.null(merged$mergedName)) {
-              mergedNames <- c(mergedNames, merged$mergedName)
-              next
-            }
+      # With a balanced split, try merging the metaclusters it separates
+      tmpTree <- NULL
+      if (length(tree) > 1) {
+        upClass <- .balancedMergeClasses(tree, metaclusterLabels)
+        if (!is.null(upClass)) {
+          merged <- .mergeMetaclusters(upClass, metaclusterLabels,
+                                       metaclusters, class)
+          tmpMeta <- merged$metaclusterLabels
+
+          #create top-level tree again
+          tmpTree <- buildTopTree(tmpMeta)
+
+          # Keep the merged metaclusters and their tree if it has no
+          # balanced split and every merged metacluster has a marker
+          accepted <- length(tmpTree) == 1 &&
+            .allTopMarked(tmpTree, merged$metaclusters)
+          if (accepted) {
+            metaclusterLabels <- tmpMeta
+            metaclusters <- merged$metaclusters
+            tree <- tmpTree
             break
           }
+        }
+      }
 
-          #decrease threshold by 10%
-          tmpThreshold <- tmpThreshold*0.9
-          message("Decreasing classifier threshold to ",tmpThreshold)
+      # A lower threshold can only add a marker through a feature the
+      # top-level split has not used. The top-level split does not depend on
+      # reuseFeatures, so this holds for both settings. With a balanced
+      # split, a lower threshold might instead give the merged tree its
+      # markers.
+      canLower <- .canAddTopMarker(features, metaclusterLabels, topLevel,
+                                   oneoffMetric) ||
+        (!is.null(tmpTree) &&
+           .canAddTopMarker(features, tmpMeta, tmpTree[[1]][[1]],
+                            oneoffMetric))
+
+      # Once no lower threshold can add a marker, merge the metaclusters
+      # that have none and build the top-level tree again
+      if (!canLower) {
+        merged <- .mergeUnmarkedMetaclusters(
+          topLevel, metaclusterLabels, metaclusters, class, mergedNames
+        )
+        metaclusterLabels <- merged$metaclusterLabels
+        metaclusters <- merged$metaclusters
+        if (!is.null(merged$mergedName)) {
+          mergedNames <- c(mergedNames, merged$mergedName)
           next
         }
+        break
       }
-      #still balanced split
-      else{
-        #get up-regulated clusters at first balanced split
-        upClass <- tree[[2]][[1]][[1]]$group1Consensus
-        
-        #if only 2 clusters at the balanced split then merge them
-        if((length(upClass) == 1) &&
-           (length(tree[[2]][[1]][[1]]$group2Consensus) == 1)){
-          upClass <- c(upClass, tree[[2]][[1]][[1]]$group2Consensus)
-        }
-        
-        # Merge the up-regulated metaclusters
-        merged <- .mergeMetaclusters(upClass, metaclusterLabels,
-                                     metaclusters, class)
-        tmpMeta <- merged$metaclusterLabels
 
-        #create top-level tree again
-        tmpTree <-
-          .generateTreeList(
-            features,
-            as.factor(tmpMeta),
-            oneoffMetric,
-            tmpThreshold,
-            reuseFeatures,
-            consecutiveOneoff
-          )
-
-        # Add alternative node for the solely down-regulated leaf
-        tmpTree <- .addAlternativeSplit(tmpTree, features,
-                                        as.factor(tmpMeta))
-
-        # If the new tree still has a balanced split, or some merged
-        # metaclusters have no marker
-        if ((length(tmpTree) > 1) ||
-            !.allTopMarked(tmpTree, merged$metaclusters)) {
-
-          #decrease threshold by 10%
-          tmpThreshold <- tmpThreshold*0.9
-          message("Decreasing classifier threshold to ",tmpThreshold)
-        }
-        else{
-          # Keep the merged metaclusters and their tree
-          metaclusterLabels <- tmpMeta
-          metaclusters <- merged$metaclusters
-          tree <- tmpTree
-          break
-        }
-      }
+      #decrease threshold by 10%
+      tmpThreshold <- tmpThreshold * 0.9
+      message("Decreasing classifier threshold to ", tmpThreshold)
     }
     
     #re-format output
@@ -523,11 +503,22 @@ findMarkersTree <- function(features,
           featUse[!featUse %in% 
                     tmpRules[tmpRules$direction == 1, "feature"]]
       }
+      if (length(featUse) == 0) {
+        stop("No features are left to split the clusters of metacluster ",
+             .metaclusterDisplayNames(metacluster, metaclusterLabels, class),
+             ", as all are its top-level markers. Set reuseFeatures = TRUE ",
+             "to use them again.", call. = FALSE)
+      }
       
+      # Features of this metacluster's cells, kept a matrix when only one
+      # feature is left
+      featSub <- features[metaclusterLabels == metacluster, featUse,
+                          drop = FALSE]
+
       # Create new tree
       newTree <-
         .generateTreeList(
-          features[metaclusterLabels == metacluster,featUse],
+          featSub,
           as.factor(subtypeLabels[metaclusterLabels == metacluster]),
           oneoffMetric,
           threshold,
@@ -539,7 +530,7 @@ findMarkersTree <- function(features,
       if (altSplit) {
         newTree <-
           .addAlternativeSplit(newTree,
-                               features[metaclusterLabels == metacluster, featUse],
+                               featSub,
                                as.factor(subtypeLabels[metaclusterLabels == metacluster]))
       }
       
@@ -636,9 +627,8 @@ findMarkersTree <- function(features,
           labels <- attributes(node)$classLabels
           labels <- as.character(labels)
           labels <- labels[labels != metacluster]
-          labels <- c(labels, unique(subtypeLabels)
-                      [grep(metacluster, unique(subtypeLabels),
-                            fixed = TRUE)])
+          subtypes <- unique(subtypeLabels[metaclusterLabels == metacluster])
+          labels <- c(labels, subtypes)
           attributes(node)$classLabels <- labels
           
           # Assign new member count for this branch
@@ -814,49 +804,33 @@ findMarkersTree <- function(features,
     })
     
     #adjust subtype labels
-    branchPoints <- lapply(branchPoints, function(br){
-      br$class <- as.character(br$class)
-      br$class[grepl("\\(.*\\)",br$class)] <- regmatches(
-        br$class[grepl("\\(.*\\)",br$class)],
-        regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                br$class[grepl("\\(.*\\)",br$class)],
-                perl = TRUE))
-      
-      br$metacluster <- as.character(br$metacluster)
-      br$metacluster[grepl("\\(.*\\)",br$metacluster)] <-
-        gsub("\\(.*\\)", "",
-             br$metacluster[grepl("\\(.*\\)",br$metacluster)])
-      
+    # Look the labels up rather than parse them, as metacluster names can
+    # contain parentheses
+    branchPoints <- lapply(branchPoints, function(br) {
+      br$class <- .subtypeClusters(br$class, subtypeLabels, class)
+      br$metacluster <- .metaclusterDisplayNames(
+        as.character(br$metacluster), metaclusterLabels, class
+      )
       return(br)
     })
     #adjust subtype labels
-    tree$rules <- suppressWarnings(lapply(tree$rules, function(r){
-      r$class <- as.character(r$class)
-      r$class[grepl("\\(.*\\)",r$class)] <- regmatches(
-        r$class[grepl("\\(.*\\)",r$class)],
-        regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                r$class[grepl("\\(.*\\)",r$class)],
-                perl = TRUE))
-      
-      r$metacluster[grepl("\\(.*\\)",r$metacluster)] <-
-        gsub("\\(.*\\)", "",
-             r$metacluster[grepl("\\(.*\\)",r$metacluster)])
+    tree$rules <- lapply(tree$rules, function(r) {
+      r$class <- .subtypeClusters(r$class, subtypeLabels, class)
+      r$metacluster <- .metaclusterDisplayNames(
+        as.character(r$metacluster), metaclusterLabels, class
+      )
       return(r)
-    }))
+    })
     
     
     #add to tree
     tree$branchPoints <- branchPoints
     
     #return class labels
-    tree$classLabels <- regmatches(subtypeLabels,
-                                   regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                                           subtypeLabels, perl = TRUE))
-    
-    tree$metaclusterLabels <- metaclusterLabels
-    tree$metaclusterLabels[grepl("\\(.*\\)",metaclusterLabels)] <- 
-      gsub("\\(.*\\)", "",
-           metaclusterLabels[grepl("\\(.*\\)",metaclusterLabels)])
+    tree$classLabels <- as.character(class)
+    tree$metaclusterLabels <- .metaclusterDisplayNames(
+      metaclusterLabels, metaclusterLabels, class
+    )
     
     # Final return
     return(tree)
@@ -940,16 +914,14 @@ findMarkersTree <- function(features,
       
       #get class groups for each marker
       markers <- oneS[oneS$direction==1, "feature"]
-      groups <- unique(unlist(lapply(markers, function(m){
-        return(paste(
-          as.character(oneS[oneS$feature==m,"class"]),
-          collapse = " "))
-      })))
+      # Kept as a list, as class labels can contain spaces
+      groups <- unique(lapply(markers, function(m) {
+        as.character(oneS[oneS$feature == m, "class"])
+      }))
       
       #return table for each class group
-      oSplits <- lapply(groups, function(x){
-        gr <- unlist(strsplit(x, split = " "))
-        oneS[as.character(oneS$class) %in% gr,]
+      oSplits <- lapply(groups, function(gr) {
+        oneS[as.character(oneS$class) %in% gr, ]
       })
     }
     
@@ -1847,21 +1819,64 @@ findMarkersTree <- function(features,
   tree
 }
 
+# Get the name shown in the output for each metacluster label in `labels`.
+# A metacluster with a single cluster is labelled "<name>(<cluster>)" while
+# the tree is built, and is shown as "<name>". Other labels are kept. The
+# cluster is looked up in `class` rather than parsed, as names can contain
+# parentheses.
+.metaclusterDisplayNames <- function(labels, metaclusterLabels, class) {
+  uniqueLabels <- unique(labels)
+  displayNames <- vapply(uniqueLabels, function(label) {
+    clusters <- unique(as.character(class[metaclusterLabels == label]))
+    if (length(clusters) != 1) {
+      return(label)
+    }
+    suffix <- paste0("(", clusters, ")")
+    if (!endsWith(label, suffix)) {
+      return(label)
+    }
+    substr(label, 1, nchar(label) - nchar(suffix))
+  }, FUN.VALUE = character(1), USE.NAMES = FALSE)
+  displayNames[match(labels, uniqueLabels)]
+}
+
+# Get the cluster of each subtype label ("<metacluster>(<cluster>)") in
+# `labels`, looked up in `class` by the cells' `subtypeLabels`. Labels that
+# are not subtype labels, such as names of metaclusters with several
+# clusters, are kept.
+.subtypeClusters <- function(labels, subtypeLabels, class) {
+  labels <- as.character(labels)
+  cells <- match(labels, subtypeLabels)
+  isSubtype <- !is.na(cells)
+  labels[isSubtype] <- as.character(class[cells[isSubtype]])
+  labels
+}
+
 # Get the metaclusters that no node of the top-level split `topLevel`
-# marks, i.e. that are in no node's group 1
+# marks alone, i.e. that are not the only class in a node's group 1
 .unmarkedMetaclusters <- function(topLevel, metaclusterLabels) {
   nodes <- topLevel[!names(topLevel) %in% c("statUsed", "fUsed", "dirs")]
-  marked <- unlist(lapply(nodes, function(node) node$group1Consensus))
+  group1 <- lapply(nodes, function(node) node$group1Consensus)
+
+  # A balanced split's group 1 can hold several metaclusters, which then
+  # share their marker
+  marked <- unlist(group1[lengths(group1) == 1])
   sort(setdiff(unique(metaclusterLabels), marked))
 }
 
 # Whether lowering the top-level threshold could still give a metacluster
 # without a positive marker one: some feature not yet used by the top-level
-# split has a one-off statistic above 0, so it passes the threshold once
-# that is low enough, and its split singles out such a metacluster.
+# one-off split (or any feature, if the split is balanced) has a one-off
+# statistic above 0, so it passes the threshold once that is low enough,
+# and its split singles out such a metacluster.
 .canAddTopMarker <- function(features, metaclusterLabels, topLevel,
                              oneoffMetric) {
-  unused <- setdiff(colnames(features), topLevel$fUsed)
+  # A balanced split is replaced by one-off splits once any feature passes
+  # the threshold, so then its own feature can become a marker too
+  unused <- colnames(features)
+  if (topLevel$statUsed != "Split") {
+    unused <- setdiff(unused, topLevel$fUsed)
+  }
   if (length(unused) == 0) {
     return(FALSE)
   }
@@ -1875,12 +1890,15 @@ findMarkersTree <- function(features,
   stats <- .splitMetricRecursive(fUnused, labels, splitMetric = splitMetric)
   stats <- stats[!is.na(stats) & stats > 0]
   noMarker <- .unmarkedMetaclusters(topLevel, metaclusterLabels)
-  helps <- vapply(names(stats), function(feat) {
+  for (feat in names(stats)) {
     split <- .getSplit(feat, stats, fUnused, labels, splitMetric)
-    length(split$group1Consensus) == 1 &&
+    singlesOut <- length(split$group1Consensus) == 1 &&
       split$group1Consensus %in% noMarker
-  }, FUN.VALUE = logical(1))
-  any(helps)
+    if (singlesOut) {
+      return(TRUE)
+    }
+  }
+  FALSE
 }
 
 # Whether the top-level split of `tree` has a node, and so a positive
@@ -1888,6 +1906,24 @@ findMarkersTree <- function(features,
 # split holds "statUsed", "fUsed" and "dirs".
 .allTopMarked <- function(tree, metaclusters) {
   length(tree[[1]][[1]]) == length(metaclusters) + 3
+}
+
+# Get the metaclusters to merge at the first level-2 node of the top-level
+# `tree`: its up-regulated metaclusters, or both of them if it splits two
+# single metaclusters. Returns NULL when there are fewer than two to merge,
+# as merging one changes nothing, or when they are every metacluster in
+# `metaclusterLabels`, as the tree would then have a single class.
+.balancedMergeClasses <- function(tree, metaclusterLabels) {
+  node <- tree[[2]][[1]][[1]]
+  upClass <- node$group1Consensus
+  if (length(upClass) == 1 && length(node$group2Consensus) == 1) {
+    upClass <- c(upClass, node$group2Consensus)
+  }
+  coversAll <- all(unique(metaclusterLabels) %in% upClass)
+  if (length(upClass) < 2 || coversAll) {
+    return(NULL)
+  }
+  upClass
 }
 
 # Merge the metaclusters labelled `toMerge` in `metaclusterLabels` into one
@@ -1898,7 +1934,10 @@ findMarkersTree <- function(features,
 .mergeMetaclusters <- function(toMerge, metaclusterLabels, metaclusters,
                                class) {
   toMerge <- sort(toMerge)
-  mergedName <- paste(sub("\\(.*\\)$", "", toMerge), collapse = "+")
+  mergedName <- paste(
+    .metaclusterDisplayNames(toMerge, metaclusterLabels, class),
+    collapse = "+"
+  )
   mergedClusters <- sort(unique(class[metaclusterLabels %in% toMerge]))
   inMerge <- vapply(metaclusters, function(clusters) {
     all(clusters %in% mergedClusters)
@@ -1925,12 +1964,19 @@ findMarkersTree <- function(features,
 
   # Name metaclusters as in the output, without the "(cluster)" of
   # single-cluster metaclusters
-  baseNames <- sub("\\(.*\\)$", "", noMarker)
+  baseNames <- .metaclusterDisplayNames(noMarker, metaclusterLabels, class)
 
   # Nothing to report if every metacluster has a marker, or the one
   # without is an earlier merge
   onlyEarlierMerge <- length(noMarker) == 1 && noMarker %in% mergedNames
   if (length(noMarker) == 0 || onlyEarlierMerge) {
+    return(unchanged)
+  }
+  # Merging every metacluster would leave a single class
+  if (setequal(noMarker, unique(metaclusterLabels))) {
+    warning("No metacluster has a positive marker of its own at the top ",
+            "level, and no unused feature can become one. To avoid this, ",
+            "build the tree without metaclusters.", call. = FALSE)
     return(unchanged)
   }
   if (length(noMarker) == 1) {
@@ -2632,10 +2678,12 @@ plotDendro <- function(tree,
   leafLabels <- dendextend::get_leaves_attr(dendro, "label")
   
   # Adjust leaf labels if there are metacluster labels
+  # Leaves are labelled "<metacluster>(<cluster>)": show the cluster
   if(!is.null(tree$metaclusterLabels)){
-    leafLabels <- regmatches(leafLabels,
-                             regexpr(pattern = "(?<=\\().*?(?=\\)$)",
-                                     leafLabels, perl = TRUE))
+    subtypeLabels <- paste0(tree$metaclusterLabels, "(", tree$classLabels,
+                            ")")
+    leaf <- match(leafLabels, subtypeLabels)
+    leafLabels[!is.na(leaf)] <- tree$classLabels[leaf[!is.na(leaf)]]
   }
   
   # Add sensitivity and precision measurements
@@ -2691,18 +2739,8 @@ plotDendro <- function(tree,
   # Check if need to add metacluster labels
   if(!is.null(tree$metaclusterLabels)){
     #store metacluster labels to add
+    # These are already the names shown, without "(cluster)"
     newLabels <- unique(tree$branchPoints$top_level$metacluster)
-    
-    #adjust labels for metaclusters of size one
-    newLabels <- unlist(lapply(newLabels, function(curMeta){
-      if(substr(curMeta, nchar(curMeta), nchar(curMeta)) == ")"){
-        return(gsub(pattern = "\\(.*\\)$", replacement = "",
-                    x = curMeta))
-      }
-      else{
-        return(curMeta)
-      }
-    }))
     
     # Create table for metacluster labels
     metaclusterText <- dendSegsLabelled[dendSegsLabelled$y ==

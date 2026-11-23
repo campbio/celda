@@ -57,6 +57,25 @@
   "M1+M2", as for metaclusters merged for lack of markers. Trees, markers,
   and performance can change for metacluster runs that had a balanced split
   at the top level.
+* With metaclusters, `findMarkersTree()` no longer lowers the top-level
+  threshold indefinitely when `reuseFeatures = TRUE`, or when merging the
+  metaclusters of a top-level balanced split can't give them a positive
+  marker. In both settings the threshold is lowered only while an unused
+  feature could still become a marker, then metaclusters without one are
+  merged, with a warning, as with `reuseFeatures = FALSE` (#438, #455).
+  Metaclusters that share the marker of a top-level balanced split now count
+  as having no marker of their own. A balanced split of a single metacluster
+  against several, or of every metacluster, is no longer merged (#455).
+* `findMarkersTree()` keeps metacluster names that contain parentheses, such
+  as "T (CD4)", in `metaclusterLabels`, `classLabels`, the `metacluster` and
+  `class` columns of `rules` and `branchPoints`, and `plotDendro()`. Before,
+  everything from the first "(" was treated as the added "(cluster)" (#455).
+  Each metacluster's subtree in the dendrogram now gets only its own
+  clusters: with 10 or more metaclusters, `M1` also took those of `M10`,
+  `M11` and so on (#444). A metacluster whose subtree has only one feature
+  left no longer fails with "$ operator is invalid for atomic vectors". When
+  no feature is left, because all are the metacluster's top-level markers,
+  the error now says so and suggests `reuseFeatures = TRUE`.
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
