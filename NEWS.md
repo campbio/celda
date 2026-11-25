@@ -85,9 +85,10 @@
   the top-level tree, as it already did without metaclusters and in each
   metacluster's subtree. Before, the top-level tree always got alternative
   splits. A metacluster solely defined by the absence of markers can now get
-  a marker only by the threshold being lowered, or else is reported as
-  having none. Markers can change for runs with `altSplit = FALSE` and
-  metaclusters, including the default `autoMetaclusters = TRUE` (#443).
+  a marker only by the threshold being lowered. Otherwise it is reported as
+  having none, or merged with other metaclusters without one. Markers can
+  change for runs with `altSplit = FALSE` and metaclusters, including the
+  default `autoMetaclusters = TRUE` (#443).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's

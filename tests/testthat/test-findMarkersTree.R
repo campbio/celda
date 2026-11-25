@@ -98,16 +98,23 @@ test_that("findMarkersTree keeps a single metacluster without markers", {
 })
 
 # Classes 1, 2 and 3 have 20 cells each. f1 marks class 1 and f2 marks
-# class 2. f3 is only slightly higher in class 3: an alternative split gives
-# it to class 3 as a marker, but the pairwise AUC one-off split cannot.
+# class 2. f3 is spread over 2 to 3 in class 3 and in 11 of the 20 cells of
+# class 1, and below 0.5 elsewhere. The pairwise AUC cut is below 0.5, so it
+# takes in classes 1 and 3 and f3 cannot be a one-off marker. The modified
+# F1 cut of an alternative split falls between 2 and 3, where it keeps over
+# half of class 3 and under half of class 1, so f3 marks class 3 there.
 .weakMarkerFixture <- function() {
   withr::with_seed(443, {
     class <- rep(seq_len(3), each = 20)
     n <- length(class)
     f1 <- ifelse(class == 1, runif(n, 5, 6), runif(n, 0, 1))
     f2 <- ifelse(class == 2, runif(n, 5, 6), runif(n, 0, 1))
-    f3 <- ifelse(class == 3, runif(n, 0.5, 1.5), runif(n, 0, 1))
   })
+  f3 <- c(
+    seq(2.02, 2.98, length.out = 11), seq(0, 0.48, length.out = 9),
+    seq(0.01, 0.49, length.out = 20),
+    seq(2, 3, length.out = 20)
+  )
   features <- rbind(f1 = f1, f2 = f2, f3 = f3)
   colnames(features) <- paste0("Cell_", seq_len(n))
   list(features = features, class = class)
