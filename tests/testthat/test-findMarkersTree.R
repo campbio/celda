@@ -282,7 +282,7 @@ test_that("a balanced split is used when no one-off split marks one class", {
   expect_length(split[names(split) != "statUsed"], 1)
 })
 
-test_that("pairwise AUC cuts above every other class, not just the closest", {
+test_that("pairwise AUC uses the largest pairwise cut-off", {
   # B overlaps A the most (lowest AUC) but its best cut-off, 6.5, would let
   # all of C through; C's cut-off, 9.75, leaves all of C and most of B
   # below it (#457)
