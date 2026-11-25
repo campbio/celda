@@ -1427,9 +1427,11 @@ findMarkersTree <- function(features,
   # Get Min Value
   aucMin <- min(aucFram$auc)
 
-  # Each threshold best separates classMax from one other class, so the
-  # largest is the cut that leaves every other class below it. A pair's
-  # threshold is -Inf only when its AUC is 0.5 or less.
+  # Each threshold is the best cut between classMax and one other class.
+  # The largest keeps most of every other class below it, where a smaller
+  # one can let a whole class through. Splits that still don't mark only
+  # classMax are dropped later. A pair's threshold is -Inf only when its
+  # AUC is 0.5 or less.
   aucValue <- max(aucFram$threshold)
   
   # Return performance or value?
