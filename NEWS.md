@@ -76,6 +76,11 @@
   left no longer fails with "$ operator is invalid for atomic vectors". When
   no feature is left, because all are the metacluster's top-level markers,
   the error now says so and suggests `reuseFeatures = TRUE`.
+* `findMarkersTree()` with `oneoffMetric = "pairwise AUC"` no longer warns
+  that pROC's `coords(transpose = TRUE)` is deprecated (#447), and
+  `plotDendro()` no longer warns that ggplot2's `label.size` argument of
+  `geom_label()` is deprecated (#445). Results and plots are unchanged.
+  celda now requires ggplot2 4.0.0 or later and pROC 1.16.0 or later.
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's

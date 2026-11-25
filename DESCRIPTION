@@ -1,6 +1,6 @@
 Package: celda
 Title: CEllular Latent Dirichlet Allocation
-Version: 1.29.10
+Version: 1.29.11
 Authors@R: c(person("Joshua", "Campbell", email = "camp@bu.edu",
     role = c("aut", "cre"),
     comment = c(ORCID = "0000-0003-0780-8662")),
@@ -18,13 +18,13 @@ Description: Celda is a suite of Bayesian hierarchical models for
     visualization functions is also included.
 Depends: R (>= 4.6.0), SingleCellExperiment, Matrix
 VignetteBuilder: knitr
-Imports: plyr, foreach, ggplot2, RColorBrewer, grid, scales, gtable,
+Imports: plyr, foreach, ggplot2 (>= 4.0.0), RColorBrewer, grid, scales, gtable,
         grDevices, graphics, matrixStats, doParallel, digest, methods,
         reshape2, S4Vectors, data.table,
         Rcpp, RcppEigen, uwot, enrichR, SummarizedExperiment,
         ggrepel, Rtsne, withr, dbscan,
         stringr, ComplexHeatmap, gridExtra,
-        circlize, dendextend, ggdendro, pROC
+        circlize, dendextend, ggdendro, pROC (>= 1.16.0)
 Suggests: testthat, knitr, roxygen2, rmarkdown, biomaRt, covr,
         BiocManager, BiocStyle, TENxPBMCData, singleCellTK, M3DExampleData,
         decontX, scater, Seurat
