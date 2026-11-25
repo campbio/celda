@@ -1426,11 +1426,10 @@ findMarkersTree <- function(features,
   
   # Get Min Value
   aucMin <- min(aucFram$auc)
-  
-  # Get indices where this AUC occurs
-  aucMinIndices <- which(aucFram$auc == aucMin)
-  
-  # Use maximum value if there are ties
+
+  # Each threshold best separates classMax from one other class, so the
+  # largest is the cut that leaves every other class below it. A pair's
+  # threshold is -Inf only when its AUC is 0.5 or less.
   aucValue <- max(aucFram$threshold)
   
   # Return performance or value?
