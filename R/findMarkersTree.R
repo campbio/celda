@@ -327,7 +327,7 @@ findMarkersTree <- function(features,
     # Create top-level tree
     
     # Build the top-level tree for metacluster labels `labels`, with an
-    # alternative node for the solely down-regulated leaf
+    # alternative node for the solely down-regulated leaf if `altSplit`
     buildTopTree <- function(labels) {
       topTree <- .generateTreeList(
         features,
@@ -337,7 +337,10 @@ findMarkersTree <- function(features,
         reuseFeatures,
         consecutiveOneoff
       )
-      .addAlternativeSplit(topTree, features, as.factor(labels))
+      if (altSplit) {
+        topTree <- .addAlternativeSplit(topTree, features, as.factor(labels))
+      }
+      topTree
     }
 
     #while there is still a balanced split at the top-level
