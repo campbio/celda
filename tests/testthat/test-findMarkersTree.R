@@ -282,6 +282,31 @@ test_that("a balanced split is used when no one-off split marks one class", {
   expect_length(split[names(split) != "statUsed"], 1)
 })
 
+test_that("pairwise AUC uses the largest pairwise cut-off", {
+  # B overlaps A the most (lowest AUC) but its best cut-off, 6.5, would let
+  # all of C through; C's cut-off, 9.75, leaves all of C and most of B
+  # below it (#457)
+  class <- factor(rep(c("A", "B", "C"), c(4, 5, 4)))
+  values <- c(10, 11, 12, 13, 0, 1, 2, 3, 10.5, 8, 8.5, 9, 9.5)
+  features <- matrix(
+    values,
+    ncol = 1,
+    dimnames = list(paste0("cell", seq_along(values)), "f1")
+  )
+  value <- celda:::.splitMetricPairwiseAUC("f1", class, features)
+  expect_equal(value, 9.75)
+  stat <- celda:::.splitMetricPairwiseAUC("f1", class, features, rPerf = TRUE)
+  expect_equal(stat, 0.95)
+  split <- celda:::.getSplit(
+    "f1",
+    c(f1 = stat),
+    features,
+    class,
+    celda:::.splitMetricPairwiseAUC
+  )
+  expect_identical(split$group1Consensus, "A")
+})
+
 test_that("findMarkersTree with pairwise AUC keeps one class per node", {
   # pROC's deprecated coords(transpose = TRUE) is no longer used (#447).
   # Matching the message also catches it if pROC makes it a lifecycle
