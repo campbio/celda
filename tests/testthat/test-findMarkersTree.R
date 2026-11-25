@@ -284,7 +284,8 @@ test_that("a balanced split is used when no one-off split marks one class", {
 
 test_that("pairwise AUC cuts above every other class, not just the closest", {
   # B overlaps A the most (lowest AUC) but its best cut-off, 6.5, would let
-  # all of C through; C's cut-off, 9.75, leaves both B and C below (#457)
+  # all of C through; C's cut-off, 9.75, leaves all of C and most of B
+  # below it (#457)
   class <- factor(rep(c("A", "B", "C"), c(4, 5, 4)))
   values <- c(10, 11, 12, 13, 0, 1, 2, 3, 10.5, 8, 8.5, 9, 9.5)
   features <- matrix(
