@@ -81,6 +81,13 @@
   `plotDendro()` no longer warns that ggplot2's `label.size` argument of
   `geom_label()` is deprecated (#445). Results and plots are unchanged.
   celda now requires ggplot2 4.0.0 or later and pROC 1.16.0 or later.
+* With metaclusters, `findMarkersTree()` now honours `altSplit = FALSE` in
+  the top-level tree, as it already did without metaclusters and in each
+  metacluster's subtree. Before, the top-level tree always got alternative
+  splits. A metacluster solely defined by the absence of markers can now get
+  a marker only by the threshold being lowered, or else is reported as
+  having none. Markers can change for runs with `altSplit = FALSE` and
+  metaclusters, including the default `autoMetaclusters = TRUE` (#443).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's

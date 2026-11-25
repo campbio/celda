@@ -61,7 +61,9 @@ separated in its own subtree.}
 once on the same cluster. Default is FALSE.}
 
 \item{altSplit}{Logical. Whether or not to force a marker for clusters that
-are solely defined by the absence of markers. Default is TRUE.}
+are solely defined by the absence of markers. With metaclusters, this
+applies to the top-level tree and to each metacluster's subtree. Default
+is TRUE.}
 
 \item{consecutiveOneoff}{Logical. Whether or not to allow one-off splits at
 consecutive brances. Default is FALSE.}
