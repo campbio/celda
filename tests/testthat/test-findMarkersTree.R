@@ -154,15 +154,13 @@ test_that("altSplit = FALSE does not try a top-level alternative split", {
   # Issue 443: no feature is left for M3, so an attempt would say so
   fixture <- .markerTreeFixture(nClass = 3)
   features <- fixture$features[c("f1", "f2"), ]
-  expect_no_message(
-    suppressWarnings(findMarkersTree(
-      features,
-      fixture$class,
-      altSplit = FALSE,
-      metaclusters = list(M1 = 1, M2 = 2, M3 = 3)
-    )),
-    message = "No alternative split added"
-  )
+  messages <- capture_messages(suppressWarnings(findMarkersTree(
+    features,
+    fixture$class,
+    altSplit = FALSE,
+    metaclusters = list(M1 = 1, M2 = 2, M3 = 3)
+  )))
+  expect_false(any(grepl("No alternative split added", messages)))
 })
 
 # Classes 1, 2 and 3 have 20 cells each. f1 is high in classes 1 and 2, so
