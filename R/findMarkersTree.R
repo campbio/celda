@@ -37,7 +37,9 @@ utils::globalVariables(c("xend", "y", "label"))
 #' @param reuseFeatures Logical. Whether or not a feature can be used more than
 #'  once on the same cluster. Default is FALSE.
 #' @param altSplit Logical. Whether or not to force a marker for clusters that
-#'  are solely defined by the absence of markers. Default is TRUE.
+#'  are solely defined by the absence of markers. With metaclusters, this
+#'  applies to the top-level tree and to each metacluster's subtree. Default
+#'  is TRUE.
 #' @param consecutiveOneoff Logical. Whether or not to allow one-off splits at
 #'  consecutive brances. Default is FALSE.
 #' @param autoMetaclusters Logical. Whether to identify metaclusters prior to
@@ -327,7 +329,7 @@ findMarkersTree <- function(features,
     # Create top-level tree
     
     # Build the top-level tree for metacluster labels `labels`, with an
-    # alternative node for the solely down-regulated leaf
+    # alternative node for the solely down-regulated leaf if `altSplit`
     buildTopTree <- function(labels) {
       topTree <- .generateTreeList(
         features,
@@ -337,7 +339,10 @@ findMarkersTree <- function(features,
         reuseFeatures,
         consecutiveOneoff
       )
-      .addAlternativeSplit(topTree, features, as.factor(labels))
+      if (altSplit) {
+        topTree <- .addAlternativeSplit(topTree, features, as.factor(labels))
+      }
+      topTree
     }
 
     #while there is still a balanced split at the top-level
