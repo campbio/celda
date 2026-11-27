@@ -605,10 +605,15 @@ findMarkersTree <- function(features,
         return(do.call("rbind", featAUC))
       })
       
-      #simplify top-level in rules tables to only up-regulated markers
-      tree$rules <- lapply(tree$rules, function(rule){
-        return(rule[-intersect(
-          which(rule$level==1), which(rule$direction==(-1))), ])
+      # Keep only up-regulated markers at the top level, except for a
+      # metacluster without one, which is identified by the absence of the
+      # other metaclusters' markers
+      tree$rules <- lapply(tree$rules, function(rule) {
+        topLevel <- rule$level == 1
+        if (any(topLevel & rule$direction == 1)) {
+          rule <- rule[!(topLevel & rule$direction == -1), , drop = FALSE]
+        }
+        rule
       })
       
       ##add gene-level info to rules tables
@@ -622,7 +627,7 @@ findMarkersTree <- function(features,
         toReturn <- data.frame(NULL)
         
         #loop over rows of this class
-        for(i in 1:nrow(class)){
+        for (i in seq_len(nrow(class))) {
           #extract relevant genes from branch points tables
           genesAUC <- collapsedBranches[
             collapsedBranches$feature==class$feature[i] &

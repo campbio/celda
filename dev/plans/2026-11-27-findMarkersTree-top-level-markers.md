@@ -68,6 +68,13 @@ In the metacluster branch of `findMarkersTree()`:
    `.mergeUnmarkedMetaclusters()`. `.unmarkedMetaclusters()` and
    `.mergeMetaclusters()` stay.
 
+7. With `featureLabels` and `counts`, the gene-level rules drop the
+   top-level down rows only for metaclusters that have a top-level up row.
+   A metacluster without a marker keeps its down rows, which describe it.
+   Before, its rules became empty and the run failed with "missing value
+   where TRUE/FALSE needed"; this was rare on devel, where every
+   metacluster was given a marker. (Added after the spec review.)
+
 Subtrees are built as now, with `altSplit` applied there.
 
 ## B. Forced markers are informational

@@ -25,9 +25,9 @@ library(celda)
   list(features = features, class = class)
 }
 
-# These tests supply `metaclusters` so that the top-level threshold loop is
-# reached without the UMAP step of `autoMetaclusters = TRUE`, which is the
-# path from issue 410. Both paths share the loop.
+# These tests supply `metaclusters` so that the top-level tree is built
+# without the UMAP step of `autoMetaclusters = TRUE`, which is the path from
+# issue 410. Both paths share the top-level tree.
 
 test_that("findMarkersTree merges metaclusters left without markers", {
   fixture <- .markerTreeFixture()
@@ -732,4 +732,32 @@ test_that("findMarkersTree drops metaclusters that have no marker", {
   ))
   expect_identical(tree$rules, flat$rules)
   expect_identical(tree$prediction, flat$prediction)
+})
+
+test_that("gene-level rules keep metaclusters without a marker", {
+  # Each feature of .overlapFixture() becomes two genes
+  fixture <- .overlapFixture()
+  features <- fixture$features
+  counts <- round(rbind(features * 10, features * 10 + 1))
+  rownames(counts) <- c(paste0(rownames(features), "a"),
+                        paste0(rownames(features), "b"))
+  featureLabels <- rep(rownames(features), 2)
+  # M3 alone has no marker, then M1 is the only metacluster with one
+  for (metaclusters in list(list(M1 = 1, M2 = 2, M3 = 3),
+                            list(M1 = 1, M23 = c(2, 3)))) {
+    tree <- suppressMessages(findMarkersTree(
+      features,
+      fixture$class,
+      metaclusters = metaclusters,
+      featureLabels = featureLabels,
+      counts = counts
+    ))
+    rulesM1 <- tree$rules[["M1(1)"]]
+    expect_true(all(rulesM1$direction == 1))
+    expect_setequal(rulesM1$gene, c("f1a", "f1b"))
+  }
+  # M3 is described by the absence of the top-level markers
+  rulesM3 <- tree$rules[["M23(3)"]]
+  expect_true(all(rulesM3$direction[rulesM3$level == 1] == -1))
+  expect_true(any(rulesM3$level == 1))
 })

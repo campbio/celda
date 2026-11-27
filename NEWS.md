@@ -101,7 +101,9 @@
   message. This replaces the lowering of the top-level threshold and the
   merging of balanced splits described above (#410, #438, #442, #443,
   #455). On the data from #410, accuracy with the default settings rises
-  from 0.46 to 0.56 (#450).
+  from 0.46 to 0.56. With `featureLabels` and `counts`, a metacluster
+  without a marker keeps its top-level rules, and the run no longer fails
+  with "missing value where TRUE/FALSE needed" (#450).
 * Markers forced by `altSplit` are still shown in the rules and the
   dendrogram, but are no longer used for prediction: their clusters are
   predicted by the absence of the other markers, as with
