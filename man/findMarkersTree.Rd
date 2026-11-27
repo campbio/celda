@@ -50,20 +50,24 @@ Counts matrix has to be provided as well.}
 
 \item{threshold}{Numeric between 0 and 1. The threshold for the oneoff
 metric. Smaller values will result in more one-off splits. Default is 0.90.
-When metaclusters are used, the threshold for the top-level tree is
-lowered by 10\% at a time until every metacluster has a positive marker.
-Once no unused feature could become a marker that way, it stops lowering
-with a warning, and metaclusters still without a positive marker are
-merged into one metacluster (names joined with "+") whose clusters are
-separated in its own subtree.}
+When metaclusters are used, the top-level tree gives a positive marker
+only to metaclusters with a one-off marker at this threshold. A
+metacluster without one is identified by the absence of the other
+metaclusters' markers. Two or more without one are merged into one
+metacluster (names joined with "+") whose clusters are separated in its
+own subtree. If no metacluster has a marker, the tree is built without
+metaclusters.}
 
 \item{reuseFeatures}{Logical. Whether or not a feature can be used more than
 once on the same cluster. Default is FALSE.}
 
 \item{altSplit}{Logical. Whether or not to force a marker for clusters that
-are solely defined by the absence of markers. With metaclusters, this
-applies to the top-level tree and to each metacluster's subtree. Default
-is TRUE.}
+are solely defined by the absence of markers. A forced marker is shown in
+the rules (with \code{alternative = TRUE}) and in the dendrogram, but is
+not used for prediction: such clusters are still predicted by the absence
+of the other markers. With metaclusters, this applies to each
+metacluster's subtree; the top-level tree never gets a forced marker.
+Default is TRUE.}
 
 \item{consecutiveOneoff}{Logical. Whether or not to allow one-off splits at
 consecutive brances. Default is FALSE.}
@@ -80,9 +84,10 @@ for identifying metaclusters. Default is 12345.}
 A named list with six elements:
 \itemize{
   \item rules - A named list with one data frame for every label. Each
- data frame has five columns and gives the set of rules for disinguishing
- each label.
+ data frame gives the set of rules for distinguishing each label, with
+ these columns:
   \itemize{
+   \item class - The label the rules are for.
    \item feature - Marker feature, e.g. marker gene name.
    \item direction - Relationship to feature value. -1 if cluster is
    down-regulated for this feature, 1 if cluster is up-regulated.
@@ -92,6 +97,8 @@ A named list with six elements:
  gain and "One-off" if one-off.
    \item level - The level of the tree at which is rule was defined. 1 is the
  level of the first split of the tree.
+   \item alternative - TRUE if the rule comes from a marker forced by
+ \code{altSplit}. These rules are not used for prediction.
    \item metacluster - Optional. If metaclusters were used, the metacluster
     this rule is applied to.
   }

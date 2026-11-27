@@ -9,7 +9,8 @@ getDecisions(rules, features)
 }
 \arguments{
 \item{rules}{List object. The `rules` element from  `findMarkersTree`
-output. Returns NA if cluster estimation was ambiguous.}
+output. Returns NA if cluster estimation was ambiguous. Rules with
+`alternative` set to TRUE (markers forced by `altSplit`) are skipped.}
 
 \item{features}{A L(features) by N(samples) numeric matrix.}
 }

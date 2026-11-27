@@ -28,18 +28,22 @@ utils::globalVariables(c("xend", "y", "label"))
 #' \emph{RunPCA} and \emph{FindClusters} must have been run on the object.
 #' @param threshold Numeric between 0 and 1. The threshold for the oneoff
 #'  metric. Smaller values will result in more one-off splits. Default is 0.90.
-#'  When metaclusters are used, the threshold for the top-level tree is
-#'  lowered by 10\% at a time until every metacluster has a positive marker.
-#'  Once no unused feature could become a marker that way, it stops lowering
-#'  with a warning, and metaclusters still without a positive marker are
-#'  merged into one metacluster (names joined with "+") whose clusters are
-#'  separated in its own subtree.
+#'  When metaclusters are used, the top-level tree gives a positive marker
+#'  only to metaclusters with a one-off marker at this threshold. A
+#'  metacluster without one is identified by the absence of the other
+#'  metaclusters' markers. Two or more without one are merged into one
+#'  metacluster (names joined with "+") whose clusters are separated in its
+#'  own subtree. If no metacluster has a marker, the tree is built without
+#'  metaclusters.
 #' @param reuseFeatures Logical. Whether or not a feature can be used more than
 #'  once on the same cluster. Default is FALSE.
 #' @param altSplit Logical. Whether or not to force a marker for clusters that
-#'  are solely defined by the absence of markers. With metaclusters, this
-#'  applies to the top-level tree and to each metacluster's subtree. Default
-#'  is TRUE.
+#'  are solely defined by the absence of markers. A forced marker is shown in
+#'  the rules (with \code{alternative = TRUE}) and in the dendrogram, but is
+#'  not used for prediction: such clusters are still predicted by the absence
+#'  of the other markers. With metaclusters, this applies to each
+#'  metacluster's subtree; the top-level tree never gets a forced marker.
+#'  Default is TRUE.
 #' @param consecutiveOneoff Logical. Whether or not to allow one-off splits at
 #'  consecutive brances. Default is FALSE.
 #' @param autoMetaclusters Logical. Whether to identify metaclusters prior to
@@ -51,9 +55,10 @@ utils::globalVariables(c("xend", "y", "label"))
 #' @return A named list with six elements:
 #' \itemize{
 #'   \item rules - A named list with one data frame for every label. Each
-#'  data frame has five columns and gives the set of rules for disinguishing
-#'  each label.
+#'  data frame gives the set of rules for distinguishing each label, with
+#'  these columns:
 #'   \itemize{
+#'    \item class - The label the rules are for.
 #'    \item feature - Marker feature, e.g. marker gene name.
 #'    \item direction - Relationship to feature value. -1 if cluster is
 #'    down-regulated for this feature, 1 if cluster is up-regulated.
@@ -63,6 +68,8 @@ utils::globalVariables(c("xend", "y", "label"))
 #'  gain and "One-off" if one-off.
 #'    \item level - The level of the tree at which is rule was defined. 1 is the
 #'  level of the first split of the tree.
+#'    \item alternative - TRUE if the rule comes from a marker forced by
+#'  \code{altSplit}. These rules are not used for prediction.
 #'    \item metacluster - Optional. If metaclusters were used, the metacluster
 #'     this rule is applied to.
 #'   }
@@ -190,8 +197,8 @@ findMarkersTree <- function(features,
   
   # If no detailed cell types are provided or to be identified
   if (!methods::hasArg(metaclusters) & (!autoMetaclusters)) {
-    return(.findMarkersTreeFlat(features, class, oneoffMetric, threshold,
-                                reuseFeatures, altSplit, consecutiveOneoff))
+    .findMarkersTreeFlat(features, class, oneoffMetric, threshold,
+                         reuseFeatures, altSplit, consecutiveOneoff)
   } else {
     # If metaclusters are provided or to be identified
     
@@ -1806,13 +1813,8 @@ findMarkersTree <- function(features,
   class <- as.factor(class)
 
   # Generate list of tree levels
-  tree <- .generateTreeList(
-    features,
-    class,
-    oneoffMetric,
-    threshold,
-    reuseFeatures,
-    consecutiveOneoff)
+  tree <- .generateTreeList(features, class, oneoffMetric, threshold,
+                            reuseFeatures, consecutiveOneoff)
 
   # Add alternative node for the solely down-regulated leaf
   if (altSplit) {
@@ -1822,26 +1824,26 @@ findMarkersTree <- function(features,
   message("Computing performance metrics...")
 
   # Format tree output for plotting and generate summary statistics
-  DTsummary <- .summarizeTree(tree, features, class)
+  treeSummary <- .summarizeTree(tree, features, class)
 
   # Remove confusing 'value' column
-  DTsummary$rules <- lapply(DTsummary$rules, function(x) {
+  treeSummary$rules <- lapply(treeSummary$rules, function(x) {
     x["value"] <- NULL
     x
   })
 
   # Add column to each rules table which specifies its class
-  DTsummary$rules <- mapply(cbind,
-                            "class" = as.character(names(DTsummary$rules)),
-                            DTsummary$rules, SIMPLIFY = FALSE)
+  treeSummary$rules <- mapply(cbind,
+                              "class" = as.character(names(treeSummary$rules)),
+                              treeSummary$rules, SIMPLIFY = FALSE)
 
   # Generate table for each branch point in the tree
-  DTsummary$branchPoints <- .createBranchPoints(DTsummary$rules)
+  treeSummary$branchPoints <- .createBranchPoints(treeSummary$rules)
 
   # Add class labels to output
-  DTsummary$classLabels <- class
+  treeSummary$classLabels <- class
 
-  DTsummary
+  treeSummary
 }
 
 # Add an alternative split that gives a positive marker to `cInt`, a class
@@ -1965,7 +1967,8 @@ findMarkersTree <- function(features,
 #' @description Get decisions for a matrix of features. Estimate cell
 #'  cluster membership using feature matrix input.
 #' @param rules List object. The `rules` element from  `findMarkersTree`
-#'  output. Returns NA if cluster estimation was ambiguous.
+#'  output. Returns NA if cluster estimation was ambiguous. Rules with
+#'  `alternative` set to TRUE (markers forced by `altSplit`) are skipped.
 #' @param features A L(features) by N(samples) numeric matrix.
 #' @return A character vector of label predicitions.
 

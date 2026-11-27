@@ -89,6 +89,25 @@
   having none, or merged with other metaclusters without one. Markers can
   change for runs with `altSplit = FALSE` and metaclusters, including the
   default `autoMetaclusters = TRUE` (#443).
+* With metaclusters, `findMarkersTree()` predicts far fewer cells as
+  "MISSING". The top-level tree now keeps only metaclusters with a one-off
+  marker at `threshold`, and the threshold is no longer lowered. A
+  metacluster without one is identified by the absence of the other
+  metaclusters' markers, and is no longer given a forced marker, which
+  could take in cells of another metacluster and miss many of its own. Two
+  or more without one are merged and separated in their own subtree, as
+  before. Both are now reported with a message instead of a warning. If no
+  metacluster has a marker, the tree is built without metaclusters, with a
+  message. This replaces the lowering of the top-level threshold and the
+  merging of balanced splits described above (#410, #438, #442, #443,
+  #455). On the data from #410, accuracy with the default settings rises
+  from 0.46 to 0.56 (#450).
+* Markers forced by `altSplit` are still shown in the rules and the
+  dendrogram, but are no longer used for prediction: their clusters are
+  predicted by the absence of the other markers, as with
+  `altSplit = FALSE`. The rules gain a column, `alternative`, which is
+  `TRUE` for such rules. Predictions and performance can change for any
+  tree with a forced marker (#450).
 
 # celda v1.29.3 (2026-10-09)
 * The `decontX` vignette is now a short pointer to the decontX package's
