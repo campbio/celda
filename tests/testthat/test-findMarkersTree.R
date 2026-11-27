@@ -694,3 +694,106 @@ test_that("findMarkersTree explains when no feature is left for a subtree", {
     regexp = "No features are left to split the clusters of metacluster M2"
   )
 })
+
+# Classes 1, 2 and 3 have 20 cells each. f1 marks class 1 and f2 marks
+# class 2, but no feature marks class 3. w is high in 15 class-3 cells and
+# in 8 class-2 cells, so a marker forced on it for class 3 would also take
+# in class-2 cells and miss the other class-3 cells.
+.overlapFixture <- function() {
+  withr::with_seed(450, {
+    class <- rep(seq_len(3), each = 20)
+    n <- length(class)
+    f1 <- ifelse(class == 1, runif(n, 5, 6), runif(n, 0, 1))
+    f2 <- ifelse(class == 2, runif(n, 5, 6), runif(n, 0, 1))
+    wHigh <- c(rep(FALSE, 20), rep(c(TRUE, FALSE), c(8, 12)),
+               rep(c(TRUE, FALSE), c(15, 5)))
+    w <- ifelse(wHigh, runif(n, 2, 3), runif(n, 0, 1))
+  })
+  features <- rbind(f1 = f1, f2 = f2, w = w)
+  colnames(features) <- paste0("Cell_", seq_len(n))
+  list(features = features, class = class)
+}
+
+test_that("the top level keeps only real markers (issue 450)", {
+  fixture <- .overlapFixture()
+  for (altSplit in c(TRUE, FALSE)) {
+    messages <- capture_messages(
+      tree <- findMarkersTree(
+        fixture$features,
+        fixture$class,
+        altSplit = altSplit,
+        metaclusters = list(M1 = 1, M2 = 2, M3 = 3)
+      )
+    )
+    expect_false(any(grepl("Decreasing classifier threshold", messages)))
+    expect_true(any(grepl("Metacluster M3 has no positive marker",
+                          messages)))
+    topM3 <- tree$rules[["M3(3)"]]
+    expect_false(any(topM3$level == 1 & topM3$direction == 1))
+    # M3 is identified by the absence of f1 and f2, so no cell is missed
+    expect_false(any(tree$prediction == "MISSING"))
+    expect_equal(tree$performance$accuracy, 1)
+  }
+})
+
+test_that("forced markers are not used for prediction", {
+  # Without metaclusters, class 3 has no marker and gets one forced on f3
+  fixture <- .weakMarkerFixture()
+  trees <- lapply(c(TRUE, FALSE), function(altSplit) {
+    suppressMessages(findMarkersTree(
+      fixture$features,
+      fixture$class,
+      oneoffMetric = "pairwise AUC",
+      altSplit = altSplit,
+      autoMetaclusters = FALSE
+    ))
+  })
+  rules3 <- trees[[1]]$rules[["3"]]
+  forced <- rules3$feature == "f3" & rules3$direction == 1
+  expect_true(any(forced))
+  # Only the forced marker's row is marked as alternative
+  expect_identical(rules3$alternative, forced)
+  expect_identical(trees[[1]]$prediction, trees[[2]]$prediction)
+})
+
+test_that("getDecisions skips rules marked as alternative", {
+  # Class A is low on g and has a forced marker on f; class B is high on g
+  rules <- list(
+    A = data.frame(feature = c("f", "g"), direction = c(1, -1),
+                   value = c(1, 1), stat = c(0.6, 0.9),
+                   statUsed = "One-off", level = 1,
+                   alternative = c(TRUE, FALSE)),
+    B = data.frame(feature = c("f", "g"), direction = c(-1, 1),
+                   value = c(1, 1), stat = c(0.6, 0.9),
+                   statUsed = "One-off", level = 1,
+                   alternative = c(TRUE, FALSE))
+  )
+  features <- rbind(f = c(0, 2, 0), g = c(0, 0, 2))
+  expect_identical(unname(getDecisions(rules, features)),
+                   c("A", "A", "B"))
+  # Rules without the column, as in older trees, use every rule
+  oldRules <- lapply(rules, function(r) r[names(r) != "alternative"])
+  expect_identical(unname(getDecisions(oldRules, features)),
+                   c(NA, "A", "B"))
+})
+
+test_that("findMarkersTree drops metaclusters that have no marker", {
+  # f1 and f2 each mark one cluster of M1, and f3 is high in M1 and in
+  # half of M2, so no feature marks M1 or M2 alone
+  fixture <- .markerTreeFixture()
+  expect_message(
+    tree <- findMarkersTree(
+      fixture$features,
+      fixture$class,
+      metaclusters = list(M1 = c(1, 2), M2 = c(3, 4))
+    ),
+    regexp = "built without metaclusters"
+  )
+  flat <- suppressMessages(findMarkersTree(
+    fixture$features,
+    fixture$class,
+    autoMetaclusters = FALSE
+  ))
+  expect_identical(tree$rules, flat$rules)
+  expect_identical(tree$prediction, flat$prediction)
+})
